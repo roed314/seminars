@@ -1,0 +1,1 @@
+../../lmfdb/lmfdb/static/jquery.dataTables.plugins.js

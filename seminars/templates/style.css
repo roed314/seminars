@@ -1,0 +1,2303 @@
+{# template defs #}
+
+{%- macro BORDER_RADIUS(R) -%}
+  border-radius: {{R}}px;
+{%- endmacro -%}
+
+{# end defs #}
+
+* { zoom: 0; }
+
+img { border: 0; }
+
+body {
+    margin: 0px;
+    padding: 0px;
+    font-family: sans-serif;
+    color: {{color.body_text}};
+    background-color: {{color.body_background}};
+}
+td.title {
+    color: {{color.box_tab_text}};
+}
+h2.link > a {
+    color: {{color.box_tab_text}};
+}
+.katex {
+    font-size: 1em !important;
+}
+/* TODO: where is content?*/
+#content > h1
+{
+    font-size: 130%;
+    font-weight: bold;
+    color: {{ color.content_text }};
+    font-family: sans-serif;
+    text-decoration: none;
+    margin: 15px 0;
+}
+#content > h1:first-child,
+#content > h2:first-child {
+    margin-top: 0px;
+}
+
+#content > h2
+{
+    font-family: sans-serif;
+    text-decoration: none;
+    font-size: 120%;
+    text-align: left;
+    font-weight: bold;
+    color: {{color.a_text}};
+    padding: 5px 0 5px 0;
+    margin: 15px 0 10px 0;
+}
+#content > h3, td.table_h2 {
+    font-family: sans-serif;
+    text-decoration: none;
+    font-size: 110%;
+    text-align: left;
+    font-weight: bold;
+    padding: 5px 0 5px 0;
+    color: {{color.a_text}};
+    margin: 10px 0 5px 0;
+}
+
+#content > h2 a[knowl], #content > h3 a[knowl] {
+    color: {{color.col_main}};
+}
+
+#content > h2.inline,
+#content > h3.inline {
+    font-weight: normal;
+    display: inline;
+    padding-right: 10px;
+    margin: 5px 0 10px 0;
+}
+
+#footer {
+    clear: both;
+    margin-top: 40px;
+    background-color: {{color.footer_background}};
+    border-top: 2px solid {{ color.footer_border }};
+    padding: 25px 10px;
+    text-align: center;
+    font-size: 75%;
+    color: {{color.footer_text}};
+}
+
+#content > ul {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Body links, sidebar links, and sidebar header text. */
+a {
+    color: {{color.col_link}};
+    text-decoration: none;
+    font-family: sans-serif;
+}
+
+a[knowl] {
+    color: {{color.col_a_knowl}};
+}
+
+a.inactive {
+    color: {{color.a_inactive}};
+}
+
+a.inactive:hover {
+    background: inherit;
+}
+
+table tbody tr.trivial {
+    color: {{color.grey}};
+}
+
+table tbody tr.trivial a {
+    color: {{color.grey}};
+}
+table tbody tr.trivial a:hover {
+    color: inherit;
+    background: inherit;
+}
+
+#content a {
+}
+#content .announce {
+  font-size: 1.2em;
+  padding: 10px 20px;
+  margin: 20px 0px;
+  border-left: 3px solid {{ color.content_border }};
+  background: {{ color.content_background }};
+  line-height: 1.5em;
+}
+#content .announce.red {
+    border-left: 3px solid {{color.content_border_red}};
+    background: {{color.content_background_red}};
+}
+
+/*
+#search-topright {
+  display: inline;
+}
+#search-topright input {
+  font-size: 75%;
+  border: 1px solid {{ color.search_border }};
+  padding: 1px;
+  background: {{color.search_background}} ;
+  position: relative;
+  top: -1px;
+}
+*/
+
+/* icon in front of external links */
+#content a[target="_blank"]:before {
+  content: url("static/images/url-ext.gif");
+  padding-right: 2px;
+}
+
+body.checklist {
+ font-size: 70%;
+}
+
+span.disable-links {
+  pointer-events: none;
+}
+
+a:visited { color: {{color.a_text_visited}}; }
+a:hover {
+    color: {{color.a_text_hover}};
+    background: {{color.a_background_hover}};
+}
+
+#logo a, #logo a:hover, body.knowl #logo a:hover {
+  background: none;
+}
+
+#header {
+  background: {{color.header_background}};
+  box-shadow: 0px 5px 5px {{color.header_shadow}};
+}
+
+body.knowl #header {
+  background: {{ color.knowl_l }};
+  box-shadow: 0px 5px 5px {{color.knowl_shadow}};
+}
+
+#header #logo {
+    display: inline-block;
+    margin: 0px;
+    padding-top: 8px;
+    padding-left: 40px;
+}
+#header #logo img {
+    max-height: 70px;
+}
+#header .right {
+    margin-top: 0px;
+    display: inline-block;
+    padding-left: 48px;
+    vertical-align: top;
+    width: calc(100% - 210px);
+}
+#header #title {
+    font-size: 180%;
+    font-weight: bold;
+    font-family: sans-serif;
+    padding-top: 25px;
+    color: {{color.header_text_title}};
+}
+
+#header #title .katex{
+    font-weight: bold !important;
+}
+
+#header .bread {
+    font-family: sans-serif;
+    font-size: 90%;
+    display: inline-block;
+}
+
+#header .bread a:first-child {
+    font-size: 150%;
+}
+
+#header .bread a {
+    color: {{color.bread_links}};
+}
+
+#header .topright {
+  text-align: right;
+  white-space:nowrap;
+  font-family: sans-serif;
+  font-size: 90%;
+  padding-top: 8px;
+  padding-right: 5px;
+  display: inline-block;
+  float: right;
+  clear: both;
+  color: {{color.header_text_topright}};
+}
+#header .topright a {
+    color: {{color.header_text_topright}};
+}
+#header .topright #communication-wrapper {
+  display: none;
+  padding: 4px;
+}
+#header .undertopright {
+  text-align: right;
+  white-space:nowrap;
+  font-family: sans-serif;
+  float: right;
+  color: {{color.header_text_topright}};
+}
+#header .undertopright a {
+    color: {{color.header_text_topright}};
+}
+#header .undertopright:first-child {
+    margin-top: 0;
+}
+
+#header #navi {
+  white-space: nowrap;
+  text-align: right;
+  color: {{color.header_navi_text}};
+  font-family: sans-serif;
+  font-size: 90%;
+  padding: 2px 5px;
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  z-index: 5;
+}
+
+/* TODO: what? */
+#flashes p {
+  border-left: 15px solid {{color.knowl_border}};
+  padding: 5px;
+  background: {{color.knowl_background}};
+}
+
+#flashes p.error {
+  margin: 15px 0;
+  font-size: 95%;
+  border: 0;
+  border-left: 15px solid {{color.flashes_border}};
+  background: {{color.flashes_background}};
+}
+
+#main {
+  margin:  0px 0px 0px 200px;
+  padding: 0px 0px 0px 10px;
+  min-height: 700px;
+}
+
+.debug {
+    background: #FF9;
+    font-style: italic;
+}
+
+body > .debug {
+    margin: 20px;
+    padding: 2px;
+}
+
+
+/*These are the right hand side properties and sidebar stuffs.*/
+#properties {
+    z-index: 99;
+    font-size: 85%;
+    font-family: sans-serif;
+    float: right;
+    clear: right;
+    margin: 10px 0px 15px 15px;
+    position: relative;
+    border: 1px solid {{color.properties_border}};
+    border: 0;
+    padding: 0px;
+}
+.properties-body div, .properties-body p {
+  padding: 5px;
+}
+.properties-body h1, .properties-body h2 {
+    color: {{ color.properties_header_text }};
+    padding: 5px;
+    margin: 0;
+    margin-bottom: 0;
+    background: {{ color.properties_text_h1h2 }};
+}
+.properties-body h1 {
+    font-size: 120%;
+}
+.properties-body h2 {
+    font-size: 110%;
+    margin-top: 10px;
+}
+.properties-body h2:first-child { margin-top: 0px; }
+.properties-body table th,
+.properties-body table td {
+  padding: 2px 10px;
+}
+.properties-body table tr:last-child td {
+  padding-bottom: 7px;
+}
+.properties-body table tr:first-child td {
+  padding-top: 7px;
+}
+.properties-body .label {
+  font-weight: bold;
+}
+.properties-body ul {
+  margin: 0px;
+  padding: 0px;
+}
+
+.properties-body ul:last-child li:last-child a {
+  border-bottom-left-radius: 10px;
+}
+.properties-body li {
+  display: block;
+  padding: 5px 0 0 7px;
+  margin: 0;
+}
+.properties-body li:first-child {
+  padding-top: 7px;
+}
+.properties-body li:last-child {
+  padding-bottom: 5px;
+}
+.properties-body li a {
+ display: block;
+/*
+ padding: 5px;
+*/
+}
+
+.properties-body {
+  margin: 0px;
+  padding: 0px;
+  background: {{color.properties_body_background}};
+  min-width: 200px;
+  border-bottom-left-radius: 10px;
+  max-height: 430px; /* 21 items with padding: 22 + 21*19 + 9 */
+  overflow-y: auto; /* scrollbar if we overflow */
+}
+.properties-header {
+  border-top-left-radius: 10px;
+  margin: 0;
+  margin-top: 10px;
+  padding: 5px 9px;
+  color: {{ color.properties_header_text }};
+  background: {{ color.properties_header_background }};
+  font-size: 14px;
+  cursor: pointer;
+  padding-right: 30px;
+}
+#properties-collapser {
+  cursor: pointer;
+  color: {{ color.properties_collapser }};
+  font-size: 19px;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid ;
+  width: 20px;
+  height: 17px;
+  position: absolute;
+  top:   12px;
+  right: 3px;
+  {{ BORDER_RADIUS(20) }}
+}
+
+#content {
+  margin-top: 20px;
+  font-size: 95%;
+  line-height: 135%;
+  padding-right: 10px;
+}
+
+#content blockquote
+{
+}
+
+
+#sidebar {
+  float: left;
+  width: 200px;
+  margin: 20px 0px 0px 0px;
+  font-family: sans-serif;
+  font-size: 85%;
+  color: {{color.sidebar_text}};
+  background: {{color.sidebar_background}};
+  margin-bottom: 100px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+#sidebar .list li {
+  padding: 5px;
+}
+#sidebar .list a {
+  display: inline;
+  padding: 5px;
+}
+#sidebar h2.knowl {
+  background: {{ color.knowl_border }};
+}
+#sidebar h2.knowl a {
+  color: {{ color.knowl_hyper_text }};
+}
+#sidebar h2.knowl a:hover {
+  background: {{ color.knowl_hover_text }};
+}
+
+#sidebar h2 {
+    font-family: sans-serif;
+    font-size: 100%;
+    background-color: {{ color.sidebar_background_h2 }};/*sidebar tabs*/
+    color: {{ color.sidebar_text_h2 }};
+    padding: 5px;
+    margin: 15px 0 0 0;
+}
+#sidebar h2:first-child {
+  margin-top: 0;
+}
+
+#sidebar ul:first-child a:first-child,
+#sidebar h2:first-child a:first-child,
+#sidebar h2:first-child {
+  margin: 0;
+  border-top-right-radius: 10px;
+}
+#sidebar ul:last-child li:last-child,
+#sidebar ul:last-child li:last-child a {
+  border-bottom-right-radius: 10px;
+}
+#sidebar ul {
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+}
+#sidebar ul li {
+    display: block;
+    margin: 0px;
+    padding: 0px;
+}
+#sidebar a:hover {
+    background: {{ color.sidebar_background_hover }};
+}
+#sidebar a {
+    color: {{color.col_sidebar_links}}; /* sets header and body sidebar links.*/
+    display: block;
+}
+#sidebar li a {
+    color: {{color.col_sidebar_text}}; /* sets the text below Data */
+    background: {{ color.sidebar_background_li }};
+  padding: 5px;
+}
+#sidebar h2 a {
+    color: {{color.col_sidebar_header_links}}; /* sets sidebar header links*/
+    padding: 5px;
+}
+#sidebar h2 a:hover {
+    background: {{ color.sidebar_background_h2_hover }};
+    color: {{ color.sidebar_h2_hover }};
+}
+#sidebar h2.link {
+  padding: 0px;
+}
+
+/* highlighting menu entries (if their respective blueprint overwirtes the body_class variable!) */
+body.mwf #sidebar a.mwf { background: {{ color.sidebar_bkg_highlight }}; }
+body.cmf #sidebar a.cmf { background: {{ color.sidebar_bkg_highlight }}; }
+body.knowl #sidebar a.knowl { background: {{ color.sidebar_bkg_highlight_knowl }}; }
+body.local_fields #sidebar a.local_fields { background:  {{ color.sidebar_bkg_highlight }}; }
+body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
+
+
+.visible {
+    visibility: visible;
+}
+
+.hidden {
+    visibility: hidden;
+    height: 0px;
+}
+
+.code {
+    font-family: monospace;
+    margin: 2px;
+    margin-right: 20px;
+}
+
+.nodisplay {
+    display: None;
+}
+/*TODO: where do the following show up?*/
+.formexample {
+   font-size: 80%;
+   font-style: italic;
+   color: {{color.grey}};
+}
+
+.errmsg {
+   font-size: 80%;
+   font-style: bold;
+   color: {{color.red}};
+}
+
+td.forminfo {
+   font-size: 80%;
+   font-style: italic;
+   color: {{color.grey}};
+   vertical-align: top;
+}
+
+input, textarea {
+  border: 2px solid {{color.input_border}};
+  font-size: 110%;
+  padding: 3px;
+  border-radius: 5px;
+}
+/* TODO: above? */
+
+button, select {
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid {{color.button_border}};
+  min-width: 75px;
+}
+
+button {
+   background: {{color.button_background}};
+}
+
+select {
+   background: {{color.select_background}};
+}
+
+body.knowl form button,
+body.knowl form select {
+  border: 2px solid {{color.knowl_thin_border}};
+  background: {{color.knowl_border}};
+}
+body.knowl form textarea,
+body.knowl form input {
+    border: 2px solid {{color.knowl_thin_border}};
+}
+
+form button:hover,
+form select:hover {
+    background:    {{color.button_background_hover}};
+    border: 2px solid {{color.button_border_hover}};
+}
+
+button.inactive {
+    background: {{color.button_background_inactive}};
+    border: 2px solid {{color.button_border_inactive}};
+}
+
+button.inactive:hover {
+    background: {{color.button_background_inactive}};
+    border: 2px solid {{color.button_border_inactive}};
+}
+
+body.knowl form button:hover,
+body.knowl form select:hover {
+    background:    {{color.knowl_hover}};
+    border: 2px solid {{color.knowl_thin_border}};
+}
+
+form table td.button {
+    padding-top: 7px
+}
+
+table {
+    border: 0;
+    border-collapse:collapse;
+}
+
+table th {
+  color: {{color.a_text}};
+  padding-bottom: 5px;
+}
+
+table th, table td {
+  padding-left:  10px;
+  padding-right: 10px;
+}
+
+table.newforms {
+/* to put a table after the properties box */
+    clear: right;
+}
+
+table.ntdata .knowl-header a,
+table.ntdata .knowl-footer a,
+table.ntdata a.knowl-link,
+table.ntdata a[knowl],
+table a.knowl-link,
+table a[knowl] {
+  display: inline;
+  padding: 0;
+}
+
+table.ntdata a {
+  display: block;
+}
+
+table.chardata a {
+  display: inline;
+}
+
+table td.top {
+  vertical-align:top;
+}
+table.ntdata td {
+  white-space: nowrap;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-right: 7px;
+  padding-left: 7px;
+}
+
+table a:hover {
+    background: {{color.table_background_hover}};
+}
+
+
+
+table td.spacing {
+  height: 20px;
+}
+
+
+table.ntdata {
+  width: auto;
+  border: 3px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+table.ntdata thead th {
+  background: {{ color.table_ntdata_background }};
+}
+table.ntdata > thead {
+  border-bottom: 2px solid {{ color.table_ntdata_border }};
+}
+table.ntdata > thead > tr.bottomlined {
+  border-bottom: 2px solid {{ color.table_ntdata_border }};
+}
+
+table.ntdata th {
+  text-align: left;
+  padding-right: 7px;
+  padding-left: 7px;
+}
+
+table.ntdata > tr.odd,
+table.ntdata > tbody > tr.odd,
+table.ntdata > thead > tr.odd,
+table.ntdata > tr:nth-child(odd),
+table.ntdata > tbody > tr:nth-child(odd),
+table.ntdata > thead > tr:nth-child(odd),
+table.ntdata > tr:first-child
+table.ntdata > tbody > tr:first-child
+table.ntdata > thead > tr:first-child {
+    background: {{color.table_ntdata_background_c1}};
+}
+
+table.ntdata > tbody > tr:last-child {
+    border-bottom:  2px solid {{ color.table_ntdata_border }};
+}
+
+table.ntdata > tr.even,
+table.ntdata > tbody > tr.even,
+table.ntdata > thead > tr.even,
+table.ntdata > tr:nth-child(even),
+table.ntdata > tbody > tr:nth-child(even),
+table.ntdata > thead > tr:nth-child(even) {
+    background: {{color.table_ntdata_background_cn}};
+}
+table.ntdata tr.toggle { font-size: 80%; text-align: left; }
+table.ntdata tr.toggle:nth-child(2n) { 
+    background: {{color.table_ntdata_background_c1}};
+}
+table.ntdata tr.toggle a:hover {
+  background: {{color.table_ntdata_background_c1}};
+}
+
+table.ntdata tr.line {
+    border-bottom: 1px dotted {{color.table_ntdata_border_bottom}};
+}
+table.ntdata tr.endsection {
+    border-bottom: 1px solid {{color.table_ntdata_border}};
+}
+
+table.right_align_table td {
+  text-align: right;
+}
+
+
+
+
+table.number_table td
+{
+text-align:right;
+border:0px;
+cellpadding:3px;
+
+}
+
+
+table.number_table {border-collapse:collapse;}
+
+table.number_table tr:nth-child(even) {
+    background: {{color.table_ntdata_background_cn}};
+}
+
+table.number_table thead th {
+  border-bottom: 2px solid {{ color.table_ntdata_border }};
+}
+
+table.number_table thead th:first-child{
+border-right: 2px solid {{ color.table_ntdata_border }};
+}
+
+table.number_table tbody th  {
+  border-right: 2px solid {{ color.table_ntdata_border }};
+}
+
+
+/* TODO: where? */
+div.literature {
+    margin-top: 10px;
+    font-size: 90%;
+    color: {{color.black}};
+}
+
+div.where {
+    margin: 10px 0 10px 0;
+}
+
+.emph {
+    font-style: italic;
+}
+
+.redhighlight {
+    color: {{color.grey}};
+}
+
+.bluehighlight {
+  color: blue;
+}
+
+.positivezero {
+    color: {{color.black}};
+}
+
+
+.highlight {
+  /* text-decoration: underline; */
+  font-weight: bold;
+}
+
+
+/** page wide defs for knowls, the *[knowl] is a selector for
+ *  all elements, that have a knowl attribute set to any value */
+table .knowl-link {
+  display: inline;
+  border-bottom: 1px dotted {{ color.knowl_hyper_text }};
+  border-radius: 0px;
+  padding: 1px;
+}
+.knowl-bar {
+  white-space: nowrap;
+  background: {{ color.knowl_background}};
+  padding: 5px 10px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid {{ color.knowl_thin_border }};
+  border-top-left-radius: 10px;
+}
+.knowl-bar button,
+.knowl-bar input,
+.knowl-bar form {
+  font-size: small;
+  display: inline;
+  margin: 0px 2px;
+}
+#knowl-search input {
+  font-size: small;
+  background: {{ color.knowl_background }};
+}
+.knowl-bar a {
+  padding: 2px 5px;
+}
+.knowl-editmode-sep {
+  padding: 5px;
+  margin: 30px 0;
+  border-bottom: 1px solid {{ color.knowl_thin_border }};
+  background: {{ color.knowl_background}};
+  color: {{ color.knowl_hyper_text }};
+  font-weight: bold;
+}
+.knowl-inc-edit {
+  margin-bottom: 10px;
+  border-bottom: 2px solid {{ color.knowl_border}};
+  font-size: x-small;
+  text-align: right;
+  line-height: 100%;
+}
+.knowl-inc-edit a {
+  padding: 3px 5px 0px 5px;
+  background: {{ color.knowl_l_1 }};
+  border-top-left-radius: 5px;
+}
+.knowl {
+  padding: 0;
+}
+/* knowl-index is the big table on the main knowledge page */
+#knowl-index td div > a {
+  display: block;
+  padding: 0px;
+  position: absolute;
+  top: 12px;
+}
+#knowl-index td div > span {
+  font-size: xx-small;
+  color: {{color.grey}};
+  position: absolute;
+  top: 2px;
+  line-height: 1em;
+}
+#knowl-index td div {
+  position: relative;
+  display: inline;
+  width: 170px;
+  height: 70px;
+  float: left;
+  min-height: 4em;
+  overflow: hidden;
+  padding: 2px;
+  margin: 1px;
+  border-radius: 2px;
+}
+#knowl-index td div:hover {
+  background: {{ color.knowl_hover }};
+  cursor: pointer;
+}
+#knowl-index td {
+  padding: 0;
+}
+#knowl-index tr td:first-child {
+  width: 50px;
+  vertical-align: top;
+  text-align: center;
+  font-size: x-large;
+  color: {{color.knowl_hyper_text}};
+  padding-top: 12px;
+}
+body.knowl table.ntdata thead tr {
+  background: {{ color.knowl_background }};
+  border-bottom: 2px solid {{ color.knowl_underline }};
+}
+body.knowl table.ntdata tr:nth-child(odd) {
+ background: {{ color.knowl_background }};
+}
+body.knowl table.ntdata tr:nth-child(even) {
+    background: {{color.white}};
+}
+
+
+table.mfdata {
+  width: auto;
+  border: 0;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+table.mfdata thead tr {
+  border-bottom: 2px solid {{ color.table_ntdata_border }};
+}
+
+table.mfdata td {
+    vertical-align: middle;
+}
+
+table.mfdata tr.oddrow {
+    background: {{color.table_ntdata_background_2}};
+}
+table.mfdata tr.evenrow {
+    background: {{color.white}};
+}
+
+table.dimgrid thead tr {
+    background: {{color.table_ntdata_background_2}};
+    border-bottom: 2px solid {{ color.table_ntdata_border }};
+}
+table.dimgrid thead tr th.blank {
+    background: {{color.white}};
+    border-bottom: 2px solid {{color.table_ntdata_background_2}} ;
+}
+table.dimgrid tbody tr th.left {
+    border-right: 2px solid {{ color.table_ntdata_border }};
+    background: {{color.table_ntdata_background_2}};
+}
+
+table.ntdata th.left {
+    border-right: 2px solid {{color.table_ntdata_border}};
+    background: {{color.table_ntdata_background_2}};
+    border-bottom: 0;
+    text-align: center;
+}
+
+table.ntdata th.weight {
+  text-align: center;
+  background: {{color.table_ntdata_background_2}};
+  border-bottom: 2px solid {{color.table_ntdata_border}};
+  border-left: 0;
+  vertical-align: center;
+}
+
+table.ntdata thead tr.space {
+  background: {{color.table_ntdata_background_2}};
+  border-bottom: 0;
+}
+
+table.ntdata thead th.spaceleft {
+  border-right: 2px solid {{color.table_ntdata_border}};
+  vertical-align: top;
+}
+
+table.ntdata tr.first {
+  border-top: 2px solid {{color.table_ntdata_border}};
+}
+table.ntdata .border-right {
+  border-right: 2px solid {{ color.table_ntdata_border }};
+}
+table.ntdata .border-bottom {
+  border-bottom: 2px solid {{ color.table_ntdata_border }};
+}
+table.ntdata .center {
+    text-align: center;
+}
+div.center {
+    text-align: center;
+}
+table.ntdata .right {
+    text-align: right;
+}
+td.right {
+    text-align: right;
+}
+table.ntdata .middle {
+    vertical-align: middle;
+}
+
+table.ntdata tr.dark td {
+    background: {{color.table_ntdata_background_2}};
+}
+table.ntdata tr.light td {
+    background: white;
+}
+table.ntdata td.dark {
+    background: {{color.table_ntdata_background_2}};
+}
+table.ntdata thead.dark tr {
+    background: {{color.table_ntdata_background_2}};
+}
+table.ntdata td.light {
+    background: white;
+}
+
+table.knowl_review tr:nth-child(odd) td {
+    background: {{color.white}};
+    padding-top: 30px;
+}
+table.knowl_review tr:first-child td {
+    padding-top: 0;
+}
+table.knowl_review tr:nth-child(even) {
+    background: {{ color.table_ntdata_background_2 }};
+}
+table.euler {
+    margin-left:auto;
+    margin-right:auto;
+}
+
+table.euler tr .galois {
+    text-align: center;
+}
+
+table.statgrid td {
+    text-align: right;
+}
+
+table.statgrid th.rhead {
+    border: 1px solid #ccc;
+    border-right: 2px solid {{color.table_ntdata_border}};
+}
+table.statgrid th.chead {
+    border: 1px solid #ccc;
+    border-bottom: 2px solid {{color.table_ntdata_border}};
+}
+table.statgrid td.prop {
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+table.statgrid td.cnt {
+    border-right: 1px solid #ccc;
+}
+
+.knowl-content {
+  padding: 0 10px;
+}
+.knowl-content h1 {
+  margin: 0px 0px 10px 0px;
+}
+.knowl-content h2 {
+  margin: 0px 0px 5px 0px;
+}
+
+*[knowl] {
+  border-bottom: 1px dotted {{ color.knowl_underline }};
+  cursor: pointer;
+  border-radius: 0;
+  margin: 3px 0 0 0;
+}
+*[knowl]:hover,
+*[knowl].active {
+  border-bottom: 2px solid {{ color.knowl_underline }};
+  background: {{ color.knowl_hover }};
+  color: {{ color.knowl_hyper_text }};
+  margin: 0;
+  padding: 3px 0 0 0;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+body.knowl #header {
+    background: {{color.knowl_header_background}};
+}
+body.knowl #header #title {
+    color: {{color.knowl_title_text}};
+}
+body.knowl #content h1,
+body.knowl #content h2,
+body.knowl #content a {
+  color: {{ color.knowl_hyper_text }};
+}
+body.knowl a:hover {
+  background: {{ color.knowl_hover }};
+}
+
+div > *[knowl], p > *[knowl] {
+  position: relative;
+}
+
+table .knowl a {
+    padding: 0;
+}
+
+.knowl-error {
+   color: {{color.knowl_error}};
+   border-bottom: 0;
+   text-decoration: underline;
+}
+
+.knowl-error a {
+   font-size:60%;
+   color: {{color.knowl_error}};
+}
+
+/*
+knowl-qm does not seem to be currently used.
+
+.knowl-qm {
+  font-family: sans-serif;
+  font-weight: bold;
+  border: 1px solid {{ color.knowl_thin_border }};
+  background: transparent;
+  color: {{ color.knowl_hover_text }};
+  cursor: pointer;
+  padding: 0 0.4em;
+  border-radius: 0.8em;
+  font-size: 0.9em;
+  top: -0.4em;
+  left: -0.1em;
+}
+.knowl-qm:hover,
+.knowl-qm.active {
+    background: {{color.knowl_db}};
+  color: {{color.white}};
+}
+.knowl-qm.active:hover {
+  background: transparent;
+  color: {{ color.knowl_hover_text }};
+}
+h1 > .knowl-qm {
+  font-size: 0.6em;
+  border-radius: 0.6em;
+  position: relative;
+  top: -0.8em;
+  left: -0.3em;
+}
+h2 > .knowl-qm {
+  font-size: 0.7em;
+  border-radius: 0.7em;
+  position: relative;
+  top: -0.6em;
+  left: -0.4em;
+}
+*/
+.knowl-output {
+  background: {{ color.knowl_background }};
+  border: 10px solid {{ color.knowl_border }};
+  {{ BORDER_RADIUS(10) }}
+  padding: 0px;
+  display: none;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  margin-right: 10px;
+  text-align: left;
+}
+
+.knowl-output .knowl-output,
+.knowl-output .knowl-output.loading {
+ margin-left: 0;
+ margin-right: 0;
+}
+.knowl-output.loading {
+ color: {{color.grey}};
+ font-style: italic;
+ font-size: small;
+}
+div.limit-height {
+  max-height: 500px;
+  overflow-y: auto;
+}
+.knowl-output h1, .knowl-output h2 {
+  margin: 5px 0;
+}
+.knowl-output h1 {
+  color: {{ color.knowl_hyper_text }};
+}
+.knowl-output h2 {
+  color: {{ color.knowl_hyper_text }};
+}
+.knowl-output a { display: inline; }
+
+.knowl-footer {
+  position: relative;
+  bottom: -10px;
+  font-size: x-small;
+  line-height: 100%;
+  background: {{ color.knowl_border }};
+  color: {{ color.knowl_border_text }};
+  padding: 1px 0 1px 10px;
+  margin:  0 0 0 0;
+}
+.knowl-header {
+  position: relative;
+  top: -10px;
+  font-size: x-small;
+  line-height: 100%;
+  background: {{ color.knowl_border }};
+  color: {{color.grey}};
+  padding: 1px 0 1px 10px;
+  margin:  0 0 0 0;
+}
+.knowl-header a,
+.knowl-footer a {
+    color: {{ color.knowl_border_links }};
+}
+.knowl-header a:hover,
+.knowl-footer a:hover {
+  background: none;
+  color: {{ color.knowl_border_hover }};
+}
+
+/* end knowl */
+
+/*** Dirichlet series, displayed in HTML ***/
+
+.dirichletseries {
+  font-family:"Times New Roman", Times, serif;
+}
+
+.dirichletseries em {
+  font-style: italic;
+}
+
+.dirichletseries td {
+  padding-left:0;
+  padding-right:0;
+}
+
+/*
+.dirichletseries td:first-child {
+  padding-top:3px;
+}
+*/
+
+.dirichletseries span.term {
+  white-space: nowrap;
+}
+
+.dirichletseries sup {
+/*  font-size: 75%;
+*/
+  font-style: italic;
+  font-family: KaTeX_Math;
+}
+
+/*** Tables for the Siegel corner ***/
+
+/** TODO these definitions are too broad. please make siegel a
+ * blueprint (name is e.g. "siegel") and prefix all siegel
+ * related definitions with body.siegel
+ */
+.box1 {
+    margin: 20px 5px 20px 5px;
+    padding: 1px;
+    max-width: 800px;
+    overflow: auto;
+}
+
+.small{
+    font-size: 12px;
+}
+
+.error {
+    margin: 20px 0 20px 0;
+    padding: 10px;
+    border: 1px solid {{color.red}};
+    color: {{color.red}};
+    font-size: 120%;
+}
+
+/* TODO: where?*/
+.enternumber
+{
+    border: 1px solid {{color.black}};
+}
+
+.watermark {
+    color: {{color.grey}} !important;
+}
+
+
+.propertylist {
+  margin: 2em 0;
+  padding: 0;
+  border: 1px solid {{color.grey}};
+}
+
+.propertylist dt {
+  font-weight: bold;
+}
+
+.propertylist dd {
+  margin-bottom: 1em
+}
+
+a.navlink {
+  color: {{color.a_nav_text}};
+  background-color: {{color.a_nav_background}};
+  font-weight: bold;
+  font-size: 11px;
+  text-align: center;
+  padding: 5px;
+  padding-top: 3px;
+  padding-bottom: 4px;
+  border: 1px solid {{color.a_nav_border}};
+  outline: 1px solid {{color.a_nav_background}};
+  text-decoration: none;
+  margin-left: 1px;
+  margin-top: 10px
+}
+
+hr {
+  border: 2px solid {{ color.hr_border }};
+  margin: 15px 0;
+}
+/*TODO: above*/
+body.knowl hr {
+  border: 2px solid {{ color.knowl_border }};
+}
+
+/* jquery ui slider */
+.slider {
+  margin: 15px; 5px;
+}
+
+/* tables */
+/* TODO: where? do colors get used?*/
+table.tablesorter {
+    font-family:arial;
+    background-color: {{color.light_grey_2}};
+    margin:10px 0pt 15px;
+    font-size: 8pt;
+    width: 100%;
+    text-align: left;
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+  background-color: {{color.col_main_ll}};/*TODO: or really light grey?*/
+  border: 1px solid {{color.white}};
+    font-size: 8pt;
+    padding: 4px;
+}
+table.tablesorter thead tr .header {
+    background-image: url("static/images/black-unsorted.gif");
+    background-repeat: no-repeat;
+    background-position: center right;
+    cursor: pointer;
+  padding-left: 4px;
+  padding-right: 15px;
+}
+table.tablesorter tbody td {
+    color: {{color.dark_grey}};
+    padding: 4px;
+    background-color: {{color.white}};
+    vertical-align: top;
+}
+table.tablesorter tbody tr.odd td {
+    background-color:{{color.knowl_background}};
+}
+table.tablesorter thead tr .headerSortUp {
+    background-image: url("static/images/black-asc.gif");
+}
+table.tablesorter thead tr .headerSortDown {
+    background-image: url("static/images/black-desc.gif");
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+    background-color: {{color.light_grey_2}};
+}
+
+.dataTables_wrapper {
+    width: 557px;
+    zoom: 1; /* Feeling sorry for IE */
+}
+
+.dataTables_processing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250px;
+    height: 30px;
+    margin-left: -125px;
+    margin-top: -15px;
+    padding: 14px 0 2px 0;
+    border: 1px solid {{color.light_grey_3}};
+    text-align: center;
+    color: {{color.grey}};
+    font-size: 14px;
+    background-color: {{color.white}};
+}
+
+.dataTables_length {
+    width: 100%;
+    line-height: 40px;
+}
+
+.dataTables_filter {
+    width: 100%;
+    line-height: 40px;
+}
+
+.dataTables_info {
+    width: 45%;
+    float: left;
+    margin: 5px;
+}
+
+.dataTables_paginate {
+    width: 50%;
+    * width: 50px;
+    float: right;
+    text-align: right;
+    margin: 5px;
+}
+
+a.paginate_active {
+    font-weight: bold;
+    padding: 5px;
+}
+
+a.paginate_button {
+    padding: 5px;
+}
+
+/* Pagination nested */
+.paginate_disabled_previous, .paginate_enabled_previous, .paginate_disabled_next, .paginate_enabled_next {
+    height: 19px;
+    width: 19px;
+    margin-left: 3px;
+    float: left;
+}
+
+.paginate_disabled_previous {
+    background-image: url('/static/images/back_disabled.jpg');
+}
+
+.paginate_enabled_previous {
+    background-image: url('/static/images/back_enabled.jpg');
+}
+
+.paginate_disabled_next {
+    background-image: url('/static/images/forward_disabled.jpg');
+}
+
+.paginate_enabled_next {
+    background-image: url('/static/images/forward_enabled.jpg');
+}
+
+table.display {
+    margin: 0 auto;
+    clear: both;
+    width: 100%;
+}
+
+table.display thead th {
+    padding: 3px 18px 3px 10px;
+    border-bottom: 1px solid {{color.black}};
+    font-weight: bold;
+    cursor: pointer;
+    * cursor: hand;
+}
+
+table.display tfoot th {
+    padding: 3px 18px 3px 10px;
+    border-top: 1px solid {{color.black}};
+    font-weight: bold;
+}
+
+table.display tr.heading2 td {
+    border-bottom: 1px solid {{color.grey}};
+}
+
+table.display td {
+    padding: 3px 10px;
+}
+
+table.display td.center {
+    text-align: center;
+}
+
+.sorting_asc {
+    background: url('/static/images/sort_asc.png') no-repeat center right;
+}
+
+.sorting_desc {
+    background: url('/static/images/sort_desc.png') no-repeat center right;
+}
+
+.sorting {
+    background: url('/static/images/sort_both.png') no-repeat center right;
+}
+
+.sorting_asc_disabled {
+    background: url('/static/images/sort_asc_disabled.png') no-repeat center right;
+}
+
+.sorting_desc_disabled {
+    background: url('/static/images/sort_desc_disabled.png') no-repeat center right;
+}
+
+
+/* TODO: I think the following are not used. */
+/*
+table.display tr.odd.gradeA {
+    background-color: {{color.col_main_ld}};
+}
+
+table.display tr.even.gradeA {
+    background-color: {{color.col_main_ll}};
+}
+
+table.display tr.odd.gradeC {
+    background-color: {{color.knowl_border}};
+}
+
+table.display tr.even.gradeC {
+    background-color: {{color.knowl_background}};
+}
+
+table.display tr.odd.gradeX {
+    background-color: {{color.col_light_red_1}};
+}
+
+table.display tr.even.gradeX {
+    background-color: {{color.col_light_red_2}};
+}
+
+table.display tr.odd.gradeU {
+    background-color: {{color.light_grey_3}};
+}
+
+table.display tr.even.gradeU {
+    background-color: {{color.light_grey_1}};
+}
+*/
+
+.dataTables_scroll {
+    clear: both;
+}
+
+.dataTables_scrollBody {
+    *margin-top: -1px;
+}
+
+.top, .bottom {
+    padding: 52px 5px 5px;
+    background-color: {{color.white_1}};
+    border: 1px solid {{color.light_grey_4}};
+}
+
+.top .dataTables_info {
+    float: none;
+}
+
+.clear {
+    clear: both;
+}
+
+.dataTables_empty {
+    text-align: center;
+}
+
+tfoot input {
+    margin: 0.5em 0;
+    width: 100%;
+    color: {{color.dark_grey_1}};
+}
+
+tfoot input.search_init {
+    color: {{color.grey}};
+}
+
+td.group {
+    background-color: {{color.light_red_grey}};
+    border-bottom: 2px solid {{color.red_grey}};
+    border-top: 2px solid {{color.red_grey}};
+}
+
+td.details {
+    background-color: {{color.light_red_grey}};
+    border: 2px solid {{color.red_grey}};
+}
+
+
+.example_alt_pagination div.dataTables_info {
+    width: 40%;
+}
+
+.paging_full_numbers {
+    height: 22px;
+    line-height: 22px;
+}
+
+.paging_full_numbers span.paginate_button,
+.paging_full_numbers span.paginate_active {
+    border: 1px solid {{color.grey}};
+    padding: 2px 5px;
+    margin: 0 3px;
+    cursor: pointer;
+    *cursor: hand;
+}
+
+.paging_full_numbers span.paginate_button {
+    background-color: {{color.light_grey_3}};
+}
+
+.paging_full_numbers span.paginate_button:hover {
+    background-color: {{color.light_grey_4}};
+}
+
+.paging_full_numbers span.paginate_active {
+    background-color: {{color.knowl_1}};
+}
+
+table.display tr.even.row_selected td {
+    background-color: {{color.blue_grey}};
+}
+
+table.display tr.odd.row_selected td {
+    background-color: {{color.blue_grey_1}};
+}
+
+tr.odd td.sorting_1 {
+    background-color: {{color.knowl_l_1}};
+}
+
+tr.odd td.sorting_2 {
+    background-color: {{color.knowl_l_2}};
+}
+
+tr.odd td.sorting_3 {
+    background-color: {{color.knowl_l_3}};
+}
+
+tr.even td.sorting_1 {
+    background-color: {{color.knowl_l_4}};
+}
+
+tr.even td.sorting_2 {
+    background-color: {{color.knowl_l_5}};
+}
+
+tr.even td.sorting_3 {
+    background-color: {{color.knowl_l_6}};
+}
+
+/*TODO: I think these are not used.*/
+/*
+tr.odd.gradeA td.sorting_1 {
+    background-color: {{color.col_main_ldl_1}};
+}
+
+tr.odd.gradeA td.sorting_2 {
+    background-color: {{color.col_main_ld_1}};
+}
+
+tr.odd.gradeA td.sorting_3 {
+    background-color: {{color.col_main_ld_1}};
+}
+
+tr.even.gradeA td.sorting_1 {
+    background-color: {{color.col_main_ld_2}};
+}
+
+tr.even.gradeA td.sorting_2 {
+    background-color: {{color.col_main_ll_1}};
+}
+
+tr.even.gradeA td.sorting_3 {
+    background-color: {{color.col_main_ll_1}};
+}
+
+tr.odd.gradeC td.sorting_1 {
+    background-color: {{color.knowl_ld_1}}
+}
+
+tr.odd.gradeC td.sorting_2 {
+    background-color: {{color.knowl_l_7}};
+}
+
+tr.odd.gradeC td.sorting_3 {
+    background-color: {{color.knowl_l_7}};
+}
+
+tr.even.gradeC td.sorting_1 {
+    background-color: {{color.knowl_l_8}};
+}
+
+tr.even.gradeC td.sorting_2 {
+    background-color: {{color.knowl_l_9}};
+}
+
+tr.even.gradeC td.sorting_3 {
+    background-color: {{color.knowl_l_9}};
+}
+
+tr.odd.gradeX td.sorting_1 {
+    background-color: {{color.light_red_4}};
+}
+
+tr.odd.gradeX td.sorting_2 {
+    background-color: {{color.light_red_5}};
+}
+
+tr.odd.gradeX td.sorting_3 {
+    background-color: {{color.light_red_5}};
+}
+
+tr.even.gradeX td.sorting_1 {
+    background-color: {{color.light_red_6}};
+}
+
+tr.even.gradeX td.sorting_2 {
+    background-color: {{color.light_red_7}};
+}
+
+tr.even.gradeX td.sorting_3 {
+    background-color: {{color.light_red_8}};
+}
+
+tr.odd.gradeU td.sorting_1 {
+    background-color: {{color.light_grey_5}};
+}
+
+tr.odd.gradeU td.sorting_2 {
+    background-color: {{color.light_grey_6}};
+}
+
+tr.odd.gradeU td.sorting_3 {
+    background-color: {{color.light_grey_6}};
+}
+
+tr.even.gradeU td.sorting_1 {
+    background-color: {{color.light_grey_7}};
+}
+
+tr.even.gradeU td.sorting_2 {
+    background-color: {{color.light_grey_8}};
+}
+
+tr.even.gradeU td.sorting_3 {
+    background-color: {{color.light_grey_8}};
+}
+
+.ex_highlight #example tbody tr.even:hover, #example tbody tr.even td.highlighted {
+    background-color: {{color.light_citron}};
+}
+
+.ex_highlight #example tbody tr.odd:hover, #example tbody tr.odd td.highlighted {
+    background-color: {{color.light_citron_1}};
+}
+
+.ex_highlight_row #example tr.even:hover {
+    background-color: {{color.light_citron}};
+}
+
+.ex_highlight_row #example tr.even:hover td.sorting_1 {
+    background-color: {{color.light_citron_2}};
+}
+
+.ex_highlight_row #example tr.even:hover td.sorting_2 {
+    background-color: {{color.light_citron_3}};
+}
+
+.ex_highlight_row #example tr.even:hover td.sorting_3 {
+    background-color: {{color.light_citron_4}};
+}
+
+.ex_highlight_row #example tr.odd:hover {
+    background-color: {{color.light_citron_1}};
+}
+
+.ex_highlight_row #example tr.odd:hover td.sorting_1 {
+    background-color: {{color.light_citron_5}};
+}
+
+.ex_highlight_row #example tr.odd:hover td.sorting_2 {
+    background-color: {{color.light_citron_6}};
+}
+
+.ex_highlight_row #example tr.odd:hover td.sorting_3 {
+    background-color: {{color.light_citron_7}};
+}
+
+table.KeyTable td {
+    border: 3px solid transparent;
+}
+
+table.KeyTable td.focus {
+    border: 3px solid {{color.blue_1}};
+}
+
+table.display tr.gradeA {
+    background-color: {{color.col_main_ll}};
+}
+
+table.display tr.gradeC {
+    background-color: {{color.knowl_background}};
+}
+
+table.display tr.gradeX {
+    background-color: {{color.col_light_red_1}};
+}
+
+table.display tr.gradeU {
+    background-color: {{color.light_grey_3}};
+}
+*/
+
+/* TODO: div? */
+div.box {
+    height: 100px;
+    padding: 10px;
+    overflow: auto;
+    border: 1px solid {{color.knowl_thin_border}};
+    background-color: {{color.knowl_background}};
+}
+
+div.codebox {
+    padding: 5px;
+    text-padding: 10px;
+    border: 1px solid {{color.knowl_thin_border}};
+    border-radius: 5px;
+    background-color: {{color.knowl_background}};
+    box-shadow: 3px 3px 3px {{color.knowl_shadow}};
+    white-space: pre;
+}
+
+/* Styling of Maass form plot */
+
+div.maassformplot {
+    position: absolute;
+    width: 720px;
+    position: relative;
+    /*    height: 800px;
+        overflow: hidden;
+        position: relative; */
+}
+
+div.maassformplot img {
+    width:100%;
+    height:auto;
+/*    position: absolute;
+    top: -200px;
+    left: -870px;*/
+}
+
+/* End of styling of Maass form plot */
+
+
+
+/*Sidebar style*/
+
+#sidebar .L a {
+    display: inline;
+    padding: 2px;
+}
+
+#sidebar .L {
+    padding-right: 4px;
+}
+
+#sidebar .heading {
+    padding-right: 1px;
+    padding-left: 2px;
+    margin-bottom: 1px;
+}
+
+#sidebar div.L {
+    margin: 8px;
+}
+
+#sidebar table td a {
+    display: block;
+    padding: 2px;
+    border-radius: 0;
+}
+
+#sidebar table td .subtitle {
+    color: {{color.sidebar_text}};
+}
+
+#sidebar table td.borc .subtitle .future {
+    margin-left: 5px;
+    padding: 2px 5px
+}
+
+#sidebar table td.borc .subtitle a {
+    margin-left: 5px;
+}
+
+#sidebar table td p {
+    padding: 2px 0px;
+}
+
+#sidebar table td.full .future  {
+    padding: 2px 5px;
+}
+
+#sidebar .future {
+    color: {{color.sidebar_text_future}};
+    display: inherit;
+}
+
+
+#sidebar .beta {
+    color: {{color.sidebar_text_beta}};
+    display: inherit;
+}
+
+
+#sidebar .beta a {
+    color: {{color.sidebar_text_beta}};
+}
+
+
+#sidebar table td .parts {
+    padding-left: 15px;
+}
+
+#sidebar table td .subitem {
+    padding-right: 15px;
+}
+
+#sidebar table td.rotation { overflow: hidden; }
+
+#sidebar li a {
+    background: inherit;
+}
+
+#sidebar .list a {
+    display: block;
+    background: none;
+    padding: 0px;
+
+}
+#sidebar h2 {
+    margin: 5px 0px 0px;}
+
+p.rotation  {
+    transform: rotate(270deg);
+}
+
+/* temporary over-side for GL(2) on beta */
+body.beta #sidebar table.short:nth-of-type(3) .rotation p.rotation {
+    transform: rotate(0deg)
+}
+
+#sidebar table th, #sidebar table td {
+    text-align: left;
+    padding: 2px;
+}
+
+#sidebar table.short{
+    width: 100%;
+    table-layout: fixed;
+    border-width: 2px;
+    border-bottom: 0px;
+    border-style: solid;
+    padding: 2px;
+    border-spacing: 0px;
+    border-color: {{color.sidebar_background}};
+    border-collapse: separate;
+}
+
+#sidebar table.short td.bor{
+    text-align: left;
+}
+
+#sidebar table.short td.nbor{
+    padding: 0px; text-align: left;
+}
+
+#sidebar table.short td.borc{
+    text-align: center;
+}
+
+#sidebar table.short td.full{
+    text-align: left;
+}
+
+#sidebar table.short td.off {
+    text-align: center;
+    background: {{color.sidebar_background_off}};
+}
+
+
+
+#sidebar ul:first-child a:first-child,
+#sidebar h2:first-child a:first-child,
+#sidebar h2:first-child {
+  margin: 0;
+  padding-top: 3px;
+}
+
+#sidebar ul:last-child li:last-child,
+#sidebar ul:last-child li:last-child a {
+  border-bottom-right-radius: 0px;
+}
+
+#sidebar .list li {
+  padding: 2px 0px;
+}
+
+#sidebar .list a {
+  padding: 0px;
+}
+
+#sidebar table.short2{
+    width: 100%;
+    table-layout:fixed;
+    padding: 10px;
+    border-spacing: 0px;
+    border-color: {{color.sidebar_background}};
+    border-collapse: collapse;
+}
+
+#sidebar table.short2 td{
+    padding-left: 10px;
+}
+
+/*End of Sidebar style*/
+
+
+
+
+/*Table boxes front page*/
+
+table.boxes {
+  table-layout: fixed;
+  width: 100%; padding: 10;
+  margin: 0px;
+  margin-left: 15px;
+  font-size:1em;
+  display:table;
+  }
+table.boxes > tbody > tr > td {
+  padding: 0px 50px 50px 0px;
+  overflow: hidden;
+  vertical-align: top
+  }
+table.box {
+  background: {{color.box_background}};
+  width: 100%; height: 100%;
+  padding: 10;
+  border-radius: 0px;
+  font-size:1em;
+  }
+table.box td.img {
+  background: {{color.box_background_img}};
+  width: 150px;
+  height: 150px;
+  border: 15;
+  padding-left: 5px;
+  padding-bottom: 0px;
+  padding-top: 5px;
+  padding-right: 5px;
+  }
+table.box img {
+  border: 15;
+  padding: 5;
+  }
+table td.title {
+  font-weight: bold;
+  font-size: 110%;
+  background: {{color.box_background_title}};
+  height: 2em;
+  padding: 5;
+  padding-left: 10px;
+  border-top-right-radius: 10px;
+  }
+table td.content {
+  background: {{color.box_background_img}};
+  font-size: 90%;
+  padding-left: 15px;
+  padding-bottom: 5px;
+  vertical-align: top;
+  }
+div.user {
+  font-size: 90%;
+  padding: 0px;
+  }
+div.user ul li {
+  line-height: 80%;
+  }
+table.box td.content ul.list {
+  margin: 0px;
+  padding-left: 15px; padding-bottom: 5px;
+  list-style-type: none;
+  list-style-position: inside;
+  line-height: 135%;
+}
+
+/*End table boxes front page*/
+
+p.short {
+  margin: 0px;
+}
+
+.table-scroll-wrapper {
+    overflow-y:auto;
+}
+
+.table-scroll-wrapper table {
+    margin-right: 1px;
+    margin-bottom: 1px;
+    border-collapse: collapse;
+}
+.table-scroll-wrapper th {
+    position: -webkit-sticky; top: 0;
+    position: sticky; top: 0;
+    z-index:1;
+    background:{{color.table_ntdata_background_2}};
+    background-clip: padding-box;
+}
+.cmf-dim-table th.level {
+    padding-left: 80px;
+}
+th.weight-label {
+    padding-left: 5px;
+    padding-right: 0px;
+}
+
+div.table-scroll-wrapper thead tr {
+    border-bottom: 0;
+}
+div.table-scroll-wrapper thead > tr:last-child > th {
+    border-bottom: 2px solid {{ color.table_ntdata_border}};
+}
+
+.table-scroll-wrapper td.border-right, .table-scroll-wrapper th.border-right {
+    border-right: 0; /* We need to put the border on td:after for scrolling */
+}
+.table-scroll-wrapper .border-right:after {
+    content:'';
+    position:absolute;
+    right: 0;
+    top: 0;
+    height:100%;
+    border-right: 2px solid {{ color.table_ntdata_border}};
+}
+.table-scroll-wrapper .sticky-col {
+    position: -webkit-sticky; left: 0;
+    position: sticky; left: 0;
+    z-index:2;
+    background-clip: padding-box;
+}
+.table-scroll-wrapper th.sticky-head {
+    position: -webkit-sticky; left: 0; top: 0;
+    position: sticky; left: 0; top: 0;
+    z-index:3;
+}
+td.nowrap {
+    white-space:nowrap;
+}
+table.ntdata td.nowrap a {
+    display: inline;
+}
+
+.float-right {
+    float:right;
+}
+.float-left {
+    float:left;
+}
+
+#complex_embeddings {
+    padding-top: 10px;
+}
+
+table.coeff_ring_basis td {
+    vertical-align: top;
+}
+
+table.coeff_ring_basis td.LHS {
+    text-align: right;
+    margin-right: 0;
+    padding-right: 0;
+}
+table.coeff_ring_basis td.eq {
+    text-align: center;
+    margin-right: 0;
+    padding-right: 2px;
+    margin-left: 0;
+    padding-left: 2px;
+}
+table.coeff_ring_basis td.RHS {
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+table.complex-cols td.real {
+    font-family: MJX_Math;
+    text-align: right;
+    margin-right: 0;
+    padding-right: 0;
+}
+table.complex-cols td.imag {
+    font-family: MJX_Math;
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
+}
+td.op {
+    font-family: MJX_Math;
+    text-align: center;
+    margin-right: 0;
+    padding-right: 2px;
+    margin-left: 0;
+    padding-left: 2px;
+}
+
+table.ntdata td.embedding-wrap {
+    margin: 0;
+    padding: 0;
+}
+.table-scroll-wrapper table.sticky-embeddings {
+    margin: 0;
+    padding: 0;
+    min-width: 55px;
+}
+table.sticky-embeddings td.vstrut {
+    margin-left: 0;
+    padding-left: 0;
+    margin-right: 0;
+    padding-right: 0;
+}
+
+table.qexp-table td.fdef {
+    text-align: right;
+    margin-right: 0;
+    padding-right: 0;
+    vertical-align: top;
+}
+table.qexp-table td.op {
+    vertical-align: top;
+}
+
+td.topspace {
+    padding-top: 15px;
+}
+table.qexp-table td.output {
+    margin-left: 0;
+    padding-left: 0;
+    vertical-align: top;
+}
+
+.mjx_basic {
+    font-family: MJX_Math;
+}
+
+input::placeholder {
+    color: #cccccc;
+}
+
+.table_rotate {
+   /* see the word "Weight" on the left edge of the table in
+        /ModularForm/GL2/Q/holomorphic/?search_type=Dimensions&dim=1
+   */
+  transform: rotate(180deg);
+
+  writing-mode: vertical-lr;
+  white-space: nowrap;
+}
+
+/* an horizonal list with bullet points */
+ul.horizontal-list {
+  display:inline-block;
+  padding:0;
+  margin: 0.5em;
+  margin-block-start: 0;
+}
+ul.horizontal-list li {
+  display: inline;
+  white-space: nowrap;
+}
+ul.horizontal-list li:after {
+
+  content:" ";
+  letter-spacing:1em;
+  background: center center no-repeat url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwAAADsABataJCQAAABl0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4xMkMEa+wAAAAnSURBVBhXY/Dz89MA4sNA/B9Ka4AEYQIwfBgkiCwAxjhVopnppwEApxQqhnyQ+VkAAAAASUVORK5CYII=);
+}
+
+input.color_selecter {
+    margin: 10px;
+}
+
+/* the button to show advanced search options */
+#advancedtoggle {
+    margin-left: 20px;
+}
+
+/* the advanced search options themselves, hidden by default */
+.advanced {
+    display: none;
+}

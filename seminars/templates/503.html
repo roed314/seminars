@@ -1,0 +1,19 @@
+{% extends 'homepage.html' %}
+{% block content %}
+
+<h3>The LMFDB is currently unavailable.</h3>
+<p>
+You can visit our
+{% if 'beta' in request.url_root %}
+main site at
+<a href="http://www.lmfdb.org">www.lmfdb.org</a>.
+{% else %}
+beta site at
+<a href="http://beta.lmfdb.org">beta.lmfdb.org</a>.
+{% endif %}
+</p>
+<p>
+You can contact us <a href="/contact">here</a>.
+</p>
+
+{% endblock %}

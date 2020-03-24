@@ -1,0 +1,38 @@
+{% extends 'homepage.html' %}
+
+{% block sidebar -%}
+{# See https://stackoverflow.com/questions/8641729/how-to-avoid-the-need-for-ctrl-click-in-a-multi-select-box-using-javascript #}
+<div id="sidebar">
+  <select name="cat" multiple="1" size="{{ categories|count }}">
+    {% for catlab in categories %}
+    <option value="{{catlab[0]}}">{{catlab[1]}}</option>
+    {% endfor %}
+  </select>
+</div>
+{%- endblock sidebar %}
+
+{% block content %}
+
+<h2> Today's seminars </h2>
+
+<p>
+  Header bar listing categories with seminars, with the number of seminars in each category in parentheses.
+  Clicking on a category will use javascript to show a list of seminars in that category.
+</p>
+
+<h2> Browse seminars </h2>
+
+<p>
+  By date: {% for day in days %}<a href="">{{day}}</a> {% endfor %}
+</p>
+
+<p>
+  By category: {% for catlab in categories %}<a href="{{ url_for('.by_category', category=catlab[0]) }}">{{catlab[1]}}</a>; {% endfor %}
+</p>
+
+<h2> Search </h2>
+<form id='search' onsubmit="cleanSubmit(this.id)">
+  {{ info.search_array.html() | safe }}
+</form>
+
+{% endblock %}

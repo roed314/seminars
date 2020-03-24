@@ -1,0 +1,32 @@
+password*
+config.ini
+
+*.pyc
+*.pyo
+*.so
+*.o
+*.c
+*.swp
+*~
+
+
+flasklog
+slow_queries.log
+
+# Testing files
+htmlcov
+.coverage*
+.pytest_cache/
+
+# vim swap files
+.*.sw?
+# backup files
+*~
+paul_scripts
+
+local.sh
+
+.DS_Store
+.idea/
+
+

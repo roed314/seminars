@@ -1,0 +1,3 @@
+[submodule "lmfdb"]
+	path = lmfdb
+	url = https://github.com/lmfdb/lmfdb
