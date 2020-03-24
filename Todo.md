@@ -1,4 +1,4 @@
-Admin
+Admin (Edgar)
 =====
 
 1. Add pages for user management (inviting and approving users, user-add tokens)
