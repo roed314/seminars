@@ -13,6 +13,8 @@ Admin (Edgar)
 
 1. Stop connecting to the lmfdb database
 
+1. Start a test server, link to mathseminars.org DNS record
+
 Content creation
 ================
 
@@ -23,6 +25,16 @@ Content creation
 1. Makes sure that content creators can delete things if they want
 
 1. Adapt knowl editing code for content creation and saving.  In particular, this gives us versioning for abstracts.
+
+1. Show help on what input is allowed (advertise that they can use latex, explain how to type a dollar sign, have a placeholder explaining what to do)
+
+1. Include other as a category, handle specially
+
+1. Allow multiple categories
+
+1. Interface for creating a singleton talk
+
+1. Mechanism for canceling talks, archiving seminars
 
 Viewing and searching
 =====================
@@ -35,10 +47,33 @@ Viewing and searching
 
 1. Create talk homepage.  Different versions for when talk is in the future, ongoing, or in the past.
 
+1. Top menu: Filter, Search, Calendar, About (includes feedback), Login/Account
+
+1. Only show zoom link if logged in
+
+1. Add route that strips headers for inclusion into a seminar webpage
+
+1. When logged in, there should be an option to see the site as if you weren't logged in
+
+1. When displaying list of seminars, show date, time, name of seminar, speaker, title
+
+1. When searching, should have ability to flip sort order (default depends on whether past or future)
+
+1. On the homepage, there should be a note at top explaining benefit of logging in
+
+1. In seminar lists, have icon for online vs offline talk (could be both)
+
+Time zones
+==========
+
+1. Should get the time zone from the browser when user not logged in (https://stackoverflow.com/questions/6939685/get-client-time-zone-from-browser)
+
 Feedback
 ========
 
 1. Add avenues for users to give feedback both to admins and to content creators
+
+1. We should create a privacy policy, discussion of cookies
 
 Calendars
 =========
@@ -60,3 +95,23 @@ Design and branding
 1. Think of a good name and register it
 
 1. Once we're ready, think about advertising strategy (Bjorn emailing number theory list; how to reach out beyond number theory, posting on Facebook, etc)
+
+Bjorn feedback
+
+Schema changes:
+- Add room to seminar and to talk
+- Time zone for seminars and talks as a string
+- comments for seminars and talks
+- switch categories to an array of strings
+- switch institution of seminar to array of strings
+- description box for seminars (shown in search results and on seminar homepage) - e.g. research seminar, conference, learning seminar....
+- Add table for categories
+- Personalized short name for seminar
+- deleted -> archived (archived seminars don't show up on users' lists of seminars)
+- update seminar_organizers table as in Schema.md
+
+Links to posts about online seminars
+- [aosun](http://math.mit.edu/~aosun/online_seminars.html?fbclid=IwAR12HWLaSri3aYplQ3DZNOjnOrjKy6uZmRDmLAX4jX46hkJR_O0eNVVBNWM)
+- [littmath](https://www.google.com/url?q=https://twitter.com/littmath/status/1242468857975115777&sa=D&source=hangouts&ust=1585257466247000&usg=AFQjCNES39qjlCfz_icIFwOg6-8j6EF1Rw)
+- [Jordan](https://twitter.com/JSEllenberg/status/1238872137588490240)
+- [isaksen](https://s.wayne.edu/isaksen/echt/)

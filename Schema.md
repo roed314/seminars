@@ -102,21 +102,24 @@ These tables record various multi-multi relations between entities in the databa
 Column     | Type   | Notes
 -----------|--------|------
 id         | bigint | auto
-username   | text   |
+email      | text   |
 seminar_id | bigint |
 
 `talk_subscriptions`: for users to add individual talks to their calendar file
 
-Column   | Type   | Notes
----------|--------|------
-id       | bigint | auto
-username | text   |
-talk_id  | bigint |
+Column  | Type   | Notes
+--------|--------|------
+id      | bigint | auto
+email   | text   |
+talk_id | bigint |
 
 `seminar_organizers`: records which users are the organizers of each seminar
 
-Column      | Type   | Notes
-------------|--------|------
-id          | bigint | auto
-seminar_id  | bigint |
-username    | text   |
+Column     | Type    | Notes
+-----------|---------|------
+id         | bigint  | auto
+seminar_id | bigint  |
+email      | text    |
+full_name  | text    |
+display    | boolean | whether to display in list of seminar organizers
+contact    | boolean | whether to specify this person as a contact
