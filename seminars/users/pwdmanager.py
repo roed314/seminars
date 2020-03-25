@@ -3,19 +3,19 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from six import string_types, text_type
+import bcrypt
 # store passwords, check users, ...
 # password hashing is done with fixed and variable salting
 # Author: Harald Schilly <harald.schilly@univie.ac.at>
 # Modified : Chris Brady and Heather Ratcliffe
 
-# NEVER EVER change the fixed_salt!
-fixed_salt = '=tU\xfcn|\xab\x0b!\x08\xe3\x1d\xd8\xe8d\xb9\xcc\xc3fM\xe9O\xfb\x02\x9e\x00\x05`\xbb\xb9\xa7\x98'
 
 from lmfdb.backend import db
 from lmfdb.backend.base import PostgresBase
 from lmfdb.backend.encoding import Array
 from psycopg2.sql import SQL, Identifier, Placeholder
 from datetime import datetime, timedelta
+from pytz import UTC
 
 from .main import logger, FLASK_LOGIN_VERSION, FLASK_LOGIN_LIMIT
 from distutils.version import StrictVersion
@@ -29,57 +29,63 @@ class PostgresUserTable(PostgresBase):
         # never narrow down the rmin-rmax range, only increase it!
         self.rmin, self.rmax = -10000, 10000
         self._rw_userdb = db.can_read_write_userdb()
-        #TODO use this instead of hardcoded columns names
-        #with identifiers
-        self._username_full_name = ["username", "full_name"]
-        if self._rw_userdb:
-            cur = self._execute(SQL("SELECT column_name FROM information_schema.columns WHERE table_schema = %s AND table_name = %s"), ['userdb', 'users'])
-            self._cols = [rec[0] for rec in cur]
-        else:
-            self._cols = self._username_full_name
+        cur = self._execute(SQL("SELECT column_name FROM information_schema.columns WHERE table_schema = %s AND table_name = %s"), ['userdb', 'users'])
+        self._cols = [rec[0] for rec in cur]
+        self._name = "userdb.users"
 
     def can_read_write_userdb(self):
         return self._rw_userdb
 
-    def get_random_salt(self):
-        """
-        Generates a random salt.
-        This random_salt is a way to have the passwords and code public,
-        but still make it very hard to guess it.
-        once computers are 10x faster, change the rmin,rmax limits
-        """
-        import random
-        return str(random.randrange(self.rmin, self.rmax))
 
-    def hashpwd(self, pwd, random_salt=None):
+    def bchash(self, pwd):
         """
-        Globally unique routine how passwords are hashed.
-        Once in production, never ever change it - otherwise all
-        passwords are useless.
+        Generate a bcrypt based password hash.
         """
-        from hashlib import sha256
-        hashed = sha256()
-        hashed.update(pwd)  # pwd must come first!
-        if not random_salt:
-            random_salt = self.get_random_salt()
-        hashed.update(random_salt)
-        hashed.update(fixed_salt)  # fixed salt must come last!
-        return hashed.hexdigest()
+        return bcrypt.hashpw(pwd.encode('utf-8'), bcrypt.gensalt())
 
-    def bchash(self, pwd, existing_hash = None):
-        """
-        Generate a bcrypt based password hash. Intended to replace
-        Schilly's original hashing algorithm
-        """
-        try:
-            import bcrypt
-            if not existing_hash:
-                existing_hash = text_type(bcrypt.gensalt())
-            return bcrypt.hashpw(pwd.encode('utf-8'), existing_hash.encode('utf-8'))
-        except Exception:
-            logger.warning("Failed to return bchash, perhaps bcrypt is not installed");
-            return None
+    def generate_key(self):
+        return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
 
+    def new_user(self, **kwargs):
+        """
+        Creates a new user.
+        Required keyword arguments:
+            - email
+            - password
+            - full_name
+            - approver
+        """
+        for col in ["email", "password", "full_name", "approver"]:
+            assert col in kwdargs
+        kwargs['password'] = bchash(kwargs['password'])
+        for col in ['email_confirmed', 'admin', 'editor', 'creator']:
+            kwargs[key] = kwdargs.get(key, False)
+        kwargs['email_reset_time'] = kwdargs.get(UTC.localize(datetime(1970,1,1,)))
+        kwargs['email_reset_code'] = kwdargs.get("email_reset_code", None)
+        kwargs['homepage'] = kwargs.get('homepage', None)
+        kwargs['timezone'] = kwargs.get('timezone', "America/New York")
+        kwargs['location'] = None
+        kwargs['created'] = datetime.now(UTC)
+        kwargs['ics_key'] = self.generate_key()
+
+
+    def change_password(self, email, newpwd):
+        if self._rw_userdb:
+            updater = SQL("UPDATE {} SET {} = %s WHERE {} = %s").format(
+                map(IdentifierWrapper, [self._name, "password", "email"]))
+            self._execute(updater, [self.bchash(newpwd), email])
+            logger.info("password for %s changed!" % email)
+            return True
+        else:
+            logger.info("no attempt to change password, not enough privileges")
+            return False
+
+
+
+######## OLD #########
+######## OLD #########
+######## OLD #########
+######## OLD #########
     def new_user(self, uid, pwd=None, full_name=None, about=None, url=None):
         """
         generates a new user, asks for the password interactively,
@@ -106,15 +112,7 @@ class PostgresUserTable(PostgresBase):
         new_user = LmfdbUser(uid)
         return new_user
 
-    def change_password(self, uid, newpwd):
-        if self._rw_userdb:
-            bcpass = self.bchash(newpwd)
-            #TODO: use identifiers
-            updater = SQL("UPDATE userdb.users SET bcpassword = %s WHERE username = %s")
-            self._execute(updater, [bcpass, uid])
-            logger.info("password for %s changed!" % uid)
-        else:
-            logger.info("no attempt to change password, not enough privileges")
+
 
     def user_exists(self, uid):
         selecter = SQL("SELECT username FROM userdb.users WHERE username = %s")
