@@ -77,6 +77,8 @@ live_link   | text    | some seminars may have a consistent link for attending
 Column      | Type        | Notes
 ------------|-------------|------
 id          | bigint      | auto
+title       | text        |
+description | text        |
 token       | text        | give permission for speaker to edit
 category    | text        |
 keywords    | text        |
