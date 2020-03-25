@@ -24,7 +24,7 @@ from flask import abort, flash, jsonify, make_response,\
 from markupsafe import Markup
 from flask_login import login_required, current_user
 from .knowl import Knowl, knowldb, knowl_title, knowl_exists, knowl_url_prefix
-from seminars.users import admin_required, knowl_reviewer_required
+from seminars.users import admin_required
 from seminars.users.pwdmanager import userdb
 from lmfdb.utils import to_dict, code_snippet_knowl
 import markdown
@@ -478,56 +478,6 @@ def resurrect(ID):
     k.resurrect()
     flash(Markup("Knowl %s has been resurrected." % ID))
     return redirect(url_for(".show", ID=ID))
-
-@knowledge_page.route("/review/<ID>/<int:timestamp>")
-@knowl_reviewer_required
-def review(ID, timestamp):
-    timestamp = timestamp_in_ms_to_datetime(timestamp)
-    k = Knowl(ID, timestamp=timestamp)
-    k.review(who=current_user.get_id())
-    flash(Markup("Knowl %s has been positively reviewed." % ID))
-    return redirect(url_for(".show", ID=ID))
-
-@knowledge_page.route("/demote/<ID>/<int:timestamp>")
-@knowl_reviewer_required
-def demote(ID, timestamp):
-    timestamp = timestamp_in_ms_to_datetime(timestamp)
-    k = Knowl(ID, timestamp=timestamp)
-    k.review(who=current_user.get_id(), set_beta=True)
-    flash(Markup("Knowl %s has been returned to beta." % ID))
-    return redirect(url_for(".show", ID=ID))
-
-@knowledge_page.route("/review_recent/<int:days>/")
-@knowl_reviewer_required
-def review_recent(days):
-    if request.args:
-        try:
-            info = to_dict(request.args)
-            beta = None
-            ID = info.get('review')
-            if ID:
-                beta = False
-            else:
-                ID = info.get('beta')
-                if ID:
-                    beta = True
-            if beta is not None:
-                k = Knowl(ID)
-                k.review(who=current_user.get_id(), set_beta=beta)
-                return jsonify({"success": 1})
-            raise ValueError
-        except Exception:
-            return jsonify({"success": 0})
-    knowls = knowldb.needs_review(days)
-    for k in knowls:
-        k.rendered = render_knowl(k.id, footer="0", raw=True, k=k)
-        k.reviewed_content = json.dumps(k.reviewed_content)
-        k.content = json.dumps(k.content)
-    b = get_bread([("Reviewing Recent", url_for('.review_recent', days=days))])
-    return render_template("knowl-review-recent.html",
-                           title="Reviewing %s days of knowls" % days,
-                           knowls=knowls,
-                           bread=b)
 
 @knowledge_page.route("/broken_links")
 def broken_links():
