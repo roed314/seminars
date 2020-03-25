@@ -6,10 +6,6 @@ import datetime
 
 from flask import (Flask, g, render_template, request, make_response,
                    redirect, url_for, current_app, abort)
-from lmfdb.utils import (
-    SearchArray, TextBox, SelectBox, YesNoBox,
-    to_dict, search_wrap
-)
 
 from lmfdb.logger import logger_file_handler, critical
 
@@ -172,7 +168,6 @@ def urlencode(kwargs):
 #    Redirects and errors    #
 ##############################
 
-
 #@app.before_request
 #def netloc_redirect():
 #    """
@@ -192,7 +187,6 @@ def urlencode(kwargs):
 #    ):
 #        url = request.url.replace("http://", "https://", 1)
 #        return redirect(url, code=301)
-
 
 def timestamp():
     return '[%s UTC]' % time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
@@ -227,121 +221,7 @@ def not_found_503(error):
 #       Top-level pages      #
 ##############################
 
-categories = [
-    ("ag", "algebraic geometry"),
-    ("at", "algebraic topology"),
-    ("ap", "analysis of PDEs"),
-    ("ct", "category theory"),
-    ("ca", "classical analysis and ODEs"),
-    ("co", "combinatorics"),
-    ("ac", "commutative algebra"),
-    ("cv", "complex variables"),
-    ("dg", "differential geometry"),
-    ("ds", "dynamical systems"),
-    ("fa", "functional analysis"),
-    ("gm", "general mathematics"),
-    ("gn", "general topology"),
-    ("gt", "geometric topology"),
-    ("gr", "group theory"),
-    ("ho", "history and overview"),
-    ("it", "information theory"),
-    ("kt", "K-theory and homology"),
-    ("lo", "logic"),
-    ("mp", "mathematical physics"),
-    ("mg", "metric geometry"),
-    ("nt", "number theory"),
-    ("na", "numerical analysis"),
-    ("oa", "operator algebras"),
-    ("oc", "optimization and control"),
-    ("pr", "probability"),
-    ("qa", "quantum algebra"),
-    ("rt", "representation theory"),
-    ("ra", "rings and algebras"),
-    ("sp", "spectral theory"),
-    ("st", "statistics theory"),
-    ("sg", "symplectic geometry")]
-
-class SemSearchArray(SearchArray):
-    noun = "seminar"
-    plural_noun = "seminars"
-    def __init__(self):
-        category = SelectBox(
-            name="category",
-            label="Category",
-            options=[("", "")] + categories)
-        keywords = TextBox(
-            name="keywords",
-            label="Keywords")
-        speaker = TextBox(
-            name="speaker",
-            label="Speaker")
-        affiliation = TextBox(
-            name="affiliation",
-            label="Affiliation")
-        institution = TextBox(
-            name="institution",
-            label="Institution")
-        title = TextBox(
-            name="title",
-            label="Title")
-        online = SelectBox(
-            name="online",
-            label="Online",
-            options=[("", "only"),
-                     ("all", "and offline"),
-                     ("exclude", "exclude")])
-        when = SelectBox(
-            name="when",
-            label="Occuring in",
-            options=[("", ""),
-                     ("future", "the future"),
-                     ("past", "the past")])
-        date = TextBox( # should have date widget?
-            name="date",
-            label="Date")
-        video = YesNoBox(
-            name="video",
-            label="Has video")
-        avail = SelectBox(
-            name="access",
-            label="Access",
-            options=[("", ""),
-                     ("open", "open only")])
-        count = TextBox(
-            name="count",
-            label="Results to display",
-            example=50)
-        self.browse_array = [[category, keywords], [speaker, affiliation], [title, institution], [when, date], [online], [video, avail], [count]]
-
-@app.route("/")
-def index():
-    info = to_dict(request.args, search_array=SemSearchArray())
-    if len(request.args) > 0:
-        return search(info)
-    today = datetime.datetime.today().weekday() # account for time zone....
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-    if today not in [5, 6]: # weekday
-        days = days[today:] + days[:today]
-        days[0] = "Today"
-        if today !=  4:
-            days[1] = "Tomorrow"
-
-    return render_template(
-        'browse.html',
-        title="Math Seminars",
-        info=info,
-        categories=categories,
-        days=days,
-        bread=None)
-
-@app.route("/<category>")
-def by_category(category):
-    # raise error if not existing category?
-    return search({"category":category})
-
-def search(info):
-    # TODO
-    pass
+# Code for the main browse page is contained in the homepage/ folder
 
 @app.route("/about")
 def about():
@@ -380,16 +260,10 @@ def info():
     output += "\n\n"
     return output.replace("\n", "<br>")
 
-
 @app.route("/acknowledgment")
 def acknowledgment():
     bread = [("Acknowledgments" , '')]
     return render_template("acknowledgment.html", title="Acknowledgments", bread=bread)
-
-# google's CSE for www.lmfdb.org/* (and *only* those pages!)
-@app.route("/search")
-def search():
-    return render_template("search.html", title="Search LMFDB", bread=[('Search', url_for("search"))])
 
 @app.route("/editorial-board")
 @app.route("/management-board")
@@ -405,20 +279,6 @@ def contact():
     b = [(t, url_for("contact"))]
     return render_template('contact.html', title=t, body_class='', bread=b)
 
-def root_static_file(name):
-    def static_fn():
-        fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", name)
-        if os.path.exists(fn):
-            return open(fn, "rb").read()
-        critical("root_static_file: file %s not found!" % fn)
-        return abort(404, 'static file %s not found.' % fn)
-    app.add_url_rule('/%s' % name, 'static_%s' % name, static_fn)
-
-
-for fn in ['favicon.ico']:
-    root_static_file(fn)
-
-
 @app.route("/robots.txt")
 def robots_txt():
     #if "beantheory.org".lower() in request.url_root.lower():
@@ -431,49 +291,6 @@ def robots_txt():
 @app.route("/humans.txt")
 def humans_txt():
     return render_template("acknowledgment.html", title="Acknowledgments")
-
-@app.context_processor
-def add_colors():
-    from .color import Slate
-    D = Slate().dict()
-    print(D['header_background'])
-    return {'color': Slate().dict()}
-
-@app.route("/style.css")
-def css():
-    response = make_response(render_template("style.css"))
-    response.headers['Content-type'] = 'text/css'
-    # don't cache css file, if in debug mode.
-    if current_app.debug:
-        response.headers['Cache-Control'] = 'no-cache, no-store'
-    else:
-        response.headers['Cache-Control'] = 'public, max-age=600'
-    return response
-
-##############################
-#         Intro pages        #
-##############################
-
-# common base class and bread
-_bc = 'intro'
-intro_bread = lambda: [('Intro', url_for("introduction"))]
-
-# template displaying just one single knowl as an KNOWL_INC
-_single_knowl = 'single.html'
-
-
-#@app.route("/intro/features")
-#def introduction_features():
-#    b = intro_bread()
-#    b.append(('Features', url_for("introduction_features")))
-#    return render_template(_single_knowl, title="Features", kid='intro.features', body_class=_bc, bread=b)
-
-#@app.route("/news")
-#def news():
-#    t = "News"
-#    b = [(t, url_for('news'))]
-#    return render_template(_single_knowl, title="LMFDB in the News", kid='doc.news.in_the_news', body_class=_bc, bread=b)
-
 
 def routes():
     """
@@ -508,3 +325,64 @@ def sitemap():
         )
         + "</ul>"
     )
+
+##############################
+#       CSS Styling          #
+##############################
+
+@app.context_processor
+def add_colors():
+    from .color import Slate
+    D = Slate().dict()
+    return {'color': Slate().dict()}
+
+@app.route("/style.css")
+def css():
+    response = make_response(render_template("style.css"))
+    response.headers['Content-type'] = 'text/css'
+    # don't cache css file, if in debug mode.
+    if current_app.debug:
+        response.headers['Cache-Control'] = 'no-cache, no-store'
+    else:
+        response.headers['Cache-Control'] = 'public, max-age=600'
+    return response
+
+##############################
+#       Static files         #
+##############################
+
+def root_static_file(name):
+    def static_fn():
+        fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", name)
+        if os.path.exists(fn):
+            return open(fn, "rb").read()
+        critical("root_static_file: file %s not found!" % fn)
+        return abort(404, 'static file %s not found.' % fn)
+    app.add_url_rule('/%s' % name, 'static_%s' % name, static_fn)
+
+for fn in ['favicon.ico']:
+    root_static_file(fn)
+
+##############################
+#         Intro pages        #
+##############################
+
+# common base class and bread
+#_bc = 'intro'
+#intro_bread = lambda: [('Intro', url_for("introduction"))]
+
+# template displaying just one single knowl as an KNOWL_INC
+#_single_knowl = 'single.html'
+
+
+#@app.route("/intro/features")
+#def introduction_features():
+#    b = intro_bread()
+#    b.append(('Features', url_for("introduction_features")))
+#    return render_template(_single_knowl, title="Features", kid='intro.features', body_class=_bc, bread=b)
+
+#@app.route("/news")
+#def news():
+#    t = "News"
+#    b = [(t, url_for('news'))]
+#    return render_template(_single_knowl, title="LMFDB in the News", kid='doc.news.in_the_news', body_class=_bc, bread=b)

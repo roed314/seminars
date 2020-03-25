@@ -28,23 +28,23 @@ login_manager = LoginManager()
 
 # We log a warning if the version of flask-login is less than FLASK_LOGIN_LIMIT
 FLASK_LOGIN_LIMIT = '0.3.0'
-from .pwdmanager import userdb, LmfdbUser, LmfdbAnonymousUser
+from .pwdmanager import userdb, SeminarsUser, SeminarsAnonymousUser
 
 base_url = "http://beta.lmfdb.org"
 
 @login_manager.user_loader
 def load_user(userid):
-    return LmfdbUser(userid)
+    return SeminarsUser(userid)
 
 login_manager.login_view = "users.info"
 
 # this anonymous user has the is_admin() method
-login_manager.anonymous_user = LmfdbAnonymousUser
+login_manager.anonymous_user = SeminarsAnonymousUser
 
 
 def get_username(uid):
     """returns the name of user @uid"""
-    return LmfdbUser(uid).name
+    return SeminarsUser(uid).name
 
 # globally define user properties and username
 
@@ -59,7 +59,7 @@ def ctx_proc_userdata():
         userdata['user_is_admin'] = False
         userdata['user_is_authenticated'] = False
         userdata['user_can_review_knowls'] = False
-        userdata['get_username'] = LmfdbAnonymousUser().name # this is a function
+        userdata['get_username'] = SeminarsAnonymousUser().name # this is a function
 
     else:
         userdata['userid'] = 'anon' if current_user.is_anonymous() else current_user._uid
@@ -71,7 +71,6 @@ def ctx_proc_userdata():
             userdata['user_is_authenticated'] = current_user.is_authenticated()
 
         userdata['user_is_admin'] = current_user.is_admin()
-        userdata['user_can_review_knowls'] = current_user.is_knowl_reviewer()
         userdata['get_username'] = get_username  # this is a function
     return userdata
 
@@ -154,7 +153,7 @@ def set_info():
 @login_required
 def profile(userid):
     # See issue #1169
-    user = LmfdbUser(userid)
+    user = SeminarsUser(userid)
     bread = base_bread() + [(user.name, url_for('.profile', userid=user.get_id()))]
     from seminars.knowledge.knowl import knowldb
     userknowls = knowldb.search(author=userid, sort=['title'])
@@ -170,7 +169,7 @@ def login(**kwargs):
     password = request.form["password"]
     next = request.form["next"]
     remember = True if request.form["remember"] == "on" else False
-    user = LmfdbUser(name)
+    user = SeminarsUser(name)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
         flask.flash(Markup("Hello %s, your login was successful!" % user.name))
@@ -194,18 +193,20 @@ def admin_required(fn):
         return fn(*args, **kwargs)
     return decorated_view
 
-def knowl_reviewer_required(fn):
+def editor_required(fn):
     """
-    wrap this around those entry points where you need to be a knowl reviewer.
+    wrap this around those entry points where you need to be an editor.
     """
     @wraps(fn)
     @login_required
     def decorated_view(*args, **kwargs):
-        logger.info("reviewer access attempt by %s" % current_user.get_id())
-        if not current_user.is_knowl_reviewer():
-            return flask.abort(403)  # acess denied
+        logger.info("admin access attempt by %s" % current_user.get_id())
+        if not current_user.is_editor():
+            return flask.abort(403)  # access denied
         return fn(*args, **kwargs)
     return decorated_view
+
+# The analogous function creator_required is not defined, since we want to allow normal users to creat things that won't be displayed until they're approved as a creator.
 
 def housekeeping(fn):
     """

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
-from .main import (login_page, login_manager, admin_required, knowl_reviewer_required,
+from .main import (login_page, login_manager, admin_required,
                   housekeeping, FLASK_LOGIN_VERSION, FLASK_LOGIN_LIMIT)
 assert admin_required  # silence pyflakes
-assert knowl_reviewer_required  # silence pyflakes
 assert housekeeping  # silence pyflakes
 
 from seminars.app import app

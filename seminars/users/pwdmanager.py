@@ -9,8 +9,7 @@ import bcrypt
 # Author: Harald Schilly <harald.schilly@univie.ac.at>
 # Modified : Chris Brady and Heather Ratcliffe
 
-
-from lmfdb.backend import db
+from seminars import db
 from lmfdb.backend.base import PostgresBase
 from lmfdb.backend.encoding import Array
 from psycopg2.sql import SQL, Identifier, Placeholder
@@ -32,6 +31,7 @@ class PostgresUserTable(PostgresBase):
         cur = self._execute(SQL("SELECT column_name FROM information_schema.columns WHERE table_schema = %s AND table_name = %s"), ['userdb', 'users'])
         self._cols = [rec[0] for rec in cur]
         self._name = "userdb.users"
+
 
     def can_read_write_userdb(self):
         return self._rw_userdb
@@ -82,6 +82,7 @@ class PostgresUserTable(PostgresBase):
 
 
 
+
 ######## OLD #########
 ######## OLD #########
 ######## OLD #########
@@ -93,7 +94,7 @@ class PostgresUserTable(PostgresBase):
         """
         if not self._rw_userdb:
             logger.info("no attempt to create user, not enough privileges")
-            return LmfdbAnonymousUser()
+            return SeminarsAnonymousUser()
 
         if self.user_exists(uid):
             raise Exception("ERROR: User %s already exists" % uid)
@@ -107,9 +108,9 @@ class PostgresUserTable(PostgresBase):
         password = self.bchash(pwd)
         from datetime import datetime
         #TODO: use identifiers
-        insertor = SQL(u"INSERT INTO userdb.users (username, bcpassword, created, full_name, about, url) VALUES (%s, %s, %s, %s, %s, %s)")
+        insertor = SQL(u"INSERT INTO userdb.users (username, password, created, full_name, about, url) VALUES (%s, %s, %s, %s, %s, %s)")
         self._execute(insertor, [uid, password, datetime.utcnow(), full_name, about, url])
-        new_user = LmfdbUser(uid)
+        new_user = SeminarsUser(uid)
         return new_user
 
 
@@ -135,34 +136,12 @@ class PostgresUserTable(PostgresBase):
             return False
 
         #TODO: use identifiers
-        selecter = SQL("SELECT bcpassword, password FROM userdb.users WHERE username = %s")
+        selecter = SQL("SELECT password FROM userdb.users WHERE username = %s")
         cur = self._execute(selecter, [uid])
         if cur.rowcount == 0:
             raise ValueError("User not present in database!")
-        bcpass, oldpass = cur.fetchone()
-        if bcpass:
-            if bcpass == self.bchash(pwd, existing_hash = bcpass):
-                return True
-        else:
-            for i in range(self.rmin, self.rmax + 1):
-                if oldpass == self.hashpwd(pwd, str(i)):
-                    bcpass = self.bchash(pwd)
-                    if bcpass:
-                        logger.info("user " + uid  +  " logged in with old style password, trying to update")
-                        try:
-                            #TODO: use identifiers
-                            updater = SQL("UPDATE userdb.users SET (bcpassword) = (%s) WHERE username = %s")
-                            self._execute(updater, [bcpass, uid])
-                            logger.info("password update for " + uid + " succeeded")
-                        except Exception:
-                            #if you can't update the password then likely someone is using a local install
-                            #log and continue
-                            logger.warning("password update for " + uid + " failed!")
-                        return True
-                    else:
-                        logger.warning("user " + uid + " logged in with old style password, but update was not possible")
-                        return False
-        return False
+        bcpass = cur.fetchone()[0]
+        return bcpass == self.bchash(pwd, existing_hash = bcpass)
 
     def save(self, data):
         if not self._rw_userdb:
@@ -170,7 +149,7 @@ class PostgresUserTable(PostgresBase):
             return;
 
         data = dict(data) # copy
-        uid = data.pop("username",None)
+        uid = data.pop("username", None)
         if not uid:
             raise ValueError("data must contain username")
         if not self.user_exists(uid):
@@ -236,11 +215,11 @@ class PostgresUserTable(PostgresBase):
 
 userdb = PostgresUserTable()
 
-class LmfdbUser(UserMixin):
+class SeminarsUser(UserMixin):
     """
     The User Object
     """
-    properties = ('full_name', 'url', 'about')
+    properties = userdb._cols
 
     def __init__(self, uid):
         if not isinstance(uid, string_types):
@@ -249,7 +228,7 @@ class LmfdbUser(UserMixin):
         self._uid = uid
         self._authenticated = False
         self._dirty = False  # flag if we have to save
-        self._data = dict([(_, None) for _ in LmfdbUser.properties])
+        self._data = dict([(_, None) for _ in SeminarsUser.properties])
 
         if userdb.user_exists(uid):
             self._data.update(userdb.lookup(uid))
@@ -268,23 +247,50 @@ class LmfdbUser(UserMixin):
         self._dirty = True
 
     @property
-    def about(self):
-        return self._data['about']
+    def email(self):
+        return self._data['email']
 
-    @about.setter
-    def about(self, about):
-        self._data['about'] = about
+    @email.setter
+    def email(self, email):
+        self._data['email'] = email
         self._dirty = True
 
     @property
-    def url(self):
-        return self._data['url']
+    def email_confirmed(self):
+        return self._data['email_confirmed']
 
-    @url.setter
-    def url(self, url):
+    @email_confirmed.setter
+    def email_confirmed(self, confirmed):
+        self._data['email_confirmed'] = confirmed
+        self._dirty = True
+
+    @property
+    def email_reset_code(self):
+        return self._data['email_reset_code']
+
+    @email_reset_code.setter
+    def email_reset_code(self, code):
+        self._data['email_reset_code'] = code
+        self._dirty = True
+
+    @property
+    def email_reset_time(self):
+        return self._data['email_reset_time']
+
+    @email_reset_time.setter
+    def email(self, time):
+        self._data['email_reset_time'] = time
+        self._dirty = True
+
+    @property
+    def homepage(self):
+        return self._data['homepage']
+
+    @homepage.setter
+    def homepage(self, url):
         if not url.startswith("http://") and not url.startswith("https://"):
             url = "http://" + url
-        self._data['url'] = url
+        self._data['homepage'] = url
         self._dirty = True
 
     @property
@@ -295,10 +301,6 @@ class LmfdbUser(UserMixin):
     def id(self):
         return self._data['username']
 
-    # def is_authenticated(self):
-    #     """required by flask-login user class"""
-    #     return self._authenticated
-
     def is_anonymous(self):
         """required by flask-login user class"""
         if StrictVersion(FLASK_LOGIN_VERSION) < StrictVersion(FLASK_LOGIN_LIMIT):
@@ -306,18 +308,32 @@ class LmfdbUser(UserMixin):
         return not self.is_authenticated
 
     def is_admin(self):
-        """true, iff has attribute admin set to True"""
         return self._data.get("admin", False)
 
-    def is_knowl_reviewer(self):
-        return self._data.get("knowl_reviewer", False)
+    def make_admin(self):
+        self._data["admin"] = True
+        self._dirty = True
+
+    def is_editor(self):
+        return self._data.get("editor", False)
+
+    def make_editor(self):
+        self._data["editor"] = True
+        self._dirty = True
+
+    def is_creator(self):
+        return self._data.get("creator", False)
+
+    def make_creator(self):
+        self._data["creator"] = True
+        self._dirty = True
 
     def authenticate(self, pwd):
         """
         checks if the given password for the user is valid.
         @return: True: OK, False: wrong password.
         """
-        if not 'password' in self._data and not 'bcpassword' in self._data:
+        if 'password' not in self._data:
             logger.warning("no password data in db for '%s'!" % self._uid)
             return False
         self._authenticated = userdb.authenticate(self._uid, pwd)
@@ -330,7 +346,7 @@ class LmfdbUser(UserMixin):
         userdb.save(self._data)
         self._dirty = False
 
-class LmfdbAnonymousUser(AnonymousUserMixin):
+class SeminarsAnonymousUser(AnonymousUserMixin):
     """
     The sole purpose of this Anonymous User is the 'is_admin' method
     and probably others.
@@ -338,7 +354,10 @@ class LmfdbAnonymousUser(AnonymousUserMixin):
     def is_admin(self):
         return False
 
-    def is_knowl_reviewer(self):
+    def is_editor(self):
+        return False
+
+    def is_creator(self):
         return False
 
     def name(self):
@@ -346,7 +365,7 @@ class LmfdbAnonymousUser(AnonymousUserMixin):
 
     # For versions of flask_login earlier than 0.3.0,
     # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a
-    # property. To match the behavior of LmfdbUser, we make it callable always.
+    # property. To match the behavior of SeminarsUser, we make it callable always.
     def is_anonymous(self):
         return True
 
