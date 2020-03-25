@@ -56,7 +56,7 @@ class PostgresUserTable(PostgresBase):
         try:
             import bcrypt
             if not existing_hash:
-                existing_hash = bcrypt.gensalt()
+                existing_hash = text_type(bcrypt.gensalt())
             return bcrypt.hashpw(pwd.encode('utf-8'), existing_hash.encode('utf-8'))
         except Exception:
             logger.warning("Failed to return bchash, perhaps bcrypt is not installed")

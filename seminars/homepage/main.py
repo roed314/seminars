@@ -1,8 +1,10 @@
 
 from seminars.app import app
 from seminars import db
+from seminars.categories import categories
 
-from flask import render_template
+from flask import render_template, request
+import datetime
 
 from lmfdb.utils import (
     SearchArray, TextBox, SelectBox, YesNoBox,

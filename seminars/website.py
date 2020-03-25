@@ -51,6 +51,8 @@ from . import users
 assert users
 from . import knowledge
 assert knowledge
+from . import homepage
+assert homepage
 # from . import characters
 # assert characters
 # from . import local_fields
