@@ -11,6 +11,8 @@ Admin (Edgar)
 
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last
 
+1. Stop connecting to the lmfdb database
+
 Content creation
 ================
 
@@ -41,9 +43,7 @@ Feedback
 Calendars
 =========
 
-1. Figure out how to personalize calendar files in a way that updates to talks and seminars are included (can't use beantheory's approach which is static)
-
-1. Think about whether google's calendar limits will affect us: https://support.google.com/a/answer/2905486?hl=en
+1. Write code for dynamically generating .ics files
 
 Email
 =====
