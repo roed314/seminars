@@ -8,24 +8,24 @@ Note that we've adapted the LMFDB's model, so we don't use `lmfdb.backend.search
 
 `users`: data on users (note that this is in the userdb schema rather than public schema)
 
-Column           | Type        | Notes
------------------|-------------|------
-username         | text        |
-password         | text        | Hashed using bcrypt
-email            | text        |
-email_confirmed  | boolean     |
+Column           | Type        |  Notes   
+-----------------|-------------|-----------
+id               | bigint      | auto
+password         | text        | hashed password with bcrypt
+email            | text        | this will act as username
+email_confirmed  | boolean     | if the email has been confirmed
 email_reset_code | text        |
 email_reset_time | timestamptz |
-admin            | boolean     | Privileges to make users admins and editors
-editor           | boolean     | Privileges to make users creators
-creator          | boolean     | Privileges to create seminars and add talks to seminars that they organize
+admin            | boolean     |
+editor           | boolean     |
+creator          | boolean     |
 full_name        | text        |
-affiliation      | text        | name of institution this user is affiliated with
+affiliation      | text        |
 homepage         | text        |
 created          | timestamptz |
-approver         | text        | username of user who approved privileges
-ics_key          | text        | user-specific key for calendar files
-location         | earth       | current plan: allow user to set this manually.  Eventual application is to search for offline seminars that are closeby
+approver         | text        |
+ics_key          | text        |
+location         | earth       |
 timezone         | text        | time zone code, e.g. "America/New York"
 
 `account_tokens`: stores tokens that provide privileges when used to create an account.  These can be sent by admins and editors when inviting people to join the site
