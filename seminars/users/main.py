@@ -70,44 +70,7 @@ def ctx_proc_userdata():
 def body_class():
     return {'body_class': 'login'}
 
-# the following doesn't work as it should, also depends on blinker python lib
-# flask signal when a user logs in. we record the last logins in the user's data
-# http://flask.pocoo.org/docs/signals/
-# def log_login_callback(cur_app, user = None):
-#  cur_user = user or current_user
-#  logger.info(">> curr_app: %s   user: %s" % (cur_app, cur_user))
-#
-# from flask.ext.login import user_logged_in, user_login_confirmed
-# user_logged_in.connect(log_login_callback)
-# user_login_confirmed.connect(log_login_callback)
 
-
-
-
-@login_page.route("/")
-@login_required
-def list():
-    COLS = 5
-    users = userdb.get_user_list()
-    # attempt to sort by last name
-    users = sorted(users, key=lambda x: x[1].strip().split(" ")[-1].lower())
-    if len(users)%COLS:
-        users += [{} for i in range(COLS-len(users)%COLS)]
-    n = len(users)/COLS
-    user_rows = tuple(zip(*[users[i*n: (i + 1)*n] for i in range(COLS)]))
-    return render_template("user-list.html", title="All Users",
-                           user_rows=user_rows)
-
-
-@login_page.route("/change_colors/<int:scheme>")
-@login_required
-def change_colors(scheme):
-    userid = current_user.get_id()
-    userdb.change_colors(userid, scheme)
-    flask.flash(Markup("Color scheme successfully changed"))
-    response = make_response(flask.redirect(url_for(".info")))
-    response.set_cookie('color', str(scheme))
-    return response
 
 @login_page.route("/myself")
 def info():
@@ -116,7 +79,6 @@ def info():
     info['logout'] = url_for(".logout")
     info['user'] = current_user
     info['next'] = request.referrer
-    print(current_user.id)
     return render_template("user-info.html",
                            info=info, title="Userinfo")
 
@@ -257,7 +219,7 @@ def register():
 @login_page.route("/change_password", methods=['POST'])
 @login_required
 def change_password():
-    uid = current_user.get_id()
+    email = current_user.email
     pw_old = request.form['oldpwd']
     if not current_user.authenticate(pw_old):
         flash_error("Ooops, old password is wrong!")
@@ -269,7 +231,11 @@ def change_password():
         flash_error("Oops, new passwords do not match!")
         return flask.redirect(url_for(".info"))
 
-    userdb.change_password(uid, pw1)
+    if len(pw1) < 8:
+        flash_error("Oops, password too short. Minimum 8 characters please!")
+        return flask.redirect(url_for(".info"))
+
+    userdb.change_password(email, pw1)
     flask.flash(Markup("Your password has been changed."))
     return flask.redirect(url_for(".info"))
 
@@ -277,7 +243,6 @@ def change_password():
 @login_page.route("/logout")
 @login_required
 def logout():
-    # FIXME delete color cookie
     logout_user()
     flask.flash(Markup("You are logged out now. Have a nice day!"))
     return flask.redirect(request.args.get("next") or request.referrer or url_for('.info'))

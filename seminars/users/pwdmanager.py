@@ -47,7 +47,7 @@ class PostgresUserTable(PostgresSearchTable):
         """
         if not existing_hash:
             existing_hash = bcrypt.gensalt().decode('utf-8')
-        return bcrypt.hashpw(pwd.encode('utf-8'), existing_hash.encode('utf-8'))
+        return bcrypt.hashpw(pwd.encode('utf-8'), existing_hash.encode('utf-8')).decode('utf-8')
 
     def generate_key(self):
         return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(12)])
@@ -98,8 +98,7 @@ class PostgresUserTable(PostgresSearchTable):
         bcpass = self.lookup(email, projection='password')
         if bcpass is None:
             raise ValueError("User not present in database!")
-        print(bcpass)
-        return bcpass.encode('utf-8') == self.bchash(password, existing_hash=bcpass)
+        return bcpass == self.bchash(password, existing_hash=bcpass)
 
     def confirm_email(self, token):
         email = self.lucky({'email_confirm_code': token}, "email")
@@ -122,7 +121,9 @@ class PostgresUserTable(PostgresSearchTable):
             raise ValueError("no data to save")
         if 'new_email' in data:
             data['email'] = data.pop('new_email')
-
+        for key in list(data.keys()):
+            if key not in self.search_cols:
+                data.pop(key)
         self.update({'email': email}, data)
 
 
@@ -179,6 +180,15 @@ class SeminarsUser(UserMixin):
         if not url.startswith("http://") and not url.startswith("https://"):
             url = "http://" + url
         self._data['homepage'] = url
+        self._dirty = True
+
+    @property
+    def affiliation(self):
+        return self._data['affiliation']
+
+    @affiliation.setter
+    def affiliation(self, affiliation):
+        self._data['affiliation'] = affiliation
         self._dirty = True
 
     @property
