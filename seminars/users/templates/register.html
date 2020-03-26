@@ -1,30 +1,66 @@
 {% extends 'homepage.html' %}
-{% block content %}  
+{% block content %}
 
 <h1>Register</h1>
 
-<form name="login" action="{{ url_for('.register_token', token=token) }}" method="post">
-  <input type="hidden" name="next" value="{{ next }}" />
+<form name="login" action="{{ url_for('.register') }}" method="POST">
   <table>
-    <tr><td>Login ID:</td><td><input name="name" /></td></tr>
-    <tr><td colspan="2" class="forminfo">You cannot change your Login ID later. Please avoid spaces, special characters, …</td></tr>
-    <tr><td colspan="2" class="spacing" /></tr>
-    <tr><td>Password:</td>
-        <td><input id="pw1" name="password1" type="password" /></td></tr>
-    <tr><td>Password (repeat):</td>
-        <td><input id="pw2" name="password2" type="password" /></td></tr>
-    <tr><td class="forminfo">Matching?</td>
-        <td class="forminfo" id="pwstatus">empty</td></tr>
-    <tr><td colspan="2" class="forminfo" style="color: {{color.red}};">Please make sure to use at least 8 characters for your password.</td></tr>
-    <tr><td colspan="2" class="forminfo" style="color: {{color.red}};">Don't use your usual password due to security concerns!</td></tr>
-    <tr><td colspan="2" class="spacing" /></tr>
-    <tr><td>Full Name:</td>
-        <td><input name="full_name" size="30" /></td></tr>
-    <tr><td></td><td class="forminfo">Visible to others, you can change it later.</td></tr>
-    <tr><td colspan="2" class="spacing" /></tr>
-    <tr><td/><td>
-         <button name="submit" type="submit">Register</button>
-         </td></tr>
+    <tr>
+      <td>Email:</td>
+      <td><input name="email" size="30" value="{{request.form.get("email", "")}}" /></td></tr>
+    <tr>
+      <td colspan="2" class="forminfo">by default, not visible to others</td></tr>
+    <tr>
+      <td colspan="2" class="spacing" /></tr>
+    <tr>
+      <td>Password:</td>
+      <td><input id="pw1" name="password1" type="password" size="30"/></td></tr>
+    <tr>
+      <td>Password (repeat):</td>
+      <td><input id="pw2" name="password2" type="password" size="30"/></td></tr>
+    <tr>
+      <td class="forminfo">Matching?</td>
+      <td class="forminfo" id="pwstatus">empty</td></tr>
+    <tr>
+      <td colspan="2" class="forminfo" style="color: {{color.red}};">Please make sure to use at least 8 characters for your password.</td></tr>
+    <tr>
+      <td colspan="2" class="forminfo" style="color: {{color.red}};">Don't reuse your usual password due to security concerns!</td></tr>
+    <tr>
+      <td colspan="2" class="spacing" />
+    </tr>
+    <tr>
+      <td>Name:</td>
+      <td><input name="name" size="30" value="{{request.form.get("name", "")}}" /></td>
+    </tr>
+    <tr>
+      <td>Affiliation:</td>
+      <td><input name="affiliation" size="30" value="{{request.form.get("affiliation", "")}}" /></td>
+    </tr>
+    <tr>
+      <td>Homepage:</td>
+      <td><input name="homepage" size="30" value="{{request.form.get("homepage", "")}}" /></td>
+    </tr>
+
+    <tr>
+      <td>Timezone:</td>
+      <td>
+        <select name="timezone">
+        {% for tz, pretty_tz in timezones %}
+        <option value={{tz}}>{{pretty_tz}}</option>
+        {% endfor %}
+        </select>
+      </td>
+    </tr>
+
+
+    <tr>
+      <td colspan="2" class="spacing" /></tr>
+    <tr>
+      <td></td>
+      <td>
+      <button name="submit" type="submit">Register</button>
+      </td>
+    </tr>
   </table>
 </form>
 
@@ -45,6 +81,9 @@ $(function () {
   $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
   checkpw();
 })
+
+const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+$('select option[value="'+tz+'"]').attr("selected",true);
 </script>
 
 

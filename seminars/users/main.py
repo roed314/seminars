@@ -13,16 +13,17 @@ from flask_login import login_required, login_user, current_user, logout_user, L
 from distutils.version import StrictVersion
 from lmfdb.utils import flash_error
 from markupsafe import Markup
+from email_validator import validate_email, EmailNotValidError
 
 from lmfdb import db
 assert db
+from seminars.utils import timezones
+import pytz
 
 
 login_page = Blueprint("users", __name__, template_folder='templates')
 logger = make_logger(login_page)
 
-import re
-allowed_usernames = re.compile("^[a-zA-Z0-9._-]+$")
 
 login_manager = LoginManager()
 
@@ -30,11 +31,10 @@ login_manager = LoginManager()
 FLASK_LOGIN_LIMIT = '0.3.0'
 from .pwdmanager import userdb, SeminarsUser, SeminarsAnonymousUser
 
-base_url = "http://beta.lmfdb.org"
 
 @login_manager.user_loader
-def load_user(userid):
-    return SeminarsUser(userid)
+def load_user(email):
+    return SeminarsUser(email)
 
 login_manager.login_view = "users.info"
 
@@ -42,9 +42,9 @@ login_manager.login_view = "users.info"
 login_manager.anonymous_user = SeminarsAnonymousUser
 
 
-def get_username(uid):
+def get_username(email):
     """returns the name of user @uid"""
-    return SeminarsUser(uid).name
+    return SeminarsUser(email).name
 
 # globally define user properties and username
 
@@ -93,8 +93,6 @@ def body_class():
 # user_login_confirmed.connect(log_login_callback)
 
 
-def base_bread():
-    return [('Users', url_for(".list"))]
 
 
 @login_page.route("/")
@@ -108,9 +106,8 @@ def list():
         users += [{} for i in range(COLS-len(users)%COLS)]
     n = len(users)/COLS
     user_rows = tuple(zip(*[users[i*n: (i + 1)*n] for i in range(COLS)]))
-    bread = base_bread()
     return render_template("user-list.html", title="All Users",
-                           user_rows=user_rows, bread=bread)
+                           user_rows=user_rows)
 
 
 @login_page.route("/change_colors/<int:scheme>")
@@ -133,8 +130,7 @@ def info():
     from lmfdb.utils.color import all_color_schemes
     return render_template("user-info.html",
                            all_colors=all_color_schemes.values(),
-                           info=info, title="Userinfo",
-                           bread=base_bread() + [("Myself", url_for(".info"))])
+                           info=info, title="Userinfo")
 
 # ./info again, but for POST!
 
@@ -149,32 +145,22 @@ def set_info():
     return flask.redirect(url_for(".info"))
 
 
-@login_page.route("/profile/<userid>")
-@login_required
-def profile(userid):
-    # See issue #1169
-    user = SeminarsUser(userid)
-    bread = base_bread() + [(user.name, url_for('.profile', userid=user.get_id()))]
-    from seminars.knowledge.knowl import knowldb
-    userknowls = knowldb.search(author=userid, sort=['title'])
-    return render_template("user-detail.html", user=user,
-                           title="%s" % user.name, bread=bread, userknowls=userknowls)
+
 
 
 @login_page.route("/login", methods=["POST"])
 def login(**kwargs):
     # login and validate the user …
     # remember = True sets a cookie to remember the user
-    name = request.form["name"]
+    email = request.form["email"]
     password = request.form["password"]
     next = request.form["next"]
     remember = True if request.form["remember"] == "on" else False
-    user = SeminarsUser(name)
+    user = SeminarsUser(email)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
         flask.flash(Markup("Hello %s, your login was successful!" % user.name))
         logger.info("login: '%s' - '%s'" % (user.get_id(), user.name))
-        # FIXME add color cookie, see change_colors
         return flask.redirect(next or url_for(".info"))
     flash_error("Oops! Wrong username or password.")
     return flask.redirect(url_for(".info"))
@@ -222,66 +208,59 @@ def housekeeping(fn):
     return decorated_view
 
 
-@login_page.route("/register")
-def register_new():
-    return ""
-
-@login_page.route("/register/new")
-@login_page.route("/register/new/<int:N>")
-@admin_required
-def register(N=10):
-    N = 100 if N > 100 else N
-    import random
-    tokens = [str(random.randrange(1e20, 1e21)) for _ in range(N)]
-    userdb.create_tokens(tokens)
-    urls = ["%s%s" % (base_url, url_for(".register_token", token=t)) for t in tokens]
-    resp = make_response('\n'.join(urls))
-    resp.headers['Content-type'] = 'text/plain'
-    return resp
 
 
-@login_page.route("/register/<token>", methods=['GET', 'POST'])
-def register_token(token):
-    if not userdb._rw_userdb:
-        flask.abort(401, "no attempt to create user, not enough privileges");
-    userdb.delete_old_tokens()
-    if not userdb.token_exists(token):
-        flask.abort(401)
-    bread = base_bread() + [('Register', url_for(".register_new"))]
+
+@login_page.route("/register/",  methods=['GET', 'POST'])
+def register():
     if request.method == "GET":
-        return render_template("register.html", title="Register", bread=bread, next=request.referrer or "/", token=token)
+        return render_template("register.html",
+                               title="Register",
+                               next=request.referrer or "/",
+                               timezones=timezones,
+                               )
     elif request.method == 'POST':
-        name = request.form['name']
-        if not allowed_usernames.match(name):
-            flash_error("""Oops, usename '%s' is not allowed.
-                  It must consist of lower/uppercase characters,
-                  no spaces, numbers or '.', '_' and '-'.""", name)
-            return flask.redirect(url_for(".register_new"))
+        email = request.form['email']
+        try:
+            validate_email(email)
+        except EmailNotValidError as e:
+            flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
+            return flask.redirect(url_for(".register"))
 
         pw1 = request.form['password1']
         pw2 = request.form['password2']
         if pw1 != pw2:
             flash_error("Oops, passwords do not match!")
-            return flask.redirect(url_for(".register_new"))
+            return flask.redirect(url_for(".register"))
 
         if len(pw1) < 8:
             flash_error("Oops, password too short. Minimum 8 characters please!")
-            return flask.redirect(url_for(".register_new"))
+            return flask.redirect(url_for(".register"))
 
-        full_name = request.form['full_name']
-        #next = request.form["next"]
+        password = pw1
+        name = request.form['name']
+        affiliation = request.form['affiliation']
+        homepage = request.form['homepage']
+        if homepage and not homepage.startswith("http://") and not homepage.startswith("https://"):
+            homepage = "http://" + homepage
+        timezone = request.form['timezone']
+        if timezone not in pytz.all_timezones:
+            flash_error("Invalid timezone '%s'.", timezone)
+            return flask.redirect(url_for(".register"))
 
-        if userdb.user_exists(name):
-            flash_error("Sorry, user ID '%s' already exists!", name)
-            return flask.redirect(url_for(".register_new"))
+        if userdb.user_exists(email):
+            flash_error("Sorry, email '%s' already exists!", email)
+            return flask.redirect(url_for(".register"))
 
-        newuser = userdb.new_user(name, pwd=pw1,  full_name=full_name)
-        userdb.delete_token(token)
-        #newuser.full_name = full_name
-        #newuser.save()
+        newuser = userdb.new_user(email=email,
+                                  password=password,
+                                  name=name,
+                                  affiliation=affiliation,
+                                  homepage=homepage,
+                                  timezone=timezone
+                                  )
         login_user(newuser, remember=True)
         flask.flash(Markup("Hello %s! Congratulations, you are a new user!" % newuser.name))
-        logger.debug("removed login token '%s'" % token)
         logger.info("new user: '%s' - '%s'" % (newuser.get_id(), newuser.name))
         return flask.redirect(url_for(".info"))
 

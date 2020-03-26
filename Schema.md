@@ -8,25 +8,24 @@ Note that we've adapted the LMFDB's model, so we don't use `lmfdb.backend.search
 
 `users`: data on users (note that this is in the userdb schema rather than public schema)
 
-Column           | Type        |  Notes   
------------------|-------------|-----------
-id               | bigint      | auto
-password         | text        | hashed password with bcrypt
-email            | text        | this will act as username
-email_confirmed  | boolean     | if the email has been confirmed
-email_reset_code | text        |
-email_reset_time | timestamptz |
-admin            | boolean     |
-editor           | boolean     |
-creator          | boolean     |
-full_name        | text        |
-affiliation      | text        |
-homepage         | text        |
-created          | timestamptz |
-approver         | text        |
-ics_key          | text        |
-location         | earth       |
-timezone         | text        | time zone code, e.g. "America/New York"
+Column              | Type        |  Notes   
+--------------------|-------------|-----------
+id                  | bigint      | auto
+password            | text        | hashed password with bcrypt
+email               | text        | this will act as username
+email_confirmed     | boolean     | if the email has been confirmed
+email_confirm_code  | text        |
+admin               | boolean     |
+editor              | boolean     |
+creator             | boolean     |
+full_name           | text        |
+affiliation         | text        |
+homepage            | text        |
+created             | timestamptz |
+approver            | text        |
+ics_key             | text        |
+location            | earth       |
+timezone            | text        | time zone code, e.g. "US/Eastern"
 
 `account_tokens`: stores tokens that provide privileges when used to create an account.  These can be sent by admins and editors when inviting people to join the site
 
@@ -50,7 +49,7 @@ name     | text   |
 aliases  | text   | comma separated string of aliases
 location | earth  |
 homepage | text   |
-timezone | text   | time zone code, e.g. "America/New York"
+timezone | text   | time zone code, e.g. "US/Eastern"
 city     | text   |
 type     | text   | university, institute, other
 admin    | text   | username responsible for updating; should be editor/admin

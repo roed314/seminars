@@ -8,17 +8,16 @@
 
 {% else %}
   <h1>You are not logged in</h1>
-  {% if user_can_write %}
- 
-{#  <div style="margin-bottom: 20px">New user? 
-     <a href="{{ url_for('.register_new') }}">Register here</a>
+
+  <div style="margin-bottom: 20px">New user?
+     <a href="{{ url_for('.register') }}">Register here</a>
   </div>
-#}
+
   <form name="login" action="{{ url_for('.login') }}" method="POST">
-    <input type="hidden" name="next" value="{{ info.next }}" /> 
+    <input type="hidden" name="next" value="{{ info.next }}" />
     <table>
-      <tr><td>Username:</td>
-          <td><input name="name" /></td></tr>
+      <tr><td>Email:</td>
+          <td><input name="email" /></td></tr>
       <tr><td>Password:</td>
           <td><input name="password" type="password" /></td></tr>
       <tr><td>Remember:</td>
@@ -27,9 +26,6 @@
       <tr><td /><td><button name="submit" type="submit">Login</button></td></tr>
     </table>
   </form>
-  {% else %}
-    This server is running with an unprivileged connection. You cannot log in since write access to the database is required for features behind the log in system
-  {% endif %}
 {% endif %}
 
 {% if user_is_authenticated %}
@@ -37,28 +33,29 @@
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
       <tr>
-        <td>Your ID:</td>
-        <td><a href="{{ url_for(".info", userid=info.user.id)}}">{{info.user.id}}</a></td>
+        <td>Email:</td>
+        <td><input name="email" value="{{info.user.email}}" size="30" tabindex="1" /></td>
       </tr>
       <tr>
         <td>Created:</td>
-        <td>{{ info.user.created|fmtdatetime }} UTC</td>
+        <td>{{ info.user.created|fmtdatetime }}</td>
       <tr>
-        <td>Full Name:</td>
-        <td><input name="full_name" value="{{info.user.full_name}}" size="50" tabindex="1" /></td>
+        <td>Name:</td>
+        <td><input name="name" value="{{info.user.name}}" size="30" tabindex="1" /></td>
         <td/>
       </tr>
       <tr>
-        <td>URL:</td>
-        <td><input name="url" id="url" value="{{info.user.url}}" size="50" tabindex="3" /></td>
+        <td>Affiliation:</td>
+        <td><input name="name" value="{{info.user.affiliation}}" size="30" tabindex="1" /></td>
+        <td/>
+      </tr>
+      <tr>
+        <td>Homepage:</td>
+        <td><input name="homepage" id="url" value="{{info.user.homepage}}" size="30" tabindex="3" /></td>
         <td id="urltest" />
       </td>
-      <tr>
-        <td>About You:</td>
-        <td><textarea name="about" rows="4" cols="50" tabindex="4">{{info.user.about}}</textarea></td>
-        <td/>
-      </tr>
-        <tr><td colspan="3" class="spacing" /></tr>
+
+      <tr><td colspan="3" class="spacing" /></tr>
       <tr>
         <td/><td colspan="2">
           <button type="submit" tabindex="5">Save</button>
@@ -87,15 +84,9 @@
     </tr>
    </table>
   </form>
+{%endif%}
 
-  <h2>Change Color Scheme</h2>
 
-  {% for color_scheme in all_colors %}
-  <form action="{{ url_for('.change_colors', scheme=color_scheme.code) }}" style="display: inline;">
-    <input class="color_selecter" style="background-color: {{ color_scheme.col_main_ld }}; color: {{ color_scheme.col_main_dl }}; border-color: {{ color_scheme.col_main_lg }}; width: 150px;" type="submit" value="{{ color_scheme.__class__.__name__ }}" rel="{{ url_for('css', color=color_scheme.code) }}">
-  </form>
-  {% endfor %}
-{% endif %}
 
 {# this script constructs a url and shows it as a link, just for testing #}
 <script type="text/javascript">
