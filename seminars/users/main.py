@@ -13,11 +13,11 @@ from flask_login import login_required, login_user, current_user, logout_user, L
 from distutils.version import StrictVersion
 from lmfdb.utils import flash_error
 from markupsafe import Markup
-#from email_validator import validate_email, EmailNotValidError
+from email_validator import validate_email, EmailNotValidError
 
 from lmfdb import db
 assert db
-#from seminars.utils import timezones
+from seminars.utils import timezones
 import pytz
 
 
