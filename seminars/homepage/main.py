@@ -13,7 +13,7 @@ from lmfdb.utils import (
 
 @cached_function
 def categories():
-    return sorted(((rec["abbreviation"], rec["name"]) for rec in db.categories.search()), key=lambda x: x[1])
+    return sorted(((rec["abbreviation"], rec["name"]) for rec in db.categories.search()), key=lambda x: x[1].lower())
 
 class SemSearchArray(SearchArray):
     noun = "seminar"
@@ -69,25 +69,46 @@ class SemSearchArray(SearchArray):
 
 @app.route("/")
 def index():
-    print("starting index")
-    info = to_dict(request.args, search_array=SemSearchArray())
-    if len(request.args) > 0:
-        return search(info)
-    today = datetime.datetime.today().weekday() # account for time zone....
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-    if today not in [5, 6]: # weekday
-        days = days[today:] + days[:today]
-        days[0] = "Today"
-        if today !=  4:
-            days[1] = "Tomorrow"
-
+    # Eventually want some kind of cutoff on which talks are included.
+    talks = list(db.talks.search({'display':True}, projection=["id", "categories", "datetime", "seminar_id", "seminar_name", "speaker", "title"])) # include id
+    print(talks)
     return render_template(
         'browse.html',
         title="Math Seminars",
+        info={},
+        categories=categories(),
+        talks=talks,
+        bread=None)
+
+@app.route("/search")
+def search():
+    info = to_dict(request.args, search_array=SemSearchArray())
+    if len(request.args) > 0:
+        st = info.get("search_type", info.get("hst", "talks"))
+        if st == "talks":
+            return search_talks(info)
+        elif st == "seminars":
+            return search_seminars(info)
+    return render_template(
+        "search.html",
+        title="Search seminars",
         info=info,
         categories=categories(),
-        days=days,
         bread=None)
+
+@app.route("/seminar/<semid>")
+def show_sem(semid):
+    pass
+
+@app.route("/talk/<talkid>")
+def show_talk(talkid):
+    pass
+
+@app.route("/subscribe")
+def subscribe():
+    # redirect to login page if not logged in, with message about what subscription is
+    # If logged in, give a link to download the .ics file, the list of seminars/talks currently followed, and instructions on adding more
+    raise NotImplementedError
 
 @app.route("/<category>")
 def by_category(category):
@@ -99,7 +120,7 @@ def by_category(category):
              title="Seminar Search Results",
              err_title="Seminar Search Input Error",
              bread=lambda:[("Search results", " ")])
-def seminar_search(info, query):
+def search_seminars(info, query):
     # For now, just ignore the info and return all results
     pass
 

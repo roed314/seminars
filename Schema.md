@@ -8,8 +8,8 @@ Note that we've adapted the LMFDB's model, so we don't use `lmfdb.backend.search
 
 `users`: data on users (note that this is in the userdb schema rather than public schema)
 
-Column              | Type        |  Notes   
---------------------|-------------|-----------
+Column              | Type        |  Notes
+--------------------|-------------|-------
 id                  | bigint      | auto
 password            | text        | hashed password with bcrypt
 email               | text        | this will act as username
@@ -77,29 +77,30 @@ live_link    | text    | some seminars may have a consistent link for attending
 
 `talks`: table for individual lectures
 
-Column      | Type        | Notes
-------------|-------------|------
-id          | bigint      | auto
-title       | text        |
-description | text        |
-token       | text        | give permission for speaker to edit
-categories  | text[]      |
-keywords    | text        |
-comments    | text        |
-seminar_id  | bigint      | every talk has to be part of a seminar
-display     | boolean     | whether seminar creator has creator privileges
-datetime    | timestamptz | start time
-timezone    | text        | time zone code, e.g. "America/New York" (this isn't exactly the same as the tz info contained within the datetime, though it's related)
-duration    | interval    |
-speaker     | text        | full name, not username
-speaker_id  | text        | username, may be null
-affiliation | text        | name of university, may be null
-online      | boolean     |
-access      | text        | we need to make a list of predefined access types
-live_link   | text        |
-room        | text        |
-video_link  | text        | archive video link
-slides_link | text        | link to slides
+Column       | Type        | Notes
+-------------|-------------|------
+id           | bigint      | auto
+title        | text        |
+description  | text        |
+token        | text        | give permission for speaker to edit
+categories   | text[]      |
+keywords     | text        |
+comments     | text        |
+seminar_id   | bigint      | every talk has to be part of a seminar
+seminar_name | text        |
+display      | boolean     | whether seminar creator has creator privileges
+datetime     | timestamptz | start time
+timezone     | text        | time zone code, e.g. "America/New York" (this isn't exactly the same as the tz info contained within the datetime, though it's related)
+duration     | interval    |
+speaker      | text        | full name, not username
+speaker_id   | text        | username, may be null
+affiliation  | text        | name of university, may be null
+online       | boolean     |
+access       | text        | we need to make a list of predefined access types
+live_link    | text        |
+room         | text        |
+video_link   | text        | archive video link
+slides_link  | text        | link to slides
 
 `categories`: table of categories for seminars and talks
 

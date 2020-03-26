@@ -15,6 +15,8 @@ Admin (Edgar)
 
 1. Start a test server, link to mathseminars.org DNS record
 
+1. Improve password reset process
+
 Content creation
 ================
 
@@ -63,6 +65,8 @@ Viewing and searching
 
 1. In seminar lists, have icon for online vs offline talk (could be both)
 
+1. Include counts of how many talks are in each category in the Filter dropdown, only include categories with at least 1
+
 Time zones
 ==========
 
@@ -97,6 +101,8 @@ Design and branding
 1. Once we're ready, think about advertising strategy (Bjorn emailing number theory list; how to reach out beyond number theory, posting on Facebook, etc)
 
 Links to posts about online seminars
+====================================
+
 - [aosun](http://math.mit.edu/~aosun/online_seminars.html?fbclid=IwAR12HWLaSri3aYplQ3DZNOjnOrjKy6uZmRDmLAX4jX46hkJR_O0eNVVBNWM)
 - [littmath](https://www.google.com/url?q=https://twitter.com/littmath/status/1242468857975115777&sa=D&source=hangouts&ust=1585257466247000&usg=AFQjCNES39qjlCfz_icIFwOg6-8j6EF1Rw)
 - [Jordan](https://twitter.com/JSEllenberg/status/1238872137588490240)

@@ -1,0 +1,9 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+<form id='search' onsubmit="cleanSubmit(this.id)">
+  {{ info.search_array.html() | safe }}
+</form>
+
+{% endblock %}
