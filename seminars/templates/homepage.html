@@ -24,43 +24,31 @@
 
 {% block body -%}
 <div id="header">
-    <div id="logo"><a href="/">
-    <img src="{{ url_for('static', filename='logo.png') }}" />
-</a></div>
-    <div class="right">
-      <div class="upper">
-        <div class="topright">
-            {% if user_is_admin -%}
-              &middot;
-              <a href="{{ url_for('users.register') }}">Registration Tokens</a>
-            {% endif %}
-            {% if user_is_authenticated -%}
-              &middot;
-              <a href="{{ url_for('users.info') }}">{{ username }}</a>
-              &middot;
-              <a href="{{ url_for('users.logout') }}">Logout</a>
-              <br/>
-            {%- else -%}
-              <a href="{{ url_for('users.info') }}">Login</a>
-              <br/>
-            {%- endif %}
-          <div class="undertopright">
-            <a href="{{ url_for('contact') }}" target="_blank">Feedback</a>
-          </div>
-        </div>
-
-        </div>
-        <div id="title">{{ title|safe }}</div>
+  <div id="logo">
+    <a href="/"><img src="{{ url_for('static', filename='logo.png') }}" /></a>
+  </div>
+  <div class="right">
+    <div class="upper">
+      <div id="title">{{ title|safe }}</div>
+      <div id="top-menu">
+        <ul>
+          <li><a href="#" onclick="$('#filter-menu').slideToggle(); return false;">Filter</a></li>
+          <li><a href="{{ url_for('search') }}">Search</a></li>
+          <li><a href="{{ url_for('subscribe') }}">Subscribe</a></li>
+          <li><a href="{{ url_for('about') }}">About</a></li>
+          <li><a href="{{ url_for('users.info') }}">{% if user_is_authenticated %}Account{% else %}Login{% endif %}</a></li>
+        </ul>
+      </div>
     </div>
+  </div>
 </div>
-
-{% block sidebar -%}
-<div id="sidebar" style="display: none; witdh=0">
+<div id="filter-menu">
+  {% for ab, name in categories %}
+  <div class="category_toggle">
+    <a href="{{ab}}">{{name}}</a>
+  </div>
+  {% endfor %}
 </div>
-<style type="text/css">
-#main { margin-left: 0; }
-</style>
-{%- endblock sidebar %}
 
  {% macro rightnavig(title, entries) -%}
    {% if entries %}

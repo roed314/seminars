@@ -8,8 +8,8 @@ Note that we've adapted the LMFDB's model, so we don't use `lmfdb.backend.search
 
 `users`: data on users (note that this is in the userdb schema rather than public schema)
 
-Column              | Type        |  Notes   
---------------------|-------------|-----------
+Column              | Type        |  Notes
+--------------------|-------------|-------
 id                  | bigint      | auto
 password            | text        | hashed password with bcrypt
 email               | text        | this will act as username
@@ -56,43 +56,59 @@ admin    | text   | username responsible for updating; should be editor/admin
 
 `seminars`: seminars and conferences.  A coherent sequence of talks.
 
-Column      | Type    | Notes
-------------|---------|------
-id          | bigint  | auto
-name        | text    |
-category    | text    |
-keywords    | text    |
-institution | text    |
-type        | text    | we should have a list of types, including (various types of conferences)/(various types of seminars)
-homepage    | text    | link to external homepage
-display     | boolean | allowed to show; will be true if and only if all organizers have creator privileges
-deleted     | boolean | if seminar organizer no longer wants it to appear
-online      | boolean |
-access      | text    | we need to make a list of predefined access types
-live_link   | text    | some seminars may have a consistent link for attending
+Column       | Type    | Notes
+-------------|---------|------
+id           | bigint  | auto
+name         | text    |
+categories   | text[]  |
+keywords     | text    |
+description  | text    | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
+comments     | text    |
+institutions | text[]  |
+timezone     | text    | time zone code, e.g. "America/New York"
+room         | text    |
+is_conference| boolean |
+homepage     | text    | link to external homepage
+display      | boolean | allowed to show; will be true if and only if all organizers have creator privileges
+archived     | boolean | seminar is no longer active (and won't show up in users' list of seminars)
+online       | boolean |
+access       | text    | we need to make a list of predefined access types
+live_link    | text    | some seminars may have a consistent link for attending
 
 `talks`: table for individual lectures
 
-Column      | Type        | Notes
-------------|-------------|------
-id          | bigint      | auto
-title       | text        |
-description | text        |
-token       | text        | give permission for speaker to edit
-category    | text        |
-keywords    | text        |
-seminar_id  | bigint      | every talk has to be part of a seminar
-display     | boolean     | whether seminar creator has creator privileges
-datetime    | timestamptz | start time
-duration    | interval    |
-speaker     | text        | full name, not username
-speaker_id  | text        | username, may be null
-affiliation | text        | name of university, may be null
-online      | boolean     |
-access      | text        | we need to make a list of predefined access types
-live_link   | text        |
-video_link  | text        | archive video link
-slides_link | text        | link to slides
+Column       | Type        | Notes
+-------------|-------------|------
+id           | bigint      | auto
+title        | text        |
+description  | text        |
+token        | text        | give permission for speaker to edit
+categories   | text[]      |
+keywords     | text        |
+comments     | text        |
+seminar_id   | bigint      | every talk has to be part of a seminar
+seminar_name | text        |
+display      | boolean     | whether seminar creator has creator privileges
+datetime     | timestamptz | start time
+timezone     | text        | time zone code, e.g. "America/New York" (this isn't exactly the same as the tz info contained within the datetime, though it's related)
+duration     | interval    |
+speaker      | text        | full name, not username
+speaker_id   | text        | username, may be null
+affiliation  | text        | name of university, may be null
+online       | boolean     |
+access       | text        | we need to make a list of predefined access types
+live_link    | text        |
+room         | text        |
+video_link   | text        | archive video link
+slides_link  | text        | link to slides
+
+`categories`: table of categories for seminars and talks
+
+Column       | Type   |  Notes
+-------------|--------|-------
+id           | bigint | auto
+name         | text   |
+abbreviation | text   |
 
 ## Relations
 
@@ -105,6 +121,7 @@ Column     | Type   | Notes
 id         | bigint | auto
 email      | text   |
 seminar_id | bigint |
+short_name | text   |
 
 `talk_subscriptions`: for users to add individual talks to their calendar file
 

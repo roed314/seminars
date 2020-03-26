@@ -10,6 +10,3 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../lmf
 from lmfdb.backend.database import PostgresDatabase
 db = PostgresDatabase(dbname="beantheory")
 assert db
-
-from .categories import categories
-assert categories

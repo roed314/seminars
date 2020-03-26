@@ -273,6 +273,29 @@ body.knowl #header {
   z-index: 5;
 }
 
+#top-menu ul li {
+  display: inline;
+}
+
+#top-menu a {
+    text-decoration: none;
+    color: #aaaaaa;
+    font-family: sans-serif;
+    padding: 5px 25px 5px 25px;
+}
+
+.category_toggle {
+    display: inline-block;
+    min-width: 15%;
+    padding: 5px;
+}
+
+#filter-menu {
+  display: none;
+  background: {{color.header_background}};
+  min-height: 100px;
+}
+
 /* TODO: what? */
 #flashes p {
   border-left: 15px solid {{color.knowl_border}};
