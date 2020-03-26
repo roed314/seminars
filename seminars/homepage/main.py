@@ -1,7 +1,7 @@
 
 from seminars.app import app
 from seminars import db
-from seminars.categories import categories
+from sage.misc.cachefunc import cached_function
 
 from flask import render_template, request
 import datetime
@@ -11,6 +11,10 @@ from lmfdb.utils import (
     to_dict, search_wrap,
 )
 
+@cached_function
+def categories():
+    return sorted(((rec["abbreviation"], rec["name"]) for rec in db.categories.search()), key=lambda x: x[1])
+
 class SemSearchArray(SearchArray):
     noun = "seminar"
     plural_noun = "seminars"
@@ -18,7 +22,7 @@ class SemSearchArray(SearchArray):
         category = SelectBox(
             name="category",
             label="Category",
-            options=[("", "")] + categories)
+            options=[("", "")] + categories())
         keywords = TextBox(
             name="keywords",
             label="Keywords")
@@ -81,7 +85,7 @@ def index():
         'browse.html',
         title="Math Seminars",
         info=info,
-        categories=categories,
+        categories=categories(),
         days=days,
         bread=None)
 

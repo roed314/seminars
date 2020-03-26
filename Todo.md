@@ -96,20 +96,6 @@ Design and branding
 
 1. Once we're ready, think about advertising strategy (Bjorn emailing number theory list; how to reach out beyond number theory, posting on Facebook, etc)
 
-Bjorn feedback
-
-Schema changes:
-- Add room to seminar and to talk
-- Time zone for seminars and talks as a string
-- comments for seminars and talks
-- switch categories to an array of strings
-- switch institution of seminar to array of strings
-- description box for seminars (shown in search results and on seminar homepage) - e.g. research seminar, conference, learning seminar....
-- Add table for categories
-- Personalized short name for seminar
-- deleted -> archived (archived seminars don't show up on users' lists of seminars)
-- update seminar_organizers table as in Schema.md
-
 Links to posts about online seminars
 - [aosun](http://math.mit.edu/~aosun/online_seminars.html?fbclid=IwAR12HWLaSri3aYplQ3DZNOjnOrjKy6uZmRDmLAX4jX46hkJR_O0eNVVBNWM)
 - [littmath](https://www.google.com/url?q=https://twitter.com/littmath/status/1242468857975115777&sa=D&source=hangouts&ust=1585257466247000&usg=AFQjCNES39qjlCfz_icIFwOg6-8j6EF1Rw)
