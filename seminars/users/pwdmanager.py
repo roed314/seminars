@@ -3,6 +3,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from six import string_types, text_type
+import random
+import string
 import bcrypt
 # store passwords, check users, ...
 # password hashing is done with fixed and variable salting
@@ -11,10 +13,11 @@ import bcrypt
 
 from seminars import db
 from lmfdb.backend.base import PostgresBase
+from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.backend.encoding import Array
 from psycopg2.sql import SQL, Identifier, Placeholder
 from datetime import datetime, timedelta
-from pytz import UTC
+from pytz import UTC, all_timezones
 
 from .main import logger, FLASK_LOGIN_VERSION, FLASK_LOGIN_LIMIT
 from distutils.version import StrictVersion
@@ -22,29 +25,32 @@ from distutils.version import StrictVersion
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
 from flask_login import UserMixin, AnonymousUserMixin
 
-class PostgresUserTable(PostgresBase):
+class PostgresUserTable(PostgresSearchTable):
     def __init__(self):
-        PostgresBase.__init__(self, 'db_users', db)
-        # never narrow down the rmin-rmax range, only increase it!
-        self.rmin, self.rmax = -10000, 10000
+        PostgresSearchTable.__init__(self, db=db, search_table="users", label_col="email", include_nones=True)
+        # FIXME
         self._rw_userdb = db.can_read_write_userdb()
-        cur = self._execute(SQL("SELECT column_name FROM information_schema.columns WHERE table_schema = %s AND table_name = %s"), ['userdb', 'users'])
-        self._cols = [rec[0] for rec in cur]
-        self._name = "userdb.users"
 
+    def log_db_change(self, what, **kwargs):
+        " no need to log the changes "
+        #FIXME: also the logger can't handle bytes
+        pass
 
     def can_read_write_userdb(self):
         return self._rw_userdb
 
 
-    def bchash(self, pwd):
+
+    def bchash(self, pwd, existing_hash=None):
         """
         Generate a bcrypt based password hash.
         """
-        return bcrypt.hashpw(pwd.encode('utf-8'), bcrypt.gensalt())
+        if not existing_hash:
+            existing_hash = bcrypt.gensalt().decode('utf-8')
+        return bcrypt.hashpw(pwd.encode('utf-8'), existing_hash.encode('utf-8'))
 
     def generate_key(self):
-        return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+        return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(12)])
 
     def new_user(self, **kwargs):
         """
@@ -52,166 +58,74 @@ class PostgresUserTable(PostgresBase):
         Required keyword arguments:
             - email
             - password
-            - full_name
-            - approver
+            - name
+            - affiliation
         """
-        for col in ["email", "password", "full_name", "approver"]:
-            assert col in kwdargs
-        kwargs['password'] = bchash(kwargs['password'])
+        for col in ["email", "password", "name", "affiliation"]:
+            assert col in kwargs
+        kwargs['password'] = self.bchash(kwargs['password'])
+        if 'approver' not in kwargs:
+            kwargs['approver'] = None
+            kwargs['admin'] = kwargs['editor'] = kwargs['creator'] = False
         for col in ['email_confirmed', 'admin', 'editor', 'creator']:
-            kwargs[key] = kwdargs.get(key, False)
-        kwargs['email_reset_time'] = kwdargs.get(UTC.localize(datetime(1970,1,1,)))
-        kwargs['email_reset_code'] = kwdargs.get("email_reset_code", None)
+            kwargs[col] = kwargs.get(col, False)
+        kwargs['email_confirm_code'] = kwargs.get("email_confirm_code", self.generate_key())
         kwargs['homepage'] = kwargs.get('homepage', None)
-        kwargs['timezone'] = kwargs.get('timezone', "America/New York")
+        kwargs['timezone'] = kwargs.get('timezone', "US/Eastern")
+        assert kwargs['timezone'] in all_timezones
         kwargs['location'] = None
         kwargs['created'] = datetime.now(UTC)
         kwargs['ics_key'] = self.generate_key()
+        email = kwargs.pop('email')
+        self.upsert({'email':email}, kwargs)
+        newuser = SeminarsUser(email)
+        return newuser
 
 
     def change_password(self, email, newpwd):
-        if self._rw_userdb:
-            updater = SQL("UPDATE {} SET {} = %s WHERE {} = %s").format(
-                map(IdentifierWrapper, [self._name, "password", "email"]))
-            self._execute(updater, [self.bchash(newpwd), email])
-            logger.info("password for %s changed!" % email)
+        self.update(query={'email': email},
+                    changes={'password': self.bchash(newpwd)},
+                    resort=False,
+                    restat=False)
+        logger.info("password for %s changed!" % email)
+
+
+    def user_exists(self, email):
+        return self.lookup(email, projection='id') is not None
+
+
+    def authenticate(self, email, password):
+        bcpass = self.lookup(email, projection='password')
+        if bcpass is None:
+            raise ValueError("User not present in database!")
+        print(bcpass)
+        return bcpass.encode('utf-8') == self.bchash(password, existing_hash=bcpass)
+
+    def confirm_email(self, token):
+        email = self.lucky({'email_confirm_code': token}, "email")
+        if email is not None:
+            self.update({'email':email}, {'email_confirmed': True, 'email_confirm_code': None})
             return True
         else:
-            logger.info("no attempt to change password, not enough privileges")
             return False
 
-
-
-
-######## OLD #########
-######## OLD #########
-######## OLD #########
-######## OLD #########
-    def new_user(self, uid, pwd=None, full_name=None, about=None, url=None):
-        """
-        generates a new user, asks for the password interactively,
-        and stores it in the DB. This is now replaced with bcrypt version
-        """
-        if not self._rw_userdb:
-            logger.info("no attempt to create user, not enough privileges")
-            return SeminarsAnonymousUser()
-
-        if self.user_exists(uid):
-            raise Exception("ERROR: User %s already exists" % uid)
-        if not pwd:
-            from getpass import getpass
-            pwd_input = getpass("Enter  Password: ")
-            pwd_input2 = getpass("Repeat Password: ")
-            if pwd_input != pwd_input2:
-                raise Exception("ERROR: Passwords do not match!")
-            pwd = pwd_input
-        password = self.bchash(pwd)
-        from datetime import datetime
-        #TODO: use identifiers
-        insertor = SQL(u"INSERT INTO userdb.users (username, password, created, full_name, about, url) VALUES (%s, %s, %s, %s, %s, %s)")
-        self._execute(insertor, [uid, password, datetime.utcnow(), full_name, about, url])
-        new_user = SeminarsUser(uid)
-        return new_user
-
-
-
-    def user_exists(self, uid):
-        selecter = SQL("SELECT username FROM userdb.users WHERE username = %s")
-        cur = self._execute(selecter, [uid])
-        return cur.rowcount > 0
-
-    def get_user_list(self):
-        """
-        returns a list of tuples: [('username', 'full_name'),…]
-        If full_name is None it will be replaced with username.
-        """
-        #TODO: use identifiers
-        selecter = SQL("SELECT username, full_name FROM userdb.users")
-        cur = self._execute(selecter)
-        return [(uid, full_name or uid) for uid, full_name in cur]
-
-    def authenticate(self, uid, pwd, bcpass=None, oldpass=None):
-        if not self._rw_userdb:
-            logger.info("no attempt to authenticate, not enough privileges")
-            return False
-
-        #TODO: use identifiers
-        selecter = SQL("SELECT password FROM userdb.users WHERE username = %s")
-        cur = self._execute(selecter, [uid])
-        if cur.rowcount == 0:
-            raise ValueError("User not present in database!")
-        bcpass = cur.fetchone()[0]
-        return bcpass == self.bchash(pwd, existing_hash = bcpass)
 
     def save(self, data):
-        if not self._rw_userdb:
-            logger.info("no attempt to save, not enough privileges")
-            return;
-
         data = dict(data) # copy
-        uid = data.pop("username", None)
-        if not uid:
-            raise ValueError("data must contain username")
-        if not self.user_exists(uid):
+        email = data.pop("email", None)
+        if not email:
+            raise ValueError("data must contain email")
+        user = self.lookup(email)
+        if not user:
             raise ValueError("user does not exist")
         if not data:
             raise ValueError("no data to save")
-        fields, values = zip(*data.items())
-        updater = SQL("UPDATE userdb.users SET ({0}) = ({1}) WHERE username = %s").format(SQL(", ").join(map(Identifier, fields)), SQL(", ").join(Placeholder() * len(values)))
-        self._execute(updater, list(values) + [uid])
+        if 'new_email' in data:
+            data['email'] = data.pop('new_email')
 
-    def lookup(self, uid):
-        selecter = SQL("SELECT {0} FROM userdb.users WHERE username = %s").format(SQL(", ").join(map(Identifier, self._cols)))
-        cur = self._execute(selecter, [uid])
-        if cur.rowcount == 0:
-            raise ValueError("user does not exist")
-        if cur.rowcount > 1:
-            raise ValueError("multiple users with same username!")
-        return {field:value for field,value in zip(self._cols, cur.fetchone()) if value is not None}
+        self.update({'email': email}, data)
 
-    def full_names(self, uids):
-        #TODO: use identifiers
-        selecter = SQL("SELECT username, full_name FROM userdb.users WHERE username = ANY(%s)")
-        cur = self._execute(selecter, [Array(uids)])
-        return [{k:v for k,v in zip(["username","full_name"], rec)} for rec in cur]
 
-    def create_tokens(self, tokens):
-        if not self._rw_userdb:
-            return;
-
-        insertor = SQL("INSERT INTO userdb.tokens (id, expire) VALUES %s")
-        now = datetime.utcnow()
-        tdelta = timedelta(days=1)
-        exp = now + tdelta
-        self._execute(insertor, [(t, exp) for t in tokens], values_list=True)
-
-    def token_exists(self, token):
-        if not self._rw_userdb:
-            logger.info("no attempt to check if token exists, not enough privileges")
-            return False;
-        selecter = SQL("SELECT 1 FROM userdb.tokens WHERE id = %s")
-        cur = self._execute(selecter, [token])
-        return cur.rowcount == 1
-
-    def delete_old_tokens(self):
-        if not self._rw_userdb:
-            logger.info("no attempt to delete old tokens, not enough privileges")
-            return;
-        deletor = SQL("DELETE FROM userdb.tokens WHERE expire < %s")
-        now = datetime.utcnow()
-        tdelta = timedelta(days=8)
-        cutoff = now - tdelta
-        self._execute(deletor, [cutoff])
-
-    def delete_token(self, token):
-        if not self._rw_userdb:
-            return;
-        deletor = SQL("DELETE FROM userdb.tokens WHERE id = %s")
-        self._execute(deletor, [token])
-
-    def change_colors(self, uid, new_color):
-        updator = SQL("UPDATE userdb.users SET color_scheme = %s WHERE username = %s")
-        self._execute(updator, [new_color, uid])
 
 userdb = PostgresUserTable()
 
@@ -219,31 +133,29 @@ class SeminarsUser(UserMixin):
     """
     The User Object
     """
-    properties = userdb._cols
+    properties =  sorted(userdb.col_type)
 
-    def __init__(self, uid):
-        if not isinstance(uid, string_types):
-            raise Exception("Username is not a string")
+    def __init__(self, email):
+        if not isinstance(email, string_types):
+            raise Exception("Username is not a string, %s" % email)
 
-        self._uid = uid
+        self._email = email
+        self._uid = email.encode('utf-8')
         self._authenticated = False
         self._dirty = False  # flag if we have to save
         self._data = dict([(_, None) for _ in SeminarsUser.properties])
 
-        if userdb.user_exists(uid):
-            self._data.update(userdb.lookup(uid))
+        user_row = userdb.lookup(email)
+        if user_row:
+            self._data.update(user_row)
 
     @property
     def name(self):
-        return self.full_name or self._data.get('username')
+        return self._data['name']
 
-    @property
-    def full_name(self):
-        return self._data['full_name']
-
-    @full_name.setter
-    def full_name(self, full_name):
-        self._data['full_name'] = full_name
+    @name.setter
+    def name(self, name):
+        self._data['name'] = name
         self._dirty = True
 
     @property
@@ -252,34 +164,10 @@ class SeminarsUser(UserMixin):
 
     @email.setter
     def email(self, email):
-        self._data['email'] = email
-        self._dirty = True
-
-    @property
-    def email_confirmed(self):
-        return self._data['email_confirmed']
-
-    @email_confirmed.setter
-    def email_confirmed(self, confirmed):
-        self._data['email_confirmed'] = confirmed
-        self._dirty = True
-
-    @property
-    def email_reset_code(self):
-        return self._data['email_reset_code']
-
-    @email_reset_code.setter
-    def email_reset_code(self, code):
-        self._data['email_reset_code'] = code
-        self._dirty = True
-
-    @property
-    def email_reset_time(self):
-        return self._data['email_reset_time']
-
-    @email_reset_time.setter
-    def email(self, time):
-        self._data['email_reset_time'] = time
+        self._data['new_email'] = email
+        if self._data['new_email'] != self._data.get('email'):
+            self._data['email_confirmed'] = False
+            self._data['email_confirm_code'] = userdb.generate_key()
         self._dirty = True
 
     @property
@@ -297,9 +185,8 @@ class SeminarsUser(UserMixin):
     def created(self):
         return self._data.get('created')
 
-    @property
     def id(self):
-        return self._data['username']
+        return self._data['email']
 
     def is_anonymous(self):
         """required by flask-login user class"""
@@ -334,9 +221,9 @@ class SeminarsUser(UserMixin):
         @return: True: OK, False: wrong password.
         """
         if 'password' not in self._data:
-            logger.warning("no password data in db for '%s'!" % self._uid)
+            logger.warning("no password data in db for '%s'!" % self._email)
             return False
-        self._authenticated = userdb.authenticate(self._uid, pwd)
+        self._authenticated = userdb.authenticate(self._email, pwd)
         return self._authenticated
 
     def save(self):
