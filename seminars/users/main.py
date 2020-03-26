@@ -52,26 +52,16 @@ def get_username(email):
 @app.context_processor
 def ctx_proc_userdata():
     userdata = {}
-    userdata['user_can_write'] = userdb.can_read_write_userdb()
-    if not userdata['user_can_write']:
-        userdata['userid'] = 'anon'
-        userdata['username'] = 'Anonymous'
-        userdata['user_is_admin'] = False
-        userdata['user_is_authenticated'] = False
-        userdata['user_can_review_knowls'] = False
-        userdata['get_username'] = SeminarsAnonymousUser().name # this is a function
+    userdata['userid'] = 'anon' if current_user.is_anonymous() else current_user._uid
+    userdata['username'] = 'Anonymous' if current_user.is_anonymous() else current_user.name
 
+    if StrictVersion(FLASK_LOGIN_VERSION) > StrictVersion(FLASK_LOGIN_LIMIT):
+        userdata['user_is_authenticated'] = current_user.is_authenticated
     else:
-        userdata['userid'] = 'anon' if current_user.is_anonymous() else current_user._uid
-        userdata['username'] = 'Anonymous' if current_user.is_anonymous() else current_user.name
+        userdata['user_is_authenticated'] = current_user.is_authenticated()
 
-        if StrictVersion(FLASK_LOGIN_VERSION) > StrictVersion(FLASK_LOGIN_LIMIT):
-            userdata['user_is_authenticated'] = current_user.is_authenticated
-        else:
-            userdata['user_is_authenticated'] = current_user.is_authenticated()
-
-        userdata['user_is_admin'] = current_user.is_admin()
-        userdata['get_username'] = get_username  # this is a function
+    userdata['user_is_admin'] = current_user.is_admin()
+    userdata['get_username'] = get_username  # this is a function
     return userdata
 
 # blueprint specific definition of the body_class variable
@@ -127,9 +117,8 @@ def info():
     info['logout'] = url_for(".logout")
     info['user'] = current_user
     info['next'] = request.referrer
-    from lmfdb.utils.color import all_color_schemes
+    print(current_user.id)
     return render_template("user-info.html",
-                           all_colors=all_color_schemes.values(),
                            info=info, title="Userinfo")
 
 # ./info again, but for POST!

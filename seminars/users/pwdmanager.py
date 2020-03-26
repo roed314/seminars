@@ -185,6 +185,7 @@ class SeminarsUser(UserMixin):
     def created(self):
         return self._data.get('created')
 
+    @property
     def id(self):
         return self._data['email']
 
