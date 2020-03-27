@@ -1,2 +1,3 @@
 email_validator
 Flask-Mail
+itsdangerous

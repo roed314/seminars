@@ -382,11 +382,13 @@ for fn in ['favicon.ico']:
 #           Mail             #
 ##############################
 
-def send_email(subject, message, to):
+def send_email(to, subject, message):
+    app.logger.info("%s sending email to %s..." % (timestamp(), to))
     mail.send(Message(subject=subject,
-                  body=message,
+                  html=message,
                   sender="info.mathseminars@gmail.com",
                   recipients=[to]))
+    app.logger.info("%s done sending email to %s" % (timestamp(), to))
 
 
 

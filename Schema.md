@@ -14,8 +14,6 @@ id                  | bigint      | auto
 password            | text        | hashed password with bcrypt
 email               | text        | this will act as username
 email_confirmed     | boolean     | if the email has been confirmed
-email_confirm_code  | text        |
-email_timestamp     | timestamptz | when the last email with the confirmation code was sent (to avoid spam)
 admin               | boolean     |
 editor              | boolean     |
 creator             | boolean     |

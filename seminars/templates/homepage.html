@@ -36,7 +36,7 @@
           <li><a href="{{ url_for('search') }}">Search</a></li>
           <li><a href="{{ url_for('subscribe') }}">Subscribe</a></li>
           <li><a href="{{ url_for('about') }}">About</a></li>
-          <li><a href="{{ url_for('users.info') }}">{% if user_is_authenticated %}Account{% else %}Login{% endif %}</a></li>
+          <li><a href="{{ url_for('user.info') }}">{% if user_is_authenticated %}Account{% else %}Login{% endif %}</a></li>
         </ul>
       </div>
     </div>

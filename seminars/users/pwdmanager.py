@@ -12,6 +12,7 @@ import bcrypt
 # Modified : Chris Brady and Heather Ratcliffe
 
 from seminars import db
+from seminars.tokens import generate_token
 from lmfdb.backend.base import PostgresBase
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.backend.encoding import Array
@@ -50,9 +51,6 @@ class PostgresUserTable(PostgresSearchTable):
             existing_hash = bcrypt.gensalt().decode('utf-8')
         return bcrypt.hashpw(pwd.encode('utf-8'), existing_hash.encode('utf-8')).decode('utf-8')
 
-    def generate_key(self):
-        return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(12)])
-
     def new_user(self, **kwargs):
         """
         Creates a new user.
@@ -64,22 +62,21 @@ class PostgresUserTable(PostgresSearchTable):
         """
         for col in ["email", "password", "name", "affiliation"]:
             assert col in kwargs
+        email = kwargs.pop('email')
         kwargs['password'] = self.bchash(kwargs['password'])
         if 'approver' not in kwargs:
             kwargs['approver'] = None
             kwargs['admin'] = kwargs['editor'] = kwargs['creator'] = False
         for col in ['email_confirmed', 'admin', 'editor', 'creator']:
             kwargs[col] = kwargs.get(col, False)
-        kwargs['email_confirm_code'] = kwargs.get("email_confirm_code", self.generate_key())
         kwargs['homepage'] = kwargs.get('homepage', None)
         kwargs['timezone'] = kwargs.get('timezone', "US/Eastern")
         assert kwargs['timezone'] in all_timezones
         kwargs['location'] = None
         kwargs['created'] = datetime.now(UTC)
-        kwargs['ics_key'] = self.generate_key()
-        email = kwargs.pop('email')
+        kwargs['ics_key'] = generate_token(email, 'ics')
         self.upsert({'email':email}, kwargs)
-        newuser = SeminarsUser(email)
+        newuser = SeminarsUser(email=email)
         return newuser
 
 
@@ -149,7 +146,6 @@ class SeminarsUser(UserMixin):
     properties =  sorted(userdb.col_type) + ['id']
 
     def __init__(self, uid=None, email=None):
-        print("\nuid", uid, "email", email)
         if email:
             if not isinstance(email, string_types):
                 raise Exception("Email is not a string, %s" % email)
@@ -166,9 +162,6 @@ class SeminarsUser(UserMixin):
         if user_row:
             self._data.update(user_row)
             self._uid = str(self._data['id'])
-        print(query)
-        print(self._data)
-        print("\n")
 
     @property
     def id(self):
@@ -192,7 +185,6 @@ class SeminarsUser(UserMixin):
         if email != self._data.get('email'):
             self._data['new_email'] = email
             self._data['email_confirmed'] = False
-            self._data['email_confirm_code'] = userdb.generate_key()
             self._dirty = True
 
     @property
@@ -209,6 +201,11 @@ class SeminarsUser(UserMixin):
     @property
     def email_confirmed(self):
         return self._data['email_confirmed']
+
+    @email_confirmed.setter
+    def email_confirmed(self, email_confirmed):
+        self._data['email_confirmed'] = email_confirmed
+        self._dirty = True
 
     @property
     def affiliation(self):
