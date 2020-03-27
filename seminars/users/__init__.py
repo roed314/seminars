@@ -18,9 +18,9 @@ app.secret_key = 'vVjYyCM99DtirZqMaGMrle'
 
 login_manager.init_app(app)
 
-app.register_blueprint(login_page, url_prefix="/users")
+app.register_blueprint(login_page, url_prefix="/user")
 
-users_logger = make_logger("users", hl=True)
+users_logger = make_logger("user", hl=True)
 
 FLASK_LOGIN_LIMIT = '0.3.0'
 if StrictVersion(FLASK_LOGIN_VERSION) < StrictVersion(FLASK_LOGIN_LIMIT):

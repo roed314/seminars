@@ -38,7 +38,8 @@
     </tr>
     <tr>
       <td>Homepage:</td>
-      <td><input name="homepage" size="30" value="{{request.form.get("homepage", "")}}" /></td>
+      <td><input name="homepage" id="url" size="30" value="{{request.form.get("homepage", "")}}" /></td>
+      <td id="urltest" /></td>
     </tr>
 
     <tr>
@@ -65,7 +66,20 @@
 </form>
 
 
+{# this script constructs a url and shows it as a link, just for testing #}
 <script type="text/javascript">
+function makelink() {
+   var url = $("#url").val();
+   if (url.substring(0,7) != "http://" && url.substring(0,8) != "https://") {
+     url = "http://" + url;
+   }
+   $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
+}
+
+$(function() {
+   $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
+});
+makelink();
 /* this tells the user if the passwords match */
 
 function checkpw() {

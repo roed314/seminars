@@ -14,7 +14,6 @@ id                  | bigint      | auto
 password            | text        | hashed password with bcrypt
 email               | text        | this will act as username
 email_confirmed     | boolean     | if the email has been confirmed
-email_confirm_code  | text        |
 admin               | boolean     |
 editor              | boolean     |
 creator             | boolean     |

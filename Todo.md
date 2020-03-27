@@ -3,19 +3,21 @@ Admin (Edgar)
 
 1. Add pages for user management (inviting and approving users, user-add tokens)
 
-1. Add user page for changing info (e.g. homepage, time zone, affiliation)
-
 1. Add institution page for changing info (e.g. homepage, time zone, aliases)
 
 1. Create login page, mechanisms for resetting password
 
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last
 
-1. Stop connecting to the lmfdb database
-
 1. Start a test server, link to mathseminars.org DNS record
 
+1. Stop connecting to the lmfdb database
+
 1. Improve password reset process
+
+1. (Done) Add user page for changing info (e.g. homepage, time zone, affiliation)
+
+1. rename /users
 
 Content creation
 ================
