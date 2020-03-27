@@ -1,0 +1,46 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+<h1>{{info.title}}{% if not info.display %} (hidden){% elif info.online %} (online){% endif %}</h1>
+
+<div id="talk-body">
+<p>
+  {% if info.speaker %}by {{info.speaker}}{% endif %}
+  {% if info.seminar_name %} as part of <a href="{{url_for('show_seminar', semid=info['seminar_id'])}}">{{info.seminar_name}}</a>{% endif %}
+</p>
+
+<p>
+  <span class="localtime" data-utcoffset="{{utcoffset}}">{{info.datetime.strftime("%a %b %-d, %-H:%M")}}{% if 'duration' in info %}-{{(info.datetime + info.duration).strftime("%-H:%M")}}{% endif %}</span>
+</p>
+
+<p>
+  {% if info.live_link %}
+  {% if user_is_authenticated %}
+  Access <a href="{{info.live_link}}">online</a>.
+  {% else %}
+  To see access link, please <a href="{{url_for('users.info')}}">log in</a> (anti-spam measure).
+  {% endif %}
+  {% endif %}
+  {% if info.room %}
+  Lecture held in {{ info.room }}.
+  {% endif %}
+</p>
+
+{% if info.description %}
+<p>{{info.description}}</p>
+{% endif %}
+
+{% if info.abstract %}
+{% for paragraph in info.abstract %}
+<p>{{paragraph}}</p>
+{% endfor %}
+{% endif %}
+
+{% if info.comments %}
+<p>{{info.comments}}</p>
+{% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+<h1>{% if info.homepage %}<a href="{{info.homepage}}">{{info.name}}</a>{% else %}{{info.name}}{% endif %}{% if not info.display %} (hidden){% elif info.archived %} (inactive){% elif info.online %} (online){% endif %}</h1>
+
+{% if info.description %}<p>{{info.description}}</p>{% endif %}
+
+{% if info.comments %}<p>{{info.comments}}</p>{% endif %}
+
+{% set show_seminar=False %}
+{% if info.future and info.past %}
+<button id="timetoggle" href="#">View past talks</button>
+{% endif %}
+{% if info.future %}
+<div id="future_talks">
+  <h3>Upcoming talks</h3>
+  <table>
+    {% for talk in info.future %}
+    <tr>
+      {% include 'talk_line.html' %}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+{% if info.past %}
+{% if not info.future %}
+<p> There are no upcoming talks. </p>
+<script> toggle_time(); </script>
+{% endif %}
+<div id="past_talks">
+  <h3>Past talks</h3>
+  <table>
+    {% for talk in info.past %}
+    <tr>
+      {% include 'talk_line.html' %}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -205,7 +205,8 @@ body.knowl #header {
     font-size: 180%;
     font-weight: bold;
     font-family: sans-serif;
-    padding-top: 25px;
+    padding-top: 50px;
+    display: inline-block;
     color: {{color.header_text_title}};
 }
 
@@ -273,6 +274,10 @@ body.knowl #header {
   z-index: 5;
 }
 
+#top-menu {
+    display: inline-block;
+}
+
 #top-menu ul li {
   display: inline;
 }
@@ -293,7 +298,14 @@ body.knowl #header {
 #filter-menu {
   display: none;
   background: {{color.header_background}};
-  min-height: 100px;
+}
+
+#past_talks {
+    display: none;
+}
+
+#talk-body {
+    max-width: 700px;
 }
 
 /* TODO: what? */

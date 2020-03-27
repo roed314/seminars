@@ -15,9 +15,7 @@
 <table id="browse-talks">
   {% for talk in talks %}
   <tr class="talk {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
-    <td>{{talk.datetime.strftime("%a %b %-d, %-H:%M")}}</td>
-    <td><a href="{{ url_for('show_sem', semid=talk.seminar_id) }}">{{talk.seminar_name}}</a></td>
-    <td><a href="{{ url_for('show_talk', talkid=talk.id) }}">{{talk.speaker}}</a></td><td>{{talk.title}}</td>
+    {% include 'talk_line.html' %}
   </tr>
   {% endfor %}
 </table>

@@ -32,16 +32,15 @@
       <div id="title">{{ title|safe }}</div>
       <div id="top-menu">
         <ul>
-          <li><a href="#" onclick="$('#filter-menu').slideToggle(); return false;">Filter</a></li>
-          <li><a href="{{ url_for('search') }}">Search</a></li>
-          <li><a href="{{ url_for('subscribe') }}">Subscribe</a></li>
-          <li><a href="{{ url_for('about') }}">About</a></li>
-          <li><a href="{{ url_for('users.info') }}">{% if user_is_authenticated %}Account{% else %}Login{% endif %}</a></li>
+          {% for url, onclick, label in top_menu %}
+          <li><a href="{{url}}"{% if onclick %} onclick="{{onclick}}"{% endif %}>{{label}}</a></li>
+          {% endfor %}
         </ul>
       </div>
     </div>
   </div>
 </div>
+{% if categories %}
 <div id="filter-menu">
   {% for ab, name in categories %}
   <div class="category_toggle">
@@ -49,6 +48,7 @@
   </div>
   {% endfor %}
 </div>
+{% endif %}
 
  {% macro rightnavig(title, entries) -%}
    {% if entries %}

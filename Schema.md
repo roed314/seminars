@@ -81,6 +81,7 @@ Column       | Type        | Notes
 -------------|-------------|------
 id           | bigint      | auto
 title        | text        |
+abstract     | text        |
 description  | text        |
 token        | text        | give permission for speaker to edit
 categories   | text[]      |

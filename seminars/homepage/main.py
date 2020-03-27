@@ -3,13 +3,29 @@ from seminars.app import app
 from seminars import db
 from sage.misc.cachefunc import cached_function
 
-from flask import render_template, request
+from flask import render_template, request, url_for
+from flask_login import current_user
 import datetime
+import pytz
+from tzlocal import get_localzone
 
 from lmfdb.utils import (
     SearchArray, TextBox, SelectBox, YesNoBox,
     to_dict, search_wrap,
 )
+
+def get_now():
+    # Returns now in the server's time zone, comparable to time-zone aware datetimes from the database
+    return datetime.datetime.now(tz=get_localzone())
+
+def basic_top_menu():
+    return [
+        (url_for("index"), "", "Browse"),
+        (url_for("search"), "", "Search"),
+        (url_for("subscribe"), "", "Subscribe"),
+        (url_for("about"), "", "About"),
+        (url_for("users.info"), "", "Account" if current_user.is_authenticated else "Login")
+    ]
 
 @cached_function
 def categories():
@@ -71,13 +87,15 @@ class SemSearchArray(SearchArray):
 def index():
     # Eventually want some kind of cutoff on which talks are included.
     talks = list(db.talks.search({'display':True}, projection=["id", "categories", "datetime", "seminar_id", "seminar_name", "speaker", "title"])) # include id
-    print(talks)
+    menu = basic_top_menu()
+    menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         'browse.html',
         title="Math Seminars",
         info={},
         categories=categories(),
         talks=talks,
+        top_menu=menu,
         bread=None)
 
 @app.route("/search")
@@ -94,15 +112,55 @@ def search():
         title="Search seminars",
         info=info,
         categories=categories(),
+        menu=basic_top_menu(),
         bread=None)
 
 @app.route("/seminar/<semid>")
-def show_sem(semid):
-    pass
+def show_seminar(semid):
+    try:
+        semid = int(semid)
+        info = db.seminars.lucky({'id': semid})
+        if info is None: raise ValueError
+    except ValueError:
+        return render_template("404.html", title="Seminar not found")
+    organizers = list(db.seminar_organizers.search({'seminar_id': semid}))
+    talks = list(db.talks.search({'display':True, 'seminar_id': semid}, projection=3))
+    now = get_now()
+    info['future'] = []
+    info['past'] = []
+    for talk in talks:
+        if talk['datetime'] + talk.get('duration', datetime.timedelta(hours=1)) >= now:
+            info['future'].append(talk)
+        else:
+            info['past'].append(talk)
+    info['future'].sort(key=lambda talk: talk['datetime'])
+    info['past'].sort(key=lambda talk: talk['datetime'], reverse=True)
+    return render_template(
+        "seminar.html",
+        title="View seminar",
+        info=info,
+        top_menu=basic_top_menu(),
+        bread=None)
 
 @app.route("/talk/<talkid>")
 def show_talk(talkid):
-    pass
+    try:
+        talkid = int(talkid)
+        info = db.talks.lucky({'id': talkid})
+        if info is None: raise ValueError
+    except ValueError:
+        return render_template("404.html", title="Talk not found")
+    if info.get("abstract"):
+        info["abstract"] = info["abstract"].split("\n\n")
+    print(info.keys())
+    utcoffset = int(info["datetime"].utcoffset().total_seconds() / 60)
+    return render_template(
+        "talk.html",
+        title="View talk",
+        info=info,
+        utcoffset=utcoffset,
+        top_menu=basic_top_menu(),
+        bread=None)
 
 @app.route("/subscribe")
 def subscribe():

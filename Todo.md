@@ -38,6 +38,8 @@ Content creation
 
 1. Mechanism for canceling talks, archiving seminars
 
+1. Think about the model described at https://talks.cam.ac.uk/document/Adding+a+talk (notably, the ability to include others' subscription lists into your own)
+
 Viewing and searching
 =====================
 
@@ -67,10 +69,14 @@ Viewing and searching
 
 1. Include counts of how many talks are in each category in the Filter dropdown, only include categories with at least 1
 
+1. Add search on time (rather than datetime) so that users can accomodate their local schedules
+
 Time zones
 ==========
 
-1. Should get the time zone from the browser when user not logged in (https://stackoverflow.com/questions/6939685/get-client-time-zone-from-browser)
+1. Should get the time zone from the browser when user not logged in (https://stackoverflow.com/questions/6939685/get-client-time-zone-from-browser and https://github.com/iamkun/dayjs)
+
+1. Configure server time zone, rather than hard coding it as Eastern in the source
 
 Feedback
 ========

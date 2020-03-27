@@ -9,7 +9,7 @@ from functools import wraps
 from seminars.app import app
 from lmfdb.logger import make_logger
 from flask import render_template, request, Blueprint, url_for, make_response
-from flask_login import login_required, login_user, current_user, logout_user, LoginManager, __version__ as FLASK_LOGIN_VERSION
+from flask_login import login_required, login_user, current_user, logout_user, LoginManager
 from distutils.version import StrictVersion
 from lmfdb.utils import flash_error
 from markupsafe import Markup
@@ -26,8 +26,6 @@ logger = make_logger(login_page)
 
 login_manager = LoginManager()
 
-# We log a warning if the version of flask-login is less than FLASK_LOGIN_LIMIT
-FLASK_LOGIN_LIMIT = '0.3.0'
 from .pwdmanager import userdb, SeminarsUser, SeminarsAnonymousUser
 
 
@@ -53,12 +51,7 @@ def ctx_proc_userdata():
     userdata = {}
     userdata['userid'] = 'anon' if current_user.is_anonymous() else current_user._uid
     userdata['username'] = 'Anonymous' if current_user.is_anonymous() else current_user.name
-
-    if StrictVersion(FLASK_LOGIN_VERSION) > StrictVersion(FLASK_LOGIN_LIMIT):
-        userdata['user_is_authenticated'] = current_user.is_authenticated
-    else:
-        userdata['user_is_authenticated'] = current_user.is_authenticated()
-
+    userdata['user_is_authenticated'] = current_user.is_authenticated
     userdata['user_is_admin'] = current_user.is_admin()
     userdata['get_username'] = get_username  # this is a function
     return userdata
@@ -116,7 +109,7 @@ def info():
     info['logout'] = url_for(".logout")
     info['user'] = current_user
     info['next'] = request.referrer
-    print(current_user.id)
+    #print(current_user.id)
     return render_template("user-info.html",
                            info=info, title="Userinfo")
 
