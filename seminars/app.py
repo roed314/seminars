@@ -24,7 +24,7 @@ mail_settings = {
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
     "MAIL_USERNAME": 'info.mathseminars@gmail.com',
-    "MAIL_PASSWORD": os.environ['EMAIL_PASSWORD']
+    "MAIL_PASSWORD": os.environ.get('EMAIL_PASSWORD','')
 }
 
 app.config.update(mail_settings)
