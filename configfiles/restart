@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# change to script's dir
+#cd `dirname "$0"`
+
+# uses the name of the script to restart the gunicorn instance
+
+echo restarting server
+
+# restart server
+kill -HUP `cat ~/gunicorn.pid`
+
+echo '... done'
