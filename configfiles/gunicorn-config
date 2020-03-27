@@ -9,6 +9,7 @@ accesslog = '/home/mathseminars/logs/seminars/accesslog'
 loglevel = 'info' # change to 'debug' for more output
 logfile = '/home/mathseminars/logs/seminars/flasklog'
 #
+raw_env = ['SERVER_NAME=mathseminars.org',']
 default_proc_name = 'mathseminars'
 timeout = 30
 max_requests = 1000
