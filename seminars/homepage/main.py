@@ -1,6 +1,7 @@
 
 from seminars.app import app
 from seminars import db
+from seminars.utils import basic_top_menu
 from sage.misc.cachefunc import cached_function
 
 from flask import render_template, request, url_for
@@ -17,15 +18,6 @@ from lmfdb.utils import (
 def get_now():
     # Returns now in the server's time zone, comparable to time-zone aware datetimes from the database
     return datetime.datetime.now(tz=get_localzone())
-
-def basic_top_menu():
-    return [
-        (url_for("index"), "", "Browse"),
-        (url_for("search"), "", "Search"),
-        (url_for("subscribe"), "", "Subscribe"),
-        (url_for("about"), "", "About"),
-        (url_for("users.info"), "", "Account" if current_user.is_authenticated else "Login")
-    ]
 
 @cached_function
 def categories():
@@ -86,7 +78,8 @@ class SemSearchArray(SearchArray):
 @app.route("/")
 def index():
     # Eventually want some kind of cutoff on which talks are included.
-    talks = list(db.talks.search({'display':True}, projection=["id", "categories", "datetime", "seminar_id", "seminar_name", "speaker", "title"])) # include id
+    # Deal with time zone right
+    talks = list(db.talks.search({'display':True, 'datetime':{'$gte':datetime.datetime.now()}}, projection=["id", "categories", "datetime", "seminar_id", "seminar_name", "speaker", "title"], sort=["datetime"])) # include id
     menu = basic_top_menu()
     menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
@@ -107,12 +100,14 @@ def search():
             return search_talks(info)
         elif st == "seminars":
             return search_seminars(info)
+    menu = basic_top_menu()
+    menu.pop(1)
     return render_template(
         "search.html",
-        title="Search seminars",
+        title="Search",
         info=info,
         categories=categories(),
-        menu=basic_top_menu(),
+        top_menu=menu,
         bread=None)
 
 @app.route("/seminar/<semid>")
@@ -166,7 +161,23 @@ def show_talk(talkid):
 def subscribe():
     # redirect to login page if not logged in, with message about what subscription is
     # If logged in, give a link to download the .ics file, the list of seminars/talks currently followed, and instructions on adding more
+    menu = basic_top_menu()
+    menu.pop(2)
+    return render_template(
+        "subscribe.html",
+        title="Subscribe",
+        top_menu=menu,
+        bread=None)
     raise NotImplementedError
+
+@app.route("/about")
+def about():
+    menu = basic_top_menu()
+    menu.pop(3)
+    return render_template(
+        "about.html",
+        title="About",
+        top_menu=menu)
 
 @app.route("/<category>")
 def by_category(category):

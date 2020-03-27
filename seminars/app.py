@@ -234,11 +234,7 @@ def not_found_503(error):
 #       Top-level pages      #
 ##############################
 
-# Code for the main browse page is contained in the homepage/ folder
-
-@app.route("/about")
-def about():
-    return render_template("about.html", title="About Math Seminars")
+# Code for the main browse pages is contained in the homepage/ folder
 
 @app.route("/health")
 @app.route("/alive")
@@ -389,6 +385,3 @@ def send_email(to, subject, message):
                   sender="info.mathseminars@gmail.com",
                   recipients=[to]))
     app.logger.info("%s done sending email to %s" % (timestamp(), to))
-
-
-

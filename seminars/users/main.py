@@ -16,7 +16,7 @@ from markupsafe import Markup
 
 from lmfdb import db
 assert db
-from seminars.utils import timezones
+from seminars.utils import timezones, basic_top_menu
 from seminars.tokens import generate_token, confirm_token
 import pytz
 
@@ -70,9 +70,12 @@ def info():
     info['logout'] = url_for(".logout")
     info['user'] = current_user
     info['next'] = request.referrer
+    menu = basic_top_menu()
+    menu.pop(-1)
     return render_template("user-info.html",
                            info=info,
-                           title="Userinfo",
+                           title="Account",
+                           top_menu=menu,
                            timezones=timezones)
 
 # ./info again, but for POST!
