@@ -127,6 +127,5 @@ def main():
              "\nto access this LMFDB instance" +
              stars
              )
-
     set_running()
     app.run(**flask_options)

@@ -6,6 +6,7 @@ import datetime
 
 from flask import (Flask, g, render_template, request, make_response,
                    redirect, url_for, current_app, abort)
+from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
 
@@ -16,6 +17,18 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 ############################
 
 app = Flask(__name__)
+
+mail_settings = {
+    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_PORT": 465,
+    "MAIL_USE_TLS": False,
+    "MAIL_USE_SSL": True,
+    "MAIL_USERNAME": 'info.mathseminars@gmail.com',
+    "MAIL_PASSWORD": os.environ['EMAIL_PASSWORD']
+}
+
+app.config.update(mail_settings)
+mail = Mail(app)
 
 ############################
 # App attribute functions  #
@@ -363,26 +376,17 @@ def root_static_file(name):
 for fn in ['favicon.ico']:
     root_static_file(fn)
 
+
+
 ##############################
-#         Intro pages        #
+#           Mail             #
 ##############################
 
-# common base class and bread
-#_bc = 'intro'
-#intro_bread = lambda: [('Intro', url_for("introduction"))]
+def send_email(subject, message, to):
+    mail.send(Message(subject=subject,
+                  body=message,
+                  sender="info.mathseminars@gmail.com",
+                  recipients=[to]))
 
-# template displaying just one single knowl as an KNOWL_INC
-#_single_knowl = 'single.html'
 
 
-#@app.route("/intro/features")
-#def introduction_features():
-#    b = intro_bread()
-#    b.append(('Features', url_for("introduction_features")))
-#    return render_template(_single_knowl, title="Features", kid='intro.features', body_class=_bc, bread=b)
-
-#@app.route("/news")
-#def news():
-#    t = "News"
-#    b = [(t, url_for('news'))]
-#    return render_template(_single_knowl, title="LMFDB in the News", kid='doc.news.in_the_news', body_class=_bc, bread=b)

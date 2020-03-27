@@ -15,6 +15,7 @@ from seminars import db
 from lmfdb.backend.base import PostgresBase
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.backend.encoding import Array
+from lmfdb.utils import flash_error
 from psycopg2.sql import SQL, Identifier, Placeholder
 from datetime import datetime, timedelta
 from pytz import UTC, all_timezones
@@ -121,10 +122,21 @@ class PostgresUserTable(PostgresSearchTable):
             raise ValueError("no data to save")
         if 'new_email' in data:
             data['email'] = data.pop('new_email')
+            if self.lookup(data['email'], 'id'):
+                flash_error("There is already a user registered with email = %s", data['email'])
+                return False
+            from email_validator import validate_email, EmailNotValidError
+            try:
+                validate_email(data['email'] )
+            except EmailNotValidError as e:
+                flash_error("""Oops, email '%s' is not allowed. %s""", data['email'], str(e))
+                return False
         for key in list(data.keys()):
             if key not in self.search_cols:
                 data.pop(key)
         self.update({'email': email}, data)
+        return True
+
 
 
 
@@ -134,21 +146,33 @@ class SeminarsUser(UserMixin):
     """
     The User Object
     """
-    properties =  sorted(userdb.col_type)
+    properties =  sorted(userdb.col_type) + ['id']
 
-    def __init__(self, email):
-        if not isinstance(email, string_types):
-            raise Exception("Username is not a string, %s" % email)
+    def __init__(self, uid=None, email=None):
+        print("\nuid", uid, "email", email)
+        if email:
+            if not isinstance(email, string_types):
+                raise Exception("Email is not a string, %s" % email)
+            query = {'email' : email}
+        else:
+            query = {'id': int(uid)}
 
-        self._email = email
-        self._uid = email.encode('utf-8')
+        self._uid = uid
         self._authenticated = False
         self._dirty = False  # flag if we have to save
         self._data = dict([(_, None) for _ in SeminarsUser.properties])
 
-        user_row = userdb.lookup(email)
+        user_row = userdb.lucky(query,  projection=SeminarsUser.properties)
         if user_row:
             self._data.update(user_row)
+            self._uid = str(self._data['id'])
+        print(query)
+        print(self._data)
+        print("\n")
+
+    @property
+    def id(self):
+        return self._uid
 
     @property
     def name(self):
@@ -165,11 +189,11 @@ class SeminarsUser(UserMixin):
 
     @email.setter
     def email(self, email):
-        self._data['new_email'] = email
-        if self._data['new_email'] != self._data.get('email'):
+        if email != self._data.get('email'):
+            self._data['new_email'] = email
             self._data['email_confirmed'] = False
             self._data['email_confirm_code'] = userdb.generate_key()
-        self._dirty = True
+            self._dirty = True
 
     @property
     def homepage(self):
@@ -183,6 +207,10 @@ class SeminarsUser(UserMixin):
         self._dirty = True
 
     @property
+    def email_confirmed(self):
+        return self._data['email_confirmed']
+
+    @property
     def affiliation(self):
         return self._data['affiliation']
 
@@ -192,12 +220,17 @@ class SeminarsUser(UserMixin):
         self._dirty = True
 
     @property
-    def created(self):
-        return self._data.get('created')
+    def timezone(self):
+        return self._data['timezone']
+
+    @timezone.setter
+    def timezone(self, timezone):
+        self._data['timezone'] = timezone
+        self._dirty = True
 
     @property
-    def id(self):
-        return self._data['email']
+    def created(self):
+        return self._data.get('created')
 
     def is_anonymous(self):
         """required by flask-login user class"""
@@ -231,10 +264,11 @@ class SeminarsUser(UserMixin):
         checks if the given password for the user is valid.
         @return: True: OK, False: wrong password.
         """
+        print("authenticating:", self.email)
         if 'password' not in self._data:
-            logger.warning("no password data in db for '%s'!" % self._email)
+            logger.warning("no password data in db for '%s'!" % self.email)
             return False
-        self._authenticated = userdb.authenticate(self._email, pwd)
+        self._authenticated = userdb.authenticate(self.email, pwd)
         return self._authenticated
 
     def save(self):
@@ -242,7 +276,17 @@ class SeminarsUser(UserMixin):
             return
         logger.debug("saving '%s': %s" % (self.id, self._data))
         userdb.save(self._data)
+        if 'new_email' in self._data:
+            self.__init__(email=self._data['new_email'])
+
         self._dirty = False
+
+    def resend_email(self):
+        # TODO
+        # use email_timestamp to figure out if one needs to send again
+        raise NotImplementedError
+
+
 
 class SeminarsAnonymousUser(AnonymousUserMixin):
     """

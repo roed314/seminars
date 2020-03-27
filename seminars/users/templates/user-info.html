@@ -1,12 +1,7 @@
 {% extends 'homepage.html' %}
 {% block content %}
 
-{% if user_is_authenticated %}
-   <h1>You are {{ info.user.name }}</h1>
-   <h2>Actions</h2>
-   <ul><li><a href="{{ info.logout }}">Logout</a></li></ul>
-
-{% else %}
+{% if not user_is_authenticated %}
   <h1>You are not logged in</h1>
 
   <div style="margin-bottom: 20px">New user?
@@ -26,19 +21,26 @@
       <tr><td /><td><button name="submit" type="submit">Login</button></td></tr>
     </table>
   </form>
-{% endif %}
-
-{% if user_is_authenticated %}
+{% else %}
+  <h1>You are {{ info.user.name }}</h1>
+  <h2>Actions</h2>
+  <ul><li><a href="{{ info.logout }}">Logout</a></li></ul>
   <h2>Edit Details</h2>
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
       <tr>
-        <td>Email:</td>
-        <td><input name="email" value="{{info.user.email}}" size="30" tabindex="1" /></td>
-      </tr>
-      <tr>
         <td>Created:</td>
         <td>{{ info.user.created|fmtdatetime }}</td>
+      </tr>
+      <tr>
+        <td>Email:</td>
+        <td><input name="email" value="{{info.user.email}}" size="30" tabindex="1" /></td>
+        {% if not info.user.email_confirmed %}
+        <td>
+          (not yet confirmed <a href="{{ url_for('.resend_confirmation_email') }}">Resend link?</a>)
+        </td>
+        {%endif%}
+      </tr>
       <tr>
         <td>Name:</td>
         <td><input name="name" value="{{info.user.name}}" size="30" tabindex="1" /></td>
@@ -52,8 +54,24 @@
       <tr>
         <td>Homepage:</td>
         <td><input name="homepage" id="url" value="{{info.user.homepage}}" size="30" tabindex="3" /></td>
-        <td id="urltest" />
+        <td id="urltest" /></td>
+      </tr>
+    <tr>
+      <td>Timezone:</td>
+      <td>
+        <select name="timezone">
+        {% for tz, pretty_tz in timezones %}
+            <option value={{tz}}
+                    {% if tz == info.user.timezone %}
+                    selected=true
+                    {%endif%}
+                    >
+                    {{pretty_tz}}
+            </option>
+        {% endfor %}
+        </select>
       </td>
+    </tr>
 
       <tr><td colspan="3" class="spacing" /></tr>
       <tr>
@@ -61,6 +79,7 @@
           <button type="submit" tabindex="5">Save</button>
         </td>
       </tr>
+
     </table>
   </form>
 

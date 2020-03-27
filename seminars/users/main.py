@@ -32,22 +32,20 @@ from .pwdmanager import userdb, SeminarsUser, SeminarsAnonymousUser
 
 
 @login_manager.user_loader
-def load_user(email):
-    return SeminarsUser(email)
+def load_user(uid):
+    return SeminarsUser(uid)
 
 login_manager.login_view = "users.info"
 
 # this anonymous user has the is_admin() method
 login_manager.anonymous_user = SeminarsAnonymousUser
 
-
-def get_username(email):
+def get_username(uid):
     """returns the name of user @uid"""
-    return SeminarsUser(email).name
+    return SeminarsUser(uid).name
+
 
 # globally define user properties and username
-
-
 @app.context_processor
 def ctx_proc_userdata():
     userdata = {}
@@ -60,12 +58,11 @@ def ctx_proc_userdata():
         userdata['user_is_authenticated'] = current_user.is_authenticated()
 
     userdata['user_is_admin'] = current_user.is_admin()
+    userdata['user_is_editor'] = current_user.is_editor()
     userdata['get_username'] = get_username  # this is a function
     return userdata
 
 # blueprint specific definition of the body_class variable
-
-
 @login_page.context_processor
 def body_class():
     return {'body_class': 'login'}
@@ -80,7 +77,9 @@ def info():
     info['user'] = current_user
     info['next'] = request.referrer
     return render_template("user-info.html",
-                           info=info, title="Userinfo")
+                           info=info,
+                           title="Userinfo",
+                           timezones=timezones)
 
 # ./info again, but for POST!
 
@@ -90,11 +89,19 @@ def info():
 def set_info():
     for k, v in request.form.items():
         setattr(current_user, k, v)
-    current_user.save()
-    flask.flash(Markup("Thank you for updating your details!"))
+    if current_user.save():
+        flask.flash(Markup("Thank you for updating your details!"))
     return flask.redirect(url_for(".info"))
 
 
+@login_page.route("/send_confirmation_email")
+@login_required
+def resend_confirmation_email():
+    try:
+        current_user.resend_email()
+    except Exception as e:
+        flash_error("%s",  str(e))
+    return flask.redirect(url_for(".info"))
 
 
 
@@ -106,7 +113,7 @@ def login(**kwargs):
     password = request.form["password"]
     next = request.form["next"]
     remember = True if request.form["remember"] == "on" else False
-    user = SeminarsUser(email)
+    user = SeminarsUser(email=email)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
         flask.flash(Markup("Hello %s, your login was successful!" % user.name))
