@@ -8,7 +8,6 @@ from flask import render_template, request, url_for
 from flask_login import current_user
 import datetime
 import pytz
-from tzlocal import get_localzone
 
 from lmfdb.utils import (
     SearchArray, TextBox, SelectBox, YesNoBox,
@@ -16,8 +15,8 @@ from lmfdb.utils import (
 )
 
 def get_now():
-    # Returns now in the server's time zone, comparable to time-zone aware datetimes from the database
-    return datetime.datetime.now(tz=get_localzone())
+    # Returns now in UTC, comparable to time-zone aware datetimes from the database
+    return datetime.datetime.now(pytz.UTC)
 
 @cached_function
 def categories():

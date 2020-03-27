@@ -73,6 +73,10 @@ Viewing and searching
 
 1. Add search on time (rather than datetime) so that users can accomodate their local schedules
 
+1. Warn that javascript is required e.g. https://iacr.org/tinfoil.html
+
+1. Use sentence case everywhere for headers
+
 Time zones
 ==========
 
@@ -96,6 +100,8 @@ Email
 =====
 
 1. The system needs to be able to send emails.  Figure out how to make that work.
+
+2. Customizable announcement emails.
 
 Design and branding
 ===================

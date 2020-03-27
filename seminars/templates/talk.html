@@ -19,7 +19,7 @@
   {% if user_is_authenticated %}
   Access <a href="{{info.live_link}}">online</a>.
   {% else %}
-  To see access link, please <a href="{{url_for('users.info')}}">log in</a> (anti-spam measure).
+  To see access link, please <a href="{{url_for('user.info')}}">log in</a> (anti-spam measure).
   {% endif %}
   {% endif %}
   {% if info.room %}
