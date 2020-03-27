@@ -28,7 +28,6 @@ mail_settings = {
 }
 
 app.config.update(mail_settings)
-app.config['SERVER_NAME'] = 'mathseminars.org'
 mail = Mail(app)
 
 ############################
