@@ -1,0 +1,16 @@
+bind = "0.0.0.0:9090"
+workers = 15
+SESSION_PROTECTION = None
+#daemon = True
+pidfile = '/home/mathseminars/gunicorn.pid'
+#
+errorlog = '/home/mathseminars/logs/dev/errorlog'
+accesslog = '/home/mathseminars/logs/dev/accesslog'
+loglevel = 'info' # change to 'debug' for more output
+logfile = '/home/mathseminars/logs/dev/flasklog'
+#
+default_proc_name = 'mathseminars'
+timeout = 30
+max_requests = 1000
+# The maximum size of HTTP request line in bytes.
+limit_request_line = 8190
