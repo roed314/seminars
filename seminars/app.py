@@ -28,6 +28,7 @@ mail_settings = {
 }
 
 app.config.update(mail_settings)
+app.config['SERVER_NAME'] = 'localhost:37778'
 mail = Mail(app)
 
 ############################
@@ -251,7 +252,7 @@ def alive():
 @app.route("/info")
 def info():
     from socket import gethostname
-    output = ""
+    output = url_for("info", _external=True) + "\n"
     output += "HOSTNAME = %s\n\n" % gethostname()
     output += "# PostgreSQL info\n"
     from . import db
@@ -385,3 +386,5 @@ def send_email(to, subject, message):
                   sender="info.mathseminars@gmail.com",
                   recipients=[to]))
     app.logger.info("%s done sending email to %s" % (timestamp(), to))
+
+
