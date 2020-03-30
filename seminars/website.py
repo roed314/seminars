@@ -53,6 +53,8 @@ from . import knowledge
 assert knowledge
 from . import homepage
 assert homepage
+from . import create
+assert create
 # from . import characters
 # assert characters
 # from . import local_fields

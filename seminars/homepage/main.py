@@ -53,7 +53,7 @@ class SemSearchArray(SearchArray):
                      ("exclude", "exclude")])
         when = SelectBox(
             name="when",
-            label="Occuring in",
+            label="Occurring in",
             options=[("", ""),
                      ("future", "the future"),
                      ("past", "the past")])
@@ -172,7 +172,7 @@ def subscribe():
 @app.route("/about")
 def about():
     menu = basic_top_menu()
-    menu.pop(3)
+    menu.pop(4)
     return render_template(
         "about.html",
         title="About",

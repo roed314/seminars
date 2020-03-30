@@ -3,6 +3,8 @@ from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from seminars import db
 from seminars.app import app
+from seminars.create import create
+from seminars.utils import basic_top_menu
 from lmfdb.utils import to_dict
 import datetime
 
@@ -31,18 +33,21 @@ def process_user_input(inp, typ):
         # should sanitize somehow
         return inp
 
-@app.route("/create/")
+@create.route("/")
 @login_required
 def index():
     # TODO: use a join for the following query
     seminars = []
-    for semid in db.seminar_organizers.search({'username': current_user._uid}, 'seminar_id'):
+    for semid in db.seminar_organizers.search({'email': current_user.email}, 'seminar_id'):
         seminars.append((semid, db.seminars.lucky({'id': semid}, 'name')))
+    menu = basic_top_menu()
+    menu.pop(-3)
     return render_template("create_index.html",
                            seminars=seminars,
+                           top_menu=menu,
                            user_is_creator=current_user.is_creator())
 
-@app.route("/create/seminar/")
+@create.route("/seminar/")
 @login_required
 def create_seminar():
     info = to_dict(request.args)

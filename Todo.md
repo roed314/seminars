@@ -77,6 +77,8 @@ Viewing and searching
 
 1. Use sentence case everywhere for headers
 
+1. Time zone select on each page, display current time
+
 Time zones
 ==========
 

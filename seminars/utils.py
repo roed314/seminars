@@ -27,6 +27,7 @@ def basic_top_menu():
         (url_for("index"), "", "Browse"),
         (url_for("search"), "", "Search"),
         (url_for("subscribe"), "", "Subscribe"),
+        (url_for("create.index"), "", "Create"),
         (url_for("about"), "", "About"),
         (url_for("user.info"), "", "Account" if current_user.is_authenticated else "Login")
     ]
