@@ -72,9 +72,13 @@ def info():
     info['next'] = request.referrer
     menu = basic_top_menu()
     menu.pop(-1)
+    if current_user.is_editor():
+        title = "Accounts"
+    else:
+        title = "Account"
     return render_template("user-info.html",
                            info=info,
-                           title="Account",
+                           title=title,
                            top_menu=menu,
                            timezones=timezones)
 

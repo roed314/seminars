@@ -23,11 +23,17 @@ def pretty_timezone(tz):
 timezones = [(v, pretty_timezone(v)) for v in sorted(pytz.common_timezones, key=naive_utcoffset)]
 
 def basic_top_menu():
+    if current_user.is_editor:
+        account = "Accounts"
+    elif current_user.is_authenticated:
+        account = "Account"
+    else:
+        account = "Login"
     return [
         (url_for("index"), "", "Browse"),
         (url_for("search"), "", "Search"),
         (url_for("subscribe"), "", "Subscribe"),
         (url_for("create.index"), "", "Create"),
         (url_for("about"), "", "About"),
-        (url_for("user.info"), "", "Account" if current_user.is_authenticated else "Login")
+        (url_for("user.info"), "", account)
     ]
