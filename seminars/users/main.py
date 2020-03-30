@@ -273,7 +273,7 @@ def generate_password_token(email):
 
 def send_confirmation_email(email):
     token = generate_confirmation_token(email)
-    confirm_url = url_for('.confirm_email', token=token, _external=True)
+    confirm_url = url_for('.confirm_email', token=token, _external=True, _scheme='https')
     html = render_template('confirm_email.html', confirm_url=confirm_url)
     subject = "Please confirm your email"
     send_email(email, subject, html)
