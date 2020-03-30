@@ -62,51 +62,6 @@ def body_class():
     return {'body_class': 'login'}
 
 
-
-@login_page.route("/myself")
-def info():
-    info = {}
-    info['login'] = url_for(".login")
-    info['logout'] = url_for(".logout")
-    info['user'] = current_user
-    info['next'] = request.referrer
-    menu = basic_top_menu()
-    menu.pop(-1)
-    if current_user.is_editor():
-        title = "Accounts"
-    else:
-        title = "Account"
-    return render_template("user-info.html",
-                           info=info,
-                           title=title,
-                           top_menu=menu,
-                           timezones=timezones)
-
-# ./info again, but for POST!
-
-
-@login_page.route("/info", methods=['POST'])
-@login_required
-def set_info():
-    for k, v in request.form.items():
-        setattr(current_user, k, v)
-    previous_email = current_user.email
-    if current_user.save():
-        flask.flash(Markup("Thank you for updating your details!"))
-    if previous_email != current_user.email:
-        send_confirmation_email(current_user.email)
-    return flask.redirect(url_for(".info"))
-
-
-@login_page.route("/send_confirmation_email")
-@login_required
-def resend_confirmation_email():
-    send_confirmation_email(current_user.email)
-    flask.flash(Markup("New email has been sent!"))
-    return flask.redirect(url_for(".info"))
-
-
-
 @login_page.route("/login", methods=["POST"])
 def login(**kwargs):
     # login and validate the user …
@@ -145,11 +100,87 @@ def editor_required(fn):
     @wraps(fn)
     @login_required
     def decorated_view(*args, **kwargs):
-        logger.info("admin access attempt by %s" % current_user.get_id())
+        logger.info("editor access attempt by %s" % current_user.get_id())
         if not current_user.is_editor():
             return flask.abort(403)  # access denied
         return fn(*args, **kwargs)
     return decorated_view
+
+def creator_required(fn):
+    """
+    wrap this around those entry points where you need to be a creator.
+    """
+    @wraps(fn)
+    @login_required
+    def decorated_view(*args, **kwargs):
+        logger.info("creator access attempt by %s" % current_user.get_id())
+        if not current_user.is_creator():
+            return flask.abort(403)  # access denied
+        return fn(*args, **kwargs)
+    return decorated_view
+
+@login_page.route("/info")
+def info():
+    menu = basic_top_menu()
+    menu.pop(-1)
+    title = "Account"
+    return render_template("user-info.html",
+                           info=info,
+                           title=title,
+                           top_menu=menu,
+                           timezones=timezones,
+                           user=current_user,
+                           next=request.referrer)
+
+# ./info again, but for POST!
+
+
+@login_page.route("/set_info", methods=['POST'])
+@login_required
+def set_info():
+    for k, v in request.form.items():
+        setattr(current_user, k, v)
+    previous_email = current_user.email
+    if current_user.save():
+        flask.flash(Markup("Thank you for updating your details!"))
+    if previous_email != current_user.email:
+        send_confirmation_email(current_user.email)
+    return flask.redirect(url_for(".info"))
+
+
+@login_page.route("/institutions")
+@editor_required
+def list_institutions():
+    raise NotImplementedError
+
+@login_page.route("/requests")
+@editor_required
+def list_requests():
+    raise NotImplementedError
+
+@login_page.route("/seminars")
+@creator_required
+def list_seminars():
+    raise NotImplementedError
+
+
+@login_page.route("/subscriptions")
+@creator_required
+def list_subscriptions():
+    raise NotImplementedError
+
+
+
+@login_page.route("/send_confirmation_email")
+@login_required
+def resend_confirmation_email():
+    send_confirmation_email(current_user.email)
+    flask.flash(Markup("New email has been sent!"))
+    return flask.redirect(url_for(".info"))
+
+
+
+
 
 # The analogous function creator_required is not defined, since we want to allow normal users to creat things that won't be displayed until they're approved as a creator.
 
@@ -282,12 +313,20 @@ def send_confirmation_email(email):
     subject = "Please confirm your email"
     send_email(email, subject, html)
 
+def send_reset_password(email):
+    token = generate_password_token(email)
+    reset_url = url_for('.reset_password_wtoken', token=token, _external=True, _scheme='https')
+    html = render_template('reset_password_email.html', reset_url=reset_url)
+    subject = "Resetting password"
+    send_email(email, subject, html)
+
+
 
 @login_page.route('/confirm/<token>')
-@login_required
 def confirm_email(token):
     try:
-        email = confirm_token(token, 'confirm email')
+        # the users have 24h to confirm their email
+        email = confirm_token(token, 'confirm email', 86400)
     except Exception:
         flash_error('The confirmation link is invalid or has expired.')
     user = SeminarsUser(email=email)
@@ -299,12 +338,24 @@ def confirm_email(token):
         flask.flash('You have confirmed your email. Thanks!', 'success')
     return flask.redirect(url_for('.info'))
 
+@login_page.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'GET':
+        return render_template("reset_password_ask_email.html",
+                               title="Forgot Password",
+                               next=request.referrer or "/"
+                               )
+    elif request.method == "POST":
+        email = request.form['email']
+        if userdb.user_exists(email):
+            send_reset_password(email)
+        return flask.redirect(url_for(".info"))
 
 @login_page.route('/reset/<token>', methods=['GET', 'POST'])
-@login_required
-def reset_pasword(token):
+def reset_password_wtoken(token):
     try:
-        email = confirm_token(token, 'reset password')
+        # the users have one hour to use previous token
+        email = confirm_token(token, 'reset password', 3600)
     except Exception:
         flash_error('The link is invalid or has expired.')
         return redirect(url_for('.info'))
@@ -312,23 +363,24 @@ def reset_pasword(token):
         flash_error('The link is invalid or has expired.')
         return redirect(url_for('.info'))
     if request.method == "GET":
-        return render_template("reset.html",
+        return render_template("reset_password_wtoken.html",
                                title="Reset password",
-                               next=request.referrer or "/"
+                               next=request.referrer or "/",
+                               token=token
                                )
     elif request.method == 'POST':
         pw1 = request.form['password1']
         pw2 = request.form['password2']
         if pw1 != pw2:
             flash_error("Oops, passwords do not match!")
-            return flask.redirect(url_for(".reset_pasword", token=token))
+            return flask.redirect(url_for(".reset_password_wtoken", token=token))
 
         if len(pw1) < 8:
             flash_error("Oops, password too short. Minimum 8 characters please!")
-            return flask.redirect(url_for(".reset_pasword", token=token))
+            return flask.redirect(url_for(".reset_password_wtoken", token=token))
 
-    userdb.change_password(email, pw1)
-    flask.flash(Markup("Your password has been changed."))
-    return flask.redirect(url_for(".info"))
+        userdb.change_password(email, pw1)
+        flask.flash(Markup("Your password has been changed. Please login with your new password."))
+        return flask.redirect(url_for(".info"))
 
 

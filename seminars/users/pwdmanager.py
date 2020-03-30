@@ -276,10 +276,9 @@ class SeminarsUser(UserMixin):
 
         self._dirty = False
 
-    def resend_email(self):
-        # TODO
-        # use email_timestamp to figure out if one needs to send again
-        raise NotImplementedError
+    def pending_requests(self):
+        # FIXME
+        return 1
 
 
 
@@ -300,14 +299,12 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     def name(self):
         return "Anonymous"
 
+    def pending_requests(self):
+        return 0
+
     # For versions of flask_login earlier than 0.3.0,
     # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a
     # property. To match the behavior of SeminarsUser, we make it callable always.
     def is_anonymous(self):
         return True
 
-if __name__ == "__main__":
-    print("Usage:")
-    print("add user")
-    print("remove user")
-    print("…")
