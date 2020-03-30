@@ -6,15 +6,17 @@
 <p>Warning: seminars and talks you create will not appear until you are <a href="">approved</a>.</p>
 {% endif %}
 
-<p> You can create a <a href='{{ url_for(".create_seminar") }}'>new seminar</a>. </p>
+<p> You can create a <a href='{{ url_for(".edit_seminar") }}'>new seminar</a>. </p>
 
 {% if seminars %}
-<p> You are an organizer for the following seminars: </p>
+<p> You are an organizer for the following seminars.  To add a talk, click on the seminar name below. </p>
 <ul>
   {% for semid, semname in seminars %}
   <li> <a href='{{ url_for(".edit_seminar", semid=semid) }}'>{{semname}}</a> </li>
   {% endfor %}
 </ul>
+{% else %}
+To add a talk, create a seminar first (it's okay if a seminar just contains a single talk).
 {% endif %}
 
 {% endblock %}

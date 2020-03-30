@@ -11,4 +11,4 @@ create_logger = make_logger(create_page)
 from . import main
 assert main # silence pyflakes
 
-app.register_blueprint(create_page, url_prefix="/create")
+app.register_blueprint(create_page, url_prefix="/") # we don't have a url_prefix since we want to use /edit/* sometimes

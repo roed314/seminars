@@ -58,6 +58,7 @@ admin    | text   | username responsible for updating; should be editor/admin
 Column       | Type    | Notes
 -------------|---------|------
 id           | bigint  | auto
+shortname    | text    | Assigned by owner, used in urls, globally unique, cannot be changed (would break links)
 name         | text    |
 categories   | text[]  |
 keywords     | text    |
@@ -69,6 +70,7 @@ room         | text    |
 is_conference| boolean |
 homepage     | text    | link to external homepage
 display      | boolean | allowed to show; will be true if and only if all organizers have creator privileges
+owner        | text    | email of owner of seminar, who controls the list of organizers (and can transfer ownership)
 archived     | boolean | seminar is no longer active (and won't show up in users' list of seminars)
 online       | boolean |
 access       | text    | we need to make a list of predefined access types
@@ -86,7 +88,8 @@ token        | text        | give permission for speaker to edit
 categories   | text[]      |
 keywords     | text        |
 comments     | text        |
-seminar_id   | bigint      | every talk has to be part of a seminar
+seminar_id   | text        | shortname of seminar (every talk has to be part of a seminar)
+seminar_ctr  | int         | Counter of talks within a given seminar
 seminar_name | text        |
 display      | boolean     | whether seminar creator has creator privileges
 datetime     | timestamptz | start time
@@ -120,7 +123,7 @@ Column     | Type   | Notes
 -----------|--------|------
 id         | bigint | auto
 email      | text   |
-seminar_id | bigint |
+seminar_id | text   |
 short_name | text   |
 
 `talk_subscriptions`: for users to add individual talks to their calendar file
@@ -136,7 +139,7 @@ talk_id | bigint |
 Column     | Type    | Notes
 -----------|---------|------
 id         | bigint  | auto
-seminar_id | bigint  |
+seminar_id | text    |
 email      | text    |
 full_name  | text    |
 display    | boolean | whether to display in list of seminar organizers

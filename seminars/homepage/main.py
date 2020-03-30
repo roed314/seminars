@@ -78,7 +78,7 @@ class SemSearchArray(SearchArray):
 def index():
     # Eventually want some kind of cutoff on which talks are included.
     # Deal with time zone right
-    talks = list(db.talks.search({'display':True, 'datetime':{'$gte':datetime.datetime.now()}}, projection=["id", "categories", "datetime", "seminar_id", "seminar_name", "speaker", "title"], sort=["datetime"])) # include id
+    talks = list(db.talks.search({'display':True, 'datetime':{'$gte':datetime.datetime.now()}}, sort=["datetime"]))
     menu = basic_top_menu()
     menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
@@ -111,14 +111,13 @@ def search():
 
 @app.route("/seminar/<semid>")
 def show_seminar(semid):
-    try:
-        semid = int(semid)
-        info = db.seminars.lucky({'id': semid})
-        if info is None: raise ValueError
-    except ValueError:
+    print(semid)
+    info = db.seminars.lucky({'shortname': semid})
+    if info is None:
         return render_template("404.html", title="Seminar not found")
     organizers = list(db.seminar_organizers.search({'seminar_id': semid}))
     talks = list(db.talks.search({'display':True, 'seminar_id': semid}, projection=3))
+    print(talks)
     now = get_now()
     info['future'] = []
     info['past'] = []
@@ -136,13 +135,10 @@ def show_seminar(semid):
         top_menu=basic_top_menu(),
         bread=None)
 
-@app.route("/talk/<talkid>")
-def show_talk(talkid):
-    try:
-        talkid = int(talkid)
-        info = db.talks.lucky({'id': talkid})
-        if info is None: raise ValueError
-    except ValueError:
+@app.route("/talk/<semid>/<int:talkid>/")
+def show_talk(semid, talkid):
+    info = db.talks.lucky({'seminar_id': semid, 'seminar_ctr': talkid})
+    if info is None:
         return render_template("404.html", title="Talk not found")
     if info.get("abstract"):
         info["abstract"] = info["abstract"].split("\n\n")

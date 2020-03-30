@@ -13,7 +13,7 @@ $ sage -i gap_packages
 $ sage -pip install -r requirements
 ```
 
-You should then edit `seminars/lmfdb/config.ini` and change the port from `37777` to `37778` (to prevent clashes with a copy of the actual LMFDB running on your machine).  After this, you can start a webserver locally by running the following in the top level seminars folder.
+You should then edit `seminars/lmfdb/config.ini` and change the port from `37777` to `37778` (to prevent clashes with a copy of the actual LMFDB running on your machine).  You may also want to change `default=False` to `default=True`.  After this, you can start a webserver locally by running the following in the top level seminars folder.
 
 ```
 $ sage -python start-seminars.py --debug
