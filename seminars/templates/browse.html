@@ -12,11 +12,10 @@
 </p>
 {% endif %}
 
-{% set show_seminar=True %}
 <table id="browse-talks">
   {% for talk in talks %}
   <tr class="talk {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
-    {% include 'talk_line.html' %}
+    {{ talk.oneline() | safe }}
   </tr>
   {% endfor %}
 </table>

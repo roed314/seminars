@@ -1,3 +1,0 @@
-    <td>{{talk.datetime.strftime("%a %b %-d, %-H:%M")}}</td>
-    {% if show_seminar %}<td><a href="{{ url_for('show_seminar', semid=talk.seminar_id) }}">{{talk.seminar_name}}</a></td>{% endif %}
-    <td><a href="{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}">{{talk.speaker}}</a></td><td>{{talk.title}}</td>

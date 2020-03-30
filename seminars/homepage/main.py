@@ -1,6 +1,7 @@
 
 from seminars.app import app
 from seminars import db
+from seminars.talk  import WebTalk
 from seminars.utils import basic_top_menu
 from sage.misc.cachefunc import cached_function
 
@@ -78,7 +79,7 @@ class SemSearchArray(SearchArray):
 def index():
     # Eventually want some kind of cutoff on which talks are included.
     # Deal with time zone right
-    talks = list(db.talks.search({'display':True, 'datetime':{'$gte':datetime.datetime.now()}}, sort=["datetime"]))
+    talks = [WebTalk(data=rec) for rec in db.talks.search({'display':True, 'datetime':{'$gte':datetime.datetime.now()}}, sort=["datetime"])]
     menu = basic_top_menu()
     menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
@@ -116,18 +117,17 @@ def show_seminar(semid):
     if info is None:
         return render_template("404.html", title="Seminar not found")
     organizers = list(db.seminar_organizers.search({'seminar_id': semid}))
-    talks = list(db.talks.search({'display':True, 'seminar_id': semid}, projection=3))
-    print(talks)
+    talks = [WebTalk(data=rec) for rec in db.talks.search({'display':True, 'seminar_id': semid}, projection=3)]
     now = get_now()
     info['future'] = []
     info['past'] = []
     for talk in talks:
-        if talk['datetime'] + talk.get('duration', datetime.timedelta(hours=1)) >= now:
+        if talk.end() >= now:
             info['future'].append(talk)
         else:
             info['past'].append(talk)
-    info['future'].sort(key=lambda talk: talk['datetime'])
-    info['past'].sort(key=lambda talk: talk['datetime'], reverse=True)
+    info['future'].sort(key=lambda talk: talk.datetime)
+    info['past'].sort(key=lambda talk: talk.datetime, reverse=True)
     return render_template(
         "seminar.html",
         title="View seminar",

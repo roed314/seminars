@@ -29,7 +29,7 @@
 <table>
 {% for talk in talk_subscriptions %}
 <tr>
-  {% include 'talk_line.html' %}
+  {{ talk.oneline() | safe }}
 </tr>
 {% endfor %}
 </table>

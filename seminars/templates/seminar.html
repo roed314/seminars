@@ -8,7 +8,6 @@
 
 {% if info.comments %}<p>{{info.comments}}</p>{% endif %}
 
-{% set show_seminar=False %}
 {% if info.future and info.past %}
 <button id="timetoggle" href="#">View past talks</button>
 {% endif %}
@@ -18,7 +17,7 @@
   <table>
     {% for talk in info.future %}
     <tr>
-      {% include 'talk_line.html' %}
+      {{ talk.oneline(include_seminar=False) | safe }}
     </tr>
     {% endfor %}
   </table>
@@ -34,7 +33,7 @@
   <table>
     {% for talk in info.past %}
     <tr>
-      {% include 'talk_line.html' %}
+      {{ talk.oneline(include_seminar=False) | safe }}
     </tr>
     {% endfor %}
   </table>
