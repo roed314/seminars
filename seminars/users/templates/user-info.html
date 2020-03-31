@@ -14,7 +14,9 @@
       <tr><td>Email:</td>
           <td><input name="email" /></td></tr>
       <tr><td>Password:</td>
-          <td><input name="password" type="password" /></td></tr>
+          <td><input name="password" type="password" /></td>
+          <td> (<a href="{{ url_for('.reset_password') }}">Forgot password?</a>) </td>
+      </tr>
       <tr><td>Remember:</td>
            <td><input type="checkbox" name="remember" checked>remember me for some time</td></tr>
       <tr><td class="spacing" colspan="2"/></tr>
