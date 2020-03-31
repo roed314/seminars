@@ -51,7 +51,6 @@ def ctx_proc_userdata():
     userdata['username'] = 'Anonymous' if current_user.is_anonymous() else current_user.name
     userdata['user_is_authenticated'] = current_user.is_authenticated
     userdata['user_is_admin'] = current_user.is_admin()
-    userdata['user_is_editor'] = current_user.is_editor()
     userdata['get_username'] = get_username  # this is a function
     return userdata
 
