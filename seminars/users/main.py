@@ -412,6 +412,8 @@ def endorse_wtoken(token):
         flash_error('Account already has creator privileges.')
     elif current_user.email != email:
         flash_error('The link is not valid for this account.')
+    elif not current_user.email_confirmed:
+        flash_error('You must confirm your email first.')
     else:
         user.endorser = int(endorser)
         user.creator = True

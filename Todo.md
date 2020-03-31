@@ -1,8 +1,5 @@
 Admin (Edgar)
 =====
-1. Improve password reset process
-
-1. Add pages for user management (inviting and approving users, user-add tokens)
 
 1. Add institution page for changing info (e.g. homepage, time zone, aliases)
 
@@ -10,19 +7,15 @@ Admin (Edgar)
 
 1. Stop connecting to the lmfdb database
 
-1. rename /users
-
 1. Fix google id for tracking
 
 1. add captcha to reset password and register
 
-1. Use gmail's api
+1. Use gmail's api or some other api
 
 1. scrape timezone?
 
-1. (Done) Add user page for changing info (e.g. homepage, time zone, affiliation)
-
-1. (Done) Start a test server, link to mathseminars.org DNS record
+1. Improve password reset process (more?)
 
 
 Content creation
