@@ -8,7 +8,7 @@ import flask
 from functools import wraps
 from seminars.app import app, send_email
 from lmfdb.logger import make_logger
-from flask import render_template, request, Blueprint, url_for,  redirect
+from flask import render_template, request, Blueprint, url_for,  redirect, make_response, session
 from flask_login import login_required, login_user, current_user, logout_user, LoginManager
 from lmfdb.utils import flash_error
 from markupsafe import Markup
@@ -117,7 +117,8 @@ def info():
                            top_menu=menu,
                            timezones=timezones,
                            user=current_user,
-                           next=request.referrer)
+                           next=request.referrer,
+                           session=session)
 
 # ./info again, but for POST!
 
@@ -377,10 +378,20 @@ def reset_password_wtoken(token):
 # endorsement
 
 @login_required
-@login_page.route('/endorse')
+@login_page.route('/endorse', methods=["POST"])
 @creator_required
-def endorse(self):
-    raise NotImplementedError
+def get_endorsing_link():
+    email = request.form['email']
+    from email_validator import validate_email, EmailNotValidError
+    try:
+        validate_email(email)
+    except EmailNotValidError as e:
+        flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
+        return redirect(url_for(".info"))
+    phd = bool(request.form.get('phd', False))
+    link = endorser_link(current_user, email, phd)
+    session['endorsing link'] = "<p>The link to endorse %s is:<br>%s</p>" % (email, link)
+    return redirect(url_for(".info"))
 
 
 def generate_endorsement_token(endorser, email, phd):
@@ -390,6 +401,7 @@ def generate_endorsement_token(endorser, email, phd):
 def endorser_link(endorser, email, phd):
     token = generate_endorsement_token(endorser, email, phd)
     return url_for('.endorse_wtoken', token=token, _external=True, _scheme='https')
+
 
 @login_page.route('/endorse/<token>')
 @login_required

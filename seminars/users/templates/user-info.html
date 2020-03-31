@@ -22,17 +22,32 @@
     </table>
   </form>
 {% else %}
-  <h1>You are {{ user.name }}</h1>
-  <h2>Actions</h2>
-  <ul>
-    {% if user.is_admin() %}
-    <li><a href="{{ url_for('.admin') }}">Admin</a></li>
-    {% endif %}
+<h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">Logout</a>)</h1>
     {% if user.is_creator() %}
-    <li><a href="{{ url_for('.endorse') }}">Endorse</a></li>
+  <h2>Endorse someone</h2>
+    <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
+    <table>
+      <tr>
+        <td>
+          Email:
+        </td>
+        <td>
+          <input name="email" size="30" tabindex="1" />
+        </td>
+        {% if user.phd %}
+        <td>
+          <input type="checkbox" name="phd" value="True">
+          <label for="phd">Has a PhD</label>
+        </td>
+        {% endif %}
+        <td>
+          <button type="submit" tabindex="2">Submit</button>
+        </td>
+      </tr>
+    </table>
+    </form>
+    {{ session.pop('endorsing link', '') | safe }}
     {% endif %}
-    <li><a href="{{ url_for(".logout") }}">Logout</a></li>
-  </ul>
   <h2>Edit Details</h2>
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
