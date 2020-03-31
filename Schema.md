@@ -15,13 +15,13 @@ password            | text        | hashed password with bcrypt
 email               | text        | this will act as username
 email_confirmed     | boolean     | if the email has been confirmed
 admin               | boolean     |
-editor              | boolean     |
-creator             | boolean     |
+creator             | boolean     | can create seminars which are displayed
 full_name           | text        |
+phd                 | boolean     | (when endoring, only phds can say others have phds; phds can create institutions)
 affiliation         | text        |
 homepage            | text        |
 created             | timestamptz |
-approver            | text        |
+endorser            | text        | email address of another user who endorses this one
 ics_key             | text        |
 location            | earth       |
 timezone            | text        | time zone code, e.g. "US/Eastern"
@@ -51,7 +51,7 @@ homepage | text   |
 timezone | text   | time zone code, e.g. "US/Eastern"
 city     | text   |
 type     | text   | university, institute, other
-admin    | text   | username responsible for updating; should be editor/admin
+admin    | text   | username responsible for updating, starts as creator
 
 `seminars`: seminars and conferences.  A coherent sequence of talks.
 
@@ -142,5 +142,6 @@ id         | bigint  | auto
 seminar_id | text    |
 email      | text    |
 full_name  | text    |
-display    | boolean | whether to display in list of seminar organizers
-contact    | boolean | whether to specify this person as a contact
+organizer  | boolean | whether to include in the organizer field (rather than the curator field)
+display    | boolean | whether to display on the page
+contact    | boolean | whether to include the email

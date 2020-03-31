@@ -47,7 +47,7 @@ def get_username(uid):
 # globally define user properties and username
 @app.context_processor
 def ctx_proc_userdata():
-    userdata = {}
+    userdata = {'user': current_user} # this should be sufficient....
     userdata['userid'] = 'anon' if current_user.is_anonymous() else current_user._uid
     userdata['username'] = 'Anonymous' if current_user.is_anonymous() else current_user.name
     userdata['user_is_authenticated'] = current_user.is_authenticated
