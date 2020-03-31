@@ -79,7 +79,7 @@ class SemSearchArray(SearchArray):
 def index():
     # Eventually want some kind of cutoff on which talks are included.
     # Deal with time zone right
-    talks = [WebTalk(data=rec) for rec in db.talks.search({'display':True, 'datetime':{'$gte':datetime.datetime.now()}}, sort=["datetime"])]
+    talks = [WebTalk(data=rec) for rec in db.talks.search({'display':True, 'end_time':{'$gte':datetime.datetime.now()}}, sort=["start_time"])]
     menu = basic_top_menu()
     menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
@@ -122,12 +122,12 @@ def show_seminar(semid):
     info['future'] = []
     info['past'] = []
     for talk in talks:
-        if talk.end() >= now:
+        if talk.end_time >= now:
             info['future'].append(talk)
         else:
             info['past'].append(talk)
-    info['future'].sort(key=lambda talk: talk.datetime)
-    info['past'].sort(key=lambda talk: talk.datetime, reverse=True)
+    info['future'].sort(key=lambda talk: talk.start_time)
+    info['past'].sort(key=lambda talk: talk.start_time, reverse=True)
     return render_template(
         "seminar.html",
         title="View seminar",
@@ -143,7 +143,7 @@ def show_talk(semid, talkid):
     if info.get("abstract"):
         info["abstract"] = info["abstract"].split("\n\n")
     print(info.keys())
-    utcoffset = int(info["datetime"].utcoffset().total_seconds() / 60)
+    utcoffset = int(info["start_time"].utcoffset().total_seconds() / 60)
     return render_template(
         "talk.html",
         title="View talk",

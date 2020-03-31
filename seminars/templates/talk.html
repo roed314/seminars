@@ -11,7 +11,7 @@
 </p>
 
 <p>
-  <span class="localtime" data-utcoffset="{{utcoffset}}">{{info.datetime.strftime("%a %b %-d, %-H:%M")}}{% if 'duration' in info %}-{{(info.datetime + info.duration).strftime("%-H:%M")}}{% endif %}</span>
+  <span class="localtime" data-utcoffset="{{utcoffset}}">{{info.start_time.strftime("%a %b %-d, %-H:%M")}}-{{(info.end_time).strftime("%-H:%M")}}</span>
 </p>
 
 <p>

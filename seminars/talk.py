@@ -1,5 +1,4 @@
 
-from datetime import timedelta
 from flask import url_for
 from seminars import db
 
@@ -15,16 +14,8 @@ class WebTalk(object):
         title = self.title if self.title else "TBA"
         return "%s (%s) - %s" % (title, self.speaker, self.show_time())
 
-    def start(self):
-        return self.datetime
-
-    def end(self):
-        # Assume duration 1 hour if not listed
-        duration = self.duration if self.duration else timedelta(hours=1)
-        return self.datetime + duration
-
     def show_time(self):
-        return self.datetime.strftime("%a %b %-d, %-H:%M")
+        return self.start_time.strftime("%a %b %-d, %-H:%M")
 
     def show_seminar(self):
         return '<a href="%s">%s</a>' % (url_for("show_seminar", semid=self.seminar_id), self.seminar_name)
