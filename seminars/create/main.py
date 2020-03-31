@@ -5,7 +5,7 @@ from seminars import db
 from seminars.app import app
 from seminars.create import create
 from seminars.utils import basic_top_menu
-from seminars.seminar import allowed_semid, is_locked, set_locked, WebSeminar
+from seminars.seminar import allowed_shortname, is_locked, set_locked, WebSeminar
 from lmfdb.utils import to_dict
 import datetime, json
 from psycopg2 import DatabaseError
@@ -58,17 +58,17 @@ def edit_seminar(shortname):
         flash_error("The seminar identifier can only include letters, numbers, hyphens and underscores.")
         return redirect(url_for(".index"), 301)
     # Check if seminar exists
-    seminar = db.seminars.lucky({'shortname': semid})
+    seminar = WebSeminar(shortname, data=db.seminars.lucky({'shortname': shortname}))
     new = (seminar is None)
     if not new and not current_user.is_admin():
         # Make sure user has permission to edit
-        organizer_data = db.seminar_organizers.lucky({'seminar_id': semid, 'email':current_user.email})
+        organizer_data = db.seminar_organizers.lucky({'shortname': shortname, 'email':current_user.email})
         if organizer_data is None:
             owner = "<%s>" % (owner_name, seminar['owner'])
             owner_name = db.users.lucky({'email': seminar['owner']}, 'full_name')
             if owner_name:
                 owner = owner_name + " " + owner
-            flash_error("You do not have permssion to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission." % (semid, owner))
+            flash_error("You do not have permssion to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission." % (shortname, owner))
             return redirect(url_for(".index"), 301)
     lock = None
     if request.args.get("lock") != "ignore":
