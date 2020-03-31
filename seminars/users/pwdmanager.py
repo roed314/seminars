@@ -2,9 +2,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 from __future__ import absolute_import
-from six import string_types, text_type
-import random
-import string
+from six import string_types
 import bcrypt
 # store passwords, check users, ...
 # password hashing is done with fixed and variable salting
@@ -13,16 +11,12 @@ import bcrypt
 
 from seminars import db
 from seminars.tokens import generate_token
-from lmfdb.backend.base import PostgresBase
 from lmfdb.backend.searchtable import PostgresSearchTable
-from lmfdb.backend.encoding import Array
 from lmfdb.utils import flash_error
-from psycopg2.sql import SQL, Identifier, Placeholder
-from datetime import datetime, timedelta
+from datetime import datetime
 from pytz import UTC, all_timezones
 
 from .main import logger
-from distutils.version import StrictVersion
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
 from flask_login import UserMixin, AnonymousUserMixin
@@ -60,21 +54,20 @@ class PostgresUserTable(PostgresSearchTable):
             - name
             - affiliation
         """
-        for col in ["email", "password", "name", "affiliation"]:
+        for col in ["email", "password", "name", "affiliation", "homepage"]:
             assert col in kwargs
         email = kwargs.pop('email')
         kwargs['password'] = self.bchash(kwargs['password'])
-        if 'approver' not in kwargs:
-            kwargs['approver'] = None
-            kwargs['admin'] = kwargs['editor'] = kwargs['creator'] = False
-        for col in ['email_confirmed', 'admin', 'editor', 'creator']:
+        if 'endorser' not in kwargs:
+            kwargs['endorser'] = None
+            kwargs['admin'] =  kwargs['creator'] = False
+        for col in ['email_confirmed', 'admin', 'creator', 'phd']:
             kwargs[col] = kwargs.get(col, False)
         kwargs['homepage'] = kwargs.get('homepage', None)
         kwargs['timezone'] = kwargs.get('timezone', "US/Eastern")
         assert kwargs['timezone'] in all_timezones
         kwargs['location'] = None
         kwargs['created'] = datetime.now(UTC)
-        kwargs['ics_key'] = generate_token(email, 'ics')
         self.upsert({'email':email}, kwargs)
         newuser = SeminarsUser(email=email)
         return newuser
@@ -117,6 +110,7 @@ class PostgresUserTable(PostgresSearchTable):
             raise ValueError("user does not exist")
         if not data:
             raise ValueError("no data to save")
+        # FIXME: update email on every other table
         if 'new_email' in data:
             data['email'] = data.pop('new_email')
             if self.lookup(data['email'], 'id'):
@@ -169,7 +163,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def name(self):
-        return self._data['name']
+        return self._data.get('name')
 
     @name.setter
     def name(self, name):
@@ -178,7 +172,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def email(self):
-        return self._data['email']
+        return self._data.get('email')
 
     @email.setter
     def email(self, email):
@@ -189,7 +183,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def homepage(self):
-        return self._data['homepage']
+        return self._data.get('homepage')
 
     @homepage.setter
     def homepage(self, url):
@@ -200,7 +194,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def email_confirmed(self):
-        return self._data['email_confirmed']
+        return self._data.get('email_confirmed')
 
     @email_confirmed.setter
     def email_confirmed(self, email_confirmed):
@@ -209,7 +203,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def affiliation(self):
-        return self._data['affiliation']
+        return self._data.get('affiliation')
 
     @affiliation.setter
     def affiliation(self, affiliation):
@@ -218,7 +212,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def timezone(self):
-        return self._data['timezone']
+        return self._data.get('timezone')
 
     @timezone.setter
     def timezone(self, timezone):
@@ -229,6 +223,39 @@ class SeminarsUser(UserMixin):
     def created(self):
         return self._data.get('created')
 
+    @property
+    def phd(self):
+        return self._data.get('phd')
+
+    @phd.setter
+    def phd(self, phd):
+        self._data['phd'] = True
+        self._dirty = True
+
+    @property
+    def endorser(self):
+        return self._data.get('endorser')
+
+    @endorser.setter
+    def endorser(self, endorser):
+        self._data['endorser'] = endorser
+        self._dirty = True
+
+    @property
+    def location(self):
+        return self._data.get('location')
+
+    @location.setter
+    def location(self, location):
+        self._data['location'] = location
+        self._dirty = True
+
+    @property
+    def ics(self):
+        return generate_token(self.id, "ics")
+
+
+
     def is_anonymous(self):
         """required by flask-login user class"""
         return not self.is_authenticated
@@ -238,13 +265,6 @@ class SeminarsUser(UserMixin):
 
     def make_admin(self):
         self._data["admin"] = True
-        self._dirty = True
-
-    def is_editor(self):
-        return self._data.get("editor", False)
-
-    def make_editor(self):
-        self._data["editor"] = True
         self._dirty = True
 
     def is_creator(self):
@@ -276,9 +296,6 @@ class SeminarsUser(UserMixin):
 
         self._dirty = False
 
-    def pending_requests(self):
-        # FIXME
-        return 1
 
 
 
@@ -288,9 +305,6 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     and probably others.
     """
     def is_admin(self):
-        return False
-
-    def is_editor(self):
         return False
 
     def is_creator(self):

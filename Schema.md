@@ -16,13 +16,12 @@ email               | text        | this will act as username
 email_confirmed     | boolean     | if the email has been confirmed
 admin               | boolean     |
 creator             | boolean     | can create seminars which are displayed
-full_name           | text        |
-phd                 | boolean     | (when endoring, only phds can say others have phds; phds can create institutions)
+name                | text        |
+phd                 | boolean     | (when endorsing, only phds can say others have phds; phds can create institutions)
 affiliation         | text        |
 homepage            | text        |
 created             | timestamptz |
 endorser            | text        | email address of another user who endorses this one
-ics_key             | text        |
 location            | earth       |
 timezone            | text        | time zone code, e.g. "US/Eastern"
 
@@ -31,7 +30,7 @@ timezone            | text        | time zone code, e.g. "US/Eastern"
 Column  | Type        | Notes
 --------|-------------|------
 id      | bigint      | auto
-token   | text        | randomly generated
+token   | text        | randomly generated:
 created | timestamptz | valid for one week, after which the new user will get a suggestion to email the original issuer
 used    | boolean     | tokens are one time use
 issuer  | text        | username of issuer

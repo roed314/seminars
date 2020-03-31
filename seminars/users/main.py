@@ -8,16 +8,15 @@ import flask
 from functools import wraps
 from seminars.app import app, send_email
 from lmfdb.logger import make_logger
-from flask import render_template, request, Blueprint, url_for, make_response
+from flask import render_template, request, Blueprint, url_for,  redirect
 from flask_login import login_required, login_user, current_user, logout_user, LoginManager
-from distutils.version import StrictVersion
 from lmfdb.utils import flash_error
 from markupsafe import Markup
 
 from lmfdb import db
 assert db
 from seminars.utils import timezones, basic_top_menu
-from seminars.tokens import generate_token, confirm_token
+from seminars.tokens import generate_timed_token, read_timed_token
 import pytz
 
 
@@ -75,9 +74,9 @@ def login(**kwargs):
         login_user(user, remember=remember)
         flask.flash(Markup("Hello %s, your login was successful!" % user.name))
         logger.info("login: '%s' - '%s'" % (user.get_id(), user.name))
-        return flask.redirect(next or url_for(".info"))
+        return redirect(next or url_for(".info"))
     flash_error("Oops! Wrong username or password.")
-    return flask.redirect(url_for(".info"))
+    return redirect(url_for(".info"))
 
 
 def admin_required(fn):
@@ -93,18 +92,6 @@ def admin_required(fn):
         return fn(*args, **kwargs)
     return decorated_view
 
-def editor_required(fn):
-    """
-    wrap this around those entry points where you need to be an editor.
-    """
-    @wraps(fn)
-    @login_required
-    def decorated_view(*args, **kwargs):
-        logger.info("editor access attempt by %s" % current_user.get_id())
-        if not current_user.is_editor():
-            return flask.abort(403)  # access denied
-        return fn(*args, **kwargs)
-    return decorated_view
 
 def creator_required(fn):
     """
@@ -145,18 +132,10 @@ def set_info():
         flask.flash(Markup("Thank you for updating your details!"))
     if previous_email != current_user.email:
         send_confirmation_email(current_user.email)
-    return flask.redirect(url_for(".info"))
+    return redirect(url_for(".info"))
 
 
-@login_page.route("/institutions")
-@editor_required
-def list_institutions():
-    raise NotImplementedError
 
-@login_page.route("/requests")
-@editor_required
-def list_requests():
-    raise NotImplementedError
 
 @login_page.route("/seminars")
 @creator_required
@@ -176,7 +155,7 @@ def list_subscriptions():
 def resend_confirmation_email():
     send_confirmation_email(current_user.email)
     flask.flash(Markup("New email has been sent!"))
-    return flask.redirect(url_for(".info"))
+    return redirect(url_for(".info"))
 
 
 
@@ -217,17 +196,17 @@ def register():
             validate_email(email)
         except EmailNotValidError as e:
             flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
-            return flask.redirect(url_for(".register"))
+            return redirect(url_for(".register"))
 
         pw1 = request.form['password1']
         pw2 = request.form['password2']
         if pw1 != pw2:
             flash_error("Oops, passwords do not match!")
-            return flask.redirect(url_for(".register"))
+            return redirect(url_for(".register"))
 
         if len(pw1) < 8:
             flash_error("Oops, password too short. Minimum 8 characters please!")
-            return flask.redirect(url_for(".register"))
+            return redirect(url_for(".register"))
 
         password = pw1
         name = request.form['name']
@@ -238,11 +217,11 @@ def register():
         timezone = request.form['timezone']
         if timezone not in pytz.all_timezones:
             flash_error("Invalid timezone '%s'.", timezone)
-            return flask.redirect(url_for(".register"))
+            return redirect(url_for(".register"))
 
         if userdb.user_exists(email):
             flash_error("Sorry, email '%s' already exists!", email)
-            return flask.redirect(url_for(".register"))
+            return redirect(url_for(".register"))
 
         newuser = userdb.new_user(email=email,
                                   password=password,
@@ -256,7 +235,7 @@ def register():
         login_user(newuser, remember=True)
         flask.flash(Markup("Hello %s! Congratulations, you are a new user!" % newuser.name))
         logger.info("new user: '%s' - '%s'" % (newuser.get_id(), newuser.name))
-        return flask.redirect(url_for(".info"))
+        return redirect(url_for(".info"))
 
 
 @login_page.route("/change_password", methods=['POST'])
@@ -266,21 +245,21 @@ def change_password():
     pw_old = request.form['oldpwd']
     if not current_user.authenticate(pw_old):
         flash_error("Ooops, old password is wrong!")
-        return flask.redirect(url_for(".info"))
+        return redirect(url_for(".info"))
 
     pw1 = request.form['password1']
     pw2 = request.form['password2']
     if pw1 != pw2:
         flash_error("Oops, new passwords do not match!")
-        return flask.redirect(url_for(".info"))
+        return redirect(url_for(".info"))
 
     if len(pw1) < 8:
         flash_error("Oops, password too short. Minimum 8 characters please!")
-        return flask.redirect(url_for(".info"))
+        return redirect(url_for(".info"))
 
     userdb.change_password(email, pw1)
     flask.flash(Markup("Your password has been changed."))
-    return flask.redirect(url_for(".info"))
+    return redirect(url_for(".info"))
 
 
 @login_page.route("/logout")
@@ -288,7 +267,7 @@ def change_password():
 def logout():
     logout_user()
     flask.flash(Markup("You are logged out now. Have a nice day!"))
-    return flask.redirect(request.args.get("next") or request.referrer or url_for('.info'))
+    return redirect(request.args.get("next") or request.referrer or url_for('.info'))
 
 
 @login_page.route("/admin")
@@ -300,11 +279,13 @@ def admin():
 
 
 
-def generate_confirmation_token(email):
-    return generate_token(email, salt='confirm email')
 
-def generate_password_token(email):
-    return generate_token(email, salt='reset password')
+
+
+# confirm email
+
+def generate_confirmation_token(email):
+    return generate_timed_token(email, salt='confirm email')
 
 def send_confirmation_email(email):
     token = generate_confirmation_token(email)
@@ -313,12 +294,6 @@ def send_confirmation_email(email):
     subject = "Please confirm your email"
     send_email(email, subject, html)
 
-def send_reset_password(email):
-    token = generate_password_token(email)
-    reset_url = url_for('.reset_password_wtoken', token=token, _external=True, _scheme='https')
-    html = render_template('reset_password_email.html', reset_url=reset_url)
-    subject = "Resetting password"
-    send_email(email, subject, html)
 
 
 
@@ -326,17 +301,32 @@ def send_reset_password(email):
 def confirm_email(token):
     try:
         # the users have 24h to confirm their email
-        email = confirm_token(token, 'confirm email', 86400)
+        email = read_timed_token(token, 'confirm email', 86400)
     except Exception:
         flash_error('The confirmation link is invalid or has expired.')
     user = SeminarsUser(email=email)
     if user.email_confirmed:
-        flash_error('Account already confirmed. Please login.')
+        flash_error('Email already confirmed.')
     else:
         user.email_confirmed = True
         user.save()
         flask.flash('You have confirmed your email. Thanks!', 'success')
-    return flask.redirect(url_for('.info'))
+    return redirect(url_for('.info'))
+
+
+
+
+# reset password
+
+def generate_password_token(email):
+    return generate_timed_token(email, salt='reset password')
+
+def send_reset_password(email):
+    token = generate_password_token(email)
+    reset_url = url_for('.reset_password_wtoken', token=token, _external=True, _scheme='https')
+    html = render_template('reset_password_email.html', reset_url=reset_url)
+    subject = "Resetting password"
+    send_email(email, subject, html)
 
 @login_page.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
@@ -349,13 +339,13 @@ def reset_password():
         email = request.form['email']
         if userdb.user_exists(email):
             send_reset_password(email)
-        return flask.redirect(url_for(".info"))
+        return redirect(url_for(".info"))
 
 @login_page.route('/reset/<token>', methods=['GET', 'POST'])
 def reset_password_wtoken(token):
     try:
         # the users have one hour to use previous token
-        email = confirm_token(token, 'reset password', 3600)
+        email = read_timed_token(token, 'reset password', 3600)
     except Exception:
         flash_error('The link is invalid or has expired.')
         return redirect(url_for('.info'))
@@ -373,14 +363,45 @@ def reset_password_wtoken(token):
         pw2 = request.form['password2']
         if pw1 != pw2:
             flash_error("Oops, passwords do not match!")
-            return flask.redirect(url_for(".reset_password_wtoken", token=token))
+            return redirect(url_for(".reset_password_wtoken", token=token))
 
         if len(pw1) < 8:
             flash_error("Oops, password too short. Minimum 8 characters please!")
-            return flask.redirect(url_for(".reset_password_wtoken", token=token))
+            return redirect(url_for(".reset_password_wtoken", token=token))
 
         userdb.change_password(email, pw1)
         flask.flash(Markup("Your password has been changed. Please login with your new password."))
-        return flask.redirect(url_for(".info"))
+        return redirect(url_for(".info"))
 
+
+# endorsement
+
+def generate_endorsement_token(endorser, email, phd):
+    rec = {'endorser': int(endorser.id), 'user': email, 'phd': endorser.phd and phd}
+    return generate_timed_token(rec, "endorser")
+
+def endorser_link(endorser, email, phd):
+    token = generate_endorsement_token(endorser, email, phd)
+    return url_for('.endorse', token=token, _external=True, _scheme='https')
+
+@login_page.route('/endorse/<token>')
+@login_required
+def endorse(token):
+    try:
+        # tokens last forever
+        rec = read_timed_token(token, 'endorser', None)
+    except Exception:
+        flash_error('The link is invalid or has expired.')
+    user = SeminarsUser(email=rec['new_email'])
+    if user.creator:
+        flash_error('Account already has creator privileges.')
+    elif user.email != rec['user']:
+        flash_error('The link is not valid for this account.')
+    else:
+        user.endorser = int(rec['endorser'])
+        user.creator = True
+        user.phd = bool(rec['phd'])
+        user.save()
+        flask.flash('You can now create seminars. Thanks!', 'success')
+    return redirect(url_for('.info'))
 
