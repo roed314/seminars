@@ -28,11 +28,8 @@
     {% if user.is_admin() %}
     <li><a href="{{ url_for('.admin') }}">Admin</a></li>
     {% endif %}
-    {% if user.is_editor() and user.pending_requests() > 0 %}
-    <li><a href="{{ url_for('.list_requests') }}">Pending requests</a> ({{user.pending_requests()}})</li>
-    {% endif %}
-    {% if user.is_editor() %}
-    <li><a href="{{ url_for('.list_institutions') }}">Manage institutions</a></li>
+    {% if user.is_creator() %}
+    <li><a href="{{ url_for('.endorse') }}">Endorse</a></li>
     {% endif %}
     <li><a href="{{ url_for(".logout") }}">Logout</a></li>
   </ul>
