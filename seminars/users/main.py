@@ -51,6 +51,7 @@ def ctx_proc_userdata():
     userdata['username'] = 'Anonymous' if current_user.is_anonymous() else current_user.name
     userdata['user_is_authenticated'] = current_user.is_authenticated
     userdata['user_is_admin'] = current_user.is_admin()
+    userdata['user_is_creator'] = current_user.is_creator()
     userdata['get_username'] = get_username  # this is a function
     return userdata
 
@@ -375,17 +376,24 @@ def reset_password_wtoken(token):
 
 # endorsement
 
+@login_required
+@login_page.route('/endorse')
+@creator_required
+def endorse(self):
+    raise NotImplementedError
+
+
 def generate_endorsement_token(endorser, email, phd):
     rec = {'endorser': int(endorser.id), 'user': email, 'phd': endorser.phd and phd}
     return generate_timed_token(rec, "endorser")
 
 def endorser_link(endorser, email, phd):
     token = generate_endorsement_token(endorser, email, phd)
-    return url_for('.endorse', token=token, _external=True, _scheme='https')
+    return url_for('.endorse_wtoken', token=token, _external=True, _scheme='https')
 
 @login_page.route('/endorse/<token>')
 @login_required
-def endorse(token):
+def endorse_wtoken(token):
     try:
         # tokens last forever
         rec = read_timed_token(token, 'endorser', None)
