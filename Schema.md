@@ -40,17 +40,18 @@ editor  | boolean     | whether the newly created user will have editor/creator 
 
 `institutions`: mainly universities, but some may be in other categories (e.g. MSRI/Banff)
 
-Column   | Type   | Notes
----------|--------|------
-id       | bigint | auto
-name     | text   |
-aliases  | text   | comma separated string of aliases
-location | earth  |
-homepage | text   |
-timezone | text   | time zone code, e.g. "US/Eastern"
-city     | text   |
-type     | text   | university, institute, other
-admin    | text   | username responsible for updating, starts as creator
+Column    | Type   | Notes
+----------|--------|------
+id        | bigint | auto
+shortname | text   | Assigned by admin on creation, used in urls, globally unique, cannot be changed (would break links)
+name      | text   |
+aliases   | text   | comma separated string of aliases
+location  | earth  |
+homepage  | text   |
+timezone  | text   | time zone code, e.g. "US/Eastern"
+city      | text   |
+type      | text   | university, institute, other
+admin     | text   | username responsible for updating, starts as creator
 
 `seminars`: seminars and conferences.  A coherent sequence of talks.
 

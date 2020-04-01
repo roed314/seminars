@@ -189,27 +189,5 @@ The function which was called for this page is: {{calling_function}}
 </div>
 {% endif %}
 
-<div id="footer">
-    {% if support -%}
-      {{ support|safe }}<br/>
-    {%- else -%}
-        <h4>{{shortthanks|safe}}</h4>
-<br />
-    {%- endif %}
-    <div>
-      <a href="{{ url_for('contact') }}">Contact</a>
-      &middot;
-      <a href="{{ url_for('acknowledgment') }}">Acknowledgments</a>
-      {# <a href="{{ 'about' }}">About</a> #}
-      &middot;
-      {{ current_source|safe }}
-      &middot;
-      {{ latest_changeset|safe }}
-      &middot;
-      {{ version|safe }}
-    </div>
-</div>
-
-
 
 {%- endblock body %}

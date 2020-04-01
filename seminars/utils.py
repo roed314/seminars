@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-import pytz
+import pytz, re
 from six import string_types
 from flask import url_for
 from flask_login import current_user
@@ -41,13 +41,14 @@ def basic_top_menu():
         (url_for("user.info"), "", account)
     ]
 
+shortname_re = re.compile("^[A-Za-z0-9_-]+$")
+def allowed_shortname(shortname):
+    return bool(shortname_re.match(shortname))
+
+# Note the caching: if you add a category you have to restart the server
 @cached_function
 def categories():
     return sorted(((rec["abbreviation"], rec["name"]) for rec in db.categories.search({}, ["abbreviation", "name"])), key=lambda x: x[1].lower())
-
-@cached_function
-def institutions():
-    return sorted(((rec["id"], rec["name"]) for rec in db.institutions.search({}, ["id", "name"])), key=lambda x: x[1].lower())
 
 def count_distinct(table, counter, query={}):
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
@@ -123,3 +124,34 @@ def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0,
         else:
             rec = {k: v for k, v in zip(search_cols + extra_cols, rec)}
         return construct(rec)
+
+def process_user_input(inp, typ, lookup={}):
+    """
+    INPUT:
+
+    - ``inp`` -- unsanitized input, as a string
+    - ``typ`` -- a Postgres type, as a string
+    """
+    if inp is None:
+        return None
+    if typ == 'timestamp with time zone':
+        # Need to sanitize more, include time zone
+        return datetime.strptime(inp, "%Y-%m-%d-%H:%M")
+    elif typ == 'boolean':
+        if inp in ['yes', 'true', 'y', 't']:
+            return True
+        elif inp in ['no', 'false', 'n', 'f']:
+            return False
+        raise ValueError
+    elif typ == 'text':
+        # should sanitize somehow?
+        return inp
+    elif typ == 'text[]':
+        # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
+        return [inp]
+    elif typ == 'bigint[]':
+        # Again, temporary
+        return [lookup.get(inp)]
+    else:
+        raise ValueError
+

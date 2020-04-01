@@ -4,6 +4,7 @@ from seminars import db
 from seminars.talk  import WebTalk, talks_search, talks_lucky
 from seminars.seminar import seminars_lucky
 from seminars.utils import basic_top_menu, categories
+from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from flask_login import current_user
 import datetime
@@ -105,6 +106,14 @@ def search():
         top_menu=menu,
         bread=None)
 
+@app.route("/institutions/")
+def list_institutions():
+    return render_template(
+        "institutions.html",
+        title="Institutions",
+        institutions=institutions(),
+        top_menu=basic_top_menu())
+
 @app.route("/seminar/<shortname>")
 def show_seminar(shortname):
     seminar = seminars_lucky({'shortname': shortname})
@@ -142,8 +151,19 @@ def show_talk(semid, talkid):
         title="View talk",
         talk=talk,
         utcoffset=utcoffset,
-        top_menu=basic_top_menu(),
-        bread=None)
+        top_menu=basic_top_menu())
+
+@app.route("/institution/<shortname>/")
+def show_institution(shortname):
+    institution = db.institutions.lookup(shortname)
+    if institution is None:
+        return render_template("404.html", title="Institution not found")
+    institution = WebInstitution(shortname, data=institution)
+    return render_template(
+        "institution.html",
+        title="View institution",
+        institution=institution,
+        top_menu=basic_top_menu())
 
 @app.route("/subscribe")
 def subscribe():

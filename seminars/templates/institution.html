@@ -1,0 +1,27 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+<h1>{% if institution.homepage %}<a href="{{institution.homepage}}">{{institution.name}}</a>{% else %}{{institution.name}}{% endif %}</h1>
+
+{% if user.admin or user.email == institution.admin %}
+<p><a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit</a></p>
+{% endif %}
+
+
+<table>
+  <tr>
+    <td>City</td>
+    <td>{{ institution.city }}</td>
+  </tr>
+  <tr>
+    <td>Time zone</td>
+    <td>{{ institution.timezone }}</td>
+  </tr>
+  <tr>
+    <td>Maintainer</td>
+    <td>{{ institution.admin_link() | safe }}</td>
+  </tr>
+</table>
+
+{% endblock %}
