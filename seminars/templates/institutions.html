@@ -1,0 +1,29 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+<h1>Institutions</h1>
+
+{% if user.phd %}
+<h2>Create</h2>
+<form action="{{ url_for('create.edit_institution') }}" method="POST">
+  <input type="hidden" name="new" value="yes"/>
+  <table>
+    <tr>
+      <td>Identifier:</td>
+      <td><input name="shortname" /></td>
+      <td><button type="submit">Create</button></td>
+    </tr>
+  </table>
+</form>
+
+<h2>Existing</h2>
+{% endif %}
+
+<ul>
+  {% for shortname, name in institutions %}
+  <li> <a href="{{ url_for('show_institution', shortname=shortname) }}">{{name}}</a></li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

@@ -178,6 +178,13 @@ def urlencode(kwargs):
     from six.moves.urllib.parse import urlencode
     return urlencode(kwargs)
 
+# Use this to have None print as the empty string
+@app.template_filter("blanknone")
+def blanknone(x):
+    if x is None:
+        return ''
+    return str(x)
+
 ##############################
 #    Redirects and errors    #
 ##############################

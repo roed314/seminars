@@ -2,42 +2,49 @@
 
 {% block content %}
 
-<h1>{% if info.homepage %}<a href="{{info.homepage}}">{{info.name}}</a>{% else %}{{info.name}}{% endif %}{% if not info.display %} (hidden){% elif info.archived %} (inactive){% elif info.online %} (online){% endif %}</h1>
+<h1>{% if seminar.homepage %}<a href="{{seminar.homepage}}">{{seminar.name}}</a>{% else %}{{seminar.name}}{% endif %}{% if not seminar.display %} (hidden){% elif seminar.archived %} (inactive){% elif seminar.online %} (online){% endif %}</h1>
 
-{% if info.description %}<p>{{info.description}}</p>{% endif %}
+{% if seminar.description %}<p>{{seminar.description}}</p>{% endif %}
 
-{% if info.comments %}<p>{{info.comments}}</p>{% endif %}
+{% if seminar.comments %}<p>{{seminar.comments}}</p>{% endif %}
 
-{% if info.future and info.past %}
+{% if future and past %}
 <button id="timetoggle" href="#">View past talks</button>
 {% endif %}
-{% if info.future %}
 <div id="future_talks">
+{% if future %}
   <h3>Upcoming talks</h3>
   <table>
-    {% for talk in info.future %}
+    {% for talk in future %}
     <tr>
       {{ talk.oneline(include_seminar=False) | safe }}
     </tr>
     {% endfor %}
   </table>
-</div>
 {% endif %}
-{% if info.past %}
-{% if not info.future %}
+</div>
+{% if past %}
+{% if not future %}
 <p> There are no upcoming talks. </p>
-<script> toggle_time(); </script>
 {% endif %}
 <div id="past_talks">
   <h3>Past talks</h3>
   <table>
-    {% for talk in info.past %}
+    {% for talk in past %}
     <tr>
       {{ talk.oneline(include_seminar=False) | safe }}
     </tr>
     {% endfor %}
   </table>
 </div>
+{% endif %}
+
+{% if past and not future %}
+<script>
+$(document).ready(function () {
+  toggle_time();
+});
+</script>
 {% endif %}
 
 {% endblock %}

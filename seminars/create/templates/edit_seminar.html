@@ -1,0 +1,143 @@
+{% extends "homepage.html" %}
+{% block content %}
+
+  {% if lock %}
+    <div style="color: {{color.red}}; font-weight: bold; font-size: 200%;">Concurrent Edit!!!</div>
+
+    <div>
+      The seminar {{ seminar.shortname }} is currently or has been recently edited by
+      <a href="mailto:{{ lock.email }}">{{ lock.name }}</a>
+      at {{ lock.timestamp|fmtdatetime }}. There might be a conflict!
+    </div>
+
+    <div style="margin-top: 30px">
+      <a href="{{ url_for('.edit_seminar', shortname=seminar.shortname, lock='ignore') }}">Continue</a>
+    </div>
+
+    <div style="margin-top: 30px">
+      <a href="{{ request.referrer }}">Abort</a>
+    </div>
+  {% else %}
+      <form action="{{ url_for('.save_seminar') }}" method="POST">
+        <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
+        <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
+      <table>
+        <tr>
+          <td>
+            Short name
+          </td>
+          <td>
+            {{ seminar.shortname }}
+          </td>
+        </tr>
+        <tr>
+          <td>Full name</td>
+          <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:500px;" /></td>
+        </tr>
+        <tr>
+          <td>Categories</td>
+          <td>
+            <select name="categories" style="width:510px;">
+              {% for ab, cat in categories %}
+              <option value="{{ ab }}">{{cat}}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Description</td>
+          <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:500px;" /></td>
+        </tr>
+        {% if user.phd %}
+        <tr>
+          <td>Institutions</td>
+          <td>
+            <select name="institutions" style="width:510px;">
+              {% for iid, name in institutions %}
+              <option value="{{iid}}"{% if iid in seminar.institutions %} selected{% endif %}>{{name}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><a href="{{ url_for('list_institutions') }}" target="_blank">Add new institution</a> (must reload this page afterward)</td>
+        </tr>
+        {% endif %}
+        {% if not user.phd or not seminar.new %}
+        <tr>
+          <td>Time zone</td>
+          <td>
+            <select name="timezone" style="width:510px;">
+              {% for tz, disp in timezones %}
+              <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td>Conference</td>
+          <td>
+            <select name="is_conference" style="width:510px;">
+              <option value="yes"{% if seminar.is_conference %} selected{% endif %}>yes</option>
+              <option value="no"{% if not seminar.is_conference %} selected{% endif %}>no</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Homepage</td>
+          <td><input style="width:500px;" name="homepage" value="{{ seminar.homepage | blanknone }}" /></td>
+        </tr>
+        <tr>
+          <td>Online</td>
+          <td>
+            <select name="online" style="width:510px;">
+              <option value="yes"{% if seminar.online %} selected{% endif %}>yes</option>
+              <option value="no"{% if not seminar.online %} selected{% endif %}>no</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Livestream link</td>
+          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" /></td>
+        </tr>
+        <tr>
+          <td>Room</td>
+          <td><input name="room" value="{{ seminar.room | blanknone }}" style="width:500px;" /></td>
+        </tr>
+        {% if not seminar.new %}
+        <tr>
+          <td>Archived</td>
+          <td>
+            <select name="archived" style="width:510px;">
+              <option value="yes"{% if seminar.archived %} selected{% endif %}>yes</option>
+              <option value="no"{% if not seminar.archived %} selected{% endif %}>no</option>
+            </select>
+          </td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td colspan="2">Comments</td>
+        </tr>
+        <tr>
+          <td colspan="2"><textarea cols="76" rows="5" name="comments">{{ seminar.comments if seminar.comments else '' }}</textarea></td>
+        </tr>
+      </table>
+      <button type="submit" onclick="return set_saved();">Save</button>
+
+      <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if seminar.new %}{{ url_for('create.index') }}{% else %}{{ url_for('show_seminar', shortname=seminar.shortname) }}{% endif %}">cancel</a>
+      </form>
+<script type="text/javascript">
+/* prevent accidental closing of browser window */
+window.onbeforeunload = function() {
+  if(unsaved) {
+    return "There are unsaved edits. Really close?";
+  }
+}
+
+$(document).ready(
+function() {
+  $('#kcontent').markItUp(myMarkdownSettings);
+});
+</script>
+
+{% endif %} {# concurrent edit warning at the top #}
+{% endblock %}

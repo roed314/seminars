@@ -6,17 +6,47 @@
 <p>Warning: seminars and talks you create will not appear until you are <a href="">approved</a>.</p>
 {% endif %}
 
-<p> You can create a <a href='{{ url_for(".edit_seminar") }}'>new seminar</a>. </p>
+<h2>Create a seminar or conference</h2>
+
+<form action="{{ url_for('.edit_seminar') }}" method="POST">
+  <input type="hidden" name="new" value="yes"/>
+  <table>
+    <tr>
+      <td>Identifier:</td>
+      <td><input name="shortname" /></td>
+      <td><button type="submit">Create</button></td>
+    </tr>
+  </table>
+</form>
 
 {% if seminars %}
-<p> You are an organizer for the following seminars.  To add a talk, click on the seminar name below. </p>
-<ul>
-  {% for semid, semname in seminars %}
-  <li> <a href='{{ url_for(".edit_seminar", semid=semid) }}'>{{semname}}</a> </li>
+<h2>Seminars</h2>
+<p> You are an organizer for the following seminars.</p>
+<table>
+  {% for seminar in seminars %}
+  <tr>
+    <td> <a href='{{ url_for("show_seminar", shortname=seminar.shortname) }}'>{{seminar.name}}</a>{% if seminar.archived %} (archived){% endif %} </td>
+    <td> <a href='{{ url_for(".edit_seminar", shortname=seminar.shortname) }}'>Edit</a></td>
+    <td> <a href='{{ url_for(".edit_talk", semid=seminar.shortname) }}'>Add talk</a> </td>
+  </tr>
   {% endfor %}
-</ul>
-{% else %}
-To add a talk, create a seminar first (it's okay if a seminar just contains a single talk).
+</table>
+{% endif %}
+{% if conferences %}
+<h2>Conferences</h2>
+<p> You are an organizer for the following conferences.</p>
+<table>
+  {% for seminar in conferences %}
+  <tr>
+    <td> <a href='{{ url_for("show_seminar", shortname=seminar.shortname) }}'>{{seminar.name}}</a>{% if seminar.archived %} (archived){% endif %} </td>
+    <td> <a href='{{ url_for(".edit_seminar", shortname=seminar.shortname) }}'>Edit</a></td>
+    <td> <a href='{{ url_for(".edit_talk", semid=seminar.shortname) }}'>Add talk</a> </td>
+  </tr>
+{% endfor %}
+</table>
+{% endif %}
+{% if not seminars and not conferences %}
+<p>To add a talk, create a seminar first.</p>
 {% endif %}
 
 {% endblock %}

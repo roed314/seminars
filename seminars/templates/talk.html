@@ -2,43 +2,43 @@
 
 {% block content %}
 
-<h1>{{info.title}}{% if not info.display %} (hidden){% elif info.online %} (online){% endif %}</h1>
+<h1>{{talk.title}}{% if not talk.display %} (hidden){% elif talk.online %} (online){% endif %}</h1>
 
 <div id="talk-body">
 <p>
-  {% if info.speaker %}by {{info.speaker}}{% endif %}
-  {% if info.seminar_name %} as part of <a href="{{url_for('show_seminar', semid=info['seminar_id'])}}">{{info.seminar_name}}</a>{% endif %}
+  {% if talk.speaker %}by {{talk.speaker}}{% endif %}
+  {% if talk.seminar_name %} as part of <a href="{{url_for('show_seminar', shortname=talk.seminar_id)}}">{{talk.seminar_name}}</a>{% endif %}
 </p>
 
 <p>
-  <span class="localtime" data-utcoffset="{{utcoffset}}">{{info.start_time.strftime("%a %b %-d, %-H:%M")}}-{{(info.end_time).strftime("%-H:%M")}}</span>
+  <span class="localtime" data-utcoffset="{{utcoffset}}">{{talk.start_time.strftime("%a %b %-d, %-H:%M")}}-{{(talk.end_time).strftime("%-H:%M")}}</span>
 </p>
 
 <p>
-  {% if info.live_link %}
+  {% if talk.live_link %}
   {% if user_is_authenticated %}
-  Access <a href="{{info.live_link}}">online</a>.
+  Access <a href="{{talk.live_link}}">online</a>.
   {% else %}
   To see access link, please <a href="{{url_for('user.info')}}">log in</a> (anti-spam measure).
   {% endif %}
   {% endif %}
-  {% if info.room %}
-  Lecture held in {{ info.room }}.
+  {% if talk.room %}
+  Lecture held in {{ talk.room }}.
   {% endif %}
 </p>
 
-{% if info.description %}
-<p>{{info.description}}</p>
+{% if talk.description %}
+<p>{{talk.description}}</p>
 {% endif %}
 
-{% if info.abstract %}
-{% for paragraph in info.abstract %}
+{% if talk.abstract %}
+{% for paragraph in talk.split_abstract() %}
 <p>{{paragraph}}</p>
 {% endfor %}
 {% endif %}
 
-{% if info.comments %}
-<p>{{info.comments}}</p>
+{% if talk.comments %}
+<p>{{talk.comments}}</p>
 {% endif %}
 
 </div>

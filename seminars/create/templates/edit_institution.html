@@ -1,0 +1,70 @@
+{% extends "homepage.html" %}
+{% block content %}
+
+<form action="{{ url_for('.save_institution') }}" method="POST" id=>
+  <input type="hidden" name="shortname" value="{{ institution.shortname }}"/>
+  <input type="hidden" name="new" value="{{ 'yes' if institution.new else 'no' }}"/>
+  <table>
+    <tr>
+      <td>
+        Short name
+      </td>
+      <td>
+        {{ institution.shortname }}
+      </td>
+    </tr>
+    <tr>
+      <td>Full name</td>
+      <td><input name="name" id="sname" value="{{ institution.name | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Aliases</td>
+      <td><input name="aliases" value="{{ institution.aliases | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Type</td>
+      <td>
+        <select name="type" style="width:510px;">
+          {% for itype, disp in institution_types %}
+          <option value="{{itype}}"{% if institution.type == itype %} selected{% endif %}>{{ disp }}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Homepage</td>
+      <td><input style="width:500px;" name="homepage" value="{{ institution.homepage | blanknone }}" /></td>
+    </tr>
+    <tr>
+      <td>City</td>
+      <td><input name="city" value="{{ institution.city | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Time zone</td>
+      <td>
+        <select name="timezone" style="width:510px;">
+          {% for tz, disp in timezones %}
+          <option value="{{ tz }}"{% if institution.timezone == tz %} selected{% endif %}>{{disp}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Admin</td>
+      <td><input name="admin" value="{{ institution.admin }}" style="width:500px;" /></td>
+    </tr>
+  </table>
+  <button type="submit" onclick="return set_saved();">Save</button>
+
+  <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if institution.new %}{{ url_for('list_institutions') }}{% else %}{{ url_for('show_institution', shortname=institution.shortname) }}{% endif %}">cancel</a>
+</form>
+<script type="text/javascript">
+/* prevent accidental closing of browser window */
+window.onbeforeunload = function() {
+  if(unsaved) {
+    return "There are unsaved edits. Really close?";
+  }
+}
+</script>
+
+{% endblock %}

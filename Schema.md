@@ -40,40 +40,41 @@ editor  | boolean     | whether the newly created user will have editor/creator 
 
 `institutions`: mainly universities, but some may be in other categories (e.g. MSRI/Banff)
 
-Column   | Type   | Notes
----------|--------|------
-id       | bigint | auto
-name     | text   |
-aliases  | text   | comma separated string of aliases
-location | earth  |
-homepage | text   |
-timezone | text   | time zone code, e.g. "US/Eastern"
-city     | text   |
-type     | text   | university, institute, other
-admin    | text   | username responsible for updating, starts as creator
+Column    | Type   | Notes
+----------|--------|------
+id        | bigint | auto
+shortname | text   | Assigned by admin on creation, used in urls, globally unique, cannot be changed (would break links)
+name      | text   |
+aliases   | text   | comma separated string of aliases
+location  | earth  |
+homepage  | text   |
+timezone  | text   | time zone code, e.g. "US/Eastern"
+city      | text   |
+type      | text   | university, institute, other
+admin     | text   | username responsible for updating, starts as creator
 
 `seminars`: seminars and conferences.  A coherent sequence of talks.
 
-Column       | Type    | Notes
--------------|---------|------
-id           | bigint  | auto
-shortname    | text    | Assigned by owner, used in urls, globally unique, cannot be changed (would break links)
-name         | text    |
-categories   | text[]  |
-keywords     | text    |
-description  | text    | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
-comments     | text    |
-institutions | text[]  |
-timezone     | text    | time zone code, e.g. "America/New York"
-room         | text    |
-is_conference| boolean |
-homepage     | text    | link to external homepage
-display      | boolean | allowed to show; will be true if and only if all organizers have creator privileges
-owner        | text    | email of owner of seminar, who controls the list of organizers (and can transfer ownership)
-archived     | boolean | seminar is no longer active (and won't show up in users' list of seminars)
-online       | boolean |
-access       | text    | we need to make a list of predefined access types
-live_link    | text    | some seminars may have a consistent link for attending
+Column       | Type     | Notes
+-------------|----------|------
+id           | bigint   | auto
+shortname    | text     | Assigned by owner, used in urls, globally unique, cannot be changed (would break links)
+name         | text     |
+categories   | text[]   |
+keywords     | text     |
+description  | text     | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
+comments     | text     |
+institutions | bigint[] |
+timezone     | text     | time zone code, e.g. "America/New York"
+room         | text     |
+is_conference| boolean  |
+homepage     | text     | link to external homepage
+display      | boolean  | allowed to show; will be true if and only if all organizers have creator privileges
+owner        | text     | email of owner of seminar, who controls the list of organizers (and can transfer ownership)
+archived     | boolean  | seminar is no longer active (and won't show up in users' list of seminars)
+online       | boolean  |
+access       | text     | we need to make a list of predefined access types
+live_link    | text     | some seminars may have a consistent link for attending
 
 `talks`: table for individual lectures
 
