@@ -1,0 +1,116 @@
+{% extends "homepage.html" %}
+{% block content %}
+
+  {% if lock %}
+    <div style="color: {{color.red}}; font-weight: bold; font-size: 200%;">Concurrent Edit!!!</div>
+
+    <div>
+      The seminar {{ seminar.shortname }} is currently or has been recently edited by
+      <a href="mailto:{{ lock.email }}">{{ lock.name }}</a>
+      at {{ lock.timestamp|fmtdatetime }}. There might be a conflict!
+    </div>
+
+    <div style="margin-top: 30px">
+      <a href="{{ url_for('.edit_seminar', shortname=seminar.shortname, lock='ignore') }}">Continue</a>
+    </div>
+
+    <div style="margin-top: 30px">
+      <a href="{{ request.referrer }}">Abort</a>
+    </div>
+  {% else %}
+      <form action="{{ url_for('.save_seminar') }}" method="POST" id=>
+      <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
+      <table>
+        <tr>
+          <td>
+            Short name
+          </td>
+          <td>
+            {{ seminar.shortname }}
+          </td>
+        </tr>
+        <tr>
+          <td>Full name</td>
+          <td><input size="40" name="name" id="sname" value="{{ seminar.name }}" style="width:500px;" /></td>
+        </tr>
+        <tr>
+          <td>Categories</td>
+          <td>
+            <select multiple name="categories" id="scategories" style="width:510px;">
+              {% for ab, cat in categories %}
+              <option value="{{ ab }}">{{cat}}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Description</td>
+          <td><input name="description" id="sdescription" value="{{ seminar.description }}" style="width:500px;" /></td>
+        </tr>
+        <tr>
+          <td>Institutions</td>
+          <td>
+            <select multiple name="institutions" id="sinstitutions" style="width:510px;">
+              {% for iid, name in institutions %}
+              <option value="{{iid}}"{% if iid in seminar.institutions %} selected{% endif %}>{{name}}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Conference</td>
+          <td>
+            <select name="is_conference" id="sis_conference" style="width:510px;">
+              <option value="yes"{% if seminar.is_conference %} selected{% endif %}>yes</option>
+              <option value="no"{% if not seminar.is_conference %} selected{% endif %}>no</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Homepage</td>
+          <td><input style="width:500px;" name="homepage" id="shomepage" value="{{ seminar.homepage if seminar.homepage else '' }}" /></td>
+        </tr>
+        <tr>
+          <td>Online</td>
+          <td>
+            <select name="online" id="sonline" style="width:510px;">
+              <option value="yes"{% if seminar.online %} selected{% endif %}>yes</option>
+              <option value="no"{% if not seminar.online %} selected{% endif %}>no</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Livestream link</td>
+          <td><input name="live_link" id="slive_link" value="{{ seminar.live_link if seminar.live_link else '' }}" style="width:500px;" /></td>
+        </tr>
+        <tr>
+          <td>Room</td>
+          <td><input name="room" id="sroom" value="{{ seminar.room if seminar.room else '' }}" style="width:500px;" /></td>
+        </tr>
+        <tr>
+          <td colspan="2">Comments</td>
+        </tr>
+        <tr>
+          <td colspan="2"><textarea cols="76" rows="5" name="comments" id="scomments">{{ seminar.comments if seminar.comments else '' }}</textarea></td>
+        </tr>
+      </table>
+      <button type="submit" id="seminar_submit" onclick="return set_saved();">Save</button>
+
+      <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">cancel</a>
+      </form>
+<script type="text/javascript">
+/* prevent accidental closing of browser window */
+window.onbeforeunload = function() {
+  if(unsaved) {
+    return "There are unsaved edits. Really close?";
+  }
+}
+
+$(document).ready(
+function() {
+  $('#kcontent').markItUp(myMarkdownSettings);
+});
+</script>
+
+{% endif %} {# concurrent edit warning at the top #}
+{% endblock %}
