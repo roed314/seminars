@@ -8,7 +8,7 @@ import flask
 from functools import wraps
 from seminars.app import app, send_email
 from lmfdb.logger import make_logger
-from flask import render_template, request, Blueprint, url_for,  redirect
+from flask import render_template, request, Blueprint, url_for,  redirect, make_response, session
 from flask_login import login_required, login_user, current_user, logout_user, LoginManager
 from lmfdb.utils import flash_error
 from markupsafe import Markup
@@ -117,7 +117,7 @@ def info():
                            top_menu=menu,
                            timezones=timezones,
                            user=current_user,
-                           next=request.referrer)
+                           session=session)
 
 # ./info again, but for POST!
 
@@ -186,7 +186,6 @@ def register():
     if request.method == "GET":
         return render_template("register.html",
                                title="Register",
-                               next=request.referrer or "/",
                                timezones=timezones,
                                )
     elif request.method == 'POST':
@@ -333,12 +332,12 @@ def reset_password():
     if request.method == 'GET':
         return render_template("reset_password_ask_email.html",
                                title="Forgot Password",
-                               next=request.referrer or "/"
                                )
     elif request.method == "POST":
         email = request.form['email']
         if userdb.user_exists(email):
             send_reset_password(email)
+        flask.flash(Markup("Check your mailbox for instructions on how to reset your password"))
         return redirect(url_for(".info"))
 
 @login_page.route('/reset/<token>', methods=['GET', 'POST'])
@@ -349,13 +348,12 @@ def reset_password_wtoken(token):
     except Exception:
         flash_error('The link is invalid or has expired.')
         return redirect(url_for('.info'))
-    if not userdb.exists(email):
+    if not userdb.user_exists(email):
         flash_error('The link is invalid or has expired.')
         return redirect(url_for('.info'))
     if request.method == "GET":
         return render_template("reset_password_wtoken.html",
                                title="Reset password",
-                               next=request.referrer or "/",
                                token=token
                                )
     elif request.method == 'POST':
@@ -377,37 +375,47 @@ def reset_password_wtoken(token):
 # endorsement
 
 @login_required
-@login_page.route('/endorse')
+@login_page.route('/endorse', methods=["POST"])
 @creator_required
-def endorse(self):
-    raise NotImplementedError
+def get_endorsing_link():
+    email = request.form['email']
+    from email_validator import validate_email, EmailNotValidError
+    try:
+        validate_email(email)
+    except EmailNotValidError as e:
+        flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
+        return redirect(url_for(".info"))
+    phd = bool(request.form.get('phd', False))
+    link = endorser_link(current_user, email, phd)
+    session['endorsing link'] = "<p>The link to endorse %s is:<br>%s</p>" % (email, link)
+    return redirect(url_for(".info"))
 
 
 def generate_endorsement_token(endorser, email, phd):
-    rec = {'endorser': int(endorser.id), 'user': email, 'phd': endorser.phd and phd}
+    rec = tuple([int(endorser.id), email, int(endorser.phd and phd)])
     return generate_timed_token(rec, "endorser")
 
 def endorser_link(endorser, email, phd):
     token = generate_endorsement_token(endorser, email, phd)
     return url_for('.endorse_wtoken', token=token, _external=True, _scheme='https')
 
+
 @login_page.route('/endorse/<token>')
 @login_required
 def endorse_wtoken(token):
     try:
         # tokens last forever
-        rec = read_timed_token(token, 'endorser', None)
+        endoser, email, phd = read_timed_token(token, 'endorser', None)
     except Exception:
         flash_error('The link is invalid or has expired.')
-    user = SeminarsUser(email=rec['new_email'])
-    if user.creator:
+    if current_user.creator:
         flash_error('Account already has creator privileges.')
-    elif user.email != rec['user']:
+    elif current_user.email != email:
         flash_error('The link is not valid for this account.')
     else:
-        user.endorser = int(rec['endorser'])
+        user.endorser = int(endorser)
         user.creator = True
-        user.phd = bool(rec['phd'])
+        user.phd = bool(phd)
         user.save()
         flask.flash('You can now create seminars. Thanks!', 'success')
     return redirect(url_for('.info'))
