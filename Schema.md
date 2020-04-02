@@ -78,32 +78,33 @@ live_link    | text     | some seminars may have a consistent link for attending
 
 `talks`: table for individual lectures
 
-Column       | Type        | Notes
--------------|-------------|------
-id           | bigint      | auto
-title        | text        |
-abstract     | text        |
-description  | text        |
-token        | text        | give permission for speaker to edit
-categories   | text[]      |
-keywords     | text        |
-comments     | text        |
-seminar_id   | text        | shortname of seminar (every talk has to be part of a seminar)
-seminar_ctr  | int         | Counter of talks within a given seminar
-seminar_name | text        |
-display      | boolean     | whether seminar creator has creator privileges
-datetime     | timestamptz | start time
-timezone     | text        | time zone code, e.g. "America/New York" (this isn't exactly the same as the tz info contained within the datetime, though it's related)
-duration     | interval    |
-speaker      | text        | full name, not username
-speaker_id   | text        | username, may be null
-affiliation  | text        | name of university, may be null
-online       | boolean     |
-access       | text        | we need to make a list of predefined access types
-live_link    | text        |
-room         | text        |
-video_link   | text        | archive video link
-slides_link  | text        | link to slides
+Column              | Type        | Notes
+--------------------|-------------|------
+id                  | bigint      | auto
+title               | text        |
+abstract            | text        |
+description         | text        |
+token               | text        | give permission for speaker to edit
+categories          | text[]      |
+keywords            | text        |
+comments            | text        |
+seminar_id          | text        | shortname of seminar (every talk has to be part of a seminar)
+seminar_ctr         | int         | Counter of talks within a given seminar
+seminar_name        | text        |
+display             | boolean     | whether seminar creator has creator privileges
+start_time          | timestamptz |
+end_time            | timestamptz |
+timezone            | text        | time zone code, e.g. "America/New York" (this isn't exactly the same as the tz info contained within the datetime, though it's related)
+speaker             | text        | full name, not username
+speaker_email       | text        | username, may be null
+speaker_affiliation | text        | name of university, may be null
+speaker_homepage    | text        |
+online              | boolean     |
+access              | text        | we need to make a list of predefined access types
+live_link           | text        |
+room                | text        |
+video_link          | text        | archive video link
+slides_link         | text        | link to slides
 
 `categories`: table of categories for seminars and talks
 

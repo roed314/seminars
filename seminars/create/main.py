@@ -6,6 +6,7 @@ from seminars.app import app
 from seminars.create import create
 from seminars.utils import basic_top_menu, categories, timezones, process_user_input
 from seminars.seminar import WebSeminar, seminars_lucky, seminars_lookup, can_edit_seminar
+from seminars.talk import WebTalk, talks_lookup
 from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types
 from seminars.lock import get_lock
 from lmfdb.utils import to_dict, flash_error
@@ -130,7 +131,6 @@ def save_seminar():
 @create.route("edit/institution/", methods=["GET", "POST"])
 @login_required
 def edit_institution():
-    print("Shortcut")
     if request.method == 'POST':
         data = request.form
     else:
@@ -192,10 +192,68 @@ def save_institution():
     flash("Institution successfully %s!" % edittype)
     return redirect(url_for("show_institution", shortname=shortname), 301)
 
+
 @create.route("edit/talk/", methods=["GET", "POST"])
-@login_required
 def edit_talk():
     if request.method == 'POST':
         data = request.form
     else:
         data = request.args
+    seminar_id = data.get("seminar_id", "")
+    seminar_ctr = data.get("seminar_ctr", "")
+    new = not seminar_ctr
+    if seminar_ctr:
+        try:
+            seminar_ctr = int(seminar_ctr)
+        except ValueError:
+            flash_error("Invalid talk id")
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301)
+    token = data.get("token", "")
+    if token:
+        if seminar_ctr == "":
+            flash_error("Must provide talk id with token")
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301)
+        talk = talks_lookup(seminar_id, seminar_ctr)
+        if talk is None:
+            flash_error("Talk does not exist")
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301)
+        elif token != talk['token']:
+            flash_error("Invalid token for editing talk")
+            return redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301)
+        seminar = seminars_lookup(seminar_id)
+    else:
+        resp, seminar = can_edit_seminar(seminar_id, new=False)
+        if resp is not None:
+            return resp
+        if new:
+            talk = WebTalk(seminar_id, seminar=seminar, editing=True)
+        else:
+            talk = WebTalk(seminar_id, seminar_ctr) # editing=True means we look up data
+    lock = get_lock(seminar_id, data.get("lock"))
+    title = "Create talk" if new else "Edit talk"
+    return render_template("edit_talk.html",
+                           talk=talk,
+                           seminar=seminar,
+                           title=title,
+                           top_menu=basic_top_menu(),
+                           categories=categories(),
+                           institutions=institutions(),
+                           timezones=timezones,
+                           lock=lock)
+
+    new = (data.get("new") == "yes")
+    resp, institution = can_edit_seminar(seminar_id, new)
+    if resp is not None:
+        return resp
+    # Don't use locks for institutions since there's only one non-admin able to edit.
+    title = "Create institution" if new else "Edit institution"
+    return render_template("edit_institution.html",
+                           institution=institution,
+                           institution_types=institution_types,
+                           timezones=timezones,
+                           title=title,
+                           top_menu=basic_top_menu())
+
+@create.route("save/talk/", methods=["POST"])
+def save_talk():
+    pass

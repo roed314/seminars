@@ -39,7 +39,7 @@
           <td>
             <select name="categories" style="width:510px;">
               {% for ab, cat in categories %}
-              <option value="{{ ab }}">{{cat}}</option>
+              <option value="{{ ab }}"{% if ab in seminar.categories %} selected{% endif %}>{{cat}}</option>
               {% endfor %}
             </select>
           </td>
@@ -128,7 +128,7 @@
           <td colspan="2">Comments</td>
         </tr>
         <tr>
-          <td colspan="2"><textarea cols="76" rows="5" name="comments">{{ seminar.comments if seminar.comments else '' }}</textarea></td>
+          <td colspan="2"><textarea cols="76" rows="5" name="comments">{{ seminar.comments | blanknone }}</textarea></td>
         </tr>
       </table>
       <h3>Organizers</h3>
