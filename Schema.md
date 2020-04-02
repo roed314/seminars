@@ -90,7 +90,6 @@ keywords            | text        |
 comments            | text        |
 seminar_id          | text        | shortname of seminar (every talk has to be part of a seminar)
 seminar_ctr         | int         | Counter of talks within a given seminar
-seminar_name        | text        |
 display             | boolean     | whether seminar creator has creator privileges
 start_time          | timestamptz |
 end_time            | timestamptz |
