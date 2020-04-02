@@ -142,6 +142,7 @@ id         | bigint  | auto
 seminar_id | text    |
 email      | text    |
 full_name  | text    |
+order      | int     | Controls order organizers displayed
 organizer  | boolean | whether to include in the organizer field (rather than the curator field)
 display    | boolean | whether to display on the page
 contact    | boolean | whether to include the email

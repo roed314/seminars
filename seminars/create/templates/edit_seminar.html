@@ -96,6 +96,16 @@
           </td>
         </tr>
         <tr>
+          <td>Access</td>
+          <td>
+            <select name="access" style="width:510px;">
+              <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view link</option>
+              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Logged-in users can view link</option>
+              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Endorsed users can view link</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
           <td>Livestream link</td>
           <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" /></td>
         </tr>
@@ -120,6 +130,43 @@
         <tr>
           <td colspan="2"><textarea cols="76" rows="5" name="comments">{{ seminar.comments if seminar.comments else '' }}</textarea></td>
         </tr>
+      </table>
+      <h3>Organizers</h3>
+      <table>
+        <tr>
+          <td>Email</td>
+          <td>Name</td>
+          <td>Curator</td>
+          <td>Display</td>
+          <td>Contact</td>
+        </tr>
+        {% for i in range(6) %}
+        <tr>
+          {% if i < (seminar.organizer_data | length) %}
+          <td>
+            <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px"/>
+          </td>
+          <td>
+            <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
+          </td>
+          <td>
+            <input type="checkbox" name="org_curator{{i}}" value="yes" {% if seminar.organizer_data[i].get("curator") %}checked{% endif %} />
+          </td>
+          <td>
+            <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
+          </td>
+          <td>
+            <input type="checkbox" name="org_contact{{i}}" value="yes" {% if seminar.organizer_data[i].get("contact") %}checked{% endif %} />
+          </td>
+          {% else %}
+          <td><input name="org_email{{i}}" style="width:220px;" /></td>
+          <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
+          <td><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
+          <td><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
+          <td><input type="checkbox" name="org_contact{{i}}" value="yes" /></td>
+          {% endif %}
+        </tr>
+        {% endfor %}
       </table>
       <button type="submit" onclick="return set_saved();">Save</button>
 

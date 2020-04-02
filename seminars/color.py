@@ -7,9 +7,12 @@ class Slate(SteelBlue):
     footer_border = '#f8d047' # yellow from logo, border along footer
     header_text_title = c.white
     col_main_dl = c.white
+    button_background = '#0066dd'
+    button_border = '#0033bb'
+    col_visited = c.blue
     #col_main = '#373737'
     a_text = '#373737' # h2 headers
-    col_link = '#aaaaaa' # link in footer
-    col_visited = '#aaaaaa' # visited link in footer
+    col_link = '#0033bb' # links
+    col_visited = '#0033bb' # visited links
     col_main_lg = '#373737' # text box border
     col_main_l = '#aaaaaa' # button background

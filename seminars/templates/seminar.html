@@ -2,11 +2,23 @@
 
 {% block content %}
 
+{% if user.email in seminar.editors() %}
+<form action="{{url_for('create.edit_seminar')}}" method="POST">
+  <input type="hidden" name="shortname" value="{{seminar.shortname}}" />
+  <button type="submit">Edit</button>
+</form>
+{% endif %}
+
 <h1>{% if seminar.homepage %}<a href="{{seminar.homepage}}">{{seminar.name}}</a>{% else %}{{seminar.name}}{% endif %}{% if not seminar.display %} (hidden){% elif seminar.archived %} (inactive){% elif seminar.online %} (online){% endif %}</h1>
 
-{% if seminar.description %}<p>{{seminar.description}}</p>{% endif %}
+{% if seminar.description %}<p>{{ (seminar.show_institutions() + ' ' + (seminar.description | blanknone) + seminar.show_categories()) | safe }}</p>{% endif %}
 
-{% if seminar.comments %}<p>{{seminar.comments}}</p>{% endif %}
+<table>
+  {{ seminar.show_organizers() | safe }}
+  {{ seminar.show_curators() | safe }}
+</table>
+
+{% if seminar.comments %}<p>{{ seminar.comments | safe }}</p>{% endif %}
 
 {% if future and past %}
 <button id="timetoggle" href="#">View past talks</button>

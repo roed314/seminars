@@ -50,6 +50,10 @@ def allowed_shortname(shortname):
 def categories():
     return sorted(((rec["abbreviation"], rec["name"]) for rec in db.categories.search({}, ["abbreviation", "name"])), key=lambda x: x[1].lower())
 
+@cached_function
+def category_dict():
+    return dict(categories())
+
 def count_distinct(table, counter, query={}):
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
     tbl = IdentifierWrapper(table.search_table)

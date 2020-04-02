@@ -65,6 +65,16 @@ def save_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
+    def make_error(err):
+        flash_error("Error processing %s: %s" % (col, err))
+        seminar = WebSeminar(shortname, data=raw_data)
+        return render_template("edit_seminar.html",
+                               seminar=seminar,
+                               title="Edit seminar error",
+                               top_menu=basic_top_menu(),
+                               categories=categories(),
+                               institutions=institutions(),
+                               lock=None)
 
     if seminar.new:
         data = {'shortname': shortname,
@@ -84,21 +94,35 @@ def save_seminar():
             else:
                 data[col] = process_user_input(val, db.seminars.col_type[col])
         except Exception as err:
-            flash_error("Error processing %s: %s" % (col, err))
-            seminar = WebSeminar(shortname, data=raw_data)
-            return render_template("edit_seminar.html",
-                                   seminar=seminar,
-                                   title="Edit seminar error",
-                                   top_menu=basic_top_menu(),
-                                   categories=categories(),
-                                   institutions=institutions(),
-                                   lock=None)
+            return make_error(err)
     if not data['timezone'] and data['institutions']:
         # Set time zone from institution
         data['timezone'] = WebInstitution(data['institutions'][0]).timezone
     print(data)
-    new_version = WebSeminar(shortname, data=data)
-    new_version.save()
+    organizer_data = []
+    for i in range(6):
+        D = {'seminar_id': seminar.shortname}
+        for col in db.seminar_organizers.search_cols:
+            if col in D: continue
+            name = "org_%s%s" % (col, i)
+            try:
+                val = raw_data.get(name)
+                if val == '':
+                    D[col] = None
+                elif val is None:
+                    D[col] = False # checkboxes
+                else:
+                    D[col] = process_user_input(val, db.seminar_organizers.col_type[col])
+            except Exception as err:
+                return make_error(err)
+        if D.get('email') or D.get('full_name'):
+            D['order'] = len(organizer_data)
+            organizer_data.append(D)
+    new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
+    if seminar.new or new_version != seminar:
+        new_version.save()
+    if seminar.organizer_data != new_version.organizer_data:
+        new_version.save_organizers()
     edittype = "created" if new else "edited"
     flash("Seminar successfully %s!" % edittype)
     return redirect(url_for("show_seminar", shortname=shortname), 301)

@@ -2,13 +2,13 @@
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, allowed_shortname
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, allowed_shortname, category_dict
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
 
 
 class WebSeminar(object):
-    def __init__(self, shortname, data=None, editing=False, showing=False, saving=False):
+    def __init__(self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False):
         if data is None and not editing:
             data = seminars_lookup(shortname)
             if data is None:
@@ -19,6 +19,7 @@ class WebSeminar(object):
             self.shortname = shortname
             self.display = current_user.is_creator()
             self.online = True # default
+            self.access = "open" # default
             self.archived = False # don't start out archived
             self.is_conference = False # seminar by default
             for key, typ in db.seminars.col_type.items():
@@ -30,14 +31,88 @@ class WebSeminar(object):
                     setattr(self, key, [])
                 else:
                     raise ValueError("Need to update seminar code to account for schema change")
+            if organizer_data is None:
+                organizer_data = [{'seminar_id': self.shortname,
+                                   'email': current_user.email,
+                                   'full_name': current_user.name,
+                                   'order': 0,
+                                   'curator': True,
+                                   'display': False,
+                                   'contact': False}]
         else:
             self.__dict__.update(data)
+        if organizer_data is None:
+            organizer_data = list(db.seminar_organizers.search({'seminar_id': self.shortname}, sort=['order']))
+        self.organizer_data = organizer_data
 
     def __repr__(self):
         return self.name
 
+    def __eq__(self, other):
+        # Note that equality ignores organizers
+        print("self ", {key : getattr(self, key, None) for key in db.seminars.search_cols})
+        print("other", {key : getattr(other, key, None) for key in db.seminars.search_cols})
+        return (isinstance(other, WebSeminar) and
+                all(getattr(self, key, None) == getattr(other, key, None) for key in db.seminars.search_cols))
+
+    def __ne__(self, other):
+        return not (self == other)
+
     def save(self):
         db.seminars.insert_many([{col: getattr(self, col, None) for col in db.seminars.search_cols}])
+
+    def save_organizers(self):
+        for i, rec in enumerate(self.organizer_data):
+            if 'email' in rec:
+                db.seminar_organizers.upsert({'email': rec['email'], 'seminar_id': self.shortname}, rec)
+
+    def show_categories(self):
+        if self.categories:
+            return " (" + ", ".join(category_dict()[cat] for cat in self.categories) + ")"
+        else:
+            return ""
+
+    def show_institutions(self):
+        if self.institutions:
+            links = []
+            for rec in db.institutions.search({'shortname': {'$in': self.institutions}},
+                                              ['shortname', 'name', 'homepage'], sort=['name']):
+                if rec['homepage']:
+                    links.append('<a href="%s">%s</a>' % (rec['homepage'], rec['name']))
+                else:
+                    links.append(rec['name'])
+            return "/".join(links)
+        else:
+            return ""
+
+    def editors(self):
+        return [rec['email'] for rec in self.organizer_data]
+
+    def _show_editors(self, label, negate=False):
+        editors = []
+        for rec in self.organizer_data:
+            show = rec['curator']
+            if negate:
+                show = not show
+            if show and rec['display']:
+                name = rec['full_name']
+                if not name:
+                    if not rec['contact']: continue
+                    name = rec['email']
+                if rec['contact']:
+                    editors.append('<a href="mailto:%s">%s</a>' % (rec['email'], name))
+                else:
+                    editors.append(name)
+        if editors:
+            return "<tr><td>%s:</td><td>%s</td></tr>" % (label, ", ".join(editors))
+        else:
+            return ""
+
+    def show_organizers(self):
+        return self._show_editors("Organizers", negate=True)
+
+    def show_curators(self):
+        return self._show_editors("Curators")
 
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")

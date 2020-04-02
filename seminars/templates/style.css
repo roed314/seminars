@@ -123,6 +123,7 @@ table tbody tr.trivial a:hover {
 }
 
 #content a {
+    color: {{ color.col_link }};
 }
 #content .announce {
   font-size: 1.2em;
@@ -605,7 +606,9 @@ button, select {
 }
 
 button {
-   background: {{color.button_background}};
+    background: {{color.button_background}};
+    color: {{color.white}};
+    font-weight: bold;
 }
 
 select {
