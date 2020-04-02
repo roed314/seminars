@@ -16,7 +16,7 @@
 
 <p>
   {% if talk.live_link %}
-  {% if user_is_authenticated %}
+  {% if user.is_authenticated %}
   Access <a href="{{talk.live_link}}">online</a>.
   {% else %}
   To see access link, please <a href="{{url_for('user.info')}}">log in</a> (anti-spam measure).

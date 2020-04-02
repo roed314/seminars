@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% if user_is_authenticated %}
+{% if user.is_authenticated %}
 {% if seminar_subscriptions or talk_subscriptions %}
 <p>Add instructions for downloading calendar file...</p>
 {% else %}
@@ -34,7 +34,7 @@
 {% endfor %}
 </table>
 {% endif %} {# talk_subscriptions #}
-{% else %} {# user_is_authenticated #}
+{% else %} {# user.is_authenticated #}
 <p>
   Once you <a href="{{url_for('user.register')}}">register</a> and <a href="{{url_for('user.info')}}">log in</a>, you can add seminars and talks to your personal subscription.  These are then available to import into a calendar app such as Google calendar or Apple iCal.
 </p>

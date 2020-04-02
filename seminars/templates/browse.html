@@ -2,11 +2,11 @@
 
 {% block content %}
 
-{% if user_is_authenticated and no_subscription %}
+{% if user.is_authenticated and no_subscription %}
 <p>
   <a href="{{ url_for('search') }}">Search</a> for seminars and talks to follow.
 </p>
-{% elif not user_is_authenticated %}
+{% elif not user.is_authenticated %}
 <p id="filter-instruction">
   Use the Filter option to select categories of interest.
 </p>
