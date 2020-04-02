@@ -25,9 +25,10 @@ foo = moment();
 
 $(document).ready(function() {
 
-  var start = moment().subtract(29, 'days');
-  var end = moment();
+  var start = moment();
+  var end = moment().add(6, 'days');
   var beginningoftime = '01/01/2020';
+  var endoftime = '01/01/2050';
 
 
 
@@ -39,40 +40,40 @@ $(document).ready(function() {
         startDate: start,
         endDate: end,
         autoUpdateInput: false,
+        opens: "center",
+        drops: "down",
         ranges: {
-           'No restriction': ['', ''],
-           'Future': [moment(), ''],
+           'No restriction': [beginningoftime, endoftime],
+           'Future': [moment(), endoftime],
            'Past': [beginningoftime, moment()],
            'Today': [moment(), moment()],
-           'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-           'This Month': [moment().startOf('month'), moment().endOf('month')],
-           'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+           'Next 7 Days': [moment(), moment().add(6, 'days')],
+           'Next 30 Days': [moment(), moment().add(29, 'days')],
         },
       },
-      function cb(start, end, label) {
-      foo = start;
-      console.log(start);
-      console.log(end);
-      if(start != '') {
-        if(start.format('MM/DD/YYYY') == beginningoftime){
-          start = '';
-        } else {
-          start = start.format('MMMM D, YYYY')
-        }
+      function(start, end, label) {
+      if(start.format('MM/DD/YYYY') == beginningoftime){
+        start = '';
+      } else {
+        start = start.format('MMMM D, YYYY')
       }
-      if(end != '') {
+      if(end.format('MM/DD/YYYY') == endoftime) {
+        end = '';
+      } else {
         end =  end.format('MMMM D, YYYY')
       }
+      // everything is a string from now on
       if(start == "Invalid date") {
         start = ''
       }
       if(end == "Invalid date") {
         end = ''
       }
-      $('input[name="daterange"]').val(start + ' - ' + end);
-      console.log('New date range selected: ' + start + ' to ' + end +  " label = " + label + ')');
+      if(start == '' && end == '') {
+        $('#daterange').val('');
+      } else {
+        $('#daterange').val(start + ' - ' + end);
+      }
     }
     );
 

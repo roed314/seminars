@@ -666,6 +666,17 @@ table th, table td {
   padding-right: 10px;
 }
 
+table th, table td {
+  padding-left:  10px;
+  padding-right: 10px;
+}
+
+.daterangepicker td, .daterangepicker th{
+  padding-left:  unset;
+  padding-right: unset;
+}
+
+
 table.newforms {
 /* to put a table after the properties box */
     clear: right;
