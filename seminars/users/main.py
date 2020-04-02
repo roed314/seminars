@@ -35,7 +35,6 @@ def load_user(uid):
 
 login_manager.login_view = "user.info"
 
-# this anonymous user has the is_admin() method
 login_manager.anonymous_user = SeminarsAnonymousUser
 
 def get_username(uid):
@@ -47,10 +46,7 @@ def get_username(uid):
 @app.context_processor
 def ctx_proc_userdata():
     userdata = {'user': current_user} # this should be sufficient....
-    userdata['userid'] = 'anon' if current_user.is_anonymous() else current_user._uid
-    userdata['username'] = 'Anonymous' if current_user.is_anonymous() else current_user.name
-    userdata['user_is_admin'] = current_user.is_admin()
-    userdata['user_is_creator'] = current_user.is_creator()
+    # used to display name of locks
     userdata['get_username'] = get_username  # this is a function
     return userdata
 

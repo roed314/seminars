@@ -20,7 +20,7 @@
   {% else %}
     {% from "knowl-defs.html" import knowlbar with context %}
 
-    {% set renamable = (k.type == 0 and k.exists() and user_is_admin and k.source is none) %}
+    {% set renamable = (k.type == 0 and k.exists() and user.is_admin() and k.source is none) %}
     {% set renaming_other_to_this = (k.type == 0 and k.source is not none and k.id != k.source) %}
     {% set renaming_this_to_other = (k.type == 0 and k.id == k.source) %}
     {% if k.type == -2 %}
