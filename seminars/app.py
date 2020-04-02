@@ -5,7 +5,7 @@ import time
 import datetime
 
 from flask import (Flask, g, render_template, request, make_response,
-                   redirect, url_for, current_app, abort)
+                   redirect, url_for, current_app, abort, session)
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
@@ -185,28 +185,15 @@ def blanknone(x):
     return str(x)
 
 ##############################
-#    Redirects and errors    #
+#    Redirects    #
 ##############################
 
-#@app.before_request
-#def netloc_redirect():
-#    """
-#        Redirect lmfdb.org -> www.lmfdb.org
-#        Redirect {www, beta, }.lmfdb.com -> {www, beta, }.lmfdb.org
-#        Force https on www.lmfdb.org
-#        Redirect non-whitelisted routes from www.lmfdb.org to beta.lmfdb.org
-#    """
-#    from six.moves.urllib.parse import urlparse, urlunparse
-#
-#    urlparts = urlparse(request.url)
-#
-#    if (
-#        urlparts.netloc == "beantheory.org"
-#        and request.headers.get("X-Forwarded-Proto", "http") != "https"
-#        and request.url.startswith("http://")
-#    ):
-#        url = request.url.replace("http://", "https://", 1)
-#        return redirect(url, code=301)
+@app.before_request
+def timezone_cookie_enforcer():
+    if not request.cookies.get('browser_timezone'):
+        # sets a cookie and goes back to the original url
+        return render_template("timezone.html", url=request.url)
+
 
 def timestamp():
     return '[%s UTC]' % time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
@@ -260,6 +247,7 @@ def info():
     from socket import gethostname
     output = url_for("info", _external=True) + "\n"
     output += "HOSTNAME = %s\n\n" % gethostname()
+    output += "browser timezone = " + str(request.cookies.get('browser_timezone')) + "\n\n"
     output += "# PostgreSQL info\n"
     from . import db
     if not db.is_alive():

@@ -14,12 +14,13 @@ from seminars.tokens import generate_token
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
 from datetime import datetime
-from pytz import UTC, all_timezones
+from pytz import UTC, all_timezones, timezone
 
 from .main import logger
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
 from flask_login import UserMixin, AnonymousUserMixin
+from flask import request
 
 class PostgresUserTable(PostgresSearchTable):
     def __init__(self):
@@ -214,6 +215,10 @@ class SeminarsUser(UserMixin):
     def timezone(self):
         return self._data.get('timezone')
 
+    @property
+    def tz(self):
+        return timezone(self._data['timezone'])
+
     @timezone.setter
     def timezone(self, timezone):
         self._data['timezone'] = timezone
@@ -315,6 +320,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
 
     def pending_requests(self):
         return 0
+
+    @property
+    def tz(self):
+        return timezone(request.cookies.get('browser_timezone'))
 
     # For versions of flask_login earlier than 0.3.0,
     # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a
