@@ -55,7 +55,8 @@ class SemSearchArray(SearchArray):
                      ("future", "the future"),
                      ("past", "the past")])
         date = TextBox( # should have date widget?
-            name="date",
+            name="daterange",
+            id="daterange",
             label="Date")
         video = YesNoBox(
             name="video",
