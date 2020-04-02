@@ -28,7 +28,6 @@ mail_settings = {
 }
 
 app.config.update(mail_settings)
-app.config['SERVER_NAME'] = 'localhost:37778'
 mail = Mail(app)
 
 ############################
