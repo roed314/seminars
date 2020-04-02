@@ -176,6 +176,8 @@ def save_institution():
                     raise ValueError("%s must have a PhD to administer an institution" % val)
             if col == 'homepage' and not val.startswith("http"):
                 data[col] = "https://" + data[col]
+            if col == "access" and val not in ["open", "users", "endorsed"]:
+                raise ValueError("Invalid access type")
         except Exception as err:
             flash_error("Error processing %s: %s" % (col, err))
             institution = WebInstitution(shortname, data=raw_data)
