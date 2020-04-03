@@ -13,13 +13,42 @@
 
         </form>
 </div>
-<form id='searchseminars' onsubmit="cleanSubmit(this.id)">
-  {{ info.seminar_search_array.html() | safe }}
-</form>
+<div id='searchseminars'>
+  <form  id='form_searchseminars' onsubmit="cleanSubmit(this.id)">
+    {{ info.seminar_search_array.html() | safe }}
+  </form>
+  {% if info.search_type == 'seminars' %}
+  <table class='ntdata'>
+    <thead>
+      <tr>
+        <th class="center">Institutions</th>
+        <th class="center">Name</th>
+        <th class="center">Description</th>
+        <th class="center">Categories</th>
+        <th class="center"></th>
+      </tr>
+    </thead>
+    {% for seminar in info.seminar_results: %}
+    <tr>
+      <td class="center">{{ seminar.show_institutions() | safe}}</td>
+      <td class="center">{{ seminar.show_name() | safe }}</td>
+      <td class="center">{{ seminar.show_description() | safe }}</td>
+      <td class="center">{{ seminar.show_categories() | safe }}</td>
+      <td class="center">{{ seminar.show_subscribe() | safe }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
 
-<form id='searchtalks' onsubmit="cleanSubmit(this.id)" style='display:none;'>
-  {{ info.takks_search_array.html() | safe }}
+<div id='searchtalks' style='display:none;'>
+<form id='form_searchtalks' onsubmit="cleanSubmit(this.id)" >
+  {{ info.talks_search_array.html() | safe }}
 </form>
+</div>
+
+{% include 'debug_info.html' %}
+
 
 <script>
 const st = {};

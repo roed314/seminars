@@ -122,8 +122,7 @@ class WebTalk(object):
         return self.title if self.title else "TBA"
 
     def show_seminar(self):
-        # Link to seminar
-        return '<a href="%s">%s</a>' % (url_for("show_seminar", shortname=self.seminar_id), self.seminar.name)
+        return seminar.show_name()
 
     def show_speaker(self):
         # As part of a list

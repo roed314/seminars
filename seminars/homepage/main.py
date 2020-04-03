@@ -5,6 +5,7 @@ from seminars.seminar import seminars_lucky
 from seminars.utils import basic_top_menu, categories
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
+from seminars.seminar import seminars_search
 from flask_login import current_user
 import datetime
 import pytz
@@ -51,8 +52,9 @@ def parse_institution_talk(info, query):
 
 
 def parse_online(info, query):
-    if info.get("online") != "all":
-        query["online"] = {"": True, "exclude": "False"}[info.get("online")]
+    online = info.get("online")
+    if online  and  online != "all":
+        query["online"] = {"": True, "exclude": "False"}[online]
 
 
 def parse_substring(info, query, field, qfield, start="%", end="%"):
@@ -246,9 +248,11 @@ def index():
 
 @app.route("/search")
 def search():
-    info = to_dict(request.args, seminar_search_array=SemSearchArray(), takks_search_array=TalkSearchArray())
+    info = to_dict(request.args,
+                   seminar_search_array=SemSearchArray(),
+                   talks_search_array=TalkSearchArray())
     if len(request.args) > 0:
-        st = info.get("search_type", info.get("hst", "talks"))
+        st = info["search_type"] = info.get("search_type", info.get("hst", "talks"))
         if st == "talks":
             return search_talks(info)
         elif st == "seminars":
@@ -357,13 +361,18 @@ def by_category(category):
     return search({"category": category})
 
 
-@search_wrap(
-    template="seminar_search_results.html",
-    table=db.seminars,
-    title="Seminar Search Results",
-    err_title="Seminar Search Input Error",
-    bread=lambda: [("Search results", " ")],
-)
-def search_seminars(info, query):
-    # For now, just ignore the info and return all results
-    pass
+def search_seminars(info):
+    query = {}
+    seminars_parser(info, query)
+    info['seminar_results'] = seminars_search(query)
+    menu = basic_top_menu()
+    menu.pop(1)
+    return render_template(
+        "search.html",
+        title="Search seminars",
+        info=info,
+        categories=categories(),
+        top_menu=menu,
+        bread=None,
+    )
+
