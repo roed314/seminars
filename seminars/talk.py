@@ -60,7 +60,7 @@ class WebTalk(object):
         db.talks.insert_many([{col: getattr(self, col, None) for col in db.talks.search_cols}])
 
     def show_time(self):
-        return self.start_time.strftime("%a %b %-d, %-H:%M")
+        return self.start_time.astimezone(current_user.tz).strftime("%a %b %-d, %-H:%M")
 
     def show_time_link(self):
         return '<a href="%s">%s</a>' % (url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr), self.show_time())
@@ -79,8 +79,8 @@ class WebTalk(object):
         def ans(rmk):
             return '<span class="localtime" data-utcoffset="%s">%s-%s</span> (%s)' % (
                 int(start.utcoffset().total_seconds() / 60),
-                start.strftime("%a %b %-d, %-H:%M"),
-                end.strftime("%-H:%M"),
+                start.astimezone(current_user.tz).strftime("%a %b %-d, %-H:%M"),
+                end.astimezone(current_user.tz).strftime("%-H:%M"),
                 rmk)
         # Add remark on when this is
         if start <= now <= end:

@@ -17,7 +17,7 @@ from lmfdb import db
 assert db
 from seminars.utils import timezones, basic_top_menu
 from seminars.tokens import generate_timed_token, read_timed_token
-import pytz
+import pytz, datetime
 
 
 login_page = Blueprint("user", __name__, template_folder='templates')
@@ -45,7 +45,8 @@ def get_username(uid):
 # globally define user properties and username
 @app.context_processor
 def ctx_proc_userdata():
-    userdata = {'user': current_user}
+    userdata = {'user': current_user,
+                'usertime': datetime.datetime.now(tz=current_user.tz)}
     # used to display name of locks
     userdata['get_username'] = get_username  # this is a function
     return userdata
