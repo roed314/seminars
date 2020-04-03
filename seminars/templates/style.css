@@ -338,9 +338,10 @@ tr.catunselected {
 }
 
 #main {
-  margin:  0px 0px 0px 200px;
+  margin:  0px auto;
   padding: 0px 0px 0px 10px;
   min-height: 700px;
+  max-width: 1000px;
 }
 
 .debug {
