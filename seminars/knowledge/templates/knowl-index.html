@@ -91,7 +91,7 @@ $(function() {
  <td>More</td>
  <td>
    <a href="{{ url_for('.history') }}">Recently modified Knowls</a>
-   {%- if user_is_authenticated -%}
+   {%- if user.is_authenticated -%}
    , <a href="{{ url_for('.comment_history') }}">Recent comments</a>, <a href="{{ url_for('.broken_links') }}">Broken links</a>
    {%- endif -%}
    {%- if user_can_review_knowls -%}
@@ -117,7 +117,7 @@ $(function() {
   {%- endfor %}
 </table>
 
-{% if user_is_authenticated -%}
+{% if user.is_authenticated -%}
   <hr/>
   <h2>Create Knowl</h2>
   <form action="{{ url_for('.edit_form') }}" method="POST">

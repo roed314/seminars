@@ -1,0 +1,13 @@
+<script>
+const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+document.cookie = "browser_timezone=" + tz + ";path=/"
+console.log(document.cookie)
+window.location.replace("{{url}}")
+</script>
+<p>
+  You should have been redirected to {{url}} :(
+</p>
+<p>
+Please enable javascript and accept our cookies
+</p>
+<iframe width="511" height="383" src="https://www.youtube.com/embed/Ye8mB6VsUHw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

@@ -8,6 +8,8 @@ from flask import render_template, request, url_for
 from flask_login import current_user
 import datetime
 import pytz
+from lmfdb.utils.search_parsing import search_parser
+from dateutil.parser import parse
 
 from lmfdb.utils import (
     SearchArray,
@@ -16,6 +18,7 @@ from lmfdb.utils import (
     YesNoBox,
     to_dict,
     search_wrap,
+    flash_error,
 )
 
 
@@ -24,62 +27,201 @@ def get_now():
     return datetime.datetime.now(pytz.UTC)
 
 
-class SemSearchArray(SearchArray):
-    noun = "seminar"
-    plural_noun = "seminars"
+def parse_category(info, query):
+    # of the talk
+    if info.get("category"):
+        query["categories"] = {"$containts": info.get("category")}
+
+
+def parse_institution_sem(info, query):
+    if info.get("institution") == "None":
+        query["institutions"] = None
+    elif info.get("institution"):
+        # one day we will do joins
+        inst_id = db.institutions.lucky({"shortname": info.get("institutions")}, "id")
+        query["institutions"] = {"$contains": inst_id}
+
+
+def parse_institution_talk(info, query):
+    sub_query = {}
+    # one day we will do joins
+    parse_institution_sem(info, sub_query)
+    sem_shortnames = db.seminars.search(sub_query, "shortname")
+    query["seminar_id"] = {"$in": sem_shortnames}
+
+
+def parse_online(info, query):
+    if info.get("online") != "all":
+        query["online"] = {"": True, "exclude": "False"}[info.get("online")]
+
+
+def parse_substring(info, query, field, qfield, start="%", end="%"):
+    if info.get("field"):
+        kwds = [elt.strip() for elt in info.get("field").split(",") if elt.strip()]
+        query[qfield] = {"$or": [{"$LIKE": start + elt + end} for elt in kwds]}
+
+
+def parse_access(info, query):
+    # we want exact matches
+    parse_substring(info, query, "access", "access", start="", end="")
+
+
+def parse_date(info, query):
+    tz = current_user.tz
+    date = info.get("daterange")
+    if date:
+        sub_query = {}
+        if "-" not in date:
+            # make it into a range
+            date = date + "-" + date
+        start, end = date.split("-")
+        if start.strip():
+            try:
+                start = tz.localize(parse(start))
+            except Exception:
+                flash_error("Could not parse date: %s", start)
+            sub_query["$gte"] = start
+        if end.strip():
+            try:
+                end = tz.localize(parse(end))
+            except Exception:
+                flash_error("Could not parse date: %s", end)
+            end = end + timedelta(hours=23, minutes=59, seconds=59)
+            sub_query["$lte"] = end
+        if sub_query:
+            query["start_time"] = sub_query
+
+
+def parse_video(info, query):
+    v = info.get("video")
+    if v == "yes":
+        query["video"] = {"$not": None}
+    elif v == "no":
+        query["video"] = None
+
+
+def talks_parser(info, query):
+    parse_category(info, query)
+    parse_institution_talk(info, query)
+    parse_online(info, query)
+    parse_substring(info, query, "keywords", "keywords")
+    parse_access(info, query)
+
+    parse_substring(info, query, "speaker", "speaker")
+    parse_substring(info, query, "affiliation", "speaker_affiliation")
+    parse_substring(info, query, "title", "title")
+    parse_date(info, query)
+    parse_video(info, query)
+
+
+def seminars_parser(info, query):
+    parse_category(info, query)
+    parse_institution_sem(info, query)
+    parse_online(info, query)
+    parse_substring(info, query, "keywords", "keywords")
+    parse_access(info, query)
+
+    parse_substring(info, query, "name", "name")
+
+
+# Common boxes
+## categories
+category = SelectBox(
+    name="category", label="Category", options=[("", "")] + categories()
+)
+## pick institution where it is held
+
+
+def institutions_shortnames():
+    return sorted(db.institutions.search({}, projection="shortname"))
+
+
+institution = SelectBox(
+    name="institution",
+    label="Institution",
+    options=[("", ""), ("No institution", "None"),]
+    + [(elt, elt) for elt in institutions_shortnames()],
+)
+## online only?
+online = SelectBox(
+    name="online",
+    label="Online",
+    options=[("", "only"), ("all", "and offline"), ("exclude", "exclude")],
+)
+## keywords for seminar or talk
+keywords = TextBox(
+    name="keywords", label="Keywords", colspan=(1, 2, 1), width=160 * 2 - 1 * 20
+)
+## type of access
+access = SelectBox(
+    name="access", label="Access", options=[("", ""), ("open", "open only")]
+)
+## number of results to display
+count = TextBox(name="count", label="Results to display", example=50)
+
+
+class TalkSearchArray(SearchArray):
+    noun = "talk"
+    plural_noun = "talks"
 
     def __init__(self):
-        category = SelectBox(
-            name="category", label="Category", options=[("", "")] + categories()
+        speaker = TextBox(
+            name="speaker", label="Speaker", colspan=(1, 2, 1), width=160 * 2 - 1 * 20
         )
-        speaker = TextBox(name="speaker",
-                          label="Speaker",
-                          colspan=(1,2,1),
-                          width=160*2 - 1*20)
-        affiliation = TextBox(name="affiliation",
-                              label="Affiliation",
-                              colspan=(1,2,1),
-                              width=160*2 - 1*20)
-        institutions_shortnames = [(elt, elt) for elt in sorted(db.institutions.search({}, projection="shortname"))]
-        institutions_options = [("", ""), ("No institution", "None")] + institutions_shortnames
-        institution = SelectBox(
-            name="institution",
-            label="Institution",
-            options=institutions_options
+        affiliation = TextBox(
+            name="affiliation",
+            label="Affiliation",
+            colspan=(1, 2, 1),
+            width=160 * 2 - 1 * 20,
         )
-        title = TextBox(name="title",
-                        label="Title",
-                        colspan=(1,2,1),
-                        width=160*2 - 1*20)
-        keywords = TextBox(name="keywords",
-                           label="Keywords",
-                           colspan=(1,2,1),
-                           width=160*2 - 1*20)
-        online = SelectBox(
-            name="online",
-            label="Online",
-            options=[("", "only"), ("all", "and offline"), ("exclude", "exclude")],
+        title = TextBox(
+            name="title", label="Title", colspan=(1, 2, 1), width=160 * 2 - 1 * 20
         )
         date = TextBox(  # should have date widget?
             name="daterange",
             id="daterange",
             label="Date",
             colspan=(1, 2, 1),
-            width=160*2 - 1*20,
+            width=160 * 2 - 1 * 20,
         )
         video = YesNoBox(name="video", label="Has video")
-        access = SelectBox(
-            name="access", label="Access", options=[("", ""), ("open", "open only")]
-        )
-        count = TextBox(name="count", label="Results to display", example=50)
         self.browse_array = [
             [category, keywords],
             [institution, title],
             [online, speaker],
-            [video, affiliation],
-            [access, date],
+            [access, affiliation],
+            [video, date],
             [count],
         ]
+    def search_types(self, info):
+        st = self._st(info)
+        if st is None or st == 'seminars':
+            return [('talks', 'List of talks')]
+        else:
+            return [('talks', 'Search again')]
+
+
+class SemSearchArray(SearchArray):
+    noun = "seminar"
+    plural_noun = "seminars"
+
+    def __init__(self):
+        name = TextBox(
+            name="name", label="Name", colspan=(1, 2, 1), width=160 * 2 - 1 * 20
+        )
+
+        self.browse_array = [
+            [category, keywords],
+            [institution, name],
+            [online, access],
+            [count],
+        ]
+    def search_types(self, info):
+        st = self._st(info)
+        if st is None or st == 'talks':
+            return [('seminars', 'List of seminars')]
+        else:
+            return [('seminars', 'Search again')]
 
 
 @app.route("/")
@@ -96,7 +238,6 @@ def index():
         "browse.html",
         title="Math Seminars",
         info={},
-        categories=categories(),
         talks=talks,
         top_menu=menu,
         bread=None,
@@ -105,7 +246,7 @@ def index():
 
 @app.route("/search")
 def search():
-    info = to_dict(request.args, search_array=SemSearchArray())
+    info = to_dict(request.args, seminar_search_array=SemSearchArray(), takks_search_array=TalkSearchArray())
     if len(request.args) > 0:
         st = info.get("search_type", info.get("hst", "talks"))
         if st == "talks":

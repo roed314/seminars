@@ -11,8 +11,11 @@ function toggle_time() {
         future.show();
     }
 }
+const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+document.cookie = "browser_timezone=" + tz + ";path=/"
 
 $(document).ready(function () {
+
     $('#timetoggle').click(
         function (evt) {
             evt.preventDefault();
@@ -20,8 +23,6 @@ $(document).ready(function () {
             return false;
         });
 });
-
-foo = moment();
 
 $(document).ready(function() {
 
@@ -81,5 +82,6 @@ $(document).ready(function() {
 
 
 });
+
 
 

@@ -2350,3 +2350,91 @@ input.color_selecter {
 .advanced {
     display: none;
 }
+
+
+/* toggle copy pasta */
+
+:root {
+    --accent: {{color.button_background}};
+    --border-width: 5px;
+    --border-radius: 55px;
+    --font-size: 15px;
+    --perspective: 2000px;
+}
+
+.container {
+    perspective: var(--perspective);
+    display: flex;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.toggle {
+    position: relative;
+    border: solid var(--border-width) var(--accent);
+    border-radius: var(--border-radius);
+    transition: transform cubic-bezier(0, 0, 0.30, 2) .4s;
+    transform-style: preserve-3d;
+    perspective: var(--perspective);
+}
+
+.toggle>input[type="radio"] {
+    display: none;
+}
+
+.toggle>#choice1:checked~#flap {
+    transform: rotateY(0deg);
+}
+.toggle>#choice1:checked~#flap>.content {
+    transform: rotateY(0deg);
+}
+
+.toggle>#choice2:checked~#flap {
+    transform: rotateY(180deg);
+}
+
+.toggle>#choice2:checked~#flap>.content {
+    transform: rotateY(180deg);
+}
+
+
+
+.toggle>label {
+    display: inline-block;
+    min-width: 170px;
+    padding: 20px;
+    font-size: var(--font-size);
+    text-align: center;
+    color: var(--accent);
+    cursor: pointer;
+}
+
+.toggle>label,
+.toggle>#flap {
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.toggle>#flap {
+    position: absolute;
+    top: calc( 0px - var(--border-width));
+    right: 50%;
+    height: calc(100% + var(--border-width) * 2);
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: var(--font-size);
+    background-color: var(--accent);
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+    transform-style: preserve-3d;
+    transform-origin: right;
+    transition: transform cubic-bezier(0.4, 0, 0.2, 1) .5s;
+}
+
+.toggle>#flap>.content {
+    color: white;
+    transition: transform 0s linear .25s;
+    transform-style: preserve-3d;
+}

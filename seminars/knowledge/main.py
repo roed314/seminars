@@ -664,7 +664,7 @@ def render_knowl(ID, footer=None, kwargs=None,
         render_me += """\
   <div class="knowl-footer">
     <a href="{{ url_for('.show', ID='%(ID)s', %(kw_params)s) }}">permalink</a>
-    {%% if user_is_authenticated %%}
+    {%% if user.is_authenticated %%}
       &middot;
       <a href="{{ url_for('.edit', ID='%(ID)s') }}">edit</a>
     {%% endif %%}

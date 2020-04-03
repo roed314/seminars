@@ -1,7 +1,7 @@
 {% extends 'homepage.html' %}
 {% block content %}
 
-{% if not user_is_authenticated %}
+{% if not user.is_authenticated %}
   <h1>You are not logged in</h1>
 
   <div style="margin-bottom: 20px">New user?

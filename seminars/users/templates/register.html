@@ -3,6 +3,7 @@
 
 <h1>Register</h1>
 
+{{ current_user.tz }}
 <form name="login" action="{{ url_for('.register') }}" method="POST">
   <table>
     <tr>
@@ -96,7 +97,6 @@ $(function () {
   checkpw();
 })
 
-const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 $('select option[value="'+tz+'"]').attr("selected",true);
 </script>
 

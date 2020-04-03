@@ -1,9 +1,70 @@
 {% extends 'homepage.html' %}
 
 {% block content %}
+<div class="container">
+        <form class="toggle">
+            <input type="radio" id="choice1" name="choice" value="seminars">
+            <label for="choice1">Seminars</label>
 
-<form id='search' onsubmit="cleanSubmit(this.id)">
-  {{ info.search_array.html() | safe }}
+            <input type="radio" id="choice2" name="choice" value="talks">
+            <label for="choice2">Talks</label>
+            <div id="flap"><span class="content">Seminars</span></div>
+
+
+        </form>
+</div>
+<form id='searchseminars' onsubmit="cleanSubmit(this.id)">
+  {{ info.seminar_search_array.html() | safe }}
 </form>
+
+<form id='searchtalks' onsubmit="cleanSubmit(this.id)" style='display:none;'>
+  {{ info.takks_search_array.html() | safe }}
+</form>
+
+<script>
+const st = {};
+
+st.flap = document.querySelector('#flap');
+st.toggle = document.querySelector('.toggle');
+
+st.choice1 = document.querySelector('#choice1');
+st.choice2 = document.querySelector('#choice2');
+
+st.flap.addEventListener('transitionend', () => {
+
+    if (st.choice1.checked) {
+        st.toggle.style.transform = 'rotateY(-15deg)';
+        setTimeout(() => st.toggle.style.transform = '', 400);
+    } else {
+        st.toggle.style.transform = 'rotateY(15deg)';
+        setTimeout(() => st.toggle.style.transform = '', 400);
+    }
+
+})
+
+st.clickHandler = (e) => {
+
+    if (e.target.tagName === 'LABEL') {
+        setTimeout(() => {
+            st.flap.children[0].textContent = e.target.textContent;
+        }, 250);
+    }
+    if (e.target.textContent == 'Seminars') {
+      $('#searchseminars').show();
+      $('#searchtalks').hide();
+    } else if (e.target.textContent == 'Talks') {
+      $('#searchtalks').show();
+      $('#searchseminars').hide();
+    }
+  console.log( e.target.textContent);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    st.flap.children[0].textContent = st.choice1.nextElementSibling.textContent;
+});
+
+document.addEventListener('click', (e) => st.clickHandler(e));
+
+</script>
 
 {% endblock %}
