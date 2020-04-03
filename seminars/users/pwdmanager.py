@@ -322,6 +322,9 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
         return 0
 
     @property
+    def email(self):
+        return None
+
     def tz(self):
         return timezone(request.cookies.get('browser_timezone'))
 

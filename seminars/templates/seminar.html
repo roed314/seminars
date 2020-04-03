@@ -2,11 +2,23 @@
 
 {% block content %}
 
-{% if user.email in seminar.editors() %}
-<form action="{{url_for('create.edit_seminar')}}" method="POST">
-  <input type="hidden" name="shortname" value="{{seminar.shortname}}" />
-  <button type="submit">Edit</button>
-</form>
+{% if user.email in seminar.editors() or user.is_admin() %}
+<table>
+  <tr>
+    <td>
+      <form action="{{url_for('create.edit_seminar')}}" method="POST">
+        <input type="hidden" name="shortname" value="{{seminar.shortname}}" />
+        <button type="submit">Edit seminar</button>
+      </form>
+    </td>
+    <td>
+      <form action="{{url_for('create.edit_seminar_schedule')}}" method="POST">
+        <input type="hidden" name="shortname" value="{{seminar.shortname}}" />
+        <button type="submit">Edit schedule</button>
+      </form>
+    </td>
+  </tr>
+</table>
 {% endif %}
 
 <h1>{% if seminar.homepage %}<a href="{{seminar.homepage}}">{{seminar.name}}</a>{% else %}{{seminar.name}}{% endif %}{% if not seminar.display %} (hidden){% elif seminar.archived %} (inactive){% elif seminar.online %} (online){% endif %}</h1>
@@ -25,7 +37,8 @@
 {% endif %}
 <div id="future_talks">
 {% if future %}
-  <h3>Upcoming talks</h3>
+<h3>Upcoming talks</h3>
+{{ seminar.add_talk_link(ptag=True) | safe }}
   <table>
     {% for talk in future %}
     <tr>
@@ -33,11 +46,14 @@
     </tr>
     {% endfor %}
   </table>
-{% endif %}
+  {% elif not past %}
+  <p> There are not yet any talks in this seminar.  {{ seminar.add_talk_link(ptag=False) | safe }}</p>
+  {% endif %}
 </div>
 {% if past %}
 {% if not future %}
-<p> There are no upcoming talks. </p>
+<p> There are no upcoming talks. {{ seminar.add_talk_link(ptag=False) | safe }}
+</p>
 {% endif %}
 <div id="past_talks">
   <h3>Past talks</h3>

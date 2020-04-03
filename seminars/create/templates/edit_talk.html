@@ -3,7 +3,7 @@
 
       <form action="{{ url_for('.save_talk') }}" method="POST">
         <input type="hidden" name="seminar_id" value="{{ talk.seminar_id }}"/>
-        <input type="hidden" name="seminar_ctr" value="{{ talk.seminar_ctr }}"/>
+        <input type="hidden" name="seminar_ctr" value="{{ talk.seminar_ctr | blanknone }}"/>
         <input type="hidden" name="new" value="{{ 'yes' if talk.new else 'no' }}"/>
         <input type="hidden" name="token" value="{{ talk.token }}"/>
       <table>

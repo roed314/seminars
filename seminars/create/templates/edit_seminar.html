@@ -53,6 +53,7 @@
           <td>Institutions</td>
           <td>
             <select name="institutions" style="width:510px;">
+              <option value=""></option>
               {% for iid, name in institutions %}
               <option value="{{iid}}"{% if iid in seminar.institutions %} selected{% endif %}>{{name}}</option>
               {% endfor %}
@@ -61,6 +62,29 @@
           <td><a href="{{ url_for('list_institutions') }}" target="_blank">Add new institution</a> (must reload this page afterward)</td>
         </tr>
         {% endif %}
+        <tr>
+          <td>Meeting day</td>
+          <td>
+            <select name="weekday" style="width:510px;">
+              <option value=""></option>
+              {% for wkday in weekdays %}
+              <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Frequency (in days)</td>
+          <td><input name="frequency" style="width:500px;" value="{{ seminar.frequency | blanknone }}" /></td>
+        </tr>
+        <tr>
+          <td>Start time</td>
+          <td><input name="start_time" style="width:500px;" value="{{ seminar.start_time | blanknone }}" /></td>
+        </tr>
+        <tr>
+          <td>End time</td>
+          <td><input name="end_time" style="width:500px;" value="{{ seminar.end_time | blanknone }}" /></td>
+        </tr>
         {% if not user.phd or not seminar.new %}
         <tr>
           <td>Time zone</td>

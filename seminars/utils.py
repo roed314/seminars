@@ -62,6 +62,15 @@ def count_distinct(table, counter, query={}):
     cur = table._execute(counter, values)
     return int(cur.fetchone()[0])
 
+def max_distinct(table, maxer, col, constraint={}):
+    # Note that this will return None for the max of an empty set
+    cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
+    tbl = IdentifierWrapper(table.search_table)
+    qstr, values = table._build_query(constraint, sort=[])
+    maxer = maxer.format(IdentifierWrapper(col), cols, tbl, qstr)
+    cur = table._execute(maxer, values)
+    return cur.fetchone()[0]
+
 def search_distinct(table, selecter, counter, iterator, query={}, projection=1, limit=None, offset=0, sort=None, info=None):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -150,6 +159,8 @@ def process_user_input(inp, typ, lookup={}):
     elif typ == 'text':
         # should sanitize somehow?
         return inp
+    elif typ in ['int', 'smallint', 'bigint', 'integer']:
+        return int(inp)
     elif typ == 'text[]':
         # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
         return [inp]
@@ -157,5 +168,5 @@ def process_user_input(inp, typ, lookup={}):
         # Again, temporary
         return [lookup.get(inp)]
     else:
-        raise ValueError
+        raise ValueError("Unrecognized type %s" % typ)
 
