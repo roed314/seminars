@@ -31,7 +31,7 @@ def get_now():
 def parse_category(info, query):
     # of the talk
     if info.get("category"):
-        query["categories"] = {"$containts": info.get("category")}
+        query["categories"] = {"$contains": info.get("category")}
 
 
 def parse_institution_sem(info, query):
@@ -39,8 +39,8 @@ def parse_institution_sem(info, query):
         query["institutions"] = None
     elif info.get("institution"):
         # one day we will do joins
-        inst_id = db.institutions.lucky({"shortname": info.get("institutions")}, "id")
-        query["institutions"] = {"$contains": inst_id}
+        query["institutions"] = {"$contains": info.get("institution")}
+        print(query)
 
 
 def parse_institution_talk(info, query):
@@ -141,7 +141,7 @@ def institutions_shortnames():
 institution = SelectBox(
     name="institution",
     label="Institution",
-    options=[("", ""), ("No institution", "None"),]
+    options=[("", ""), ("None", "No institution", ),]
     + [(elt, elt) for elt in institutions_shortnames()],
 )
 ## online only?
