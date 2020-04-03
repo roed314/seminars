@@ -316,6 +316,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     def pending_requests(self):
         return 0
 
+    @property
+    def email(self):
+        return None
+
     # For versions of flask_login earlier than 0.3.0,
     # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a
     # property. To match the behavior of SeminarsUser, we make it callable always.

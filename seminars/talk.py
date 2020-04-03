@@ -1,10 +1,12 @@
 
 import pytz, datetime, random
-from flask import url_for
+from urllib.parse import urlencode, quote
+from flask import url_for, redirect
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct
-from seminars.seminar import WebSeminar
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct
+from seminars.seminar import WebSeminar, can_edit_seminar, seminars_lookup
+from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
 
 class WebTalk(object):
@@ -15,7 +17,7 @@ class WebTalk(object):
                 raise ValueError("Talk %s/%s does not exist" % (semid, semctr))
             data = dict(data.__dict__)
         if seminar is None:
-            seminar = WebSeminar(semid, organizer_data=[]) # don't need organizers
+            seminar = WebSeminar(semid)
         self.seminar = seminar
         self.new = (data is None)
         if self.new:
@@ -46,8 +48,22 @@ class WebTalk(object):
         title = self.title if self.title else "TBA"
         return "%s (%s) - %s" % (title, self.speaker, self.show_time())
 
+    def __eq__(self, other):
+        return (isinstance(other, WebTalk) and
+                all(getattr(self, key, None) == getattr(other, key, None) for key in db.talks.search_cols))
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def save(self):
+        assert self.__dict__.get('seminar_id') and self.__dict__.get('seminar_ctr')
+        db.talks.insert_many([{col: getattr(self, col, None) for col in db.talks.search_cols}])
+
     def show_time(self):
         return self.start_time.strftime("%a %b %-d, %-H:%M")
+
+    def show_time_link(self):
+        return '<a href="%s">%s</a>' % (url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr), self.show_time())
 
     def show_time_and_duration(self):
         start = self.start_time
@@ -78,13 +94,13 @@ class WebTalk(object):
             elif until < 36*hour:
                 return ans("starts in %s hours" % (round(until / hour)))
             elif until < 11*day:
-                return ans("starts in %s days" % (round(until / day)))
+                return ans("%s days from now" % (round(until / day)))
             elif until < 7*week:
-                return ans("starts in %s weeks" % (round(until / week)))
+                return ans(" %s weeks from now" % (round(until / week)))
             elif until < 2*year:
-                return ans("starts in %s months" % (round(until / month)))
+                return ans("%s months from now" % (round(until / month)))
             else:
-                return ans("starts in %s years" % (round(until / year)))
+                return ans("%s years from now" % (round(until / year)))
         else:
             ago = now - end
             if ago < minute:
@@ -102,20 +118,28 @@ class WebTalk(object):
             else:
                 return ans("%s years ago" % (round(ago / year)))
 
+    def show_title(self):
+        return self.title if self.title else "TBA"
+
     def show_seminar(self):
         # Link to seminar
         return '<a href="%s">%s</a>' % (url_for("show_seminar", shortname=self.seminar_id), self.seminar.name)
 
     def show_speaker(self):
         # As part of a list
-        return '<a href="%s">%s</a>' % (url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr), self.speaker)
+        if self.speaker_homepage:
+            return '<a href="%s">%s</a>' % (self.speaker_homepage, self.speaker)
+        else:
+            return self.speaker
 
     def show_speaker_and_seminar(self):
         # On homepage
         ans = ""
-        print(self.speaker_affiliation, self.seminar_id, self.seminar.name)
         if self.speaker:
-            ans += "by " + self.speaker
+            if self.speaker_homepage:
+                ans += 'by <a href="%s">%s</a>' % (self.speaker_homepage, self.speaker)
+            else:
+                ans += "by " + self.speaker
             if self.speaker_affiliation:
                 ans += " (%s)" % (self.speaker_affiliation)
         if self.seminar.name:
@@ -142,20 +166,83 @@ class WebTalk(object):
         else: # should never happen
             return ""
 
+    def edit_link(self):
+        return '<a href="%s">Edit</a>' % url_for("create.edit_talk", seminar_id=self.seminar_id, seminar_ctr=self.seminar_ctr)
+
     def oneline(self, include_seminar=True):
-        cols = [self.show_time()]
+        cols = []
+        if not include_seminar and (current_user.is_admin() or current_user.email in self.seminar.editors()):
+            cols.append(self.edit_link())
+        cols.append(self.show_time_link())
         if include_seminar:
             cols.append(self.show_seminar())
         cols.append(self.show_speaker())
-        cols.append(self.title)
+        cols.append(self.show_title())
         return "".join("<td>%s</td>" % c for c in cols)
 
     def split_abstract(self):
         return self.abstract.split("\n\n")
 
+    def speaker_link(self):
+        return "https://mathseminars.org/edit/talk/%s/%s/%s" % (self.seminar_id, self.seminar_ctr, self.token)
+
+    def send_speaker_link(self):
+        """
+        Creates a mailto link with instructions on editing the talk.
+        """
+        data = {'body': "Dear %s,\nYou can edit your upcoming talk using the the following link: %s.\n\nYours,\n%s" % (self.speaker, self.speaker_link(), current_user.name),
+                'subject': "%s: title and abstract" % self.seminar.name}
+        email_to = self.speaker_email if self.speaker_email else ''
+        return 'or <a href="mailto:%s?%s">email speaker a link</a>' % (email_to, urlencode(data, quote_via=quote))
+
+def can_edit_talk(seminar_id, seminar_ctr, token):
+    """
+    INPUT:
+
+    - ``seminar_id`` -- the identifier of the seminar
+    - ``seminar_ctr`` -- an integer as a string, or the empty string (for new talk)
+    - ``token`` -- a string (allows editing by speaker who might not have account)
+
+    OUTPUT:
+
+    - ``resp`` -- a response to return to the user (indicating an error) or None (editing allowed)
+    - ``seminar`` -- a WebSeminar object, as returned by ``seminars_lookup(seminar_id)``
+    - ``talk`` -- a WebTalk object, as returned by ``talks_lookup(seminar_id, seminar_ctr)``,
+                  or ``None`` (if error or talk does not exist)
+    """
+    new = not seminar_ctr
+    if seminar_ctr:
+        try:
+            seminar_ctr = int(seminar_ctr)
+        except ValueError:
+            flash_error("Invalid talk id")
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None, None
+    if token and seminar_ctr != "":
+        talk = talks_lookup(seminar_id, seminar_ctr)
+        if talk is None:
+            flash_error("Talk does not exist")
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None, None
+        elif token != talk.token:
+            flash_error("Invalid token for editing talk")
+            return redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301), None, None
+        seminar = seminars_lookup(seminar_id)
+    else:
+        resp, seminar = can_edit_seminar(seminar_id, new=False)
+        if resp is not None:
+            return resp, None, None
+        if seminar.new:
+            # TODO: This is where you might insert the ability to create a talk without first making a seminar
+            flash_error("You must first create the seminar %s" % seminar_id)
+            return redirect(url_for("edit_seminar", shortname=seminar_id), 301)
+        if new:
+            talk = WebTalk(seminar_id, seminar=seminar, editing=True)
+        else:
+            talk = WebTalk(seminar_id, seminar_ctr, seminar=seminar)
+    return None, seminar, talk
 
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (seminar_id, seminar_ctr) {0} FROM {1} ORDER BY seminar_id, seminar_ctr, id DESC) tmp{2}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (seminar_id, seminar_ctr) {0} FROM {1} ORDER BY seminar_id, seminar_ctr, id DESC) tmp{2}) tmp2")
+_maxer = SQL("SELECT MAX({0}) FROM (SELECT DISTINCT ON (seminar_id, seminar_ctr) {1} FROM {2} ORDER BY seminar_id, seminar_ctr, id DESC) tmp{3}")
 def _construct(rec):
     if isinstance(rec, str):
         return rec
@@ -167,9 +254,15 @@ def _iterator(cur, search_cols, extra_cols, projection):
 
 def talks_count(query={}):
     """
-    Replacement for db.talks.count to account for versioning.
+    Replacement for db.talks.count to account for versioning and so that we don't cache results.
     """
     return count_distinct(db.talks, _counter, query)
+
+def talks_max(col, constraint={}):
+    """
+    Replacement for db.talks.max to account for versioning and so that we don't cache results.
+    """
+    return max_distinct(db.talks, _maxer, col, constraint)
 
 def talks_search(*args, **kwds):
     """

@@ -2,7 +2,7 @@
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, allowed_shortname, category_dict
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
 
@@ -22,6 +22,8 @@ class WebSeminar(object):
             self.access = "open" # default
             self.archived = False # don't start out archived
             self.is_conference = False # seminar by default
+            self.frequency = 7
+            self.schedule_len = 15 # currently no way to edit this default on the website
             for key, typ in db.seminars.col_type.items():
                 if key == 'id' or hasattr(self, key):
                     continue
@@ -50,8 +52,6 @@ class WebSeminar(object):
 
     def __eq__(self, other):
         # Note that equality ignores organizers
-        print("self ", {key : getattr(self, key, None) for key in db.seminars.search_cols})
-        print("other", {key : getattr(other, key, None) for key in db.seminars.search_cols})
         return (isinstance(other, WebSeminar) and
                 all(getattr(self, key, None) == getattr(other, key, None) for key in db.seminars.search_cols))
 
@@ -59,6 +59,7 @@ class WebSeminar(object):
         return not (self == other)
 
     def save(self):
+        assert self.__dict__.get('shortname')
         db.seminars.insert_many([{col: getattr(self, col, None) for col in db.seminars.search_cols}])
 
     def save_organizers(self):
@@ -114,8 +115,18 @@ class WebSeminar(object):
     def show_curators(self):
         return self._show_editors("Curators")
 
+    def add_talk_link(self, ptag=True):
+        if current_user.email in self.editors():
+            s ='<a href="%s">Add talk</a>' % url_for("create.edit_talk", seminar_id=self.shortname)
+            if ptag:
+                s = '<p>%s</p>' % s
+            return s
+        else:
+            return ''
+
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")
+_maxer = SQL("SELECT MAX({0}) FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")
 def _construct(rec):
     if isinstance(rec, str):
         return rec
@@ -130,6 +141,9 @@ def seminars_count(query={}):
     Replacement for db.seminars.count to account for versioning.
     """
     return count_distinct(db.seminars, _counter, query)
+
+def seminars_max(col, constraint={}):
+    return max_distinct(db.seminars, _maxer, col, constraint)
 
 def seminars_search(*args, **kwds):
     """
@@ -169,6 +183,9 @@ def can_edit_seminar(shortname, new):
     if new != (seminar is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
         return redirect(url_for(".index"), 301), None
+    if current_user.is_anonymous(): # can happen via talks, which don't check for logged in in order to support tokens
+        flash_error("You do not have permission to edit seminar %s.  Please create an account and contact the seminar organizers." % shortname)
+        return redirect(url_for("show_seminar", shortname=shortname), 301), None
     if not new and not current_user.is_admin():
         # Make sure user has permission to edit
         organizer_data = db.seminar_organizers.lucky({'shortname': shortname, 'email':current_user.email})

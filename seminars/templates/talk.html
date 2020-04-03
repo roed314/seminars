@@ -2,7 +2,16 @@
 
 {% block content %}
 
-<h1>{{talk.title}}{% if not talk.display %} (hidden){% elif talk.online %} (online){% endif %}</h1>
+{% if user.email in talk.seminar.editors() or user.is_admin() %}
+<form action="{{url_for('create.edit_talk')}}" method="POST">
+  <input type="hidden" name="seminar_id" value="{{talk.seminar_id}}" />
+  <input type="hidden" name="seminar_ctr" value="{{talk.seminar_ctr}}" />
+  <button type="submit">Edit talk</button>
+  {{ talk.send_speaker_link() | safe }}
+</form>
+{% endif %}
+
+<h1>{{talk.show_title()}}{% if not talk.display %} (hidden){% elif talk.online %} (online){% endif %}</h1>
 
 <div id="talk-body">
   <p>
