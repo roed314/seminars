@@ -1,3 +1,17 @@
+Now
+===
+
+1. Search working (Edgar)
+
+1. Filtering working (Edgar + David)
+
+1. Subscriptions working
+
+1. CSS (Edgar)
+
+1. Time zones (David)
+
+
 Admin (Edgar)
 =====
 
