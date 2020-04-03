@@ -1,8 +1,10 @@
 <script>
-const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-document.cookie = "browser_timezone=" + tz + ";path=/"
-console.log(document.cookie)
-window.location.replace("{{url}}")
+if (navigator.cookieEnabled) {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.cookie = "browser_timezone=" + tz + ";path=/"
+  console.log(document.cookie)
+  window.location.replace("{{url}}")
+}
 </script>
 <p>
   You should have been redirected to {{url}} :(
@@ -10,4 +12,6 @@ window.location.replace("{{url}}")
 <p>
 Please enable javascript and accept our cookies
 </p>
-<iframe width="511" height="383" src="https://www.youtube.com/embed/Ye8mB6VsUHw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=Ye8mB6VsUHw">
+<image  width="640" height="360" src="http://i3.ytimg.com/vi/Ye8mB6VsUHw/maxresdefault.jpg">
+</a>
