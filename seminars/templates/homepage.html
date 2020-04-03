@@ -49,7 +49,7 @@
 {% if categories %}
 <div id="filter-menu">
   {% for ab, name in [("ALL", "All")] + categories %}
-  <div class="category_toggle" id="catlink-{{ab}}">
+  <div class="category_toggle{% if ab=='ALL' %} catselected{% endif %}" id="catlink-{{ab}}">
     {{name}}
   </div>
   {% endfor %}
