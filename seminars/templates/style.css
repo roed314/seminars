@@ -299,9 +299,6 @@ div.category_toggle {
 div.category_toggle:hover {
     cursor: pointer;
 }
-.category_toggle a {
-    color: floralwhite;
-}
 
 #filter-menu {
   display: none;
