@@ -73,6 +73,16 @@ class WebSeminar(object):
         else:
             return ""
 
+    def show_name(self):
+        # Link to seminar
+        return '<a href="%s">%s</a>' % (url_for("show_seminar", shortname=self.shortname), self.name)
+
+    def show_description(self):
+        return self.description
+
+    def show_subscribe(self):
+        return ""
+
     def show_institutions(self):
         if self.institutions:
             links = []
