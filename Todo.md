@@ -131,6 +131,11 @@ Design and branding
 
 1. Once we're ready, think about advertising strategy (Bjorn emailing number theory list; how to reach out beyond number theory, posting on Facebook, etc)
 
+Other
+=====
+
+1. Update instructions in GettingsStarted: config.ini is only created when lmfdb is run for the first time.
+
 Links to posts about online seminars
 ====================================
 
