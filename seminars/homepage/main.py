@@ -39,8 +39,7 @@ def parse_institution_sem(info, query):
         query["institutions"] = None
     elif info.get("institution"):
         # one day we will do joins
-        inst_id = db.institutions.lucky({"shortname": info.get("institution")}, "id")
-        query["institutions"] = {"$contains": inst_id}
+        query["institutions"] = {"$contains": info.get("institution")}
         print(query)
 
 
