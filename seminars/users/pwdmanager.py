@@ -325,8 +325,13 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     def email(self):
         return None
 
+    @property
+    def timezone(self):
+        return request.cookies.get('browser_timezone', 'UTC')
+
+    @property
     def tz(self):
-        return timezone(request.cookies.get('browser_timezone'))
+        return timezone(self.timezone)
 
     # For versions of flask_login earlier than 0.3.0,
     # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a

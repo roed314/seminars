@@ -49,8 +49,8 @@ function setCategoryLinks() {
     var cur_cats = getCookie("categories")
     console.log(cur_cats);
     if (cur_cats == null) {
-        cur_cats = "";
-        setCookie("categories", "");
+        cur_cats = "ALL";
+        setCookie("categories", "ALL");
     }
     cur_cats = cur_cats.split(",");
     for (var i=0; i<cur_cats.length; i++) {
