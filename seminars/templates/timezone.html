@@ -1,8 +1,10 @@
 <script>
-const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-document.cookie = "browser_timezone=" + tz + ";path=/"
-console.log(document.cookie)
-window.location.replace("{{url}}")
+if (navigator.cookieEnabled) {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.cookie = "browser_timezone=" + tz + ";path=/"
+  console.log(document.cookie)
+  window.location.replace("{{url}}")
+}
 </script>
 <p>
   You should have been redirected to {{url}} :(
