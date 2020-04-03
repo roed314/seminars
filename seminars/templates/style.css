@@ -295,6 +295,9 @@ body.knowl #header {
     min-width: 15%;
     padding: 5px;
 }
+.category_toggle a {
+    color: floralwhite;
+}
 
 #filter-menu {
   display: none;
