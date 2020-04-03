@@ -122,7 +122,7 @@ class WebTalk(object):
         return self.title if self.title else "TBA"
 
     def show_seminar(self):
-        return seminar.show_name()
+        return self.seminar.show_name()
 
     def show_speaker(self):
         # As part of a list
