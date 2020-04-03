@@ -283,17 +283,21 @@ body.knowl #header {
   display: inline;
 }
 
-#top-menu a {
+#top-menu a, #filter-menu a {
     text-decoration: none;
     color: #aaaaaa;
     font-family: sans-serif;
     padding: 5px 25px 5px 25px;
 }
 
-.category_toggle {
+div.category_toggle {
     display: inline-block;
     min-width: 15%;
     padding: 5px;
+    color: #aaaaaa;
+}
+div.category_toggle:hover {
+    cursor: pointer;
 }
 .category_toggle a {
     color: floralwhite;
@@ -310,6 +314,14 @@ body.knowl #header {
 
 #talk-body {
     max-width: 700px;
+}
+
+div.catselected {
+    color: #f00;
+}
+
+tr.catunselected {
+    display: none;
 }
 
 /* TODO: what? */

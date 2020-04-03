@@ -45,7 +45,7 @@ def get_username(uid):
 # globally define user properties and username
 @app.context_processor
 def ctx_proc_userdata():
-    userdata = {'user': current_user} # this should be sufficient....
+    userdata = {'user': current_user}
     # used to display name of locks
     userdata['get_username'] = get_username  # this is a function
     return userdata
