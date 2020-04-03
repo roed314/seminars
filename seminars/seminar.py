@@ -134,6 +134,11 @@ class WebSeminar(object):
         else:
             return ''
 
+    def show_input_time(self, time):
+        if not time:
+            return ""
+        return time.strftime("%-H:%M")
+
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")
 _maxer = SQL("SELECT MAX({0}) FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")

@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
+from dateutil.parser import parse as parse_time
 import pytz, re
 from six import string_types
 from flask import url_for
@@ -149,7 +150,9 @@ def process_user_input(inp, typ, tz):
         return None
     if typ == 'timestamp with time zone':
         # Need to sanitize more, include time zone
-        return datetime.strptime(inp, "%Y-%m-%d-%H:%M", tz=tz)
+        return tz.localize(parse_time(inp))
+    elif typ == 'time with time zone':
+        return tz.localize(parse_time(inp))
     elif typ == 'boolean':
         if inp in ['yes', 'true', 'y', 't']:
             return True

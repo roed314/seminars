@@ -11,6 +11,7 @@ from seminars.institution import WebInstitution, can_edit_institution, instituti
 from seminars.lock import get_lock
 from lmfdb.utils import to_dict, flash_error
 import datetime, pytz, json
+from markupsafe import Markup, escape
 
 @create.route("create/")
 @login_required
@@ -86,6 +87,9 @@ def save_seminar():
         data = {'shortname': shortname,
                 'display': seminar.display or current_user.is_creator(),
                 'owner': seminar.owner}
+    # Have to get time zone first
+    data['timezone'] = tz = raw_data.get('timezone')
+    tz = pytz.timezone(tz)
     for col in db.seminars.search_cols:
         if col in data: continue
         try:
@@ -93,9 +97,11 @@ def save_seminar():
             if not val:
                 data[col] = None
             else:
-                data[col] = process_user_input(val, db.seminars.col_type[col])
+                data[col] = process_user_input(val, db.seminars.col_type[col], tz=tz)
         except Exception as err:
             return make_error(err)
+    if not data['institutions']: # need [] not None
+        data['institutions'] = []
     if not data['timezone'] and data['institutions']:
         # Set time zone from institution
         data['timezone'] = WebInstitution(data['institutions'][0]).timezone
@@ -112,7 +118,7 @@ def save_seminar():
                 elif val is None:
                     D[col] = False # checkboxes
                 else:
-                    D[col] = process_user_input(val, db.seminar_organizers.col_type[col])
+                    D[col] = process_user_input(val, db.seminar_organizers.col_type[col], tz=tz)
                 if col == 'homepage' and val and not val.startswith("http"):
                     data[col] = "http://" + data[col]
             except Exception as err:
@@ -161,6 +167,8 @@ def save_institution():
         return resp
 
     data = {}
+    data['timezone'] = tz = raw_data.get('timezone', 'UTC')
+    tz = pytz.timezone(tz)
     for col in db.institutions.search_cols:
         if col in data: continue
         try:
@@ -168,7 +176,7 @@ def save_institution():
             if not val:
                 data[col] = None
             else:
-                data[col] = process_user_input(val, db.institutions.col_type[col])
+                data[col] = process_user_input(val, db.institutions.col_type[col], tz=tz)
             if col == 'admin':
                 userdata = db.users.lookup(val)
                 if userdata is None:
@@ -245,6 +253,8 @@ def save_talk():
         data['seminar_ctr'] = curmax + 1
     else:
         data['seminar_ctr'] = talk.seminar_ctr
+    data['timezone'] = tz = raw_data.get('timezone', seminar.get('timezone', 'UTC'))
+    tz = pytz.timezone(tz)
     for col in db.talks.search_cols:
         if col in data: continue
         try:
@@ -252,7 +262,7 @@ def save_talk():
             if not val:
                 data[col] = None
             else:
-                data[col] = process_user_input(val, db.talks.col_type[col])
+                data[col] = process_user_input(val, db.talks.col_type[col], tz=tz)
             if col == 'speaker_homepage' and val and not val.startswith("http"):
                 data[col] = "http://" + data[col]
             if col == "access" and val not in ["open", "users", "endorsed"]:
@@ -372,7 +382,7 @@ def save_seminar_schedule():
             talk = WebTalk(shortname, seminar_ctr, seminar=seminar)
             data = dict(talk.__dict__)
             for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
-                data[col] = process_user_input(raw_data["%s%s" % (col, i)], 'text')
+                data[col] = process_user_input(raw_data["%s%s" % (col, i)], 'text', tz=seminar.timezone)
             if update_times:
                 data["start_time"] = datetime.datetime.combine(date, start_time)
                 data["end_time"] = datetime.datetime.combine(date, end_time)
@@ -385,7 +395,7 @@ def save_seminar_schedule():
             talk = WebTalk(shortname, seminar=seminar, editing=True)
             data = dict(talk.__dict__)
             for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
-                data[col] = process_user_input(raw_data["%s%s" % (col, i)], 'text')
+                data[col] = process_user_input(raw_data["%s%s" % (col, i)], 'text', tz=seminar.timezone)
             data["start_time"] = datetime.datetime.combine(date, start_time)
             data["end_time"] = datetime.datetime.combine(date, end_time)
             data["seminar_ctr"] = ctr

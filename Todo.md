@@ -60,6 +60,8 @@ Content creation
 Viewing and searching
 =====================
 
+1. When listing talks, time and date in separate columns
+
 1. Design and implement front page view, both for logged in and new users
 
 1. Adapt search results pages from LMFDB to viewing seminars and talks
@@ -101,6 +103,8 @@ Time zones
 
 1. Configure server time zone, rather than hard coding it as Eastern in the source
 
+1. Warning if creating talk in the middle of the night
+
 Feedback
 ========
 
@@ -135,6 +139,8 @@ Other
 =====
 
 1. Update instructions in GettingsStarted: config.ini is only created when lmfdb is run for the first time.
+
+1. Reach out to Kiran about recruiting organizers.  Princeton/IAS.  
 
 Links to posts about online seminars
 ====================================
