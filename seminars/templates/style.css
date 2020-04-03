@@ -176,6 +176,11 @@ a:hover {
   background: none;
 }
 
+header.inner {
+  margin: 0 auto;
+  max-width: 1000px;
+}
+
 #header {
   background: {{color.header_background}};
   box-shadow: 0px 5px 5px {{color.header_shadow}};

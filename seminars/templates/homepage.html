@@ -24,6 +24,7 @@
 
 {% block body -%}
 <div id="header">
+  <header class="inner">
   <div id="logo">
     <a href="/"><img src="{{ url_for('static', filename='logo.png') }}" /></a>
   </div>
@@ -44,6 +45,7 @@
         </table>
       </div>
     </div>
+  </header>
   </div>
 </div>
 {% if categories %}
