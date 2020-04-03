@@ -14,7 +14,7 @@
 
 <table id="browse-talks">
   {% for talk in talks %}
-  <tr class="talk {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
+  <tr class="talk catunselected {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
     {{ talk.oneline() | safe }}
   </tr>
   {% endfor %}
