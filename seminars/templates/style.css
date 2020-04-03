@@ -314,7 +314,8 @@ div.category_toggle:hover {
 }
 
 div.catselected {
-    color: #f00;
+    color: {{color.header_background}};
+    background: #aaaaaa;
 }
 
 tr.catunselected {

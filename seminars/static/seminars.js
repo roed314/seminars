@@ -37,12 +37,12 @@ function addCategory(cat) {
     } else {
         cur_cats = cat;
     }
-    setCookie(cur_cats);
+    setCookie("categories", cur_cats);
 }
 function removeCategory(cat) {
     var cur_cats = getCookie("categories");
     cur_cats = cur_cats.replace(cat, "").replace(",,",",");
-    setCookie(cur_cats);
+    setCookie("categories", cur_cats);
 }
 
 function setCategoryLinks() {
