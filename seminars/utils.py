@@ -138,7 +138,7 @@ def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0,
             rec = {k: v for k, v in zip(search_cols + extra_cols, rec)}
         return construct(rec)
 
-def process_user_input(inp, typ, lookup={}):
+def process_user_input(inp, typ, tz):
     """
     INPUT:
 
@@ -149,7 +149,7 @@ def process_user_input(inp, typ, lookup={}):
         return None
     if typ == 'timestamp with time zone':
         # Need to sanitize more, include time zone
-        return datetime.strptime(inp, "%Y-%m-%d-%H:%M")
+        return datetime.strptime(inp, "%Y-%m-%d-%H:%M", tz=tz)
     elif typ == 'boolean':
         if inp in ['yes', 'true', 'y', 't']:
             return True
@@ -164,9 +164,6 @@ def process_user_input(inp, typ, lookup={}):
     elif typ == 'text[]':
         # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
         return [inp]
-    elif typ == 'bigint[]':
-        # Again, temporary
-        return [lookup.get(inp)]
     else:
         raise ValueError("Unrecognized type %s" % typ)
 

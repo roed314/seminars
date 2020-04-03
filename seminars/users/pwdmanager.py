@@ -213,11 +213,11 @@ class SeminarsUser(UserMixin):
 
     @property
     def timezone(self):
-        return self._data.get('timezone')
+        return self._data.get('timezone', request.cookies.get('browser_timezone'))
 
     @property
     def tz(self):
-        return timezone(self._data['timezone'])
+        return timezone(self.timezone)
 
     @timezone.setter
     def timezone(self, timezone):

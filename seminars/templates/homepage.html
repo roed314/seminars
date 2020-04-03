@@ -37,6 +37,12 @@
           {% endfor %}
         </ul>
       </div>
+      <div class="topright">
+        <table>
+          <tr><td>{{ usertime.strftime("%-H:%M") }}</td></tr>
+          <tr><td>{{ user.timezone.replace("_", " ") }}</td></tr>
+        </table>
+      </div>
     </div>
   </div>
 </div>

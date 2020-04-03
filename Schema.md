@@ -64,7 +64,7 @@ categories   | text[]              |
 keywords     | text                |
 description  | text                | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
 comments     | text                |
-institutions | bigint[]            |
+institutions | text[]              |
 timezone     | text                | time zone code, e.g. "America/New York"
 weekday      | smallint            | 0=Monday, 6=Sunday for consistency with Python
 time         | time with time zone | Regular meeting time
