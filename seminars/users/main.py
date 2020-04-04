@@ -122,6 +122,7 @@ def info():
 @login_required
 def set_info():
     for k, v in request.form.items():
+        print(k, v)
         setattr(current_user, k, v)
     previous_email = current_user.email
     if current_user.save():
@@ -210,7 +211,7 @@ def register():
         if homepage and not homepage.startswith("http://") and not homepage.startswith("https://"):
             homepage = "http://" + homepage
         timezone = request.form['timezone']
-        if timezone not in pytz.all_timezones:
+        if timezone and timezone not in pytz.all_timezones:
             flash_error("Invalid timezone '%s'.", timezone)
             return redirect(url_for(".register"))
 

@@ -40,7 +40,7 @@
       </div>
       <div class="topright">
         <table>
-          <tr><td>{{ usertime.strftime("%-H:%M") }}</td></tr>
+          <tr><td><span id="curtime">{{ usertime.strftime("%-H:%M") }}</span></td></tr>
           <tr><td>{{ user.timezone.replace("_", " ") }}</td></tr>
         </table>
       </div>
@@ -48,15 +48,20 @@
   </header>
   </div>
 </div>
-{% if categories %}
+{% if category_counts %}
 <div id="filter-menu">
   {% for ab, name in [("ALL", "All")] + categories %}
   <div class="category_toggle{% if ab=='ALL' %} catselected{% endif %}" id="catlink-{{ab}}">
-    {{name}}
+    {{name}}{% if category_counts[ab] %} ({{category_counts[ab]}}){% endif %}
   </div>
   {% endfor %}
 </div>
 {% endif %}
+<noscript>
+<div id="javascript-explanation">
+  We use javascript to filter seminar categories, adapt seminars to your local time zone, enter date ranges, and hide this annoying message.
+</div>
+</noscript>
 
  {% macro rightnavig(title, entries) -%}
    {% if entries %}

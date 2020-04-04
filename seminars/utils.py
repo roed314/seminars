@@ -2,12 +2,15 @@ from datetime import datetime, timedelta, time
 from dateutil.parser import parse as parse_time
 import pytz, re
 from six import string_types
-from flask import url_for
+from flask import url_for, flash
 from flask_login import current_user
 from seminars import db
 from sage.misc.cachefunc import cached_function
 from lmfdb.backend.utils import IdentifierWrapper
+from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
+from markupsafe import Markup, escape
+
 
 def naive_utcoffset(tz):
     for h in range(10):
@@ -27,6 +30,26 @@ def pretty_timezone(tz):
     return "(GMT {}) {}".format(diff, tz)
 
 timezones = [(v, pretty_timezone(v)) for v in sorted(pytz.common_timezones, key=naive_utcoffset)]
+
+def is_nighttime(t):
+    # These are times that might be mixed up by using a 24 hour clock
+    return 1 <= t.hour < 8
+
+def flash_warning(warnmsg, *args):
+    flash(Markup("Warning: " + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))), "error")
+
+def check_time(start_time, end_time):
+    """
+    Flashes errors/warnings and returns True when an error should be raised.
+    """
+    if start_time > end_time:
+        if is_nighttime(end_time):
+            flash_error("Your start time is after your end time; perhaps you forgot pm")
+        else:
+            flash_error("Your start time is after your end time")
+        return True
+    if is_nighttime(start_time) or is_nighttime(end_time):
+        flash_warning("Your seminar is scheduled between midnight and 8am; if that was unintentional you should edit again using 24-hour notation or including pm")
 
 def basic_top_menu():
     if current_user.is_authenticated:

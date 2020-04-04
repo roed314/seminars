@@ -107,53 +107,6 @@ def ctx_proc_userdata():
     return vars
 
 ##############################
-# Bottom link to google code #
-##############################
-
-branch = "bean"
-
-def git_infos():
-    try:
-        from subprocess import Popen, PIPE
-        # cwd should be the root of git repo
-        cwd = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
-        git_rev_cmd = '''git rev-parse HEAD'''
-        git_date_cmd = '''git show --format="%ci" -s HEAD'''
-        git_contains_cmd = '''git branch --contains HEAD'''
-        git_reflog_cmd = '''git reflog -n5'''
-        git_graphlog_cmd = '''git log --graph  -n 10'''
-        rev = Popen([git_rev_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
-        date = Popen([git_date_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
-        contains = Popen([git_contains_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
-        reflog = Popen([git_reflog_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
-        graphlog = Popen([git_graphlog_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
-        pairs = [[git_rev_cmd, rev],
-                [git_date_cmd, date],
-                [git_contains_cmd, contains],
-                [git_reflog_cmd, reflog],
-                [git_graphlog_cmd, graphlog]]
-        summary = "\n".join("$ %s\n%s" % (c, o) for c, o in pairs)
-        return rev, date, summary
-    except Exception:
-        return '-', '-', '-'
-
-
-git_rev, git_date, _  = git_infos()
-
-# Creates link to the source code at the most recent commit.
-_url_source = 'https://github.com/LMFDB/lmfdb/tree/'
-_current_source = '<a href="%s%s">%s</a>' % (_url_source, git_rev, "Source")
-
-# Creates link to the list of revisions on the master, where the most recent commit is on top.
-_url_changeset = 'https://github.com/LMFDB/lmfdb/commits/%s' % branch
-_latest_changeset = '<a href="%s">%s</a>' % (_url_changeset, git_date)
-
-@app.context_processor
-def link_to_current_source():
-    return {'current_source': _current_source,
-            'latest_changeset': _latest_changeset}
-
-##############################
 #      Jinja formatters      #
 ##############################
 

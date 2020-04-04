@@ -38,16 +38,19 @@ function addCategory(cat) {
         cur_cats = cat;
     }
     setCookie("categories", cur_cats);
+    return cur_cats;
 }
 function removeCategory(cat) {
     var cur_cats = getCookie("categories");
     cur_cats = cur_cats.replace(cat, "").replace(",,",",");
+    if (cur_cats.startsWith(",")) cur_cats = cur_cats.slice(1);
+    if (cur_cats.endsWith(",")) cur_cats = cur_cats.slice(0, -1);
     setCookie("categories", cur_cats);
+    return cur_cats;
 }
 
 function setCategoryLinks() {
     var cur_cats = getCookie("categories")
-    console.log(cur_cats);
     if (cur_cats == null) {
         cur_cats = "ALL";
         setCookie("categories", "ALL");
@@ -62,16 +65,32 @@ function setCategoryLinks() {
 function toggleCategory(id) {
     var toggler = $("#" + id);
     var cat = id.substring(8);
-    console.log(cat);
     if (toggler.hasClass("catselected")) {
         toggler.removeClass("catselected");
-        removeCategory(cat);
-        $(".cat-" + cat).addClass("catunselected");
+        cur_cats = removeCategory(cat);
+        // Have to handle ALL specially, since we need to add the other categories back in
+        if (!cur_cats.includes("ALL")) $(".cat-" + cat).addClass("catunselected");
+        if (cat == "ALL") setCategoryLinks();
     } else {
         toggler.addClass("catselected");
         addCategory(cat);
         $(".cat-" + cat).removeClass("catunselected");
     }
+}
+
+function tickClock() {
+    var curtime = $("#curtime").text();
+    var hourmin = curtime.split(":");
+    hourmin[1] = parseInt(hourmin[1]) + 1;
+    if (hourmin[1] == 60) {
+        hourmin[1] = 0;
+        hourmin[0] = parseInt(hourmin[0]) + 1;
+        if (hourmin[0] == 24) hourmin[0] = 0;
+        hourmin[0] = hourmin[0].toString();
+    }
+    hourmin[1] = hourmin[1].toString().padStart(2, '0');
+    curtime = hourmin.join(":");
+    $("#curtime").text(curtime);
 }
 
 $(document).ready(function () {
@@ -89,6 +108,25 @@ $(document).ready(function () {
             evt.preventDefault();
             toggleCategory(this.id);
         });
+
+    var today = new Date();
+    var minute = today.getMinutes();
+    var millisecond = 1000 * today.getSeconds() + today.getMilliseconds();
+    var displayed_minute = parseInt($("#curtime").text().split(":")[1]);
+    // We might have passed a minute barrier between the server setting the time and the page finishing loading
+    // Because of weird time zones (the user time preference may not be their local clock time),
+    // we only do something if the minute is offset by 1 or 2 (for a super-slow page load)
+    if (minute == displayed_minute + 1) {
+        tickClock();
+    } else if (minute == displayed_minute + 2) {
+        tickClock(); tickClock();
+    }
+    setTimeout(function() {
+        tickClock();
+        setInterval(function() {
+            // update the clock in the top right every 60 seconds
+        }, 60000);
+    }, 60000 - millisecond);
 });
 
 $(document).ready(function() {

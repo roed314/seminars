@@ -15,6 +15,10 @@ institution_types = [
 def institutions():
     return sorted(((rec["shortname"], rec["name"]) for rec in db.institutions.search({}, ["shortname", "name"])), key=lambda x: x[1].lower())
 
+def institution_known(institution):
+    matcher = {'$like': '%{0}%'.format(institution)}
+    return db.institutions.count({'$or':[{'shortname': matcher}, {'aliases': matcher}]}) > 0
+
 class WebInstitution(object):
     def __init__(self, shortname, data=None, editing=False, showing=False, saving=False):
         if data is None and not editing:
@@ -42,6 +46,13 @@ class WebInstitution(object):
 
     def __repr__(self):
         return self.name
+
+    def __eq__(self, other):
+        return (isinstance(other, WebInstitution) and
+                all(getattr(self, key, None) == getattr(other, key, None) for key in db.institutions.search_cols))
+
+    def __ne__(self, other):
+        return not (self == other)
 
     def save(self):
         if self.new:

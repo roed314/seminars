@@ -20,9 +20,9 @@
     </tr>
     <tr>
       <td>Start time</td>
-      <td><input name="start_time" style="width:140px;" value="{{ seminar.start_time | blanknone }}" /></td>
+      <td><input name="start_time" style="width:140px;" value="{{ seminar.start_time.strftime('%-H:%M') if seminar.start_time }}" /></td>
       <td>End time</td>
-      <td><input name="end_time" style="width:140px;" value="{{ seminar.end_time | blanknone }}" /></td>
+      <td><input name="end_time" style="width:140px;" value="{{ seminar.end_time.strftime('%-H:%M') if seminar.end_time }}" /></td>
       <td>Update existing times <input type="checkbox" name="update_times" value="yes" /></td>
     </tr>
   </table>

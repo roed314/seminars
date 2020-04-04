@@ -50,7 +50,7 @@
     </form>
     {{ session.pop('endorsing link', '') | safe }}
     {% endif %}
-  <h2>Edit Details</h2>
+  <h2>Edit details</h2>
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
       <tr>
@@ -85,9 +85,9 @@
       <td>Timezone:</td>
       <td>
         <select name="timezone">
-        {% for tz, pretty_tz in timezones %}
-            <option value={{tz}}
-                    {% if tz == user.timezone %}
+        {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
+            <option value="{{tz}}"
+                    {% if tz == user.raw_timezone %}
                     selected=true
                     {%endif%}
                     >
@@ -108,7 +108,7 @@
     </table>
   </form>
 
-  <h2>Change Password</h2>
+  <h2>Change password</h2>
 
   <form action="{{ url_for('.change_password') }}" method="POST" name="changepassword">
    <table>

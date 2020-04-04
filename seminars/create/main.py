@@ -4,14 +4,13 @@ from flask_login import login_required, current_user
 from seminars import db
 from seminars.app import app
 from seminars.create import create
-from seminars.utils import basic_top_menu, categories, timezones, process_user_input
+from seminars.utils import basic_top_menu, categories, timezones, process_user_input, check_time
 from seminars.seminar import WebSeminar, seminars_lucky, seminars_lookup, can_edit_seminar
 from seminars.talk import WebTalk, talks_lookup, talks_max, talks_search, talks_lucky, can_edit_talk
-from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types
+from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types, institution_known
 from seminars.lock import get_lock
 from lmfdb.utils import to_dict, flash_error
 import datetime, pytz, json
-from markupsafe import Markup, escape
 
 @create.route("create/")
 @login_required
@@ -30,6 +29,7 @@ def index():
     return render_template("create_index.html",
                            seminars=seminars,
                            conferences=conferences,
+                           institution_known=institution_known,
                            top_menu=menu,
                            title="Create",
                            user_is_creator=current_user.is_creator())
@@ -67,8 +67,9 @@ def save_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
-    def make_error(err):
-        flash_error("Error processing %s: %s" % (col, err))
+    def make_error(col=None, err=None):
+        if err is not None:
+            flash_error("Error processing %s: {0}".format(err), col)
         seminar = WebSeminar(shortname, data=raw_data)
         return render_template("edit_seminar.html",
                                seminar=seminar,
@@ -99,7 +100,7 @@ def save_seminar():
             else:
                 data[col] = process_user_input(val, db.seminars.col_type[col], tz=tz)
         except Exception as err:
-            return make_error(err)
+            return make_error(col, err)
     if not data['institutions']: # need [] not None
         data['institutions'] = []
     if not data['timezone'] and data['institutions']:
@@ -122,17 +123,22 @@ def save_seminar():
                 if col == 'homepage' and val and not val.startswith("http"):
                     data[col] = "http://" + data[col]
             except Exception as err:
-                return make_error(err)
+                return make_error(col, err)
         if D.get('email') or D.get('full_name'):
             D['order'] = len(organizer_data)
             organizer_data.append(D)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
+    if check_time(new_version.start_time, new_version.end_time):
+        return make_error()
     if seminar.new or new_version != seminar:
         new_version.save()
+        edittype = "created" if new else "edited"
+        flash("Seminar %s successfully!" % edittype)
+    elif seminar.organizer_data == new_version.organizer_data:
+        flash("No changes made to seminar.")
     if seminar.organizer_data != new_version.organizer_data:
         new_version.save_organizers()
-    edittype = "created" if new else "edited"
-    flash("Seminar successfully %s!" % edittype)
+        flash("Seminar organizers updated!")
     return redirect(url_for("show_seminar", shortname=shortname), 301)
 
 @create.route("edit/institution/", methods=["GET", "POST"])
@@ -198,9 +204,12 @@ def save_institution():
                                    title="Edit institution error",
                                    top_menu=basic_top_menu())
     new_version = WebInstitution(shortname, data=data)
-    new_version.save()
-    edittype = "created" if new else "edited"
-    flash("Institution successfully %s!" % edittype)
+    if new_version == institution:
+        flash("No changes made to institution.")
+    else:
+        new_version.save()
+        edittype = "created" if new else "edited"
+        flash("Institution %s successfully!" % edittype)
     return redirect(url_for("show_institution", shortname=shortname), 301)
 
 @create.route("edit/talk/<seminar_id>/<seminar_ctr>/<token>")
@@ -241,6 +250,19 @@ def save_talk():
     if resp is not None:
         return resp
 
+    def make_error(col=None, err=None):
+        if err is not None:
+            flash_error("Error processing %s: {0}".format(err), col)
+        talk = WebTalk(talk.seminar_id, talk.seminar_ctr, data=raw_data)
+        title = "Create talk error" if talk.new else "Edit talk error"
+        return render_template("edit_talk.html",
+                               talk=talk,
+                               seminar=seminar,
+                               title=title,
+                               top_menu=basic_top_menu(),
+                               institutions=institutions(),
+                               timezones=timezones)
+
     data = {
         'seminar_id': talk.seminar_id,
         'token': talk.token,
@@ -268,18 +290,10 @@ def save_talk():
             if col == "access" and val not in ["open", "users", "endorsed"]:
                 raise ValueError("Invalid access type")
         except Exception as err:
-            flash_error("Error processing %s: %s", [col, err])
-            talk = WebTalk(talk.seminar_id, talk.seminar_ctr, data=raw_data)
-            title = "Create talk" if talk.new else "Edit talk"
-            return render_template("edit_talk.html",
-                                   talk=talk,
-                                   seminar=seminar,
-                                   title=title,
-                                   top_menu=basic_top_menu(),
-                                   categories=categories(),
-                                   institutions=institutions(),
-                                   timezones=timezones)
+            return make_error(col, err)
     new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
+    if check_time(new_version.start_time, new_version.end_time):
+        return make_error()
     if new_version == talk:
         flash("No changes made to talk.")
     else:

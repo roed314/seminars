@@ -46,8 +46,8 @@
       <td>Timezone:</td>
       <td>
         <select name="timezone">
-        {% for tz, pretty_tz in timezones %}
-        <option value={{tz}}>{{pretty_tz}}</option>
+        {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
+        <option value={{tz}}{% if tz=='' %} selected{% endif %}>{{pretty_tz}}</option>
         {% endfor %}
         </select>
       </td>

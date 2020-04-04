@@ -9,6 +9,7 @@ from seminars.seminar import seminars_search
 from flask_login import current_user
 import datetime
 import pytz
+from collections import Counter
 from lmfdb.utils.search_parsing import search_parser
 from dateutil.parser import parse
 
@@ -229,17 +230,22 @@ class SemSearchArray(SearchArray):
 @app.route("/")
 def index():
     # Eventually want some kind of cutoff on which talks are included.
-    # Deal with time zone right
-    talks = talks_search(
+    talks = list(talks_search(
         {"display": True, "end_time": {"$gte": datetime.datetime.now()}},
         sort=["start_time"],
-    )
+    ))
+    category_counts = Counter()
+    for talk in talks:
+        category_counts["ALL"] += 1
+        if talk.categories:
+            for cat in talk.categories:
+                category_counts[cat] += 1
     menu = basic_top_menu()
     menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
         title="Math Seminars",
-        info={},
+        category_counts=category_counts,
         talks=talks,
         top_menu=menu,
         bread=None,
@@ -263,7 +269,6 @@ def search():
         "search.html",
         title="Search",
         info=info,
-        categories=categories(),
         top_menu=menu,
         bread=None,
     )
@@ -354,6 +359,9 @@ def about():
     menu.pop(4)
     return render_template("about.html", title="About", top_menu=menu)
 
+@app.route("/faq")
+def faq():
+    return render_template("faq.html", title="FAQ", top_menu=basic_top_menu())
 
 @app.route("/<category>")
 def by_category(category):
@@ -371,7 +379,6 @@ def search_seminars(info):
         "search.html",
         title="Search seminars",
         info=info,
-        categories=categories(),
         top_menu=menu,
         bread=None,
     )

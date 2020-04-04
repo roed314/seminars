@@ -65,8 +65,8 @@ class PostgresUserTable(PostgresSearchTable):
         for col in ['email_confirmed', 'admin', 'creator', 'phd']:
             kwargs[col] = kwargs.get(col, False)
         kwargs['homepage'] = kwargs.get('homepage', None)
-        kwargs['timezone'] = kwargs.get('timezone', "US/Eastern")
-        assert kwargs['timezone'] in all_timezones
+        kwargs['timezone'] = tz = kwargs.get('timezone', "")
+        assert tz == "" or tz in all_timezones
         kwargs['location'] = None
         kwargs['created'] = datetime.now(UTC)
         self.upsert({'email':email}, kwargs)
@@ -126,6 +126,8 @@ class PostgresUserTable(PostgresSearchTable):
         for key in list(data.keys()):
             if key not in self.search_cols:
                 data.pop(key)
+                print("Popped", key)
+        print("Updating", data)
         self.update({'email': email}, data)
         return True
 
@@ -213,7 +215,16 @@ class SeminarsUser(UserMixin):
 
     @property
     def timezone(self):
-        return self._data.get('timezone', request.cookies.get('browser_timezone'))
+        tz = self._data.get('timezone')
+        if not tz:
+            tz = request.cookies.get('browser_timezone', 'UTC')
+        return tz
+
+    @property
+    def raw_timezone(self):
+        # For the user info page, we want to allow the user to set their time zone to blank,
+        # which is interpreted as the browser's timezone for other uses.
+        return self._data.get('timezone')
 
     @property
     def tz(self):
@@ -300,9 +311,7 @@ class SeminarsUser(UserMixin):
             self.__init__(email=self._data['new_email'])
 
         self._dirty = False
-
-
-
+        return True
 
 class SeminarsAnonymousUser(AnonymousUserMixin):
     """

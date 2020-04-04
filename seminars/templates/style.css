@@ -308,6 +308,11 @@ div.category_toggle:hover {
   background: {{color.header_background}};
 }
 
+#javascript-explanation {
+    padding: 5px;
+    text-align: center;
+}
+
 #past_talks {
     display: none;
 }

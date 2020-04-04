@@ -3,14 +3,7 @@ Now
 
 1. Search working (Edgar)
 
-1. Filtering working (Edgar + David)
-
 1. Subscriptions working
-
-1. CSS (Edgar)
-
-1. Time zones (David)
-
 
 Admin (Edgar)
 =====
@@ -35,21 +28,13 @@ Admin (Edgar)
 Content creation
 ================
 
-1. Add pages for creating a seminar and for editing it (overall attributes and adding talks)
-
-1. Add page for speaker/organizer to update the info on a talk
-
 1. Makes sure that content creators can delete things if they want
 
-1. Adapt knowl editing code for content creation and saving.  In particular, this gives us versioning for abstracts.
+1. Should we include other as a category and handle specially?
 
-1. Show help on what input is allowed (advertise that they can use latex, explain how to type a dollar sign, have a placeholder explaining what to do)
+1. Allow multiple categories (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))
 
-1. Include other as a category, handle specially
-
-1. Allow multiple categories
-
-1. Interface for creating a singleton talk
+1. Interface for creating a singleton talk?
 
 1. Mechanism for canceling talks, archiving seminars
 
@@ -60,25 +45,17 @@ Content creation
 Viewing and searching
 =====================
 
-1. When listing talks, time and date in separate columns
+1. Figure out how to limit number of seminars shown on browse page for initial users (limit at a certain number per category?)
 
-1. Design and implement front page view, both for logged in and new users
+1. Build talks search results template.
 
-1. Adapt search results pages from LMFDB to viewing seminars and talks
+1. Search for conferences?  Should conference homepage be different than a seminar's?
 
-1. Create seminar homepage.  Should it be different for a conference?  Either has the capacity to include a link to an external page.
-
-1. Create talk homepage.  Different versions for when talk is in the future, ongoing, or in the past.
-
-1. Top menu: Filter, Search, Calendar, About (includes feedback), Login/Account
-
-1. Only show zoom link if logged in
+1. Redesign top menu
 
 1. Add route that strips headers for inclusion into a seminar webpage
 
 1. When logged in, there should be an option to see the site as if you weren't logged in
-
-1. When displaying list of seminars, show date, time, name of seminar, speaker, title
 
 1. When searching, should have ability to flip sort order (default depends on whether past or future)
 
@@ -86,24 +63,33 @@ Viewing and searching
 
 1. In seminar lists, have icon for online vs offline talk (could be both)
 
-1. Include counts of how many talks are in each category in the Filter dropdown, only include categories with at least 1
-
 1. Add search on time (rather than datetime) so that users can accomodate their local schedules
 
-1. Warn that javascript is required e.g. https://iacr.org/tinfoil.html
+1. We now have a warning that javascript is required (displayed at top of every page).  Another model:  https://iacr.org/tinfoil.html
 
-1. Use sentence case everywhere for headers
+Knowls
+======
 
-1. Time zone select on each page, display current time
+1. Update knowl code and knowl database from LMFDB to give the ability to provide explanations (e.g. advertise that they can use latex, explain how to type a dollar sign, have placeholders with examples)
+
+1. Add dynamic abstract knowls for talk titles.
 
 Time zones
 ==========
 
-1. Should get the time zone from the browser when user not logged in (https://stackoverflow.com/questions/6939685/get-client-time-zone-from-browser and https://github.com/iamkun/dayjs)
+Localization
+============
 
-1. Configure server time zone, rather than hard coding it as Eastern in the source
+1. Think about whether there is anything we should do to support other languages.  Maybe add a language column for talks and seminars?
 
-1. Warning if creating talk in the middle of the night
+Onboarding
+==========
+
+1. Write the About page
+
+1. Add to the FAQ page
+
+1. Create a message shown to a user when they first visit the site (detected by absence of the timezone cookie); make sure that information also included in About page
 
 Feedback
 ========
@@ -120,9 +106,9 @@ Calendars
 Email
 =====
 
-1. The system needs to be able to send emails.  Figure out how to make that work.
+1. Figure out how to make our emails less likely to be marked spam.
 
-2. Customizable announcement emails.
+2. Customizable announcement emails for seminar organizers.
 
 Design and branding
 ===================
@@ -138,9 +124,29 @@ Design and branding
 Other
 =====
 
-1. Update instructions in GettingsStarted: config.ini is only created when lmfdb is run for the first time.
+1. Write tests
 
-1. Reach out to Kiran about recruiting organizers.  Princeton/IAS.  
+1. Reach out to Kiran about recruiting organizers.
+
+Examples of online seminars we might add
+========================================
+
+1. Princeton/IAS number theory
+
+1. [LAGA](https://www.math.univ-paris13.fr/laga/index.php/fr/pm/seminaires?id=97:seminaire-d-analyse-appliquee-2&catid=76:seminaires-pm-edp)
+
+1. [NASO](https://docs.google.com/spreadsheets/d/1MwTXrguSlEon46UKFV1ZJSeozsOECfUvSL6Othufyvs/edit#gid=0)
+
+1. Maria Gillespie launching an algebraic combinatorics one
+
+1. [CRAAG](https://www.daniellitt.com/crag)
+
+Examples of online conferences we might add
+===========================================
+
+Look for more on math meetings and email organizers suggesting they add talks to our site?
+
+1. Front Range Number Theory Day (April 25)
 
 Links to posts about online seminars
 ====================================
@@ -149,3 +155,7 @@ Links to posts about online seminars
 - [littmath](https://www.google.com/url?q=https://twitter.com/littmath/status/1242468857975115777&sa=D&source=hangouts&ust=1585257466247000&usg=AFQjCNES39qjlCfz_icIFwOg6-8j6EF1Rw)
 - [Jordan](https://twitter.com/JSEllenberg/status/1238872137588490240)
 - [isaksen](https://s.wayne.edu/isaksen/echt/)
+- [dermenjian](http://dermenjian.com/seminars/)
+- [adams](https://www.math.colostate.edu/~adams/advising/onlineSeminars/?fbclid=IwAR10iN4GQv4jc39IcRiuohJZJbos7iJcFh9v1p2MgTtOBR6TOomWSPaPkzs)
+- [Rubinstein-Salzedo](https://www.facebook.com/complexzeta/posts/10107887555517347)
+- [Moeller-Williams](https://johncarlosbaez.wordpress.com/2020/03/24/actucr-seminar/?fbclid=IwAR0JUBHUs7mxdnR8ynShIt-6QCFI81mU7DZFwETYHIQCH9QvXcE5lpGALKc)

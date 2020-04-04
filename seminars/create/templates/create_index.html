@@ -2,8 +2,12 @@
 
 {% block content %}
 
-{% if not user_is_creator %}
+{% if not user.is_creator() %}
 <p>Warning: seminars and talks you create will not appear until you are <a href="">approved</a>.</p>
+{% endif %}
+
+{% if user.phd and user.affiliation and not institution_known(user.affiliation) %}
+<p> Your affiliation doesn't appear to be on our list of institutions.  You may want to <a href="{{ url_for('list_institutions') }}">create your institution</a> before creating a seminar.
 {% endif %}
 
 <h2>Create a seminar or conference</h2>

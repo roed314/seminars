@@ -46,7 +46,7 @@ class WebTalk(object):
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
-        return "%s (%s) - %s" % (title, self.speaker, self.show_time())
+        return "%s (%s) - %s, %s" % (title, self.speaker, self.show_date(), self.show_start_time())
 
     def __eq__(self, other):
         return (isinstance(other, WebTalk) and
@@ -59,11 +59,26 @@ class WebTalk(object):
         assert self.__dict__.get('seminar_id') and self.__dict__.get('seminar_ctr')
         db.talks.insert_many([{col: getattr(self, col, None) for col in db.talks.search_cols}])
 
-    def show_time(self):
-        return self.start_time.astimezone(current_user.tz).strftime("%a %b %-d, %-H:%M")
+    def show_start_time(self):
+        return self.start_time.astimezone(current_user.tz).strftime("%-H:%M")
+
+    def show_end_time(self):
+        # This is used in show_time_and_duration, and needs to include the ending date if different (might not be the same in current user's time zone)
+        t0 = self.start_time.astimezone(current_user.tz)
+        t = self.end_time.astimezone(current_user.tz)
+        if t0.date() == t.date():
+            return t.strftime("%-H:%M")
+        else:
+            return t.strftime("%a %b %-d, %-H:%M")
 
     def show_time_link(self):
-        return '<a href="%s">%s</a>' % (url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr), self.show_time())
+        return '<a href="%s">%s</a>' % (url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr), self.show_start_time())
+
+    def show_date(self):
+        return self.start_time.astimezone(current_user.tz).strftime("%a %b %-d")
+
+    def show_date_link(self):
+        return '<a href="%s">%s</a>' % (url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr), self.show_date())
 
     def show_time_and_duration(self):
         start = self.start_time
@@ -172,6 +187,7 @@ class WebTalk(object):
         cols = []
         if not include_seminar and (current_user.is_admin() or current_user.email in self.seminar.editors()):
             cols.append(self.edit_link())
+        cols.append(self.show_date_link())
         cols.append(self.show_time_link())
         if include_seminar:
             cols.append(self.show_seminar())
