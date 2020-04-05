@@ -30,6 +30,8 @@ Content creation
 
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
 
+1. **Allow seminars to meet on multiple days.**
+
 1. Think about the model described at https://talks.cam.ac.uk/document/Adding+a+talk (notably, the ability to include others' subscription lists into your own)
 
 1. Think about security model of how we update the display attribute when someone gets endorsed.  Does every talk/seminar that they're an organizer for get set to display=True?  Can this be taken advantage of by adding another user as an organizer who then gets endorsed, or transferring ownership?  We don't require permission to become an organizer/transfer.  Solved if we have newly endorsed users manually have to add the content they want to be displayed.  Also: if you aren't yet endorsed, you can't add other organizers or transfer ownership.
@@ -45,7 +47,7 @@ Viewing and searching
 
 1. **One liner for seminars, add time and frequency.**
 
-1. **Redesign top menu: enhance (bold) rather than pop out. **
+1. **Redesign top menu: enhance (bold) rather than pop out.**
 
 1. **Save values in search results, add ability to clear inputs, show results of empty search on initial page load.**
 
@@ -107,7 +109,7 @@ Feedback
 Calendars
 =========
 
-1. Write code for dynamically generating .ics files
+1. **Write code for dynamically generating .ics files**
 
 Email
 =====
