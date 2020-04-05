@@ -5,6 +5,9 @@ Now
 
 Admin (Edgar)
 =====
+
+1. **Inserting talks/seminars triggers a `log_db_change` on the corresponding tables, so we should add a `logging/editor` entry to `config.ini on the server.**
+
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last
 
 1. Stop connecting to the lmfdb database
@@ -15,13 +18,17 @@ Admin (Edgar)
 
 1. Forward back to page once you log in: https://github.com/LMFDB/lmfdb/blob/master/lmfdb/users/main.py#L251
 
+1. Give users ability to toggle between 24 hour time and am/pm.
+
 
 Content creation
 ================
 
 1. **Allow multiple categories (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 
-1. Makes sure that content creators can delete talks and seminars if they want (medium)
+1. **Make sure no line breaks in date in edit_seminar.html.**
+
+1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
 
 1. Think about the model described at https://talks.cam.ac.uk/document/Adding+a+talk (notably, the ability to include others' subscription lists into your own)
 
@@ -40,7 +47,7 @@ Viewing and searching
 
 1. **Redesign top menu: enhance (bold) rather than pop out. **
 
-1. **Save values in search results, add ability to clear inputs.**
+1. **Save values in search results, add ability to clear inputs, show results of empty search on initial page load.**
 
 1. **Make future the default search.**
 
@@ -49,6 +56,8 @@ Viewing and searching
 1. **When searching, should have ability to flip sort order (default depends on whether past or future)**
 
 1. **Add search on time (rather than datetime) so that users can accomodate their local schedules**
+
+1. **Set minimum/maximum widths for the tds in oneline (so that long speakers/titles/seminar names don't make dates break across lines)**
 
 1. Figure out how to limit number of seminars shown on browse page for initial users (limit at a certain number per category?)
 

@@ -10,3 +10,10 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../lmf
 from lmfdb.backend.database import PostgresDatabase
 db = PostgresDatabase(dbname="beantheory")
 assert db
+
+# Have to make sure that changes aren't logged using the LMFDB's logging mechanism.
+def nothing(self, **kwargs):
+    pass
+db.seminars.log_db_change = nothing
+db.talks.log_db_change = nothing
+db.institutions.log_db_change = nothing

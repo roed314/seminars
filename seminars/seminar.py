@@ -24,6 +24,7 @@ class WebSeminar(object):
             self.is_conference = False # seminar by default
             self.frequency = 7
             self.schedule_len = 15 # currently no way to edit this default on the website
+            self.weekday = self.start_time = self.end_time = None
             for key, typ in db.seminars.col_type.items():
                 if key == 'id' or hasattr(self, key):
                     continue

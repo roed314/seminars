@@ -145,7 +145,7 @@ class WebTalk(object):
     def show_seminar(self):
         return self.seminar.show_name()
 
-    def show_speaker(self):
+    def show_speaker(self, affiliation=True):
         # As part of a list
         ans = ""
         if self.speaker:
@@ -153,7 +153,7 @@ class WebTalk(object):
                 ans += '<a href="%s">%s</a>' % (self.speaker_homepage, self.speaker)
             else:
                 ans += self.speaker
-            if self.speaker_affiliation:
+            if affiliation and self.speaker_affiliation:
                 ans += " (%s)" % (self.speaker_affiliation)
         return ans
 
@@ -200,7 +200,7 @@ class WebTalk(object):
         cols.append(self.show_time_link())
         if include_seminar:
             cols.append(self.show_seminar())
-        cols.append(self.show_speaker())
+        cols.append(self.show_speaker(affiliation=False))
         cols.append(self.show_title())
         return "".join("<td>%s</td>" % c for c in cols)
 
