@@ -138,7 +138,6 @@ class WebTalk(object):
         return self.title if self.title else "TBA"
 
     def show_knowl_title(self):
-        print(Markup(render_template('talk-knowl.html', talk=self)))
         return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
             title=self.show_title(),
             content=Markup.escape(render_template('talk-knowl.html', talk=self))

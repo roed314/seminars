@@ -5,9 +5,6 @@ Now
 
 Admin (Edgar)
 =====
-
-1. **Fix google id for tracking**
-
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last
 
 1. Stop connecting to the lmfdb database
