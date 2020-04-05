@@ -124,9 +124,13 @@ Design and branding
 Other
 =====
 
+1. scrape some timezones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
 1. Write tests
 
 1. Reach out to Kiran about recruiting organizers.
+
+1. toggle option between http and https
 
 Examples of online seminars we might add
 ========================================
