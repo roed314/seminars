@@ -140,6 +140,7 @@ def institutions_shortnames():
     return sorted(db.institutions.search({}, projection="shortname"))
 
 
+textwidth = 400
 institution = SelectBox(
     name="institution",
     label="Institution",
@@ -154,7 +155,7 @@ online = SelectBox(
 )
 ## keywords for seminar or talk
 keywords = TextBox(
-    name="keywords", label="Keywords", colspan=(1, 2, 1), width=160 * 2 - 1 * 20
+    name="keywords", label="Keywords", colspan=(1, 2, 1), width=textwidth
 )
 ## type of access
 access = SelectBox(
@@ -170,7 +171,7 @@ class TalkSearchArray(SearchArray):
 
     def __init__(self):
         speaker = TextBox(
-            name="speaker", label="Speaker", colspan=(1, 2, 1), width=160 * 2 - 1 * 20
+            name="speaker", label="Speaker", colspan=(1, 2, 1), width=textwidth
         )
         affiliation = TextBox(
             name="affiliation",
@@ -179,7 +180,7 @@ class TalkSearchArray(SearchArray):
             width=160 * 2 - 1 * 20,
         )
         title = TextBox(
-            name="title", label="Title", colspan=(1, 2, 1), width=160 * 2 - 1 * 20
+            name="title", label="Title", colspan=(1, 2, 1), width=textwidth
         )
         date = TextBox(  # should have date widget?
             name="daterange",
@@ -211,7 +212,7 @@ class SemSearchArray(SearchArray):
 
     def __init__(self):
         name = TextBox(
-            name="name", label="Name", colspan=(1, 2, 1), width=160 * 2 - 1 * 20
+            name="name", label="Name", colspan=(1, 2, 1), width=textwidth
         )
 
         self.browse_array = [

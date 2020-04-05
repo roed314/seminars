@@ -715,7 +715,7 @@ table a[knowl] {
 }
 
 table.ntdata a {
-  display: block;
+  display: inline;
 }
 
 table.chardata a {
@@ -2373,6 +2373,14 @@ input.color_selecter {
     display: none;
 }
 
+.search-container {
+  text-align: center;
+}
+
+.searchresults, .searchform {
+  display: inline-block;
+  text-align: left;
+}
 
 /* toggle copy pasta */
 
@@ -2386,9 +2394,10 @@ input.color_selecter {
 
 .container {
     perspective: var(--perspective);
-    display: flex;
+    display: inline-flex;
     margin: 0;
     font-family: sans-serif;
+    padding-bottom: 10px;
 }
 
 .toggle {
@@ -2423,8 +2432,8 @@ input.color_selecter {
 
 .toggle>label {
     display: inline-block;
-    min-width: 170px;
-    padding: 20px;
+    min-width: 150px;
+    padding: 10px;
     font-size: var(--font-size);
     text-align: center;
     color: var(--accent);
@@ -2442,7 +2451,7 @@ input.color_selecter {
     top: calc( 0px - var(--border-width));
     right: 50%;
     height: calc(100% + var(--border-width) * 2);
-    width: 50%;
+    width: 51%;
     display: flex;
     justify-content: center;
     align-items: center;

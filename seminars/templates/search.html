@@ -1,6 +1,7 @@
 {% extends 'homepage.html' %}
 
 {% block content %}
+<div class="search-container">
 <div class="container">
         <form class="toggle">
             <input type="radio" id="choice1" name="choice" value="seminars">
@@ -17,9 +18,12 @@
         </form>
 </div>
 <div id='searchseminars'>
+  <div class='searchform'>
   <form  id='form_searchseminars' onsubmit="cleanSubmit(this.id)">
     {{ info.seminar_search_array.html() | safe }}
   </form>
+  </div>
+  <div class='searchresults'>
   {% if info.search_type == 'seminars' %}
   <table class='ntdata'>
     <thead>
@@ -40,12 +44,16 @@
     {% endfor %}
   </table>
   {% endif %}
+  </div>
 </div>
 
 <div id='searchtalks' style='display:none;'>
+<div class='searchform'>
 <form id='form_searchtalks' onsubmit="cleanSubmit(this.id)" >
   {{ info.talks_search_array.html() | safe }}
 </form>
+</div>
+<div class='searchresults'>
   {% if info.search_type == 'talks' %}
   <table class='ntdata'>
     <thead>
@@ -68,6 +76,8 @@
     {% endfor %}
   </table>
   {% endif %}
+</div>
+</div>
 </div>
 
 {% include 'debug_info.html' %}

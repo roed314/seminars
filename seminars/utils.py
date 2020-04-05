@@ -16,7 +16,7 @@ def naive_utcoffset(tz):
     for h in range(10):
         try:
             return pytz.timezone(tz).utcoffset(datetime.now() + timedelta(hours=h))
-        except pytz.exceptions.NonExistentTimeError:
+        except (pytz.exceptions.NonExistentTimeError, pytz.exceptions.AmbiguousTimeError):
             pass
 
 def pretty_timezone(tz):
