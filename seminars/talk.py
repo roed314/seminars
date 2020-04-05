@@ -1,12 +1,13 @@
 
 import pytz, datetime, random
 from urllib.parse import urlencode, quote
-from flask import url_for, redirect
+from flask import url_for, redirect, render_template
 from flask_login import current_user
 from seminars import db
 from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct
 from seminars.seminar import WebSeminar, can_edit_seminar, seminars_lookup
 from lmfdb.utils import flash_error
+from markupsafe import Markup
 from psycopg2.sql import SQL
 
 class WebTalk(object):
@@ -136,6 +137,12 @@ class WebTalk(object):
     def show_title(self):
         return self.title if self.title else "TBA"
 
+    def show_knowl_title(self):
+        print(Markup(render_template('talk-knowl.html', talk=self)))
+        return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
+            title=self.show_title(),
+            content=Markup.escape(render_template('talk-knowl.html', talk=self))
+        )
     def show_seminar(self):
         return self.seminar.show_name()
 

@@ -1,0 +1,28 @@
+<div id="talk-body">
+  <p>
+    {{ talk.show_time_and_duration() | safe }}
+  </p>
+
+  <p>
+    {{ talk.show_live_link() | safe }}
+    {% if talk.room %}
+    Lecture held in {{ talk.room }}.
+    {% endif %}
+  </p>
+
+  {% if talk.description %}
+  <p>{{talk.description}}</p>
+  {% endif %}
+
+  <h3>Abstract</h3>
+  {% if talk.abstract %}
+  {% for paragraph in talk.split_abstract() %}
+  <p>{{paragraph}}</p>
+  {% endfor %}
+  {%else%}
+  TBA
+  {% endif %}
+  <div align="right">
+    <a href="{{url_for("show_talk", semid=talk.seminar_id, talkid=talk.seminar_ctr)}}">Talk's home page</a>
+  </div>
+</div>
