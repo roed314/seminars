@@ -6,6 +6,7 @@ from seminars.utils import basic_top_menu, categories
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search
+from seminars.talk import talks_search
 from flask_login import current_user
 import datetime
 import pytz
@@ -41,15 +42,15 @@ def parse_institution_sem(info, query):
     elif info.get("institution"):
         # one day we will do joins
         query["institutions"] = {"$contains": info.get("institution")}
-        print(query)
 
 
 def parse_institution_talk(info, query):
-    sub_query = {}
-    # one day we will do joins
-    parse_institution_sem(info, sub_query)
-    sem_shortnames = db.seminars.search(sub_query, "shortname")
-    query["seminar_id"] = {"$in": sem_shortnames}
+    if info.get("institution"):
+        sub_query = {}
+        # one day we will do joins
+        parse_institution_sem(info, sub_query)
+        sem_shortnames = list(db.seminars.search(sub_query, "shortname"))
+        query["seminar_id"] = {"$in": sem_shortnames}
 
 
 def parse_online(info, query):
@@ -378,6 +379,21 @@ def search_seminars(info):
     return render_template(
         "search.html",
         title="Search seminars",
+        info=info,
+        top_menu=menu,
+        bread=None,
+    )
+
+
+def search_talks(info):
+    query = {}
+    talks_parser(info, query)
+    info['talk_results'] = talks_search(query)
+    menu = basic_top_menu()
+    menu.pop(1)
+    return render_template(
+        "search.html",
+        title="Search talks",
         info=info,
         top_menu=menu,
         bread=None,

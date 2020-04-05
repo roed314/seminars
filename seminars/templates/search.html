@@ -4,12 +4,15 @@
 <div class="container">
         <form class="toggle">
             <input type="radio" id="choice1" name="choice" value="seminars">
-            <label for="choice1">Seminars</label>
+            <label id="labelchoice1" for="choice1">Seminars</label>
 
             <input type="radio" id="choice2" name="choice" value="talks">
-            <label for="choice2">Talks</label>
+            <label id="labelchoice2" for="choice2">Talks</label>
+            {% if info.get('search_type') == 'talks' %}
+            <div id="flap"><span class="content" id="rotatedcontent" style="transform: rotateY(180deg)">Talks</span></div>
+            {% else %}
             <div id="flap"><span class="content">Seminars</span></div>
-
+            {% endif %}
 
         </form>
 </div>
@@ -24,17 +27,15 @@
         <th class="center">Institutions</th>
         <th class="center">Name</th>
         <th class="center">Description</th>
-        <th class="center">Categories</th>
         <th class="center"></th>
       </tr>
     </thead>
     {% for seminar in info.seminar_results: %}
     <tr>
-      <td class="center">{{ seminar.show_institutions() | safe}}</td>
-      <td class="center">{{ seminar.show_name() | safe }}</td>
-      <td class="center">{{ seminar.show_description() | safe }}</td>
-      <td class="center">{{ seminar.show_categories() | safe }}</td>
-      <td class="center">{{ seminar.show_subscribe() | safe }}</td>
+      <td>{{ seminar.show_institutions() | safe}}</td>
+      <td>{{ seminar.show_name() | safe }}</td>
+      <td>{{ seminar.show_description() | safe }}</td>
+      <td>{{ seminar.show_subscribe() | safe }}</td>
     </tr>
     {% endfor %}
   </table>
@@ -45,6 +46,28 @@
 <form id='form_searchtalks' onsubmit="cleanSubmit(this.id)" >
   {{ info.talks_search_array.html() | safe }}
 </form>
+  {% if info.search_type == 'talks' %}
+  <table class='ntdata'>
+    <thead>
+      <tr>
+        <th class="center">Date</th>
+        <th class="center">Time</th>
+        <th class="center">Speaker</th>
+        <th class="center">Title</th>
+        <th class="center"></th>
+      </tr>
+    </thead>
+    {% for talk in info.talk_results: %}
+    <tr>
+      <td>{{ talk.show_date() | safe}}</td>
+      <td>{{ talk.show_start_time() | safe }}</td>
+      <td>{{ talk.show_speaker() | safe }}</td>
+      <td>{{ talk.show_title() | safe }}</td>
+      <td>{{ talk.show_subscribe() | safe }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
 </div>
 
 {% include 'debug_info.html' %}
@@ -59,8 +82,7 @@ st.toggle = document.querySelector('.toggle');
 st.choice1 = document.querySelector('#choice1');
 st.choice2 = document.querySelector('#choice2');
 
-st.flap.addEventListener('transitionend', () => {
-
+st.final_flap = (e) => {
     if (st.choice1.checked) {
         st.toggle.style.transform = 'rotateY(-15deg)';
         setTimeout(() => st.toggle.style.transform = '', 400);
@@ -68,8 +90,9 @@ st.flap.addEventListener('transitionend', () => {
         st.toggle.style.transform = 'rotateY(15deg)';
         setTimeout(() => st.toggle.style.transform = '', 400);
     }
-
-})
+  console.log('triggered');
+  console.log(e);
+};
 
 st.clickHandler = (e) => {
 
@@ -85,14 +108,36 @@ st.clickHandler = (e) => {
       $('#searchtalks').show();
       $('#searchseminars').hide();
     }
-  console.log( e.target.textContent);
+  console.log(e);
 }
 
+  document.addEventListener('click', (e) => st.clickHandler(e));
+
+
 document.addEventListener('DOMContentLoaded', () => {
-    st.flap.children[0].textContent = st.choice1.nextElementSibling.textContent;
+{% if info.get('search_type') == 'talks' %}
+  var oldtoggle = st.toggle.style.transition;
+  var oldflap = st.flap.style.transition;
+  st.toggle.style.transition = '0s';
+  st.flap.style.transition = '0s';
+  st.choice2.checked = true;
+  $('#searchtalks').show();
+  $('#searchseminars').hide();
+  st.flap.children[0].textContent = st.choice2.nextElementSibling.textContent;
+  st.toggle.style.transition = oldtoggle;
+  st.flap.style.transition = oldflap;
+  document.querySelector('#rotatedcontent').style.transform = '';
+  setTimeout(() => st.flap.addEventListener('transitionend', st.final_flap), 300);
+{% else %}
+  st.flap.children[0].textContent = st.choice1.nextElementSibling.textContent;
+  st.flap.addEventListener('transitionend', st.final_flap);
+{% endif %}
+
 });
 
-document.addEventListener('click', (e) => st.clickHandler(e));
+
+
+
 
 </script>
 

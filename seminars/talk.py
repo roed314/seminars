@@ -141,21 +141,21 @@ class WebTalk(object):
 
     def show_speaker(self):
         # As part of a list
-        if self.speaker_homepage:
-            return '<a href="%s">%s</a>' % (self.speaker_homepage, self.speaker)
-        else:
-            return self.speaker
+        ans = ""
+        if self.speaker:
+            if self.speaker_homepage:
+                ans += '<a href="%s">%s</a>' % (self.speaker_homepage, self.speaker)
+            else:
+                ans += self.speaker
+            if self.speaker_affiliation:
+                ans += " (%s)" % (self.speaker_affiliation)
+        return ans
 
     def show_speaker_and_seminar(self):
         # On homepage
         ans = ""
         if self.speaker:
-            if self.speaker_homepage:
-                ans += 'by <a href="%s">%s</a>' % (self.speaker_homepage, self.speaker)
-            else:
-                ans += "by " + self.speaker
-            if self.speaker_affiliation:
-                ans += " (%s)" % (self.speaker_affiliation)
+            ans += "by " + self.show_speaker()
         if self.seminar.name:
             ans += " as part of %s" % (self.show_seminar())
         return ans
@@ -182,6 +182,9 @@ class WebTalk(object):
 
     def edit_link(self):
         return '<a href="%s">Edit</a>' % url_for("create.edit_talk", seminar_id=self.seminar_id, seminar_ctr=self.seminar_ctr)
+
+    def show_subscribe(self):
+        return ""
 
     def oneline(self, include_seminar=True):
         cols = []
