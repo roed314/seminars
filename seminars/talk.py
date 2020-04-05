@@ -112,7 +112,7 @@ class WebTalk(object):
             elif until < 11*day:
                 return ans("%s days from now" % (round(until / day)))
             elif until < 7*week:
-                return ans(" %s weeks from now" % (round(until / week)))
+                return ans("%s weeks from now" % (round(until / week)))
             elif until < 2*year:
                 return ans("%s months from now" % (round(until / month)))
             else:
