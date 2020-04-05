@@ -1,78 +1,76 @@
 Now
 ===
 
-1. Search working (Edgar)
-
 1. Subscriptions working
 
 Admin (Edgar)
 =====
 
-1. Add institution page for changing info (e.g. homepage, time zone, aliases)
+1. **Fix google id for tracking**
 
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last
 
 1. Stop connecting to the lmfdb database
 
-1. Fix google id for tracking
-
 1. add captcha to reset password and register
 
 1. Use gmail's api or some other api
 
-1. scrape timezone?
-
-1. Improve password reset process (more?)
+1. Forward back to page once you log in: https://github.com/LMFDB/lmfdb/blob/master/lmfdb/users/main.py#L251
 
 
 Content creation
 ================
 
-1. Makes sure that content creators can delete things if they want
+1. **Allow multiple categories (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 
-1. Should we include other as a category and handle specially?
-
-1. Allow multiple categories (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))
-
-1. Interface for creating a singleton talk?
-
-1. Mechanism for canceling talks, archiving seminars
+1. Makes sure that content creators can delete talks and seminars if they want (medium)
 
 1. Think about the model described at https://talks.cam.ac.uk/document/Adding+a+talk (notably, the ability to include others' subscription lists into your own)
 
-1. Think about security model of how we update the display attribute when someone gets endorsed.  Does every talk/seminar that they're an organizer for get set to display=True?  Can this be taken advantage of by adding another user as an organizer who then gets endorsed, or transferring ownership?  We don't require permission to become an organizer/transfer.
+1. Think about security model of how we update the display attribute when someone gets endorsed.  Does every talk/seminar that they're an organizer for get set to display=True?  Can this be taken advantage of by adding another user as an organizer who then gets endorsed, or transferring ownership?  We don't require permission to become an organizer/transfer.  Solved if we have newly endorsed users manually have to add the content they want to be displayed.  Also: if you aren't yet endorsed, you can't add other organizers or transfer ownership.
+
+1. Interface for creating a singleton talk?
 
 Viewing and searching
 =====================
 
+1. **Sort seminar and talks search results**
+
+1. **Add type (conference/seminar) to seminar search.**
+
+1. **One liner for seminars, add time and frequency.**
+
+1. **Redesign top menu: enhance (bold) rather than pop out. **
+
+1. **Save values in search results, add ability to clear inputs.**
+
+1. **Make future the default search.**
+
+1. **Paginate search results.**
+
+1. **When searching, should have ability to flip sort order (default depends on whether past or future)**
+
+1. **Add search on time (rather than datetime) so that users can accomodate their local schedules**
+
 1. Figure out how to limit number of seminars shown on browse page for initial users (limit at a certain number per category?)
 
-1. Build talks search results template.
-
-1. Search for conferences?  Should conference homepage be different than a seminar's?
-
-1. Redesign top menu
+1. Should conference homepage be different than a seminar's?
 
 1. Add route that strips headers for inclusion into a seminar webpage
 
 1. When logged in, there should be an option to see the site as if you weren't logged in
 
-1. When searching, should have ability to flip sort order (default depends on whether past or future)
-
 1. On the homepage, there should be a note at top explaining benefit of logging in
 
 1. In seminar lists, have icon for online vs offline talk (could be both)
-
-1. Add search on time (rather than datetime) so that users can accomodate their local schedules
 
 1. We now have a warning that javascript is required (displayed at top of every page).  Another model:  https://iacr.org/tinfoil.html
 
 Knowls
 ======
 
-1. Update knowl code and knowl database from LMFDB to give the ability to provide explanations (e.g. advertise that they can use latex, explain how to type a dollar sign, have placeholders with examples)
-
-1. Add dynamic abstract knowls for talk titles.
+1. **Update knowl code and knowl database from LMFDB to give the ability to provide explanations (e.g. advertise that they can use latex, explain how to type a dollar sign, have placeholders with examples)**
 
 Time zones
 ==========
@@ -94,9 +92,11 @@ Onboarding
 Feedback
 ========
 
-1. Add avenues for users to give feedback both to admins and to content creators
+1. Change **LMFDB error**
 
-1. We should create a privacy policy, discussion of cookies
+1. **Add avenues for users to give feedback both to admins and to content creators**
+
+1. **We should create a privacy policy, discussion of cookies**
 
 Calendars
 =========
@@ -113,9 +113,9 @@ Email
 Design and branding
 ===================
 
-1. Clean up css file to remove all the old stuff, think about what we want to have.
+1. **Clean up css file to remove all the old stuff, think about what we want to have.**
 
-1. Come up with a logo and favicon
+1. **Come up with a logo and favicon**
 
 1. Think of a good name and register it
 
