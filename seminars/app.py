@@ -87,15 +87,15 @@ def ctx_proc_userdata():
     # For example, [ ('Bread', '.'), ('Crumb', '.'), ('Hierarchy', '.')]
     vars['bread'] = None
 
-    # default title
-    vars['title'] = r'Bean Theory'
+    # default title - Math seminars already included in base.html
+    vars['title'] = r''
 
     # LMFDB version number displayed in footer
     vars['version'] = SEMINARS_VERSION
 
     # meta_description appears in the meta tag "description"
-    vars['meta_description'] = r'Welcome to Bean Theory, a listing of mathematical research seminars and conferences.'
-    vars['shortthanks'] = r'This project is supported by <a href="%s">grants</a> from the US National Science Foundation, the UK Engineering and Physical Sciences Research Council, and the Simons Foundation.' % (url_for('acknowledgment') + "#sponsors")
+    vars['meta_description'] = r'Welcome to Math seminars, a listing of mathematical research seminars and conferences.'
+    vars['shortthanks'] = r'This project is supported by a <a href="%s">grant</a> from the Simons Foundation.' % (url_for('acknowledgment') + "#sponsors")
     vars['feedbackpage'] = r"https://docs.google.com/spreadsheet/viewform?formkey=dDJXYXBleU1BMTFERFFIdjVXVmJqdlE6MQ"
     vars['LINK_EXT'] = lambda a, b: '<a href="%s" target="_blank">%s</a>' % (b, a)
 
@@ -241,7 +241,7 @@ def contact():
 
 @app.route("/robots.txt")
 def robots_txt():
-    #if "beantheory.org".lower() in request.url_root.lower():
+    #if "mathseminars.org" in request.url_root.lower():
     #    fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "robots.txt")
     #    if os.path.exists(fn):
     #        return open(fn).read()
