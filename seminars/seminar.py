@@ -204,7 +204,7 @@ def can_edit_seminar(shortname, new):
         return redirect(url_for("show_seminar", shortname=shortname), 301), None
     if not new and not current_user.is_admin():
         # Make sure user has permission to edit
-        organizer_data = db.seminar_organizers.lucky({'shortname': shortname, 'email':current_user.email})
+        organizer_data = db.seminar_organizers.lucky({'seminar_id': shortname, 'email':current_user.email})
         if organizer_data is None:
             owner_name = db.users.lucky({'email': seminar.owner}, 'full_name')
             owner = "<%s>" % (owner_name, seminar.owner)

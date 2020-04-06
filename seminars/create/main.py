@@ -275,7 +275,10 @@ def save_talk():
         data['seminar_ctr'] = curmax + 1
     else:
         data['seminar_ctr'] = talk.seminar_ctr
-    data['timezone'] = tz = raw_data.get('timezone', seminar.get('timezone', 'UTC'))
+    default_tz = seminar.timezone
+    if not default_tz:
+        default_tz = 'UTC'
+    data['timezone'] = tz = raw_data.get('timezone', default_tz)
     tz = pytz.timezone(tz)
     for col in db.talks.search_cols:
         if col in data: continue
