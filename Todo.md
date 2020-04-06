@@ -6,8 +6,6 @@ Now
 Admin (Edgar)
 =====
 
-1. **Inserting talks/seminars triggers a `log_db_change` on the corresponding tables, so we should add a `logging/editor` entry to `config.ini on the server.**
-
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last
 
 1. Stop connecting to the lmfdb database
@@ -47,9 +45,9 @@ Viewing and searching
 
 1. **One liner for seminars, add time and frequency.**
 
-1. **Redesign top menu: enhance (bold) rather than pop out.**
+1. **Change how all/clear work for filtering.**
 
-1. **Save values in search results, add ability to clear inputs, show results of empty search on initial page load.**
+1. **Add button to clear search inputs.**
 
 1. **Make future the default search.**
 

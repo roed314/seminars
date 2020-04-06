@@ -9,7 +9,7 @@ from flask import (Flask, g, render_template, request, make_response,
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
-from seminars.utils import categories
+from seminars.utils import categories, top_menu
 
 SEMINARS_VERSION = "Seminars Release 0.1"
 
@@ -103,6 +103,7 @@ def ctx_proc_userdata():
     vars['DEBUG'] = is_debug_mode()
 
     vars['categories'] = categories()
+    vars['top_menu'] = top_menu()
 
     return vars
 

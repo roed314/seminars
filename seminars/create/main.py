@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from seminars import db
 from seminars.app import app
 from seminars.create import create
-from seminars.utils import basic_top_menu, categories, timezones, process_user_input, check_time
+from seminars.utils import categories, timezones, process_user_input, check_time, weekdays
 from seminars.seminar import WebSeminar, seminars_lucky, seminars_lookup, can_edit_seminar
 from seminars.talk import WebTalk, talks_lookup, talks_max, talks_search, talks_lucky, can_edit_talk
 from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types, institution_known
@@ -24,13 +24,11 @@ def index():
             conferences.append(seminar)
         else:
             seminars.append(seminar)
-    menu = basic_top_menu()
-    menu.pop(-3)
     return render_template("create_index.html",
                            seminars=seminars,
                            conferences=conferences,
                            institution_known=institution_known,
-                           top_menu=menu,
+                           section="Create",
                            title="Create",
                            user_is_creator=current_user.is_creator())
 
@@ -51,7 +49,7 @@ def edit_seminar():
     return render_template("edit_seminar.html",
                            seminar=seminar,
                            title=title,
-                           top_menu=basic_top_menu(),
+                           #section="Create",
                            categories=categories(),
                            institutions=institutions(),
                            weekdays=weekdays,
@@ -74,7 +72,7 @@ def save_seminar():
         return render_template("edit_seminar.html",
                                seminar=seminar,
                                title="Edit seminar error",
-                               top_menu=basic_top_menu(),
+                               #section="Create",
                                categories=categories(),
                                institutions=institutions(),
                                lock=None)
@@ -160,7 +158,8 @@ def edit_institution():
                            institution_types=institution_types,
                            timezones=timezones,
                            title=title,
-                           top_menu=basic_top_menu())
+                           section="Create",
+    )
 
 @create.route("save/institution/", methods=["POST"])
 @login_required
@@ -202,7 +201,8 @@ def save_institution():
                                    institution_types=institution_types,
                                    timezones=timezones,
                                    title="Edit institution error",
-                                   top_menu=basic_top_menu())
+                                   #section="Create",
+            )
     new_version = WebInstitution(shortname, data=data)
     if new_version == institution:
         flash("No changes made to institution.")
@@ -235,7 +235,7 @@ def edit_talk():
                            talk=talk,
                            seminar=seminar,
                            title=title,
-                           top_menu=basic_top_menu(),
+                           #section="Create",
                            categories=categories(),
                            institutions=institutions(),
                            timezones=timezones)
@@ -259,7 +259,7 @@ def save_talk():
                                talk=talk,
                                seminar=seminar,
                                title=title,
-                               top_menu=basic_top_menu(),
+                               #section="Create",
                                institutions=institutions(),
                                timezones=timezones)
 
@@ -347,7 +347,6 @@ def make_date_data(seminar):
             seminar.end_time = last_talk.end_time.time()
     return None, seminar, all_dates, by_date
 
-weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 @create.route("edit/schedule/", methods=["GET", "POST"])
 def edit_seminar_schedule():
     # It would be good to have a version of this that worked for a conference, but that's a project for later
@@ -369,7 +368,8 @@ def edit_seminar_schedule():
                            by_date=by_date,
                            weekdays=weekdays,
                            title=title,
-                           top_menu=basic_top_menu())
+                           #section="Create",
+    )
 
 @create.route("save/schedule/", methods=["POST"])
 def save_seminar_schedule():

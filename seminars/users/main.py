@@ -15,7 +15,7 @@ from markupsafe import Markup
 
 from lmfdb import db
 assert db
-from seminars.utils import timezones, basic_top_menu
+from seminars.utils import timezones
 from seminars.tokens import generate_timed_token, read_timed_token
 import pytz, datetime
 
@@ -104,13 +104,14 @@ def creator_required(fn):
 
 @login_page.route("/info")
 def info():
-    menu = basic_top_menu()
-    menu.pop(-1)
-    title = "Account"
+    if current_user.is_authenticated:
+        title = section = "Account"
+    else:
+        title = section = "Login"
     return render_template("user-info.html",
                            info=info,
                            title=title,
-                           top_menu=menu,
+                           section=section,
                            timezones=timezones,
                            user=current_user,
                            session=session)

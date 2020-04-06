@@ -2,7 +2,7 @@ from seminars.app import app
 from seminars import db
 from seminars.talk import WebTalk, talks_search, talks_lucky
 from seminars.seminar import seminars_lucky
-from seminars.utils import basic_top_menu, categories
+from seminars.utils import categories
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search
@@ -18,7 +18,7 @@ from lmfdb.utils import (
     SearchArray,
     TextBox,
     SelectBox,
-    YesNoBox,
+    CheckBox,
     to_dict,
     search_wrap,
     flash_error,
@@ -30,45 +30,53 @@ def get_now():
     return datetime.datetime.now(pytz.UTC)
 
 
-def parse_category(info, query):
+def parse_category(info, query, prefix):
     # of the talk
-    if info.get("category"):
-        query["categories"] = {"$contains": info.get("category")}
+    cat = info.get(prefix + "_category")
+    if cat:
+        query["categories"] = {"$contains": cat}
 
 
-def parse_institution_sem(info, query):
-    if info.get("institution") == "None":
+def parse_institution_sem(info, query, prefix="seminar"):
+    inst = info.get(prefix + "_institution")
+    if inst == "None":
         query["institutions"] = None
-    elif info.get("institution"):
+    elif inst:
         # one day we will do joins
-        query["institutions"] = {"$contains": info.get("institution")}
+        query["institutions"] = {"$contains": inst}
 
 
-def parse_institution_talk(info, query):
+def parse_institution_talk(info, query, prefix="talk"):
     if info.get("institution"):
         sub_query = {}
         # one day we will do joins
-        parse_institution_sem(info, sub_query)
-        sem_shortnames = list(db.seminars.search(sub_query, "shortname"))
+        parse_institution_sem(info, sub_query, prefix="talk")
+        sem_shortnames = list(seminars_search(sub_query, "shortname"))
         query["seminar_id"] = {"$in": sem_shortnames}
 
 
-def parse_online(info, query):
-    online = info.get("online")
-    if online  and  online != "all":
-        query["online"] = {"": True, "exclude": "False"}[online]
+def parse_online(info, query, prefix):
+    if info.get(prefix + "_online") == "yes":
+        query["online"] = True
+
+def parse_offline(info, query, prefix):
+    if info.get(prefix + "_offline") == "yes":
+        query["room"] = {"$exists": True}
+
+def parse_substring(info, query, field, qfields, start="%", end="%"):
+    if info.get(field):
+        kwds = [elt.strip() for elt in info.get(field).split(",") if elt.strip()]
+        for qfield in qfields:
+            query[qfield] = {"$or": [{"$like": start + elt + end} for elt in kwds]}
 
 
-def parse_substring(info, query, field, qfield, start="%", end="%"):
-    if info.get("field"):
-        kwds = [elt.strip() for elt in info.get("field").split(",") if elt.strip()]
-        query[qfield] = {"$or": [{"$LIKE": start + elt + end} for elt in kwds]}
-
-
-def parse_access(info, query):
+def parse_access(info, query, prefix):
     # we want exact matches
-    parse_substring(info, query, "access", "access", start="", end="")
-
+    access = info.get(prefix + "_access")
+    if access == "open":
+        query["access"] = "open"
+    elif access == "users":
+        query["access"] = {"$or": ["open", "users"]}
 
 def parse_date(info, query):
     tz = current_user.tz
@@ -99,41 +107,35 @@ def parse_date(info, query):
 def parse_video(info, query):
     v = info.get("video")
     if v == "yes":
-        query["video"] = {"$not": None}
-    elif v == "no":
-        query["video"] = None
-
+        query["video_link"] = {"$not": None}
 
 def talks_parser(info, query):
-    parse_category(info, query)
+    parse_category(info, query, prefix="talk")
     parse_institution_talk(info, query)
-    parse_online(info, query)
-    parse_substring(info, query, "keywords", "keywords")
-    parse_access(info, query)
+    parse_online(info, query, prefix="talk")
+    parse_offline(info, query, prefix="talk")
+    parse_substring(info, query, "talk_keywords", ["abstract"])
+    parse_access(info, query, prefix="talk")
 
-    parse_substring(info, query, "speaker", "speaker")
-    parse_substring(info, query, "affiliation", "speaker_affiliation")
-    parse_substring(info, query, "title", "title")
+    parse_substring(info, query, "speaker", ["speaker"])
+    parse_substring(info, query, "affiliation", ["speaker_affiliation"])
+    parse_substring(info, query, "title", ["title"])
     parse_date(info, query)
     parse_video(info, query)
 
 
 def seminars_parser(info, query):
-    parse_category(info, query)
+    parse_category(info, query, prefix="seminar")
     parse_institution_sem(info, query)
-    parse_online(info, query)
-    parse_substring(info, query, "keywords", "keywords")
-    parse_access(info, query)
+    parse_online(info, query, prefix="seminar")
+    parse_offline(info, query, prefix="seminar")
+    parse_substring(info, query, "seminar_keywords", ["description", "comments"])
+    parse_access(info, query, prefix="seminar")
 
-    parse_substring(info, query, "name", "name")
+    parse_substring(info, query, "name", ["name"])
 
 
 # Common boxes
-## categories
-category = SelectBox(
-    name="category", label="Category", options=[("", "")] + categories()
-)
-## pick institution where it is held
 
 
 def institutions_shortnames():
@@ -141,28 +143,6 @@ def institutions_shortnames():
 
 
 textwidth = 400
-institution = SelectBox(
-    name="institution",
-    label="Institution",
-    options=[("", ""), ("None", "No institution", ),]
-    + [(elt, elt) for elt in institutions_shortnames()],
-)
-## online only?
-online = SelectBox(
-    name="online",
-    label="Online",
-    options=[("", "only"), ("all", "and offline"), ("exclude", "exclude")],
-)
-## keywords for seminar or talk
-keywords = TextBox(
-    name="keywords", label="Keywords", colspan=(1, 2, 1), width=textwidth
-)
-## type of access
-access = SelectBox(
-    name="access", label="Access", options=[("", ""), ("open", "open only")]
-)
-## number of results to display
-count = TextBox(name="count", label="Results to display", example=50)
 
 
 class TalkSearchArray(SearchArray):
@@ -170,40 +150,73 @@ class TalkSearchArray(SearchArray):
     plural_noun = "talks"
 
     def __init__(self):
-        speaker = TextBox(
-            name="speaker", label="Speaker", colspan=(1, 2, 1), width=textwidth
+        ## categories
+        category = SelectBox(name="talk_category", label="Category", options=[("", "")] + categories())
+
+        ## pick institution where it is held
+        institution = SelectBox(
+            name="talk_institution",
+            label="Institution",
+            options=[("", ""), ("None", "No institution", ),]
+            + [(elt, elt) for elt in institutions_shortnames()],
         )
+
+        ## online only?
+        online = CheckBox(name="talk_online", label="Online")
+        offline = CheckBox(name="talk_offline", label="Offline")
+
+        ## keywords for seminar or talk
+        keywords = TextBox(
+            name="talk_keywords",
+            label="Keywords",
+            colspan=(1, 2, 1),
+            width=textwidth,
+        )
+        ## type of access
+        access = SelectBox(
+            name="talk_access",
+            label="Access",
+            options=[("", ""),
+                     ("open", "Any visitor can view link"),
+                     ("users", "Any logged-in user can view link")],
+        )
+        ## number of results to display
+        count = TextBox(name="talk_count", label="Results to display", example=50)
+
+        speaker = TextBox(name="speaker", label="Speaker", colspan=(1, 2, 1), width=textwidth)
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
-        title = TextBox(
-            name="title", label="Title", colspan=(1, 2, 1), width=textwidth
-        )
-        date = TextBox(  # should have date widget?
+        title = TextBox(name="title", label="Title", colspan=(1, 2, 1), width=textwidth)
+        date = TextBox(
             name="daterange",
             id="daterange",
             label="Date",
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
-        video = YesNoBox(name="video", label="Has video")
-        self.browse_array = [
+        video = CheckBox(name="video", label="Has video")
+        self.array = [
             [category, keywords],
             [institution, title],
             [online, speaker],
+            [offline],
             [access, affiliation],
             [video, date],
             [count],
         ]
+
+    def main_table(self, info=None):
+        return self._print_table(self.array, info, layout_type="horizontal")
+
     def search_types(self, info):
-        st = self._st(info)
-        if st is None or st == 'seminars':
-            return [('talks', 'List of talks')]
-        else:
-            return [('talks', 'Search again')]
+        return [('talks', 'List of talks')]
+
+    def hidden(self, info):
+        return [("talk_start", "talk_start"), ("talk_count", "talk_count")]
 
 
 class SemSearchArray(SearchArray):
@@ -211,23 +224,58 @@ class SemSearchArray(SearchArray):
     plural_noun = "seminars"
 
     def __init__(self):
+        ## categories
+        category = SelectBox(name="seminar_category", label="Category", options=[("", "")] + categories())
+
+        ## pick institution where it is held
+        institution = SelectBox(
+            name="seminar_institution",
+            label="Institution",
+            options=[("", ""), ("None", "No institution", ),]
+            + [(elt, elt) for elt in institutions_shortnames()],
+        )
+
+        ## online only?
+        online = CheckBox(name="seminar_online", label="Online")
+        offline = CheckBox(name="seminar_offline", label="Offline")
+
+        ## keywords for seminar or talk
+        keywords = TextBox(
+            name="seminar_keywords",
+            label="Keywords",
+            colspan=(1, 2, 1),
+            width=textwidth,
+        )
+        ## type of access
+        access = SelectBox(
+            name="seminar_access",
+            label="Access",
+            options=[("", ""),
+                     ("open", "Any visitor can view link"),
+                     ("users", "Any logged-in user can view link")],
+        )
+        ## number of results to display
+        count = TextBox(name="seminar_count", label="Results to display", example=50)
+
         name = TextBox(
             name="name", label="Name", colspan=(1, 2, 1), width=textwidth
         )
 
-        self.browse_array = [
+        self.array = [
             [category, keywords],
             [institution, name],
             [online, access],
             [count],
         ]
-    def search_types(self, info):
-        st = self._st(info)
-        if st is None or st == 'talks':
-            return [('seminars', 'List of seminars')]
-        else:
-            return [('seminars', 'Search again')]
 
+    def main_table(self, info=None):
+        return self._print_table(self.array, info, layout_type="horizontal")
+
+    def search_types(self, info):
+        return [('seminars', 'List of seminars')]
+
+    def hidden(self, info):
+        return [("talk_start", "talk_start"), ("talk_count", "talk_count")]
 
 @app.route("/")
 def index():
@@ -242,14 +290,13 @@ def index():
         if talk.categories:
             for cat in talk.categories:
                 category_counts[cat] += 1
-    menu = basic_top_menu()
-    menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
+    #menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
         title="Math Seminars",
         category_counts=category_counts,
         talks=talks,
-        top_menu=menu,
+        section="Browse",
         bread=None,
     )
 
@@ -259,19 +306,33 @@ def search():
     info = to_dict(request.args,
                    seminar_search_array=SemSearchArray(),
                    talks_search_array=TalkSearchArray())
-    if len(request.args) > 0:
-        st = info["search_type"] = info.get("search_type", info.get("hst", "talks"))
-        if st == "talks":
-            return search_talks(info)
-        elif st == "seminars":
-            return search_seminars(info)
-    menu = basic_top_menu()
-    menu.pop(1)
+    if "search_type" not in info:
+        info["talk_online"] = info["seminar_online"] = True
+    try:
+        seminar_count = int(info["seminar_count"])
+        talk_count = int(info["talk_count"])
+        seminar_start = int(info["seminar_start"])
+        if seminar_start < 0:
+            seminar_start += (1 - (seminar_start + 1) // seminar_count) * seminar_count
+        talk_start = int(info["talk_start"])
+        if talk_start < 0:
+            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
+    except (KeyError, ValueError):
+        seminar_count = info["seminar_count"] = 50
+        talk_count = info["seminar_count"] = 50
+        seminar_start = info["seminar_start"] = 0
+        talk_start = info["talk_start"] = 0
+    seminar_query = {}
+    seminars_parser(info, seminar_query)
+    info['seminar_results'] = seminars_search(seminar_query, limit=seminar_count, offset=seminar_start, sort=["weekday", "start_time", "name"])
+    talk_query = {}
+    talks_parser(info, talk_query)
+    info['talk_results'] = talks_search(talk_query, limit=talk_count, offset=talk_start, sort=["start_time", "speaker"])
     return render_template(
         "search.html",
-        title="Search",
+        title="Search seminars",
         info=info,
-        top_menu=menu,
+        section="Search",
         bread=None,
     )
 
@@ -282,7 +343,6 @@ def list_institutions():
         "institutions.html",
         title="Institutions",
         institutions=institutions(),
-        top_menu=basic_top_menu(),
     )
 
 
@@ -309,7 +369,6 @@ def show_seminar(shortname):
         future=future,
         past=past,
         seminar=seminar,
-        top_menu=basic_top_menu(),
         bread=None,
     )
 
@@ -325,7 +384,6 @@ def show_talk(semid, talkid):
         title="View talk",
         talk=talk,
         utcoffset=utcoffset,
-        top_menu=basic_top_menu(),
     )
 
 
@@ -339,7 +397,6 @@ def show_institution(shortname):
         "institution.html",
         title="View institution",
         institution=institution,
-        top_menu=basic_top_menu(),
     )
 
 
@@ -347,56 +404,21 @@ def show_institution(shortname):
 def subscribe():
     # redirect to login page if not logged in, with message about what subscription is
     # If logged in, give a link to download the .ics file, the list of seminars/talks currently followed, and instructions on adding more
-    menu = basic_top_menu()
-    menu.pop(2)
     return render_template(
-        "subscribe.html", title="Subscribe", top_menu=menu, bread=None
+        "subscribe.html", title="Subscribe", bread=None
     )
     raise NotImplementedError
 
 
 @app.route("/about")
 def about():
-    menu = basic_top_menu()
-    menu.pop(4)
-    return render_template("about.html", title="About", top_menu=menu)
+    return render_template("about.html", title="About", section="About")
 
 @app.route("/faq")
 def faq():
-    return render_template("faq.html", title="FAQ", top_menu=basic_top_menu())
+    return render_template("faq.html", title="FAQ")
 
 @app.route("/<category>")
 def by_category(category):
     # raise error if not existing category?
-    return search({"category": category})
-
-
-def search_seminars(info):
-    query = {}
-    seminars_parser(info, query)
-    info['seminar_results'] = seminars_search(query)
-    menu = basic_top_menu()
-    menu.pop(1)
-    return render_template(
-        "search.html",
-        title="Search seminars",
-        info=info,
-        top_menu=menu,
-        bread=None,
-    )
-
-
-def search_talks(info):
-    query = {}
-    talks_parser(info, query)
-    info['talk_results'] = talks_search(query)
-    menu = basic_top_menu()
-    menu.pop(1)
-    return render_template(
-        "search.html",
-        title="Search talks",
-        info=info,
-        top_menu=menu,
-        bread=None,
-    )
-
+    return search({"seminars_category": category, "talks_category": category})

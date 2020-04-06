@@ -211,8 +211,8 @@ body.knowl #header {
     font-size: 180%;
     font-weight: bold;
     font-family: sans-serif;
-    padding-top: 50px;
-    display: inline-block;
+    padding-top: 10px;
+    /* display: inline-block; */
     color: {{color.header_text_title}};
 }
 
@@ -282,11 +282,12 @@ body.knowl #header {
     display: inline-block;
 }
 
-#top-menu ul li {
-  display: inline;
+#top-menu div {
+    margin-top: 16px;
+    display: inline-block;
 }
 
-#top-menu a, #filter-menu a {
+#top-menu a, #filter-menu a, #top-menu span {
     text-decoration: none;
     color: #aaaaaa;
     font-family: sans-serif;
@@ -302,10 +303,28 @@ div.category_toggle {
 div.category_toggle:hover {
     cursor: pointer;
 }
+#filter-btn:hover {
+    cursor: pointer;
+}
+
+#filter-btn {
+    z-index: 2;
+    margin-left:191px;
+    width:53px;
+    display: inline-block;
+    padding: 5px 25px 5px 25px;
+    color: #aaaaaa;
+    background: {{color.header_background}};
+}
 
 #filter-menu {
-  display: none;
-  background: {{color.header_background}};
+    margin-top:-29px;
+    z-index: 1;
+    display: none;
+    background: {{color.header_background}};
+}
+#filter-inner{
+    padding-top:29px;
 }
 
 #javascript-explanation {
@@ -319,6 +338,11 @@ div.category_toggle:hover {
 
 #talk-body {
     max-width: 700px;
+}
+
+#top-menu div.menu-active span {
+    background: #aaaaaa;
+    color: {{color.header_background}};
 }
 
 div.catselected {

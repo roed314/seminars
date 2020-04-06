@@ -2,7 +2,7 @@
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict, weekdays
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
 
@@ -102,8 +102,24 @@ class WebSeminar(object):
             return "/".join(links)
         else:
             return ""
-    def oneline(self, include_institutions=True, include_description=True, include_subscribe=True):
+
+    def show_day(self):
+        if self.weekday is None:
+            return ""
+        else:
+            return weekdays[self.weekday][:3]
+
+    def show_time(self):
+        if self.start_time:
+            return self.start_time.strftime("%-H:%M")
+        else:
+            return ""
+
+    def oneline(self, include_institutions=True, include_datetime=True, include_description=True, include_subscribe=True):
         cols = []
+        if include_datetime:
+            cols.append(self.show_day())
+            cols.append(self.show_time())
         if include_institutions:
             cols.append(self.show_institutions())
         cols.append(self.show_name())

@@ -67,7 +67,7 @@
           <td>
             <select name="weekday" style="width:510px;">
               <option value=""></option>
-              {% for wkday in [('', '')] + weekdays %}
+              {% for wkday in weekdays %}
               <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>

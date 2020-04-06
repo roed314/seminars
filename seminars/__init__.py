@@ -12,8 +12,6 @@ db = PostgresDatabase(dbname="beantheory")
 assert db
 
 # Have to make sure that changes aren't logged using the LMFDB's logging mechanism.
-def nothing(self, **kwargs):
+def nothing(self, *args, **kwds):
     pass
-db.seminars.log_db_change = nothing
-db.talks.log_db_change = nothing
-db.institutions.log_db_change = nothing
+db._log_db_change = nothing

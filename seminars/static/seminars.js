@@ -12,6 +12,18 @@ function toggle_time() {
     }
 }
 
+function toggle_filter() {
+    var filt_btn = $('#filter-btn');
+    var filt_menu = $("#filter-menu");
+    filt_btn.text("Filter");
+    if (filt_menu.is(":hidden")) {
+        filt_menu.slideToggle(400, function() {filt_btn.text("Filter ∧")});
+    } else {
+        filt_menu.slideToggle(400, function() {filt_btn.text("Filter ∨")});
+    }
+    return false;
+}
+
 function setCookie(name,value) {
     document.cookie = name + "=" + (value || "") + ";path=/";
 }

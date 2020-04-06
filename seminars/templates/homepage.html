@@ -32,11 +32,15 @@
     <div class="upper">
       <div id="title">{{ title|safe }}</div>
       <div id="top-menu">
-        <ul>
-          {% for url, onclick, label in top_menu %}
-          <li><a href="{{url}}"{% if onclick %} onclick="{{onclick}}"{% endif %}>{{label}}</a></li>
-          {% endfor %}
-        </ul>
+        {% for url, onclick, label in top_menu %}
+        {% if section == label %}
+        <div class="menu-active">
+          <span>{{label}}</span>
+        </div>
+        {% else %}
+        <div><a href="{{url}}"{% if onclick %} onclick="{{onclick}}"{% endif %}>{{label}}</a></div>
+        {% endif %}
+        {% endfor %}
       </div>
       <div class="topright">
         <table>
@@ -48,13 +52,22 @@
   </header>
   </div>
 </div>
-{% if category_counts %}
+{% if section == "Browse" %}
+<div id="filter-container">
+  <header class="inner">
+    <div id="filter-btn" onclick="return toggle_filter();">
+      Filter &or;
+    </div>
+  </header>
+</div>
 <div id="filter-menu">
-  {% for ab, name in [("ALL", "All")] + categories %}
-  <div class="category_toggle{% if ab=='ALL' %} catselected{% endif %}" id="catlink-{{ab}}">
-    {{name}}{% if category_counts[ab] %} ({{category_counts[ab]}}){% endif %}
+  <div id="filter-inner">
+    {% for ab, name in [("ALL", "All")] + categories %}
+    <div class="category_toggle{% if ab=='ALL' %} catselected{% endif %}" id="catlink-{{ab}}">
+      {{name}}{% if category_counts[ab] %} ({{category_counts[ab]}}){% endif %}
+    </div>
+    {% endfor %}
   </div>
-  {% endfor %}
 </div>
 {% endif %}
 <noscript>
