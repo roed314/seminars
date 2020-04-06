@@ -172,6 +172,20 @@ class WebSeminar(object):
             return ""
         return time.strftime("%-H:%M")
 
+
+def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
+    cols = []
+    if include_time:
+        cols.append((2, "Time"))
+    if include_institutions:
+        cols.append((1, "Institutions"))
+    cols.append((1, "Name"))
+    if include_description:
+        cols.append((1, "Description"))
+    if include_subscribe:
+        cols.append((1, ""))
+    return "".join('<th class="center" colspan="%s">%s</th>' % pair for pair in cols)
+
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")
 _maxer = SQL("SELECT MAX({0}) FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")

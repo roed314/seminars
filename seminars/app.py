@@ -10,6 +10,8 @@ from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
 from seminars.utils import categories, top_menu
+from .seminar import seminars_header
+from .talk import talks_header
 
 SEMINARS_VERSION = "Seminars Release 0.1"
 
@@ -80,32 +82,35 @@ def ctx_proc_userdata():
     # set the body class to some default, blueprints should
     # overwrite it with their name, using @<blueprint_object>.context_processor
     # see http://flask.pocoo.org/docs/api/?highlight=context_processor#flask.Blueprint.context_processor
-    vars = {'info': {}, 'body_class': ''}
+    data = {'info': {}, 'body_class': ''}
 
     # insert the default bread crumb hierarchy
     # overwrite this variable when you want to customize it
     # For example, [ ('Bread', '.'), ('Crumb', '.'), ('Hierarchy', '.')]
-    vars['bread'] = None
+    data['bread'] = None
 
     # default title - Math seminars already included in base.html
-    vars['title'] = r''
+    data['title'] = r''
 
     # LMFDB version number displayed in footer
-    vars['version'] = SEMINARS_VERSION
+    data['version'] = SEMINARS_VERSION
 
     # meta_description appears in the meta tag "description"
-    vars['meta_description'] = r'Welcome to Math seminars, a listing of mathematical research seminars and conferences.'
-    vars['shortthanks'] = r'This project is supported by a <a href="%s">grant</a> from the Simons Foundation.' % (url_for('acknowledgment') + "#sponsors")
-    vars['feedbackpage'] = r"https://docs.google.com/spreadsheet/viewform?formkey=dDJXYXBleU1BMTFERFFIdjVXVmJqdlE6MQ"
-    vars['LINK_EXT'] = lambda a, b: '<a href="%s" target="_blank">%s</a>' % (b, a)
+    data['meta_description'] = r'Welcome to Math seminars, a listing of mathematical research seminars and conferences.'
+    data['shortthanks'] = r'This project is supported by a <a href="%s">grant</a> from the Simons Foundation.' % (url_for('acknowledgment') + "#sponsors")
+    data['feedbackpage'] = r"https://docs.google.com/spreadsheet/viewform?formkey=dDJXYXBleU1BMTFERFFIdjVXVmJqdlE6MQ"
+    data['LINK_EXT'] = lambda a, b: '<a href="%s" target="_blank">%s</a>' % (b, a)
 
     # debug mode?
-    vars['DEBUG'] = is_debug_mode()
+    data['DEBUG'] = is_debug_mode()
 
-    vars['categories'] = categories()
-    vars['top_menu'] = top_menu()
+    data['categories'] = categories()
+    data['top_menu'] = top_menu()
 
-    return vars
+    data['talks_header'] = talks_header
+    data['seminars_header'] = seminars_header
+
+    return data
 
 ##############################
 #      Jinja formatters      #

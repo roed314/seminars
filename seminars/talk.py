@@ -292,6 +292,19 @@ class WebTalk(object):
             urlencode(data, quote_via=quote),
         )
 
+def talks_header(include_seminar=True, include_edit=True, include_subscribe=True):
+    cols = []
+    if include_edit:
+        cols.append("")
+    cols.append("Date")
+    cols.append("Time")
+    if include_seminar:
+        cols.append("Seminar")
+    cols.append("Speaker")
+    cols.append("Title")
+    if include_subscribe:
+        cols.append("")
+    return "".join('<th class="center">%s</th>' % c for c in cols)
 
 def can_edit_talk(seminar_id, seminar_ctr, token):
     """

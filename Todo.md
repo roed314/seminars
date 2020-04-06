@@ -1,7 +1,20 @@
 Now
 ===
 
-1. Subscriptions working
+1. get ics links to work
+
+1. search is broken, see Alex comments
+
+1. fix default date range
+
+To put somewhere
+===
+
+
+1. Get rid of static/images/url-ext.gif and fix style of links
+
+1. handle failure of subscription
+
 
 Admin (Edgar)
 =====

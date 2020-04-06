@@ -26,11 +26,7 @@
         <table class='ntdata'>
           <thead>
             <tr>
-              <th class="center" colspan="2">Time</th>
-              <th class="center">Institutions</th>
-              <th class="center">Name</th>
-              <th class="center">Description</th>
-              <th class="center"></th>
+              {{ seminars_header() | safe }}
             </tr>
           </thead>
           {% for seminar in info.seminar_results: %}
@@ -50,11 +46,7 @@
         <table class='ntdata'>
           <thead>
             <tr>
-              <th class="center">Date</th>
-              <th class="center">Time</th>
-              <th class="center">Speaker</th>
-              <th class="center">Title</th>
-              <th class="center"></th>
+              {{  talks_header() | safe }}
             </tr>
           </thead>
           {% for talk in info.talk_results: %}
