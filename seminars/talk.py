@@ -334,6 +334,8 @@ class WebTalk(object):
         event.add("description", desc)
         if self.room:
             event.add("location", "Lecture held in {}".format(self.room))
+        event.add("DTSTAMP", datetime.datetime.now(tz=pytz.UTC))
+        event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 
 
