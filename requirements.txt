@@ -2,3 +2,4 @@ email_validator
 python-dateutil
 Flask-Mail
 itsdangerous
+icalendar

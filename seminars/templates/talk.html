@@ -33,11 +33,8 @@
   <p>{{talk.description}}</p>
   {% endif %}
 
-  {% if talk.abstract %}
-  {% for paragraph in talk.split_abstract() %}
-  <p>{{paragraph}}</p>
-  {% endfor %}
-  {% endif %}
+  <h3> Abstract </h3>
+  talk.show_abstract()
 
   {% if talk.comments %}
   <p>{{talk.comments}}</p>

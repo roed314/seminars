@@ -336,12 +336,6 @@ class SeminarsUser(UserMixin):
 
 
 
-
-
-
-
-
-
     def is_anonymous(self):
         """required by flask-login user class"""
         return not self.is_authenticated
@@ -411,6 +405,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     @property
     def tz(self):
         return timezone(self.timezone)
+
+    @property
+    def email_confirmed(self):
+        return False
 
     # For versions of flask_login earlier than 0.3.0,
     # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a

@@ -52,6 +52,11 @@
     </tr>
     {% endfor %}
   </table>
+  {%  if not user.email_confirmed  %}
+  <p>
+    Please confirm your email to get access to your personalized calendar.
+  </p>
+  {% else %}
   <div>
       <ul class="ical-detail">
         <li class="ical-detail">
@@ -70,6 +75,7 @@
           </a>
         </li>
   </div>
+  {% endif %}
 
     {% if user.is_creator() %}
   <h2>Endorse someone</h2>

@@ -8,6 +8,7 @@ from seminars.seminar import WebSeminar, can_edit_seminar, seminars_lookup
 from lmfdb.utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
+from icalendar import Event
 
 
 class WebTalk(object):
@@ -178,8 +179,8 @@ class WebTalk(object):
             content=Markup.escape(render_template("talk-knowl.html", talk=self)),
         )
 
-    def show_seminar(self):
-        return self.seminar.show_name()
+    def show_seminar(self, external=False):
+        return self.seminar.show_name(external=external)
 
     def show_speaker(self, affiliation=True):
         # As part of a list
@@ -193,31 +194,36 @@ class WebTalk(object):
                 ans += " (%s)" % (self.speaker_affiliation)
         return ans
 
-    def show_speaker_and_seminar(self):
+    def show_speaker_and_seminar(self, external=False):
         # On homepage
         ans = ""
         if self.speaker:
             ans += "by " + self.show_speaker()
         if self.seminar.name:
-            ans += " as part of %s" % (self.show_seminar())
+            ans += " as part of %s" % (self.show_seminar(external=external))
         return ans
 
-    def show_live_link(self):
+    def show_live_link(self, user=current_user, raw=False):
         if not self.live_link:
             return ""
-        success = 'Access <a href="%s">online</a>.' % self.live_link
+        if raw:
+            success = self.live_link
+        else:
+            success = 'Access <a href="%s">online</a>.' % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
-            if current_user.is_authenticated:
-                return success
-            else:
+            if user.is_anonymous():
                 return (
                     'To see access link, please <a href="%s">log in</a> (anti-spam measure).'
                     % (url_for("user.info"))
                 )
+            elif not user.email_confirmed:
+                return "To see access link, please confirm your email."
+            else:
+                return success
         elif self.access == "endorsed":
-            if current_user.is_creator():
+            if user.is_creator():
                 return success
             else:
                 # TODO: add link to an explanation of endorsement
@@ -247,7 +253,6 @@ class WebTalk(object):
             "checked" if is_subscribed() else "",
         )
 
-
     def oneline(self, include_seminar=True, include_edit=True, include_subscribe=True):
         cols = []
         if include_edit:
@@ -269,6 +274,12 @@ class WebTalk(object):
 
     def split_abstract(self):
         return self.abstract.split("\n\n")
+
+    def show_abstract(self):
+        if self.abstract:
+            return "\n".join("<p>%s</p>" for elt in self.split_abstract())
+        else:
+            return "<p>TBA</p>"
 
     def speaker_link(self):
         return "https://mathseminars.org/edit/talk/%s/%s/%s" % (
@@ -292,6 +303,40 @@ class WebTalk(object):
             urlencode(data, quote_via=quote),
         )
 
+    def event(self, user):
+        event = Event()
+        event.add("summary", self.speaker)
+        event.add("dtstart", self.start_time.astimezone(pytz.UTC))
+        event.add("dtend", self.start_time.astimezone(pytz.UTC))
+        desc = ""
+        # Title
+        if self.title:
+            desc += "Title: %s\n" % (self.title)
+        # Speaker and seminar
+        desc += "by %s" % (self.speaker)
+        if self.speaker_affiliation:
+            desc += " (%s)" % (self.speaker_affiliation)
+        if self.seminar.name:
+            desc += " as part of %s" % (self.seminar.name)
+        desc += "\n\n"
+        if self.live_link:
+            link = self.show_live_link(user=user, raw=True)
+            if link.startswith("http"):
+                desc += "Access: %s\n" % (link)
+                event.add("url", link)
+        if self.room:
+            desc += "Lecture held in %s.\n" % self.room
+        if self.abstract:
+            desc += "\nAbstract\n%s" % self.abstract
+        else:
+            desc += "Abstract: TBA"
+
+        event.add("description", desc)
+        if self.room:
+            event.add("location", "Lecture held in {}".format(self.room))
+        return event
+
+
 def talks_header(include_seminar=True, include_edit=True, include_subscribe=True):
     cols = []
     if include_edit:
@@ -305,6 +350,7 @@ def talks_header(include_seminar=True, include_edit=True, include_subscribe=True
     if include_subscribe:
         cols.append("")
     return "".join('<th class="center">%s</th>' % c for c in cols)
+
 
 def can_edit_talk(seminar_id, seminar_ctr, token):
     """

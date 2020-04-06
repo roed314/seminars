@@ -74,9 +74,13 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_name(self):
+    def show_name(self, external=False):
         # Link to seminar
-        return '<a href="%s">%s</a>' % (url_for("show_seminar", shortname=self.shortname), self.name)
+        kwargs = {'shortname': self.shortname}
+        if external:
+            kwargs['_external'] = True
+            kwargs['_scheme'] = 'https'
+        return '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
 
     def show_description(self):
         return self.description
@@ -171,6 +175,11 @@ class WebSeminar(object):
         if not time:
             return ""
         return time.strftime("%-H:%M")
+
+    def talks(self):
+        from seminars.talk import talks_search # avoid import loop
+        return talks_search({'seminar_id': self.shortname})
+
 
 
 def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):

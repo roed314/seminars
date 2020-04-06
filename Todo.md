@@ -7,13 +7,13 @@ Now
 
 1. fix default date range
 
-To put somewhere
-===
+1. add feedback to subscription
+
+1. what should we do if a user is subscribed to a seminar and tries to unsubscribe from a talk in that seminar?
+
+1. subscription is broken on https://mathseminars.org/seminar/MITNT
 
 
-1. Get rid of static/images/url-ext.gif and fix style of links
-
-1. handle failure of subscription
 
 
 Admin (Edgar)

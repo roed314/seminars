@@ -8,15 +8,17 @@ import flask
 from functools import wraps
 from seminars.app import app, send_email
 from lmfdb.logger import make_logger
-from flask import render_template, request, Blueprint, url_for,  redirect, make_response, session
+from flask import render_template, request, Blueprint, url_for,  redirect, make_response, session, send_file
 from flask_login import login_required, login_user, current_user, logout_user, LoginManager
 from lmfdb.utils import flash_error
 from markupsafe import Markup
+from icalendar import Calendar
+from io import BytesIO
 
 from lmfdb import db
 assert db
 from seminars.utils import timezones
-from seminars.tokens import generate_timed_token, read_timed_token
+from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import pytz, datetime
 
 
@@ -452,4 +454,28 @@ def talk_subscriptions_remove(shortname, ctr):
 
 @login_page.route('/ics/<token>')
 def ics_file(token):
-    pass
+    try:
+        uid = read_token(token, "ics")
+        user = SeminarsUser(uid=int(uid))
+        if not user.email_confirmed:
+            return abort(404, 'Email has not yet been confirmed!')
+    except Exception:
+        return abort(404, 'Invalid link')
+
+
+    cal = Calendar()
+    cal.add("VERSION", "2.0")
+    cal.add("PRODID", "mathseminars.org")
+    cal.add("CALSCALE", "GREGORIAN")
+    cal.add("X-WR-CALNAME", "mathseminars.org")
+    cal.add("DTSTAMP", datetime.datetime.now(tz=pytz.UTC))
+
+    for talk in user.talks:
+        cal.add_component(talk.event(user))
+    for seminar in user.seminars:
+        for talk in seminar.talks():
+            cal.add_component(talk.event(user))
+    bIO = BytesIO()
+    bIO.write(cal.to_ical())
+    bIO.seek(0)
+    return send_file(bIO, attachment_filename='mathseminars.ics', as_attachment=True, add_etags=False)
