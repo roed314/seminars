@@ -52,7 +52,8 @@
     </tr>
     {% endfor %}
   </table>
-      <ul>
+  <div>
+      <ul class="ical-detail">
         <li class="ical-detail">
           <a href="https://calendar.google.com/calendar/render?cid={{ user.ics_link }}" target="_blank">
             <i class="fab fa-google"></i> Google Calendar
@@ -68,6 +69,7 @@
             <i class="fas fa-file-download"></i> ICS file
           </a>
         </li>
+  </div>
 
     {% if user.is_creator() %}
   <h2>Endorse someone</h2>

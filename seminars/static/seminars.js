@@ -202,3 +202,18 @@ $(document).ready(function() {
 
 
 
+//handling subscriptions
+$(document).ready(function(){
+    $("input.subscribe:checkbox").change(function() {
+      foo = $(this);
+        if($(this).is(":checked")) {
+            $.ajax( 'user/subscribe/' +  $(this)[0].value);
+              console.log('user/subscribe/' +  $(this)[0].value);
+        } else {
+          $.ajax( 'user/unsubscribe/' +  $(this)[0].value);
+              console.log('user/unsubscribe/' +  $(this)[0].value);
+        }
+    });
+});
+
+

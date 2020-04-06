@@ -152,11 +152,6 @@ table tbody tr.trivial a:hover {
 }
 */
 
-/* icon in front of external links */
-#content a[target="_blank"]:before {
-  content: url("static/images/url-ext.gif");
-  padding-right: 2px;
-}
 
 body.checklist {
  font-size: 70%;
@@ -2406,6 +2401,15 @@ input.color_selecter {
   text-align: left;
 }
 
+/* ics links */
+ul.ical-detail {
+  display: inline-flex;
+  list-style: none;
+}
+li.ical-detail {
+  padding-left: 10px;
+}
+
 /* toggle copy pasta */
 
 :root {
@@ -2493,3 +2497,4 @@ input.color_selecter {
     transition: transform 0s linear .25s;
     transform-style: preserve-3d;
 }
+
