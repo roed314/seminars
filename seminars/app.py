@@ -152,7 +152,7 @@ def blanknone(x):
 
 @app.before_request
 def timezone_cookie_enforcer():
-    if not (request.cookies.get('browser_timezone') or request.url.startswith('/user/ics/'):
+    if not (request.cookies.get('browser_timezone') or request.url.startswith('/user/ics/')):
         # sets a cookie and goes back to the original url
         return render_template("timezone.html", url=request.url)
 
