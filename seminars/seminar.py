@@ -82,6 +82,12 @@ class WebSeminar(object):
         return self.description
 
     def show_subscribe(self):
+        if current_user.is_anonymous():
+            return ""
+        return '<input type="checkbox" class="subscribe" value="%s" %s>' % (
+            self.shortname,
+            "checked" if self.shortname in current_user.seminar_subscriptions else "",
+        )
         return ""
 
     def show_institutions(self):
@@ -96,6 +102,16 @@ class WebSeminar(object):
             return "/".join(links)
         else:
             return ""
+    def oneline(self, include_institutions=True, include_description=True, include_subscribe=True):
+        cols = []
+        if include_institutions:
+            cols.append(self.show_institutions())
+        cols.append(self.show_name())
+        if include_description:
+            cols.append(self.show_description())
+        if include_subscribe:
+            cols.append(self.show_subscribe())
+        return "".join("<td>%s</td>" % c for c in cols)
 
     def editors(self):
         return [rec['email'] for rec in self.organizer_data]

@@ -8,22 +8,24 @@ Note that we've adapted the LMFDB's model, so we don't use `lmfdb.backend.search
 
 `users`: data on users (note that this is in the userdb schema rather than public schema)
 
-Column              | Type        |  Notes
---------------------|-------------|-------
-id                  | bigint      | auto
-password            | text        | hashed password with bcrypt
-email               | text        | this will act as username
-email_confirmed     | boolean     | if the email has been confirmed
-admin               | boolean     |
-creator             | boolean     | can create seminars which are displayed
-name                | text        |
-phd                 | boolean     | (when endorsing, only phds can say others have phds; phds can create institutions)
-affiliation         | text        |
-homepage            | text        |
-created             | timestamptz |
-endorser            | text        | email address of another user who endorses this one
-location            | earth       |
-timezone            | text        | time zone code, e.g. "US/Eastern"
+Column                | Type        |  Notes
+----------------------|-------------|-------
+id                    | bigint      | auto
+password              | text        | hashed password with bcrypt
+email                 | text        | this will act as username
+email_confirmed       | boolean     | if the email has been confirmed
+admin                 | boolean     |
+creator               | boolean     | can create seminars which are displayed
+name                  | text        |
+phd                   | boolean     | (when endorsing, only phds can say others have phds; phds can create institutions)
+affiliation           | text        |
+homepage              | text        |
+created               | timestamptz |
+endorser              | text        | email address of another user who endorses this one
+location              | earth       |
+timezone              | text        | time zone code, e.g. "US/Eastern"
+seminar_subscriptions | text[]      | set of short names of seminars that the user is subscribed to
+talks_subscriptions   | json        | dict as {shorname : list of counters}
 
 `account_tokens`: stores tokens that provide privileges when used to create an account.  These can be sent by admins and editors when inviting people to join the site
 
