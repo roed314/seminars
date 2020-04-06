@@ -25,6 +25,10 @@
   </form>
 {% else %}
 <h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">Logout</a>)</h1>
+  <h2> Subscriptions </h2>
+  <h3> Seminars </h3>
+  <h3> Talks </h3>
+
     {% if user.is_creator() %}
   <h2>Endorse someone</h2>
     <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">

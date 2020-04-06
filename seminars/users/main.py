@@ -412,10 +412,43 @@ def endorse_wtoken(token):
     elif not current_user.email_confirmed:
         flash_error('You must confirm your email first.')
     else:
-        user.endorser = int(endorser)
-        user.creator = True
-        user.phd = bool(phd)
-        user.save()
+        current_user.endorser = int(endorser)
+        current_user.creator = True
+        current_user.phd = bool(phd)
+        current_user.save()
         flask.flash('You can now create seminars. Thanks!', 'success')
     return redirect(url_for('.info'))
 
+@login_page.route('/subscribe/<shortname>')
+@login_required
+def seminar_subscriptions_add(shortname):
+    current_user.seminar_subscriptions_add(shortname)
+    current_user.save()
+    return "success"
+
+@login_page.route('/unsubscribe/<shortname>')
+@login_required
+def seminar_subscriptions_remove(shortname):
+    current_user.seminar_subscriptions_remove(shortname)
+    current_user.save()
+    return "success"
+
+@login_page.route('/subscribe/<shortname>/<ctr>')
+@login_required
+def talk_subscriptions_add(shortname, ctr):
+    current_user.talk_subscriptions_add(shortname, int(ctr))
+    current_user.save()
+    return "success"
+
+@login_page.route('/unsubscribe/<shortname>/<ctr>')
+@login_required
+def talk_subscriptions_remove(shortname, ctr):
+    current_user.talk_subscriptions_remove(shortname, int(ctr))
+    current_user.save()
+    return "success"
+
+
+
+@login_page.route('/ics/<token>')
+def ics_file(token):
+    pass

@@ -15,6 +15,7 @@ from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone
+import bisect
 
 from .main import logger
 
@@ -64,6 +65,8 @@ class PostgresUserTable(PostgresSearchTable):
             kwargs['admin'] =  kwargs['creator'] = False
         for col in ['email_confirmed', 'admin', 'creator', 'phd']:
             kwargs[col] = kwargs.get(col, False)
+        kwargs['talk_subscriptions'] = kwargs.get('talk_subscriptions', {})
+        kwargs['seminar_subscriptions'] = kwargs.get('seminar_subscriptions', [])
         kwargs['homepage'] = kwargs.get('homepage', None)
         kwargs['timezone'] = tz = kwargs.get('timezone', "")
         assert tz == "" or tz in all_timezones
@@ -269,6 +272,49 @@ class SeminarsUser(UserMixin):
     @property
     def ics(self):
         return generate_token(self.id, "ics")
+
+    @property
+    def seminar_subscriptions(self):
+        return self._data['seminar_subscriptions']
+
+    def seminar_subscriptions_add(self, shortname):
+        if shortname not in self._data['seminar_subscriptions']:
+            bisect.insort(self._data['seminar_subscriptions'], shortname)
+            if shortname in self.talk_subscriptions:
+                self._data['talk_subscriptions'].pop(shortname)
+            self._dirty = True
+
+    def seminar_subscriptions_remove(self, shortname):
+        if shortname in self._data['seminar_subscriptions']:
+            self._data['seminar_subscriptions'].remove(shortname)
+            self._dirty = True
+
+    @property
+    def talk_subscriptions(self):
+        return self._data['talk_subscriptions']
+
+    def talk_subscriptions_add(self, shortname, ctr):
+        if shortname in self._data['seminar_subscriptions']:
+            pass
+        elif ctr in self._data['talk_subscriptions'].get(shortname, []):
+            pass
+        else:
+            if shortname in self._data['talk_subscriptions']:
+                bisect.insort(self._data['talk_subscriptions'][shortname], ctr)
+            else:
+                self._data['talk_subscriptions'][shortname] = [ctr]
+            self._dirty = True
+
+    def talk_subscriptions_remove(self, shortname, ctr):
+        if ctr in self._data['talk_subscriptions'].get(shortname, []):
+            self._data['talk_subscriptions'][shortname].remove(ctr)
+            self._dirty = True
+
+
+
+
+
+
 
 
 
