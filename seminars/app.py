@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import os
 import time
 import datetime
+from urlparse import urlparse
 
 from flask import (Flask, g, render_template, request, make_response,
                    redirect, url_for, current_app, abort, session)
@@ -152,7 +153,8 @@ def blanknone(x):
 
 @app.before_request
 def timezone_cookie_enforcer():
-    if not (request.cookies.get('browser_timezone') or request.url.startswith('/user/ics/')):
+    urlparts = urlparse(request.url)
+    if not (request.cookies.get('browser_timezone') or urlparts.path.startswith('/user/ics/')):
         # sets a cookie and goes back to the original url
         return render_template("timezone.html", url=request.url)
 
