@@ -2,7 +2,7 @@
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict, weekdays
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
 
@@ -102,8 +102,24 @@ class WebSeminar(object):
             return "/".join(links)
         else:
             return ""
-    def oneline(self, include_institutions=True, include_description=True, include_subscribe=True):
+
+    def show_day(self):
+        if self.weekday is None:
+            return ""
+        else:
+            return weekdays[self.weekday][:3]
+
+    def show_time(self):
+        if self.start_time:
+            return self.start_time.strftime("%-H:%M")
+        else:
+            return ""
+
+    def oneline(self, include_institutions=True, include_datetime=True, include_description=True, include_subscribe=True):
         cols = []
+        if include_datetime:
+            cols.append(self.show_day())
+            cols.append(self.show_time())
         if include_institutions:
             cols.append(self.show_institutions())
         cols.append(self.show_name())
@@ -157,16 +173,18 @@ class WebSeminar(object):
         return time.strftime("%-H:%M")
 
 
-def seminars_header(include_institutions=True, include_description=True, include_subscribe=True):
+def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
     cols = []
+    if include_time:
+        cols.append((2, "Time"))
     if include_institutions:
-        cols.append("Institutions")
-    cols.append("Name")
+        cols.append((1, "Institutions"))
+    cols.append((1, "Name"))
     if include_description:
-        cols.append("Description")
+        cols.append((1, "Description"))
     if include_subscribe:
-        cols.append("")
-    return "".join('<th class="center">%s</th>' % c for c in cols)
+        cols.append((1, ""))
+    return "".join('<th class="center" colspan="%s">%s</th>' % pair for pair in cols)
 
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")
@@ -232,7 +250,7 @@ def can_edit_seminar(shortname, new):
         return redirect(url_for("show_seminar", shortname=shortname), 301), None
     if not new and not current_user.is_admin():
         # Make sure user has permission to edit
-        organizer_data = db.seminar_organizers.lucky({'shortname': shortname, 'email':current_user.email})
+        organizer_data = db.seminar_organizers.lucky({'seminar_id': shortname, 'email':current_user.email})
         if organizer_data is None:
             owner_name = db.users.lucky({'email': seminar.owner}, 'full_name')
             owner = "<%s>" % (owner_name, seminar.owner)

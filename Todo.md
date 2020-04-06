@@ -19,8 +19,6 @@ To put somewhere
 Admin (Edgar)
 =====
 
-1. **Inserting talks/seminars triggers a `log_db_change` on the corresponding tables, so we should add a `logging/editor` entry to `config.ini on the server.**
-
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last
 
 1. Stop connecting to the lmfdb database
@@ -60,10 +58,9 @@ Viewing and searching
 
 1. **One liner for seminars, add time and frequency.**
 
+1. **Change how all/clear work for filtering.**
 
-1. **Redesign top menu: enhance (bold) rather than pop out.**
-
-1. **Save values in search results, add ability to clear inputs, show results of empty search on initial page load.**
+1. **Add button to clear search inputs.**
 
 1. **Make future the default search.**
 
@@ -89,6 +86,8 @@ Viewing and searching
 
 1. We now have a warning that javascript is required (displayed at top of every page).  Another model:  https://iacr.org/tinfoil.html
 
+1. Editable tips
+
 Knowls
 ======
 
@@ -101,6 +100,8 @@ Localization
 ============
 
 1. Think about whether there is anything we should do to support other languages.  Maybe add a language column for talks and seminars?
+
+1. Django has built in internationalization system (google Zulip internationalization)
 
 Onboarding
 ==========
@@ -128,9 +129,11 @@ Calendars
 Email
 =====
 
+1. Tim suggest mailgun (cheapest low tier).  Can steal email code from Zulip (they also use Django).  Look at Zulip or Django documentation.  Dedicated IP address helps against spam filtering.  Or use MIT and talk to MIT help desk.
+
 1. Figure out how to make our emails less likely to be marked spam.
 
-2. Customizable announcement emails for seminar organizers.
+1. Customizable announcement emails for seminar organizers.
 
 Design and branding
 ===================
@@ -153,6 +156,10 @@ Other
 1. Reach out to Kiran about recruiting organizers.
 
 1. toggle option between http and https
+
+1. Twitter page?  Talk to someone who uses it.  Grab the username now.
+
+1. Python-social-auth: common framework for authentication integration.  Stackexchange/mathoverflow authentication?
 
 Examples of online seminars we might add
 ========================================

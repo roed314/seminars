@@ -2,68 +2,62 @@
 
 {% block content %}
 <div class="search-container">
-<div class="container">
-        <form class="toggle">
-            <input type="radio" id="choice1" name="choice" value="seminars">
-            <label id="labelchoice1" for="choice1">Seminars</label>
+  <div class="container">
+    <form class="toggle">
+      <input type="radio" id="choice1" name="choice" value="seminars">
+      <label id="labelchoice1" for="choice1">Seminars</label>
 
-            <input type="radio" id="choice2" name="choice" value="talks">
-            <label id="labelchoice2" for="choice2">Talks</label>
-            {% if info.get('search_type') == 'talks' %}
-            <div id="flap"><span class="content" id="rotatedcontent" style="transform: rotateY(180deg)">Talks</span></div>
-            {% else %}
-            <div id="flap"><span class="content">Seminars</span></div>
-            {% endif %}
+      <input type="radio" id="choice2" name="choice" value="talks">
+      <label id="labelchoice2" for="choice2">Talks</label>
+      {% if info.get('search_type') == 'talks' %}
+      <div id="flap"><span class="content" id="rotatedcontent" style="transform: rotateY(180deg)">Talks</span></div>
+      {% else %}
+      <div id="flap"><span class="content">Seminars</span></div>
+      {% endif %}
 
-        </form>
-</div>
-<div id='searchseminars'>
-  <div class='searchform'>
-  <form  id='form_searchseminars' onsubmit="cleanSubmit(this.id)">
-    {{ info.seminar_search_array.html() | safe }}
+    </form>
+  </div>
+  <form id='search_form' onsubmit="cleanSubmit(this.id)">
+    <div id='searchseminars'>
+      <div class='searchform'>
+        {{ info.seminar_search_array.html(info) | safe }}
+      </div>
+      <div class='searchresults'>
+        <table class='ntdata'>
+          <thead>
+            <tr>
+              {{ seminars_header() | safe }}
+            </tr>
+          </thead>
+          {% for seminar in info.seminar_results: %}
+          <tr>
+            {{ seminar.oneline() | safe }}
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+
+    <div id='searchtalks' style='display:none;'>
+      <div class='searchform'>
+        {{ info.talks_search_array.html(info) | safe }}
+      </div>
+      <div class='searchresults'>
+        <table class='ntdata'>
+          <thead>
+            <tr>
+              {{  talks_header() | safe }}
+            </tr>
+          </thead>
+          {% for talk in info.talk_results: %}
+          <tr>
+            {{ talk.oneline(include_seminar=False, include_edit=False) | safe }}
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
   </form>
-  </div>
-  <div class='searchresults'>
-  {% if info.search_type == 'seminars' %}
-  <table class='ntdata'>
-    <thead>
-      <tr>
-        {{ seminars_header() | safe }}
-      </tr>
-    </thead>
-    {% for seminar in info.seminar_results %}
-    <tr>
-      {{ seminar.oneline() | safe }}
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
-  </div>
-</div>
-
-<div id='searchtalks' style='display:none;'>
-<div class='searchform'>
-<form id='form_searchtalks' onsubmit="cleanSubmit(this.id)" >
-  {{ info.talks_search_array.html() | safe }}
-</form>
-</div>
-<div class='searchresults'>
-  {% if info.search_type == 'talks' %}
-  <table class='ntdata'>
-    <thead>
-      <tr>
-        {{  talks_header() | safe }}
-      </tr>
-    </thead>
-    {% for talk in info.talk_results %}
-    <tr>
-      {{ talk.oneline(include_seminar=False, include_edit=False) | safe }}
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
-</div>
-</div>
 </div>
 
 {% include 'debug_info.html' %}
