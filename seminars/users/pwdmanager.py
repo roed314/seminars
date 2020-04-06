@@ -11,6 +11,8 @@ import bcrypt
 
 from seminars import db
 from seminars.tokens import generate_token
+from seminars.seminar import WebSeminar
+from seminars.talk import WebTalk
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
 from datetime import datetime
@@ -21,7 +23,7 @@ from .main import logger
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
 from flask_login import UserMixin, AnonymousUserMixin
-from flask import request
+from flask import request, url_for
 
 class PostgresUserTable(PostgresSearchTable):
     def __init__(self):
@@ -274,8 +276,20 @@ class SeminarsUser(UserMixin):
         return generate_token(self.id, "ics")
 
     @property
+    def ics_link(self):
+        return url_for('.ics_file', token=self.ics, _external=True, _scheme='https')
+
+    @property
+    def ics_webcal_link(self):
+        return url_for('.ics_file', token=self.ics, _external=True, _scheme='webcal')
+
+    @property
     def seminar_subscriptions(self):
         return self._data['seminar_subscriptions']
+
+    @property
+    def seminars(self):
+        return [WebSeminar(elt) for elt in self.seminar_subscriptions]
 
     def seminar_subscriptions_add(self, shortname):
         if shortname not in self._data['seminar_subscriptions']:
@@ -292,6 +306,16 @@ class SeminarsUser(UserMixin):
     @property
     def talk_subscriptions(self):
         return self._data['talk_subscriptions']
+
+    @property
+    def talks(self):
+        res = []
+        for shortname, ctrs in self.talk_subscriptions.items():
+            for ctr in ctrs:
+                res.append(WebTalk(shortname, ctr))
+        res.sort(key=lambda elt: elt.start_time)
+        return res
+
 
     def talk_subscriptions_add(self, shortname, ctr):
         if shortname in self._data['seminar_subscriptions']:

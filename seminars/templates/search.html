@@ -28,13 +28,10 @@
   <table class='ntdata'>
     <thead>
       <tr>
-        <th class="center">Institutions</th>
-        <th class="center">Name</th>
-        <th class="center">Description</th>
-        <th class="center"></th>
+        {{ seminars_header() | safe }}
       </tr>
     </thead>
-    {% for seminar in info.seminar_results: %}
+    {% for seminar in info.seminar_results %}
     <tr>
       {{ seminar.oneline() | safe }}
     </tr>
@@ -55,14 +52,10 @@
   <table class='ntdata'>
     <thead>
       <tr>
-        <th class="center">Date</th>
-        <th class="center">Time</th>
-        <th class="center">Speaker</th>
-        <th class="center">Title</th>
-        <th class="center"></th>
+        {{  talks_header() | safe }}
       </tr>
     </thead>
-    {% for talk in info.talk_results: %}
+    {% for talk in info.talk_results %}
     <tr>
       {{ talk.oneline(include_seminar=False, include_edit=False) | safe }}
     </tr>

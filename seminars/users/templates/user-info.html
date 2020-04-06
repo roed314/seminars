@@ -27,7 +27,47 @@
 <h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">Logout</a>)</h1>
   <h2> Subscriptions </h2>
   <h3> Seminars </h3>
+  <table class='ntdata'>
+    <thead>
+      <tr>
+        {{ seminars_header() | safe }}
+      </tr>
+    </thead>
+    {% for seminar in user.seminars: %}
+    <tr>
+      {{ seminar.oneline() | safe }}
+    </tr>
+    {% endfor %}
+  </table>
   <h3> Talks </h3>
+  <table class='ntdata'>
+    <thead>
+      <tr>
+        {{  talks_header(include_seminar=False, include_edit=False) | safe }}
+      </tr>
+    </thead>
+    {% for talk in user.talks: %}
+    <tr>
+      {{ talk.oneline(include_seminar=False, include_edit=False) | safe }}
+    </tr>
+    {% endfor %}
+  </table>
+      <ul>
+        <li class="ical-detail">
+          <a href="https://calendar.google.com/calendar/render?cid={{ user.ics_link }}" target="_blank">
+            <i class="fab fa-google"></i> Google Calendar
+          </a>
+        </li>
+        <li class="ical-detail">
+          <a href="webcal://{{ user.ics_webcal_link }}" target="_blank">
+            <i class="fas fa-calendar-alt"></i> iCal/Outlook
+          </a>
+        </li>
+        <li class="ical-detail">
+          <a href="{{ user.ics_link }}" target="_blank">
+            <i class="fas fa-file-download"></i> ICS file
+          </a>
+        </li>
 
     {% if user.is_creator() %}
   <h2>Endorse someone</h2>
