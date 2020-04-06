@@ -1,13 +1,13 @@
 Now
 ===
 
-1. get ics links to work
-
 1. search is broken, see Alex comments
 
 1. fix default date range
 
 1. add feedback to subscription
+
+1. subscription doesnt work on users page
 
 1. what should we do if a user is subscribed to a seminar and tries to unsubscribe from a talk in that seminar?
 
