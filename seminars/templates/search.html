@@ -46,7 +46,7 @@
         <table class='ntdata'>
           <thead>
             <tr>
-              {{  talks_header() | safe }}
+              {{  talks_header(include_seminar=False, include_edit=False) | safe }}
             </tr>
           </thead>
           {% for talk in info.talk_results: %}
