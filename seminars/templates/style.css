@@ -279,7 +279,7 @@ body.knowl #header {
 
 #top-menu div {
     margin-top: 16px;
-    display: inline-block;
+    display: inline-flex;
 }
 
 #top-menu a, #filter-menu a, #top-menu span {
