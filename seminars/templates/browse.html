@@ -14,7 +14,10 @@
 
 <button id="filter-btn" onclick="return toggle_filter();">Show filters</button>
 
-<table id="browse-talks" class="talk-table">
+<table id="browse-talks" class="talk-table ntdata">
+  <thead>
+  <tr> {{ talks_header()  | safe }} </tr>
+  </thead>
   {% for talk in talks %}
   <tr class="talk catunselected cat-ALL {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
     {{ talk.oneline() | safe }}
