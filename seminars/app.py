@@ -97,8 +97,7 @@ def ctx_proc_userdata():
     data['version'] = SEMINARS_VERSION
 
     # meta_description appears in the meta tag "description"
-    data['meta_description'] = r'Welcome to Math seminars, a listing of mathematical research seminars and conferences.'
-    data['shortthanks'] = r'This project is supported by a <a href="%s">grant</a> from the Simons Foundation.' % (url_for('acknowledgment') + "#sponsors")
+    data['meta_description'] = r'Welcome to Math seminars, a listing of mathematical research seminars, talks and conferences!  We aim to make online talks accessible to mathematicians worldwide.'
     data['feedbackpage'] = r"https://docs.google.com/spreadsheet/viewform?formkey=dDJXYXBleU1BMTFERFFIdjVXVmJqdlE6MQ"
     data['LINK_EXT'] = lambda a, b: '<a href="%s" target="_blank">%s</a>' % (b, a)
 

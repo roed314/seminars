@@ -99,7 +99,7 @@ Time zones
 Localization
 ============
 
-1. Think about whether there is anything we should do to support other languages.  Maybe add a language column for talks and seminars?
+1. **Add a language column for talks and seminars.**
 
 1. Django has built in internationalization system (google Zulip internationalization)
 

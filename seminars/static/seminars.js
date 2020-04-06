@@ -17,10 +17,11 @@ function toggle_filter() {
     var filt_menu = $("#filter-menu");
     filt_btn.text("Filter");
     if (filt_menu.is(":hidden")) {
-        filt_menu.slideToggle(400, function() {filt_btn.text("Filter ∧")});
+        filt_btn.html("Hide filters");
     } else {
-        filt_menu.slideToggle(400, function() {filt_btn.text("Filter ∨")});
+        filt_btn.html("Show filters");
     }
+    filt_menu.slideToggle(300);
     return false;
 }
 

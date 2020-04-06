@@ -309,7 +309,7 @@ def make_date_data(seminar):
     shortname = seminar.shortname
     if not seminar.frequency or seminar.frequency < 0 or not seminar.schedule_len or seminar.schedule_len < 0 or seminar.schedule_len > 400:
         print(seminar.frequency, seminar.schedule_len)
-        flash_error("You must specify a meeting frequence to use the scheduler")
+        flash_error("You must specify a meeting frequency to use the scheduler")
         return redirect(url_for("show_seminar", shortname=shortname), 301), None, None, None
     now = datetime.datetime.now(tz=pytz.utc)
     today = now.date()

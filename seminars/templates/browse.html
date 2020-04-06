@@ -12,7 +12,9 @@
 </p>
 {% endif %}
 
-<table id="browse-talks">
+<button id="filter-btn" onclick="return toggle_filter();">Show filters</button>
+
+<table id="browse-talks" class="talk-table">
   {% for talk in talks %}
   <tr class="talk catunselected cat-ALL {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
     {{ talk.oneline() | safe }}

@@ -298,28 +298,14 @@ div.category_toggle {
 div.category_toggle:hover {
     cursor: pointer;
 }
-#filter-btn:hover {
-    cursor: pointer;
-}
-
-#filter-btn {
-    z-index: 2;
-    margin-left:191px;
-    width:53px;
-    display: inline-block;
-    padding: 5px 25px 5px 25px;
-    color: #aaaaaa;
-    background: {{color.header_background}};
-}
 
 #filter-menu {
-    margin-top:-29px;
-    z-index: 1;
     display: none;
     background: {{color.header_background}};
 }
-#filter-inner{
-    padding-top:29px;
+
+#filter-btn {
+    margin: 0px 30px 15px 30px;
 }
 
 #javascript-explanation {
@@ -335,7 +321,7 @@ div.category_toggle:hover {
     max-width: 700px;
 }
 
-#top-menu div.menu-active span {
+#top-menu div.menu-active a {
     background: #aaaaaa;
     color: {{color.header_background}};
 }
@@ -347,6 +333,10 @@ div.catselected {
 
 tr.catunselected {
     display: none;
+}
+
+.talk-table td:nth-child(2), .talk-table td:nth-child(4), .talk-table td:nth-child(5) {
+    white-space: nowrap;
 }
 
 /* TODO: what? */
