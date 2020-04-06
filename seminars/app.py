@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import os
 import time
 import datetime
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from flask import (Flask, g, render_template, request, make_response,
                    redirect, url_for, current_app, abort, session)
