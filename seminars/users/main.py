@@ -468,7 +468,6 @@ def ics_file(token):
     cal.add("PRODID", "mathseminars.org")
     cal.add("CALSCALE", "GREGORIAN")
     cal.add("X-WR-CALNAME", "mathseminars.org")
-    cal.add("DTSTAMP", datetime.datetime.now(tz=pytz.UTC))
 
     for talk in user.talks:
         cal.add_component(talk.event(user))

@@ -280,6 +280,10 @@ class SeminarsUser(UserMixin):
         return url_for('.ics_file', token=self.ics, _external=True, _scheme='https')
 
     @property
+    def ics_gcal_link(self):
+        return "https://calendar.google.com/calendar/render?cid=" + url_for('.ics_file', token=self.ics, _external=True, _scheme='http')
+
+    @property
     def ics_webcal_link(self):
         return url_for('.ics_file', token=self.ics, _external=True, _scheme='webcal')
 
