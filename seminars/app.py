@@ -325,7 +325,20 @@ def root_static_file(name):
         return abort(404, 'static file %s not found.' % fn)
     app.add_url_rule('/%s' % name, 'static_%s' % name, static_fn)
 
-for fn in ['favicon.ico']:
+
+for fn in ["favicon/apple-touch-icon-57x57.png",
+           "favicon/apple-touch-icon-114x114.png",
+           "favicon/apple-touch-icon-72x72.png",
+           "favicon/apple-touch-icon-144x144.png",
+           "favicon/apple-touch-icon-60x60.png",
+           "favicon/apple-touch-icon-120x120.png",
+           "favicon/apple-touch-icon-76x76.png",
+           "favicon/apple-touch-icon-152x152.png",
+           "favicon/favicon-196x196.png",
+           "favicon/favicon-96x96.png",
+           "favicon/favicon-32x32.png",
+           "favicon/favicon-16x16.png",
+           "favicon/favicon-128.png"]:
     root_static_file(fn)
 
 
