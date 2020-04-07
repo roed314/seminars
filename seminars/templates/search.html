@@ -119,10 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('#rotatedcontent').style.transform = '';
   setTimeout(() => st.flap.addEventListener('transitionend', st.final_flap), 300);
 {% else %}
+if( st.choice2.checked ){
+  $('#searchtalks').show();
+  $('#searchseminars').hide();
+  st.flap.children[0].textContent = st.choice2.nextElementSibling.textContent;
+} else {
   st.flap.children[0].textContent = st.choice1.nextElementSibling.textContent;
+}
   st.flap.addEventListener('transitionend', st.final_flap);
 {% endif %}
-
 });
 
 
