@@ -5,6 +5,13 @@ from seminars import db
 from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict, weekdays
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
+import datetime, pytz
+def next_weekday(weekday, timezone):
+    now = datetime.datetime.now(pytz.UTC)
+    days_ahead = weekday - now.weekday()
+    if days_ahead <= 0: # Target day already happened this week
+        days_ahead += 7
+    return d + datetime.timedelta(days_ahead)
 
 
 class WebSeminar(object):
@@ -112,6 +119,7 @@ class WebSeminar(object):
             return "/".join(links)
         else:
             return ""
+
 
     def show_day(self):
         if self.weekday is None:
