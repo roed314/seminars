@@ -79,7 +79,7 @@ def can_edit_institution(shortname, new):
         # Make sure user has permission to edit
         if institution.admin != current_user.email:
             owner_name = db.users.lucky({'email': institution.admin}, 'full_name')
-            owner = "<%s>" % (owner_name, institution.admin)
+            owner = "<%s %s>" % (owner_name, institution.admin)
             if owner_name:
                 owner = owner_name + " " + owner
             flash_error("You do not have permission to edit %s.  Contact the institution admin, %s, and ask them to fix any errors." % (institution.name, owner))
