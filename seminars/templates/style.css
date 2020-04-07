@@ -321,7 +321,7 @@ div.category_toggle:hover {
     max-width: 700px;
 }
 
-#top-menu div.menu-active a {
+#top-menu div.menu-active a,  #top-menu a:hover {
     background: #aaaaaa;
     color: {{color.header_background}};
 }
@@ -642,7 +642,7 @@ button {
     font-weight: bold;
 }
 
-select {
+select, select option{
    background: {{color.select_background}};
 }
 
@@ -659,6 +659,11 @@ body.knowl form input {
 form button:hover,
 form select:hover {
     background:    {{color.button_background_hover}};
+    border: 2px solid {{color.button_border_hover}};
+}
+
+form select:hover {
+    background:    {{color.select_background}};
     border: 2px solid {{color.button_border_hover}};
 }
 
@@ -2531,7 +2536,7 @@ li.ical-detail {
 }
 
 .tgl-light + .tgl-btn {
-  background: #f0f0f0;
+  background: #d8d8d8;
   border-radius: 1.25em;
   padding: 2px;
   -webkit-transition: all .4s ease;
