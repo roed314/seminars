@@ -215,7 +215,7 @@ class TalkSearchArray(SearchArray):
         return [('talks', 'List of talks')]
 
     def hidden(self, info):
-        return [("talk_start", "talk_start"), ("talk_count", "talk_count")]
+        return [("talk_start", "talk_start")]
 
 
 class SemSearchArray(SearchArray):
@@ -274,7 +274,7 @@ class SemSearchArray(SearchArray):
         return [('seminars', 'List of seminars')]
 
     def hidden(self, info):
-        return [("seminar_start", "seminar_start"), ("seminar_count", "seminar_count")]
+        return [("seminar_start", "seminar_start")]
 
 @app.route("/")
 def index():
@@ -318,7 +318,7 @@ def search():
             talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
     except (KeyError, ValueError):
         seminar_count = info["seminar_count"] = 50
-        talk_count = info["seminar_count"] = 50
+        talk_count = info["talk_count"] = 50
         seminar_start = info["seminar_start"] = 0
         talk_start = info["talk_start"] = 0
     seminar_query = {}
