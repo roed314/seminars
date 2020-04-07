@@ -48,7 +48,6 @@
           <td>Description</td>
           <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:500px;" /></td>
         </tr>
-        {% if user.phd %}
         <tr>
           <td>Institutions</td>
           <td>
@@ -61,7 +60,6 @@
           </td>
           <td><a href="{{ url_for('list_institutions') }}" target="_blank">Add new institution</a> (must reload this page afterward)</td>
         </tr>
-        {% endif %}
         <tr>
           <td>Meeting day</td>
           <td>

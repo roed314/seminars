@@ -6,7 +6,7 @@
 <p>Warning: seminars and talks you create will not appear until you are <a href="">approved</a>.</p>
 {% endif %}
 
-{% if user.phd and user.affiliation and not institution_known(user.affiliation) %}
+{% if user.affiliation and not institution_known(user.affiliation) %}
 <p> Your affiliation doesn't appear to be on our list of institutions.  You may want to <a href="{{ url_for('list_institutions') }}">create your institution</a> before creating a seminar.
 {% endif %}
 

@@ -88,6 +88,12 @@ class WebSeminar(object):
     def show_subscribe(self):
         if current_user.is_anonymous():
             return ""
+        return """
+<input type="checkbox" class="subscribe tgl tgl-light" value="{sem}" id="tgl{sem}" {checked}>
+<label class="tgl-btn" for="tgl{sem}"></label>
+""".format(sem=self.shortname,
+           checked="checked" if self.shortname in current_user.seminar_subscriptions else "",
+        )
         return '<input type="checkbox" class="subscribe" value="%s" %s>' % (
             self.shortname,
             "checked" if self.shortname in current_user.seminar_subscriptions else "",
@@ -192,8 +198,11 @@ def seminars_header(include_time=True, include_institutions=True, include_descri
     if include_description:
         cols.append((1, "Description"))
     if include_subscribe:
-        cols.append((1, ""))
-    return "".join('<th class="center" colspan="%s">%s</th>' % pair for pair in cols)
+        if current_user.is_anonymous():
+            cols.append((1, ""))
+        else:
+            cols.append((1, "Saved"))
+    return "".join('<th colspan="%s">%s</th>' % pair for pair in cols)
 
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")

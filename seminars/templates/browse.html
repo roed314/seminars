@@ -26,7 +26,10 @@
 </table>
 
 
-<table id="browse-talks" class="talk-table">
+<table id="browse-talks" class="talk-table ntdata">
+  <thead>
+  <tr> {{ talks_header()  | safe }} </tr>
+  </thead>
   <tbody>
     {% for talk in talks %}
     <tr class="talk {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">

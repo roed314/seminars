@@ -32,9 +32,9 @@
     <div class="upper">
       <div id="title">{{ title|safe }}</div>
       <div id="top-menu">
-        {% for url, onclick, label in top_menu %}
+        {% for url, onclick, label in top_menu -%}
         <div {% if section == label %} class="menu-active"{% endif %}><a href="{{url}}"{% if onclick %} onclick="{{onclick}}"{% endif %}>{{label}}</a></div>
-        {% endfor %}
+        {%- endfor %}
       </div>
       <div class="topright">
         <table>

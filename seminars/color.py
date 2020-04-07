@@ -9,7 +9,7 @@ class Slate(SteelBlue):
     col_main_dl = c.white
     button_background = '#0066dd'
     button_border = '#0033bb'
-    col_visited = c.blue
+    col_visited = '#00499b'
     #col_main = '#373737'
     a_text = '#373737' # h2 headers
     col_link = '#0033bb' # links

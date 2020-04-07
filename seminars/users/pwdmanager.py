@@ -58,19 +58,19 @@ class PostgresUserTable(PostgresSearchTable):
             - name
             - affiliation
         """
-        for col in ["email", "password", "name", "affiliation", "homepage"]:
+        for col in ["email", "password"]:
             assert col in kwargs
         email = kwargs.pop('email')
         kwargs['password'] = self.bchash(kwargs['password'])
         if 'endorser' not in kwargs:
             kwargs['endorser'] = None
             kwargs['admin'] =  kwargs['creator'] = False
-        for col in ['email_confirmed', 'admin', 'creator', 'phd']:
+        for col in ['email_confirmed', 'admin', 'creator']:
             kwargs[col] = kwargs.get(col, False)
         kwargs['talk_subscriptions'] = kwargs.get('talk_subscriptions', {})
         kwargs['seminar_subscriptions'] = kwargs.get('seminar_subscriptions', [])
-        kwargs['homepage'] = kwargs.get('homepage', None)
-        kwargs['timezone'] = tz = kwargs.get('timezone', "")
+        for col in  ["name", "affiliation", "homepage", "timezone"]:
+            kwargs[col] = tz = kwargs.get(col, "")
         assert tz == "" or tz in all_timezones
         kwargs['location'] = None
         kwargs['created'] = datetime.now(UTC)
@@ -88,7 +88,7 @@ class PostgresUserTable(PostgresSearchTable):
 
 
     def user_exists(self, email):
-        return self.lookup(email, projection='id') is not None
+        return self.lucky({'email': email}, projection='id') is not None
 
 
     def authenticate(self, email, password):
@@ -244,14 +244,6 @@ class SeminarsUser(UserMixin):
     def created(self):
         return self._data.get('created')
 
-    @property
-    def phd(self):
-        return self._data.get('phd')
-
-    @phd.setter
-    def phd(self, phd):
-        self._data['phd'] = True
-        self._dirty = True
 
     @property
     def endorser(self):

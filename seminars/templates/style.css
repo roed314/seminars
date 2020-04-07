@@ -279,7 +279,7 @@ body.knowl #header {
 
 #top-menu div {
     margin-top: 16px;
-    display: inline-block;
+    display: inline-flex;
 }
 
 #top-menu a, #topic-filter-menu a, #top-menu span {
@@ -330,7 +330,7 @@ div.topic_cmd {
     max-width: 700px;
 }
 
-#top-menu div.menu-active a {
+#top-menu div.menu-active a,  #top-menu a:hover {
     background: #aaaaaa;
     color: {{color.header_background}};
 }
@@ -651,7 +651,7 @@ button {
     font-weight: bold;
 }
 
-select {
+select, select option{
    background: {{color.select_background}};
 }
 
@@ -668,6 +668,11 @@ body.knowl form input {
 form button:hover,
 form select:hover {
     background:    {{color.button_background_hover}};
+    border: 2px solid {{color.button_border_hover}};
+}
+
+form select:hover {
+    background:    {{color.select_background}};
     border: 2px solid {{color.button_border_hover}};
 }
 
@@ -1437,7 +1442,7 @@ table.tablesorter thead tr th, table.tablesorter tfoot tr th {
     padding: 4px;
 }
 table.tablesorter thead tr .header {
-    background-image: url("static/images/black-unsorted.gif");
+    background-image: url("/static/images/black-unsorted.gif");
     background-repeat: no-repeat;
     background-position: center right;
     cursor: pointer;
@@ -1454,10 +1459,10 @@ table.tablesorter tbody tr.odd td {
     background-color:{{color.knowl_background}};
 }
 table.tablesorter thead tr .headerSortUp {
-    background-image: url("static/images/black-asc.gif");
+    background-image: url("/static/images/black-asc.gif");
 }
 table.tablesorter thead tr .headerSortDown {
-    background-image: url("static/images/black-desc.gif");
+    background-image: url("/static/images/black-desc.gif");
 }
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
     background-color: {{color.light_grey_2}};
@@ -1526,19 +1531,19 @@ a.paginate_button {
 }
 
 .paginate_disabled_previous {
-    background-image: url('/static/images/back_disabled.jpg');
+    background-image: url('//static/images/back_disabled.jpg');
 }
 
 .paginate_enabled_previous {
-    background-image: url('/static/images/back_enabled.jpg');
+    background-image: url('//static/images/back_enabled.jpg');
 }
 
 .paginate_disabled_next {
-    background-image: url('/static/images/forward_disabled.jpg');
+    background-image: url('//static/images/forward_disabled.jpg');
 }
 
 .paginate_enabled_next {
-    background-image: url('/static/images/forward_enabled.jpg');
+    background-image: url('//static/images/forward_enabled.jpg');
 }
 
 table.display {
@@ -1574,23 +1579,23 @@ table.display td.center {
 }
 
 .sorting_asc {
-    background: url('/static/images/sort_asc.png') no-repeat center right;
+    background: url('//static/images/sort_asc.png') no-repeat center right;
 }
 
 .sorting_desc {
-    background: url('/static/images/sort_desc.png') no-repeat center right;
+    background: url('//static/images/sort_desc.png') no-repeat center right;
 }
 
 .sorting {
-    background: url('/static/images/sort_both.png') no-repeat center right;
+    background: url('//static/images/sort_both.png') no-repeat center right;
 }
 
 .sorting_asc_disabled {
-    background: url('/static/images/sort_asc_disabled.png') no-repeat center right;
+    background: url('//static/images/sort_asc_disabled.png') no-repeat center right;
 }
 
 .sorting_desc_disabled {
-    background: url('/static/images/sort_desc_disabled.png') no-repeat center right;
+    background: url('//static/images/sort_desc_disabled.png') no-repeat center right;
 }
 
 
@@ -2495,5 +2500,65 @@ li.ical-detail {
     color: white;
     transition: transform 0s linear .25s;
     transform-style: preserve-3d;
+}
+
+/* fancy checkmarks */
+.tgl {
+  display: none;
+}
+.tgl, .tgl:after, .tgl:before, .tgl *, .tgl *:after, .tgl *:before, .tgl + .tgl-btn {
+  box-sizing: border-box;
+}
+.tgl::-moz-selection, .tgl:after::-moz-selection, .tgl:before::-moz-selection, .tgl *::-moz-selection, .tgl *:after::-moz-selection, .tgl *:before::-moz-selection, .tgl + .tgl-btn::-moz-selection {
+  background: none;
+}
+.tgl::selection, .tgl:after::selection, .tgl:before::selection, .tgl *::selection, .tgl *:after::selection, .tgl *:before::selection, .tgl + .tgl-btn::selection {
+  background: none;
+}
+.tgl + .tgl-btn {
+  outline: 0;
+  display: block;
+  width: 2.5em;
+  height: 1.25em;
+  position: relative;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+.tgl + .tgl-btn:after, .tgl + .tgl-btn:before {
+  position: relative;
+  display: block;
+  content: "";
+  width: 50%;
+  height: 100%;
+}
+.tgl + .tgl-btn:after {
+  left: 0;
+}
+.tgl + .tgl-btn:before {
+  display: none;
+}
+.tgl:checked + .tgl-btn:after {
+  left: 50%;
+}
+
+.tgl-light + .tgl-btn {
+  background: #d8d8d8;
+  border-radius: 1.25em;
+  padding: 2px;
+  -webkit-transition: all .4s ease;
+  transition: all .4s ease;
+  margin: auto;
+}
+.tgl-light + .tgl-btn:after {
+  border-radius: 50%;
+  background: #fff;
+  -webkit-transition: all .2s ease;
+  transition: all .2s ease;
+}
+.tgl-light:checked + .tgl-btn {
+  background: {{ color.button_background }};
 }
 
