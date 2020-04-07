@@ -13,6 +13,8 @@ from seminars.lock import get_lock
 from lmfdb.utils import to_dict, flash_error
 import datetime, pytz, json
 
+SCHEDULE_LEN = 15 # Number of weeks to show in edit_seminar_schedule
+
 @create.route("create/")
 @login_required
 @email_confirmed_required
@@ -309,8 +311,8 @@ def save_talk():
 
 def make_date_data(seminar):
     shortname = seminar.shortname
-    if not seminar.frequency or seminar.frequency < 0 or not seminar.schedule_len or seminar.schedule_len < 0 or seminar.schedule_len > 400:
-        print(seminar.frequency, seminar.schedule_len)
+    if not seminar.frequency or seminar.frequency < 0:
+        print(seminar.frequency)
         flash_error("You must specify a meeting frequency to use the scheduler")
         return redirect(url_for("show_seminar", shortname=shortname), 301), None, None, None
     now = datetime.datetime.now(tz=pytz.utc)
@@ -336,7 +338,7 @@ def make_date_data(seminar):
         today = now.date()
         while next_date < today:
             next_date += seminar.frequency * day
-    all_dates = sorted(set([next_date + i*seminar.frequency*day for i in range(seminar.schedule_len)] + list(by_date)))
+    all_dates = sorted(set([next_date + i*seminar.frequency*day for i in range(SCHEDULE_LEN)] + list(by_date)))
     if seminar.start_time is None:
         if future_talks:
             seminar.start_time = future_talks[0].start_time.time()

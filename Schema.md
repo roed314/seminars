@@ -70,7 +70,6 @@ timezone     | text                | time zone code, e.g. "America/New York"
 weekday      | smallint            | 0=Monday, 6=Sunday for consistency with Python
 time         | time with time zone | Regular meeting time
 frequency    | int                 | meeting frequency in days (often 7)
-schedule_len | int                 | maximum number of upcoming meetings scheduled (e.g. 15 for a semester)
 room         | text                |
 is_conference| boolean             |
 homepage     | text                | link to external homepage

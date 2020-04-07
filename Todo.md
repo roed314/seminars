@@ -39,7 +39,7 @@ Content creation
 
 1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 
-1. **Make sure no line breaks in date in edit_seminar.html.**
+1. **Make sure no line breaks in date in edit_seminar_schedule.html.**
 
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
 
