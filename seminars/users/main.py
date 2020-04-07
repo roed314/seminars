@@ -435,21 +435,19 @@ def endorser_link(endorser, email):
 
 @login_page.route("/endorse/<token>")
 @login_required
+@email_confirmed_required
 def endorse_wtoken(token):
     try:
         # tokens last forever
         endorser, email = read_timed_token(token, "endorser", None)
     except Exception:
         return flask.abort(404, "The link is invalid or has expired.")
-    if current_user.creator:
+    if current_user.is_creator():
         flash_error("Account already has creator privileges.")
     elif current_user.email != email:
         flash_error("The link is not valid for this account.")
-    elif not current_user.email_confirmed:
-        flash_error("You must confirm your email first.")
     else:
-        current_user.endorser = int(endorser)
-        current_user.creator = True
+        current_user.make_creator(int(endorser))
         current_user.save()
         flask.flash("You can now create seminars. Thanks!", "success")
     return redirect(url_for(".info"))

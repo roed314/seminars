@@ -366,7 +366,8 @@ class SeminarsUser(UserMixin):
     def is_creator(self):
         return self._data.get("creator", False)
 
-    def make_creator(self):
+    def make_creator(self, endorser):
+        self.endorser = endorser
         self._data["creator"] = True
         self._dirty = True
 
