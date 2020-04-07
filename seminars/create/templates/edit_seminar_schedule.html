@@ -42,8 +42,6 @@
     {% if date in by_date %}
     {% set talk = by_date[date] %}
     <tr>
-      <input type="hidden" name="seminar_ctr{{i}}" value="{{ talk.seminar_ctr }}" />
-      <input type="hidden" name="date{{i}}" value="{{ date.isoformat() }}" />
       <td>
         {{ talk.edit_link() | safe }}
       </td>
@@ -65,11 +63,11 @@
       <td>
         <a href="{{ talk.speaker_link() }}">Link</a>
       </td>
+      <input type="hidden" name="seminar_ctr{{i}}" value="{{ talk.seminar_ctr }}" />
+      <input type="hidden" name="date{{i}}" value="{{ date.isoformat() }}" />
     </tr>
     {% else %}
     <tr>
-      <input type="hidden" name="seminar_ctr{{i}}" value="" />
-      <input type="hidden" name="date{{i}}" value="{{ date.isoformat() }}" />
       <td></td>
       <td>
         {{ date.strftime("%a %b %-d") }}
@@ -87,6 +85,8 @@
         <input name="title{{i}}" style="width:160px;" />
       </td>
       <td></td>
+      <input type="hidden" name="seminar_ctr{{i}}" value="" />
+      <input type="hidden" name="date{{i}}" value="{{ date.isoformat() }}" />
     </tr>
     {% endif %}
     {% endfor %}

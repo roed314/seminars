@@ -1,18 +1,11 @@
 Now
 ===
 
-1. search is broken, see Alex comments
-
 1. fix default date range
 
 1. add feedback to subscription
 
-1. subscription doesnt work on users page
-
 1. what should we do if a user is subscribed to a seminar and tries to unsubscribe from a talk in that seminar?
-
-1. subscription is broken on https://mathseminars.org/seminar/MITNT
-
 
 
 
@@ -39,11 +32,9 @@ Content creation
 
 1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 
-1. **Make sure no line breaks in date in edit_seminar_schedule.html.**
-
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
 
-1. **Allow seminars to meet on multiple days.**
+1. Allow seminars to meet on multiple days.
 
 1. Think about the model described at https://talks.cam.ac.uk/document/Adding+a+talk (notably, the ability to include others' subscription lists into your own)
 
@@ -60,19 +51,15 @@ Viewing and searching
 
 1. **One liner for seminars, add time and frequency.**
 
-1. **Change how all/clear work for filtering.**
-
-1. **Add button to clear search inputs.**
-
 1. **Make future the default search.**
 
 1. **Paginate search results.**
 
-1. **When searching, should have ability to flip sort order (default depends on whether past or future)**
-
 1. **Add search on time (rather than datetime) so that users can accomodate their local schedules**
 
 1. **Set minimum/maximum widths for the tds in oneline (so that long speakers/titles/seminar names don't make dates break across lines)**
+
+1. When searching, should have ability to flip sort order (default depends on whether past or future)
 
 1. Figure out how to limit number of seminars shown on browse page for initial users (limit at a certain number per topic?)
 
@@ -131,8 +118,6 @@ Feedback
 
 Calendars
 =========
-
-1. **Write code for dynamically generating .ics files**
 
 1. **Each seminar should have its own calendar so that seminar organizers can use it as the primary source for their own front-end.**
 

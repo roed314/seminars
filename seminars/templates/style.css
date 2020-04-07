@@ -349,7 +349,7 @@ div.topicselected {
     white-space: nowrap;
 }
 
-#edit-schedule-table tbody td:nth-child(2) {
+#edit-schedule-table td:nth-child(2) {
     white-space: nowrap;
 }
 
