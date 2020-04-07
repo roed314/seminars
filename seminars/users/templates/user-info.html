@@ -25,8 +25,9 @@
   </form>
 {% else %}
 <h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">Logout</a>)</h1>
-  <h2> Calendar subscriptions </h2>
+  <h2> Saved events </h2>
   <h3> Seminars </h3>
+  <div style="margin-left: 1em;">
   <table class='ntdata'>
     <thead>
       <tr>
@@ -39,7 +40,9 @@
     </tr>
     {% endfor %}
   </table>
+  </div>
   <h3> Talks </h3>
+  <div style="margin-left: 1em;">
   <table class='ntdata'>
     <thead>
       <tr>
@@ -52,12 +55,14 @@
     </tr>
     {% endfor %}
   </table>
+  </div>
   {%  if not user.email_confirmed  %}
   <p>
     Please confirm your email to get access to your personalized calendar.
   </p>
   {% else %}
   <div>
+      Export to
       <ul class="ical-detail">
         <li class="ical-detail">
           <a href="{{ user.ics_gcal_link }}" target="_blank">

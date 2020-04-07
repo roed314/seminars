@@ -2414,9 +2414,10 @@ input.color_selecter {
 ul.ical-detail {
   display: inline-flex;
   list-style: none;
+  padding-left: 1em;
 }
 li.ical-detail {
-  padding-left: 10px;
+  padding-right: 2em;
 }
 
 /* toggle copy pasta */

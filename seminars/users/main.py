@@ -92,7 +92,10 @@ def login(**kwargs):
     user = SeminarsUser(email=email)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
-        flask.flash(Markup("Hello %s, your login was successful!" % user.name))
+        if user.name:
+            flask.flash(Markup("Hello %s, your login was successful!" % user.name))
+        else:
+            flask.flash(Markup("Hello, your login was successful!"))
         logger.info("login: '%s' - '%s'" % (user.get_id(), user.name))
         return redirect(next or url_for(".info"))
     flash_error("Oops! Wrong username or password.")
@@ -126,6 +129,22 @@ def creator_required(fn):
         logger.info("creator access attempt by %s" % current_user.get_id())
         if not current_user.is_creator():
             return flask.abort(403)  # access denied
+        return fn(*args, **kwargs)
+
+    return decorated_view
+
+def email_confirmed_required(fn):
+    """
+    wrap this around those entry points where you need to be a creator.
+    """
+
+    @wraps(fn)
+    @login_required
+    def decorated_view(*args, **kwargs):
+        logger.info("email confirmed access attempt by %s" % current_user.get_id())
+        if not current_user.email_confirmed:
+            flash_error("Oops, you haven't yet confirmed your email")
+            return redirect(url_for("user.info"))
         return fn(*args, **kwargs)
 
     return decorated_view
@@ -218,7 +237,6 @@ def register():
         except EmailNotValidError as e:
             flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
             return make_response(render_template("register.html", title="Register", email=email))
-        print(pw1)
         if pw1 != pw2:
             flash_error("Oops, passwords do not match!")
             return make_response(render_template("register.html", title="Register", email=email))
@@ -228,7 +246,6 @@ def register():
             return make_response(render_template("register.html", title="Register", email=email))
 
         password = pw1
-        print("checking email")
         if userdb.user_exists(email=email):
             flash_error("Sorry, email '%s' is already registered!", email)
             return make_response(render_template("register.html", title="Register", email=email))
@@ -418,21 +435,19 @@ def endorser_link(endorser, email):
 
 @login_page.route("/endorse/<token>")
 @login_required
+@email_confirmed_required
 def endorse_wtoken(token):
     try:
         # tokens last forever
         endorser, email = read_timed_token(token, "endorser", None)
     except Exception:
         return flask.abort(404, "The link is invalid or has expired.")
-    if current_user.creator:
+    if current_user.is_creator():
         flash_error("Account already has creator privileges.")
     elif current_user.email != email:
         flash_error("The link is not valid for this account.")
-    elif not current_user.email_confirmed:
-        flash_error("You must confirm your email first.")
     else:
-        current_user.endorser = int(endorser)
-        current_user.creator = True
+        current_user.make_creator(int(endorser))
         current_user.save()
         flask.flash("You can now create seminars. Thanks!", "success")
     return redirect(url_for(".info"))
@@ -499,6 +514,7 @@ def ics_file(token):
     )
 
 @login_page.route("/public/")
+@email_confirmed_required
 def public_users():
     query = SQL("SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email")
     public_organizers = list(userdb._execute(query))
