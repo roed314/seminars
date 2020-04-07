@@ -257,7 +257,7 @@ def can_edit_seminar(shortname, new):
                      or ``None`` (if error or seminar does not exist)
     """
     if not allowed_shortname(shortname):
-        flash_error("The seminar identifier must be nonempty and can only include letters, numbers, hyphens and underscores.")
+        flash_error("The identifier must be nonempty and can include only letters, numbers, hyphens and underscores.")
         return redirect(url_for(".index"), 301), None
     seminar = seminars_lookup(shortname)
     # Check if seminar exists
