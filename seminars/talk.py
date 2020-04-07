@@ -297,7 +297,7 @@ class WebTalk(object):
 
     def show_abstract(self):
         if self.abstract:
-            return "\n".join("<p>%s</p>" for elt in self.split_abstract())
+            return "\n".join("<p>%s</p>" % (elt) for elt in self.split_abstract())
         else:
             return "<p>TBA</p>"
 
