@@ -33,6 +33,8 @@ def pretty_timezone(tz):
 timezones = [(v, pretty_timezone(v)) for v in sorted(pytz.common_timezones, key=naive_utcoffset)]
 
 def is_nighttime(t):
+    if t is None:
+        return False
     # These are times that might be mixed up by using a 24 hour clock
     return 1 <= t.hour < 8
 
@@ -43,12 +45,13 @@ def check_time(start_time, end_time):
     """
     Flashes errors/warnings and returns True when an error should be raised.
     """
-    if start_time > end_time:
-        if is_nighttime(end_time):
-            flash_error("Your start time is after your end time; perhaps you forgot pm")
-        else:
-            flash_error("Your start time is after your end time")
-        return True
+    if None not in [start_time, end_time]:
+        if start_time > end_time:
+            if is_nighttime(end_time):
+                flash_error("Your start time is after your end time; perhaps you forgot pm")
+            else:
+                flash_error("Your start time is after your end time")
+            return True
     if is_nighttime(start_time) or is_nighttime(end_time):
         flash_warning("Your seminar is scheduled between midnight and 8am; if that was unintentional you should edit again using 24-hour notation or including pm")
 

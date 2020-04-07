@@ -9,15 +9,15 @@
 
 <h3>Browse</h3>
 
-<p>The front page lists upcoming talks.  You can filter them by topic to tailor them to your interests.</p>
+<p>The <a href="{{ url_for("index") }}">front page</a> lists upcoming talks.  You can filter them by topic to tailor them to your interests.</p>
 
 <h3>Search</h3>
 
-<p>You can search for seminars and talks satisfying various criteria, including specifying keywords within talk abstracts.</p>
+<p>You can <a href="{{ url_for("search") }}">search</a> for seminars and talks satisfying various criteria, including specifying keywords within talk abstracts.</p>
 
 <h3>Subscribe</h3>
 
-<p>After <a href="{{ url_for('user.register') }}">registering</a> you can export selected seminars and talks to your own calendar (e.g., Google calendar, Outlook or iCal).  When you subscribe to a seminar, new talks will be pushed to your calendar automatically.</p>
+<p>After <a href="{{ url_for('user.register') }}">registering</a>, you can <a href="{{ url_for('user.info') }}">export</a> selected seminars and talks to your own calendar (e.g., Google calendar, Outlook or iCal).  When you subscribe to a seminar, new talks will be pushed to your calendar automatically.</p>
 
 <h3>Attend</h3>
 
@@ -25,11 +25,11 @@
 
 <h3>Create</h3>
 
-<p>If you are organizing a seminar, we aim to make it easy to add your seminar to the site.  Once you create a new seminar (requires an endorsed account), you can add upcoming or historical talks.</p>
+<p>If you are organizing a seminar, we aim to make it easy to add your seminar to the site.  Once you <a href="{{ url_for('create.index') }}">create</a> a new seminar (requires an endorsed account), you can add upcoming or historical talks.</p>
 
 <h3>Organize</h3>
 
-<p>Seminar organizers can add upcoming talks easily: defaults are filled in from the seminar but are editable on a per-talk basis.  Sharing a talk's edit link with speakers allows them to update their own title and abstract.  Seminar information can be exported to formats suitable for your own website or department calendar.</p>
+<p>Seminar organizers can add upcoming talks easily: defaults are filled in from the seminar but are editable on a per-talk basis.  Sharing a talk's edit link with speakers allows them to update their own title and abstract.  Seminar information can be <a href="{{ url_for('user.info') }}">exported</a> to formats suitable for your own website or department calendar.</p>
 
 <h3>Accounts</h3>
 
