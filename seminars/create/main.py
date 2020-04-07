@@ -65,7 +65,7 @@ def save_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
-    def make_error(col=None, err=None):
+    def make_error(shortname, col=None, err=None):
         if err is not None:
             flash_error("Error processing %s: {0}".format(err), col)
         seminar = WebSeminar(shortname, data=raw_data)
@@ -98,7 +98,7 @@ def save_seminar():
             else:
                 data[col] = process_user_input(val, db.seminars.col_type[col], tz=tz)
         except Exception as err:
-            return make_error(col, err)
+            return make_error(shortname, col, err)
     if not data['institutions']: # need [] not None
         data['institutions'] = []
     if not data['timezone'] and data['institutions']:
@@ -121,13 +121,13 @@ def save_seminar():
                 if col == 'homepage' and val and not val.startswith("http"):
                     data[col] = "http://" + data[col]
             except Exception as err:
-                return make_error(col, err)
+                return make_error(shortname, col, err)
         if D.get('email') or D.get('full_name'):
             D['order'] = len(organizer_data)
             organizer_data.append(D)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
-        return make_error()
+        return make_error(shortname)
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
@@ -248,7 +248,7 @@ def save_talk():
     if resp is not None:
         return resp
 
-    def make_error(col=None, err=None):
+    def make_error(talk, seminar, col=None, err=None):
         if err is not None:
             flash_error("Error processing %s: {0}".format(err), col)
         talk = WebTalk(talk.seminar_id, talk.seminar_ctr, data=raw_data)
@@ -281,7 +281,7 @@ def save_talk():
     for col in db.talks.search_cols:
         if col in data: continue
         try:
-            val = raw_data.get(col).strip()
+            val = raw_data.get(col, "").strip()
             if not val:
                 data[col] = None
             else:
@@ -291,10 +291,10 @@ def save_talk():
             if col == "access" and val not in ["open", "users", "endorsed"]:
                 raise ValueError("Invalid access type")
         except Exception as err:
-            return make_error(col, err)
+            return make_error(talk, seminar, col, err)
     new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
     if check_time(new_version.start_time, new_version.end_time):
-        return make_error()
+        return make_error(talk, seminar)
     if new_version == talk:
         flash("No changes made to talk.")
     else:
