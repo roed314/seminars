@@ -13,12 +13,14 @@
     {% endif %}
   </p>
 
-  {% if talk.description %}
-  <p>{{talk.description}}</p>
+  <h3>Abstract</h3>
+  {{ talk.show_abstract() | safe}}
+
+
+  {% if talk.comments %}
+  <p>{{talk.comments | safe}}</p>
   {% endif %}
 
-  <h3>Abstract</h3>
-  {{ talk.show_abstract() }}
 </div>
   <div align="right">
     <a href="{{url_for("show_talk", semid=talk.seminar_id, talkid=talk.seminar_ctr)}}">Talk's home page</a>
