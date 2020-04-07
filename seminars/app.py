@@ -327,9 +327,11 @@ for fn in ["favicon/apple-touch-icon-57x57.png",
 ##############################
 
 def send_email(to, subject, message):
+    from html2text import html2text
     app.logger.info("%s sending email to %s..." % (timestamp(), to))
     mail.send(Message(subject=subject,
                   html=message,
+                  body=html2text(message), # a plain text version of our email
                   sender="info.mathseminars@gmail.com",
                   recipients=[to]))
     app.logger.info("%s done sending email to %s" % (timestamp(), to))
