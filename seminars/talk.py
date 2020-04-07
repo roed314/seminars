@@ -279,21 +279,18 @@ class WebTalk(object):
             if not include_seminar and (
                 current_user.is_admin() or current_user.email in self.seminar.editors()
             ):
-                cols.append(self.edit_link())
+                cols.append(('', self.edit_link()))
             else:
-                cols.append("")
-        cols.append(self.show_date())
-        ans = "".join("<td>%s</td>" % c for c in cols)
-        ans += '<td style="text-align: right;">%s</td>' % (self.show_start_time())
-        cols = []
+                cols.append(('', ''))
+        cols.append(('', self.show_date()))
+        cols.append(('style="text-align: right;"', self.show_start_time()))
         if include_seminar:
-            cols.append(self.show_seminar())
-        cols.append(self.show_speaker(affiliation=False))
-        cols.append(self.show_knowl_title())
-        ans += "".join("<td>%s</td>" % c for c in cols)
+            cols.append(('', self.show_seminar()))
+        cols.append(('', self.show_speaker(affiliation=False)))
+        cols.append(('', self.show_knowl_title()))
         if include_subscribe:
-            ans += '<td style="text-align: right;">%s</td>' % (self.show_subscribe())
-        return ans
+            cols.append(('style="text-align: right;"', self.show_subscribe()))
+        return "".join("<td %s>%s</td>" % c for c in cols)
 
     def split_abstract(self):
         return self.abstract.split("\n\n")

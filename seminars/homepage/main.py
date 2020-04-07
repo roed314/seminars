@@ -180,7 +180,7 @@ class TalkSearchArray(SearchArray):
                      ("users", "Any logged-in user can view link")],
         )
         ## number of results to display
-        count = TextBox(name="talk_count", label="Results to display", example=50)
+        count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
 
         speaker = TextBox(name="speaker", label="Speaker", colspan=(1, 2, 1), width=textwidth)
         affiliation = TextBox(
@@ -254,7 +254,7 @@ class SemSearchArray(SearchArray):
                      ("users", "Any logged-in user can view link")],
         )
         ## number of results to display
-        count = TextBox(name="seminar_count", label="Results to display", example=50)
+        count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
 
         name = TextBox(
             name="name", label="Name", colspan=(1, 2, 1), width=textwidth
