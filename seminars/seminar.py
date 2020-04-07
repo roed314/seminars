@@ -199,7 +199,7 @@ def seminars_header(include_time=True, include_institutions=True, include_descri
         cols.append((1, "Description"))
     if include_subscribe:
         cols.append((1, "Saved"))
-    return "".join('<th class="center" colspan="%s">%s</th>' % pair for pair in cols)
+    return "".join('<th colspan="%s">%s</th>' % pair for pair in cols)
 
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")

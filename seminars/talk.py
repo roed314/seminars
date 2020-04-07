@@ -356,7 +356,7 @@ def talks_header(include_seminar=True, include_edit=True, include_subscribe=True
     cols.append("Title")
     if include_subscribe:
         cols.append("Saved")
-    return "".join('<th class="center">%s</th>' % c for c in cols)
+    return "".join('<th>%s</th>' % c for c in cols)
 
 
 def can_edit_talk(seminar_id, seminar_ctr, token):
