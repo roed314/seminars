@@ -45,13 +45,15 @@ def check_time(start_time, end_time):
     """
     Flashes errors/warnings and returns True when an error should be raised.
     """
-    if None not in [start_time, end_time]:
-        if start_time > end_time:
-            if is_nighttime(end_time):
-                flash_error("Your start time is after your end time; perhaps you forgot pm")
-            else:
-                flash_error("Your start time is after your end time")
-            return True
+    if start_time is None or end_time is None:
+        # Users are allowed to not fill in a time
+        return
+    if start_time > end_time:
+        if is_nighttime(end_time):
+            flash_error("Your start time is after your end time; perhaps you forgot pm")
+        else:
+            flash_error("Your start time is after your end time")
+        return True
     if is_nighttime(start_time) or is_nighttime(end_time):
         flash_warning("Your seminar is scheduled between midnight and 8am; if that was unintentional you should edit again using 24-hour notation or including pm")
 
