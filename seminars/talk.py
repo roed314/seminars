@@ -46,7 +46,6 @@ class WebTalk(object):
                 elif (
                     db.seminars.col_type.get(key) == typ
                     and getattr(seminar, key, None)
-                    and key != "description"
                 ):
                     # carry over from seminar
                     setattr(self, key, getattr(seminar, key))
@@ -347,9 +346,11 @@ class WebTalk(object):
         if self.room:
             desc += "Lecture held in %s.\n" % self.room
         if self.abstract:
-            desc += "\nAbstract\n%s" % self.abstract
+            desc += "\nAbstract\n%s\n" % self.abstract
         else:
-            desc += "Abstract: TBA"
+            desc += "Abstract: TBA\n"
+        if self.comments:
+            desc += "\n%s\n" % (self.comments)
 
         event.add("description", desc)
         if self.room:
