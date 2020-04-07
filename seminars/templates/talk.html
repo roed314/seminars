@@ -30,14 +30,14 @@
   </p>
 
   {% if talk.description %}
-  <p>{{talk.description}}</p>
+  <p>{{talk.description | safe }}</p>
   {% endif %}
 
   <h3> Abstract </h3>
-  {{ talk.show_abstract() }}
+  {{ talk.show_abstract() | safe }}
 
   {% if talk.comments %}
-  <p>{{talk.comments}}</p>
+  <p>{{talk.comments | safe}}</p>
   {% endif %}
 
 </div>
