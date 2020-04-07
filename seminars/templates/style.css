@@ -349,6 +349,10 @@ div.topicselected {
     white-space: nowrap;
 }
 
+.edit-schedule-table td:nth-child(2), .talk-table td:nth-child(4), .talk-table td:nth-child(5) {
+    white-space: nowrap;
+}
+
 #footer a {
     color: #aaaaaa;
 }
