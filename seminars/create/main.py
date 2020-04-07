@@ -134,9 +134,10 @@ def save_seminar():
         flash("Seminar %s successfully!" % edittype)
     elif seminar.organizer_data == new_version.organizer_data:
         flash("No changes made to seminar.")
-    if seminar.organizer_data != new_version.organizer_data:
+    if seminar.new or seminar.organizer_data != new_version.organizer_data:
         new_version.save_organizers()
-        flash("Seminar organizers updated!")
+        if not seminar.new:
+            flash("Seminar organizers updated!")
     return redirect(url_for("show_seminar", shortname=shortname), 301)
 
 @create.route("edit/institution/", methods=["GET", "POST"])
