@@ -49,7 +49,7 @@ from .app import app, set_running  # So that we can set it running below
 # assert sato_tate_groups
 from . import users
 assert users
-from . import knowledge
+from . import homepage
 assert homepage
 from . import create
 assert create
