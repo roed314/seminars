@@ -33,6 +33,8 @@ def pretty_timezone(tz):
 timezones = [(v, pretty_timezone(v)) for v in sorted(pytz.common_timezones, key=naive_utcoffset)]
 
 def is_nighttime(t):
+    if t is None:
+        return False
     # These are times that might be mixed up by using a 24 hour clock
     return 1 <= t.hour < 8
 

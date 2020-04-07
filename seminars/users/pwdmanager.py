@@ -285,7 +285,16 @@ class SeminarsUser(UserMixin):
 
     @property
     def seminars(self):
-        return [WebSeminar(elt) for elt in self.seminar_subscriptions]
+        ans = []
+        for elt in self.seminar_subscriptions:
+            try:
+                ans.append(WebSeminar(elt))
+            except ValueError:
+                self._data['seminar_subscriptions'].delete(elt)
+                self._dirty = True
+        if self._dirty:
+            self.save()
+        return ans
 
     def seminar_subscriptions_add(self, shortname):
         if shortname not in self._data['seminar_subscriptions']:
@@ -308,7 +317,18 @@ class SeminarsUser(UserMixin):
         res = []
         for shortname, ctrs in self.talk_subscriptions.items():
             for ctr in ctrs:
-                res.append(WebTalk(shortname, ctr))
+                try:
+                    res.append(WebTalk(shortname, ctr))
+                except ValueError:
+                    self._data['talk_subscriptions'][shortname].delete(ctr)
+                    self._dirty = True
+
+        if self._dirty:
+            for shortname in self._data['talk_subscriptions']:
+                if not self._data['talk_subscriptions']:
+                    self._data['talk_subscriptions'].pop('shortname')
+            self.save()
+
         res.sort(key=lambda elt: elt.start_time)
         return res
 
