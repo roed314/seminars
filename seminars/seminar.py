@@ -88,6 +88,12 @@ class WebSeminar(object):
     def show_subscribe(self):
         if current_user.is_anonymous():
             return ""
+        return """
+<input type="checkbox" class="subscribe tgl tgl-light" value="{sem}" id="tgl{sem}" {checked}>
+<label class="tgl-btn" for="tgl{sem}"></label>
+""".format(sem=self.shortname,
+           checked="checked" if self.shortname in current_user.seminar_subscriptions else "",
+        )
         return '<input type="checkbox" class="subscribe" value="%s" %s>' % (
             self.shortname,
             "checked" if self.shortname in current_user.seminar_subscriptions else "",

@@ -122,7 +122,6 @@ def ctx_proc_userdata():
 # {{ <datetimeobject>|fmtdatetime('%H:%M:%S') }}
 @app.template_filter("fmtdatetime")
 def fmtdatetime(value, format='%Y-%m-%d %H:%M:%S'):
-    import datetime
     if isinstance(value, datetime.datetime):
         return value.strftime(format)
     else:
@@ -205,27 +204,6 @@ def alive():
     else:
         abort(503)
 
-@app.route("/info")
-def info():
-    from socket import gethostname
-    output = url_for("info", _external=True) + "\n"
-    output += "HOSTNAME = %s\n\n" % gethostname()
-    output += "browser timezone = " + str(request.cookies.get('browser_timezone')) + "\n\n"
-    output += "# PostgreSQL info\n"
-    from . import db
-    if not db.is_alive():
-        output += "db is offline\n"
-    else:
-        conn_str = "%s" % db.conn
-        output += "Connection: %s\n" % conn_str.replace("<","").replace(">","")
-        output += "User: %s\n" % db._user
-        output += "Read only: %s\n" % db._read_only
-        output += "Read and write to userdb: %s\n" % db._read_and_write_userdb
-        output += "Read and write to knowls: %s\n" % db._read_and_write_knowls
-    output += "\n# GIT info\n"
-    output += git_infos()[-1]
-    output += "\n\n"
-    return output.replace("\n", "<br>")
 
 @app.route("/acknowledgment")
 def acknowledgment():
@@ -300,7 +278,6 @@ def sitemap():
 @app.context_processor
 def add_colors():
     from .color import Slate
-    D = Slate().dict()
     return {'color': Slate().dict()}
 
 @app.route("/style.css")

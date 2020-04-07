@@ -6,7 +6,6 @@ from seminars.utils import categories
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search
-from seminars.talk import talks_search
 from flask_login import current_user
 import datetime
 import pytz

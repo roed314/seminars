@@ -247,10 +247,12 @@ class WebTalk(object):
                 self.seminar_id, []
             )
 
-        return '<input type="checkbox" class="subscribe" value="%s/%s" %s>' % (
-            self.seminar_id,
-            self.seminar_ctr,
-            "checked" if is_subscribed() else "",
+        return """
+<input type="checkbox" class="subscribe tgl tgl-light" value="{sem}/{ctr}" id="tgl{sem}/{ctr}" {checked}>
+<label class="tgl-btn" for="tgl{sem}/{ctr}"></label>
+""".format(sem=self.seminar_id,
+           ctr=self.seminar_ctr,
+           checked="checked" if is_subscribed() else "",
         )
 
     def oneline(self, include_seminar=True, include_edit=True, include_subscribe=True):
@@ -270,9 +272,10 @@ class WebTalk(object):
             cols.append(self.show_seminar())
         cols.append(self.show_speaker(affiliation=False))
         cols.append(self.show_knowl_title())
+        ans += "".join("<td>%s</td>" % c for c in cols)
         if include_subscribe:
-            cols.append(self.show_subscribe())
-        return ans + "".join("<td>%s</td>" % c for c in cols)
+            ans += '<td style="text-align: right;">%s</td>' % (self.show_subscribe())
+        return ans
 
     def split_abstract(self):
         return self.abstract.split("\n\n")

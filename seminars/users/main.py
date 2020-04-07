@@ -406,7 +406,7 @@ def get_endorsing_link():
 
 
 def generate_endorsement_token(endorser, email):
-    rec = tuple([int(endorser.id), email)])
+    rec = [int(endorser.id), email]
     return generate_timed_token(rec, "endorser")
 
 
@@ -420,9 +420,9 @@ def endorser_link(endorser, email):
 def endorse_wtoken(token):
     try:
         # tokens last forever
-        endoser, email = read_timed_token(token, "endorser", None)
+        endorser, email = read_timed_token(token, "endorser", None)
     except Exception:
-        flash_error("The link is invalid or has expired.")
+        return flask.abort(404, "The link is invalid or has expired.")
     if current_user.creator:
         flash_error("Account already has creator privileges.")
     elif current_user.email != email:
@@ -475,9 +475,9 @@ def ics_file(token):
         uid = read_token(token, "ics")
         user = SeminarsUser(uid=int(uid))
         if not user.email_confirmed:
-            return abort(404, "Email has not yet been confirmed!")
+            return flask.abort(404, "The email has not yet been confirmed!")
     except Exception:
-        return abort(404, "Invalid link")
+        return flask.abort(404, "Invalid link")
 
     cal = Calendar()
     cal.add("VERSION", "2.0")

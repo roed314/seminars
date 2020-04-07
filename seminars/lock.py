@@ -1,5 +1,6 @@
 
 from psycopg2 import DatabaseError
+from flask import current_user
 
 
 def is_locked(shortname):
