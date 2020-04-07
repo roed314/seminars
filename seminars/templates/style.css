@@ -91,6 +91,11 @@ h2.link > a {
     margin-bottom: 10px;
 }
 
+div.text_content {
+  max-width: 70%;
+  margin: auto;
+}
+
 /* Body links, sidebar links, and sidebar header text. */
 a {
     color: {{color.col_link}};

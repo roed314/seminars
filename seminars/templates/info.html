@@ -2,6 +2,7 @@
 
 {% block content %}
 
+<div class="text_content">
 <p>
 {{meta_description}}  On this site, <i>seminar</i> means a talk series (which might be a conference), and a <i>talk</i> is a one-time event that occurs as part of a seminar.
 </p>
@@ -41,5 +42,7 @@
 <h3>Questions?</h3>
 
 <p>For more information, see our <a href="{{ url_for('faq') }}">FAQ</a>.  If you have questions not addressed there, please <a href="{{feedbackpage}}">send us feedback</a>.
+
+</div>
 
 {% endblock %}
