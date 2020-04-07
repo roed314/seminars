@@ -263,14 +263,16 @@ class WebTalk(object):
             else:
                 cols.append("")
         cols.append(self.show_date())
-        cols.append(self.show_start_time())
+        ans = "".join("<td>%s</td>" % c for c in cols)
+        ans += '<td style="text-align: right;">%s</td>' % (self.show_start_time())
+        cols = []
         if include_seminar:
             cols.append(self.show_seminar())
         cols.append(self.show_speaker(affiliation=False))
         cols.append(self.show_knowl_title())
         if include_subscribe:
             cols.append(self.show_subscribe())
-        return "".join("<td>%s</td>" % c for c in cols)
+        return ans + "".join("<td>%s</td>" % c for c in cols)
 
     def split_abstract(self):
         return self.abstract.split("\n\n")

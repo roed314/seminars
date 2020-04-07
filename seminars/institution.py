@@ -67,9 +67,6 @@ class WebInstitution(object):
         return '<a href="mailto:%s">%s</a>' % (self.admin, userdata['name'] if userdata['name'] else self.admin)
 
 def can_edit_institution(shortname, new):
-    if not current_user.phd:
-        flash_error("You must have a PhD to create an institution")
-        return redirect(url_for(".index"), 301), None
     if not allowed_shortname(shortname):
         flash_error("The institution identifier must be nonempty and can only include letters, numbers, hyphens and underscores.")
         return redirect(url_for(".index"), 301), None

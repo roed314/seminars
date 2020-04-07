@@ -17,7 +17,6 @@ email_confirmed       | boolean     | if the email has been confirmed
 admin                 | boolean     |
 creator               | boolean     | can create seminars which are displayed
 name                  | text        |
-phd                   | boolean     | (when endorsing, only phds can say others have phds; phds can create institutions)
 affiliation           | text        |
 homepage              | text        |
 created               | timestamptz |

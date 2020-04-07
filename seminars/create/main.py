@@ -186,8 +186,6 @@ def save_institution():
                 userdata = db.users.lookup(val)
                 if userdata is None:
                     raise ValueError("%s must have account on this site" % val)
-                if not userdata['phd']:
-                    raise ValueError("%s must have a PhD to administer an institution" % val)
             if col == 'homepage' and val and not val.startswith("http"):
                 data[col] = "http://" + data[col]
             if col == "access" and val not in ["open", "users", "endorsed"]:

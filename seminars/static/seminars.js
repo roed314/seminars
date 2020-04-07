@@ -218,3 +218,22 @@ $(document).ready(function(){
 });
 
 
+
+function checkpw() {
+  var match = "Too short";
+  if($("#pw1").val().length < 8){
+    "Too short (less than 8 characters)";
+    $("#pw1status").html("Too short (less than 8 characters)");
+    $("#pw2status").html("");
+  } else {
+    $("#pw1status").html("");
+  }
+
+  if($("#pw1").val() == $("#pw2").val()) {
+    $("#pw2status").html("");
+  } else {
+    $("#pw2status").html("Not matching");
+  }
+}
+
+

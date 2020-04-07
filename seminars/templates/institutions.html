@@ -4,7 +4,6 @@
 
 <h1>Institutions</h1>
 
-{% if user.phd %}
 <h2>Create</h2>
 <form action="{{ url_for('create.edit_institution') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
@@ -18,7 +17,6 @@
 </form>
 
 <h2>Existing</h2>
-{% endif %}
 
 <ul>
   {% for shortname, name in institutions %}

@@ -25,7 +25,7 @@
   </form>
 {% else %}
 <h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">Logout</a>)</h1>
-  <h2> Subscriptions </h2>
+  <h2> Calendar subscriptions </h2>
   <h3> Seminars </h3>
   <table class='ntdata'>
     <thead>
@@ -88,12 +88,6 @@
         <td>
           <input name="email" size="30" tabindex="1" />
         </td>
-        {% if user.phd %}
-        <td>
-          <input type="checkbox" name="phd" value="True">
-          <label for="phd">Has a PhD</label>
-        </td>
-        {% endif %}
         <td>
           <button type="submit" tabindex="2">Endorse</button>
         </td>
@@ -167,15 +161,15 @@
     <tr>
      <td>Old Password:</td>
      <td><input name="oldpwd" type="password" /></td>
+     <tr><td colspan="2" class="forminfo" />Don't use a password that you use elsewhere!</tr>
      <tr><td>New Password:</td>
-         <td><input id="pw1" name="password1" type="password" /></td></tr>
+         <td><input id="pw1" name="password1" type="password" /></td>
+         <td class="forminfo" id="pw1status" style="color: {{color.red}};"></td></tr>
+     </tr>
      <tr><td>New Password (repeat):</td>
-         <td><input id="pw2" name="password2" type="password" /></td></tr>
-     <tr><td class="forminfo">Matching?</td>
-         <td class="forminfo" id="pwstatus">empty</td></tr>
+         <td><input id="pw2" name="password2" type="password" /></td>
+         <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td></tr>
     <tr>
-      <td colspan="2" class="forminfo" style="color: {{color.red}};">Please make sure to use at least 8 characters for your password.</td></tr>
-     <tr><td colspan="2" class="forminfo" style="color: {{color.red}};">Don't use a password that you use elsewhere!</td></tr>
      <tr><td colspan="2" class="spacing" /></tr>
      <tr><td/>
          <td><button name="submit" type="submit">Change Password</button></td>
@@ -191,7 +185,7 @@
 function makelink() {
    var url = $("#url").val();
    if (url.substring(0,7) != "http://" && url.substring(0,8) != "https://") {
-     url = "http://" + url;  
+     url = "http://" + url;
    }
    $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
 }
@@ -203,21 +197,10 @@ makelink();
 
 /* this tells the user if the passwords match */
 
-function checkpw() {
-  var match = "False";
-  if($("#pw1").val() == $("#pw2").val()) {
-    match = "True";
-  }
-  $("#pwstatus").html(match);
-}
 
 $(function () {
   $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
   $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-  /*$(".color_selecter").mouseenter(function (evt) {
-    $("link#style_css").attr("href",$(this).attr('rel'))});
-  $(".color_selecter").mouseleave(function (evt) {
-    $("link#style_css").attr("href","{{ url_for('css') }}")});*/
   checkpw();
 })
 </script>
