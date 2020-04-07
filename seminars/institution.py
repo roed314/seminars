@@ -68,7 +68,7 @@ class WebInstitution(object):
 
 def can_edit_institution(shortname, new):
     if not allowed_shortname(shortname):
-        flash_error("The institution identifier must be nonempty and can only include letters, numbers, hyphens and underscores.")
+        flash_error("The identifier must be nonempty and can include only letters, numbers, hyphens and underscores.")
         return redirect(url_for(".index"), 301), None
     institution = db.institutions.lookup(shortname)
     # Check if institution exists
