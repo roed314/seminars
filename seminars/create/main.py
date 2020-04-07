@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
+from seminars.users.main import email_confirmed_required
 from seminars import db
 from seminars.app import app
 from seminars.create import create
@@ -14,6 +15,7 @@ import datetime, pytz, json
 
 @create.route("create/")
 @login_required
+@email_confirmed_required
 def index():
     # TODO: use a join for the following query
     seminars = []
@@ -34,6 +36,7 @@ def index():
 
 @create.route("edit/seminar/", methods=["GET", "POST"])
 @login_required
+@email_confirmed_required
 def edit_seminar():
     if request.method == 'POST':
         data = request.form
@@ -58,6 +61,7 @@ def edit_seminar():
 
 @create.route("save/seminar/", methods=["POST"])
 @login_required
+@email_confirmed_required
 def save_seminar():
     raw_data = request.form
     shortname = raw_data["shortname"]
@@ -142,6 +146,7 @@ def save_seminar():
 
 @create.route("edit/institution/", methods=["GET", "POST"])
 @login_required
+@email_confirmed_required
 def edit_institution():
     if request.method == 'POST':
         data = request.form
@@ -164,6 +169,7 @@ def edit_institution():
 
 @create.route("save/institution/", methods=["POST"])
 @login_required
+@email_confirmed_required
 def save_institution():
     raw_data = request.form
     shortname = raw_data["shortname"]
