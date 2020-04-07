@@ -78,11 +78,11 @@ def can_edit_institution(shortname, new):
     if not new and not current_user.is_admin():
         # Make sure user has permission to edit
         if institution.admin != current_user.email:
-            admin_name = db.users.lucky({'email': institution.admin}, 'full_name')
+            owner_name = db.users.lucky({'email': institution.admin}, 'full_name')
             owner = "<%s>" % (owner_name, institution.admin)
             if owner_name:
                 owner = owner_name + " " + owner
-            flash_error("You do not have permssion to edit %s.  Contact the institution admin, %s, and ask them to fix any errors." % (institution.name, owner))
+            flash_error("You do not have permission to edit %s.  Contact the institution admin, %s, and ask them to fix any errors." % (institution.name, owner))
             return redirect(url_for(".index"), 301), None
     if institution is None:
         institution = WebInstitution(shortname, data=None, editing=True)
