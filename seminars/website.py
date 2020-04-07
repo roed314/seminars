@@ -50,8 +50,6 @@ from .app import app, set_running  # So that we can set it running below
 from . import users
 assert users
 from . import knowledge
-assert knowledge
-from . import homepage
 assert homepage
 from . import create
 assert create
