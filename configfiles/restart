@@ -8,6 +8,6 @@
 echo restarting server
 
 # restart server
-kill -HUP `cat ~/gunicorn.pid`
+kill -HUP `cat /home/mathseminars/gunicorn.pid`
 
 echo '... done'
