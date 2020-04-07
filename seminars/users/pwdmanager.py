@@ -290,7 +290,7 @@ class SeminarsUser(UserMixin):
             try:
                 ans.append(WebSeminar(elt))
             except ValueError:
-                self._data['seminar_subscriptions'].delete(elt)
+                self._data['seminar_subscriptions'].remove(elt)
                 self._dirty = True
         if self._dirty:
             self.save()
