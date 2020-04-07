@@ -37,7 +37,7 @@ Admin (Edgar)
 Content creation
 ================
 
-1. **Allow multiple categories (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
+1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 
 1. **Make sure no line breaks in date in edit_seminar.html.**
 
@@ -74,7 +74,7 @@ Viewing and searching
 
 1. **Set minimum/maximum widths for the tds in oneline (so that long speakers/titles/seminar names don't make dates break across lines)**
 
-1. Figure out how to limit number of seminars shown on browse page for initial users (limit at a certain number per category?)
+1. Figure out how to limit number of seminars shown on browse page for initial users (limit at a certain number per topic?)
 
 1. Should conference homepage be different than a seminar's?
 

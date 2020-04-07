@@ -46,23 +46,23 @@ function eraseCookie(name) {
 }
 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 setCookie("browser_timezone", tz);
-function addTopic(cat) {
-    var cur_cats = getCookie("topics");
-    if (cur_cats) {
-        cur_cats = cur_cats + "," + cat;
+function addTopic(topic) {
+    var cur_topics = getCookie("topics");
+    if (cur_topics) {
+        cur_topics = cur_topics + "," + topic;
     } else {
-        cur_cats = cat;
+        cur_topics = topic;
     }
-    setCookie("topics", cur_cats);
-    return cur_cats;
+    setCookie("topics", cur_topics);
+    return cur_topics;
 }
-function removeTopic(cat) {
-    var cur_cats = getCookie("topics");
-    cur_cats = cur_cats.replace(cat, "").replace(",,",",");
-    if (cur_cats.startsWith(",")) cur_cats = cur_cats.slice(1);
-    if (cur_cats.endsWith(",")) cur_cats = cur_cats.slice(0, -1);
-    setCookie("topics", cur_cats);
-    return cur_cats;
+function removeTopic(topic) {
+    var cur_topics = getCookie("topics");
+    cur_topics = cur_topics.replace(topic, "").replace(",,",",");
+    if (cur_topics.startsWith(",")) cur_topics = cur_topics.slice(1);
+    if (cur_topics.endsWith(",")) cur_topics = cur_topics.slice(0, -1);
+    setCookie("topics", cur_topics);
+    return cur_topics;
 }
 
 function topicFiltering() {
@@ -73,9 +73,9 @@ function calFiltering() {
 }
 
 function setTopicLinks() {
-    var cur_cats = getCookie("topics");
+    var cur_topics = getCookie("topics");
     $(".talk").addClass("topic-filtered");
-    if (cur_cats == null) {
+    if (cur_topics == null) {
         setCookie("topics", "");
         setCookie("filter_topic", "0");
         setCookie("filter_calendar", "0");
@@ -85,23 +85,23 @@ function setTopicLinks() {
     } else {
         $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
         $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
-        cur_cats = cur_cats.split(",");
-        for (var i=0; i<cur_cats.length; i++) {
-            $("#catlink-" + cur_cats[i]).addClass("catselected");
-            $(".cat-" + cur_cats[i]).removeClass("topic-filtered");
+        cur_topics = cur_topics.split(",");
+        for (var i=0; i<cur_topics.length; i++) {
+            $("#topiclink-" + cur_topics[i]).addClass("topicselected");
+            $(".topic-" + cur_topics[i]).removeClass("topic-filtered");
         }
         toggleFilters(null);
     }
 }
 function toggleTopic(id) {
     var toggler = $("#" + id);
-    var cat = id.substring(8);
-    var talks = $(".cat-" + cat);
-    if (toggler.hasClass("catselected")) {
-        toggler.removeClass("catselected");
-        cur_cats = removeTopic(cat).split(",");
-        for (i=0; i<cur_cats.length; i++) {
-            talks = talks.not(".cat-" + cur_cats[i]);
+    var topic = id.substring(8);
+    var talks = $(".topic-" + topic);
+    if (toggler.hasClass("topicselected")) {
+        toggler.removeClass("topicselected");
+        cur_topics = removeTopic(topic).split(",");
+        for (i=0; i<cur_topics.length; i++) {
+            talks = talks.not(".topic-" + cur_topics[i]);
         }
         talks.addClass("topic-filtered");
         if (topicFiltering()) {
@@ -109,8 +109,8 @@ function toggleTopic(id) {
             apply_striping();
         }
     } else {
-        toggler.addClass("catselected");
-        addTopic(cat);
+        toggler.addClass("topicselected");
+        addTopic(topic);
         talks.removeClass("topic-filtered");
         if (topicFiltering()) {
             // elements may be filtered by other criteria
@@ -130,7 +130,7 @@ function getAllTopics() {
 function selectAllTopics() {
     var toggles = getAllTopics();
     setCookie("topics", toggles.join(","));
-    $(".topic_toggle").addClass("catselected");
+    $(".topic_toggle").addClass("topicselected");
     var talks = $(".talk");
     talks.removeClass("topic-filtered");
     if (topicFiltering()) {
@@ -142,7 +142,7 @@ function selectAllTopics() {
 function clearAllTopics() {
     setCookie("topics", "");
     var toggles = getAllTopics();
-    $(".topic_toggle").removeClass("catselected");
+    $(".topic_toggle").removeClass("topicselected");
     var talks = $(".talk");
     talks.addClass("topic-filtered");
     if (topicFiltering()) {

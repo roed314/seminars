@@ -340,7 +340,7 @@ div.topic_cmd {
     color: {{color.header_background}};
 }
 
-div.catselected {
+div.topicselected {
     color: {{color.header_background}};
     background: #aaaaaa;
 }

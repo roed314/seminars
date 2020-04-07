@@ -61,7 +61,7 @@ Column       | Type                | Notes
 id           | bigint              | auto
 shortname    | text                | Assigned by owner, used in urls, globally unique, cannot be changed (would break links)
 name         | text                |
-categories   | text[]              |
+topics       | text[]              |
 keywords     | text                |
 description  | text                | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
 comments     | text                |
@@ -90,7 +90,7 @@ title               | text        |
 abstract            | text        |
 description         | text        |
 token               | text        | give permission for speaker to edit
-categories          | text[]      |
+topics              | text[]      |
 keywords            | text        |
 comments            | text        |
 seminar_id          | text        | shortname of seminar (every talk has to be part of a seminar)
@@ -110,7 +110,7 @@ room                | text        |
 video_link          | text        | archive video link
 slides_link         | text        | link to slides
 
-`categories`: table of categories for seminars and talks
+`topics`: table of topics for seminars and talks
 
 Column       | Type   |  Notes
 -------------|--------|-------

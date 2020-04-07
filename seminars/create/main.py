@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from seminars import db
 from seminars.app import app
 from seminars.create import create
-from seminars.utils import categories, timezones, process_user_input, check_time, weekdays
+from seminars.utils import timezones, process_user_input, check_time, weekdays
 from seminars.seminar import WebSeminar, seminars_lucky, seminars_lookup, can_edit_seminar
 from seminars.talk import WebTalk, talks_lookup, talks_max, talks_search, talks_lucky, can_edit_talk
 from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types, institution_known
@@ -50,7 +50,6 @@ def edit_seminar():
                            seminar=seminar,
                            title=title,
                            #section="Create",
-                           categories=categories(),
                            institutions=institutions(),
                            weekdays=weekdays,
                            timezones=timezones,
@@ -73,7 +72,6 @@ def save_seminar():
                                seminar=seminar,
                                title="Edit seminar error",
                                #section="Create",
-                               categories=categories(),
                                institutions=institutions(),
                                lock=None)
 
@@ -235,7 +233,6 @@ def edit_talk():
                            seminar=seminar,
                            title=title,
                            #section="Create",
-                           categories=categories(),
                            institutions=institutions(),
                            timezones=timezones)
 
