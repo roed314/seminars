@@ -56,8 +56,6 @@ Viewing and searching
 
 1. **Filter option to show personal calendar**
 
-1. **Sort seminar and talks search results**
-
 1. **Add type (conference/seminar) to seminar search.**
 
 1. **One liner for seminars, add time and frequency.**
@@ -106,7 +104,7 @@ Time zones
 
 1. **When creating things, default to user's time zone.**
 
-1. **Add checkbox for use institution time when creating seminar.**
+1. Add checkbox for use institution time when creating seminar.
 
 Localization
 ============
@@ -127,9 +125,7 @@ Onboarding
 Feedback
 ========
 
-1. Change **LMFDB error**
-
-1. **Add avenues for users to give feedback both to admins and to content creators**
+1. Add avenues for users to give feedback both to content creators
 
 1. **We should create a privacy policy, discussion of cookies**
 
@@ -153,10 +149,6 @@ Design and branding
 ===================
 
 1. **Clean up css file to remove all the old stuff, think about what we want to have.**
-
-1. **Come up with a logo and favicon**
-
-1. Think of a good name and register it
 
 1. Once we're ready, think about advertising strategy (Bjorn emailing number theory list; how to reach out beyond number theory, posting on Facebook, etc)
 
