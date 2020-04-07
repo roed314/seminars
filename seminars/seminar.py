@@ -114,7 +114,7 @@ class WebSeminar(object):
             return ""
 
     def show_day(self):
-        if self.weekday is None:
+        if self.weekday is None or self.start_time is None:
             return ""
         else:
             return weekdays[adapt_weektime(self.start_time, self.timezone, weekday=self.weekday)[0]][:3]

@@ -17,6 +17,12 @@
         <button type="submit">Edit schedule</button>
       </form>
     </td>
+    <td>
+      <form action="{{url_for('create.edit_talk', seminar_id=seminar.shortname)}}">
+        <input type="hidden" name="shortname" value="{{seminar.shortname}}" />
+        <button type="submit">Add talk</button>
+      </form>
+    </td>
   </tr>
 </table>
 {% endif %}
