@@ -283,7 +283,7 @@ def save_talk():
     for col in db.talks.search_cols:
         if col in data: continue
         try:
-            val = raw_data.get(col)
+            val = raw_data.get(col).strip()
             if not val:
                 data[col] = None
             else:

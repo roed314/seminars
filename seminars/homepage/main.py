@@ -293,7 +293,7 @@ def index():
     #menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
-        title="Math Seminars",
+        title="Math Seminars (beta)",
         category_counts=category_counts,
         talks=talks,
         section="Browse",
@@ -410,15 +410,15 @@ def subscribe():
     raise NotImplementedError
 
 
-@app.route("/about")
-def about():
-    return render_template("about.html", title="About", section="About")
+@app.route("/info")
+def info():
+    return render_template("info.html", title="Info", section="Info")
 
 @app.route("/faq")
 def faq():
     return render_template("faq.html", title="FAQ")
 
-@app.route("/<category>")
-def by_category(category):
-    # raise error if not existing category?
-    return search({"seminars_category": category, "talks_category": category})
+#@app.route("/<category>")
+#def by_category(category):
+#    # raise error if not existing category?
+#    return search({"seminars_category": category, "talks_category": category})

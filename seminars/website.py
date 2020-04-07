@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
-# LMFDB - L-function and Modular Forms Database web-site - www.lmfdb.org
-# Copyright (C) 2010-2012 by the LMFDB authors
+# Math Seminars - https://mathseminars.org
+# Copyright (C) 2020 by the Math Seminars authors
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -126,7 +126,7 @@ def main():
              "\n  \033[1m https://cocalc.com" +
              app.wsgi_app.app_root +
              " \033[0m" +
-             "\nto access this LMFDB instance" +
+             "\nto access this Math Seminars instance" +
              stars
              )
     set_running()

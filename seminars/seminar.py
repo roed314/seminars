@@ -2,7 +2,7 @@
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict, weekdays
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict, weekdays, adapt_weektime
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
 
@@ -111,11 +111,11 @@ class WebSeminar(object):
         if self.weekday is None:
             return ""
         else:
-            return weekdays[self.weekday][:3]
+            return weekdays[adapt_weektime(self.start_time, self.timezone, weekday=self.weekday)[0]][:3]
 
     def show_time(self):
         if self.start_time:
-            return self.start_time.strftime("%-H:%M")
+            return adapt_weektime(self.start_time, self.timezone, weekday=self.weekday)[1].strftime("%-H:%M")
         else:
             return ""
 

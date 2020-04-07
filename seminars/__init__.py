@@ -14,4 +14,5 @@ assert db
 # Have to make sure that changes aren't logged using the LMFDB's logging mechanism.
 def nothing(self, *args, **kwds):
     pass
-db._log_db_change = nothing
+for tname in db.tablenames:
+    db[tname].log_db_change = nothing

@@ -47,16 +47,16 @@
   </div>
 </div>
 {% if section == "Browse" %}
-<div id="filter-menu">
-  <div id="filter-head">
-    {% for ab, name in [("ALL", "Show all"), ("CLR", "Hide all")] %}
-    <div class="category_toggle" id="catlink-{{ab}}">
+<div id="topic-filter-menu">
+  <div id="topic-filter-head">
+    {% for ab, name, onclick in [("ALL", "Select all topics", "selectAllTopics();"), ("CLR", "Clear selection", "clearAllTopics();")] %}
+    <div class="topic_cmd" id="catlink-{{ab}}" onclick="{{onclick}}">
       {{name}}
     </div>
     {% endfor %}
   </div>
   {% for ab, name in categories %}
-  <div class="category_toggle" id="catlink-{{ab}}">
+  <div class="topic_toggle" id="catlink-{{ab}}">
     {{name}}{% if category_counts[ab] %} ({{category_counts[ab]}}){% endif %}
   </div>
   {% endfor %}
@@ -207,6 +207,14 @@ The function which was called for this page is: {{calling_function}}
 {% endif %}
 </div>
 {% endif %}
+
+<div id="footer">
+  <div>
+    Beta release on Tue Apr 7, 2020
+    &middot;
+    <a href="{{feedbackpage}}">Send us feedback</a>
+  </div>
+</div>
 
 
 {%- endblock body %}

@@ -3,7 +3,7 @@ from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, adapt_datetime
 from seminars.seminar import WebSeminar, can_edit_seminar, seminars_lookup
 from lmfdb.utils import flash_error
 from markupsafe import Markup
@@ -87,13 +87,31 @@ class WebTalk(object):
             [{col: getattr(self, col, None) for col in db.talks.search_cols}]
         )
 
+    @classmethod
+    def _editable_time(cls, t):
+        if not t:
+            return ""
+        return t.strftime("%Y-%m-%d %-H:%M")
+
+    def editable_start_time(self):
+        """
+        A version of the start time for editing
+        """
+        return self._editable_time(self.start_time)
+
+    def editable_end_time(self):
+        """
+        A version of the start time for editing
+        """
+        return self._editable_time(self.end_time)
+
     def show_start_time(self):
-        return self.start_time.astimezone(current_user.tz).strftime("%-H:%M")
+        return adapt_datetime(self.start_time).strftime("%-H:%M")
 
     def show_end_time(self):
         # This is used in show_time_and_duration, and needs to include the ending date if different (might not be the same in current user's time zone)
-        t0 = self.start_time.astimezone(current_user.tz)
-        t = self.end_time.astimezone(current_user.tz)
+        t0 = adapt_datetime(self.start_time)
+        t = adapt_datetime(self.end_time)
         if t0.date() == t.date():
             return t.strftime("%-H:%M")
         else:
@@ -106,7 +124,7 @@ class WebTalk(object):
         )
 
     def show_date(self):
-        return self.start_time.astimezone(current_user.tz).strftime("%a %b %-d")
+        return adapt_datetime(self.start_time).strftime("%a %b %-d")
 
     def show_date_link(self):
         return '<a href="%s">%s</a>' % (
@@ -129,8 +147,8 @@ class WebTalk(object):
         def ans(rmk):
             return '<span class="localtime" data-utcoffset="%s">%s-%s</span> (%s)' % (
                 int(start.utcoffset().total_seconds() / 60),
-                start.astimezone(current_user.tz).strftime("%a %b %-d, %-H:%M"),
-                end.astimezone(current_user.tz).strftime("%-H:%M"),
+                adapt_datetime(start).strftime("%a %b %-d, %-H:%M"),
+                adapt_datetime(end).strftime("%-H:%M"),
                 rmk,
             )
 
@@ -298,7 +316,7 @@ class WebTalk(object):
             "subject": "%s: title and abstract" % self.seminar.name,
         }
         email_to = self.speaker_email if self.speaker_email else ""
-        return 'or <a href="mailto:%s?%s">email speaker a link</a>' % (
+        return 'or <a href="mailto:%s?%s" target="_blank">email speaker a link</a>' % (
             email_to,
             urlencode(data, quote_via=quote),
         )
@@ -306,8 +324,8 @@ class WebTalk(object):
     def event(self, user):
         event = Event()
         event.add("summary", self.speaker)
-        event.add("dtstart", self.start_time.astimezone(pytz.UTC))
-        event.add("dtend", self.start_time.astimezone(pytz.UTC))
+        event.add("dtstart", adapt_datetime(self.start_time, pytz.UTC))
+        event.add("dtend", adapt_datetime(self.start_time, pytz.UTC))
         desc = ""
         # Title
         if self.title:

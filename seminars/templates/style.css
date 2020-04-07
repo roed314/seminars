@@ -282,30 +282,39 @@ body.knowl #header {
     display: inline-block;
 }
 
-#top-menu a, #filter-menu a, #top-menu span {
+#top-menu a, #topic-filter-menu a, #top-menu span {
     text-decoration: none;
     color: #aaaaaa;
     font-family: sans-serif;
     padding: 5px 25px 5px 25px;
 }
 
-div.category_toggle {
+div.topic_toggle {
     display: inline-block;
     min-width: 15%;
     padding: 5px;
     color: #aaaaaa;
 }
-div.category_toggle:hover {
+div.topic_toggle:hover, div.topic_cmd {
     cursor: pointer;
 }
-
-#filter-menu {
-    display: none;
-    background: {{color.header_background}};
+div.topic_cmd {
+    display: inline-block;
+    margin: 10px 30px 10px 30px;
+    padding: 4px 8px 4px 8px;
+    border: solid black 2px;
+    border-radius: 4px;
+    background: white;
+    color: {{color.header_background}};
 }
 
-#filter-btn {
-    margin: 0px 30px 15px 30px;
+#filter-table {
+    margin-left: 30px;
+}
+
+#topic-filter-menu {
+    display: none;
+    background: {{color.header_background}};
 }
 
 #javascript-explanation {
@@ -331,12 +340,12 @@ div.catselected {
     background: #aaaaaa;
 }
 
-tr.catunselected {
-    display: none;
-}
-
 .talk-table td:nth-child(2), .talk-table td:nth-child(4), .talk-table td:nth-child(5) {
     white-space: nowrap;
+}
+
+#footer a {
+    color: #aaaaaa;
 }
 
 /* TODO: what? */

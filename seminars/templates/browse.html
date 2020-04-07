@@ -12,14 +12,28 @@
 </p>
 {% endif %}
 
-<button id="filter-btn" onclick="return toggle_filter();">Show filters</button>
+<table id="filter-table">
+  <tr>
+    <td>
+      <button id="topic-filter-btn" onclick="$('#topic-filter-menu').slideToggle(300); return false;">Topic filter</button> enabled <input id="enable_topic_filter" type="checkbox" onchange="toggleFilters(this.id);">
+    </td>
+    {% if user.is_authenticated %}
+    <td>
+      <button id="calendar-filter-btn" onclick="">Subscription filter</button> enabled <input id="enable_calendar_filter" type="checkbox" onchange="toggleFilters(this.id);">
+    </td>
+    {% endif %}
+  </tr>
+</table>
+
 
 <table id="browse-talks" class="talk-table">
-  {% for talk in talks %}
-  <tr class="talk catunselected cat-ALL {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
-    {{ talk.oneline() | safe }}
-  </tr>
-  {% endfor %}
+  <tbody>
+    {% for talk in talks %}
+    <tr class="talk {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
+      {{ talk.oneline() | safe }}
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 
 {% endblock %}

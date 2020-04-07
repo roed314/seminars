@@ -61,7 +61,7 @@ def top_menu():
         (url_for("index"), "", "Browse"),
         (url_for("search"), "", "Search"),
         (url_for("create.index"), "", "Create"),
-        (url_for("about"), "", "About"),
+        (url_for("info"), "", "Info"),
         (url_for("user.info"), "", account)
     ]
 
@@ -162,6 +162,49 @@ def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0,
             rec = {k: v for k, v in zip(search_cols + extra_cols, rec)}
         return construct(rec)
 
+def localize_time(t, newtz=None):
+    """
+    Takes a time or datetime object and adds in a timezone if not already present.
+    """
+    if t.tzinfo is None:
+        if newtz is None:
+            newtz = current_user.tz
+        return newtz.localize(t)
+    else:
+        return t
+
+def adapt_datetime(t, newtz=None):
+    """
+    Converts a time-zone-aware datetime object into a specified time zone
+    (current user's time zone by default).
+    """
+    if newtz is None:
+        newtz = current_user.tz
+    return t.astimezone(newtz)
+
+def adapt_weektime(t, oldtz, newtz=None, weekday=None):
+    """
+    Converts a weekday and time in a given time zone to the specified new time zone using the next valid date.
+    """
+    if isinstance(oldtz, str):
+        oldtz = pytz.timezone(oldtz)
+    now = datetime.now(oldtz)
+    # The t we obtain from psycopg2 comes with tzinfo, but we need to forget it
+    # in order to compare with now.time()
+    t = t.replace(tzinfo=None)
+    if weekday is None:
+        days_ahead = 0 if now.time() <= t else 1
+    else:
+        days_ahead = weekday - now.weekday()
+        if days_ahead < 0 or (days_ahead == 0 and now.time() > t):
+            days_ahead += 7
+    next_t = datetime.combine(now.date() + timedelta(days=days_ahead), t)
+    next_t = adapt_datetime(next_t, newtz)
+    if weekday is None:
+        return None, next_t.time()
+    else:
+        return next_t.weekday(), next_t.time()
+
 def process_user_input(inp, typ, tz):
     """
     INPUT:
@@ -173,9 +216,9 @@ def process_user_input(inp, typ, tz):
         return None
     if typ == 'timestamp with time zone':
         # Need to sanitize more, include time zone
-        return tz.localize(parse_time(inp))
+        return localize_time(parse_time(inp), tz)
     elif typ == 'time with time zone':
-        return tz.localize(parse_time(inp))
+        return localize_time(parse_time(inp), tz)
     elif typ == 'boolean':
         if inp in ['yes', 'true', 'y', 't']:
             return True

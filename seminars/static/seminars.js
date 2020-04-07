@@ -12,8 +12,10 @@ function toggle_time() {
     }
 }
 
+/*
+Old version
 function toggle_filter() {
-    var filt_btn = $('#filter-btn');
+    var filt_btn = $('#topic-filter-btn');
     var filt_menu = $("#filter-menu");
     filt_btn.text("Filter");
     if (filt_menu.is(":hidden")) {
@@ -24,6 +26,7 @@ function toggle_filter() {
     filt_menu.slideToggle(300);
     return false;
 }
+*/
 
 function setCookie(name,value) {
     document.cookie = name + "=" + (value || "") + ";path=/";
@@ -43,52 +46,141 @@ function eraseCookie(name) {
 }
 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 setCookie("browser_timezone", tz);
-function addCategory(cat) {
-    var cur_cats = getCookie("categories");
+function addTopic(cat) {
+    var cur_cats = getCookie("topics");
     if (cur_cats) {
         cur_cats = cur_cats + "," + cat;
     } else {
         cur_cats = cat;
     }
-    setCookie("categories", cur_cats);
+    setCookie("topics", cur_cats);
     return cur_cats;
 }
-function removeCategory(cat) {
-    var cur_cats = getCookie("categories");
+function removeTopic(cat) {
+    var cur_cats = getCookie("topics");
     cur_cats = cur_cats.replace(cat, "").replace(",,",",");
     if (cur_cats.startsWith(",")) cur_cats = cur_cats.slice(1);
     if (cur_cats.endsWith(",")) cur_cats = cur_cats.slice(0, -1);
-    setCookie("categories", cur_cats);
+    setCookie("topics", cur_cats);
     return cur_cats;
 }
 
-function setCategoryLinks() {
-    var cur_cats = getCookie("categories")
+function topicFiltering() {
+    return $('#enable_topic_filter').is(":checked");
+}
+function calFiltering() {
+    return $('#enable_calendar_filter').is(":checked");
+}
+
+function setTopicLinks() {
+    var cur_cats = getCookie("topics");
+    $(".talk").addClass("topic-filtered");
     if (cur_cats == null) {
-        cur_cats = "ALL";
-        setCookie("categories", "ALL");
-        $(".cat-all").removeClass("catunselected");
-    }
-    cur_cats = cur_cats.split(",");
-    for (var i=0; i<cur_cats.length; i++) {
-        $("#catlink-" + cur_cats[i]).addClass("catselected");
-        $(".cat-" + cur_cats[i]).removeClass("catunselected");
+        setCookie("topics", "");
+        setCookie("filter_topic", "0");
+        setCookie("filter_calendar", "0");
+        // Set the following in preparation so we don't need to worry about them not existing.
+        setCookie("filter_location", "0");
+        setCookie("filter_time", "0");
+    } else {
+        $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
+        $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
+        cur_cats = cur_cats.split(",");
+        for (var i=0; i<cur_cats.length; i++) {
+            $("#catlink-" + cur_cats[i]).addClass("catselected");
+            $(".cat-" + cur_cats[i]).removeClass("topic-filtered");
+        }
+        toggleFilters(null);
     }
 }
-function toggleCategory(id) {
+function toggleTopic(id) {
     var toggler = $("#" + id);
     var cat = id.substring(8);
+    var talks = $(".cat-" + cat);
     if (toggler.hasClass("catselected")) {
         toggler.removeClass("catselected");
-        cur_cats = removeCategory(cat);
-        // Have to handle ALL specially, since we need to add the other categories back in
-        if (!cur_cats.includes("ALL")) $(".cat-" + cat).addClass("catunselected");
-        if (cat == "ALL") setCategoryLinks();
+        cur_cats = removeTopic(cat).split(",");
+        for (i=0; i<cur_cats.length; i++) {
+            talks = talks.not(".cat-" + cur_cats[i]);
+        }
+        talks.addClass("topic-filtered");
+        if (topicFiltering()) {
+            talks.hide();
+            apply_striping();
+        }
     } else {
         toggler.addClass("catselected");
-        addCategory(cat);
-        $(".cat-" + cat).removeClass("catunselected");
+        addTopic(cat);
+        talks.removeClass("topic-filtered");
+        if (topicFiltering()) {
+            // elements may be filtered by other criteria
+            talks = talksToShow(talks);
+            talks.show();
+            apply_striping();
+        }
     }
+}
+function getAllTopics() {
+    var toggles = []
+    $(".topic_toggle").each(function() {
+        toggles.push(this.id.substring(8));
+    })
+    return toggles;
+}
+function selectAllTopics() {
+    var toggles = getAllTopics();
+    setCookie("topics", toggles.join(","));
+    $(".topic_toggle").addClass("catselected");
+    var talks = $(".talk");
+    talks.removeClass("topic-filtered");
+    if (topicFiltering()) {
+        talks = talksToShow(talks);
+        talks.show();
+        apply_striping();
+    }
+}
+function clearAllTopics() {
+    setCookie("topics", "");
+    var toggles = getAllTopics();
+    $(".topic_toggle").removeClass("catselected");
+    var talks = $(".talk");
+    talks.addClass("topic-filtered");
+    if (topicFiltering()) {
+        talks.hide();
+        // no need to apply striping since no visible talks
+    }
+}
+
+var filter_classes = [['.topic-filtered', topicFiltering], ['.calendar-filtered', calFiltering]]
+function talksToShow(talks) {
+    for (i=0; i<filter_classes.length; i++) {
+        if (filter_classes[i][1]()) {
+            talks = talks.not(filter_classes[i][0]);
+        }
+    }
+    return talks;
+}
+function toggleFilters(id) {
+    if (id !== null) {
+        setCookie("filter_" + id.split("_")[1], $('#'+id).is(":checked") ? "1" : "0");
+    }
+    var talks = $('.talk');
+    talks.hide();
+    talks = talksToShow(talks);
+    talks.show();
+    apply_striping();
+}
+
+function apply_striping() {
+    // Not sure if this gives the same order as $('.talk')
+    var rows = $('#browse-talks tbody tr');
+    rows.find('tr:visible').each(function(i) {
+        if (i%2) {
+            $(this).css('background', '#f7f7f7');
+        } else {
+            $(this).css('background', 'none');
+        };
+    });
 }
 
 function tickClock() {
@@ -108,7 +200,7 @@ function tickClock() {
 
 $(document).ready(function () {
 
-    setCategoryLinks();
+    setTopicLinks();
 
     $('#timetoggle').click(
         function (evt) {
@@ -116,16 +208,17 @@ $(document).ready(function () {
             toggle_time();
             return false;
         });
-    $('.category_toggle').click(
+    $('.topic_toggle').click(
         function (evt) {
             evt.preventDefault();
-            toggleCategory(this.id);
+            toggleTopic(this.id);
         });
 
     var today = new Date();
     var minute = today.getMinutes();
     var millisecond = 1000 * today.getSeconds() + today.getMilliseconds();
     var displayed_minute = parseInt($("#curtime").text().split(":")[1]);
+    console.log(displayed_minute);
     // We might have passed a minute barrier between the server setting the time and the page finishing loading
     // Because of weird time zones (the user time preference may not be their local clock time),
     // we only do something if the minute is offset by 1 or 2 (for a super-slow page load)

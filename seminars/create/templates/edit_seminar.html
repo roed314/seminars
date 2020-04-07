@@ -78,15 +78,6 @@
           <td><input name="frequency" style="width:500px;" value="{{ seminar.frequency | blanknone }}" /></td>
         </tr>
         <tr>
-          <td>Start time</td>
-          <td><input name="start_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.start_time) }}" /></td>
-        </tr>
-        <tr>
-          <td>End time</td>
-          <td><input name="end_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.end_time) }}" /></td>
-        </tr>
-        {% if not user.phd or not seminar.new %}
-        <tr>
           <td>Time zone</td>
           <td>
             <select name="timezone" style="width:510px;">
@@ -96,7 +87,14 @@
             </select>
           </td>
         </tr>
-        {% endif %}
+        <tr>
+          <td>Start time</td>
+          <td><input name="start_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.start_time) }}" /></td>
+        </tr>
+        <tr>
+          <td>End time</td>
+          <td><input name="end_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.end_time) }}" /></td>
+        </tr>
         <tr>
           <td>Conference</td>
           <td>

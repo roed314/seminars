@@ -12,7 +12,7 @@
             Seminar
           </td>
           <td>
-            <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name }}</a>
+            <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
           </td>
         </tr>
         <tr>
@@ -46,14 +46,6 @@
           </td>
         </tr>
         <tr>
-          <td>Start</td>
-          <td><input name="start_time" value="{{ talk.start_time | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>End</td>
-          <td><input name="end_time" value="{{ talk.end_time | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
           <td>Time zone</td>
           <td>
             <select name="timezone" style="width:510px;">
@@ -62,6 +54,14 @@
               {% endfor %}
             </select>
           </td>
+        </tr>
+        <tr>
+          <td>Start</td>
+          <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:500px;" /></td>
+        </tr>
+        <tr>
+          <td>End</td>
+          <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:500px;" /></td>
         </tr>
         <tr>
           <td>Room</td>
@@ -109,7 +109,7 @@
       <table>
         <tr>
           <td colspan="2"><textarea cols="80" rows="10"
-                                    name="abstract" id="inp_abstract">{{ talk.abstract }}</textarea>
+                                    name="abstract" id="inp_abstract">{{ talk.abstract | blanknone }}</textarea>
           </td>
         </tr>
       </table>

@@ -15,8 +15,7 @@ from markupsafe import Markup
 from icalendar import Calendar
 from io import BytesIO
 
-from lmfdb import db
-assert db
+from psycopg2.sql import SQL
 from seminars.utils import timezones
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import pytz, datetime
@@ -478,3 +477,12 @@ def ics_file(token):
     bIO.write(cal.to_ical())
     bIO.seek(0)
     return send_file(bIO, attachment_filename='mathseminars.ics', as_attachment=True, add_etags=False)
+
+@login_page.route("/public/")
+def public_users():
+    query = SQL("SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email")
+    public_organizers = list(userdb._execute(query))
+    public_organizers.sort()
+    return render_template('public_users.html',
+                           title="Public users",
+                           public_users=public_organizers)

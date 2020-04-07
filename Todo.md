@@ -19,6 +19,8 @@ Now
 Admin (Edgar)
 =====
 
+1. Add ability to request endorsement, then update public_users.html with a link.
+
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last
 
 1. Stop connecting to the lmfdb database
@@ -51,6 +53,8 @@ Content creation
 
 Viewing and searching
 =====================
+
+1. **Filter option to show personal calendar**
 
 1. **Sort seminar and talks search results**
 
@@ -96,6 +100,14 @@ Knowls
 Time zones
 ==========
 
+1. **Default seminar time zone come from user time zone.**
+
+1. **Localize time zones in search results.**
+
+1. **When creating things, default to user's time zone.**
+
+1. **Add checkbox for use institution time when creating seminar.**
+
 Localization
 ============
 
@@ -125,6 +137,8 @@ Calendars
 =========
 
 1. **Write code for dynamically generating .ics files**
+
+1. **Each seminar should have its own calendar so that seminar organizers can use it as the primary source for their own front-end.**
 
 Email
 =====
