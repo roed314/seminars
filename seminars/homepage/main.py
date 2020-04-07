@@ -274,7 +274,7 @@ class SemSearchArray(SearchArray):
         return [('seminars', 'List of seminars')]
 
     def hidden(self, info):
-        return [("talk_start", "talk_start"), ("talk_count", "talk_count")]
+        return [("seminar_start", "seminar_start"), ("seminar_count", "seminar_count")]
 
 @app.route("/")
 def index():
