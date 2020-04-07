@@ -202,17 +202,53 @@ $(document).ready(function() {
 });
 
 
+function uniqueID(){
+  function chr4(){
+    return Math.random().toString(16).slice(-4);
+  }
+  return chr4() + chr4() +
+    '-' + chr4() +
+    '-' + chr4() +
+    '-' + chr4() +
+    '-' + chr4() + chr4() + chr4();
+}
 
 //handling subscriptions
 $(document).ready(function(){
+    function error(msg) {
+      var id = uniqueID()
+      var paragraph = document.createElement("p")
+      paragraph.className = "error";
+      var txt = document.createTextNode(msg);
+      paragraph.appendChild(txt);
+      paragraph.id = id;
+      $('#flashes')[0].appendChild(paragraph);
+      setTimeout(() => $('#'+id).fadeOut(1000), 2000)
+    }
+    function success(msg) {
+      var id = uniqueID()
+      var paragraph = document.createElement("p")
+      paragraph.className = "message";
+      var txt = document.createTextNode(msg);
+      paragraph.appendChild(txt);
+      paragraph.id = id;
+      $('#flashes')[0].appendChild(paragraph);
+      setTimeout(() => $('#'+id).fadeOut(1000), 2000)
+    }
+
     $("input.subscribe:checkbox").change(function() {
-      foo = $(this);
         if($(this).is(":checked")) {
-            $.ajax( '/user/subscribe/' +  $(this)[0].value);
+            $.ajax({
+              url: '/user/subscribe/' +  $(this)[0].value,
+              //success: success
+            });
               console.log('/user/subscribe/' +  $(this)[0].value);
         } else {
-          $.ajax('/user/unsubscribe/' +  $(this)[0].value);
-              console.log('/user/unsubscribe/' +  $(this)[0].value);
+          $.ajax({
+            url: '/user/unsubscribe/' +  $(this)[0].value,
+            //success: success
+          });
+            console.log('/user/unsubscribe/' +  $(this)[0].value);
         }
     });
 });

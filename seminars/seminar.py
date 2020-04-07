@@ -5,13 +5,6 @@ from seminars import db
 from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict, weekdays
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
-import datetime, pytz
-def next_weekday(weekday, timezone):
-    now = datetime.datetime.now(pytz.UTC)
-    days_ahead = weekday - now.weekday()
-    if days_ahead <= 0: # Target day already happened this week
-        days_ahead += 7
-    return d + datetime.timedelta(days_ahead)
 
 
 class WebSeminar(object):
@@ -120,7 +113,6 @@ class WebSeminar(object):
         else:
             return ""
 
-
     def show_day(self):
         if self.weekday is None:
             return ""
@@ -206,7 +198,10 @@ def seminars_header(include_time=True, include_institutions=True, include_descri
     if include_description:
         cols.append((1, "Description"))
     if include_subscribe:
-        cols.append((1, "Saved"))
+        if current_user.is_anonymous():
+            cols.append((1, ""))
+        else:
+            cols.append((1, "Saved"))
     return "".join('<th colspan="%s">%s</th>' % pair for pair in cols)
 
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")

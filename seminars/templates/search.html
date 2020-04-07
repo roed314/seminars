@@ -86,7 +86,7 @@ st.final_flap = (e) => {
 
 st.clickHandler = (e) => {
 
-    if (e.target.tagName === 'LABEL') {
+    if (e.target.id == 'labelchoice1' ||  e.target.id == 'labelchoice2' ) {
         setTimeout(() => {
             st.flap.children[0].textContent = e.target.textContent;
         }, 250);
@@ -98,7 +98,7 @@ st.clickHandler = (e) => {
       $('#searchtalks').show();
       $('#searchseminars').hide();
     }
-  console.log(e);
+console.log(e);
 }
 
   document.addEventListener('click', (e) => st.clickHandler(e));

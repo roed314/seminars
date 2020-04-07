@@ -355,7 +355,10 @@ def talks_header(include_seminar=True, include_edit=True, include_subscribe=True
     cols.append("Speaker")
     cols.append("Title")
     if include_subscribe:
-        cols.append("Saved")
+        if current_user.is_anonymous():
+            cols.append("")
+        else:
+            cols.append("Saved")
     return "".join('<th>%s</th>' % c for c in cols)
 
 
