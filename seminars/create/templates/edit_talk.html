@@ -36,11 +36,11 @@
           <td><input style="width:500px;" name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" /></td>
         </tr>
         <tr>
-          <td>Categories</td>
+          <td>Topics</td>
           <td>
-            <select name="categories" style="width:510px;">
-              {% for ab, cat in categories %}
-              <option value="{{ ab }}"{% if ab in talk.categories %} selected{% endif %}>{{cat}}</option>
+            <select name="topics" style="width:510px;">
+              {% for ab, topic in topics %}
+              <option value="{{ ab }}"{% if ab in talk.topics %} selected{% endif %}>{{topic}}</option>
               {% endfor %}
             </select>
           </td>

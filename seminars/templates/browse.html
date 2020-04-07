@@ -2,16 +2,6 @@
 
 {% block content %}
 
-{% if user.is_authenticated and no_subscription %}
-<p>
-  <a href="{{ url_for('search') }}">Search</a> for seminars and talks to follow.
-</p>
-{% elif not user.is_authenticated %}
-<p id="filter-instruction">
-  Use the Filter option to select categories of interest.
-</p>
-{% endif %}
-
 <table id="filter-table">
   <tr>
     <td>
@@ -32,7 +22,7 @@
   </thead>
   <tbody>
     {% for talk in talks %}
-    <tr class="talk {% for cat in talk.categories %}cat-{{cat}} {% endfor %}">
+    <tr class="talk {% for topic in talk.topics %}topic-{{topic}} {% endfor %}">
       {{ talk.oneline() | safe }}
     </tr>
     {% endfor %}

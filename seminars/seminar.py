@@ -2,7 +2,7 @@
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, category_dict, weekdays, adapt_weektime
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
 
@@ -69,9 +69,9 @@ class WebSeminar(object):
             if 'email' in rec:
                 db.seminar_organizers.upsert({'email': rec['email'], 'seminar_id': self.shortname}, rec)
 
-    def show_categories(self):
-        if self.categories:
-            return " (" + ", ".join(category_dict()[cat] for cat in self.categories) + ")"
+    def show_topics(self):
+        if self.topics:
+            return " (" + ", ".join(topic_dict()[topic] for topic in self.topics) + ")"
         else:
             return ""
 

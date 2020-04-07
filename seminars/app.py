@@ -10,7 +10,7 @@ from flask import (Flask, g, render_template, request, make_response,
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
-from seminars.utils import categories, top_menu
+from seminars.utils import topics, top_menu
 from .seminar import seminars_header
 from .talk import talks_header
 
@@ -100,7 +100,7 @@ def ctx_proc_userdata():
     # debug mode?
     data['DEBUG'] = is_debug_mode()
 
-    data['categories'] = categories()
+    data['topics'] = topics()
     data['top_menu'] = top_menu()
 
     data['talks_header'] = talks_header

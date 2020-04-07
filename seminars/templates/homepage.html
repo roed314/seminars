@@ -50,14 +50,14 @@
 <div id="topic-filter-menu">
   <div id="topic-filter-head">
     {% for ab, name, onclick in [("ALL", "Select all topics", "selectAllTopics();"), ("CLR", "Clear selection", "clearAllTopics();")] %}
-    <div class="topic_cmd" id="catlink-{{ab}}" onclick="{{onclick}}">
+    <div class="topic_cmd" id="topiclink-{{ab}}" onclick="{{onclick}}">
       {{name}}
     </div>
     {% endfor %}
   </div>
-  {% for ab, name in categories %}
-  <div class="topic_toggle" id="catlink-{{ab}}">
-    {{name}}{% if category_counts[ab] %} ({{category_counts[ab]}}){% endif %}
+  {% for ab, name in topics %}
+  <div class="topic_toggle" id="topiclink-{{ab}}">
+    {{name}}{% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
   </div>
   {% endfor %}
 </div>
@@ -65,7 +65,7 @@
 {% endif %}
 <noscript>
 <div id="javascript-explanation">
-  We use javascript to filter seminar categories, adapt seminars to your local time zone, enter date ranges, and hide this annoying message.
+  We use javascript to filter seminar topics, adapt seminars to your local time zone, enter date ranges, and hide this annoying message.
 </div>
 </noscript>
 

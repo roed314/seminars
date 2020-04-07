@@ -35,11 +35,11 @@
           <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:500px;" /></td>
         </tr>
         <tr>
-          <td>Categories</td>
+          <td>Topics</td>
           <td>
-            <select name="categories" style="width:510px;">
-              {% for ab, cat in categories %}
-              <option value="{{ ab }}"{% if ab in seminar.categories %} selected{% endif %}>{{cat}}</option>
+            <select name="topics" style="width:510px;">
+              {% for ab, topic in topics %}
+              <option value="{{ ab }}"{% if ab in seminar.topics %} selected{% endif %}>{{topic}}</option>
               {% endfor %}
             </select>
           </td>

@@ -2,7 +2,7 @@ from seminars.app import app
 from seminars import db
 from seminars.talk import WebTalk, talks_search, talks_lucky
 from seminars.seminar import seminars_lucky
-from seminars.utils import categories
+from seminars.utils import topics
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search
@@ -29,11 +29,11 @@ def get_now():
     return datetime.datetime.now(pytz.UTC)
 
 
-def parse_category(info, query, prefix):
+def parse_topic(info, query, prefix):
     # of the talk
-    cat = info.get(prefix + "_category")
-    if cat:
-        query["categories"] = {"$contains": cat}
+    topic = info.get(prefix + "_topic")
+    if topic:
+        query["topics"] = {"$contains": topic}
 
 
 def parse_institution_sem(info, query, prefix="seminar"):
@@ -109,7 +109,7 @@ def parse_video(info, query):
         query["video_link"] = {"$not": None}
 
 def talks_parser(info, query):
-    parse_category(info, query, prefix="talk")
+    parse_topic(info, query, prefix="talk")
     parse_institution_talk(info, query)
     parse_online(info, query, prefix="talk")
     parse_offline(info, query, prefix="talk")
@@ -124,7 +124,7 @@ def talks_parser(info, query):
 
 
 def seminars_parser(info, query):
-    parse_category(info, query, prefix="seminar")
+    parse_topic(info, query, prefix="seminar")
     parse_institution_sem(info, query)
     parse_online(info, query, prefix="seminar")
     parse_offline(info, query, prefix="seminar")
@@ -149,8 +149,8 @@ class TalkSearchArray(SearchArray):
     plural_noun = "talks"
 
     def __init__(self):
-        ## categories
-        category = SelectBox(name="talk_category", label="Category", options=[("", "")] + categories())
+        ## topics
+        topic = SelectBox(name="talk_topic", label="Topics", options=[("", "")] + topics())
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -199,7 +199,7 @@ class TalkSearchArray(SearchArray):
         )
         video = CheckBox(name="video", label="Has video")
         self.array = [
-            [category, keywords],
+            [topic, keywords],
             [institution, title],
             [online, speaker],
             [offline],
@@ -223,8 +223,8 @@ class SemSearchArray(SearchArray):
     plural_noun = "seminars"
 
     def __init__(self):
-        ## categories
-        category = SelectBox(name="seminar_category", label="Category", options=[("", "")] + categories())
+        ## topics
+        topic = SelectBox(name="seminar_topic", label="Topics", options=[("", "")] + topics())
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -261,7 +261,7 @@ class SemSearchArray(SearchArray):
         )
 
         self.array = [
-            [category, keywords],
+            [topic, keywords],
             [institution, name],
             [online, access],
             [count],
@@ -283,17 +283,17 @@ def index():
         {"display": True, "end_time": {"$gte": datetime.datetime.now()}},
         sort=["start_time"],
     ))
-    category_counts = Counter()
+    topic_counts = Counter()
     for talk in talks:
-        category_counts["ALL"] += 1
-        if talk.categories:
-            for cat in talk.categories:
-                category_counts[cat] += 1
+        topic_counts["ALL"] += 1
+        if talk.topics:
+            for topic in talk.topics:
+                topic_counts[topic] += 1
     #menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
         title="Math Seminars (beta)",
-        category_counts=category_counts,
+        topic_counts=topic_counts,
         talks=talks,
         section="Browse",
         bread=None,
@@ -417,7 +417,7 @@ def info():
 def faq():
     return render_template("faq.html", title="FAQ")
 
-#@app.route("/<category>")
-#def by_category(category):
-#    # raise error if not existing category?
-#    return search({"seminars_category": category, "talks_category": category})
+#@app.route("/<topic>")
+#def by_topic(topic):
+#    # raise error if not existing topic?
+#    return search({"seminars_topic": topic, "talks_topic": topic})

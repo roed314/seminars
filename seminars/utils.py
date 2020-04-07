@@ -74,14 +74,14 @@ shortname_re = re.compile("^[A-Za-z0-9_-]+$")
 def allowed_shortname(shortname):
     return bool(shortname_re.match(shortname))
 
-# Note the caching: if you add a category you have to restart the server
+# Note the caching: if you add a topic you have to restart the server
 @cached_function
-def categories():
-    return sorted(((rec["abbreviation"], rec["name"]) for rec in db.categories.search({}, ["abbreviation", "name"])), key=lambda x: x[1].lower())
+def topics():
+    return sorted(((rec["abbreviation"], rec["name"]) for rec in db.topics.search({}, ["abbreviation", "name"])), key=lambda x: x[1].lower())
 
 @cached_function
-def category_dict():
-    return dict(categories())
+def topic_dict():
+    return dict(topics())
 
 def count_distinct(table, counter, query={}):
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))

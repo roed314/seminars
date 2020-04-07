@@ -23,7 +23,7 @@
 
 <h1>{% if seminar.homepage %}<a href="{{seminar.homepage}}">{{seminar.name}}</a>{% else %}{{seminar.name}}{% endif %}{% if not seminar.display %} (hidden){% elif seminar.archived %} (inactive){% elif seminar.online %} (online){% endif %}</h1>
 
-{% if seminar.description %}<p>{{ (seminar.show_institutions() + ' ' + (seminar.description | blanknone) + seminar.show_categories()) | safe }}</p>{% endif %}
+{% if seminar.description %}<p>{{ (seminar.show_institutions() + ' ' + (seminar.description | blanknone) + seminar.show_topics()) | safe }}</p>{% endif %}
 
 <table>
   {{ seminar.show_organizers() | safe }}
