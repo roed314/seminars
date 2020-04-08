@@ -391,7 +391,7 @@ def edit_seminar_schedule():
     if resp is not None:
         return resp
     seminar, all_dates, by_date = make_date_data(seminar)
-    title = seminar.name
+    title = seminar.name + " (edit schedule)"
     return render_template("edit_seminar_schedule.html",
                            seminar=seminar,
                            all_dates=all_dates,
