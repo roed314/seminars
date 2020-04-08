@@ -1204,6 +1204,9 @@ table.statgrid td.cnt {
 .knowl-content h2 {
   margin: 0px 0px 5px 0px;
 }
+a.likeknowl {
+  border-bottom: 1px dotted {{ color.knowl_underline }};
+}
 
 *[knowl] {
   border-bottom: 1px dotted {{ color.knowl_underline }};
