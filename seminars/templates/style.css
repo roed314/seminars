@@ -2625,6 +2625,3 @@ li.ical-detail {
   background: {{ color.button_background }};
 }
 
-#manage-submenu {
-  display: flex;
-}
