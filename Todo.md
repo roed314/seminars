@@ -39,6 +39,14 @@ Content creation
 
 1. **Cancel -> Cancel changes**
 
+1. **Add additional talk into main form, add new fields, maybe one button (if two, do the same thing), not all in one column, flash warning and keep raw data if title/email but no speaker, make details save**
+
+1. **On manage homepage, vertical and horizontal lines in table**
+
+1. **Uniformize on identifier (change places where called shortname)**
+
+1. Warning if user tries to close schedule without saving
+
 1. When adding speakers, could give Speaker's math sci net id.
 
 1. Consistency: add talk vs create talk (maybe create seminars, add talks)

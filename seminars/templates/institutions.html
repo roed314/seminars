@@ -2,9 +2,10 @@
 
 {% block content %}
 
-<h1>Institutions</h1>
+<h2>Create Institution</h2>
 
-<h2>Create</h2>
+<p>The identifier is a short label for the institution, used in its URL.  It should consist only of letters, numbers, hyphens and underscores - no spaces.  The full name of your institution will be entered on the next page.</p>
+
 <form action="{{ url_for('create.edit_institution') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
   <table>
@@ -16,12 +17,19 @@
   </table>
 </form>
 
-<h2>Existing</h2>
+<h2>Existing Institutions</h2>
 
-<ul>
+<table>
+  <thead>
+    <th>Short name</th>
+    <th>Full name</th>
+  </thead>
   {% for shortname, name in institutions %}
-  <li> <a href="{{ url_for('show_institution', shortname=shortname) }}">{{name}}</a></li>
+  <tr>
+    <td>{{shortname}}</td>
+    <td><a href="{{ url_for('show_institution', shortname=shortname) }}">{{name}}</a></td>
+  </tr>
   {% endfor %}
-</ul>
+</table>
 
 {% endblock %}
