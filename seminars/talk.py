@@ -3,7 +3,7 @@ from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, adapt_datetime
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, adapt_datetime, toggle
 from seminars.seminar import WebSeminar, can_edit_seminar, seminars_lookup
 from lmfdb.utils import flash_error
 from markupsafe import Markup
@@ -248,6 +248,13 @@ class WebTalk(object):
         else:  # should never happen
             return ""
 
+    def is_subscribed(self):
+        if current_user.is_anonymous():
+            return False
+        if self.seminar_id in current_user.seminar_subscriptions:
+            return True
+        return self.seminar_ctr in current_user.talk_subscriptions.get(self.seminar_id, [])
+
     def edit_link(self):
         return '<a href="%s">Edit</a>' % url_for(
             "create.edit_talk", seminar_id=self.seminar_id, seminar_ctr=self.seminar_ctr
@@ -257,12 +264,11 @@ class WebTalk(object):
         if current_user.is_anonymous():
             return ""
 
-        def is_subscribed():
-            if self.seminar_id in current_user.seminar_subscriptions:
-                return True
-            return self.seminar_ctr in current_user.talk_subscriptions.get(
-                self.seminar_id, []
-            )
+        value = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
+        return toggle(tglid="tlg" + value,
+                      value=value,
+                      checked=self.is_subscribed(),
+                      classes="subscribe")
 
         return """
 <input type="checkbox" class="subscribe tgl tgl-light" value="{sem}/{ctr}" id="tgl{sem}/{ctr}" {checked}>

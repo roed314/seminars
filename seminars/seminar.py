@@ -2,7 +2,7 @@
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime, toggle
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
 
@@ -85,20 +85,19 @@ class WebSeminar(object):
     def show_description(self):
         return self.description
 
+    def is_subscribed(self):
+        if current_user.is_anonymous():
+            return False
+        return self.shortname in current_user.seminar_subscriptions
+
     def show_subscribe(self):
         if current_user.is_anonymous():
             return ""
-        return """
-<input type="checkbox" class="subscribe tgl tgl-light" value="{sem}" id="tgl{sem}" {checked}>
-<label class="tgl-btn" for="tgl{sem}"></label>
-""".format(sem=self.shortname,
-           checked="checked" if self.shortname in current_user.seminar_subscriptions else "",
-        )
-        return '<input type="checkbox" class="subscribe" value="%s" %s>' % (
-            self.shortname,
-            "checked" if self.shortname in current_user.seminar_subscriptions else "",
-        )
-        return ""
+
+        return toggle(tglid="tlg" + self.shortname,
+                      value=self.shortname,
+                      checked=self.is_subscribed(),
+                      classes="subscribe")
 
     def show_institutions(self):
         if self.institutions:

@@ -172,6 +172,10 @@ Examples of online seminars we might add
 
 1. Princeton/IAS number theory
 
+1. UCSD
+
+1. Harvard
+
 1. [LAGA](https://www.math.univ-paris13.fr/laga/index.php/fr/pm/seminaires?id=97:seminaire-d-analyse-appliquee-2&catid=76:seminaires-pm-edp)
 
 1. [NASO](https://docs.google.com/spreadsheets/d/1MwTXrguSlEon46UKFV1ZJSeozsOECfUvSL6Othufyvs/edit#gid=0)
