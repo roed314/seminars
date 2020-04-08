@@ -2,7 +2,10 @@
 
 {% block content %}
 <div class="text_content">
-<h2>Create Institution</h2>
+
+<p>If your institution is not listed here, you can add it so that seminars can be associated with it later.</p>
+
+<h2>Add institution</h2>
 
 <p>The identifier is a short label for the institution, used in its URL.  It should consist only of letters, numbers, hyphens and underscores - no spaces.  The full name of your institution will be entered on the next page.</p>
 
@@ -17,12 +20,12 @@
   </table>
 </form>
 
-<h2>Existing Institutions</h2>
+<h2>Existing institutions</h2>
 
 <table class="ntdata">
   <thead>
-    <th>Short name</th>
-    <th>Full name</th>
+    <th>Identifier</th>
+    <th>Name</th>
   </thead>
   {% for shortname, name in institutions %}
   <tr>
