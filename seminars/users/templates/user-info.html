@@ -85,7 +85,7 @@
   {% if user.is_creator() %}
   <h2>Adding content</h2>
   <p>
-    To add content or manage the seminars that you organize, use the <a href"{{ url_for('create.index') }}">Create</a> tab in the top menu.
+    To add content or manage the seminars that you organize, use the <a href"{{ url_for('create.index') }}">Manage</a> tab in the top menu.
   </p>
   <h2>Endorse someone</h2>
     <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
