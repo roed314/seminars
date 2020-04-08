@@ -16,7 +16,7 @@ from collections import defaultdict
 
 SCHEDULE_LEN = 15 # Number of weeks to show in edit_seminar_schedule
 
-@create.route("create/")
+@create.route("manage/")
 @login_required
 @email_confirmed_required
 def index():
