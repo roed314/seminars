@@ -315,7 +315,6 @@ function uniqueID(){
 //handling subscriptions
 $(document).ready(function(){
     $("input.subscribe:checkbox").change(function(evt) {
-        foo = $(this);
         var elem = $(this);
         function success(msg) {
           // this is the row
