@@ -338,9 +338,12 @@ def search():
 
 @app.route("/institutions/")
 def list_institutions():
+    section = "Manage" if current_user.is_creator() else None
     return render_template(
         "institutions.html",
         title="Institutions",
+        section=section,
+        subsection="institutions",
         institutions=institutions(),
     )
 
@@ -362,15 +365,20 @@ def show_seminar(shortname):
             past.append(talk)
     future.sort(key=lambda talk: talk.start_time)
     past.sort(key=lambda talk: talk.start_time, reverse=True)
+    if current_user.email in seminar.editors() or current_user.is_admin():
+        section = "Manage"
+    else:
+        section = None
     return render_template(
         "seminar.html",
         title="View seminar",
         future=future,
         past=past,
         seminar=seminar,
+        section=section,
+        subsection="view",
         bread=None,
     )
-
 
 @app.route("/talk/<semid>/<int:talkid>/")
 def show_talk(semid, talkid):
@@ -392,10 +400,13 @@ def show_institution(shortname):
     if institution is None:
         return render_template("404.html", title="Institution not found")
     institution = WebInstitution(shortname, data=institution)
+    section = "Manage" if current_user.is_creator() else None
     return render_template(
         "institution.html",
         title="View institution",
         institution=institution,
+        section=section,
+        subsection="viewinst",
     )
 
 

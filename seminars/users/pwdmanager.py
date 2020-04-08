@@ -18,6 +18,7 @@ from lmfdb.utils import flash_error
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone
 import bisect
+from sage.misc.cachefunc import cached_method
 
 from .main import logger
 
@@ -371,6 +372,10 @@ class SeminarsUser(UserMixin):
         self._data["creator"] = True
         self._dirty = True
 
+    @cached_method
+    def is_organizer(self):
+        return self.is_admin() or self.is_creator() and db.seminar_organizers.count({"email": self.email}) > 0
+
     def authenticate(self, pwd):
         """
         checks if the given password for the user is valid.
@@ -403,6 +408,9 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
         return False
 
     def is_creator(self):
+        return False
+
+    def is_organizer(self):
         return False
 
     def name(self):

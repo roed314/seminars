@@ -1,14 +1,20 @@
 
-function toggle_time() {
+function toggle_time(id) {
     var future = $('#future_talks');
     var past = $('#past_talks');
     if (future.is(":visible"))
     {
-        future.hide();
-        past.show();
+        if (id == "toggle_to_past") {
+            $('.toggler-nav').toggleClass("toggler-active");
+            future.hide();
+            past.show();
+        }
     } else {
-        past.hide();
-        future.show();
+        if (id == "toggle_to_future") {
+            $('.toggler-nav').toggleClass("toggler-active");
+            past.hide();
+            future.show();
+        }
     }
 }
 
@@ -202,10 +208,10 @@ $(document).ready(function () {
 
     setTopicLinks();
 
-    $('#timetoggle').click(
+    $('.toggler-nav').click(
         function (evt) {
             evt.preventDefault();
-            toggle_time();
+            toggle_time(this.id);
             return false;
         });
     $('.topic_toggle').click(

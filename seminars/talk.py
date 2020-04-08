@@ -249,7 +249,7 @@ class WebTalk(object):
             return ""
 
     def edit_link(self):
-        return '<a href="%s">Edit</a>' % url_for(
+        return '<a href="%s">Details</a>' % url_for(
             "create.edit_talk", seminar_id=self.seminar_id, seminar_ctr=self.seminar_ctr
         )
 
@@ -272,23 +272,16 @@ class WebTalk(object):
            checked="checked" if is_subscribed() else "",
         )
 
-    def oneline(self, include_seminar=True, include_edit=True, include_subscribe=True):
+    def oneline(self, include_seminar=True, include_subscribe=True):
         cols = []
-        if include_edit:
-            if not include_seminar and (
-                current_user.is_admin() or current_user.email in self.seminar.editors()
-            ):
-                cols.append(('', self.edit_link()))
-            else:
-                cols.append(('', ''))
-        cols.append(('', self.show_date()))
-        cols.append(('style="text-align: right;"', self.show_start_time()))
+        cols.append(('class="date"', self.show_date()))
+        cols.append(('class="time"', self.show_start_time()))
         if include_seminar:
-            cols.append(('', self.show_seminar()))
-        cols.append(('', self.show_speaker(affiliation=False)))
-        cols.append(('', self.show_knowl_title()))
+            cols.append(('class="seminar"', self.show_seminar()))
+        cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
+        cols.append(('class="talktitle"', self.show_knowl_title()))
         if include_subscribe:
-            cols.append(('style="text-align: right;"', self.show_subscribe()))
+            cols.append(('class="subscribe"', self.show_subscribe()))
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def split_abstract(self):
@@ -360,10 +353,8 @@ class WebTalk(object):
         return event
 
 
-def talks_header(include_seminar=True, include_edit=True, include_subscribe=True):
+def talks_header(include_seminar=True, include_subscribe=True):
     cols = []
-    if include_edit:
-        cols.append("")
     cols.append("Date")
     cols.append("Time")
     if include_seminar:
@@ -375,7 +366,7 @@ def talks_header(include_seminar=True, include_edit=True, include_subscribe=True
             cols.append("")
         else:
             cols.append("Saved")
-    return "".join('<th>%s</th>' % c for c in cols)
+    return "".join('<th%s>%s</th>' % (' class="%s"' % c.lower() if c else '', c) for c in cols)
 
 
 def can_edit_talk(seminar_id, seminar_ctr, token):
@@ -399,29 +390,15 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             seminar_ctr = int(seminar_ctr)
         except ValueError:
             flash_error("Invalid talk id")
-            return (
-                redirect(url_for("show_seminar", shortname=seminar_id), 301),
-                None,
-                None,
-            )
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None, None
     if token and seminar_ctr != "":
         talk = talks_lookup(seminar_id, seminar_ctr)
         if talk is None:
             flash_error("Talk does not exist")
-            return (
-                redirect(url_for("show_seminar", shortname=seminar_id), 301),
-                None,
-                None,
-            )
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None, None
         elif token != talk.token:
             flash_error("Invalid token for editing talk")
-            return (
-                redirect(
-                    url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301
-                ),
-                None,
-                None,
-            )
+            return redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301), None, None
         seminar = seminars_lookup(seminar_id)
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
@@ -430,7 +407,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
         if seminar.new:
             # TODO: This is where you might insert the ability to create a talk without first making a seminar
             flash_error("You must first create the seminar %s" % seminar_id)
-            return redirect(url_for("edit_seminar", shortname=seminar_id), 301)
+            return redirect(url_for(".edit_seminar", shortname=seminar_id), 301)
         if new:
             talk = WebTalk(seminar_id, seminar=seminar, editing=True)
         else:

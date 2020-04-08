@@ -62,10 +62,14 @@ def top_menu():
         account = "Account"
     else:
         account = "Login"
+    if current_user.is_organizer():
+        manage = "Manage"
+    else:
+        manage = "Create"
     return [
         (url_for("index"), "", "Browse"),
         (url_for("search"), "", "Search"),
-        (url_for("create.index"), "", "Create"),
+        (url_for("create.index"), "", manage),
         (url_for("info"), "", "Info"),
         (url_for("user.info"), "", account)
     ]
@@ -224,6 +228,8 @@ def process_user_input(inp, typ, tz):
         return localize_time(parse_time(inp), tz)
     elif typ == 'time with time zone':
         return localize_time(parse_time(inp), tz)
+    elif typ == 'date':
+        return parse_time(inp).date()
     elif typ == 'boolean':
         if inp in ['yes', 'true', 'y', 't']:
             return True

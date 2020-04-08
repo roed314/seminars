@@ -2,31 +2,6 @@
 
 {% block content %}
 
-{% if user.email in seminar.editors() or user.is_admin() %}
-<table>
-  <tr>
-    <td>
-      <form action="{{url_for('create.edit_seminar')}}" method="POST">
-        <input type="hidden" name="shortname" value="{{seminar.shortname}}" />
-        <button type="submit">Edit seminar</button>
-      </form>
-    </td>
-    <td>
-      <form action="{{url_for('create.edit_seminar_schedule')}}" method="POST">
-        <input type="hidden" name="shortname" value="{{seminar.shortname}}" />
-        <button type="submit">Edit schedule</button>
-      </form>
-    </td>
-    <td>
-      <form action="{{url_for('create.edit_talk', seminar_id=seminar.shortname)}}">
-        <input type="hidden" name="shortname" value="{{seminar.shortname}}" />
-        <button type="submit">Add talk</button>
-      </form>
-    </td>
-  </tr>
-</table>
-{% endif %}
-
 <h1>{% if seminar.homepage %}<a href="{{seminar.homepage}}">{{seminar.name}}</a>{% else %}{{seminar.name}}{% endif %}{% if not seminar.display %} (hidden){% elif seminar.archived %} (inactive){% elif seminar.online %} (online){% endif %}</h1>
 
 {% if seminar.description %}<p>{{ (seminar.show_institutions() + ' ' + (seminar.description | blanknone) + seminar.show_topics()) | safe }}</p>{% endif %}
@@ -38,32 +13,42 @@
 
 {% if seminar.comments %}<p>{{ seminar.comments | safe }}</p>{% endif %}
 
-{% if future and past %}
-<button id="timetoggle" href="#">View past talks</button>
-{% endif %}
+<div class="time_toggler">
+  <header class="inner">
+    <div class="time_toggler_inner">
+      <div id="toggle_to_future" class="toggler-nav toggler-active">
+        Upcoming talks
+      </div>
+      <div id="toggle_to_past" class="toggler-nav">
+        Past talks
+      </div>
+    </div>
+  </header>
+</div>
 <div id="future_talks">
-{% if future %}
-<h3>Upcoming talks</h3>
-{{ seminar.add_talk_link(ptag=True) | safe }}
+  {% if future %}
   <table>
+    <thead>
+      <tr>
+        {{ talks_header(include_seminar=False) | safe }}
+      </tr>
+    </thead>
     {% for talk in future %}
     <tr>
       {{ talk.oneline(include_seminar=False) | safe }}
     </tr>
     {% endfor %}
   </table>
-  {% elif not past %}
-  <p> There are not yet any talks in this seminar.  {{ seminar.add_talk_link(ptag=False) | safe }}</p>
   {% endif %}
 </div>
 {% if past %}
-{% if not future %}
-<p> There are no upcoming talks. {{ seminar.add_talk_link(ptag=False) | safe }}
-</p>
-{% endif %}
 <div id="past_talks">
-  <h3>Past talks</h3>
   <table>
+    <thead>
+      <tr>
+        {{ talks_header(include_seminar=False) | safe }}
+      </tr>
+    </thead>
     {% for talk in past %}
     <tr>
       {{ talk.oneline(include_seminar=False) | safe }}

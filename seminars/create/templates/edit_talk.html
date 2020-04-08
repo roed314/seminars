@@ -1,139 +1,143 @@
 {% extends "homepage.html" %}
 {% block content %}
 
-      <form action="{{ url_for('.save_talk') }}" method="POST">
-        <input type="hidden" name="seminar_id" value="{{ talk.seminar_id }}"/>
-        <input type="hidden" name="seminar_ctr" value="{{ talk.seminar_ctr | blanknone }}"/>
-        <input type="hidden" name="new" value="{{ 'yes' if talk.new else 'no' }}"/>
-        <input type="hidden" name="token" value="{{ talk.token }}"/>
-      <table>
-        <tr>
-          <td>
-            Seminar
-          </td>
-          <td>
-            <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
-          </td>
-        </tr>
-        <tr>
-          <td>Title</td>
-          <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Speaker</td>
-          <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Speaker email</td>
-          <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Speaker affiliation</td>
-          <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Speaker homepage</td>
-          <td><input style="width:500px;" name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" /></td>
-        </tr>
-        <tr>
-          <td>Topics</td>
-          <td>
-            <select name="topics" style="width:510px;">
-              {% for ab, topic in topics %}
-              <option value="{{ ab }}"{% if ab in talk.topics %} selected{% endif %}>{{topic}}</option>
-              {% endfor %}
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Time zone</td>
-          <td>
-            <select name="timezone" style="width:510px;">
-              {% for tz, disp in timezones %}
-              <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
-              {% endfor %}
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Start</td>
-          <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>End</td>
-          <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Room</td>
-          <td><input name="room" value="{{ talk.room | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Online</td>
-          <td>
-            <select name="online" style="width:510px;">
-              <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
-              <option value="no"{% if not talk.online %} selected{% endif %}>no</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Access</td>
-          <td>
-            <select name="access" style="width:510px;">
-              <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view link</option>
-              <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Logged-in users can view link</option>
-              <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Endorsed users can view link</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Livestream link</td>
-          <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Video recording link</td>
-          <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Slides link</td>
-          <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td colspan="2">Comments</td>
-        </tr>
-        <tr>
-          <td colspan="2"><textarea cols="80" rows="3" name="comments">{{ talk.comments | blanknone }}</textarea></td>
-        </tr>
-      </table>
-      <h3>Abstract</h3>
-      <table>
-        <tr>
-          <td colspan="2"><textarea cols="80" rows="10"
-                                    name="abstract" id="inp_abstract">{{ talk.abstract | blanknone }}</textarea>
-          </td>
-        </tr>
-      </table>
-      <table>
-        <tr>
-          <td>
-            <button type="submit" onclick="return set_saved();">Save</button>
-          </td>
-          <td>
-            <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if talk.new %}{{ url_for('show_seminar', shortname=talk.seminar_id) }}{% else %}{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}{% endif %}">cancel</a>
-          </td>
-          <td>
-            <a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a>
-          </td>
-        </tr>
-      </table>
-      </form>
+<p>
+  You can give the speaker the ability to edit this talk without logging in using this <a href="{{ talk.speaker_link() }}">link</a>.
+</p>
 
-      <div id="view-wrapper" class="knowl" style="width:670px;">
-        <div id="view-preview">
-          <h1 id="view-title"></h1>
-          <div id="view-abstract"></div>
-        </div>
-      </div>
+<form action="{{ url_for('.save_talk') }}" method="POST">
+  <input type="hidden" name="seminar_id" value="{{ talk.seminar_id }}"/>
+  <input type="hidden" name="seminar_ctr" value="{{ talk.seminar_ctr | blanknone }}"/>
+  <input type="hidden" name="new" value="{{ 'yes' if talk.new else 'no' }}"/>
+  <input type="hidden" name="token" value="{{ talk.token }}"/>
+  <table>
+    <tr>
+      <td>
+        Seminar
+      </td>
+      <td>
+        <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Speaker</td>
+      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Speaker email</td>
+      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Speaker affiliation</td>
+      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Speaker homepage</td>
+      <td><input style="width:500px;" name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" /></td>
+    </tr>
+    <tr>
+      <td>Topics</td>
+      <td>
+        <select name="topics" style="width:510px;">
+          {% for ab, topic in topics %}
+          <option value="{{ ab }}"{% if ab in talk.topics %} selected{% endif %}>{{topic}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Time zone</td>
+      <td>
+        <select name="timezone" style="width:510px;">
+          {% for tz, disp in timezones %}
+          <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Start</td>
+      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>End</td>
+      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Room</td>
+      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Online</td>
+      <td>
+        <select name="online" style="width:510px;">
+          <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
+          <option value="no"{% if not talk.online %} selected{% endif %}>no</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Access</td>
+      <td>
+        <select name="access" style="width:510px;">
+          <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view link</option>
+          <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Logged-in users can view link</option>
+          <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Endorsed users can view link</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Livestream link</td>
+      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Video recording link</td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Slides link</td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td colspan="2">Comments</td>
+    </tr>
+    <tr>
+      <td colspan="2"><textarea cols="80" rows="3" name="comments">{{ talk.comments | blanknone }}</textarea></td>
+    </tr>
+  </table>
+  <h3>Abstract</h3>
+  <table>
+    <tr>
+      <td colspan="2"><textarea cols="80" rows="10"
+                                name="abstract" id="inp_abstract">{{ talk.abstract | blanknone }}</textarea>
+      </td>
+    </tr>
+  </table>
+  <table>
+    <tr>
+      <td>
+        <button type="submit" onclick="return set_saved();">Save</button>
+      </td>
+      <td>
+        <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if talk.new %}{{ url_for('show_seminar', shortname=talk.seminar_id) }}{% else %}{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}{% endif %}">cancel</a>
+      </td>
+      <td>
+        <a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a>
+      </td>
+    </tr>
+  </table>
+</form>
+
+<div id="view-wrapper" class="knowl" style="width:670px;">
+  <div id="view-preview">
+    <h1 id="view-title"></h1>
+    <div id="view-abstract"></div>
+  </div>
+</div>
 
 <script type="text/javascript"
         src="https://cdn.jsdelivr.net/gh/markitup/1.x@1.1.15/markitup/jquery.markitup.js"

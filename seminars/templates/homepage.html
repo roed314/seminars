@@ -40,6 +40,46 @@
   {% endfor %}
 </div>
 </div>
+{% elif section == "Manage" %}
+<div id="manage-submenu">
+  <header class="inner">
+    <div class="manage-inner">
+      <div class="manage-nav{% if subsection == 'home' %} manage-active{% endif %}">
+        <a href="{{ url_for('create.index') }}">Home</a>
+      </div>
+      <div class="manage-nav{% if subsection == 'institutions' %} manage-active{% endif %}">
+        <a href="{{ url_for('list_institutions') }}">Institutions</a>
+      </div>
+      {% if institution %}
+      <div class="manage-nav{% if subsection == 'viewinst' %} manage-active{% endif %}">
+        <a href="{{ url_for('show_institution', shortname=institution.shortname) }}">View institution</a>
+      </div>
+      {% if user.is_admin() or user.email == institution.admin %}
+      <div class="manage-nav{% if subsection == 'editinst' %} manage-active{% endif %}">
+        <a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit properties</a>
+      </div>
+      {% endif %}
+      {% elif seminar %}
+      <div class="manage-nav{% if subsection == 'view' %} manage-active{% endif %}">
+        <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View seminar</a>
+      </div>
+      <div class="manage-nav{% if subsection == 'editsem' %} manage-active{% endif %}">
+        <a href="{{ url_for('create.edit_seminar', shortname=seminar.shortname) }}">{% if seminar.new %}Create{% else %}Edit{% endif %} {% if subsection == 'edittalk' %}seminar{% else %}properties{% endif %}</a>
+      </div>
+      {% if not seminar.new %}
+      <div class="manage-nav{% if subsection == 'schedule' %} manage-active{% endif %}">
+        <a href="{{ url_for('create.edit_seminar_schedule', shortname=seminar.shortname) }}">Edit schedule</a>
+      </div>
+      {% if subsection == 'edittalk' %}
+      <div class="manage-nav manage-active">
+        <a href="#">Edit talk</a>
+      </div>
+      {% endif %}
+      {% endif %}
+      {% endif %}
+    </div>
+  </header>
+</div>
 {% endif %}
 <noscript>
 <div id="javascript-explanation">

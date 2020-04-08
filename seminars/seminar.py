@@ -128,15 +128,15 @@ class WebSeminar(object):
     def oneline(self, include_institutions=True, include_datetime=True, include_description=True, include_subscribe=True):
         cols = []
         if include_datetime:
-            cols.append(('', self.show_day()))
-            cols.append(('style="text-align: right;"', self.show_time()))
+            cols.append(('class="day"', self.show_day()))
+            cols.append(('class="time"', self.show_time()))
         if include_institutions:
-            cols.append(('', self.show_institutions()))
-        cols.append(('', self.show_name()))
+            cols.append(('class="institution"', self.show_institutions()))
+        cols.append(('class="name"', self.show_name()))
         if include_description:
-            cols.append(('', self.show_description()))
+            cols.append(('class="description"', self.show_description()))
         if include_subscribe:
-            cols.append(('', self.show_subscribe()))
+            cols.append(('class="subscribe"', self.show_subscribe()))
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):

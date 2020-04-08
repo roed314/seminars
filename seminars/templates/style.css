@@ -285,6 +285,7 @@ body.knowl #header {
 #top-menu div {
     margin-top: 16px;
     display: inline-flex;
+    font-size: 18px;
 }
 
 #top-menu a, #topic-filter-menu a, #top-menu span {
@@ -335,7 +336,12 @@ div.topic_cmd {
     max-width: 700px;
 }
 
-#top-menu div.menu-active a,  #top-menu a:hover {
+#top-menu div.menu-active a {
+    background: white;
+    color: {{color.header_background}};
+}
+
+#top-menu a:hover {
     background: #aaaaaa;
     color: {{color.header_background}};
 }
@@ -345,16 +351,54 @@ div.topicselected {
     background: #aaaaaa;
 }
 
-.talk-table td:nth-child(2), .talk-table td:nth-child(4), .talk-table td:nth-child(5) {
+td.date {
     white-space: nowrap;
 }
+td.time, td.subscribe {
+    text-align: right;
+}
+/*
+td.speaker {
+    min-width: 136px;
+}
+*/
 
-#edit-schedule-table td:nth-child(2) {
-    white-space: nowrap;
+.talk-table td:nth-child(6) {
+    /* Title column on browse */
+    max-width: 380px;
+}
+#searchtalks td:nth-child(4) {
+    /* Title column on talk search results */
+    max-width: 600px;
 }
 
 #footer a {
     color: #aaaaaa;
+}
+
+div.time_toggler {
+    margin: 30px 0px 20px 0px;
+}
+
+div.manage-inner, div.time_toggler_inner {
+    border-bottom: 1px solid {{ color.header_background }};
+}
+div.manage-nav, div.toggler-nav {
+    display: inline-block;
+    font-size: 16px;
+    padding: 10px;
+    margin: 0px 10px 0px 10px;
+    min-width: 50px;
+}
+div.manage-nav a, div.toggler-nav a {
+    padding: 10px 20px 10px 20px;
+    color: {{color.header_background }};
+}
+div.manage-active, div.toggler-active {
+    border-bottom: 1px solid {{ color.header_background }};
+}
+div.toggler-nav:hover {
+    cursor: pointer;
 }
 
 /* TODO: what? */
@@ -758,7 +802,6 @@ table td.top {
   vertical-align:top;
 }
 table.ntdata td {
-  white-space: nowrap;
   padding-top: 3px;
   padding-bottom: 3px;
   padding-right: 7px;

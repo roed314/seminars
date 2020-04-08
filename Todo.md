@@ -34,6 +34,8 @@ Content creation
 
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
 
+1. Add ability to change times for all upcoming talks.
+
 1. Allow seminars to meet on multiple days.
 
 1. Think about the model described at https://talks.cam.ac.uk/document/Adding+a+talk (notably, the ability to include others' subscription lists into your own)

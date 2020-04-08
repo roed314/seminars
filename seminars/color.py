@@ -16,3 +16,4 @@ class Slate(SteelBlue):
     col_visited = '#0033bb' # visited links
     col_main_lg = '#373737' # text box border
     col_main_l = '#aaaaaa' # button background
+    a_background_hover = '#e0e0e0'
