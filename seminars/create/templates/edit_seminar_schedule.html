@@ -98,11 +98,11 @@
     </tr>
     <tr>
       <td>Start time</td>
-      <td><input name="start_time" value="{{ seminar.start_time.strftime('%-H:%M') }}" /></td>
+      <td><input name="start_time" value="{{ seminar.show_start_time(adapt=False) }}" /></td>
     </tr>
     <tr>
       <td>End time</td>
-      <td><input name="end_time" value="{{ seminar.end_time.strftime('%-H:%M') }}" /></td>
+      <td><input name="end_time" value="{{ seminar.show_end_time(adapt=False) }}" /></td>
     </tr>
     <tr>
       <td><button type="submit">Add to schedule</button></td>
