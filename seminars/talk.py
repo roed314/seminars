@@ -116,20 +116,11 @@ class WebTalk(object):
         else:
             return t.strftime("%a %b %-d, %-H:%M")
 
-    def show_time_link(self):
-        return '<a href="%s">%s</a>' % (
-            url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr),
-            self.show_start_time(),
-        )
-
     def show_date(self):
-        return adapt_datetime(self.start_time).strftime("%a %b %-d")
-
-    def show_date_link(self):
-        return '<a href="%s">%s</a>' % (
-            url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr),
-            self.show_date(),
-        )
+        if self.start_time is None:
+            return ""
+        else:
+            return adapt_datetime(self.start_time).strftime("%a %b %-d")
 
     def show_time_and_duration(self):
         start = self.start_time
@@ -144,8 +135,7 @@ class WebTalk(object):
         year = delta(days=365)
 
         def ans(rmk):
-            return '<span class="localtime" data-utcoffset="%s">%s-%s</span> (%s)' % (
-                int(start.utcoffset().total_seconds() / 60),
+            return '%s-%s (%s)' % (
                 adapt_datetime(start).strftime("%a %b %-d, %-H:%M"),
                 adapt_datetime(end).strftime("%-H:%M"),
                 rmk,
@@ -260,6 +250,16 @@ class WebTalk(object):
             "create.edit_talk", seminar_id=self.seminar_id, seminar_ctr=self.seminar_ctr
         )
 
+    def user_can_edit(self):
+        # Check whether the current user can edit the seminar
+        # See can_edit_seminar for another permission check
+        # that takes a seminar's shortname as an argument
+        # and returns various error messages if not editable
+        return (current_user.is_admin() or
+                current_user.email_confirmed and
+                (current_user.email in self.seminar.editors() or
+                 current_user.email == self.speaker_email))
+
     def show_subscribe(self):
         if current_user.is_anonymous():
             return ""
@@ -316,9 +316,10 @@ class WebTalk(object):
             "subject": "%s: title and abstract" % self.seminar.name,
         }
         email_to = self.speaker_email if self.speaker_email else ""
-        return 'or <a href="mailto:%s?%s" target="_blank">email speaker a link</a>' % (
+        return 'You can <a href="mailto:%s?%s" target="_blank">email</a> this <a href="%s">link</a> to anyone you want to allow to edit this talk without logging in.' % (
             email_to,
             urlencode(data, quote_via=quote),
+            self.speaker_link(),
         )
 
     def event(self, user):
@@ -396,20 +397,24 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             seminar_ctr = int(seminar_ctr)
         except ValueError:
             flash_error("Invalid talk id")
-            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None, None
-    if token and seminar_ctr != "":
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None
+    if seminar_ctr != "":
         talk = talks_lookup(seminar_id, seminar_ctr)
         if talk is None:
             flash_error("Talk does not exist")
-            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None, None
-        elif token != talk.token:
-            flash_error("Invalid token for editing talk")
-            return redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301), None, None
-        seminar = seminars_lookup(seminar_id)
+            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None
+        if token:
+            if token != talk.token:
+                flash_error("Invalid token for editing talk")
+                return redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301), None
+        else:
+            if not talk.user_can_edit():
+                flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
+                return redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301), None
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
         if resp is not None:
-            return resp, None, None
+            return resp, None
         if seminar.new:
             # TODO: This is where you might insert the ability to create a talk without first making a seminar
             flash_error("You must first create the seminar %s" % seminar_id)
@@ -418,7 +423,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             talk = WebTalk(seminar_id, seminar=seminar, editing=True)
         else:
             talk = WebTalk(seminar_id, seminar_ctr, seminar=seminar)
-    return None, seminar, talk
+    return None, talk
 
 
 _selecter = SQL(

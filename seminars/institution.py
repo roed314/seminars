@@ -77,7 +77,7 @@ def can_edit_institution(shortname, new):
         return redirect(url_for(".index"), 301), None
     if not new and not current_user.is_admin():
         # Make sure user has permission to edit
-        if institution.admin != current_user.email:
+        if institution['admin'] != current_user.email:
             owner_name = db.users.lucky({'email': institution.admin}, 'full_name')
             owner = "<%s %s>" % (owner_name, institution.admin)
             if owner_name:

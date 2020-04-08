@@ -5,6 +5,7 @@ from seminars import db
 from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime, toggle
 from lmfdb.utils import flash_error
 from psycopg2.sql import SQL
+import pytz
 
 
 class WebSeminar(object):
@@ -112,23 +113,50 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_day(self):
-        if self.weekday is None or self.start_time is None:
-            return ""
-        else:
-            return weekdays[adapt_weektime(self.start_time, self.timezone, weekday=self.weekday)[0]][:3]
+    @property
+    def tz(self):
+        return pytz.timezone(self.timezone)
 
-    def show_time(self):
-        if self.start_time:
-            return adapt_weektime(self.start_time, self.timezone, weekday=self.weekday)[1].strftime("%-H:%M")
+    def show_day(self, truncate=True):
+        if self.weekday is None:
+            return ""
+        elif self.start_time is None:
+            d = weekdays[self.weekday]
+        else:
+            d = weekdays[adapt_weektime(self.start_time, self.tz, weekday=self.weekday)[0]]
+        if truncate:
+            return d[:3]
+        else:
+            return d
+
+    def _show_time(self, t, adapt):
+        if t:
+            if adapt and self.weekday:
+                t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
+            return t.strftime("%-H:%M")
         else:
             return ""
+
+    def show_start_time(self, adapt=True):
+        return self._show_time(self.start_time, adapt)
+
+    def show_end_time(self, adapt=True):
+        return self._show_time(self.end_time, adapt)
+
+    def show_weektime_and_duration(self, adapt=True):
+        s = self.show_day(truncate=False)
+        if s:
+            s += ", "
+        s += self.show_start_time(adapt=adapt)
+        if self.start_time and self.end_time:
+            s += "-" + self.show_end_time(adapt=adapt)
+        return s
 
     def oneline(self, include_institutions=True, include_datetime=True, include_description=True, include_subscribe=True):
         cols = []
         if include_datetime:
             cols.append(('class="day"', self.show_day()))
-            cols.append(('class="time"', self.show_time()))
+            cols.append(('class="time"', self.show_start_time()))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
         cols.append(('class="name"', self.show_name()))
@@ -140,6 +168,15 @@ class WebSeminar(object):
 
     def editors(self):
         return [rec['email'] for rec in self.organizer_data]
+
+    def user_can_edit(self):
+        # Check whether the current user can edit the seminar
+        # See can_edit_seminar for another permission check
+        # that takes a seminar's shortname as an argument
+        # and returns various error messages if not editable
+        return (current_user.is_admin() or
+                current_user.email_confirmed and
+                current_user.email in self.editors())
 
     def _show_editors(self, label, negate=False):
         editors = []

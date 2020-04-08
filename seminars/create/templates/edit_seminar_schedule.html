@@ -62,16 +62,20 @@
         {{ date.strftime("%a %b %-d") }}
       </td>
       <td>
+        {% if seminar.start_time and seminar.end_time %}
         {{ seminar.start_time.strftime("%-H:%M") }}-{{ seminar.end_time.strftime("%-H:%M") }}
+        {% else %}
+        <input name="time{{i}}" value="{{ raw_data['time%s'%i] }}" style="width:160px;" />
+        {% endif %}
       </td>
       <td>
-        <input name="speaker{{i}}" style="width:160px;" />
+        <input name="speaker{{i}}" value="{{ raw_data['speaker%s'%i] }}" style="width:160px;" />
       </td>
       <td>
-        <input name="speaker_email{{i}}" style="width:160px;" />
+        <input name="speaker_email{{i}}" value="{{ raw_data['speaker_email%s'%i] }}" style="width:160px;" />
       </td>
       <td>
-        <input name="title{{i}}" style="width:160px;" />
+        <input name="title{{i}}" value="{{ raw_data['title%s'%i] }}" style="width:160px;" />
       </td>
       <td></td>
       <input type="hidden" name="seminar_ctr{{i}}" value="" />

@@ -208,7 +208,7 @@ def save_institution():
             # TODO: this probably needs to be a redirect to change the URL?  We want to save the data the user entered.
             flash_error("Error processing %s: %s" % (col, err))
             institution = WebInstitution(shortname, data=raw_data)
-            return render_template(".edit_institution.html",
+            return render_template("edit_institution.html",
                                    institution=institution,
                                    institution_types=institution_types,
                                    timezones=timezones,
@@ -236,15 +236,16 @@ def edit_talk():
         data = request.form
     else:
         data = request.args
-    resp, seminar, talk = can_edit_talk(
+    token = data.get("token", "")
+    resp, talk = can_edit_talk(
         data.get("seminar_id", ""),
         data.get("seminar_ctr", ""),
-        data.get("token", ""))
+        token)
     if resp is not None:
         return resp
     # The seminar schedule page adds in a date and times
     if data.get("date", "").strip():
-        tz = pytz.timezone(seminar.timezone)
+        tz = pytz.timezone(talk.seminar.timezone)
         date = process_user_input(data["date"], "date", tz)
         try:
             start_time = process_user_input(data.get("start_time"), "time with time zone", tz).time()
@@ -252,38 +253,40 @@ def edit_talk():
             start_time = datetime.datetime.combine(date, start_time)
             end_time = datetime.datetime.combine(date, end_time)
         except ValueError:
-            return redirect(url_for(".edit_seminar_schedule", shortname=seminar.shortname), 301)
+            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 301)
         talk.start_time = start_time
         talk.end_time = end_time
     #lock = get_lock(seminar_id, data.get("lock"))
     title = "Create talk" if talk.new else "Edit talk"
     return render_template("edit_talk.html",
                            talk=talk,
-                           seminar=seminar,
+                           seminar=talk.seminar,
                            title=title,
                            section="Manage",
                            subsection="edittalk",
                            institutions=institutions(),
-                           timezones=timezones)
+                           timezones=timezones,
+                           token=token)
 
 @create.route("save/talk/", methods=["POST"])
 def save_talk():
     raw_data = request.form
-    resp, seminar, talk = can_edit_talk(
+    token = raw_data.get("token", "")
+    resp, talk = can_edit_talk(
         raw_data.get("seminar_id", ""),
         raw_data.get("seminar_ctr", ""),
-        raw_data.get("token", ""))
+        token)
     if resp is not None:
         return resp
 
-    def make_error(talk, seminar, col=None, err=None):
+    def make_error(talk, col=None, err=None):
         if err is not None:
             flash_error("Error processing %s: {0}".format(err), col)
         talk = WebTalk(talk.seminar_id, talk.seminar_ctr, data=raw_data)
         title = "Create talk error" if talk.new else "Edit talk error"
         return render_template("edit_talk.html",
                                talk=talk,
-                               seminar=seminar,
+                               seminar=talk.seminar,
                                title=title,
                                section="Manage",
                                subsection="edittalk",
@@ -302,7 +305,7 @@ def save_talk():
         data['seminar_ctr'] = curmax + 1
     else:
         data['seminar_ctr'] = talk.seminar_ctr
-    default_tz = seminar.timezone
+    default_tz = talk.seminar.timezone
     if not default_tz:
         default_tz = 'UTC'
     data['timezone'] = tz = raw_data.get('timezone', default_tz)
@@ -320,17 +323,20 @@ def save_talk():
             if col == "access" and val not in ["open", "users", "endorsed"]:
                 raise ValueError("Invalid access type")
         except Exception as err:
-            return make_error(talk, seminar, col, err)
+            return make_error(talk, col, err)
     new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
     if check_time(new_version.start_time, new_version.end_time):
-        return make_error(talk, seminar)
+        return make_error(talk)
     if new_version == talk:
         flash("No changes made to talk.")
     else:
         new_version.save()
         edittype = "created" if talk.new else "edited"
         flash("Talk successfully %s!" % edittype)
-    return redirect(url_for(".edit_talk", seminar_id=new_version.seminar_id, seminar_ctr=new_version.seminar_ctr), 301)
+    edit_kwds = dict(seminar_id=new_version.seminar_id, seminar_ctr=new_version.seminar_ctr)
+    if token:
+        edit_kwds['token'] = token
+    return redirect(url_for(".edit_talk", **edit_kwds), 301)
 
 def make_date_data(seminar):
     shortname = seminar.shortname
@@ -349,7 +355,7 @@ def make_date_data(seminar):
                 seminar.weekday = future_talks[0].start_time.weekday()
             else:
                 # No talks and no weekday information.  We just use today.
-                seminar.weekday = datetime.now(tz=pytz.timezone(seminar.timezone)).weekday()
+                seminar.weekday = datetime.datetime.now(tz=pytz.timezone(seminar.timezone)).weekday()
         next_date = today
         while next_date.weekday() != seminar.weekday:
             next_date += day
@@ -391,6 +397,7 @@ def edit_seminar_schedule():
                            all_dates=all_dates,
                            by_date=by_date,
                            weekdays=weekdays,
+                           raw_data=data,
                            title=title,
                            section="Manage",
                            subsection="schedule",
@@ -409,12 +416,12 @@ def save_seminar_schedule():
     if curmax is None:
         curmax = 0
     ctr = curmax + 1
-    try:
-        start_time = datetime.time.fromisoformat(raw_data["start_time"])
-        end_time = datetime.time.fromisoformat(raw_data["end_time"])
-    except ValueError as err:
-        flash_error("Invalid time: %s", err)
-        return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)
+    #try:
+    #    start_time = datetime.time.fromisoformat(raw_data["start_time"])
+    #    end_time = datetime.time.fromisoformat(raw_data["end_time"])
+    #except ValueError as err:
+    #    flash_error("Invalid time: %s", err)
+    #    return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)
     for i in range(schedule_count):
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
         date = datetime.date.fromisoformat(raw_data["date%s" % i])
@@ -425,9 +432,9 @@ def save_seminar_schedule():
             data = dict(talk.__dict__)
             for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
                 data[col] = process_user_input(raw_data["%s%s" % (col, i)], 'text', tz=seminar.timezone)
-            if update_times:
-                data["start_time"] = datetime.datetime.combine(date, start_time)
-                data["end_time"] = datetime.datetime.combine(date, end_time)
+            #if update_times:
+            #    data["start_time"] = datetime.datetime.combine(date, start_time)
+            #    data["end_time"] = datetime.datetime.combine(date, end_time)
             new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
             if new_version != talk:
                 print(data)
@@ -438,6 +445,22 @@ def save_seminar_schedule():
             data = dict(talk.__dict__)
             for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
                 data[col] = process_user_input(raw_data["%s%s" % (col, i)], 'text', tz=seminar.timezone)
+            time_input = raw_data.get("time%s" % i, "").strip()
+            if time_input: # seminar may not have a time, in which case user can enter one
+                try:
+                    time_split = time_input.split("-")
+                    if len(time_split) == 1:
+                        raise ValueError("Must specify both start and end times")
+                    elif len(time_split) > 2:
+                        raise ValueError("More than one hyphen")
+                    start_time = process_user_input(time_split[0], "time with time zone", seminar.tz)
+                    end_time = process_user_input(time_split[1], "time with time zone", seminar.tz)
+                except ValueError as err:
+                    flash_error("invalid time range %s: {0}".format(err), time_input)
+                    redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301)
+            else:
+                start_time = seminar.start_time
+                end_time = seminar.end_time
             data["start_time"] = datetime.datetime.combine(date, start_time)
             data["end_time"] = datetime.datetime.combine(date, end_time)
             data["seminar_ctr"] = ctr

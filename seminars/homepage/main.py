@@ -382,15 +382,24 @@ def show_seminar(shortname):
 
 @app.route("/talk/<semid>/<int:talkid>/")
 def show_talk(semid, talkid):
+    token = request.args.get("token", "") # save the token so user can toggle between view and edit
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
         return render_template("404.html", title="Talk not found")
-    utcoffset = int(talk.start_time.utcoffset().total_seconds() / 60)
+    if (current_user.email_confirmed and
+        (current_user.email in talk.seminar.editors() or
+         current_user.email == talk.speaker_email) or
+        current_user.is_admin()):
+        section = "Manage"
+    else:
+        section = None
     return render_template(
         "talk.html",
         title="View talk",
         talk=talk,
-        utcoffset=utcoffset,
+        section=section,
+        subsection='viewtalk',
+        token=token,
     )
 
 

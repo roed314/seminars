@@ -386,12 +386,17 @@ div.manage-inner, div.time_toggler_inner {
 div.manage-nav, div.toggler-nav {
     display: inline-block;
     font-size: 16px;
-    padding: 10px;
-    margin: 0px 10px 0px 10px;
+    padding: 8px;
     min-width: 50px;
 }
+div.manage-nav {
+    margin: 0px 4px 0px 4px;
+}
+div.toggler-nav {
+    margin: 0px 10px 0px 10px;
+}
 div.manage-nav a, div.toggler-nav a {
-    padding: 10px 20px 10px 20px;
+    padding: 8px 16px 8px 16px;
     color: {{color.header_background }};
 }
 div.manage-active, div.toggler-active {

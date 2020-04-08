@@ -1,9 +1,11 @@
 {% extends "homepage.html" %}
 {% block content %}
 
+{% if not token %}
 <p>
-  You can give the speaker the ability to edit this talk without logging in using this <a href="{{ talk.speaker_link() }}">link</a>.
+  {{ talk.send_speaker_link() | safe }}
 </p>
+{% endif %}
 
 <form action="{{ url_for('.save_talk') }}" method="POST">
   <input type="hidden" name="seminar_id" value="{{ talk.seminar_id }}"/>

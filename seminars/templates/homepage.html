@@ -44,12 +44,14 @@
 <div id="manage-submenu">
   <header class="inner">
     <div class="manage-inner">
+      {% if user.is_creator() %}
       <div class="manage-nav{% if subsection == 'home' %} manage-active{% endif %}">
         <a href="{{ url_for('create.index') }}">Home</a>
       </div>
       <div class="manage-nav{% if subsection == 'institutions' %} manage-active{% endif %}">
         <a href="{{ url_for('list_institutions') }}">Institutions</a>
       </div>
+      {% endif %}
       {% if institution %}
       <div class="manage-nav{% if subsection == 'viewinst' %} manage-active{% endif %}">
         <a href="{{ url_for('show_institution', shortname=institution.shortname) }}">View institution</a>
@@ -58,8 +60,8 @@
       <div class="manage-nav{% if subsection == 'editinst' %} manage-active{% endif %}">
         <a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit properties</a>
       </div>
-      {% endif %}
-      {% elif seminar %}
+      {% endif %} {# institution admin #}
+      {% elif seminar and seminar.user_can_edit() %}
       <div class="manage-nav{% if subsection == 'view' %} manage-active{% endif %}">
         <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View seminar</a>
       </div>
@@ -70,13 +72,20 @@
       <div class="manage-nav{% if subsection == 'schedule' %} manage-active{% endif %}">
         <a href="{{ url_for('create.edit_seminar_schedule', shortname=seminar.shortname) }}">Edit schedule</a>
       </div>
-      {% if subsection == 'edittalk' %}
-      <div class="manage-nav manage-active">
-        <a href="#">Edit talk</a>
+      {% endif %} {# seminar.new #}
+      {% endif %} {# institution/seminar #}
+      {% if talk %}
+      <div class="manage-nav{% if subsection == 'viewtalk' %} manage-active{% endif %}">
+        {% if talk.seminar.user_can_edit() %}
+        <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr) }}">View talk</a>
+        {% else %}
+        <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr, token=token) }}">View talk</a>
+        {% endif %}
       </div>
-      {% endif %}
-      {% endif %}
-      {% endif %}
+      <div class="manage-nav{% if subsection == 'edittalk' %} manage-active{% endif %}">
+        <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr) }}">Edit talk</a>
+      </div>
+      {% endif %} {# talk #}
     </div>
   </header>
 </div>

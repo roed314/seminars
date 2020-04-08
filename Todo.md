@@ -3,11 +3,6 @@ Now
 
 1. fix default date range
 
-1. add feedback to subscription
-
-1. what should we do if a user is subscribed to a seminar and tries to unsubscribe from a talk in that seminar?
-
-
 
 Admin (Edgar)
 =====
@@ -34,6 +29,20 @@ Content creation
 
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
 
+1. **Improve text at manage when not endorsed (Raymond)**
+
+1. **In edit seminar, move toom right under end time (Bjorn)**
+
+1. **For conference, enter dates rather than frequency**
+
+1. **Test creating seminar without being endorsed**
+
+1. **Cancel -> Cancel changes**
+
+1. When adding speakers, could give Speaker's math sci net id.
+
+1. Consistency: add talk vs create talk (maybe create seminars, add talks)
+
 1. Add ability to change times for all upcoming talks.
 
 1. Allow seminars to meet on multiple days.
@@ -49,17 +58,23 @@ Viewing and searching
 
 1. **Filter option to show personal calendar**
 
-1. **Add type (conference/seminar) to seminar search.**
+1. **Uniformize from saved events to favorites**
 
-1. **One liner for seminars, add time and frequency.**
+1. **Add type (conference/seminar) to seminar search.**
 
 1. **Make future the default search.**
 
-1. **Paginate search results.**
+1. **Remove count and start.**
 
-1. **Add search on time (rather than datetime) so that users can accomodate their local schedules**
+1. **Set table min-width for all pages.**
 
-1. **Set minimum/maximum widths for the tds in oneline (so that long speakers/titles/seminar names don't make dates break across lines)**
+1. **Improve styling for talk and seminar pages, add info (time and day)**
+
+1. **Add placeholders and e.g. for seminar/talk creation**
+
+1. Add search on time (rather than datetime) so that users can accomodate their local schedules
+
+1. Paginate search results.
 
 1. When searching, should have ability to flip sort order (default depends on whether past or future)
 
@@ -82,23 +97,23 @@ Viewing and searching
 Knowls
 ======
 
-1. **Update knowl code and knowl database from LMFDB to give the ability to provide explanations (e.g. advertise that they can use latex, explain how to type a dollar sign, have placeholders with examples)**
+1. **Read yaml to create static knowls**
+
+1. Clarify online vs online only
 
 Time zones
 ==========
 
-1. **Default seminar time zone come from user time zone.**
+1. **Fix Alex/Drew's time zone bug**
 
-1. **Localize time zones in search results.**
-
-1. **When creating things, default to user's time zone.**
+1. **Fix Vantage time zone**
 
 1. Add checkbox for use institution time when creating seminar.
 
 Localization
 ============
 
-1. **Add a language column for talks and seminars.**
+1. Add a language column for talks and seminars.
 
 1. Django has built in internationalization system (google Zulip internationalization)
 
@@ -116,7 +131,7 @@ Feedback
 
 1. Add avenues for users to give feedback both to content creators
 
-1. **We should create a privacy policy, discussion of cookies**
+1. We should create a privacy policy
 
 Calendars
 =========
