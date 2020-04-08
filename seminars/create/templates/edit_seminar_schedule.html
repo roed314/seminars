@@ -34,7 +34,7 @@
     {% if date in by_date %}
     {% for talk in by_date[date] %}
     <tr>
-      <td>
+      <td class="date">
         {{ date.strftime("%a %b %-d") }}
       </td>
       <td>
@@ -58,7 +58,7 @@
     {% endfor %}
     {% else %}
     <tr>
-      <td>
+      <td class="date">
         {{ date.strftime("%a %b %-d") }}
       </td>
       <td>
