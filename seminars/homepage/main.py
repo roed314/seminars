@@ -138,7 +138,7 @@ def seminars_parser(info, query):
 
 
 def institutions_shortnames():
-    return sorted(db.institutions.search({}, projection="shortname"))
+    return sorted(db.institutions.search({}, projection=["shortname", "name"]), key=lambda elt: elt["name"])
 
 
 textwidth = 400
@@ -157,7 +157,7 @@ class TalkSearchArray(SearchArray):
             name="talk_institution",
             label="Institution",
             options=[("", ""), ("None", "No institution", ),]
-            + [(elt, elt) for elt in institutions_shortnames()],
+            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
         ## online only?
@@ -231,7 +231,7 @@ class SemSearchArray(SearchArray):
             name="seminar_institution",
             label="Institution",
             options=[("", ""), ("None", "No institution", ),]
-            + [(elt, elt) for elt in institutions_shortnames()],
+            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
         ## online only?
