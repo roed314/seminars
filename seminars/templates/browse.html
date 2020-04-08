@@ -5,11 +5,11 @@
 <table id="filter-table">
   <tr>
     <td>
-      <input id="enable_topic_filter" type="checkbox" onchange="toggleFilters(this.id);"> Restrict by <button id="topic-filter-btn" onclick="$('#topic-filter-menu').slideToggle(300); return false;">Topic</button>
+      <input id="enable_topic_filter" type="checkbox" onchange="toggleFilters(this.id);"> Restrict by <a id="topic-filter-btn" style="border-bottom-style: dotted;"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
     </td>
     {% if user.is_authenticated %}
     <td>
-      <input id="enable_calendar_filter" type="checkbox" onchange="toggleFilters(this.id);"> Show only <button id="calendar-filter-btn" onclick="">Saved events</button>
+      <input id="enable_calendar_filter" type="checkbox" onchange="toggleFilters(this.id);"> Show only Saved events
     </td>
     {% endif %}
   </tr>
