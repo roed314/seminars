@@ -2,13 +2,14 @@
 {% block content %}
 
 <h1>{{seminar.name}}</h1>
-
+<div class="text_content">
 <p> To add a talk at a regularly scheduled time, enter Speaker (and optionally Email and Title) in row(s) of the table, and click "Save changes" or any "Details" link.</p>
 
-<p>To add a talk at <i>any</i> time, under <a href="#add_new_talk">Add talk</a>, enter, Date, Start and End times, and Speaker (and optionally Email and Title); then click "Save changes" or any "Details" link..</p>
+<p>To add a talk at <i>any</i> time, under <a href="#add_new_talk">Add talk</a>, enter, Date, Start and End times, and Speaker (and optionally Email and Title); then click "Save changes" or any "Details" link.</p>
 
 
 <p>All times are shown in the seminar's time zone, {{ seminar.timezone }}.</p>
+</div>
 
 {#
 <p> To change the day of week or frequency of meeting, <a href="{{ url_for('.edit_seminar', shortname=seminar.shortname) }}">edit the seminar</a>.</p>
