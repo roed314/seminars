@@ -27,7 +27,7 @@
 {% if section == "Browse" %}
 <div id="topic-filter-menu">
   <div id="topic-filter-head">
-    {% for ab, name, onclick in [("ALL", "Select all topics", "selectAllTopics();"), ("CLR", "Clear selection", "clearAllTopics();")] %}
+    {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics();"), ("CLR", "Clear all", "clearAllTopics();")] %}
     <div class="topic_cmd" id="topiclink-{{ab}}" onclick="{{onclick}}">
       {{name}}
     </div>
