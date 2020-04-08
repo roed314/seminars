@@ -53,7 +53,7 @@ def edit_seminar():
     if resp is not None:
         return resp
     lock = get_lock(shortname, data.get("lock"))
-    title = "Create seminar" if new else "Edit seminar"
+    title = "Create seminar" if new else seminar.name + " (edit properties)"
     manage = "Manage" if current_user.is_organizer() else "Create"
     return render_template("edit_seminar.html",
                            seminar=seminar,
