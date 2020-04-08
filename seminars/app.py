@@ -205,14 +205,6 @@ def acknowledgment():
     bread = [("Acknowledgments" , '')]
     return render_template("acknowledgment.html", title="Acknowledgments", bread=bread)
 
-@app.route("/editorial-board")
-@app.route("/management-board")
-@app.route("/management")
-def editorial_board():
-    t = "Editorial Board"
-    b = [(t, url_for("editorial_board"))]
-    return render_template('management.html', title=t, bread=b)
-
 @app.route("/contact")
 def contact():
     t = "Contact and Feedback"
