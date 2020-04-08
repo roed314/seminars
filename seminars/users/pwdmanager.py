@@ -302,17 +302,17 @@ class SeminarsUser(UserMixin):
             if shortname in self.talk_subscriptions:
                 self._data['talk_subscriptions'].pop(shortname)
             self._dirty = True
-            return 200, "Added to favourites"
+            return 200, "Added to favorites"
         else:
-            return 200, "Already added to favourites"
+            return 200, "Already added to favorites"
 
     def seminar_subscriptions_remove(self, shortname):
         if shortname in self._data['seminar_subscriptions']:
             self._data['seminar_subscriptions'].remove(shortname)
             self._dirty = True
-            return 200, "Removed from favourites"
+            return 200, "Removed from favorites"
         else:
-            return 200, "Already removed from favourites"
+            return 200, "Already removed from favorites"
 
     @property
     def talk_subscriptions(self):
@@ -343,14 +343,14 @@ class SeminarsUser(UserMixin):
         if shortname in self._data['seminar_subscriptions']:
             return 200, "Talk is part of favorited seminar"
         elif ctr in self._data['talk_subscriptions'].get(shortname, []):
-            return 200, "Already added to favourites"
+            return 200, "Already added to favorites"
         else:
             if shortname in self._data['talk_subscriptions']:
                 bisect.insort(self._data['talk_subscriptions'][shortname], ctr)
             else:
                 self._data['talk_subscriptions'][shortname] = [ctr]
             self._dirty = True
-            return 200, "Added to favourites"
+            return 200, "Added to favorites"
 
     def talk_subscriptions_remove(self, shortname, ctr):
         if shortname in self._data['seminar_subscriptions']:
@@ -358,7 +358,7 @@ class SeminarsUser(UserMixin):
         if ctr in self._data['talk_subscriptions'].get(shortname, []):
             self._data['talk_subscriptions'][shortname].remove(ctr)
             self._dirty = True
-            return 200, "Removed from favourites"
+            return 200, "Removed from favorites"
 
 
 
