@@ -29,6 +29,7 @@
   {{ talk.show_abstract() | safe }}
 
   {% if talk.comments %}
+  <hr>
   <p>{{talk.comments | safe}}</p>
   {% endif %}
 

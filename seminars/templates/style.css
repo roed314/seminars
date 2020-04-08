@@ -283,7 +283,7 @@ body.knowl #header {
 }
 
 #top-menu div {
-    margin-top: 16px;
+    margin-top: 8px;
     display: inline-flex;
     font-size: 18px;
 }
@@ -292,7 +292,7 @@ body.knowl #header {
     text-decoration: none;
     color: #aaaaaa;
     font-family: sans-serif;
-    padding: 5px 25px 5px 25px;
+    padding: 10px 25px 10px 25px;
 }
 
 div.topic_toggle {
@@ -1208,6 +1208,9 @@ table.statgrid td.cnt {
 }
 .knowl-content h2 {
   margin: 0px 0px 5px 0px;
+}
+a.likeknowl {
+  border-bottom: 1px dotted {{ color.knowl_underline }};
 }
 
 *[knowl] {

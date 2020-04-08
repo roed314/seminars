@@ -186,6 +186,7 @@ Examples of online seminars we might add
 
 1. [CRAAG](https://www.daniellitt.com/crag)
 
+1. http://www.unige.ch/math/folks/nikolaev/GlobalPoisson.html
 Examples of online conferences we might add
 ===========================================
 

@@ -314,15 +314,36 @@ function uniqueID(){
 
 //handling subscriptions
 $(document).ready(function(){
-    $("input.subscribe:checkbox").change(function() {
+    $("input.subscribe:checkbox").change(function(evt) {
         var elem = $(this);
         function success(msg) {
           // this is the row
           $(elem[0].parentElement.parentElement).notify(msg, {className: "success", position:"right" });
+          //evt.stopPropagation();
+          var value = elem[0].value;
+          // is a seminar
+          if( ! elem[0].value.includes('/') ){
+            // apply the same thing to the talks of that seminar
+            console.log('input.subscribe[id^="tlg' + value +'/"]');
+            console.log(elem.is(":checked"));
+            $('input.subscribe[id^="tlg' + value +'/"]').prop("checked", elem.is(":checked"));
+          } else {
+            // for the browse page
+            if( elem.is(":checked") ) {
+              elem.removeClass("calendar-filtered");
+            } else {
+              elem.addClass("calendar-filtered");
+            }
+          }
         }
-        function error(msg) {
+        function error(xhr) {
           // this is the row
+          var msg = xhr.responseText
+          console.log(msg);
           $(elem[0].parentElement.parentElement).notify(msg, {className: "error", position:"right" });
+          // revert
+          evt.stopPropagation();
+          elem.prop("checked", ! elem.is(":checked"));
         }
         if($(this).is(":checked")) {
             $.ajax({

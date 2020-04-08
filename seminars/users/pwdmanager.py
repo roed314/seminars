@@ -197,8 +197,6 @@ class SeminarsUser(UserMixin):
 
     @homepage.setter
     def homepage(self, url):
-        if not url.startswith("http://") and not url.startswith("https://"):
-            url = "http://" + url
         self._data['homepage'] = url
         self._dirty = True
 
@@ -275,7 +273,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def ics_gcal_link(self):
-        return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode({'cid': url_for('.ics_file', token=self.ics, _external=True, _scheme='https')})
+        return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode({'cid': url_for('.ics_file', token=self.ics, _external=True, _scheme='http')})
 
     @property
     def ics_webcal_link(self):
@@ -304,11 +302,17 @@ class SeminarsUser(UserMixin):
             if shortname in self.talk_subscriptions:
                 self._data['talk_subscriptions'].pop(shortname)
             self._dirty = True
+            return 200, "Added to favorites"
+        else:
+            return 200, "Already added to favorites"
 
     def seminar_subscriptions_remove(self, shortname):
         if shortname in self._data['seminar_subscriptions']:
             self._data['seminar_subscriptions'].remove(shortname)
             self._dirty = True
+            return 200, "Removed from favorites"
+        else:
+            return 200, "Already removed from favorites"
 
     @property
     def talk_subscriptions(self):
@@ -337,20 +341,24 @@ class SeminarsUser(UserMixin):
 
     def talk_subscriptions_add(self, shortname, ctr):
         if shortname in self._data['seminar_subscriptions']:
-            pass
+            return 200, "Talk is part of favorited seminar"
         elif ctr in self._data['talk_subscriptions'].get(shortname, []):
-            pass
+            return 200, "Already added to favorites"
         else:
             if shortname in self._data['talk_subscriptions']:
                 bisect.insort(self._data['talk_subscriptions'][shortname], ctr)
             else:
                 self._data['talk_subscriptions'][shortname] = [ctr]
             self._dirty = True
+            return 200, "Added to favorites"
 
     def talk_subscriptions_remove(self, shortname, ctr):
+        if shortname in self._data['seminar_subscriptions']:
+            return 400, "Talk is part of favorited seminar"
         if ctr in self._data['talk_subscriptions'].get(shortname, []):
             self._data['talk_subscriptions'][shortname].remove(ctr)
             self._dirty = True
+            return 200, "Removed from favorites"
 
 
 
