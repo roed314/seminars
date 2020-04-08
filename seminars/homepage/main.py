@@ -231,7 +231,7 @@ class SemSearchArray(SearchArray):
             name="seminar_institution",
             label="Institution",
             options=[("", ""), ("None", "No institution", ),]
-            + [(elt, elt) for elt in institutions_shortnames()],
+            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
         ## online only?
