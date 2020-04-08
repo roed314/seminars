@@ -456,33 +456,33 @@ def endorse_wtoken(token):
 @login_page.route("/subscribe/<shortname>")
 @login_required
 def seminar_subscriptions_add(shortname):
-    current_user.seminar_subscriptions_add(shortname)
+    code, msg = current_user.seminar_subscriptions_add(shortname)
     current_user.save()
-    return "success"
+    return msg, code
 
 
 @login_page.route("/unsubscribe/<shortname>")
 @login_required
 def seminar_subscriptions_remove(shortname):
-    current_user.seminar_subscriptions_remove(shortname)
+    code, msg = current_user.seminar_subscriptions_remove(shortname)
     current_user.save()
-    return "success"
+    return msg, code
 
 
 @login_page.route("/subscribe/<shortname>/<ctr>")
 @login_required
 def talk_subscriptions_add(shortname, ctr):
-    current_user.talk_subscriptions_add(shortname, int(ctr))
+    code, msg = current_user.talk_subscriptions_add(shortname, int(ctr))
     current_user.save()
-    return "success"
+    return msg, code
 
 
 @login_page.route("/unsubscribe/<shortname>/<ctr>")
 @login_required
 def talk_subscriptions_remove(shortname, ctr):
-    current_user.talk_subscriptions_remove(shortname, int(ctr))
+    code, msg = current_user.talk_subscriptions_remove(shortname, int(ctr))
     current_user.save()
-    return "success"
+    return msg, code
 
 
 @login_page.route("/ics/<token>")

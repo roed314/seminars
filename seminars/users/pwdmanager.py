@@ -197,8 +197,6 @@ class SeminarsUser(UserMixin):
 
     @homepage.setter
     def homepage(self, url):
-        if not url.startswith("http://") and not url.startswith("https://"):
-            url = "http://" + url
         self._data['homepage'] = url
         self._dirty = True
 
@@ -304,11 +302,17 @@ class SeminarsUser(UserMixin):
             if shortname in self.talk_subscriptions:
                 self._data['talk_subscriptions'].pop(shortname)
             self._dirty = True
+            return 200, "Added to favourites"
+        else:
+            return 200, "Already added to favourites"
 
     def seminar_subscriptions_remove(self, shortname):
         if shortname in self._data['seminar_subscriptions']:
             self._data['seminar_subscriptions'].remove(shortname)
             self._dirty = True
+            return 200, "Removed from favourites"
+        else:
+            return 200, "Already removed from favourites"
 
     @property
     def talk_subscriptions(self):
@@ -337,20 +341,24 @@ class SeminarsUser(UserMixin):
 
     def talk_subscriptions_add(self, shortname, ctr):
         if shortname in self._data['seminar_subscriptions']:
-            pass
+            return 200, "Talk is part of favorited seminar"
         elif ctr in self._data['talk_subscriptions'].get(shortname, []):
-            pass
+            return 200, "Already added to favourites"
         else:
             if shortname in self._data['talk_subscriptions']:
                 bisect.insort(self._data['talk_subscriptions'][shortname], ctr)
             else:
                 self._data['talk_subscriptions'][shortname] = [ctr]
             self._dirty = True
+            return 200, "Added to favourites"
 
     def talk_subscriptions_remove(self, shortname, ctr):
+        if shortname in self._data['seminar_subscriptions']:
+            return 400, "Talk is part of favorited seminar"
         if ctr in self._data['talk_subscriptions'].get(shortname, []):
             self._data['talk_subscriptions'][shortname].remove(ctr)
             self._dirty = True
+            return 200, "Removed from favourites"
 
 
 
