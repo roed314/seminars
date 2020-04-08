@@ -2,7 +2,7 @@
 
 {% block content %}
 
-
+<div class="text_content">
 {% if not user.is_creator() %}
 <p>
   If you want to add seminars to the site, you need to be endorsed by someone on the site.
@@ -70,5 +70,6 @@
 {% if not seminars and not conferences %}
 <p>To add a talk, create a seminar first.</p>
 {% endif %}
+</div>
 
 {% endblock %}
