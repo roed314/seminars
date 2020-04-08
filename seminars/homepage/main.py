@@ -138,7 +138,7 @@ def seminars_parser(info, query):
 
 
 def institutions_shortnames():
-    return sorted(db.institutions.search({}, projection=["shortname", ["name"]))
+    return sorted(db.institutions.search({}, projection=["shortname", "name"]), key=lambda elt: elt["name"])
 
 
 textwidth = 400
