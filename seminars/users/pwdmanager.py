@@ -274,7 +274,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def ics_gcal_link(self):
-        return "https://calendar.google.com/calendar/render?cid=" + urllib.parse.quote(url_for('.ics_file', token=self.ics, _external=True, _scheme='https'))
+        return "https://calendar.google.com/calendar/render?cid=" + urllib.parse.quote(url_for('.ics_file', token=self.ics, _external=True, _scheme='https'), safe='')
 
     @property
     def ics_webcal_link(self):
