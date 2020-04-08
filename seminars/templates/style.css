@@ -844,9 +844,9 @@ table.ntdata th {
 table.ntdata > tr.odd,
 table.ntdata > tbody > tr.odd,
 table.ntdata > thead > tr.odd,
-table.ntdata > tr:nth-child(odd),
-table.ntdata > tbody > tr:nth-child(odd),
-table.ntdata > thead > tr:nth-child(odd),
+table.ntdata > tr:nth-of-type(odd),
+table.ntdata > tbody > tr:nth-of-type(odd),
+table.ntdata > thead > tr:nth-of-type(odd),
 table.ntdata > tr:first-child
 table.ntdata > tbody > tr:first-child
 table.ntdata > thead > tr:first-child {
@@ -860,13 +860,13 @@ table.ntdata > tbody > tr:last-child {
 table.ntdata > tr.even,
 table.ntdata > tbody > tr.even,
 table.ntdata > thead > tr.even,
-table.ntdata > tr:nth-child(even),
-table.ntdata > tbody > tr:nth-child(even),
-table.ntdata > thead > tr:nth-child(even) {
+table.ntdata > tr:nth-of-type(even),
+table.ntdata > tbody > tr:nth-of-type(even),
+table.ntdata > thead > tr:nth-of-type(even) {
     background: {{color.table_ntdata_background_cn}};
 }
 table.ntdata tr.toggle { font-size: 80%; text-align: left; }
-table.ntdata tr.toggle:nth-child(2n) { 
+table.ntdata tr.toggle:nth-of-type(2n) { 
     background: {{color.table_ntdata_background_c1}};
 }
 table.ntdata tr.toggle a:hover {
@@ -898,7 +898,7 @@ cellpadding:3px;
 
 table.number_table {border-collapse:collapse;}
 
-table.number_table tr:nth-child(even) {
+table.number_table tr:nth-of-type(even) {
     background: {{color.table_ntdata_background_cn}};
 }
 
@@ -1047,10 +1047,10 @@ body.knowl table.ntdata thead tr {
   background: {{ color.knowl_background }};
   border-bottom: 2px solid {{ color.knowl_underline }};
 }
-body.knowl table.ntdata tr:nth-child(odd) {
+body.knowl table.ntdata tr:nth-of-type(odd) {
  background: {{ color.knowl_background }};
 }
-body.knowl table.ntdata tr:nth-child(even) {
+body.knowl table.ntdata tr:nth-of-type(even) {
     background: {{color.white}};
 }
 
@@ -1155,14 +1155,14 @@ table.ntdata td.light {
     background: white;
 }
 
-table.knowl_review tr:nth-child(odd) td {
+table.knowl_review tr:nth-of-type(odd) td {
     background: {{color.white}};
     padding-top: 30px;
 }
 table.knowl_review tr:first-child td {
     padding-top: 0;
 }
-table.knowl_review tr:nth-child(even) {
+table.knowl_review tr:nth-of-type(even) {
     background: {{ color.table_ntdata_background_2 }};
 }
 table.euler {
