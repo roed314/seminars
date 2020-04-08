@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from six import string_types
 import bcrypt
+import urllib.parse
 # store passwords, check users, ...
 # password hashing is done with fixed and variable salting
 # Author: Harald Schilly <harald.schilly@univie.ac.at>
@@ -273,7 +274,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def ics_gcal_link(self):
-        return "https://calendar.google.com/calendar/render?cid=" + url_for('.ics_file', token=self.ics, _external=True, _scheme='http')
+        return "https://calendar.google.com/calendar/render?cid=" + urllib.parse.quote(url_for('.ics_file', token=self.ics, _external=True, _scheme='https'))
 
     @property
     def ics_webcal_link(self):
