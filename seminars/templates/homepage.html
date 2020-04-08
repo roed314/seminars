@@ -46,7 +46,7 @@
     <div class="manage-inner">
       {% if user.is_creator() %}
       <div class="manage-nav{% if subsection == 'home' %} manage-active{% endif %}">
-        <a href="{{ url_for('create.index') }}">Home</a>
+        <a href="{{ url_for('create.index') }}">Seminars</a>
       </div>
       <div class="manage-nav{% if subsection == 'institutions' %} manage-active{% endif %}">
         <a href="{{ url_for('list_institutions') }}">Institutions</a>

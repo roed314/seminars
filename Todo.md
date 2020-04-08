@@ -45,6 +45,12 @@ Content creation
 
 1. **Uniformize on identifier (change places where called shortname)**
 
+1. **Clarify that institution homepage means department homepage via placeholder or e.g.**
+
+1. **Remove aliases**
+
+1. **Placeholder in city name for institution**
+
 1. Warning if user tries to close schedule without saving
 
 1. When adding speakers, could give Speaker's math sci net id.
@@ -79,6 +85,8 @@ Viewing and searching
 1. **Improve styling for talk and seminar pages, add info (time and day)**
 
 1. **Add placeholders and e.g. for seminar/talk creation**
+
+1. **Improve institution page.**
 
 1. Add search on time (rather than datetime) so that users can accomodate their local schedules
 
