@@ -47,7 +47,7 @@
         <input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" style="width:160px;" />
       </td>
       <td>
-        <input name="title{{i}}" value="{{ talk.title | blanknone }}" style="width:160px;" />
+        <input name="title{{i}}" value="{{ talk.title | blanknone }}" style="width:320px;" />
       </td>
       <td>
         {{ talk.edit_link() | safe }}
@@ -75,7 +75,7 @@
         <input name="speaker_email{{i}}" value="{{ raw_data['speaker_email%s'%i] }}" style="width:160px;" />
       </td>
       <td>
-        <input name="title{{i}}" value="{{ raw_data['title%s'%i] }}" style="width:160px;" />
+        <input name="title{{i}}" value="{{ raw_data['title%s'%i] }}" style="width:320px;" />
       </td>
       <td></td>
       <input type="hidden" name="seminar_ctr{{i}}" value="" />
