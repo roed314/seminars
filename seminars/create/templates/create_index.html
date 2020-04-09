@@ -5,6 +5,7 @@
 <div class="text_content">
 {% if not user.is_creator() %}
 <p>
+  You are currently not endorsed.
   If you want to add seminars to the site, you need to be endorsed by someone on the site.
   Once you have been endorsed, you can
   endorse others. See if you know anyone on this <a href="{{ url_for('user.public_users') }}">list</a> of
