@@ -65,6 +65,35 @@ def edit_seminar():
                            timezones=timezones,
                            lock=lock)
 
+@create.route("delete/seminar/<shortname>")
+@login_required
+@email_confirmed_required
+def delete_seminar(shortname):
+    seminar = WebSeminar(shortname)
+    manage = "Manage" if current_user.is_organizer() else "Create"
+    lock = get_lock(shortname, request.args.get("lock"))
+    def failure():
+        return render_template("edit_seminar.html",
+                           seminar=seminar,
+                           title="Edit properties",
+                           section=manage,
+                           subsection="editsem",
+                           institutions=institutions(),
+                           weekdays=weekdays,
+                           timezones=timezones,
+                           lock=lock)
+    if not seminar.user_can_delete():
+        flash_error("Only the owner of the seminar can delete it")
+        return failure()
+    else:
+        if seminar.delete():
+            flash("Seminar deleted")
+            return redirect(url_for(".index"))
+        else:
+            flash_error("Only the owner of the seminar can delete it")
+            return failure()
+
+
 @create.route("save/seminar/", methods=["POST"])
 @login_required
 @email_confirmed_required

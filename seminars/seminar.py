@@ -110,6 +110,11 @@ class WebSeminar(object):
                       value=self.shortname,
                       checked=self.is_subscribed(),
                       classes="subscribe")
+    def show_homepage(self):
+        if not self.homepage:
+            return ""
+        else:
+            return "<a href='%s'>Official homepage</a>" % (self.homepage)
 
     def show_institutions(self):
         if self.institutions:
@@ -178,7 +183,16 @@ class WebSeminar(object):
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
-        return [rec['email'] for rec in self.organizer_data]
+        return [rec['email'] for rec in self.organizer_data] + [self.owner]
+
+    def user_can_delete(self):
+        # Check whether the current user can edit the seminar
+        # See can_edit_seminar for another permission check
+        # that takes a seminar's shortname as an argument
+        # and returns various error messages if not editable
+        return (current_user.is_admin() or
+                (current_user.email_confirmed and
+                current_user.email == self.owner))
 
     def user_can_edit(self):
         # Check whether the current user can edit the seminar
@@ -235,6 +249,15 @@ class WebSeminar(object):
         if self.user_can_edit():
             query.pop('display')
         return talks_search(query, projection=projection)
+
+    def delete(self):
+        if self.user_can_delete():
+            with DelayCommit(db):
+                db.seminars.delete({'shortname': self.shortname})
+                db.seminar_organizers.delete({'seminar_id': self.shortname})
+            return True
+        else:
+            return False
 
 
 def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
@@ -320,10 +343,10 @@ def can_edit_seminar(shortname, new):
         organizer_data = db.seminar_organizers.lucky({'seminar_id': shortname, 'email':current_user.email})
         if organizer_data is None:
             owner_name = db.users.lucky({'email': seminar.owner}, 'full_name')
-            owner = "<%s>" % (owner_name, seminar.owner)
             if owner_name:
-                owner = owner_name + " " + owner
-            flash_error("You do not have permssion to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission." % (shortname, owner))
+                owner = "%s (%s)" % (owner_name, owner)
+
+            flash_error("You do not have permission to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission." % (shortname, owner))
             return redirect(url_for(".index"), 301), None
     if seminar is None:
         seminar = WebSeminar(shortname, data=None, editing=True)

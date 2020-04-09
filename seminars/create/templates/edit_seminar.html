@@ -191,12 +191,22 @@
       <button type="submit" onclick="return set_saved();">Save</button>
 
       <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if seminar.new %}{{ url_for('create.index') }}{% else %}{{ url_for('show_seminar', shortname=seminar.shortname) }}{% endif %}">Cancel changes</a>
+      {% if seminar.user_can_delete() %}
+      <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="return confirm('Are you sure you want to delete this item?');">
+        <button type="button">
+          Delete seminar
+        </button>
+      </a>
+      {% endif %}
       </form>
 <script type="text/javascript">
 /* prevent accidental closing of browser window */
 window.onbeforeunload = function() {
   if(unsaved) {
     return "There are unsaved edits. Really close?";
+  }
+  if(delete) {
+    return "Are you sure that you want to delete this seminar?"
   }
 }
 
