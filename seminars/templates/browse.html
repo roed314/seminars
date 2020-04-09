@@ -8,7 +8,7 @@
       {{ toggle(tglid="enable_topic_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
     <td>
-      Restrict by <a id="topic-filter-btn" class="likeknowl"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
+      Filter by <a id="topic-filter-btn" class="likeknowl"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
     </td>
     {% if user.is_authenticated %}
     <td style="padding-left: 2em;">

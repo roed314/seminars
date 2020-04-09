@@ -101,7 +101,8 @@ function setTopicLinks() {
 }
 function toggleTopic(id) {
     var toggler = $("#" + id);
-    var topic = id.substring(8);
+    console.log(id);
+    var topic = id.substring(10);
     var talks = $(".topic-" + topic);
     if (toggler.hasClass("topicselected")) {
         toggler.removeClass("topicselected");
@@ -129,7 +130,7 @@ function toggleTopic(id) {
 function getAllTopics() {
     var toggles = []
     $(".topic_toggle").each(function() {
-        toggles.push(this.id.substring(8));
+        toggles.push(this.id.substring(10));
     })
     return toggles;
 }
@@ -162,15 +163,19 @@ function talksToShow(talks) {
     for (i=0; i<filter_classes.length; i++) {
         if (filter_classes[i][1]()) {
             talks = talks.not(filter_classes[i][0]);
+            console.log(talks.length);
         }
     }
     return talks;
 }
 function toggleFilters(id) {
+    console.log(id);
     if (id !== null) {
+        console.log($('#'+id).is(":checked"));
         setCookie("filter_" + id.split("_")[1], $('#'+id).is(":checked") ? "1" : "0");
     }
     var talks = $('.talk');
+    console.log(talks.length);
     talks.hide();
     talks = talksToShow(talks);
     talks.show();
@@ -228,7 +233,6 @@ $(document).ready(function () {
     var minute = today.getMinutes();
     var millisecond = 1000 * today.getSeconds() + today.getMilliseconds();
     var displayed_minute = parseInt($("#curtime").text().split(":")[1]);
-    console.log(displayed_minute);
     // We might have passed a minute barrier between the server setting the time and the page finishing loading
     // Because of weird time zones (the user time preference may not be their local clock time),
     // we only do something if the minute is offset by 1 or 2 (for a super-slow page load)

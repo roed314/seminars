@@ -17,3 +17,4 @@ class Slate(SteelBlue):
     col_main_lg = '#373737' # text box border
     col_main_l = '#aaaaaa' # button background
     a_background_hover = '#e0e0e0'
+    table_background_hover = '#e0e0e0'
