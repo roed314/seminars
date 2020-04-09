@@ -7,6 +7,7 @@ from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit
 from psycopg2.sql import SQL
 import pytz
+from sage.misc.lazy_attribute import lazy_attribute
 
 
 class WebSeminar(object):
@@ -79,6 +80,42 @@ class WebSeminar(object):
         with DelayCommit(db):
             db.seminar_organizers.delete({'seminar_id': self.shortname})
             db.seminar_organizers.insert_many(self.organizer_data)
+
+    # We use timestamps on January 1, 2020 to save start and end times
+    # so that we have a well defined conversion between time zone and UTC offset (which
+    # is how postgres/psycopg2 stores its time zones).
+
+    # These functions allow a user to specify either start_time or start_timestamp,
+    # end_time or end_timestamp.  The _time versions are time-zone naive, since they're
+    # not tied to a day.
+
+    # We also support not specifying times (though in this case you can't add either time)
+
+    @lazy_attribute
+    def start_time(self):
+        if self.start_timestamp is None:
+            return None
+        return self.start_timestamp.time()
+
+    @lazy_attribute
+    def end_time(self):
+        if self.end_timestamp is None:
+            return None
+        return self.end_timestamp.time()
+
+    @lazy_attribute
+    def start_timestamp(self):
+        if self.start_time is None:
+            return None
+        return self.tz.localize(datetime.datetime.combine(datetime.datetime(2020, 1, 1), self.start_time))
+
+    @lazy_attribute
+    def end_timestamp(self):
+        if self.end_time is None:
+            return None
+        return self.tz.localize(datetime.datetime.combine(datetime.datetime(2020, 1, 1), self.end_time))
+
+    # These functions return time zone aware time objects in either the user's time zone or the seminar's time zone.
 
     def show_topics(self):
         if self.topics:
@@ -319,7 +356,7 @@ def can_edit_seminar(shortname, new):
         # Make sure user has permission to edit
         organizer_data = db.seminar_organizers.lucky({'seminar_id': shortname, 'email':current_user.email})
         if organizer_data is None:
-            owner_name = db.users.lucky({'email': seminar.owner}, 'full_name')
+            owner_name = db.users.lucky({'email': seminar.owner}, 'name')
             owner = "<%s>" % (owner_name, seminar.owner)
             if owner_name:
                 owner = owner_name + " " + owner
