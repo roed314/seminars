@@ -248,12 +248,12 @@ def process_user_input(inp, typ, tz):
         raise ValueError("Unrecognized type %s" % typ)
 
 
-def toggle(tglid, value, checked=False, classes=""):
+def toggle(tglid, value, checked=False, classes="", onchange=""):
     if classes:
         classes += " "
     return """
-<input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" {checked}>
+<input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" onchange="{onchange}"{checked}>
 <label class="tgl-btn" for="{tglid}"></label>
-""".format(tglid=tglid, value=value, checked="checked" if checked else "", classes=classes)
+""".format(tglid=tglid, value=value, checked="checked" if checked else "", classes=classes, onchange=onchange)
 
 
