@@ -318,8 +318,8 @@ class WebTalk(object):
         email_to = self.speaker_email if self.speaker_email else ""
         return  """
 <p>
- To let someone edit this page, send them this link:</br>
-<a href="{link}">{link}</a> </br>
+ To let someone edit this page, send them this link:
+<a href="{link}">{link}</a></br>
 <a href="mailto:{email_to}?{msg}" target="_blank">Email edit link to speaker</a>""".format(
             link=self.speaker_link(),
             email_to=email_to,
