@@ -311,15 +311,20 @@ class WebTalk(object):
         Creates a mailto link with instructions on editing the talk.
         """
         data = {
-            "body": "Dear %s,\nYou can edit your upcoming talk using the the following link: %s.\n\nYours,\n%s"
+            "body": "Dear %s,\n\nYou can edit your upcoming talk using the following link:\n%s\n\nBest,\n%s"
             % (self.speaker, self.speaker_link(), current_user.name),
             "subject": "%s: title and abstract" % self.seminar.name,
         }
         email_to = self.speaker_email if self.speaker_email else ""
-        return 'You can <a href="mailto:%s?%s" target="_blank">email</a> this <a href="%s">link</a> to anyone you want to allow to edit this talk without logging in.' % (
-            email_to,
-            urlencode(data, quote_via=quote),
-            self.speaker_link(),
+        return  """
+<p>
+ To let someone edit this page, send them this link:
+<a href="{link}">{link}</a></br>
+<a href="mailto:{email_to}?{msg}" target="_blank">
+<button type="submit">Email link to speaker</button></a>""".format(
+            link=self.speaker_link(),
+            email_to=email_to,
+            msg = urlencode(data, quote_via=quote),
         )
 
     def event(self, user):

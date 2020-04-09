@@ -8,8 +8,8 @@
       <input id="enable_topic_filter" type="checkbox" onchange="toggleFilters(this.id);"> Restrict by <a id="topic-filter-btn" class="likeknowl"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
     </td>
     {% if user.is_authenticated %}
-    <td>
-      <input id="enable_calendar_filter" type="checkbox" onchange="toggleFilters(this.id);"> Show only Saved events
+    <td style="padding-left: 2em;">
+      <input id="enable_calendar_filter" type="checkbox" onchange="toggleFilters(this.id);"> Show only saved events
     </td>
     {% endif %}
   </tr>

@@ -1,10 +1,4 @@
-Now
-===
-
-1. fix default date range
-
-
-Admin (Edgar)
+Admin
 =====
 
 1. Add ability to request endorsement, then update public_users.html with a link.
@@ -25,6 +19,10 @@ Admin (Edgar)
 Content creation
 ================
 
+1. **need parsing for date and time  for the edit schedule, when there is no date and time set for the seminar, see flasklog** CRITICAL
+
+1. **why is there toke as hidden inpu in edit talk? This makes the link and email button disappear after a save.**
+
 1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
@@ -37,11 +35,9 @@ Content creation
 
 1. **Test creating seminar without being endorsed**
 
-1. **Cancel -> Cancel changes**
+1. **Add button Cancel changes to edit schedule**
 
 1. **Add additional talk into main form, add new fields, maybe one button (if two, do the same thing), not all in one column, flash warning and keep raw data if title/email but no speaker, make details save**
-
-1. **On manage homepage, vertical and horizontal lines in table**
 
 1. **Uniformize on identifier (change places where called shortname)**
 
@@ -76,15 +72,17 @@ Content creation
 Viewing and searching
 =====================
 
+1. **restrict by topic is broken** CRITICAL
+
+1. **flask error on date error**
+
 1. **Filter option to show personal calendar**
 
-1. **Uniformize from saved events to favorites**
+1. **replace like by ilike**
+
+1. **Uniformize from saved events to favorites** should the headers say Favorite? or Saved?
 
 1. **Add type (conference/seminar) to seminar search.**
-
-1. **Make future the default search.**
-
-1. **Remove count and start.**
 
 1. **Set table min-width for all pages.**
 
@@ -148,9 +146,7 @@ Localization
 Onboarding
 ==========
 
-1. Write the About page
-
-1. Add to the FAQ page
+1. **add links to FAQ**
 
 1. Create a message shown to a user when they first visit the site (detected by absence of the timezone cookie); make sure that information also included in About page
 

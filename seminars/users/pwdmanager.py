@@ -341,7 +341,7 @@ class SeminarsUser(UserMixin):
 
     def talk_subscriptions_add(self, shortname, ctr):
         if shortname in self._data['seminar_subscriptions']:
-            return 200, "Talk is part of favorited seminar"
+            return 200, "Talk is in saved seminar"
         elif ctr in self._data['talk_subscriptions'].get(shortname, []):
             return 200, "Already added to favorites"
         else:

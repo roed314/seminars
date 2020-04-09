@@ -242,12 +242,54 @@ $(document).ready(function () {
 });
 
 $(document).ready(function() {
-
+  dr = $("input[name='daterange']")
+  var beginningoftime = 'January 1, 2020';
+  var endoftime = 'January 1, 2050';
   var start = moment();
   var end = moment().add(6, 'days');
-  var beginningoftime = '01/01/2020';
-  var endoftime = '01/01/2050';
+  if( dr.length > 0 ) {
+    var drval = dr[0].value;
+    if( drval.includes('-') ) {
+      var se = drval.split('-');
+      start = se[0].trim();
+      end = se[1].trim();
+    } else {
+      start = beginningoftime;
+      end = endoftime;
+    }
+    if(start == '') {
+      start = beginningoftime;
+    }
+    if(end == '') {
+      end = endoftime;
+    }
+  }
 
+
+  function cd(start, end, label) {
+      if(start.format('MMMM D, YYYY') == beginningoftime){
+        start = '';
+      } else {
+        start = start.format('MMMM D, YYYY')
+      }
+      if(end.format('MMMM D, YYYY') == endoftime) {
+        end = '';
+      } else {
+        end =  end.format('MMMM D, YYYY')
+      }
+      // everything is a string from now on
+      if(start == "Invalid date") {
+        start = ''
+      }
+      if(end == "Invalid date") {
+        end = ''
+      }
+      if(start == '' && end == '') {
+        $('#daterange').val('');
+      } else {
+        $('#daterange').val(start + ' - ' + end);
+      }
+    };
 
 
   $('input[name="daterange"]').on('cancel.daterangepicker', function(ev, picker) {
@@ -268,31 +310,11 @@ $(document).ready(function() {
            'Next 7 Days': [moment(), moment().add(6, 'days')],
            'Next 30 Days': [moment(), moment().add(29, 'days')],
         },
+        locale: {
+          format: "MMMM D, YYYY",
+        },
       },
-      function(start, end, label) {
-      if(start.format('MM/DD/YYYY') == beginningoftime){
-        start = '';
-      } else {
-        start = start.format('MMMM D, YYYY')
-      }
-      if(end.format('MM/DD/YYYY') == endoftime) {
-        end = '';
-      } else {
-        end =  end.format('MMMM D, YYYY')
-      }
-      // everything is a string from now on
-      if(start == "Invalid date") {
-        start = ''
-      }
-      if(end == "Invalid date") {
-        end = ''
-      }
-      if(start == '' && end == '') {
-        $('#daterange').val('');
-      } else {
-        $('#daterange').val(start + ' - ' + end);
-      }
-    }
+      cd
     );
 
     //cb(start, end);

@@ -97,7 +97,7 @@
       <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:500px;" /></td>
     </tr>
     <tr>
-      <td>Video recording link</td>
+      <td>Videorecording link</td>
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:500px;" /></td>
     </tr>
     <tr>
@@ -125,7 +125,7 @@
         <button type="submit" onclick="return set_saved();">Save</button>
       </td>
       <td>
-        <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if talk.new %}{{ url_for('show_seminar', shortname=talk.seminar_id) }}{% else %}{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}{% endif %}">cancel</a>
+        <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if talk.new %}{{ url_for('show_seminar', shortname=talk.seminar_id) }}{% else %}{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}{% endif %}">Cancel changes</a>
       </td>
       <td>
         <a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a>

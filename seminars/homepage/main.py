@@ -180,7 +180,7 @@ class TalkSearchArray(SearchArray):
                      ("users", "Any logged-in user can view link")],
         )
         ## number of results to display
-        count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
+        # count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
 
         speaker = TextBox(name="speaker", label="Speaker", colspan=(1, 2, 1), width=textwidth)
         affiliation = TextBox(
@@ -194,6 +194,8 @@ class TalkSearchArray(SearchArray):
             name="daterange",
             id="daterange",
             label="Date",
+            example=datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -"),
+            example_value=True,
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
@@ -205,17 +207,17 @@ class TalkSearchArray(SearchArray):
             [offline],
             [access, affiliation],
             [video, date],
-            [count],
+            # [count],
         ]
 
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [('talks', 'List of talks')]
+        return [('talks', 'Search for talks')]
 
     def hidden(self, info):
-        return [("talk_start", "talk_start")]
+        return [] # [("talk_start", "talk_start")]
 
 
 class SemSearchArray(SearchArray):
@@ -254,7 +256,7 @@ class SemSearchArray(SearchArray):
                      ("users", "Any logged-in user can view link")],
         )
         ## number of results to display
-        count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
+        # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
 
         name = TextBox(
             name="name", label="Name", colspan=(1, 2, 1), width=textwidth
@@ -264,17 +266,17 @@ class SemSearchArray(SearchArray):
             [topic, keywords],
             [institution, name],
             [online, access],
-            [count],
+            # [count],
         ]
 
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [('seminars', 'List of seminars')]
+        return [('seminars', 'Search for seminars')]
 
     def hidden(self, info):
-        return [("seminar_start", "seminar_start")]
+        return [] # [("seminar_start", "seminar_start")]
 
 @app.route("/")
 def index():
@@ -307,6 +309,7 @@ def search():
                    talks_search_array=TalkSearchArray())
     if "search_type" not in info:
         info["talk_online"] = info["seminar_online"] = True
+        info["daterange"] = info.get("daterange", datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -"))
     try:
         seminar_count = int(info["seminar_count"])
         talk_count = int(info["talk_count"])
@@ -323,10 +326,10 @@ def search():
         talk_start = info["talk_start"] = 0
     seminar_query = {}
     seminars_parser(info, seminar_query)
-    info['seminar_results'] = seminars_search(seminar_query, limit=seminar_count, offset=seminar_start, sort=["weekday", "start_time", "name"])
+    info['seminar_results'] = seminars_search(seminar_query, sort=["weekday", "start_time", "name"]) # limit=seminar_count, offset=seminar_start,
     talk_query = {}
     talks_parser(info, talk_query)
-    info['talk_results'] = talks_search(talk_query, limit=talk_count, offset=talk_start, sort=["start_time", "speaker"])
+    info['talk_results'] = talks_search(talk_query, sort=["start_time", "speaker"]) # limit=talk_count, offset=talk_start, 
     return render_template(
         "search.html",
         title="Search seminars",

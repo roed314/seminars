@@ -2,7 +2,7 @@
 
 {% block content %}
 
-
+<div class="text_content">
 {% if not user.is_creator() %}
 <p>
   If you want to add seminars to the site, you need to be endorsed by someone on the site.
@@ -31,44 +31,33 @@
   </table>
 </form>
 
-{% if seminars %}
-<h2>Seminars you organize</h2>
-<table class="ntdata">
-  <thead>
-    <th>View</th>
-    <th colspan="2" style="border-left: solid 1px;text-align: center;">Edit</th>
-  </thead>
-  <tbody>
-    {% for seminar in seminars %}
-    <tr>
-      <td> <a href='{{ url_for("show_seminar", shortname=seminar.shortname) }}'>{{seminar.name}}</a>{% if seminar.archived %} (archived){% endif %} </td>
-      <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar", shortname=seminar.shortname) }}'>Properties</a></td>
-      <td> <a href='{{ url_for(".edit_seminar_schedule", shortname=seminar.shortname) }}'>Schedule</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% endif %}
-{% if conferences %}
-<h2>Conferences you organize</h2>
-<table class="ntdata">
-  <thead>
-    <th>View</th>
-    <th colspan="2" style="border-left: solid 1px;text-align: center;">Edit</th>
-  </thead>
-  <tbody>
-    {% for conference in conferences %}
-    <tr>
-      <td> <a href='{{ url_for("show_seminar", shortname=conference.shortname) }}'>{{conference.name}}</a>{% if conference.archived %} (archived){% endif %} </td>
-      <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar", shortname=conference.shortname) }}'>Properties</a></td>
-      <td> <a href='{{ url_for(".edit_seminar_schedule", shortname=conference.shortname) }}'>Schedule</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% endif %}
+
+{% set pair = [('Seminars you organize', seminars), ('Conferences you organize', conferences)] %}
+{% for title, list in pair %}
+  {% if list %}
+    <h2>{{ title }}</h2>
+    <table class="ntdata">
+    <thead>
+      <th>View</th>
+      <th colspan="2" style="border-left: solid 1px;text-align: center;">Edit</th>
+      <th colspan="1" style="border-left: solid 1px;text-align: center;">View</th>
+    </thead>
+    <tbody>
+      {% for elt in list %}
+      <tr>
+        <td> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>{{elt.name}}</a>{% if elt.archived %} (archived){% endif %} </td>
+        <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>Schedule</a></td>
+        <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>Properties</a></td>
+        <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    </table>
+  {% endif %}
+{% endfor %}
 {% if not seminars and not conferences %}
 <p>To add a talk, create a seminar first.</p>
 {% endif %}
+</div>
 
 {% endblock %}

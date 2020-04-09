@@ -53,7 +53,7 @@ def edit_seminar():
     if resp is not None:
         return resp
     lock = get_lock(shortname, data.get("lock"))
-    title = "Create seminar" if new else "Edit seminar"
+    title = "Create seminar" if new else "Edit properties"
     manage = "Manage" if current_user.is_organizer() else "Create"
     return render_template("edit_seminar.html",
                            seminar=seminar,
@@ -391,7 +391,7 @@ def edit_seminar_schedule():
     if resp is not None:
         return resp
     seminar, all_dates, by_date = make_date_data(seminar)
-    title = seminar.name
+    title = "Edit schedule"
     return render_template("edit_seminar_schedule.html",
                            seminar=seminar,
                            all_dates=all_dates,
@@ -431,20 +431,19 @@ def save_seminar_schedule():
             talk = WebTalk(shortname, seminar_ctr, seminar=seminar)
             data = dict(talk.__dict__)
             for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
-                data[col] = process_user_input(raw_data["%s%s" % (col, i)], 'text', tz=seminar.timezone)
+                data[col] = process_user_input(raw_data.get("%s%s" % (col, i), ''), 'text', tz=seminar.timezone)
             #if update_times:
             #    data["start_time"] = datetime.datetime.combine(date, start_time)
             #    data["end_time"] = datetime.datetime.combine(date, end_time)
             new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
             if new_version != talk:
-                print(data)
                 new_version.save()
         elif raw_data["speaker%s" % i].strip():
             # new talk
             talk = WebTalk(shortname, seminar=seminar, editing=True)
             data = dict(talk.__dict__)
             for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
-                data[col] = process_user_input(raw_data["%s%s" % (col, i)], 'text', tz=seminar.timezone)
+                data[col] = process_user_input(raw_data.get("%s%s" % (col, i), ''), 'text', tz=seminar.timezone)
             time_input = raw_data.get("time%s" % i, "").strip()
             if time_input: # seminar may not have a time, in which case user can enter one
                 try:
@@ -466,7 +465,6 @@ def save_seminar_schedule():
             data["seminar_ctr"] = ctr
             ctr += 1
             new_version = WebTalk(talk.seminar_id, ctr, data=data)
-            print(data)
             new_version.save()
 
     return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)

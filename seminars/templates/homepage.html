@@ -3,97 +3,100 @@
 {% block body -%}
 <div id="header">
   <header class="inner">
-  <div id="logo">
-    <a href="/"><img src="{{ url_for('static', filename='logo.png') }}" /></a>
-  </div>
-  <div class="right">
-    <div class="upper">
-      <div id="title">{{ title|safe }}</div>
-      <div id="top-menu">
+    <div id="logo">
+      <a href="/"><img src="{{ url_for('static', filename='logo.png') }}" /></a>
+    </div>
+    <div class="right">
+      <div class="upper">
+        <div id="title">{{ title|safe }}</div>
+        <div id="top-menu">
         {% for url, onclick, label in top_menu -%}
-        <div {% if section == label %} class="menu-active"{% endif %}><a href="{{url}}"{% if onclick %} onclick="{{onclick}}"{% endif %}>{{label}}</a></div>
+          <div {% if section == label %} class="menu-active"{% endif %}><a href="{{url}}"{% if onclick %} onclick="{{onclick}}"{% endif %}>{{label}}</a></div>
         {%- endfor %}
+        </div>
+        <div class="topright">
+          <table>
+            <tr><td><span id="curtime">{{ usertime.strftime("%-H:%M") }}</span></td></tr>
+            <tr><td>{{ user.timezone.replace("_", " ") }}</td></tr>
+          </table>
+        </div>
       </div>
-      <div class="topright">
-        <table>
-          <tr><td><span id="curtime">{{ usertime.strftime("%-H:%M") }}</span></td></tr>
-          <tr><td>{{ user.timezone.replace("_", " ") }}</td></tr>
-        </table>
-      </div>
-    </div>
   </header>
-  </div>
 </div>
+</div>
+
 {% if section == "Browse" %}
-<div id="topic-filter-menu">
-  <div id="topic-filter-head">
-    {% for ab, name, onclick in [("ALL", "Select all topics", "selectAllTopics();"), ("CLR", "Clear selection", "clearAllTopics();")] %}
-    <div class="topic_cmd" id="topiclink-{{ab}}" onclick="{{onclick}}">
-      {{name}}
+  <div id="topic-filter-menu">
+    <div id="topic-filter-head">
+      {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics();"), ("CLR", "Clear all", "clearAllTopics();")] %}
+      <div class="topic_cmd" id="topiclink-{{ab}}" onclick="{{onclick}}">
+        {{name}}
+      </div>
+      {% endfor %}
     </div>
+    {% for ab, name in topics %}
+      <div class="topic_toggle" id="topiclink-{{ab}}">
+        {{name}}{% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+      </div>
     {% endfor %}
-  </div>
-  {% for ab, name in topics %}
-  <div class="topic_toggle" id="topiclink-{{ab}}">
-    {{name}}{% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
-  </div>
-  {% endfor %}
-</div>
-</div>
-{% elif section == "Manage" %}
-<div id="manage-submenu">
-  <header class="inner">
-    <div class="manage-inner">
-      {% if user.is_creator() %}
-      <div class="manage-nav{% if subsection == 'home' %} manage-active{% endif %}">
-        <a href="{{ url_for('create.index') }}">Seminars</a>
-      </div>
-      <div class="manage-nav{% if subsection == 'institutions' %} manage-active{% endif %}">
-        <a href="{{ url_for('list_institutions') }}">Institutions</a>
-      </div>
-      {% endif %}
-      {% if institution %}
-      <div class="manage-nav{% if subsection == 'viewinst' %} manage-active{% endif %}">
-        <a href="{{ url_for('show_institution', shortname=institution.shortname) }}">View institution</a>
-      </div>
-      {% if user.is_admin() or user.email == institution.admin %}
-      <div class="manage-nav{% if subsection == 'editinst' %} manage-active{% endif %}">
-        <a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit properties</a>
-      </div>
-      {% endif %} {# institution admin #}
-      {% elif seminar and seminar.user_can_edit() %}
-      <div class="manage-nav{% if subsection == 'view' %} manage-active{% endif %}">
-        <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View seminar</a>
-      </div>
-      <div class="manage-nav{% if subsection == 'editsem' %} manage-active{% endif %}">
-        <a href="{{ url_for('create.edit_seminar', shortname=seminar.shortname) }}">{% if seminar.new %}Create{% else %}Edit{% endif %} {% if subsection == 'edittalk' %}seminar{% else %}properties{% endif %}</a>
-      </div>
-      {% if not seminar.new %}
-      <div class="manage-nav{% if subsection == 'schedule' %} manage-active{% endif %}">
-        <a href="{{ url_for('create.edit_seminar_schedule', shortname=seminar.shortname) }}">Edit schedule</a>
-      </div>
-      {% endif %} {# seminar.new #}
-      {% endif %} {# institution/seminar #}
-      {% if talk %}
-      <div class="manage-nav{% if subsection == 'viewtalk' %} manage-active{% endif %}">
-        {% if talk.seminar.user_can_edit() %}
-        <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr) }}">View talk</a>
-        {% else %}
-        <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr, token=token) }}">View talk</a>
-        {% endif %}
-      </div>
-      <div class="manage-nav{% if subsection == 'edittalk' %} manage-active{% endif %}">
-        <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr) }}">Edit talk</a>
-      </div>
-      {% endif %} {# talk #}
     </div>
-  </header>
-</div>
+  </div>
+{% elif section == "Manage" %}
+  <div id="manage-submenu">
+    <header class="inner">
+      <div class="manage-inner">
+        {% if user.is_creator() %}
+          <div class="manage-nav{% if subsection == 'home' %} manage-active{% endif %}">
+            <a href="{{ url_for('create.index') }}">Seminars</a>
+          </div>
+          {% if not subsection in ['view', 'editsem', 'schedule', 'viewtalk', 'edittalk'] %}
+            <div class="manage-nav{% if subsection == 'institutions' %} manage-active{% endif %}">
+              <a href="{{ url_for('list_institutions') }}">Institutions</a>
+            </div>
+          {% endif %}
+        {% endif %}
+        {% if institution %}
+          <div class="manage-nav{% if subsection == 'viewinst' %} manage-active{% endif %}">
+            <a href="{{ url_for('show_institution', shortname=institution.shortname) }}">View institution</a>
+          </div>
+          {% if user.is_admin() or user.email == institution.admin %}
+            <div class="manage-nav{% if subsection == 'editinst' %} manage-active{% endif %}">
+              <a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit properties</a>
+            </div>
+          {% endif %} {# institution admin #}
+        {% elif seminar and seminar.user_can_edit() %}
+          {% if not seminar.new %}
+            <div class="manage-nav{% if subsection == 'schedule' %} manage-active{% endif %}">
+              <a href="{{ url_for('create.edit_seminar_schedule', shortname=seminar.shortname) }}">Edit schedule</a>
+            </div>
+          {% endif %} {# seminar.new #}
+          <div class="manage-nav{% if subsection == 'editsem' %} manage-active{% endif %}">
+            <a href="{{ url_for('create.edit_seminar', shortname=seminar.shortname) }}">{% if seminar.new %}Create{% else %}Edit{% endif %} {% if subsection == 'edittalk' %}seminar{% else %}properties{% endif %}</a>
+          </div>
+          <div class="manage-nav{% if subsection == 'view' %} manage-active{% endif %}">
+            <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View seminar</a>
+          </div>
+        {% endif %} {# institution/seminar #}
+        {% if talk %}
+          <div class="manage-nav{% if subsection == 'viewtalk' %} manage-active{% endif %}">
+            {% if talk.seminar.user_can_edit() %}
+              <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr) }}">View talk</a>
+            {% else %}
+              <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr, token=token) }}">View talk</a>
+            {% endif %}
+          </div>
+          <div class="manage-nav{% if subsection == 'edittalk' %} manage-active{% endif %}">
+            <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr) }}">Edit talk</a>
+          </div>
+        {% endif %} {# talk #}
+      </div>
+    </header>
+  </div>
 {% endif %}
 <noscript>
-<div id="javascript-explanation">
-  We use javascript to filter seminar topics, adapt seminars to your local time zone, enter date ranges, and hide this annoying message.
-</div>
+  <div id="javascript-explanation">
+    We use javascript to filter seminar topics, adapt seminars to your local time zone, enter date ranges, and hide this annoying message.
+  </div>
 </noscript>
 
 
