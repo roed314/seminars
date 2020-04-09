@@ -62,7 +62,7 @@
             <select name="weekday" style="width:510px;">
               <option value=""></option>
               {% for wkday in weekdays %}
-              <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
@@ -76,7 +76,7 @@
           <td>
             <select name="timezone" style="width:510px;">
               {% for tz, disp in timezones %}
-              <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
+                <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
               {% endfor %}
             </select>
           </td>
@@ -130,15 +130,15 @@
           <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" /></td>
         </tr>
         {% if not seminar.new %}
-        <tr>
-          <td>Archived</td>
-          <td>
-            <select name="archived" style="width:510px;">
-              <option value="yes"{% if seminar.archived %} selected{% endif %}>yes</option>
-              <option value="no"{% if not seminar.archived %} selected{% endif %}>no</option>
-            </select>
-          </td>
-        </tr>
+          <tr>
+            <td>Archived</td>
+            <td>
+              <select name="archived" style="width:510px;">
+                <option value="yes"{% if seminar.archived %} selected{% endif %}>yes</option>
+                <option value="no"{% if not seminar.archived %} selected{% endif %}>no</option>
+              </select>
+            </td>
+          </tr>
         {% endif %}
         <tr>
           <td colspan="2">Comments</td>
@@ -159,27 +159,27 @@
         {% for i in range(6) %}
         <tr>
           {% if i < (seminar.organizer_data | length) %}
-          <td>
-            <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px"/>
-          </td>
-          <td>
-            <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
-          </td>
-          <td>
-            <input type="checkbox" name="org_curator{{i}}" value="yes" {% if seminar.organizer_data[i].get("curator") %}checked{% endif %} />
-          </td>
-          <td>
-            <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
-          </td>
-          <td>
-            <input type="checkbox" name="org_contact{{i}}" value="yes" {% if seminar.organizer_data[i].get("contact") %}checked{% endif %} />
-          </td>
+            <td>
+              <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px"/>
+            </td>
+            <td>
+              <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
+            </td>
+            <td>
+              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if seminar.organizer_data[i].get("curator") %}checked{% endif %} />
+            </td>
+            <td>
+              <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
+            </td>
+            <td>
+              <input type="checkbox" name="org_contact{{i}}" value="yes" {% if seminar.organizer_data[i].get("contact") %}checked{% endif %} />
+            </td>
           {% else %}
-          <td><input name="org_email{{i}}" style="width:220px;" /></td>
-          <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
-          <td><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
-          <td><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
-          <td><input type="checkbox" name="org_contact{{i}}" value="yes" /></td>
+            <td><input name="org_email{{i}}" style="width:220px;" /></td>
+            <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
+            <td><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
+            <td><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
+            <td><input type="checkbox" name="org_contact{{i}}" value="yes" /></td>
           {% endif %}
         </tr>
         {% endfor %}
@@ -187,15 +187,16 @@
       <button type="submit" onclick="return set_saved();">Save</button>
 
       {% if seminar.new %}
-      <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('create.index') }}">Cancel creation</a>
+        <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('create.index') }}">Cancel creation</a>
       {% else %}
-      <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">Cancel changes</a>
-      {% if seminar.user_can_delete() %}
-      <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="return confirm('Are you sure you want to delete this item?');">
-        <button type="button">
-          Delete seminar
-        </button>
-      </a>
+        <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">Cancel changes</a>
+        {% if seminar.user_can_delete() %}
+        <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="return confirm('Are you sure you want to delete this item?');">
+          <button type="button">
+            Delete seminar
+          </button>
+        </a>
+        {% endif %}
       {% endif %}
       </form>
 <script type="text/javascript">
