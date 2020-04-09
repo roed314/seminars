@@ -231,7 +231,7 @@ class WebSeminar(object):
 
     def talks(self, projection=1):
         from seminars.talk import talks_search # avoid import loop
-        query = {'seminar_id': self.shortname, 'display': self.display}
+        query = {'seminar_id': self.shortname, 'display': True}
         if self.user_can_edit():
             query.pop('display')
         return talks_search(query, projection=projection)
