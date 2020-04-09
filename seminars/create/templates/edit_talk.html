@@ -125,7 +125,7 @@
         <button type="submit" onclick="return set_saved();">Save</button>
       </td>
       <td>
-        <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if talk.new %}{{ url_for('show_seminar', shortname=talk.seminar_id) }}{% else %}{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}{% endif %}">cancel</a>
+        <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if talk.new %}{{ url_for('show_seminar', shortname=talk.seminar_id) }}{% else %}{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}{% endif %}">Cancel changes</a>
       </td>
       <td>
         <a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a>
