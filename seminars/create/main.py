@@ -482,8 +482,8 @@ def save_seminar_schedule():
                     flash_error("invalid time range %s: {0}".format(err), time_input)
                     redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
             else:
-                start_time = seminar.start_time
-                end_time = seminar.end_time
+                start_time = seminar.start_time.time()
+                end_time = seminar.end_time.time()
             data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
             data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
             data["seminar_ctr"] = ctr
