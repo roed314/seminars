@@ -212,7 +212,7 @@ class TalkSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [('talks', 'List of talks')]
+        return [('talks', 'Search for talks')]
 
     def hidden(self, info):
         return [("talk_start", "talk_start")]
@@ -271,7 +271,7 @@ class SemSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [('seminars', 'List of seminars')]
+        return [('seminars', 'Search for seminars')]
 
     def hidden(self, info):
         return [("seminar_start", "seminar_start")]

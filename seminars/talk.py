@@ -320,7 +320,8 @@ class WebTalk(object):
 <p>
  To let someone edit this page, send them this link:
 <a href="{link}">{link}</a></br>
-<a href="mailto:{email_to}?{msg}" target="_blank">Email edit link to speaker</a>""".format(
+<a href="mailto:{email_to}?{msg}" target="_blank">
+<button type="submit">Email link to speaker</button></a>""".format(
             link=self.speaker_link(),
             email_to=email_to,
             msg = urlencode(data, quote_via=quote),
