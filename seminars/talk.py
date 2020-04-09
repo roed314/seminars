@@ -278,13 +278,6 @@ class WebTalk(object):
                       checked=self.is_subscribed(),
                       classes="subscribe")
 
-        return """
-<input type="checkbox" class="subscribe tgl tgl-light" value="{sem}/{ctr}" id="tgl{sem}/{ctr}" {checked}>
-<label class="tgl-btn" for="tgl{sem}/{ctr}"></label>
-""".format(sem=self.seminar_id,
-           ctr=self.seminar_ctr,
-           checked="checked" if is_subscribed() else "",
-        )
 
     def oneline(self, include_seminar=True, include_subscribe=True):
         cols = []
