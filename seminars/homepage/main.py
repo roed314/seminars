@@ -56,8 +56,6 @@ def parse_institution_talk(info, query, prefix="talk"):
 def parse_online(info, query, prefix):
     if info.get(prefix + "_online") == "yes":
         query["online"] = True
-    else:
-        query["online"] = False
 
 def parse_offline(info, query, prefix):
     if info.get(prefix + "_offline") == "yes":
