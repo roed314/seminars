@@ -11,11 +11,6 @@
 <p>All times are shown in the seminar's time zone, {{ seminar.timezone }}.</p>
 </div>
 
-{#
-<p> To change the day of week or frequency of meeting, <a href="{{ url_for('.edit_seminar', shortname=seminar.shortname) }}">edit the seminar</a>.</p>
-
-<p> The edit link for existing seminars can be sent to speakers so that they can edit the talk without an account.</p>
-#}
 
 <form action="{{ url_for('.save_seminar_schedule') }}" method="POST">
   <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>

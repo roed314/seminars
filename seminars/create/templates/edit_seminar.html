@@ -190,7 +190,7 @@
       </table>
       <button type="submit" onclick="return set_saved();">Save</button>
 
-      <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if seminar.new %}{{ url_for('create.index') }}{% else %}{{ url_for('show_seminar', shortname=seminar.shortname) }}{% endif %}">cancel</a>
+      <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if seminar.new %}{{ url_for('create.index') }}{% else %}{{ url_for('show_seminar', shortname=seminar.shortname) }}{% endif %}">Cancel changes</a>
       </form>
 <script type="text/javascript">
 /* prevent accidental closing of browser window */
