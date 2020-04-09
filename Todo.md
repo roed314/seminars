@@ -1,3 +1,26 @@
+Questions
+=========
+1. Deepkink to hidden seminar?
+
+1. when does a seminar become public? (create content and then swap curators)
+
+1. When does a seminar become public?
+
+
+Bugs
+====
+
+1. Delete
+
+1. swap curator fails
+
+1. no changes are done to seminars after endorsement
+
+1. start date for seminar (if doesn't meet weekly)
+
+
+
+
 Admin
 =====
 
