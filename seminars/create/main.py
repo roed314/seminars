@@ -5,7 +5,7 @@ from seminars.users.main import email_confirmed_required
 from seminars import db
 from seminars.app import app
 from seminars.create import create
-from seminars.utils import timezones, process_user_input, check_time, weekdays, flash_warning
+from seminars.utils import timezones, process_user_input, check_time, weekdays, flash_warning, localize_time
 from seminars.seminar import WebSeminar, seminars_lucky, seminars_lookup, can_edit_seminar
 from seminars.talk import WebTalk, talks_lookup, talks_max, talks_search, talks_lucky, can_edit_talk
 from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types, institution_known
@@ -260,10 +260,11 @@ def edit_talk():
         tz = pytz.timezone(talk.seminar.timezone)
         date = process_user_input(data["date"], "date", tz)
         try:
-            start_time = process_user_input(data.get("start_time"), "time with time zone", tz)
-            end_time = process_user_input(data.get("end_time"), "time with time zone", tz)
-            start_time = datetime.datetime.combine(date, start_time)
-            end_time = datetime.datetime.combine(date, end_time)
+            # TODO: clean this up
+            start_time = process_user_input(data.get("start_time"), "time", tz)
+            end_time = process_user_input(data.get("end_time"), "time", tz)
+            start_time = localize_time(datetime.datetime.combine(date, start_time), tz)
+            end_time = localize_time(datetime.datetime.combine(date, end_time), tz)
         except ValueError:
             return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 301)
         talk.start_time = start_time
@@ -473,16 +474,17 @@ def save_seminar_schedule():
                         raise ValueError("Must specify both start and end times")
                     elif len(time_split) > 2:
                         raise ValueError("More than one hyphen")
-                    start_time = process_user_input(time_split[0], "time with time zone", seminar.tz)
-                    end_time = process_user_input(time_split[1], "time with time zone", seminar.tz)
+                    # TODO: clean this up
+                    start_time = process_user_input(time_split[0], "time", seminar.tz).time()
+                    end_time = process_user_input(time_split[1], "time", seminar.tz).time()
                 except ValueError as err:
                     flash_error("invalid time range %s: {0}".format(err), time_input)
                     redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
             else:
                 start_time = seminar.start_time
                 end_time = seminar.end_time
-            data["start_time"] = datetime.datetime.combine(date, start_time)
-            data["end_time"] = datetime.datetime.combine(date, end_time)
+            data["start_time"] = localize(datetime.datetime.combine(date, start_time), seminar.tz)
+            data["end_time"] = localize(datetime.datetime.combine(date, end_time), seminar.tz)
             data["seminar_ctr"] = ctr
             ctr += 1
             new_version = WebTalk(talk.seminar_id, ctr, data=data)
