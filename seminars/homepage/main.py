@@ -2,7 +2,7 @@ from seminars.app import app
 from seminars import db
 from seminars.talk import WebTalk, talks_search, talks_lucky
 from seminars.seminar import seminars_lucky
-from seminars.utils import topics
+from seminars.utils import topics, toggle
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search
@@ -298,7 +298,7 @@ def index():
         topic_counts=topic_counts,
         talks=talks,
         section="Browse",
-        bread=None,
+        toggle=toggle,
     )
 
 
