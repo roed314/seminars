@@ -66,11 +66,13 @@ Viewing and searching
 
 1. **Filter option to show personal calendar**
 
-1. **Uniformize from saved events to favorites**
+1. **replace like by ilike **
+
+1. **using enter to submit search form always displays Seminars**
+
+1. **Uniformize from saved events to favorites** should the headers say Favorite? or Saved?
 
 1. **Add type (conference/seminar) to seminar search.**
-
-1. **Make future the default search.**
 
 1. **Remove count and start.**
 
@@ -81,6 +83,7 @@ Viewing and searching
 1. **Add placeholders and e.g. for seminar/talk creation**
 
 1. **Improve institution page.**
+
 
 1. Add search on time (rather than datetime) so that users can accomodate their local schedules
 

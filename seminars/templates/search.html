@@ -17,11 +17,10 @@
 
     </form>
   </div>
-  <form id='search_form' onsubmit="cleanSubmit(this.id)">
     <div id='searchseminars'>
-      <div class='searchform'>
+      <form class='searchform' id='seminarsform'>
         {{ info.seminar_search_array.html(info) | safe }}
-      </div>
+      </form>
       <div class='searchresults'>
         <table class='ntdata'>
           <thead>
@@ -39,9 +38,9 @@
     </div>
 
     <div id='searchtalks' style='display:none;'>
-      <div class='searchform'>
+      <form class='searchform' id='talksform'>
         {{ info.talks_search_array.html(info) | safe }}
-      </div>
+      </form>
       <div class='searchresults'>
         <table class='ntdata'>
           <thead>
@@ -57,13 +56,49 @@
         </table>
       </div>
     </div>
-  </form>
 </div>
 
 {% include 'debug_info.html' %}
 
 
 <script>
+
+
+$('#talksform').submit(doubleSubmit)
+$('#seminarsform').submit(doubleSubmit)
+function doubleSubmit(evt) {
+  var other;
+  if( $(this).id == 'seminarsform' ) {
+    other = $('#talksform');
+  } else {
+    other = $('#seminarsform');
+  }
+  foo = $(this);
+  bar = other;
+  // copy items from other form to this form
+  for(const type of ['input', 'select']) {
+    for(const item of other[0].getElementsByTagName(type)) {
+      if (item.getAttribute('name') ) {
+        var cln = document.createElement("input");
+        cln.name = item.name;
+        cln.value = item.value;
+        if( item.type == "checkbox" ) {
+          cln.type = item.type;
+          cln.style.display = "none";
+          cln.checked = item.checked;
+        } else {
+          cln.type = "hidden";
+        }
+        $(this)[0].appendChild(cln);
+        console.log(cln.name + " -> " + cln.value);
+      }
+    }
+  }
+  cleanSubmit($(this)[0].id);
+  console.log($(this)[0].getElementsByTagName('input'))
+  console.log($(this)[0].getElementsByTagName('select'))
+};
+
 const st = {};
 
 st.flap = document.querySelector('#flap');

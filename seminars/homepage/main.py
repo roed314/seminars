@@ -180,7 +180,7 @@ class TalkSearchArray(SearchArray):
                      ("users", "Any logged-in user can view link")],
         )
         ## number of results to display
-        count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
+        # count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
 
         speaker = TextBox(name="speaker", label="Speaker", colspan=(1, 2, 1), width=textwidth)
         affiliation = TextBox(
@@ -207,7 +207,7 @@ class TalkSearchArray(SearchArray):
             [offline],
             [access, affiliation],
             [video, date],
-            [count],
+            # [count],
         ]
 
     def main_table(self, info=None):
@@ -217,7 +217,7 @@ class TalkSearchArray(SearchArray):
         return [('talks', 'Search for talks')]
 
     def hidden(self, info):
-        return [("talk_start", "talk_start")]
+        return [] # [("talk_start", "talk_start")]
 
 
 class SemSearchArray(SearchArray):
@@ -256,7 +256,7 @@ class SemSearchArray(SearchArray):
                      ("users", "Any logged-in user can view link")],
         )
         ## number of results to display
-        count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
+        # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
 
         name = TextBox(
             name="name", label="Name", colspan=(1, 2, 1), width=textwidth
@@ -266,7 +266,7 @@ class SemSearchArray(SearchArray):
             [topic, keywords],
             [institution, name],
             [online, access],
-            [count],
+            # [count],
         ]
 
     def main_table(self, info=None):
@@ -276,7 +276,7 @@ class SemSearchArray(SearchArray):
         return [('seminars', 'Search for seminars')]
 
     def hidden(self, info):
-        return [("seminar_start", "seminar_start")]
+        return [] # [("seminar_start", "seminar_start")]
 
 @app.route("/")
 def index():
@@ -326,10 +326,10 @@ def search():
         talk_start = info["talk_start"] = 0
     seminar_query = {}
     seminars_parser(info, seminar_query)
-    info['seminar_results'] = seminars_search(seminar_query, limit=seminar_count, offset=seminar_start, sort=["weekday", "start_time", "name"])
+    info['seminar_results'] = seminars_search(seminar_query, sort=["weekday", "start_time", "name"]) # limit=seminar_count, offset=seminar_start,
     talk_query = {}
     talks_parser(info, talk_query)
-    info['talk_results'] = talks_search(talk_query, limit=talk_count, offset=talk_start, sort=["start_time", "speaker"])
+    info['talk_results'] = talks_search(talk_query, sort=["start_time", "speaker"]) # limit=talk_count, offset=talk_start, 
     return render_template(
         "search.html",
         title="Search seminars",
