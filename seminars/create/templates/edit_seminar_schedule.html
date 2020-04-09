@@ -5,12 +5,11 @@
 <h1>{{seminar.name}}</h1>
 <p> To add a talk at a regularly scheduled time, enter Speaker (and optionally Email and Title) in row(s) of the table; and then click "Save changes" or any "Details" link.</p>
 
-<p>To add a talk at <i>any</i> time, under <a href="#add_new_talk">Add talk</a>, enter, Date, Start and End times, and Speaker (and optionally Email and Title); then click "Save changes" or any "Details" link.</p>
+<p>To add a talk at <i>any</i> time, under <a href="#add_new_talk">Add talk</a>, enter Date, Start and End times, and Speaker (and optionally Email and Title); then click "Save changes" or any "Details" link.</p>
 
 
 <p>All times are shown in the seminar's time zone, {{ seminar.timezone }}.</p>
 </div>
-
 
 <form action="{{ url_for('.save_seminar_schedule') }}" method="POST">
   <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
@@ -25,6 +24,7 @@
         <th>Speaker</th>
         <th>Email</th>
         <th>Affiliation</th>
+        <th>Title</th>
         <th></th>
       </tr>
     </thead>
@@ -48,8 +48,7 @@
       <td class="affiliationinp">
         <input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" />
       </td>
-      <th>Title</th>
-      <td class="titleinp" colspan='4'>
+      <td class="titleinp">
         <input name="title{{i}}" value="{{ talk.title | blanknone }}" />
       </td>
       <td>
@@ -80,8 +79,7 @@
       <td class="affiliationinp">
         <input name="speaker_affiliation{{i}}" value="{{ raw_data['speaker_affiliation%s'%i] | blanknone }}" />
       </td>
-      <th>Title</th>
-      <td class="titleinp" colspan='4'>
+      <td class="titleinp">
         <input name="title{{i}}" value="{{ raw_data['title%s'%i] }}" />
       </td>
       <td></td>
@@ -130,7 +128,6 @@
 </form>
 
 <div name="add_new_talk">
-  
 
 </div>
 
