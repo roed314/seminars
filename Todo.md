@@ -188,6 +188,41 @@ Examples of online seminars we might add
 
 1. http://www.unige.ch/math/folks/nikolaev/GlobalPoisson.html
 
+From http://dermenjian.com/seminars/
+------------------------------------
+
+1. https://upennig.weebly.com/gapt-seminar.html
+
+1. https://sites.google.com/view/gocc-combinatorics
+
+1. https://dibernstein.github.io/VirtualSeminar.html
+
+1. https://www.mis.mpg.de/nlalg/seminars/upcoming.html
+
+1. https://sites.google.com/view/northeastcombinatoricsnetwork/virtual-combinatorics-colloquium
+
+1. http://people.maths.ox.ac.uk/scott/dmp.htm
+
+1. https://web.math.princeton.edu/~pds/onlinetalks/talks.html
+
+1. https://chebyshev.spbu.ru/en/schedule/
+
+1. https://math.berkeley.edu/~corteel/combinatorics/
+
+1. https://www.math.ucdavis.edu/research/seminars/?type=6&when=future
+
+1. https://www.math.umass.edu/seminars/discrete-math-seminar
+
+1. http://www-users.math.umn.edu/~cfraser/seminar_spring20.html
+
+1. https://math.washington.edu/events/series/combinatorics-and-geometry-seminar
+
+1. http://lacim.uqam.ca/seminaire/
+
+1. https://sites.google.com/view/womenincombinatoricstemporary/colloquium
+
+1. http://garsia.math.yorku.ca/seminar/algebra.html
+
 Examples of online conferences we might add
 ===========================================
 

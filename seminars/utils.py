@@ -200,7 +200,7 @@ def adapt_weektime(t, oldtz, newtz=None, weekday=None):
     now = datetime.now(oldtz)
     # The t we obtain from psycopg2 comes with tzinfo, but we need to forget it
     # in order to compare with now.time()
-    t = t.replace(tzinfo=None)
+    t = t.replace(tzinfo=None).time()
     if weekday is None:
         days_ahead = 0 if now.time() <= t else 1
     else:
