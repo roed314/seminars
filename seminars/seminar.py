@@ -267,9 +267,9 @@ class WebSeminar(object):
                                                [self.shortname]):
                     talk_sub.remove(self.shortname)
                     db.update({'id': i}, {'talk_subscriptions': talk_sub})
-               return True
-            else:
-               return False
+            return True
+        else:
+            return False
 
 
 def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
