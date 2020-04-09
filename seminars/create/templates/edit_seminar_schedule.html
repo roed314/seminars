@@ -90,10 +90,21 @@
     {% endif %}
     {% endfor %}
     <tr>
-      <td colspan="5" class="tblh3">
+      <td colspan="7" class="tblh3">
         Add talk (time not listed above)
       </td>
     </tr>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Speaker</th>
+        <th>Email</th>
+        <th>Affiliation</th>
+        <th>Title</th>
+        <th></th>
+      </tr>
+    </thead>
     <tr>
       <td class="date">
         <input name="dateX" value="{{ raw_data.dateX | blanknone }}" />
@@ -118,6 +129,7 @@
 </form>
 
 <div name="add_new_talk">
+  
 
 </div>
 
