@@ -25,17 +25,11 @@ Content creation
 
 1. **Improve text at manage when not endorsed (Raymond)**
 
-1. **In edit seminar, move toom right under end time (Bjorn)**
-
 1. **For conference, enter dates rather than frequency**
 
 1. **Test creating seminar without being endorsed**
 
-1. **Clarify that institution homepage means department homepage via placeholder or e.g.**
-
 1. **Remove aliases**
-
-1. **Placeholder in city name for institution**
 
 1. **Add details links back in to view seminars**
 

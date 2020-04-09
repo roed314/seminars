@@ -68,7 +68,7 @@
         {% if seminar.start_time and seminar.end_time %}
         {{ seminar.start_time.strftime("%-H:%M") }}-{{ seminar.end_time.strftime("%-H:%M") }}
         {% else %}
-        <input name="time{{i}}" value="{{ raw_data['time%s'%i] }}" />
+        <input name="time{{i}}" value="{{ raw_data['time%s'%i] }}" placeholder="15:00-16:00" />
         {% endif %}
       </td>
       <td class="speakerinp">

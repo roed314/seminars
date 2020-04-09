@@ -87,11 +87,15 @@
         </tr>
         <tr>
           <td>Start time</td>
-          <td><input name="start_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.start_time) }}" /></td>
+          <td><input name="start_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.start_time) }}" placeholder="15:00"/></td>
         </tr>
         <tr>
           <td>End time</td>
-          <td><input name="end_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.end_time) }}" /></td>
+          <td><input name="end_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.end_time) }}" placeholder="16:00"/></td>
+        </tr>
+        <tr>
+          <td>Room</td>
+          <td><input name="room" value="{{ seminar.room | blanknone }}" style="width:500px;" /></td>
         </tr>
         <tr>
           <td>Conference</td>
@@ -128,10 +132,6 @@
         <tr>
           <td>Livestream link</td>
           <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Room</td>
-          <td><input name="room" value="{{ seminar.room | blanknone }}" style="width:500px;" /></td>
         </tr>
         {% if not seminar.new %}
         <tr>
