@@ -194,6 +194,8 @@ class TalkSearchArray(SearchArray):
             name="daterange",
             id="daterange",
             label="Date",
+            example=datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -"),
+            example_value=True,
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
@@ -307,6 +309,7 @@ def search():
                    talks_search_array=TalkSearchArray())
     if "search_type" not in info:
         info["talk_online"] = info["seminar_online"] = True
+        info["daterange"] = info.get("daterange", datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -"))
     try:
         seminar_count = int(info["seminar_count"])
         talk_count = int(info["talk_count"])

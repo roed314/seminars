@@ -1,10 +1,4 @@
-Now
-===
-
-1. fix default date range
-
-
-Admin (Edgar)
+Admin
 =====
 
 1. Add ability to request endorsement, then update public_users.html with a link.
