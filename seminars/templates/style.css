@@ -84,9 +84,6 @@ h2.link > a {
     text-align: center;
     font-size: 75%;
     color: {{color.footer_text}};
-    position: absolute;
-    bottom: 0;
-    min-width: 100%;
 }
 
 #content > ul {
