@@ -2,7 +2,7 @@
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime, toggle
+from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime, adapt_datetime, toggle
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit
 from psycopg2.sql import SQL
@@ -16,6 +16,8 @@ class WebSeminar(object):
             if data is None:
                 raise ValueError("Seminar %s does not exist" % shortname)
             data = dict(data.__dict__)
+        elif data is not None:
+            data = dict(data)
         self.new = (data is None)
         if self.new:
             self.shortname = shortname
@@ -45,6 +47,13 @@ class WebSeminar(object):
                                    'display': False,
                                    'contact': False}]
         else:
+            # The output from psycopg2 seems to always be given in the server's time zone
+            if data.get('timezone'):
+                tz = pytz.timezone(data['timezone'])
+                if data.get('start_time'):
+                    data['start_time'] = adapt_datetime(data['start_time'], tz)
+                if data.get('end_time'):
+                    data['end_time'] = adapt_datetime(data['end_time'], tz)
             self.__dict__.update(data)
         if organizer_data is None:
             organizer_data = list(db.seminar_organizers.search({'seminar_id': self.shortname}, sort=['order']))

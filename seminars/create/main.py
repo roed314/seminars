@@ -99,6 +99,10 @@ def save_seminar():
     # Have to get time zone first
     data['timezone'] = tz = raw_data.get('timezone')
     tz = pytz.timezone(tz)
+    def replace(a):
+        if a == "timestamp with time zone":
+            return "time"
+        return a
     for col in db.seminars.search_cols:
         if col in data: continue
         try:
@@ -106,7 +110,7 @@ def save_seminar():
             if not val:
                 data[col] = None
             else:
-                data[col] = process_user_input(val, db.seminars.col_type[col], tz=tz)
+                data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
             return make_error(shortname, col, err)
     if not data['institutions']: # need [] not None
