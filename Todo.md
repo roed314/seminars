@@ -51,6 +51,12 @@ Content creation
 
 1. **Placeholder in city name for institution**
 
+1. **Add details links back in to view seminars**
+
+1. **When viewing talk as a seminar organizer, keep seminar links**
+
+1. **Confirmation message on successful schedule save**
+
 1. Warning if user tries to close schedule without saving
 
 1. When adding speakers, could give Speaker's math sci net id.
@@ -88,9 +94,15 @@ Viewing and searching
 
 1. **Improve institution page.**
 
+1. **Restrict by topic not working.**
+
+1. **Make filter checkboxes toggles.**
+
 1. Add search on time (rather than datetime) so that users can accomodate their local schedules
 
 1. Paginate search results.
+
+1. Manage submenu is not idempotent
 
 1. When searching, should have ability to flip sort order (default depends on whether past or future)
 
