@@ -186,7 +186,7 @@ class TalkSearchArray(SearchArray):
                           label="Speaker",
                           colspan=(1, 2, 1),
                           width=textwidth,
-                          example="Diophanti Alexandrini")
+                          example="Pythagoras o Samios")
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
@@ -243,7 +243,7 @@ class SemSearchArray(SearchArray):
 
         ## online only?
         online = Toggle(name="seminar_online", label="Online")
-        offline = Toggle(name="seminar_offline", label="Offline")
+        # offline = Toggle(name="seminar_offline", label="Offline")
 
         ## keywords for seminar or talk
         keywords = TextBox(
@@ -361,7 +361,6 @@ def show_seminar(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
         return render_template("404.html", title="Seminar not found")
-    organizers = list(db.seminar_organizers.search({"seminar_id": shortname}))
     talks = talks_search({"display": True, "seminar_id": shortname}, projection=3)
     now = get_now()
     future = []

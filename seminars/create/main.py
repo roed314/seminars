@@ -83,7 +83,7 @@ def save_seminar():
         return render_template("edit_seminar.html",
                                seminar=seminar,
                                title="Edit seminar error",
-                               section="Create",
+                               section=manage,
                                institutions=institutions(),
                                lock=None)
 
@@ -428,7 +428,8 @@ def save_seminar_schedule():
     if resp is not None:
         return resp
     schedule_count = int(raw_data["schedule_count"])
-    update_times = bool(raw_data.get("update_times"))
+    # FIXME not being used
+    # update_times = bool(raw_data.get("update_times"))
     curmax = talks_max('seminar_ctr', {'seminar_id': shortname})
     if curmax is None:
         curmax = 0
@@ -443,7 +444,7 @@ def save_seminar_schedule():
                 try:
                     date = process_user_input(date, "date", tz=seminar.tz)
                 except ValueError as err:
-                    flash_error("invalid date %s: {0}".format(err), time_input)
+                    flash_error("invalid date %s: {0}".format(err), date)
                     redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301)
             else:
                 date = None
@@ -483,8 +484,8 @@ def save_seminar_schedule():
             else:
                 start_time = seminar.start_time
                 end_time = seminar.end_time
-            data["start_time"] = localize(datetime.datetime.combine(date, start_time), seminar.tz)
-            data["end_time"] = localize(datetime.datetime.combine(date, end_time), seminar.tz)
+            data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
+            data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
             data["seminar_ctr"] = ctr
             ctr += 1
             new_version = WebTalk(talk.seminar_id, ctr, data=data)
