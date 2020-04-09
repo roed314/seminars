@@ -480,7 +480,7 @@ def save_seminar_schedule():
                     end_time = process_user_input(time_split[1], "time", seminar.tz).time()
                 except ValueError as err:
                     flash_error("invalid time range %s: {0}".format(err), time_input)
-                    redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+                    return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
             else:
                 start_time = seminar.start_time.time()
                 end_time = seminar.end_time.time()

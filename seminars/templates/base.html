@@ -51,6 +51,8 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script src="https://unpkg.com/select-pure@latest/dist/bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='select_pure.css') }}" />
 
     <!-- for ics ical and google calendar logos -->
     <script src="https://kit.fontawesome.com/7144df9805.js"></script>
@@ -67,6 +69,7 @@
 
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.dataTables.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.dataTables.plugins.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.markitup.markdown.js') }}"></script>
 
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 

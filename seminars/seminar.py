@@ -8,6 +8,8 @@ from lmfdb.backend.utils import DelayCommit
 from psycopg2.sql import SQL
 import pytz
 from sage.misc.lazy_attribute import lazy_attribute
+from datetime import datetime, date
+combine = datetime.combine
 
 
 class WebSeminar(object):
@@ -91,31 +93,87 @@ class WebSeminar(object):
 
     # We also support not specifying times (though in this case you can't add either time)
 
+    @property
+    def tz(self):
+        return pytz.timezone(self.timezone)
+
     @lazy_attribute
     def start_time(self):
-        if self.start_timestamp is None:
-            return None
+        if self.start_timestamp is None: return None
         return self.start_timestamp.time()
 
     @lazy_attribute
     def end_time(self):
-        if self.end_timestamp is None:
-            return None
+        if self.end_timestamp is None: return None
         return self.end_timestamp.time()
 
     @lazy_attribute
     def start_timestamp(self):
-        if self.start_time is None:
-            return None
-        return self.tz.localize(datetime.datetime.combine(datetime.datetime(2020, 1, 1), self.start_time))
+        if self.start_time is None: return None
+        return self.tz.localize(combine(date(2020, 1, 1), self.start_time))
 
     @lazy_attribute
     def end_timestamp(self):
-        if self.end_time is None:
-            return None
-        return self.tz.localize(datetime.datetime.combine(datetime.datetime(2020, 1, 1), self.end_time))
+        if self.end_time is None: return None
+        return self.tz.localize(combine(date(2020, 1, 1), self.end_time))
 
-    # These functions return time zone aware time objects in either the user's time zone or the seminar's time zone.
+    # These functions return time zone aware time objects in either
+    # the user's time zone or the seminar's time zone.
+    # Be careful: the date input is the date of the SEMINAR
+
+    def start_time_seminar(self, date):
+        if self.start_time is None: return None
+        return self.tz.localize(combine(date, self.start_time))
+
+    def end_time_seminar(self, date):
+        if self.end_time is None: return None
+        return self.tz.localize(combine(date, self.end_time))
+
+    def start_time_user(self, date):
+        if self.start_time is None: return None
+        return self.start_time_seminar(date).astimezone(current_user.tz)
+
+    def end_time_user(self, date):
+        if self.end_time is None: return None
+        return self.end_time_seminar(date).astimezone(current_user.tz)
+
+    ## This function
+
+    def show_day(self, truncate=True):
+        if self.weekday is None:
+            return ""
+        elif self.start_time is None:
+            d = weekdays[self.weekday]
+        else:
+            d = weekdays[adapt_weektime(self.start_time, self.tz, weekday=self.weekday)[0]]
+        if truncate:
+            return d[:3]
+        else:
+            return d
+
+    def _show_time(self, t, adapt):
+        if t:
+            if adapt and self.weekday:
+                t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
+            return t.strftime("%-H:%M")
+        else:
+            return ""
+
+    def show_start_time(self, adapt=True):
+        return self._show_time(self.start_time, adapt)
+
+    def show_end_time(self, adapt=True):
+        return self._show_time(self.end_time, adapt)
+
+    def show_weektime_and_duration(self, adapt=True):
+        s = self.show_day(truncate=False)
+        if s:
+            s += ", "
+        s += self.show_start_time(adapt=adapt)
+        if self.start_time and self.end_time:
+            s += "-" + self.show_end_time(adapt=adapt)
+        return s
+
 
     def show_topics(self):
         if self.topics:
@@ -160,45 +218,6 @@ class WebSeminar(object):
             return "/".join(links)
         else:
             return ""
-
-    @property
-    def tz(self):
-        return pytz.timezone(self.timezone)
-
-    def show_day(self, truncate=True):
-        if self.weekday is None:
-            return ""
-        elif self.start_time is None:
-            d = weekdays[self.weekday]
-        else:
-            d = weekdays[adapt_weektime(self.start_time, self.tz, weekday=self.weekday)[0]]
-        if truncate:
-            return d[:3]
-        else:
-            return d
-
-    def _show_time(self, t, adapt):
-        if t:
-            if adapt and self.weekday:
-                t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
-            return t.strftime("%-H:%M")
-        else:
-            return ""
-
-    def show_start_time(self, adapt=True):
-        return self._show_time(self.start_time, adapt)
-
-    def show_end_time(self, adapt=True):
-        return self._show_time(self.end_time, adapt)
-
-    def show_weektime_and_duration(self, adapt=True):
-        s = self.show_day(truncate=False)
-        if s:
-            s += ", "
-        s += self.show_start_time(adapt=adapt)
-        if self.start_time and self.end_time:
-            s += "-" + self.show_end_time(adapt=adapt)
-        return s
 
     def oneline(self, include_institutions=True, include_datetime=True, include_description=True, include_subscribe=True):
         cols = []
