@@ -64,17 +64,15 @@ Content creation
 Viewing and searching
 =====================
 
+1. **flask error on date error**
+
 1. **Filter option to show personal calendar**
 
-1. **replace like by ilike **
-
-1. **using enter to submit search form always displays Seminars**
+1. **replace like by ilike**
 
 1. **Uniformize from saved events to favorites** should the headers say Favorite? or Saved?
 
 1. **Add type (conference/seminar) to seminar search.**
-
-1. **Remove count and start.**
 
 1. **Set table min-width for all pages.**
 
@@ -133,9 +131,7 @@ Localization
 Onboarding
 ==========
 
-1. Write the About page
-
-1. Add to the FAQ page
+1. **add links to FAQ**
 
 1. Create a message shown to a user when they first visit the site (detected by absence of the timezone cookie); make sure that information also included in About page
 
