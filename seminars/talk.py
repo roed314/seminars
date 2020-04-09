@@ -316,10 +316,14 @@ class WebTalk(object):
             "subject": "%s: title and abstract" % self.seminar.name,
         }
         email_to = self.speaker_email if self.speaker_email else ""
-        return 'You can <a href="mailto:%s?%s" target="_blank">email</a> this <a href="%s">link</a> to anyone you want to allow to edit this talk without logging in.' % (
-            email_to,
-            urlencode(data, quote_via=quote),
-            self.speaker_link(),
+        return  """
+<p>
+ To let someone edit this page, send them this link:</br>
+<a href="{link}">{link}</a> </br>
+<a href="mailto:{email_to}?{msg}" target="_blank">Email edit link to speaker</a>""".format(
+            link=self.speaker_link(),
+            email_to=email_to,
+            msg = urlencode(data, quote_via=quote),
         )
 
     def event(self, user):
