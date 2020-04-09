@@ -86,6 +86,7 @@ h2.link > a {
     color: {{color.footer_text}};
     position: absolute;
     bottom: 0;
+    min-width: 100%;
 }
 
 #content > ul {
