@@ -2,15 +2,11 @@ Questions
 =========
 1. Deepkink to hidden seminar?
 
-1. when does a seminar become public? (create content and then swap curators)
-
-1. When does a seminar become public?
-
 
 Bugs
 ====
 
-1. Delete
+1. Delete talk
 
 1. swap curator fails
 
@@ -43,6 +39,8 @@ Admin
 
 Content creation
 ================
+
+1. **add text explaing hidden seminar**
 
 1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 

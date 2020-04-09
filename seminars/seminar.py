@@ -256,20 +256,20 @@ class WebSeminar(object):
                 db.seminars.delete({'shortname': self.shortname})
                 db.seminar_organizers.delete({'seminar_id': self.shortname})
                 for elt in db.users.search(
-                        {'seminar_subscriptions': {'$in': self.shortname}},
-                        ['id', seminar_subscriptions]):
+                    {'seminar_subscriptions': {'$in': self.shortname}},
+                        ['id', "seminar_subscriptions"]):
                     elt['seminar_subscriptions'].remove(self.shortname)
-                    db.update({'id': elt['id'], {'seminar_subscriptions': elt['seminar_subscriptions']})
+                    db.users.update({'id': elt['id']},
+                                    {'seminar_subscriptions': elt['seminar_subscriptions']})
                 for i, talk_sub in db._execute(SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
                     *map(IdentifierWrapper,
                          ['id', 'talk_subscriptions', 'users', 'talk_subscriptions'])),
-                                       [self.shortname]):
+                                               [self.shortname]):
                     talk_sub.remove(self.shortname)
                     db.update({'id': i, {'talk_subscriptions': talk_sub})
-
-            return True
-        else:
-            return False
+                               return True
+                               else:
+                               return False
 
 
 def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
