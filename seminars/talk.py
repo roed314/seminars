@@ -311,7 +311,7 @@ class WebTalk(object):
         Creates a mailto link with instructions on editing the talk.
         """
         data = {
-            "body": "Dear %s,\nYou can edit your upcoming talk using the the following link: %s.\n\nYours,\n%s"
+            "body": "Dear %s,\nYou can edit your upcoming talk using the following link:\n%s\n\nBest,\n%s"
             % (self.speaker, self.speaker_link(), current_user.name),
             "subject": "%s: title and abstract" % self.seminar.name,
         }
