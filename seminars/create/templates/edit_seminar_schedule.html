@@ -25,7 +25,6 @@
         <th>Speaker</th>
         <th>Email</th>
         <th>Affiliation</th>
-        <th>Title</th>
         <th></th>
       </tr>
     </thead>
@@ -49,7 +48,10 @@
       <td class="affiliationinp">
         <input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" />
       </td>
-      <td class="titleinp">
+    </tr>
+    <tr>
+      <th>Title</th>
+      <td class="titleinp" colspan='4'>
         <input name="title{{i}}" value="{{ talk.title | blanknone }}" />
       </td>
       <td>
@@ -58,6 +60,7 @@
       <input type="hidden" name="seminar_ctr{{i}}" value="{{ talk.seminar_ctr }}" />
       <input type="hidden" name="date{{i}}" value="{{ date.isoformat() }}" />
     </tr>
+    <tr><td class="spacing"></td></tr>
     {% endfor %}
     {% else %}
     <tr>
@@ -80,13 +83,17 @@
       <td class="affiliationinp">
         <input name="speaker_affiliation{{i}}" value="{{ raw_data['speaker_affiliation%s'%i] | blanknone }}" />
       </td>
-      <td class="titleinp">
+      <tr>
+      </tr>
+      <th>Title</th>
+      <td class="titleinp" colspan='4'>
         <input name="title{{i}}" value="{{ raw_data['title%s'%i] }}" />
       </td>
       <td></td>
       <input type="hidden" name="seminar_ctr{{i}}" value="" />
       <input type="hidden" name="date{{i}}" value="{{ date.isoformat() }}" />
     </tr>
+    <tr><td class="spacing"></td></tr>
     {% endif %}
     {% endfor %}
     <tr>
