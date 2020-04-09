@@ -71,7 +71,7 @@
             </div>
           {% endif %} {# seminar.new #}
           <div class="manage-nav{% if subsection == 'editsem' %} manage-active{% endif %}">
-            <a href="{{ url_for('create.edit_seminar', shortname=seminar.shortname) }}">{% if seminar.new %}Create{% else %}Edit{% endif %} {% if subsection == 'edittalk' %}seminar{% else %}properties{% endif %}</a>
+            <a href="{{ url_for('create.edit_seminar', shortname=seminar.shortname) }}">{% if seminar.new %}Create{% else %}Edit{% endif %} {% if subsection in ['edittalk', 'viewtalk'] %}seminar{% else %}properties{% endif %}</a>
           </div>
           <div class="manage-nav{% if subsection == 'view' %} manage-active{% endif %}">
             <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View seminar</a>

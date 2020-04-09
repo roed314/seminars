@@ -19,8 +19,6 @@ Admin
 Content creation
 ================
 
-1. **why is there toke as hidden inpu in edit talk? This makes the link and email button disappear after a save.**
-
 1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
@@ -33,12 +31,6 @@ Content creation
 
 1. **Test creating seminar without being endorsed**
 
-1. **Add button Cancel changes to edit schedule**
-
-1. **Add additional talk into main form, add new fields, maybe one button (if two, do the same thing), not all in one column, flash warning and keep raw data if title/email but no speaker, make details save**
-
-1. **Uniformize on identifier (change places where called shortname)**
-
 1. **Clarify that institution homepage means department homepage via placeholder or e.g.**
 
 1. **Remove aliases**
@@ -46,10 +38,6 @@ Content creation
 1. **Placeholder in city name for institution**
 
 1. **Add details links back in to view seminars**
-
-1. **When viewing talk as a seminar organizer, keep seminar links**
-
-1. **Confirmation message on successful schedule save**
 
 1. Warning if user tries to close schedule without saving
 
@@ -70,8 +58,6 @@ Content creation
 Viewing and searching
 =====================
 
-1. **restrict by topic is broken** CRITICAL
-
 1. **flask error on date error**
 
 1. **Filter option to show personal calendar**
@@ -89,10 +75,6 @@ Viewing and searching
 1. **Add placeholders and e.g. for seminar/talk creation**
 
 1. **Improve institution page.**
-
-1. **Restrict by topic not working.**
-
-1. **Make filter checkboxes toggles.**
 
 1. Add search on time (rather than datetime) so that users can accomodate their local schedules
 
@@ -127,10 +109,6 @@ Knowls
 
 Time zones
 ==========
-
-1. **Fix Alex/Drew's time zone bug**
-
-1. **Fix Vantage time zone**
 
 1. Add checkbox for use institution time when creating seminar.
 

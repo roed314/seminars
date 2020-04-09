@@ -5,7 +5,7 @@ from seminars.users.main import email_confirmed_required
 from seminars import db
 from seminars.app import app
 from seminars.create import create
-from seminars.utils import timezones, process_user_input, check_time, weekdays
+from seminars.utils import timezones, process_user_input, check_time, weekdays, flash_warning
 from seminars.seminar import WebSeminar, seminars_lucky, seminars_lookup, can_edit_seminar
 from seminars.talk import WebTalk, talks_lookup, talks_max, talks_search, talks_lucky, can_edit_talk
 from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types, institution_known
@@ -345,6 +345,8 @@ def save_talk():
     edit_kwds = dict(seminar_id=new_version.seminar_id, seminar_ctr=new_version.seminar_ctr)
     if token:
         edit_kwds['token'] = token
+    else:
+        edit_kwds.pop('token', None)
     return redirect(url_for(".edit_talk", **edit_kwds), 301)
 
 def make_date_data(seminar):
@@ -412,6 +414,7 @@ def edit_seminar_schedule():
                            subsection="schedule",
     )
 
+non_speaker_cols = ["speaker_affiliation", "speaker_email", "title"]
 @create.route("save/schedule/", methods=["POST"])
 def save_seminar_schedule():
     raw_data = request.form
@@ -426,12 +429,7 @@ def save_seminar_schedule():
         curmax = 0
     ctr = curmax + 1
     updated = 0
-    #try:
-    #    start_time = datetime.time.fromisoformat(raw_data["start_time"])
-    #    end_time = datetime.time.fromisoformat(raw_data["end_time"])
-    #except ValueError as err:
-    #    flash_error("Invalid time: %s", err)
-    #    return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)
+    warned = False
     for i in list(range(schedule_count)) + ['X']:
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
         if i == 'X':
@@ -451,7 +449,7 @@ def save_seminar_schedule():
             seminar_ctr = int(seminar_ctr)
             talk = WebTalk(shortname, seminar_ctr, seminar=seminar)
             data = dict(talk.__dict__)
-            for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
+            for col in ["speaker"] + non_speaker_cols:
                 data[col] = process_user_input(raw_data.get("%s%s" % (col, i), ''), 'text', tz=seminar.timezone)
             new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
             if new_version != talk:
@@ -475,7 +473,7 @@ def save_seminar_schedule():
                     end_time = process_user_input(time_split[1], "time with time zone", seminar.tz)
                 except ValueError as err:
                     flash_error("invalid time range %s: {0}".format(err), time_input)
-                    redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301)
+                    redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
             else:
                 start_time = seminar.start_time
                 end_time = seminar.end_time
@@ -485,6 +483,16 @@ def save_seminar_schedule():
             ctr += 1
             new_version = WebTalk(talk.seminar_id, ctr, data=data)
             new_version.save()
+        elif not warned and any(raw_data.get("%s%s" % (col, i), "").strip() for col in non_speaker_cols):
+            warned = True
+            flash_warning("Talks are only saved if you specify a speaker")
 
-    flash("%s talks updated, %s talks created" % (updated, ctr - curmax - 1))
-    return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)
+    if raw_data.get("detailctr"):
+        return redirect(url_for(".edit_talk", seminar_id=shortname, seminar_ctr=int(raw_data.get("detailctr"))), 301)
+    else:
+        if updated or ctr > curmax + 1:
+            flash("%s talks updated, %s talks created" % (updated, ctr - curmax - 1))
+        if warned:
+            return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+        else:
+            return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)

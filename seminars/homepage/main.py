@@ -389,7 +389,7 @@ def show_talk(semid, talkid):
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
         return render_template("404.html", title="Talk not found")
-    kwds = dict(title="View talk", talk=talk, subsection="viewtalk", token=token)
+    kwds = dict(title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token)
     if token:
         kwds["section"] = "Manage"
         # Also want to override top menu

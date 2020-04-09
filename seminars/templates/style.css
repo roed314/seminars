@@ -440,6 +440,34 @@ div.toggler-nav:hover {
     cursor: pointer;
 }
 
+div.inlineh2 {
+    display: inline-block;
+    font-size: 1.5em;
+    margin-block-start: 0.16em;
+    margin-block-end: 0.96em;
+    font-weight: bold;
+}
+
+button.aslink {
+  background: none!important;
+  border: none;
+  padding: 0!important;
+  /*input has OS specific font-family*/
+  color: {{color.col_link}};
+  text-decoration: none;
+  font-family: sans-serif;
+  font-weight: normal;
+  font-size: 15px;
+  cursor: pointer;
+  min-width: 0;
+  border-radius: 0;
+}
+form button.aslink:hover {
+    background: {{ color.a_background_hover }}!important;
+    border: none;
+    
+}
+
 /* TODO: what? */
 #flashes p {
   border-left: 15px solid {{color.knowl_border}};

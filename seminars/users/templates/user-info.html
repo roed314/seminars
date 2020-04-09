@@ -25,8 +25,7 @@
   </form>
 {% else %}
 <h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">Logout</a>)</h1>
-  <h2> Favorite events </h2>
-  <h3> Seminars </h3>
+  <h3> Favorite Seminars </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
     <thead>
@@ -41,7 +40,7 @@
     {% endfor %}
   </table>
   </div>
-  <h3> Talks </h3>
+  <h3> Favorite Talks </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
     <thead>
@@ -62,7 +61,7 @@
   </p>
   {% else %}
   <div>
-      Export to
+      Export favorites to
       <ul class="ical-detail">
         <li class="ical-detail">
           <a href="{{ user.ics_gcal_link }}" target="_blank">

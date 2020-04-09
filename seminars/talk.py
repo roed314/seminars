@@ -245,10 +245,9 @@ class WebTalk(object):
             return True
         return self.seminar_ctr in current_user.talk_subscriptions.get(self.seminar_id, [])
 
-    def edit_link(self):
-        return '<a href="%s">Details</a>' % url_for(
-            "create.edit_talk", seminar_id=self.seminar_id, seminar_ctr=self.seminar_ctr
-        )
+    def details_link(self):
+        # Submits the form and redirects to create.edit_talk
+        return '<button type="submit" class="aslink" name="detailctr" value="%s">Details</button>' % self.seminar_ctr
 
     def user_can_edit(self):
         # Check whether the current user can edit the seminar
