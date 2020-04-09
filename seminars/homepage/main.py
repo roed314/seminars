@@ -196,7 +196,11 @@ class TalkSearchArray(SearchArray):
             width=160 * 2 - 1 * 20,
             example="Monsters University",
         )
-        title = TextBox(name="title", label="Title", colspan=(1, 2, 1), width=textwidth)
+        title = TextBox(name="title",
+                        label="Title",
+                        colspan=(1, 2, 1),
+                        width=textwidth,
+                        example="The proof of the Riemann hypothesis")
         date = TextBox(
             name="daterange",
             id="daterange",
