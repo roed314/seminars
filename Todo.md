@@ -39,6 +39,12 @@ Content creation
 
 1. **Add details links back in to view seminars**
 
+1. **Token keeps showing up when saving a talk**
+
+1. **No good way to add/edit past talks**
+
+1. For detail links in edit schedule, surround with an anchor with a valid href so that hover link revealing and open in new tab works, then disable it with javascript.
+
 1. Warning if user tries to close schedule without saving
 
 1. When adding speakers, could give Speaker's math sci net id.
@@ -172,12 +178,6 @@ Other
 Examples of online seminars we might add
 ========================================
 
-1. Princeton/IAS number theory
-
-1. UCSD
-
-1. Harvard
-
 1. [LAGA](https://www.math.univ-paris13.fr/laga/index.php/fr/pm/seminaires?id=97:seminaire-d-analyse-appliquee-2&catid=76:seminaires-pm-edp)
 
 1. [NASO](https://docs.google.com/spreadsheets/d/1MwTXrguSlEon46UKFV1ZJSeozsOECfUvSL6Othufyvs/edit#gid=0)
@@ -187,6 +187,7 @@ Examples of online seminars we might add
 1. [CRAAG](https://www.daniellitt.com/crag)
 
 1. http://www.unige.ch/math/folks/nikolaev/GlobalPoisson.html
+
 Examples of online conferences we might add
 ===========================================
 
