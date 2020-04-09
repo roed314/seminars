@@ -153,13 +153,13 @@
       </table>
       <h3>Organizers</h3>
       <table>
-        <tr>
-          <td>Email</td>
-          <td>Name</td>
-          <td>Curator</td>
-          <td>Display</td>
-          <td>Contact</td>
-        </tr>
+        <thead>
+          <th>Email</th>
+          <th>Name</th>
+          <th>Curator</th>
+          <th>Display</th>
+          <th>Contact</th>
+        </thead>
         {% for i in range(6) %}
         <tr>
           {% if i < (seminar.organizer_data | length) %}
