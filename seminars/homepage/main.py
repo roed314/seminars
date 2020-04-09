@@ -182,12 +182,17 @@ class TalkSearchArray(SearchArray):
         ## number of results to display
         # count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
 
-        speaker = TextBox(name="speaker", label="Speaker", colspan=(1, 2, 1), width=textwidth)
+        speaker = TextBox(name="speaker",
+                          label="Speaker",
+                          colspan=(1, 2, 1),
+                          width=textwidth,
+                          example="Pythagoras of Samos")
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
+            example="Monsters University",
         )
         title = TextBox(name="title", label="Title", colspan=(1, 2, 1), width=textwidth)
         date = TextBox(
