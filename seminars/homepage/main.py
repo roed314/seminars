@@ -186,7 +186,7 @@ class TalkSearchArray(SearchArray):
                           label="Speaker",
                           colspan=(1, 2, 1),
                           width=textwidth,
-                          example="Pythagoras of Samos")
+                          example="Diophanti Alexandrini")
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
