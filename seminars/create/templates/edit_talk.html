@@ -1,7 +1,7 @@
 {% extends "homepage.html" %}
 {% block content %}
 
-{% if not token %}
+{% if talk.seminar.user_can_edit() %}
 <p>
   {{ talk.send_speaker_link() | safe }}
 </p>

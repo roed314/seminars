@@ -389,10 +389,11 @@ def show_talk(semid, talkid):
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
         return render_template("404.html", title="Talk not found")
-    if (current_user.email_confirmed and
+    if (token or
+        current_user.is_admin() or
+        current_user.email_confirmed and
         (current_user.email in talk.seminar.editors() or
-         current_user.email == talk.speaker_email) or
-        current_user.is_admin()):
+         current_user.email == talk.speaker_email)):
         section = "Manage"
     else:
         section = None
