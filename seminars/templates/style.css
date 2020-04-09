@@ -463,9 +463,8 @@ button.aslink {
   border-radius: 0;
 }
 form button.aslink:hover {
-    background: {{ color.a_background_hover }}!important;
-    border: none;
-    
+  background: {{ color.a_background_hover }}!important;
+  border: none;
 }
 
 /* TODO: what? */
@@ -609,7 +608,7 @@ body > .debug {
 #content {
   margin-top: 20px;
   font-size: 95%;
-  line-height: 135%;
+  /* line-height: 135%; */
   padding-right: 10px;
 }
 
