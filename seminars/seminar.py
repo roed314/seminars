@@ -186,8 +186,8 @@ class WebSeminar(object):
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
         return (current_user.is_admin() or
-                current_user.email_confirmed and
-                current_user.email in self.editors())
+                (current_user.email_confirmed and
+                current_user.email in self.editors()))
 
     def _show_editors(self, label, negate=False):
         editors = []
@@ -229,10 +229,12 @@ class WebSeminar(object):
             return ""
         return time.strftime("%-H:%M")
 
-    def talks(self):
+    def talks(self, projection=1):
         from seminars.talk import talks_search # avoid import loop
-        return talks_search({'seminar_id': self.shortname})
-
+        query = {'seminar_id': self.shortname, 'display': self.display}
+        if self.user_can_edit():
+            query.pop('display')
+        return talks_search(query, projection=projection)
 
 
 def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):

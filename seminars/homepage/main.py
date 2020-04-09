@@ -363,7 +363,7 @@ def show_seminar(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
         return render_template("404.html", title="Seminar not found")
-    talks = talks_search({"display": True, "seminar_id": shortname}, projection=3)
+    talks = seminar.talks(projection=3)
     now = get_now()
     future = []
     past = []
