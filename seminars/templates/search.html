@@ -68,7 +68,7 @@ $('#talksform').submit(doubleSubmit)
 $('#seminarsform').submit(doubleSubmit)
 function doubleSubmit(evt) {
   var other;
-  if( $(this).id == 'seminarsform' ) {
+  if( $(this)[0].id == 'seminarsform' ) {
     other = $('#talksform');
   } else {
     other = $('#seminarsform');

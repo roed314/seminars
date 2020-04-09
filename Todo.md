@@ -1,6 +1,8 @@
 Admin
 =====
 
+1. Disable case sensitivity for emails
+
 1. Add ability to request endorsement, then update public_users.html with a link.
 
 1. Add ability to deal with spam: admins should be able to easily hide a page, which should shut down the editing ability of the user who changed it last

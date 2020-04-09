@@ -8,6 +8,7 @@ from seminars import db
 from sage.misc.cachefunc import cached_function
 from lmfdb.backend.utils import IdentifierWrapper
 from lmfdb.utils import flash_error
+from lmfdb.utils.search_boxes import SearchBox
 from psycopg2.sql import SQL
 from markupsafe import Markup, escape
 
@@ -253,12 +254,25 @@ def process_user_input(inp, typ, tz):
         raise ValueError("Unrecognized type %s" % typ)
 
 
-def toggle(tglid, value, checked=False, classes="", onchange=""):
+def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
     if classes:
         classes += " "
     return """
-<input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" onchange="{onchange}"{checked}>
+<input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" onchange="{onchange}" name="{name}" {checked}>
 <label class="tgl-btn" for="{tglid}"></label>
-""".format(tglid=tglid, value=value, checked="checked" if checked else "", classes=classes, onchange=onchange)
+""".format(tglid=tglid,
+           value=value,
+           checked="checked" if checked else "",
+           classes=classes,
+           onchange=onchange,
+           name=name)
 
 
+class Toggle(SearchBox):
+    def _input(self, info=None):
+        main = toggle(tglid="toggle_%s" % self.name,
+                      name=self.name,
+                      value="yes",
+                      checked=info is not None and info.get(self.name, False)
+                      )
+        return '<span style="display: inline-block">%s</span>' % (main,)

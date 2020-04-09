@@ -2,7 +2,7 @@ from seminars.app import app
 from seminars import db
 from seminars.talk import WebTalk, talks_search, talks_lucky
 from seminars.seminar import seminars_lucky
-from seminars.utils import topics, toggle
+from seminars.utils import topics, toggle, Toggle
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search
@@ -17,7 +17,6 @@ from lmfdb.utils import (
     SearchArray,
     TextBox,
     SelectBox,
-    CheckBox,
     to_dict,
     search_wrap,
     flash_error,
@@ -57,6 +56,8 @@ def parse_institution_talk(info, query, prefix="talk"):
 def parse_online(info, query, prefix):
     if info.get(prefix + "_online") == "yes":
         query["online"] = True
+    else:
+        query["online"] = False
 
 def parse_offline(info, query, prefix):
     if info.get(prefix + "_offline") == "yes":
@@ -161,13 +162,14 @@ class TalkSearchArray(SearchArray):
         )
 
         ## online only?
-        online = CheckBox(name="talk_online", label="Online")
-        offline = CheckBox(name="talk_offline", label="Offline")
+        online = Toggle(name="talk_online", label="Online")
+        offline = Toggle(name="talk_offline", label="Offline")
 
         ## keywords for seminar or talk
         keywords = TextBox(
             name="talk_keywords",
             label="Keywords",
+            knowl="keywords",
             colspan=(1, 2, 1),
             width=textwidth,
         )
@@ -204,7 +206,7 @@ class TalkSearchArray(SearchArray):
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
-        video = CheckBox(name="video", label="Has video")
+        video = Toggle(name="video", label="Has video")
         self.array = [
             [topic, keywords],
             [institution, title],
@@ -242,8 +244,8 @@ class SemSearchArray(SearchArray):
         )
 
         ## online only?
-        online = CheckBox(name="seminar_online", label="Online")
-        offline = CheckBox(name="seminar_offline", label="Offline")
+        online = Toggle(name="seminar_online", label="Online")
+        offline = Toggle(name="seminar_offline", label="Offline")
 
         ## keywords for seminar or talk
         keywords = TextBox(
