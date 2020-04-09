@@ -2478,7 +2478,7 @@ table.qexp-table td.output {
 }
 
 input::placeholder {
-    color: #cccccc;
+    color: #999;
 }
 
 .table_rotate {

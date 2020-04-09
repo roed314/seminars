@@ -13,6 +13,12 @@
 
 {% if seminar.weekday is not none or seminar.start_time %}<p>{{ seminar.show_weektime_and_duration() }}</p>{% endif %}
 
+{% if seminar.homepage %}
+<p>
+{{ seminar.show_homepage() | safe }}
+</p>
+{% endif %}
+
 <table>
   {{ seminar.show_organizers() | safe }}
   {{ seminar.show_curators() | safe }}

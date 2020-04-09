@@ -118,7 +118,7 @@ class PostgresUserTable(PostgresSearchTable):
             raise ValueError("user does not exist")
         if not data:
             raise ValueError("no data to save")
-        # FIXME: update email on every other table
+        # FIXME: update email on every other tables, seminar_subscriptions, seminars.owner
         if 'new_email' in data:
             data['email'] = data.pop('new_email')
             if self.lookup(data['email'], 'id'):
