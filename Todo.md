@@ -19,8 +19,6 @@ Admin
 Content creation
 ================
 
-1. **need parsing for date and time  for the edit schedule, when there is no date and time set for the seminar, see flasklog** CRITICAL
-
 1. **why is there toke as hidden inpu in edit talk? This makes the link and email button disappear after a save.**
 
 1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**

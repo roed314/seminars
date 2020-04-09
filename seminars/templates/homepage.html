@@ -86,7 +86,11 @@
             {% endif %}
           </div>
           <div class="manage-nav{% if subsection == 'edittalk' %} manage-active{% endif %}">
+            {% if talk.seminar.user_can_edit() %}
             <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr) }}">Edit talk</a>
+            {% else %}
+            <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr, token=token) }}">Edit talk</a>
+            {% endif %}
           </div>
         {% endif %} {# talk #}
       </div>
