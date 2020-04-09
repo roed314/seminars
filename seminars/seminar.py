@@ -266,7 +266,7 @@ class WebSeminar(object):
                          ['id', 'talk_subscriptions', 'users', 'talk_subscriptions'])),
                                                [self.shortname]):
                     talk_sub.remove(self.shortname)
-                    db.update({'id': i, {'talk_subscriptions': talk_sub})
+                    db.update({'id': i}, {'talk_subscriptions': talk_sub})
                                return True
                                else:
                                return False
