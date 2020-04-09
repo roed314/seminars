@@ -27,6 +27,8 @@ class WebTalk(object):
             if data is None:
                 raise ValueError("Talk %s/%s does not exist" % (semid, semctr))
             data = dict(data.__dict__)
+        elif data is not None:
+            data = dict(data)
         if seminar is None:
             seminar = WebSeminar(semid)
         self.seminar = seminar
@@ -60,6 +62,13 @@ class WebTalk(object):
                         "Need to update talk code to account for schema change"
                     )
         else:
+            # The output from psycopg2 seems to always be given in the server's time zone
+            if data.get('timezone'):
+                tz = pytz.timezone(data['timezone'])
+                if data.get('start_time'):
+                    data['start_time'] = adapt_datetime(data['start_time'], tz)
+                if data.get('end_time'):
+                    data['end_time'] = adapt_datetime(data['end_time'], tz)
             self.__dict__.update(data)
 
     def __repr__(self):

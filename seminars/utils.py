@@ -224,10 +224,15 @@ def process_user_input(inp, typ, tz):
     if inp is None:
         return None
     if typ == 'timestamp with time zone':
-        # Need to sanitize more, include time zone
         return localize_time(parse_time(inp), tz)
-    elif typ == 'time with time zone':
-        return localize_time(parse_time(inp), tz).time()
+    elif typ == 'time':
+        # Note that parse_time, when passed a time with no date, returns
+        # a datetime object with the date set to today.  This could cause different
+        # relative orders around daylight savings time, so we store all times
+        # as datetimes on Jan 1, 2020.
+        t = parse_time(inp)
+        t = t.replace(year=2020, month=1, day=1)
+        return localize_time(t, tz)
     elif typ == 'date':
         return parse_time(inp).date()
     elif typ == 'boolean':
