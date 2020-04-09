@@ -389,23 +389,20 @@ def show_talk(semid, talkid):
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
         return render_template("404.html", title="Talk not found")
-    if (token or
-        current_user.is_admin() or
-        current_user.email_confirmed and
-        (current_user.email in talk.seminar.editors() or
-         current_user.email == talk.speaker_email)):
-        section = "Manage"
-    else:
-        section = None
-    return render_template(
-        "talk.html",
-        title="View talk",
-        talk=talk,
-        section=section,
-        subsection='viewtalk',
-        token=token,
-    )
-
+    kwds = dict(title="View talk", talk=talk, subsection="viewtalk", token=token)
+    if token:
+        kwds["section"] = "Manage"
+        # Also want to override top menu
+        from seminars.utils import top_menu
+        menu = top_menu()
+        menu[2] = (url_for("create.index"), "", manage)
+        kwds["top_menu"] = menu
+    elif (current_user.is_admin() or
+          current_user.email_confirmed and
+          (current_user.email in talk.seminar.editors() or
+           current_user.email == talk.speaker_email)):
+        kwds["section"] = "Manage"
+    return render_template("talk.html", **kwds)
 
 @app.route("/institution/<shortname>/")
 def show_institution(shortname):
