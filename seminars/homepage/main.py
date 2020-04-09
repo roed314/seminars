@@ -395,7 +395,7 @@ def show_talk(semid, talkid):
         # Also want to override top menu
         from seminars.utils import top_menu
         menu = top_menu()
-        menu[2] = (url_for("create.index"), "", manage)
+        menu[2] = (url_for("create.index"), "", "Manage")
         kwds["top_menu"] = menu
     elif (current_user.is_admin() or
           current_user.email_confirmed and
