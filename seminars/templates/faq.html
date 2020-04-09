@@ -5,7 +5,7 @@
 
 <div class="text_content">
 
-<ol>
+<ul>
   <li> How do I add things to the FAQ?
     <br>
     <p> Ask questions via the <a href="{{feedbackpage}}" target="_blank">Feedback page</a>!</p>
@@ -22,9 +22,9 @@
   </li>
   <li> What are the benefits of <a href="{{ url_for('user.register') }}">registering</a>?
     <br>
-    <ol><li> Registered users can save seminars and talks to their favorites.  Then on the <a href="{{ url_for("index") }}">front page</a> they can click "Show only saved events" to display only those.  Moreover, on the Account page, they can export these to their own calendars.</li>
+    <p><ol><li> Registered users can save seminars and talks to their favorites.  Then on the <a href="{{ url_for("index") }}">front page</a> they can click "Show only saved events" to display only those.  Moreover, on the Account page, they can export these to their own calendars.</li>
       <li> Registered users, once endorsed, can create their own seminars and conferences for others to see.</li>
-    </ol>
+    </ol></p>
   </li>
   <li> If I export seminars to my Google calendar, do I have to export them again every week to see the latest talks?
     <br>
@@ -32,10 +32,10 @@
   </li>
   <li> How do I create a new seminar?
     <br>
-    <ol><li><a href="{{ url_for('user.register') }}">Register</a> for an account.</li>
+    <p><ol><li><a href="{{ url_for('user.register') }}">Register</a> for an account.</li>
       <li>Get your account endorsed by some other endorsed user.  (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
       <li>Click on the "Create" tab and follow the instructions there.  (Note: After creating your first seminar, the "Create" tab will be renamed as "Manage".)</li>
-    </ol>
+    </ol></p>
   </li>
    <li> How do I create a new conference?
      <br>
@@ -45,7 +45,7 @@
     <br>
     <p> If it meets every other week on the same day, set the Frequency to 14 in the "Edit properties" page for the seminar.  If it meets on different days of the week, you won't be able to use the default dates in the "Edit schedule" page, but you can still add talks one by one.</p>
   </li>
-</ol>
+</ul>
 
 </div>
 
