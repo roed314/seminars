@@ -40,15 +40,13 @@
     <thead>
       <th>View</th>
       <th colspan="2" style="border-left: solid 1px;text-align: center;">Edit</th>
-      <th colspan="1" style="border-left: solid 1px;text-align: center;">View</th>
     </thead>
     <tbody>
       {% for elt in list %}
       <tr>
-        <td> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>{{elt.name}}</a>{% if elt.archived %} (archived){% endif %} </td>
+        <td> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.name}}</a>{% if elt.archived %} (archived){% endif %} </td>
         <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>Schedule</a></td>
         <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>Properties</a></td>
-        <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a></td>
       </tr>
       {% endfor %}
     </tbody>

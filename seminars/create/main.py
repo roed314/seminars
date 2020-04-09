@@ -248,8 +248,8 @@ def edit_talk():
         tz = pytz.timezone(talk.seminar.timezone)
         date = process_user_input(data["date"], "date", tz)
         try:
-            start_time = process_user_input(data.get("start_time"), "time with time zone", tz).time()
-            end_time = process_user_input(data.get("end_time"), "time with time zone", tz).time()
+            start_time = process_user_input(data.get("start_time"), "time with time zone", tz)
+            end_time = process_user_input(data.get("end_time"), "time with time zone", tz)
             start_time = datetime.datetime.combine(date, start_time)
             end_time = datetime.datetime.combine(date, end_time)
         except ValueError:
@@ -416,15 +416,27 @@ def save_seminar_schedule():
     if curmax is None:
         curmax = 0
     ctr = curmax + 1
+    updated = 0
     #try:
     #    start_time = datetime.time.fromisoformat(raw_data["start_time"])
     #    end_time = datetime.time.fromisoformat(raw_data["end_time"])
     #except ValueError as err:
     #    flash_error("Invalid time: %s", err)
     #    return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)
-    for i in range(schedule_count):
+    for i in list(range(schedule_count)) + ['X']:
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
-        date = datetime.date.fromisoformat(raw_data["date%s" % i])
+        if i == 'X':
+            date = raw_data.get("dateX").strip()
+            if date:
+                try:
+                    date = process_user_input(date, "date", tz=seminar.tz)
+                except ValueError as err:
+                    flash_error("invalid date %s: {0}".format(err), time_input)
+                    redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301)
+            else:
+                date = None
+        else:
+            date = datetime.date.fromisoformat(raw_data["date%s" % i])
         if seminar_ctr:
             # existing talk
             seminar_ctr = int(seminar_ctr)
@@ -432,13 +444,11 @@ def save_seminar_schedule():
             data = dict(talk.__dict__)
             for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
                 data[col] = process_user_input(raw_data.get("%s%s" % (col, i), ''), 'text', tz=seminar.timezone)
-            #if update_times:
-            #    data["start_time"] = datetime.datetime.combine(date, start_time)
-            #    data["end_time"] = datetime.datetime.combine(date, end_time)
             new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
             if new_version != talk:
+                updated += 1
                 new_version.save()
-        elif raw_data["speaker%s" % i].strip():
+        elif raw_data["speaker%s" % i].strip() and date:
             # new talk
             talk = WebTalk(shortname, seminar=seminar, editing=True)
             data = dict(talk.__dict__)
@@ -467,4 +477,5 @@ def save_seminar_schedule():
             new_version = WebTalk(talk.seminar_id, ctr, data=data)
             new_version.save()
 
+    flash("%s talks updated, %s talks created" % (updated, ctr - curmax - 1))
     return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)

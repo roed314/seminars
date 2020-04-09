@@ -4,6 +4,7 @@ from flask_login import current_user
 from seminars import db
 from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime, toggle
 from lmfdb.utils import flash_error
+from lmfdb.backend.utils import DelayCommit
 from psycopg2.sql import SQL
 import pytz
 
@@ -65,9 +66,10 @@ class WebSeminar(object):
         db.seminars.insert_many([{col: getattr(self, col, None) for col in db.seminars.search_cols}])
 
     def save_organizers(self):
-        for i, rec in enumerate(self.organizer_data):
-            if 'email' in rec:
-                db.seminar_organizers.upsert({'email': rec['email'], 'seminar_id': self.shortname}, rec)
+        # Need to allow for deleting organizers, so we delete them all then add them back
+        with DelayCommit(db):
+            db.seminar_organizers.delete({'seminar_id': self.shortname})
+            db.seminar_organizers.insert_many(self.organizer_data)
 
     def show_topics(self):
         if self.topics:

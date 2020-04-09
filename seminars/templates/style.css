@@ -350,7 +350,7 @@ div.topicselected {
     background: #aaaaaa;
 }
 
-td.date {
+td.date, td.timerange {
     white-space: nowrap;
 }
 td.time, td.subscribe {
@@ -370,6 +370,41 @@ td.speaker {
     /* Title column on talk search results */
     max-width: 600px;
 }
+
+button.textbottom {
+    vertical-align: text-bottom;
+    margin-left: 20px;
+}
+
+#edit-schedule-table td {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+#edit-schedule-table td.date input {
+    width: 80px;
+}
+#edit-schedule-table td.timerange input {
+    width: 90px;
+}
+#edit-schedule-table td.speakerinp input {
+    width: 160px;
+}
+#edit-schedule-table td.emailinp input {
+    width: 180px;
+}
+#edit-schedule-table td.affiliationinp input {
+    width: 160px;
+}
+#edit-schedule-table td.titleinp input {
+    width: 360px;
+}
+
+#edit-schedule-table td.tblh3 {
+    padding: 20px;
+    font-weight: bold;
+    font-size: 20px;
+}
+
 
 #footer a {
     color: #aaaaaa;
@@ -1211,7 +1246,10 @@ table.statgrid td.cnt {
   margin: 0px 0px 5px 0px;
 }
 a.likeknowl {
-  border-bottom: 1px dotted {{ color.knowl_underline }};
+    border-bottom: 1px dotted {{ color.knowl_underline }};
+}
+a.likeknowl:hover {
+    cursor: pointer;
 }
 
 *[knowl] {

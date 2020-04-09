@@ -227,7 +227,7 @@ def process_user_input(inp, typ, tz):
         # Need to sanitize more, include time zone
         return localize_time(parse_time(inp), tz)
     elif typ == 'time with time zone':
-        return localize_time(parse_time(inp), tz)
+        return localize_time(parse_time(inp), tz).time()
     elif typ == 'date':
         return parse_time(inp).date()
     elif typ == 'boolean':

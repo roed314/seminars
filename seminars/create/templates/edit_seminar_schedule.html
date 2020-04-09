@@ -16,7 +16,7 @@
   <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
   <input type="hidden" name="schedule_count" value="{{ all_dates | length }}" />
-  <h2>Upcoming schedule <button type="submit">Save changes</button></h2>
+  <h2>Upcoming schedule <button type="submit" class="textbottom">Save changes</button></h2>
   <table id="edit-schedule-table">
     <thead>
       <tr>
@@ -24,6 +24,7 @@
         <th>Time</th>
         <th>Speaker</th>
         <th>Email</th>
+        <th>Affiliation</th>
         <th>Title</th>
         <th></th>
       </tr>
@@ -36,17 +37,20 @@
       <td class="date">
         {{ date.strftime("%a %b %-d") }}
       </td>
-      <td>
+      <td class="timerange">
         {{ talk.start_time.strftime("%-H:%M") }}-{{ talk.end_time.strftime("%-H:%M") }}
       </td>
-      <td>
-        <input name="speaker{{i}}" value="{{ talk.speaker | blanknone }}" style="width:160px;" />
+      <td class="speakerinp">
+        <input name="speaker{{i}}" value="{{ talk.speaker | blanknone }}" />
       </td>
-      <td>
-        <input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" style="width:160px;" />
+      <td class="emailinp">
+        <input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" />
       </td>
-      <td>
-        <input name="title{{i}}" value="{{ talk.title | blanknone }}" style="width:320px;" />
+      <td class="affiliationinp">
+        <input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" />
+      </td>
+      <td class="titleinp">
+        <input name="title{{i}}" value="{{ talk.title | blanknone }}" />
       </td>
       <td>
         {{ talk.edit_link() | safe }}
@@ -60,21 +64,24 @@
       <td class="date">
         {{ date.strftime("%a %b %-d") }}
       </td>
-      <td>
+      <td class="timerange">
         {% if seminar.start_time and seminar.end_time %}
         {{ seminar.start_time.strftime("%-H:%M") }}-{{ seminar.end_time.strftime("%-H:%M") }}
         {% else %}
-        <input name="time{{i}}" value="{{ raw_data['time%s'%i] }}" style="width:160px;" />
+        <input name="time{{i}}" value="{{ raw_data['time%s'%i] }}" />
         {% endif %}
       </td>
-      <td>
-        <input name="speaker{{i}}" value="{{ raw_data['speaker%s'%i] }}" style="width:160px;" />
+      <td class="speakerinp">
+        <input name="speaker{{i}}" value="{{ raw_data['speaker%s'%i] }}" />
       </td>
-      <td>
-        <input name="speaker_email{{i}}" value="{{ raw_data['speaker_email%s'%i] }}" style="width:160px;" />
+      <td class="emailinp">
+        <input name="speaker_email{{i}}" value="{{ raw_data['speaker_email%s'%i] }}" />
       </td>
-      <td>
-        <input name="title{{i}}" value="{{ raw_data['title%s'%i] }}" style="width:320px;" />
+      <td class="affiliationinp">
+        <input name="speaker_affiliation{{i}}" value="{{ raw_data['speaker_affiliation%s'%i] | blanknone }}" />
+      </td>
+      <td class="titleinp">
+        <input name="title{{i}}" value="{{ raw_data['title%s'%i] }}" />
       </td>
       <td></td>
       <input type="hidden" name="seminar_ctr{{i}}" value="" />
@@ -82,32 +89,36 @@
     </tr>
     {% endif %}
     {% endfor %}
+    <tr>
+      <td colspan="5" class="tblh3">
+        Add talk (time not listed above)
+      </td>
+    </tr>
+    <tr>
+      <td class="date">
+        <input name="dateX" value="{{ raw_data.dateX | blanknone }}" />
+      </td>
+      <td class="timerange">
+        <input name="timeX" value="{% if seminar.start_time and seminar.end_time %}{{ seminar.start_time.strftime('%-H:%M') }}-{{ seminar.end_time.strftime('%-H:%M') }}{% endif %}" />
+      </td>
+      <td class="speakerinp">
+        <input name="speakerX" value="{{ raw_data.speakerX | blanknone }}" />
+      </td>
+      <td class="emailinp">
+        <input name="emailX" value="{{ raw_data.emailX | blanknone }}" />
+      </td>
+      <td class="affiliationinp">
+        <input name="speaker_affiliationX" value="{{ raw_data.speaker_affiliationX | blanknone }}" />
+      </td>
+      <td class="titleinp">
+        <input name="titleX" value="{{ raw_data.titleX | blanknone }}" />
+      </td>
+    </tr>
   </table>
 </form>
 
 <div name="add_new_talk">
-<h3>Add talk (time not listed above)</h3>
 
-<form action="{{ url_for('.edit_talk') }}" method="POST">
-  <input type="hidden" name="seminar_id" value="{{ seminar.shortname }}"/>
-  <table>
-    <tr>
-      <td>Date</td>
-      <td><input name="date" /></td>
-    </tr>
-    <tr>
-      <td>Start time</td>
-      <td><input name="start_time" value="{{ seminar.show_start_time(adapt=False) }}" /></td>
-    </tr>
-    <tr>
-      <td>End time</td>
-      <td><input name="end_time" value="{{ seminar.show_end_time(adapt=False) }}" /></td>
-    </tr>
-    <tr>
-      <td><button type="submit">Add to schedule</button></td>
-    </tr>
-  </table>
-</form>
 </div>
 
 {% endblock %}
