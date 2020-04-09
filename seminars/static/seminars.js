@@ -178,6 +178,9 @@ function toggleFilters(id) {
 }
 
 function apply_striping() {
+  $('#browse-talks tbody tr:visible:odd').css('background', '#E3F2FD');
+  $('#browse-talks tbody tr:visible:even').css('background', 'none');
+  /*
     // Not sure if this gives the same order as $('.talk')
     var rows = $('#browse-talks tbody tr');
     rows.find('tr:visible').each(function(i) {
@@ -187,6 +190,7 @@ function apply_striping() {
             $(this).css('background', 'none');
         };
     });
+  */
 }
 
 function tickClock() {
