@@ -243,6 +243,14 @@ def edit_talk():
         token)
     if resp is not None:
         return resp
+    if token:
+        # Also want to override top menu
+        from seminars.utils import top_menu
+        menu = top_menu()
+        menu[2] = (url_for("create.index"), "", "Manage")
+        extras = {"top_menu": menu}
+    else:
+        extras = {}
     # The seminar schedule page adds in a date and times
     if data.get("date", "").strip():
         tz = pytz.timezone(talk.seminar.timezone)
@@ -266,7 +274,8 @@ def edit_talk():
                            subsection="edittalk",
                            institutions=institutions(),
                            timezones=timezones,
-                           token=token)
+                           token=token,
+                           **extras)
 
 @create.route("save/talk/", methods=["POST"])
 def save_talk():
