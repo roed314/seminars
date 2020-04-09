@@ -120,6 +120,7 @@ def talks_parser(info, query):
     parse_substring(info, query, "title", ["title"])
     parse_date(info, query)
     parse_video(info, query)
+    query['display'] = True
 
 
 def seminars_parser(info, query):
@@ -131,6 +132,7 @@ def seminars_parser(info, query):
     parse_access(info, query, prefix="seminar")
 
     parse_substring(info, query, "name", ["name"])
+    query['display'] = True
 
 
 # Common boxes
