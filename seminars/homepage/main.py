@@ -66,7 +66,7 @@ def parse_substring(info, query, field, qfields, start="%", end="%"):
     if info.get(field):
         kwds = [elt.strip() for elt in info.get(field).split(",") if elt.strip()]
         for qfield in qfields:
-            query[qfield] = {"$or": [{"$like": start + elt + end} for elt in kwds]}
+            query[qfield] = {"$or": [{"$ilike": start + elt + end} for elt in kwds]}
 
 
 def parse_access(info, query, prefix):
