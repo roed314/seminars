@@ -25,6 +25,8 @@ Admin (Edgar)
 Content creation
 ================
 
+1. **why is there toke as hidden inpu in edit talk? This makes the link and email button disappear after a save.**
+
 1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
 
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
@@ -37,11 +39,9 @@ Content creation
 
 1. **Test creating seminar without being endorsed**
 
-1. **Cancel -> Cancel changes**
+1. **Add button Cancel changes to edit schedule**
 
 1. **Add additional talk into main form, add new fields, maybe one button (if two, do the same thing), not all in one column, flash warning and keep raw data if title/email but no speaker, make details save**
-
-1. **On manage homepage, vertical and horizontal lines in table**
 
 1. **Uniformize on identifier (change places where called shortname)**
 

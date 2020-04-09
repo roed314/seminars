@@ -48,9 +48,11 @@
       <div class="manage-nav{% if subsection == 'home' %} manage-active{% endif %}">
         <a href="{{ url_for('create.index') }}">Seminars</a>
       </div>
+      {% if not subsection in ['view', 'editsem', 'schedule', 'viewtalk', 'edittalk'] %}
       <div class="manage-nav{% if subsection == 'institutions' %} manage-active{% endif %}">
         <a href="{{ url_for('list_institutions') }}">Institutions</a>
       </div>
+      {% endif %}
       {% endif %}
       {% if institution %}
       <div class="manage-nav{% if subsection == 'viewinst' %} manage-active{% endif %}">
