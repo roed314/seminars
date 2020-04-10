@@ -154,11 +154,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
 <script type="text/javascript">
 /* prevent accidental closing of browser window */
-window.onbeforeunload = function() {
-  if(unsaved) {
-    return "There are unsaved edits. Really close?";
-  }
-}
+{{ prevent_unsaved() }}
 
 /* register keyhandlers */
 $(function() {

@@ -197,9 +197,10 @@
       {% endif %}
       </form>
 <script type="text/javascript">
+/* prevent accidental closing of browser window */
 {{ prevent_unsaved() }}
 
-/* topic selector */
+/* topic and inst selector */
 const topicOptions = [
   {% for ab, topic in topics %}
   {
