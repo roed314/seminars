@@ -10,9 +10,12 @@ Bugs
 
 1. swap curator fails
 
-1. no changes are done to seminars after endorsement
-
 1. start date for seminar (if doesn't meet weekly)
+
+1. (only) change display on endorsement
+
+1. change email changes email everywhere with a delay commit
+
 
 
 
