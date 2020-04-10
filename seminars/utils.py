@@ -248,11 +248,13 @@ def process_user_input(inp, typ, tz):
     elif typ in ['int', 'smallint', 'bigint', 'integer']:
         return int(inp)
     elif typ == 'text[]':
-        print(inp)
+        print(repr(inp))
         inp = inp.strip()
         if inp:
             if inp[0] == '[' and inp[-1] == ']':
-                return [elt.strip().strip("'") for elt in inp[1:-1].split(',')]
+                res = [elt.strip().strip("'") for elt in inp[1:-1].split(',')]
+                if res == ['']:
+                    return []
             else:
                 # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
                 return [inp]
