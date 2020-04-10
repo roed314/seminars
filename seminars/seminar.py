@@ -227,6 +227,11 @@ class WebSeminar(object):
             return "/".join(links)
         else:
             return ""
+    def show_comments(self):
+        if self.comments:
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+        else:
+            return ""
 
     def oneline(self, include_institutions=True, include_datetime=True, include_description=True, include_subscribe=True):
         cols = []

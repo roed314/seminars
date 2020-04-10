@@ -229,7 +229,10 @@ class WebTalk(object):
         if raw:
             success = self.live_link
         else:
-            success = 'Access <a href="%s">online</a>.' % self.live_link
+            if self.link.startswith('http'):
+                success = 'Access <a href="%s">online</a>.' % self.live_link
+            else:
+                success = 'Livestream comment: %s' % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
@@ -294,6 +297,12 @@ class WebTalk(object):
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
         return "".join("<td %s>%s</td>" % c for c in cols)
+
+    def show_comments(self):
+        if self.comments:
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+        else:
+            return ""
 
     def split_abstract(self):
         return self.abstract.split("\n\n")
