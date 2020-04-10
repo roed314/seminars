@@ -252,7 +252,7 @@ def process_user_input(inp, typ, tz):
         inp = inp.strip()
         if inp:
             if inp[0] == '[' and inp[-1] == ']':
-                return inp[1:-1].split(',')
+                return [elt.strip().strip("'") for elt in inp[1:-1].split(',')]
             else:
                 # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
                 return [inp]
