@@ -29,6 +29,7 @@ class WebTalk(object):
             data = dict(data.__dict__)
         elif data is not None:
             data = dict(data)
+            # avoid Nones
             if data.get('topics') is None:
                 data['topics'] = []
         if seminar is None:

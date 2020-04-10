@@ -21,6 +21,11 @@ class WebSeminar(object):
             data = dict(data.__dict__)
         elif data is not None:
             data = dict(data)
+            # avoid Nones
+            if data.get('topics') is None:
+                data['topics'] = []
+            if data.get('instructions') is None:
+                data['instructions'] = []
         self.new = (data is None)
         if self.new:
             self.shortname = shortname
