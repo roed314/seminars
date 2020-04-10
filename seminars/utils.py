@@ -253,8 +253,10 @@ def process_user_input(inp, typ, tz):
         if inp:
             if inp[0] == '[' and inp[-1] == ']':
                 res = [elt.strip().strip("'") for elt in inp[1:-1].split(',')]
-                if res == ['']:
+                if res == ['']: # was an empty array
                     return []
+                else:
+                    return res
             else:
                 # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
                 return [inp]
