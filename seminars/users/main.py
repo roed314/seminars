@@ -89,7 +89,7 @@ def login(**kwargs):
     email = request.form["email"]
     password = request.form["password"]
     next = request.form["next"]
-    remember = True if request.form["remember"] == "on" else False
+    remember = True # if request.form["remember"] == "on" else False
     user = SeminarsUser(email=email)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
