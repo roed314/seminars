@@ -200,7 +200,7 @@ class TalkSearchArray(SearchArray):
                         label="Title",
                         colspan=(1, 2, 1),
                         width=textwidth,
-                        example="The proof of the Riemann hypothesis")
+                        example="A rigorous definition of rigorous")
         date = TextBox(
             name="daterange",
             id="daterange",
