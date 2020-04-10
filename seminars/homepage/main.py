@@ -5,7 +5,7 @@ from seminars.seminar import seminars_lucky, all_seminars
 from seminars.utils import topics, toggle, Toggle
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
-from seminars.seminar import seminars_search
+from seminars.seminar import seminars_search, all_seminars, all_organizers
 from flask_login import current_user
 import datetime
 import pytz
@@ -339,10 +339,17 @@ def search():
         talk_start = info["talk_start"] = 0
     seminar_query = {}
     seminars_parser(info, seminar_query)
-    info['seminar_results'] = seminars_search(seminar_query, sort=["weekday", "start_time", "name"]) # limit=seminar_count, offset=seminar_start,
+    info['seminar_results'] = seminars_search(
+        seminar_query,
+        sort=["weekday", "start_time", "name"],
+        organizer_dict=all_organizers(),
+    ) # limit=seminar_count, offset=seminar_start,
     talk_query = {}
     talks_parser(info, talk_query)
-    info['talk_results'] = talks_search(talk_query, sort=["start_time", "speaker"]) # limit=talk_count, offset=talk_start, 
+    info['talk_results'] = talks_search(
+        talk_query,
+        sort=["start_time", "speaker"],
+        seminar_dict=all_seminars()) # limit=talk_count, offset=talk_start
     return render_template(
         "search.html",
         title="Search seminars",
