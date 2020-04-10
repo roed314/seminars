@@ -4,6 +4,7 @@ from flask_login import current_user
 from seminars import db
 from seminars.utils import allowed_shortname
 from lmfdb.utils import flash_error
+from collections.abc import Iterable
 
 institution_types = [
     ("university", "University"),
