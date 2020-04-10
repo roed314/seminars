@@ -22,6 +22,7 @@
         <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
         <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
         <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
+        <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
       <table>
         <tr>
           <td>
@@ -48,12 +49,7 @@
         <tr>
           <td>Institutions</td>
           <td>
-            <select name="institutions" style="width:510px;">
-              <option value=""></option>
-              {% for iid, name in institutions %}
-              <option value="{{iid}}"{% if iid in seminar.institutions %} selected{% endif %}>{{name}}</option>
-              {% endfor %}
-            </select>
+            <span id="institution_selector"></span>
           </td>
           <td><a href="{{ url_for('list_institutions') }}" target="_blank">Add new institution</a> (must reload this page afterward)</td>
         </tr>
@@ -213,19 +209,23 @@ const topicOptions = [
   {% endfor %}
 ];
 
+const instOptions = [
+  {% for iid, name in institutions %}
+  {
+    label: "{{ name }}",
+    value: "{{ iid }}",
+  },
+  {% endfor %}
+];
+
+
+
 $(document).ready(function() {
+
 function callback_topics(value) {
   $('input[name="topics"]')[0].value = '[' + value + ']';
-}
-var topicSelector = new SelectPure("#topic_selector", {
-  onChange: callback_topics,
-  options: topicOptions,
-  multiple: true,
-  autocomplete: true,
-  icon: "fa fa-times",
-  inlineIcon: false,
-  value: {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
-  classNames: {
+};
+var classNames = {
     select: "select-pure__select",
     dropdownShown: "select-pure__select--opened",
     multiselect: "select-pure__select--multiple",
@@ -238,9 +238,33 @@ var topicSelector = new SelectPure("#topic_selector", {
     selectedOption: "select-pure__option--selected",
     placeholderHidden: "select-pure__placeholder--hidden",
     optionHidden: "select-pure__option--hidden",
-  },
+  };
+var topicSelector = new SelectPure("#topic_selector", {
+  onChange: callback_topics,
+  options: topicOptions,
+  multiple: true,
+  autocomplete: true,
+  icon: "fa fa-times",
+  inlineIcon: false,
+  value: {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
+  classNames: classNames,
+});
+
+function callback_institutions(value) {
+  $('input[name="institutions"]')[0].value = '[' + value + ']';
+};
+var instSelector = new SelectPure("#institution_selector", {
+  onChange: callback_institutions,
+  options: instOptions,
+  multiple: true,
+  autocomplete: true,
+  icon: "fa fa-times",
+  inlineIcon: false,
+  value: {% if seminar.new or not seminar.institutions %}[]{% else %}{{ seminar.institutions | safe }}{% endif %},
+  classNames: classNames,
 });
 });
+
 
 </script>
 
