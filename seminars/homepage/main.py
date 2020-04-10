@@ -1,7 +1,7 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import WebTalk, talks_search, talks_lucky
-from seminars.seminar import seminars_lucky
+from seminars.seminar import seminars_lucky, all_seminars
 from seminars.utils import topics, toggle, Toggle
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
@@ -292,9 +292,11 @@ class SemSearchArray(SearchArray):
 @app.route("/")
 def index():
     # Eventually want some kind of cutoff on which talks are included.
+    seminars = all_seminars()
     talks = list(talks_search(
         {"display": True, "end_time": {"$gte": datetime.datetime.now()}},
         sort=["start_time"],
+        seminar_dict=all_seminars(),
     ))
     topic_counts = Counter()
     for talk in talks:

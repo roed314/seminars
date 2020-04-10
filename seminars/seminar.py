@@ -8,6 +8,7 @@ from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from psycopg2.sql import SQL
 import pytz
 from sage.misc.lazy_attribute import lazy_attribute
+from collections import defaultdict
 from datetime import datetime, date
 combine = datetime.combine
 
@@ -356,14 +357,23 @@ def seminars_header(include_time=True, include_institutions=True, include_descri
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")
 _maxer = SQL("SELECT MAX({0}) FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")
-def _construct(rec):
-    if isinstance(rec, str):
-        return rec
-    else:
-        return WebSeminar(rec['shortname'], data=rec)
-def _iterator(cur, search_cols, extra_cols, projection):
-    for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
-        yield _construct(rec)
+
+def _construct(organizer_dict):
+    def inner_construct(rec):
+        if isinstance(rec, str):
+            return rec
+        else:
+            return WebSeminar(
+                rec['shortname'],
+                organizer_data=organizer_dict.get(rec['shortname']),
+                data=rec)
+    return inner_construct
+
+def _iterator(organizer_dict):
+    def inner_iterator(cur, search_cols, extra_cols, projection):
+        for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
+            yield _construct(organizer_dict)(rec)
+    return inner_iterator
 
 def seminars_count(query={}):
     """
@@ -380,16 +390,34 @@ def seminars_search(*args, **kwds):
 
     Doesn't support split_ors or raw.  Always computes count.
     """
-    return search_distinct(db.seminars, _selecter, _counter, _iterator, *args, **kwds)
+    organizer_dict = kwds.pop('organizer_dict', {})
+    return search_distinct(db.seminars, _selecter, _counter, _iterator(organizer_dict), *args, **kwds)
 
 def seminars_lucky(*args, **kwds):
     """
     Replacement for db.seminars.lucky to account for versioning, return a WebSeminar object or None.
     """
-    return lucky_distinct(db.seminars, _selecter, _construct, *args, **kwds)
+    organizer_dict = kwds.pop('organizer_dict', {})
+    return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict), *args, **kwds)
 
-def seminars_lookup(shortname, projection=3, label_col='shortname'):
-    return seminars_lucky({label_col: shortname}, projection=projection)
+def seminars_lookup(shortname, projection=3, label_col='shortname', organizer_dict={}):
+    return seminars_lucky({label_col: shortname}, projection=projection, organizer_dict=organizer_dict)
+
+def all_organizers():
+    """
+    A dictionary with keys the seminar ids and values a list of organizer data as fed into WebSeminar.
+    Usable for the organizer_dict input to seminars_search, seminars_lucky and seminars_lookup
+    """
+    organizers = defaultdict(list)
+    for rec in db.seminar_organizers.search({}, sort=['seminar_id', 'order']):
+        organizers[rec['seminar_id']].append(rec)
+    return organizers
+
+def all_seminars():
+    """
+    A dictionary with keys the seminar ids and values a WebSeminar object.
+    """
+    return {seminar.shortname: seminar for seminar in seminars_search({}, organizer_dict=all_organizers())}
 
 def can_edit_seminar(shortname, new):
     """
