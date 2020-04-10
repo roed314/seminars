@@ -45,7 +45,7 @@ class WebTalk(object):
                 seminar, "online", bool(getattr(seminar, "live_link"))
             )
             self.live_ink = getattr(seminar, "live_link")
-            self.talks = getattr(seminar, "talk")
+            self.topics = getattr(seminar, "topics")
             self.deleted = False
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
