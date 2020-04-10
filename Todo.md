@@ -102,6 +102,8 @@ Viewing and searching
 
 1. **Improve institution page.**
 
+1. Add little arxiv colored topic tags in search results.
+
 1. Add search on time (rather than datetime) so that users can accomodate their local schedules
 
 1. Paginate search results.
