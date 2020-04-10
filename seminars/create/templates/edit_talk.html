@@ -23,26 +23,6 @@
       </td>
     </tr>
     <tr>
-      <td>Title</td>
-      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:500px;" /></td>
-    </tr>
-    <tr>
-      <td>Speaker</td>
-      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:500px;" /></td>
-    </tr>
-    <tr>
-      <td>Speaker email</td>
-      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:500px;" /></td>
-    </tr>
-    <tr>
-      <td>Speaker affiliation</td>
-      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:500px;" /></td>
-    </tr>
-    <tr>
-      <td>Speaker homepage</td>
-      <td><input style="width:500px;" name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" /></td>
-    </tr>
-    <tr>
       <td>Topics</td>
       <td>
             <span id="topic_selector"></span>
@@ -80,6 +60,10 @@
       </td>
     </tr>
     <tr>
+      <td>Livestream link</td>
+      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
       <td>Access</td>
       <td>
         <select name="access" style="width:510px;">
@@ -90,22 +74,41 @@
       </td>
     </tr>
     <tr>
-      <td>Livestream link</td>
-      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:500px;" /></td>
-    </tr>
-    <tr>
       <td>Videorecording link</td>
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:500px;" /></td>
-    </tr>
-    <tr>
-      <td>Slides link</td>
-      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:500px;" /></td>
     </tr>
     <tr>
       <td colspan="2">Comments</td>
     </tr>
     <tr>
       <td colspan="2"><textarea cols="80" rows="3" name="comments">{{ talk.comments | blanknone }}</textarea></td>
+    </tr>
+  </table>
+  <hr style="width: 700px;">
+  <table>
+    <tr>
+      <td>Speaker</td>
+      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Speaker email</td>
+      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Speaker affiliation</td>
+      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Speaker homepage</td>
+      <td><input style="width:500px;" name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" /></td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td>Slides link</td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:500px;" /></td>
     </tr>
   </table>
   <h3>Abstract</h3>
