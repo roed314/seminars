@@ -11,6 +11,7 @@ from lmfdb.utils import flash_error
 from lmfdb.utils.search_boxes import SearchBox
 from psycopg2.sql import SQL
 from markupsafe import Markup, escape
+from collections.abc import Iterable
 
 weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -87,6 +88,21 @@ def topics():
 @cached_function
 def topic_dict():
     return dict(topics())
+
+def clean_topics(inp):
+    if inp is None:
+        return []
+    if isinstance(inp, str):
+        inp = inp.strip()
+        if inp[0] == '[' and inp[-1] == ']':
+            inp = [elt.strip().strip("'") for elt in inp[1:-1].split(',')]
+            if inp == ['']: # was an empty array
+                return []
+        else:
+            inp = [inp]
+    if isinstance(inp, Iterable):
+        inp = [elt for elt in inp if elt in topics()]
+    return inp
 
 def count_distinct(table, counter, query={}):
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))

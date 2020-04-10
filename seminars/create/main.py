@@ -5,10 +5,10 @@ from seminars.users.main import email_confirmed_required
 from seminars import db
 from seminars.app import app
 from seminars.create import create
-from seminars.utils import timezones, process_user_input, check_time, weekdays, flash_warning, localize_time
+from seminars.utils import timezones, process_user_input, check_time, weekdays, flash_warning, localize_time, clean_topics
 from seminars.seminar import WebSeminar, seminars_lucky, seminars_lookup, can_edit_seminar
 from seminars.talk import WebTalk, talks_lookup, talks_max, talks_search, talks_lucky, can_edit_talk
-from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types, institution_known
+from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types, institution_known, clean_institutions
 from seminars.lock import get_lock
 from lmfdb.utils import to_dict, flash_error
 import datetime, pytz, json
@@ -142,10 +142,8 @@ def save_seminar():
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
             return make_error(shortname, col, err)
-    if not data['institutions']:
-        data['institutions'] = []
-    if not data['topics']:
-        data['topics'] = []
+    data['institutions'] = clean_institutions(data.get('institutions'))
+    data['topics'] = clean_topics(data.get('topics'))
     if not data['timezone'] and data['institutions']:
         # Set time zone from institution
         data['timezone'] = WebInstitution(data['institutions'][0]).timezone
@@ -369,8 +367,7 @@ def save_talk():
                 raise ValueError("Invalid access type")
         except Exception as err:
             return make_error(talk, col, err)
-    if not data['topics']:
-        data['topics'] = []
+    data['topics'] = clean_topics(data.get('topics'))
     new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(talk)
