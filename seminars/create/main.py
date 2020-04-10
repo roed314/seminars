@@ -405,14 +405,18 @@ def make_date_data(seminar):
         next_date = today
         while next_date.weekday() != seminar.weekday:
             next_date += day
-    elif seminar.frequency and seminar.frequency > 0:
+    elif frequency and frequency > 0:
         next_date = last_talk.start_time.date()
         while next_date < today:
             next_date += seminar.frequency * day
     else:
         next_date = today
-        frequency = 0
-    all_dates = sorted(set([next_date + i*frequency*day for i in range(SCHEDULE_LEN)] + list(by_date)))
+        frequency = None
+    if frequency is None:
+        schedule_days = []
+    else:
+        schedule_days = [next_date + i*frequency*day for i in range(SCHEDULE_LEN)]
+    all_dates = sorted(set(schedule_days + list(by_date)))
     if seminar.start_time is None:
         if future_talks:
             seminar.start_time = future_talks[0].start_time.time()
