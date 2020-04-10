@@ -63,6 +63,12 @@ Content creation
 
 1. **If time is past, make today not show up on edit schedule**
 
+1. **Add a mailing list link**
+
+1. If you change the time zone of a seminar, the time zone of the talks don't change so they show up weirdly on the edit schedule page.
+
+1. Previewing abstract doesn't take double new lines into account.
+
 1. For detail links in edit schedule, surround with an anchor with a valid href so that hover link revealing and open in new tab works, then disable it with javascript.
 
 1. Warning if user tries to close schedule without saving
@@ -101,6 +107,8 @@ Viewing and searching
 1. **Add placeholders and e.g. for seminar/talk creation**
 
 1. **Improve institution page.**
+
+1. Should we make identifiers case insensitive?
 
 1. Add little arxiv colored topic tags in search results.
 

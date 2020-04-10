@@ -148,7 +148,7 @@ def save_seminar():
         # Set time zone from institution
         data['timezone'] = WebInstitution(data['institutions'][0]).timezone
     organizer_data = []
-    for i in range(6):
+    for i in range(10):
         D = {'seminar_id': seminar.shortname}
         for col in db.seminar_organizers.search_cols:
             if col in D: continue
