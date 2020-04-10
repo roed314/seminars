@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import
 import flask
+from urllib.parse import urlencode, quote
 from functools import wraps
 from seminars.app import app, send_email
 from lmfdb.logger import make_logger
@@ -416,10 +417,55 @@ def get_endorsing_link():
         flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
         return redirect(url_for(".info"))
     link = endorser_link(current_user, email)
-    session["endorsing link"] = "<p>The link to endorse %s is:<br>%s</p>" % (
-        email,
-        link,
-    )
+    rec = userdb.lookup(email, ['name', 'creator'])
+    if rec is None: # No account
+        to_send = """Hello,
+
+I am offering you permission to add content (e.g., create a seminar)
+on the mathseminars.org website.
+
+To accept this invitation:
+
+1. Register at https://mathseminars.org/user/register/ using this email address.
+
+2. Click on the link the system emails you, to confirm your email address.
+
+3. Go to {link}
+
+Best,
+{name}
+""".format(link=link, name=current_user.name)
+    else:
+        target_name = rec['name']
+        if rec['creator']:
+            to_send = None
+        else:
+            to_send = """Dear {target_name},
+
+I am offering you permission to add content (e.g., create a seminar)
+on the mathseminars.org website for your account with this email address.
+
+To accept this invitation, please go to
+    {link}
+
+Best,
+{name}
+""".format(link=link, name=current_user.name, target_name=target_name)
+    if to_send is None:
+        endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
+    else:
+        data = {
+            "body": to_send,
+            "subject": "Adding content to mathseminars.org"
+        }
+        endorsing_link = """
+<p>
+ The link to endorse {email} is <span class="noclick">{link}</span></br>
+<button onClick="window.open('mailto:{email}?{msg}')">
+Send email
+</button>
+""".format(link=link, email=email, msg=urlencode(data, quote_via=quote))
+    session["endorsing link"] = endorsing_link
     return redirect(url_for(".info"))
 
 
