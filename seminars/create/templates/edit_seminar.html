@@ -214,12 +214,11 @@ const topicOptions = [
 ];
 
 $(document).ready(function() {
-function callback(value) {
-  console.log("foo");
-  console.log(value);
+function callback_topics(value) {
+  $('input[name="topics"]')[0].value = '[' + value + ']';
 }
 var topicSelector = new SelectPure("#topic_selector", {
-  onChange: callback,
+  onChange: callback_topics,
   options: topicOptions,
   multiple: true,
   autocomplete: true,
