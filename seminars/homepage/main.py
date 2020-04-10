@@ -38,7 +38,7 @@ def parse_topic(info, query, prefix):
 def parse_institution_sem(info, query, prefix="seminar"):
     inst = info.get(prefix + "_institution")
     if inst == "None":
-        query["institutions"] = None
+        query["institutions"] = []
     elif inst:
         # one day we will do joins
         query["institutions"] = {"$contains": inst}

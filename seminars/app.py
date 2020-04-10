@@ -202,10 +202,10 @@ def contact():
 
 @app.route("/robots.txt")
 def robots_txt():
-    #if "mathseminars.org" in request.url_root.lower():
-    #    fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "robots.txt")
-    #    if os.path.exists(fn):
-    #        return open(fn).read()
+    if "mathseminars.org" in request.url_root.lower():
+        fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "robots.txt")
+        if os.path.exists(fn):
+            return open(fn).read()
     return "User-agent: *\nDisallow: / \n"
 
 # geeky pages have humans.txt
