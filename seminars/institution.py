@@ -28,7 +28,7 @@ def clean_institutions(inp):
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in institutions()]
+        inp = [elt for elt in inp if elt in dict(institutions())]
     return inp
 
 def institution_known(institution):
