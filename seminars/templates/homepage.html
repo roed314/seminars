@@ -1,5 +1,24 @@
 {% extends "base.html" %}
 
+{% macro prevent_unsaved(formid='') -%}
+  {% if formid %}
+    var $form = $('#{{formid}}');
+  {% else %}
+    var $form = $('form');
+  {% endif %}
+  var unsaved = true;
+  var initialState = $form.serialize();
+  window.onbeforeunload = function() {
+  if (unsaved && initialState !== $form.serialize())  {
+console.log('Form has changed!');
+      return "There are unsaved edits. Really close?";
+    }
+    else {
+console.log('Form is unchanged!');
+}
+  };
+{%- endmacro %}
+
 {% block body -%}
 <div id="header">
   <header class="inner">

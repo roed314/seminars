@@ -18,9 +18,10 @@
       <a href="{{ request.referrer }}">Abort</a>
     </div>
   {% else %}
-      <form action="{{ url_for('.save_seminar') }}" method="POST">
+      <form id="seminarform" action="{{ url_for('.save_seminar') }}" method="POST">
         <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
         <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
+        <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
       <table>
         <tr>
           <td>
@@ -184,14 +185,14 @@
         </tr>
         {% endfor %}
       </table>
-      <button type="submit" onclick="return set_saved();">Save</button>
+      <button type="submit" onclick="unsaved = false;return true;">Save</button>
 
       {% if seminar.new %}
         <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('create.index') }}">Cancel creation</a>
       {% else %}
         <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">Cancel changes</a>
         {% if seminar.user_can_delete() %}
-        <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="return confirm('Are you sure you want to delete this item?');">
+        <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="unsaved = false;return confirm('Are you sure you want to delete this item?');">
           <button type="button">
             Delete seminar
           </button>
@@ -200,15 +201,7 @@
       {% endif %}
       </form>
 <script type="text/javascript">
-/* prevent accidental closing of browser window */
-window.onbeforeunload = function() {
-  if(unsaved) {
-    return "There are unsaved edits. Really close?";
-  }
-  if(delete) {
-    return "Are you sure that you want to delete this seminar?"
-  }
-}
+{{ prevent_unsaved() }}
 
 /* topic selector */
 const topicOptions = [
@@ -221,13 +214,18 @@ const topicOptions = [
 ];
 
 $(document).ready(function() {
+function callback(value) {
+  console.log("foo");
+  console.log(value);
+}
 var topicSelector = new SelectPure("#topic_selector", {
+  onChange: callback,
   options: topicOptions,
   multiple: true,
   autocomplete: true,
   icon: "fa fa-times",
   inlineIcon: false,
-  value: {% if seminar.new %}getCookie("topics").split(","){% else %}seminar.topics{% endif %},
+  value: {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
   classNames: {
     select: "select-pure__select",
     dropdownShown: "select-pure__select--opened",

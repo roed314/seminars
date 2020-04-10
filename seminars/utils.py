@@ -248,8 +248,16 @@ def process_user_input(inp, typ, tz):
     elif typ in ['int', 'smallint', 'bigint', 'integer']:
         return int(inp)
     elif typ == 'text[]':
-        # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
-        return [inp]
+        print(inp)
+        inp = inp.strip()
+        if inp:
+            if inp[0] == '[' and inp[-1] == ']':
+                return inp[1:-1].split(',')
+            else:
+                # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
+                return [inp]
+        else:
+            return []
     else:
         raise ValueError("Unrecognized type %s" % typ)
 

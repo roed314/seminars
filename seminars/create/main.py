@@ -142,8 +142,10 @@ def save_seminar():
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
             return make_error(shortname, col, err)
-    if not data['institutions']: # need [] not None
+    if not data['institutions']:
         data['institutions'] = []
+    if not data['topics']:
+        data['topics'] = []
     if not data['timezone'] and data['institutions']:
         # Set time zone from institution
         data['timezone'] = WebInstitution(data['institutions'][0]).timezone
