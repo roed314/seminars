@@ -59,6 +59,10 @@ Content creation
 
 1. **No good way to add/edit past talks**
 
+1. **Add text to right advising capitalization standards**
+
+1. **If time is past, make today not show up on edit schedule**
+
 1. For detail links in edit schedule, surround with an anchor with a valid href so that hover link revealing and open in new tab works, then disable it with javascript.
 
 1. Warning if user tries to close schedule without saving
@@ -194,6 +198,12 @@ Other
 1. Python-social-auth: common framework for authentication integration.  Stackexchange/mathoverflow authentication?
 
 1. https://unpkg.com/select-pure@latest/dist/bundle.min.js seems slow.  Look at other options for installing select-pure
+
+1. Figure out how to enable cookie-less browsing for robots
+
+1. Move javascript in house if we run into more page load issues
+
+1. Improve our 404
 
 Examples of online seminars we might add
 ========================================
