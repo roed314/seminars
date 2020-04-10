@@ -29,6 +29,8 @@ class WebTalk(object):
             data = dict(data.__dict__)
         elif data is not None:
             data = dict(data)
+            if data.get('topics') is None:
+                data['topics'] = []
         if seminar is None:
             seminar = WebSeminar(semid)
         self.seminar = seminar
