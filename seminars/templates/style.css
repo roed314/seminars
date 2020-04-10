@@ -2695,3 +2695,6 @@ li.ical-detail {
   background: {{ color.button_background }};
 }
 
+.noclick {
+  color: #933e20;
+}
