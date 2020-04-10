@@ -320,6 +320,7 @@ class WebSeminar(object):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.seminars.delete({'shortname': self.shortname})
+                db.talks.delete({'seminar_id': self.shortname})
                 db.seminar_organizers.delete({'seminar_id': self.shortname})
                 for elt in db.users.search(
                     {'seminar_subscriptions': {'$contains': self.shortname}},
