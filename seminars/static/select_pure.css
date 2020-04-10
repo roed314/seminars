@@ -1,3 +1,8 @@
+#topic_selector {
+  width: 510px;
+  display: block;
+}
+
 .select-wrapper {
   margin: auto;
   max-width: 600px;
