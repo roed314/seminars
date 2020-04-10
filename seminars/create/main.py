@@ -353,6 +353,8 @@ def save_talk():
     default_tz = talk.seminar.timezone
     if not default_tz:
         default_tz = 'UTC'
+    if not data['topics']:
+        data['topics'] = []
     data['timezone'] = tz = raw_data.get('timezone', default_tz)
     tz = pytz.timezone(tz)
     for col in db.talks.search_cols:
