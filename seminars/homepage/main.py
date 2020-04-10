@@ -1,11 +1,10 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import WebTalk, talks_search, talks_lucky
-from seminars.seminar import seminars_lucky, all_seminars
 from seminars.utils import topics, toggle, Toggle
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
-from seminars.seminar import seminars_search, all_seminars, all_organizers
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky
 from flask_login import current_user
 import datetime
 import pytz
@@ -38,7 +37,7 @@ def parse_topic(info, query, prefix):
 def parse_institution_sem(info, query, prefix="seminar"):
     inst = info.get(prefix + "_institution")
     if inst == "None":
-        query["institutions"] = None
+        query["institutions"] = []
     elif inst:
         # one day we will do joins
         query["institutions"] = {"$contains": inst}
@@ -292,7 +291,6 @@ class SemSearchArray(SearchArray):
 @app.route("/")
 def index():
     # Eventually want some kind of cutoff on which talks are included.
-    seminars = all_seminars()
     talks = list(talks_search(
         {"display": True, "end_time": {"$gte": datetime.datetime.now()}},
         sort=["start_time"],

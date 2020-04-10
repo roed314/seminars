@@ -26,16 +26,6 @@ timezone              | text        | time zone code, e.g. "US/Eastern"
 seminar_subscriptions | text[]      | set of short names of seminars that the user is subscribed to
 talks_subscriptions   | json        | dict as {shorname : list of counters}
 
-`account_tokens`: stores tokens that provide privileges when used to create an account.  These can be sent by admins and editors when inviting people to join the site
-
-Column  | Type        | Notes
---------|-------------|------
-id      | bigint      | auto
-token   | text        | randomly generated:
-created | timestamptz | valid for one week, after which the new user will get a suggestion to email the original issuer
-used    | boolean     | tokens are one time use
-issuer  | text        | username of issuer
-editor  | boolean     | whether the newly created user will have editor/creator privileges (admin privileges not possible through a token)
 
 ## Institutions, seminars and talks
 
@@ -121,22 +111,6 @@ abbreviation | text   |
 
 These tables record various multi-multi relations between entities in the database
 
-`seminar_subscriptions`: for users to follow seminars and add them to their calendar file
-
-Column     | Type   | Notes
------------|--------|------
-id         | bigint | auto
-email      | text   |
-seminar_id | text   |
-short_name | text   |
-
-`talk_subscriptions`: for users to add individual talks to their calendar file
-
-Column  | Type   | Notes
---------|--------|------
-id      | bigint | auto
-email   | text   |
-talk_id | bigint |
 
 `seminar_organizers`: records which users are the organizers of each seminar
 

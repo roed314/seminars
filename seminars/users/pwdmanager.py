@@ -145,8 +145,14 @@ class PostgresUserTable(PostgresSearchTable):
             if key not in self.search_cols:
                 data.pop(key)
                 print("Popped", key)
-        print("Updating", data)
-        self.update({'email': email}, data)
+        with DelayCommit(db):
+            if 'email' in data:
+                newemail = data['email']
+                db.institutions.update({'admin':email}, {'admin': newemail})
+                db.seminars.update({'owner':email}, {'owner': newemail})
+                db.seminar_organizers.update({'email':email}, {'email': newemail})
+                db.talks.update({'speaker_email':email}, {'speaker_email': newemail})
+            self.update({'email': email}, data)
         return True
 
 
