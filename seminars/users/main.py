@@ -495,6 +495,7 @@ def endorse_wtoken(token):
         endorser, email = read_timed_token(token, "endorser", None)
     except Exception:
         return flask.abort(404, "The link is invalid or has expired.")
+        return redirect(url_for(".info"))
     if current_user.is_creator():
         flash_error("Account already has creator privileges.")
     elif current_user.email != email:

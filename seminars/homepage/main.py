@@ -200,7 +200,7 @@ class TalkSearchArray(SearchArray):
                         label="Title",
                         colspan=(1, 2, 1),
                         width=textwidth,
-                        example="The proof of the Riemann hypothesis")
+                        example="A rigorous definition of rigorous")
         date = TextBox(
             name="daterange",
             id="daterange",
@@ -270,7 +270,7 @@ class SemSearchArray(SearchArray):
         # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
 
         name = TextBox(
-            name="name", label="Name", colspan=(1, 2, 1), width=textwidth
+            name="name", label="Name", colspan=(1, 2, 1), width=textwidth, example="What Do They Know? Do They Know Things?? Let's Find Out!"
         )
 
         self.array = [
