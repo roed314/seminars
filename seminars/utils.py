@@ -120,6 +120,7 @@ def search_distinct(table, selecter, counter, iterator, query={}, projection=1, 
     """
     if offset < 0:
         raise ValueError("Offset cannot be negative")
+    all_cols = SQL(", ").join(map(IdentifierWrapper, ['id'] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     tbl = IdentifierWrapper(table.search_table)
@@ -128,9 +129,9 @@ def search_distinct(table, selecter, counter, iterator, query={}, projection=1, 
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
-    selecter = selecter.format(cols, tbl, qstr)
+    fselecter = selecter.format(cols, all_cols, tbl, qstr)
     cur = table._execute(
-        selecter,
+        fselecter,
         values,
         buffered=(limit is None),
         slow_note=(table.search_table, "analyze", query, repr(projection), limit, offset),
@@ -158,12 +159,13 @@ def search_distinct(table, selecter, counter, iterator, query={}, projection=1, 
     return list(results)
 
 def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0, sort=[]):
+    all_cols = SQL(", ").join(map(IdentifierWrapper, ['id'] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
     tbl = table._get_table_clause(extra_cols)
-    selecter = selecter.format(cols, tbl, qstr)
-    cur = table._execute(selecter, values)
+    fselecter = selecter.format(cols, all_cols, tbl, qstr)
+    cur = table._execute(fselecter, values)
     if cur.rowcount > 0:
         rec = cur.fetchone()
         if projection == 0 or isinstance(projection, string_types):

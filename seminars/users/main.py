@@ -323,13 +323,14 @@ def confirm_email(token):
         email = read_timed_token(token, "confirm email", 86400)
     except Exception:
         flash_error("The confirmation link is invalid or has expired.")
-    user = SeminarsUser(email=email)
-    if user.email_confirmed:
-        flash_error("Email already confirmed.")
     else:
-        user.email_confirmed = True
-        user.save()
-        flask.flash("You have confirmed your email. Thanks!", "success")
+        user = SeminarsUser(email=email)
+        if user.email_confirmed:
+            flash_error("Email already confirmed.")
+        else:
+            user.email_confirmed = True
+            user.save()
+            flask.flash("You have confirmed your email. Thanks!", "success")
     return redirect(url_for(".info"))
 
 
@@ -417,8 +418,8 @@ def get_endorsing_link():
         flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
         return redirect(url_for(".info"))
     link = endorser_link(current_user, email)
-    rec = userdb.lookup(email, ['name', 'creator'])
-    if rec is None: # No account
+    rec = userdb.lookup(email, ['name', 'creator', 'email_confirmed'])
+    if rec is None or not rec['email_confirmed']: # No account or email unconfirmed
         to_send = """Hello,
 
 I am offering you permission to add content (e.g., create a seminar)
@@ -435,28 +436,9 @@ To accept this invitation:
 Best,
 {name}
 """.format(link=link, name=current_user.name)
-    else:
-        target_name = rec['name']
-        if rec['creator']:
-            to_send = None
-        else:
-            to_send = """Dear {target_name},
-
-I am offering you permission to add content (e.g., create a seminar)
-on the mathseminars.org website for your account with this email address.
-
-To accept this invitation, please go to
-    {link}
-
-Best,
-{name}
-""".format(link=link, name=current_user.name, target_name=target_name)
-    if to_send is None:
-        endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
-    else:
         data = {
             "body": to_send,
-            "subject": "Adding content to mathseminars.org"
+            "subject": "An invitation to collaborate on mathseminars.org"
         }
         endorsing_link = """
 <p>
@@ -465,6 +447,31 @@ Best,
 Send email
 </button>
 """.format(link=link, email=email, msg=urlencode(data, quote_via=quote))
+    else:
+        target_name = rec['name']
+        if rec['creator']:
+            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
+        else:
+            to_send = """Dear {target_name},
+
+I have endorsed you on mathseminars.org and any content you create will
+be publicly viewable.
+
+Best,
+{name}
+""".format(name=current_user.name, target_name=target_name)
+            data = {
+                "body": to_send,
+                "subject": "Endorsement to create content on mathseminars.org"
+            }
+            userdb.make_creator(email, current_user._uid)
+            endorsing_link = """
+<p>
+ {target_name} is now able to create content.</br>
+<button onClick="window.open('mailto:{email}?{msg}')">
+Send email
+</button> to let them know.
+""".format(target_name=target_name, email=email, msg=urlencode(data, quote_via=quote))
     session["endorsing link"] = endorsing_link
     return redirect(url_for(".info"))
 
@@ -493,7 +500,7 @@ def endorse_wtoken(token):
     elif current_user.email != email:
         flash_error("The link is not valid for this account.")
     else:
-        current_user.make_creator(int(endorser))
+        userdb.make_creator(current_user.email, int(endorser))
         current_user.save()
         flask.flash("You can now create seminars. Thanks!", "success")
     return redirect(url_for(".info"))

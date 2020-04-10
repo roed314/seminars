@@ -16,6 +16,7 @@ from seminars.seminar import WebSeminar
 from seminars.talk import WebTalk
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
+from lmfdb.backend.utils import DelayCommit
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone
 import bisect
@@ -106,6 +107,16 @@ class PostgresUserTable(PostgresSearchTable):
             return True
         else:
             return False
+
+    def make_creator(self, email, endorser):
+        with DelayCommit(self):
+            db.users.update({'email': email}, {'creator': True, 'endorser': endorser})
+            # Update all of this user's created seminars and talks
+            db.seminars.update({'owner': email}, {'display': True})
+            # Could do this with a join...
+            from seminars.seminar import seminars_search
+            for sem in seminars_search({'owner': email}, 'shortname'):
+                db.talks.update({'seminar_id': sem}, {'display': True})
 
 
     def save(self, data):
@@ -375,17 +386,6 @@ class SeminarsUser(UserMixin):
 
     def is_creator(self):
         return self._data.get("creator", False)
-
-    def make_creator(self, endorser):
-        self.endorser = endorser
-        # Update all of this owner's created seminars and talks
-        db.seminars.update({'owner': self.email}, {'display': True})
-        # Could do this with a join...
-        from seminars.seminar import seminars_search
-        for sem in seminars_search({'owner': self.email}, 'shortname'):
-            db.talks.update({'seminar_id': sem}, {'display': True})
-        self._data["creator"] = True
-        self._dirty = True
 
     @cached_method
     def is_organizer(self):

@@ -239,7 +239,7 @@ class WebSeminar(object):
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
-        return [rec['email'] for rec in self.organizer_data] + [self.owner]
+        return [rec['email'] for rec in self.organizer_data if rec['email']] + [self.owner]
 
     def user_can_delete(self):
         # Check whether the current user can edit the seminar
@@ -344,7 +344,7 @@ def seminars_header(include_time=True, include_institutions=True, include_descri
             cols.append((1, "Saved"))
     return "".join('<th colspan="%s">%s</th>' % pair for pair in cols)
 
-_selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}")
+_selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")
 _maxer = SQL("SELECT MAX({0}) FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")
 def _construct(rec):

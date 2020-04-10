@@ -512,6 +512,9 @@ def save_seminar_schedule():
                 except ValueError as err:
                     flash_error("invalid time range %s: {0}".format(err), time_input)
                     return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+            elif seminar.start_time is None or seminar.end_time is None:
+                flash_error("Since the seminar does not have a time specified, you must provide one")
+                return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
             else:
                 start_time = seminar.start_time.time()
                 end_time = seminar.end_time.time()

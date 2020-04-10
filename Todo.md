@@ -39,6 +39,8 @@ Admin
 
 1. Give users ability to toggle between 24 hour time and am/pm.
 
+1. Add admin view where you can see hidden content and make people creators directly.
+
 
 Content creation
 ================
@@ -80,6 +82,8 @@ Content creation
 1. Think about security model of how we update the display attribute when someone gets endorsed.  Does every talk/seminar that they're an organizer for get set to display=True?  Can this be taken advantage of by adding another user as an organizer who then gets endorsed, or transferring ownership?  We don't require permission to become an organizer/transfer.  Solved if we have newly endorsed users manually have to add the content they want to be displayed.  Also: if you aren't yet endorsed, you can't add other organizers or transfer ownership.
 
 1. Interface for creating a singleton talk?
+
+1. Add radio button in the seminar organizers section for who the owner is, only visible by owner and only if they are a creator, allowing them to transfer ownership.
 
 Viewing and searching
 =====================
