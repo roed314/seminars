@@ -108,7 +108,9 @@ Viewing and searching
 
 1. **Add placeholders and e.g. for seminar/talk creation**
 
-1. **Improve institution page.**
+1. **Improve institution page: add list of seminars at that institution**
+
+1. **Search for no institution is broken**
 
 1. Should we make identifiers case insensitive?
 

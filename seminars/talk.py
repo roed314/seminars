@@ -42,10 +42,8 @@ class WebTalk(object):
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = current_user.is_creator()
             self.online = getattr(
-                seminar, "online", bool(getattr(seminar, "live_link"))
+                seminar, "online", bool(seminar.live_link)
             )
-            self.live_ink = getattr(seminar, "live_link")
-            self.topics = getattr(seminar, "topics")
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
