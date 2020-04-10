@@ -111,7 +111,7 @@ def talks_parser(info, query):
     parse_institution_talk(info, query)
     parse_online(info, query, prefix="talk")
     parse_offline(info, query, prefix="talk")
-    parse_substring(info, query, "talk_keywords", ["abstract"])
+    #parse_substring(info, query, "talk_keywords", ["abstract"])
     parse_access(info, query, prefix="talk")
 
     parse_substring(info, query, "speaker", ["speaker"])
@@ -127,7 +127,7 @@ def seminars_parser(info, query):
     parse_institution_sem(info, query)
     parse_online(info, query, prefix="seminar")
     parse_offline(info, query, prefix="seminar")
-    parse_substring(info, query, "seminar_keywords", ["description", "comments"])
+    #parse_substring(info, query, "seminar_keywords", ["description", "comments"])
     parse_access(info, query, prefix="seminar")
 
     parse_substring(info, query, "name", ["name"])
