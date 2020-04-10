@@ -161,6 +161,8 @@ Calendars
 
 1. **Each seminar should have its own calendar so that seminar organizers can use it as the primary source for their own front-end.**
 
+1. Make a custom error type so that we don't accidentally delete a seminar from someone's subscription if we have a bug in our code (we should only delete if the seminar isn't found).
+
 Email
 =====
 
