@@ -4,7 +4,7 @@ from flask_login import current_user
 from seminars import db
 from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime, adapt_datetime, toggle
 from lmfdb.utils import flash_error
-from lmfdb.backend.utils import DelayCommit
+from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from psycopg2.sql import SQL
 import pytz
 from sage.misc.lazy_attribute import lazy_attribute
@@ -312,7 +312,7 @@ class WebSeminar(object):
                 db.seminars.delete({'shortname': self.shortname})
                 db.seminar_organizers.delete({'seminar_id': self.shortname})
                 for elt in db.users.search(
-                    {'seminar_subscriptions': {'$in': self.shortname}},
+                    {'seminar_subscriptions': {'$contains': self.shortname}},
                         ['id', "seminar_subscriptions"]):
                     elt['seminar_subscriptions'].remove(self.shortname)
                     db.users.update({'id': elt['id']},
