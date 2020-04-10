@@ -353,8 +353,6 @@ def save_talk():
     default_tz = talk.seminar.timezone
     if not default_tz:
         default_tz = 'UTC'
-    if not data['topics']:
-        data['topics'] = []
     data['timezone'] = tz = raw_data.get('timezone', default_tz)
     tz = pytz.timezone(tz)
     for col in db.talks.search_cols:
@@ -371,6 +369,8 @@ def save_talk():
                 raise ValueError("Invalid access type")
         except Exception as err:
             return make_error(talk, col, err)
+    if not data['topics']:
+        data['topics'] = []
     new_version = WebTalk(talk.seminar_id, data['seminar_ctr'], data=data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(talk)
