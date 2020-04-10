@@ -123,7 +123,7 @@ def save_seminar():
                 'archived':False}
     else:
         data = {'shortname': shortname,
-                'display': seminar.display or current_user.is_creator(),
+                'display': seminar.display,
                 'owner': seminar.owner}
     # Have to get time zone first
     data['timezone'] = tz = raw_data.get('timezone')
