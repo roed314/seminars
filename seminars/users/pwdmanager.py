@@ -378,6 +378,12 @@ class SeminarsUser(UserMixin):
 
     def make_creator(self, endorser):
         self.endorser = endorser
+        # Update all of this owner's created seminars and talks
+        db.seminars.update({'owner': self.email}, {'display': True})
+        # Could do this with a join...
+        from seminars.seminar import seminars_search
+        for sem in seminars_search({'owner': self.email}, 'shortname'):
+            db.talks.update({'seminar_id': sem}, {'display': True})
         self._data["creator"] = True
         self._dirty = True
 
