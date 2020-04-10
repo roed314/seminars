@@ -262,7 +262,7 @@ def process_user_input(inp, typ, tz):
         raise ValueError
     elif typ == 'text':
         # should sanitize somehow?
-        return inp
+        return "\n".join(inp.splitlines())
     elif typ in ['int', 'smallint', 'bigint', 'integer']:
         return int(inp)
     elif typ == 'text[]':
