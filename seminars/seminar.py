@@ -209,7 +209,7 @@ class WebSeminar(object):
         if not self.homepage:
             return ""
         else:
-            return "<a href='%s'>Official homepage</a>" % (self.homepage)
+            return "<a href='%s'>External homepage</a>" % (self.homepage)
 
     def show_institutions(self):
         if self.institutions:
