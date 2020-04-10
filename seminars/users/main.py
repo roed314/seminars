@@ -442,10 +442,12 @@ Best,
         }
         endorsing_link = """
 <p>
- The link to endorse {email} is <span class="noclick">{link}</span></br>
+ The link to endorse {email} is</br>
+ <span class="noclick">{link}</span></br>
 <button onClick="window.open('mailto:{email}?{msg}')">
 Send email
 </button>
+ </p>
 """.format(link=link, email=email, msg=urlencode(data, quote_via=quote))
     else:
         target_name = rec['name']
