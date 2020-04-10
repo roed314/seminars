@@ -30,7 +30,7 @@
 
   {% if talk.comments %}
   <hr>
-  <p>{{talk.comments | safe}}</p>
+  <p>{{talk.show_comments() | safe}}</p>
   {% endif %}
 
 </div>
