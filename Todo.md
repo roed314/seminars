@@ -215,6 +215,8 @@ Other
 
 1. Improve our 404
 
+1. Clock isn't updating
+
 Examples of online seminars we might add
 ========================================
 
