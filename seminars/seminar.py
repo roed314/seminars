@@ -51,8 +51,8 @@ class WebSeminar(object):
                                    'full_name': current_user.name,
                                    'order': 0,
                                    'curator': True,
-                                   'display': False,
-                                   'contact': False}]
+                                   'display': True,
+                                   'contact': True}]
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
             if data.get('timezone'):
