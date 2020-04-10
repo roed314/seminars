@@ -45,15 +45,9 @@ Content creation
 
 1. **add text explaing hidden seminar**
 
-1. **Allow multiple topics (use multi select from [select-pure](https://www.npmjs.com/package/select-pure))**
-
 1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
 
-1. **Improve text at manage when not endorsed (Raymond)**
-
 1. **For conference, enter dates rather than frequency**
-
-1. **Test creating seminar without being endorsed**
 
 1. **Remove aliases**
 
@@ -87,8 +81,6 @@ Viewing and searching
 1. **flask error on date error**
 
 1. **Filter option to show personal calendar**
-
-1. **replace like by ilike**
 
 1. **Uniformize from saved events to favorites** should the headers say Favorite? or Saved?
 
