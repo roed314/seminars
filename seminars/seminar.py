@@ -335,18 +335,18 @@ class WebSeminar(object):
 def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
     cols = []
     if include_time:
-        cols.append((2, "Time"))
+        cols.append(('colspan="2"', "Time"))
     if include_institutions:
-        cols.append((1, "Institutions"))
-    cols.append((1, "Name"))
+        cols.append(('', "Institutions"))
+    cols.append(('', "Name"))
     if include_description:
-        cols.append((1, "Description"))
+        cols.append(('style="min-width:280px;"', "Description"))
     if include_subscribe:
         if current_user.is_anonymous():
-            cols.append((1, ""))
+            cols.append(('', ""))
         else:
-            cols.append((1, "Saved"))
-    return "".join('<th colspan="%s">%s</th>' % pair for pair in cols)
+            cols.append(('', "Saved"))
+    return "".join('<th %s>%s</th>' % pair for pair in cols)
 
 _selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")
 _counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")
