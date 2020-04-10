@@ -9,7 +9,24 @@
     {% else %}
       <title>Math seminars{% if title %} - {{ title|striptags }}{% endif %}  </title>
     {% endif %}
-    <link id="style_css" href="{{ url_for('css') }}" rel="stylesheet" type="text/css" /> 
+  <script>
+  if (navigator.cookieEnabled) {
+    console.log("cookies enabled");
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if( document.cookie.includes('browser_timezone') ) {
+      //console.log("has cookie");
+      console.log(document.cookie);
+    } else {
+      document.cookie = "browser_timezone=" + tz + ";path=/"
+      //console.log("adding cookie");
+      //console.log(document.cookie);
+      location.reload();
+    }
+    } else {
+      //console.log("cookies disabled");
+  }
+  </script>
+    <link id="style_css" href="{{ url_for('css') }}" rel="stylesheet" type="text/css" />
 
 
     <link rel="apple-touch-icon-precomposed" sizes="57x57" href="/static/favicon/apple-touch-icon-57x57.png" />

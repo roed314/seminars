@@ -145,12 +145,12 @@ def blanknone(x):
 #    Redirects    #
 ##############################
 
-@app.before_request
-def timezone_cookie_enforcer():
-    urlparts = urlparse(request.url)
-    if not (request.cookies.get('browser_timezone') or urlparts.path.startswith('/user/ics/')):
-        # sets a cookie and goes back to the original url
-        return render_template("timezone.html", url=request.url)
+#@app.before_request
+#def timezone_cookie_enforcer():
+#    urlparts = urlparse(request.url)
+#    if not (request.cookies.get('browser_timezone') or urlparts.path.startswith('/user/ics/')):
+#        # sets a cookie and goes back to the original url
+#        return render_template("timezone.html", url=request.url)
 
 
 def timestamp():
@@ -171,16 +171,7 @@ def not_found_500(error):
 def not_found_503(error):
     return render_template("503.html"), 503
 
-##############################
-#           Cookies          #
-##############################
 
-#@app.before_request
-#def get_menu_cookie():
-#    """
-#    sets cookie for show/hide sidebar
-#    """
-#    g.show_menu = str(request.cookies.get('showmenu')) != "False"
 
 ##############################
 #       Top-level pages      #
