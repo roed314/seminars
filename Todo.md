@@ -193,6 +193,8 @@ Other
 
 1. Python-social-auth: common framework for authentication integration.  Stackexchange/mathoverflow authentication?
 
+1. https://unpkg.com/select-pure@latest/dist/bundle.min.js seems slow.  Look at other options for installing select-pure
+
 Examples of online seminars we might add
 ========================================
 

@@ -92,7 +92,10 @@ h2.link > a {
 }
 
 div.text_content {
-  max-width: 70%;
+    max-width: 70%;
+}
+div.auto {
+    margin: auto;
 }
 
 /* Body links, sidebar links, and sidebar header text. */
@@ -178,6 +181,10 @@ a:hover {
 header.inner {
   margin: 0 auto;
   max-width: 1000px;
+}
+header.shortinner {
+  margin: 0 auto;
+  max-width: 750px;
 }
 
 #header {
@@ -419,26 +426,26 @@ div.time_toggler {
     margin: 30px 0px 20px 0px;
 }
 
-div.manage-inner, div.time_toggler_inner {
+div.submenu-inner, div.time_toggler_inner {
     border-bottom: 1px solid {{ color.header_background }};
 }
-div.manage-nav, div.toggler-nav {
+div.submenu-nav, div.toggler-nav {
     display: inline-block;
     font-size: 16px;
     padding: 8px;
     min-width: 50px;
 }
-div.manage-nav {
+div.submenu-nav {
     margin: 0px 4px 0px 4px;
 }
 div.toggler-nav {
     margin: 0px 10px 0px 10px;
 }
-div.manage-nav a, div.toggler-nav a {
+div.submenu-nav a, div.toggler-nav a {
     padding: 8px 16px 8px 16px;
     color: {{color.header_background }};
 }
-div.manage-active, div.toggler-active {
+div.submenu-active, div.toggler-active {
     border-bottom: 1px solid {{ color.header_background }};
 }
 div.toggler-nav:hover {

@@ -202,14 +202,12 @@ def alive():
 
 @app.route("/acknowledgment")
 def acknowledgment():
-    bread = [("Acknowledgments" , '')]
-    return render_template("acknowledgment.html", title="Acknowledgments", bread=bread)
+    return render_template("acknowledgment.html", title="Acknowledgments", section="Info", subsection="acknowledgments")
 
 @app.route("/contact")
 def contact():
     t = "Contact and Feedback"
-    b = [(t, url_for("contact"))]
-    return render_template('contact.html', title=t, body_class='', bread=b)
+    return render_template('contact.html', title=t, section="Info", subsection="contact")
 
 @app.route("/robots.txt")
 def robots_txt():

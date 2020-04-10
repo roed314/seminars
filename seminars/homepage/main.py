@@ -442,11 +442,11 @@ def subscribe():
 
 @app.route("/info")
 def info():
-    return render_template("info.html", title="Info", section="Info")
+    return render_template("info.html", title="Features", section="Info", subsection="features")
 
 @app.route("/faq")
 def faq():
-    return render_template("faq.html", title="FAQ")
+    return render_template("faq.html", title="FAQ", section="Info", subsection="faq")
 
 #@app.route("/<topic>")
 #def by_topic(topic):

@@ -63,48 +63,48 @@ console.log('Form is unchanged!');
 {% elif section in ["Manage", "Create"] %}
   <div id="manage-submenu">
     <header class="inner">
-      <div class="manage-inner">
+      <div class="submenu-inner">
         {% if user.is_creator() %}
-          <div class="manage-nav{% if subsection == 'home' %} manage-active{% endif %}">
+          <div class="submenu-nav{% if subsection == 'home' %} submenu-active{% endif %}">
             <a href="{{ url_for('create.index') }}">Seminars</a>
           </div>
           {% if not subsection in ['view', 'editsem', 'schedule', 'viewtalk', 'edittalk'] %}
-            <div class="manage-nav{% if subsection == 'institutions' %} manage-active{% endif %}">
+            <div class="submenu-nav{% if subsection == 'institutions' %} submenu-active{% endif %}">
               <a href="{{ url_for('list_institutions') }}">Institutions</a>
             </div>
           {% endif %}
         {% endif %}
         {% if institution %}
-          <div class="manage-nav{% if subsection == 'viewinst' %} manage-active{% endif %}">
+          <div class="submenu-nav{% if subsection == 'viewinst' %} submenu-active{% endif %}">
             <a href="{{ url_for('show_institution', shortname=institution.shortname) }}">View institution</a>
           </div>
           {% if user.is_admin() or user.email == institution.admin %}
-            <div class="manage-nav{% if subsection == 'editinst' %} manage-active{% endif %}">
+            <div class="submenu-nav{% if subsection == 'editinst' %} submenu-active{% endif %}">
               <a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit properties</a>
             </div>
           {% endif %} {# institution admin #}
         {% elif seminar and seminar.user_can_edit() %}
           {% if not seminar.new %}
-            <div class="manage-nav{% if subsection == 'schedule' %} manage-active{% endif %}">
+            <div class="submenu-nav{% if subsection == 'schedule' %} submenu-active{% endif %}">
               <a href="{{ url_for('create.edit_seminar_schedule', shortname=seminar.shortname) }}">Edit schedule</a>
             </div>
           {% endif %} {# seminar.new #}
-          <div class="manage-nav{% if subsection == 'editsem' %} manage-active{% endif %}">
+          <div class="submenu-nav{% if subsection == 'editsem' %} submenu-active{% endif %}">
             <a href="{{ url_for('create.edit_seminar', shortname=seminar.shortname) }}">{% if seminar.new %}Create{% else %}Edit{% endif %} {% if subsection in ['edittalk', 'viewtalk'] %}seminar{% else %}properties{% endif %}</a>
           </div>
-          <div class="manage-nav{% if subsection == 'view' %} manage-active{% endif %}">
+          <div class="submenu-nav{% if subsection == 'view' %} submenu-active{% endif %}">
             <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View seminar</a>
           </div>
         {% endif %} {# institution/seminar #}
         {% if talk %}
-          <div class="manage-nav{% if subsection == 'viewtalk' %} manage-active{% endif %}">
+          <div class="submenu-nav{% if subsection == 'viewtalk' %} submenu-active{% endif %}">
             {% if talk.seminar.user_can_edit() %}
               <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr) }}">View talk</a>
             {% else %}
               <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr, token=token) }}">View talk</a>
             {% endif %}
           </div>
-          <div class="manage-nav{% if subsection == 'edittalk' %} manage-active{% endif %}">
+          <div class="submenu-nav{% if subsection == 'edittalk' %} submenu-active{% endif %}">
             {% if talk.seminar.user_can_edit() %}
             <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr) }}">Edit talk</a>
             {% else %}
@@ -112,6 +112,25 @@ console.log('Form is unchanged!');
             {% endif %}
           </div>
         {% endif %} {# talk #}
+      </div>
+    </header>
+  </div>
+{% elif section in ["Info"] %}
+  <div id="manage-submenu">
+    <header class="shortinner">
+      <div class="submenu-inner">
+        <div class="submenu-nav{% if subsection == 'features' %} submenu-active{% endif %}">
+          <a href="{{ url_for('info') }}">Features</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'faq' %} submenu-active{% endif %}">
+          <a href="{{ url_for('faq') }}">FAQ</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'acknowledgments' %} submenu-active{% endif %}">
+          <a href="{{ url_for('acknowledgment') }}">Acknowledgments</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'contact' %} submenu-active{% endif %}">
+          <a href="{{ url_for('contact') }}">Contact</a>
+        </div>
       </div>
     </header>
   </div>

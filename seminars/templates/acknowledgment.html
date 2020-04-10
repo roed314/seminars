@@ -24,14 +24,15 @@
   #contribs > div > div.notes { color: {{color.contrib_text_notes}}; }
 </style>
 
+<div class="text_content auto">
 <a name="sponsors"></a>
-<h1 >Sponsors</h1>
+<h2 >Sponsors</h2>
 <div>
  The development of this site was supported by grant 550033 from the <a href="https://www.simonsfoundation.org/">Simons Foundation</a>, awarded to the <a href="https://icerm.brown.edu/simonscollaboration/">Simons Collaboration on Arithmetic Geometry, Number Theory, and Computation</a>.
 </div>
 
 <a name="software"></a>
-<h1>Software</h1>
+<h2>Software</h2>
 
 <div>
     Our website is run on free open source software, including
@@ -46,7 +47,7 @@ and
 </div>
 
 <a name="hosting"></a>
-<h1>Hosting</h1>
+<h2>Hosting</h2>
 <div>
   The database and web server are hosted at MIT.
   The website source code is hosted
@@ -56,7 +57,7 @@ and
 </div>
 
 <a name="individuals"></a>
-<h1>Maintainers</h1>
+<h2>Maintainers</h2>
 <div id="contribs">
   The site was written and is maintained by <a href="https://math.mit.edu/~edgarc">Edgar Costa</a> and <a href="https://math.mit.edu/~roed">David Roe</a>.  <a href="https://math.mit.edu/~poonen">Bjorn Poonen</a> and <a href="https://math.mit.edu/~drew">Andrew Sutherland</a> provided a huge amount of feedback during the creation of the site and now join Edgar and David as site admininstrators.
 {% for c in contribs %}
@@ -68,6 +69,8 @@ and
     {# {% if c.notes -%}<div class="notes">{{ c.notes|join(', ')|safe }}</div>{%- endif %} #}
   </div>
 {% endfor %}
+</div>
+
 </div>
 
 {% endblock %}
