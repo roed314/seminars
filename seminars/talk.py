@@ -320,7 +320,7 @@ class WebTalk(object):
         return  """
 <p>
  To let someone edit this page, send them this link:
-<a href="{link}">{link}</a></br>
+{link}</br>
 <button onClick="window.open('mailto:{email_to}?{msg}')">
 Email link to speaker
 </button>""".format(
