@@ -101,7 +101,7 @@ def clean_topics(inp):
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in topics()]
+        inp = [elt for elt in inp if elt in dict(topics())]
     return inp
 
 def count_distinct(table, counter, query={}):
@@ -262,7 +262,7 @@ def process_user_input(inp, typ, tz):
         raise ValueError
     elif typ == 'text':
         # should sanitize somehow?
-        return inp
+        return "\n".join(inp.splitlines())
     elif typ in ['int', 'smallint', 'bigint', 'integer']:
         return int(inp)
     elif typ == 'text[]':
