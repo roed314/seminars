@@ -29,6 +29,9 @@ class WebTalk(object):
             data = dict(data.__dict__)
         elif data is not None:
             data = dict(data)
+            # avoid Nones
+            if data.get('topics') is None:
+                data['topics'] = []
         if seminar is None:
             seminar = WebSeminar(semid)
         self.seminar = seminar
@@ -296,7 +299,7 @@ class WebTalk(object):
 
     def show_abstract(self):
         if self.abstract:
-            return "\n".join("<p>%s</p>" % (elt) for elt in self.split_abstract())
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.split_abstract())
         else:
             return "<p>TBA</p>"
 

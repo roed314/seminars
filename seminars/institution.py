@@ -15,6 +15,21 @@ institution_types = [
 def institutions():
     return sorted(((rec["shortname"], rec["name"]) for rec in db.institutions.search({}, ["shortname", "name"])), key=lambda x: x[1].lower())
 
+def clean_institutions(inp):
+    if inp is None:
+        return []
+    if isinstance(inp, str):
+        inp = inp.strip()
+        if inp[0] == '[' and inp[-1] == ']':
+            inp = [elt.strip().strip("'") for elt in inp[1:-1].split(',')]
+            if inp == ['']: # was an empty array
+                return []
+        else:
+            inp = [inp]
+    if isinstance(inp, Iterable):
+        inp = [elt for elt in inp if elt in institutions()]
+    return inp
+
 def institution_known(institution):
     matcher = {'$like': '%{0}%'.format(institution)}
     return db.institutions.count({'$or':[{'shortname': matcher}, {'aliases': matcher}]}) > 0
