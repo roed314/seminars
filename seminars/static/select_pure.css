@@ -3,6 +3,11 @@
   display: block;
 }
 
+#institution_selector {
+  width: 510px;
+  display: block;
+}
+
 .select-wrapper {
   margin: auto;
   max-width: 600px;
@@ -19,11 +24,10 @@
   color: #363b3e;
   cursor: pointer;
   display: flex;
-  font-size: 16px;
   font-weight: 500;
   justify-content: left;
   min-height: 44px;
-  padding: 5px 10px;
+  padding: 2px 4px;
   position: relative;
   transition: 0.2s;
   width: 100%;
@@ -69,12 +73,12 @@
 }
 
 .select-pure__selected-label {
-  background: #5e6264;
+  background: #373737;
   border-radius: 4px;
   color: #fff;
   cursor: initial;
   display: inline-block;
-  margin: 5px 10px 5px 0;
+  margin: 2px 4px 2px 0;
   padding: 3px 7px;
 }
 
