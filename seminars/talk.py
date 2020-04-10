@@ -44,8 +44,9 @@ class WebTalk(object):
             self.online = getattr(
                 seminar, "online", bool(getattr(seminar, "live_link"))
             )
+            self.live_ink = getattr(seminar, "live_link")
+            self.talks = getattr(seminar, "talk")
             self.deleted = False
-            self.talks = seminar.talks
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -229,7 +230,7 @@ class WebTalk(object):
         if raw:
             success = self.live_link
         else:
-            if self.link.startswith('http'):
+            if self.live_link.startswith('http'):
                 success = 'Access <a href="%s">online</a>.' % self.live_link
             else:
                 success = 'Livestream comment: %s' % self.live_link
