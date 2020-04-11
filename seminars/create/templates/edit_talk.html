@@ -115,8 +115,8 @@
   <h3>Abstract</h3>
   <table>
     <tr>
-      <td colspan="2"><textarea cols="80" rows="10"
-                                name="abstract" id="inp_abstract">{{ talk.abstract | blanknone }} placeholder="TeX symbols are OK here" </textarea>
+      <td colspan="2">
+        <textarea cols="80" rows="10" name="abstract" id="inp_abstract" placeholder="TeX symbols are OK here">{% if talk.abstract -%}{{talk.abstract | blanknone }}{%- endif %}</textarea>
       </td>
     </tr>
   </table>
