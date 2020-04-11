@@ -161,12 +161,18 @@ def save_seminar():
                     D[col] = False # checkboxes
                 else:
                     D[col] = process_user_input(val, db.seminar_organizers.col_type[col], tz=tz)
-                if col == 'homepage' and val and not val.startswith("http"):
-                    data[col] = "http://" + data[col]
+                # if col == 'homepage' and val and not val.startswith("http"):
+                #     D[col] = "http://" + data[col]
             except Exception as err:
                 return make_error(shortname, col, err)
         if D.get('email') or D.get('full_name'):
             D['order'] = len(organizer_data)
+            ####### HOT FIX ####################
+            # WARNING the header on the template
+            # says organizer and we have agreed
+            # that one is either an organizer or
+            # a curator
+            D['curator'] = not D['curator']
             organizer_data.append(D)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
@@ -430,6 +436,8 @@ def make_date_data(seminar):
     return seminar, all_dates, by_date
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
+@login_required
+@email_confirmed_required
 def edit_seminar_schedule():
     # It would be good to have a version of this that worked for a conference, but that's a project for later
     if request.method == 'POST':
@@ -455,6 +463,8 @@ def edit_seminar_schedule():
 
 non_speaker_cols = ["speaker_affiliation", "speaker_email", "title"]
 @create.route("save/schedule/", methods=["POST"])
+@login_required
+@email_confirmed_required
 def save_seminar_schedule():
     raw_data = request.form
     shortname = raw_data["shortname"]

@@ -89,7 +89,8 @@ def login(**kwargs):
     email = request.form["email"]
     password = request.form["password"]
     next = request.form["next"]
-    remember = True if request.form["remember"] == "on" else False
+    # we always remember
+    remember = True # if request.form["remember"] == "on" else False
     user = SeminarsUser(email=email)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
@@ -572,7 +573,7 @@ def ics_file(token):
 @login_page.route("/public/")
 @email_confirmed_required
 def public_users():
-    query = SQL("SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email")
+    query = SQL("SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email WHERE users.creator = True")
     public_organizers = list(userdb._execute(query))
     public_organizers.sort()
     return render_template('public_users.html',

@@ -44,7 +44,7 @@ def parse_institution_sem(info, query, prefix="seminar"):
 
 
 def parse_institution_talk(info, query, prefix="talk"):
-    if info.get("institution"):
+    if info.get(prefix + "_institution"):
         sub_query = {}
         # one day we will do joins
         parse_institution_sem(info, sub_query, prefix="talk")

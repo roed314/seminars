@@ -94,7 +94,7 @@ def ctx_proc_userdata():
 
     # meta_description appears in the meta tag "description"
     data['meta_description'] = r'Welcome to Math Seminars, a listing of mathematical research seminars, talks and conferences!'
-    data['feedbackpage'] = r"https://forms.gle/5HoL6M6PSNEEwLZk6"
+    data['feedbackpage'] = r"https://docs.google.com/forms/d/e/1FAIpQLSdJNJ0MwBXzqZleN5ibAI9u1gPPu9Aokzsy08ot802UitiDRw/viewform"
     data['LINK_EXT'] = lambda a, b: '<a href="%s" target="_blank">%s</a>' % (b, a)
 
     # debug mode?
@@ -142,15 +142,22 @@ def blanknone(x):
     return str(x)
 
 ##############################
-#    Redirects    #
+#    Redirects and errors    #
 ##############################
 
-#@app.before_request
-#def timezone_cookie_enforcer():
-#    urlparts = urlparse(request.url)
-#    if not (request.cookies.get('browser_timezone') or urlparts.path.startswith('/user/ics/')):
-#        # sets a cookie and goes back to the original url
-#        return render_template("timezone.html", url=request.url)
+
+@app.before_request
+def netloc_redirect():
+    """
+        Redirect beantheory.org, www.mathseminars.org -> mathseminars.org
+    """
+    from six.moves.urllib.parse import urlparse, urlunparse
+
+    urlparts = urlparse(request.url)
+
+    if urlparts.netloc in ["beantheory.org", "www.mathseminars.org"]:
+        replaced = urlparts._replace(netloc="mathseminars.org", scheme="https")
+        return redirect(urlunparse(replaced), code=301)
 
 
 def timestamp():
@@ -293,7 +300,14 @@ for fn in ["favicon/apple-touch-icon-57x57.png",
            "favicon/favicon-96x96.png",
            "favicon/favicon-32x32.png",
            "favicon/favicon-16x16.png",
-           "favicon/favicon-128.png"]:
+           "favicon/favicon-128.png",
+           "favicon/favicon.ico",
+           "favicon/mstile-144x144.png",
+           "favicon/mstile-150x150.png",
+           "favicon/mstile-310x150.png",
+           "favicon/mstile-310x310.png",
+           "favicon/mstile-70x70.png",
+           "favicon.ico"]:
     root_static_file(fn)
 
 

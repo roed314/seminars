@@ -35,6 +35,7 @@
         <tr>
           <td>Full name</td>
           <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:500px;" /></td>
+          <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
         </tr>
         <tr>
           <td>Topics</td>
@@ -51,7 +52,7 @@
           <td>
             <span id="institution_selector"></span>
           </td>
-          <td><a href="{{ url_for('list_institutions') }}" target="_blank">Add new institution</a> (must reload this page afterward)</td>
+          <td><a href="{{ url_for('list_institutions') }}" target="_blank">Add new institution</a> (reload this page afterward)</td>
         </tr>
         <tr>
           <td>Meeting day</td>
@@ -101,7 +102,7 @@
         </tr>
         <tr>
           <td>External homepage</td>
-          <td><input style="width:500px;" name="homepage" value="{{ seminar.homepage | blanknone }}" /></td>
+          <td><input style="width:500px;" name="homepage" value="{{ seminar.homepage | blanknone }}" placeholder="https://example.org"/></td>
         </tr>
         <tr>
           <td>Online</td>
@@ -124,7 +125,7 @@
         </tr>
         <tr>
           <td>Livestream link</td>
-          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" /></td>
+          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="https://example.org"/></td>
         </tr>
         {% if not seminar.new %}
           <tr>
@@ -145,12 +146,15 @@
         </tr>
       </table>
       <h3>Organizers</h3>
-        <FONT COLOR="808080"><small>A "curator" is typically a staff person or a student/postdoc assistant with permission to edit the seminar despite not being responsible for the scientific organization.  The organizers with "Display" checked will be visible on the seminar's page, in the order below; if in addition "Contact" is checked, their names there will be "mailto:" links.</small></FONT><br><br>
+      <p class="forminfo">
+        Normally, leave "Organizer" checked; uncheck for a staff/student/postdoc assistant with permission to edit the seminar despite not being responsible for the scientific organization.
+        </br>
+      Anyone with "Display" checked will be visible on the seminar's page, in the order below (in a separate list of "Curators" if "Organizer" is not checked); if in addition "Contact" is checked, their names there will be "mailto:" links.</p>
       <table>
         <thead>
           <th>Email</th>
           <th>Name</th>
-          <th>Curator</th>
+          <th>Organizer</th>
           <th>Display</th>
           <th>Contact</th>
         </thead>
@@ -164,7 +168,9 @@
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
             </td>
             <td>
-              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if seminar.organizer_data[i].get("curator") %}checked{% endif %} />
+              {############ HOT FIX ###############}
+              {# WARNING: the header is organizer #}
+              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
             </td>
             <td>
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />

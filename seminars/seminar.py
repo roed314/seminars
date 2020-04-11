@@ -51,7 +51,7 @@ class WebSeminar(object):
                                    'email': current_user.email,
                                    'full_name': current_user.name,
                                    'order': 0,
-                                   'curator': True,
+                                   'curator': False,
                                    'display': True,
                                    'contact': True}]
         else:

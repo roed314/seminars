@@ -344,7 +344,7 @@ Email link to speaker
         event = Event()
         event.add("summary", self.speaker)
         event.add("dtstart", adapt_datetime(self.start_time, pytz.UTC))
-        event.add("dtend", adapt_datetime(self.start_time, pytz.UTC))
+        event.add("dtend", adapt_datetime(self.end_time, pytz.UTC))
         desc = ""
         # Title
         if self.title:

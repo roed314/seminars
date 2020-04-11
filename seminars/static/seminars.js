@@ -230,8 +230,9 @@ $(document).ready(function () {
     }
     setTimeout(function() {
         tickClock();
+        // update the clock in the top right every 60 seconds
         setInterval(function() {
-            // update the clock in the top right every 60 seconds
+          tickClock();
         }, 60000);
     }, 60000 - millisecond);
 });

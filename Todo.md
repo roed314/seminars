@@ -96,9 +96,11 @@ Content creation
 Viewing and searching
 =====================
 
-1. **flask error on date error**
+1. ** ICS calendar per seminar **
 
-1. **Filter option to show personal calendar**
+1. ** RSS feed on a query for date and seminar: Seminar (in case I didn't specify), Date, Time, Speaker, Title, Abstract **
+
+1. **flask error on date error**
 
 1. **Uniformize from saved events to favorites** should the headers say Favorite? or Saved?
 
@@ -289,3 +291,6 @@ Links to posts about online seminars
 - [adams](https://www.math.colostate.edu/~adams/advising/onlineSeminars/?fbclid=IwAR10iN4GQv4jc39IcRiuohJZJbos7iJcFh9v1p2MgTtOBR6TOomWSPaPkzs)
 - [Rubinstein-Salzedo](https://www.facebook.com/complexzeta/posts/10107887555517347)
 - [Moeller-Williams](https://johncarlosbaez.wordpress.com/2020/03/24/actucr-seminar/?fbclid=IwAR0JUBHUs7mxdnR8ynShIt-6QCFI81mU7DZFwETYHIQCH9QvXcE5lpGALKc)
+- https://mathoverflow.net/questions/349283/software-and-ideas-for-workshops-and-conferences-with-long-distance-participants
+- https://mathoverflow.net/questions/356119/online-events-during-the-quarantine
+- https://www.reddit.com/r/math/comments/fy5dwq/seminars_over_zoom/
