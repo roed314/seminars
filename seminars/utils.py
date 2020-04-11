@@ -235,14 +235,14 @@ def adapt_weektime(t, oldtz, newtz=None, weekday=None):
     now = datetime.now(oldtz)
     # The t we obtain from psycopg2 comes with tzinfo, but we need to forget it
     # in order to compare with now.time()
-    t = t.replace(tzinfo=None).time()
+    tblank = t.replace(tzinfo=None).time()
     if weekday is None:
-        days_ahead = 0 if now.time() <= t else 1
+        days_ahead = 0 if now.time() <= tblank else 1
     else:
         days_ahead = weekday - now.weekday()
-        if days_ahead < 0 or (days_ahead == 0 and now.time() > t):
+        if days_ahead < 0 or (days_ahead == 0 and now.time() > tblank):
             days_ahead += 7
-    next_t = datetime.combine(now.date() + timedelta(days=days_ahead), t)
+    next_t = oldtz.localize(datetime.combine(now.date() + timedelta(days=days_ahead), t.time()))
     next_t = adapt_datetime(next_t, newtz)
     if weekday is None:
         return None, next_t.time()
