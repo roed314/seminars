@@ -344,7 +344,7 @@ class WebSeminar(object):
 def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
     cols = []
     if include_time:
-        cols.append(('colspan="2"', "Your time"))
+        cols.append(('colspan="2" class="yourtime"', "Your time"))
     cols.append(('', "Name"))
     if include_institutions:
         cols.append(('', "Institutions"))

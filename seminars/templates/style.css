@@ -357,6 +357,9 @@ div.topicselected {
     background: #aaaaaa;
 }
 
+table.ntdata th.yourtime {
+    text-align: center;
+}
 td.date, td.timerange {
     white-space: nowrap;
 }

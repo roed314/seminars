@@ -400,7 +400,7 @@ Email link to speaker
 
 def talks_header(include_seminar=True, include_subscribe=True):
     cols = []
-    cols.append((' colspan="2"', "Your time"))
+    cols.append((' colspan="2" class="yourtime"', "Your time"))
     if include_seminar:
         cols.append((' class="seminar"', "Seminar"))
     cols.append((' class="speaker"', "Speaker"))
