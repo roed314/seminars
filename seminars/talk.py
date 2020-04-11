@@ -101,7 +101,7 @@ class WebTalk(object):
     def _editable_time(cls, t):
         if not t:
             return ""
-        return t.strftime("%Y-%m-%d %-H:%M")
+        return t.strftime("%Y-%m-%d %H:%M")
 
     def editable_start_time(self):
         """
@@ -116,16 +116,16 @@ class WebTalk(object):
         return self._editable_time(self.end_time)
 
     def show_start_time(self):
-        return adapt_datetime(self.start_time).strftime("%-H:%M")
+        return adapt_datetime(self.start_time).strftime("%H:%M")
 
     def show_end_time(self):
         # This is used in show_time_and_duration, and needs to include the ending date if different (might not be the same in current user's time zone)
         t0 = adapt_datetime(self.start_time)
         t = adapt_datetime(self.end_time)
         if t0.date() == t.date():
-            return t.strftime("%-H:%M")
+            return t.strftime("%H:%M")
         else:
-            return t.strftime("%a %b %-d, %-H:%M")
+            return t.strftime("%a %b %-d, %H:%M")
 
     def show_date(self):
         if self.start_time is None:
@@ -147,8 +147,8 @@ class WebTalk(object):
 
         def ans(rmk):
             return '%s-%s (%s)' % (
-                adapt_datetime(start).strftime("%a %b %-d, %-H:%M"),
-                adapt_datetime(end).strftime("%-H:%M"),
+                adapt_datetime(start).strftime("%a %b %-d, %H:%M"),
+                adapt_datetime(end).strftime("%H:%M"),
                 rmk,
             )
 

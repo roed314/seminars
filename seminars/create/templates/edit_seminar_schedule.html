@@ -38,7 +38,7 @@
         {{ date.strftime("%a %b %-d") }}
       </td>
       <td class="timerange">
-        {{ talk.start_time.strftime("%-H:%M") }}-{{ talk.end_time.strftime("%-H:%M") }}
+        {{ talk.start_time.strftime("%H:%M") }}-{{ talk.end_time.strftime("%H:%M") }}
       </td>
       <td class="speakerinp">
         <input name="speaker{{i}}" value="{{ talk.speaker | blanknone }}" />
@@ -66,7 +66,7 @@
       </td>
       <td class="timerange">
         {% if seminar.start_time and seminar.end_time %}
-        {{ seminar.start_time.strftime("%-H:%M") }}-{{ seminar.end_time.strftime("%-H:%M") }}
+        {{ seminar.start_time.strftime("%H:%M") }}-{{ seminar.end_time.strftime("%H:%M") }}
         {% else %}
         <input name="time{{i}}" value="{{ raw_data['time%s'%i] }}" placeholder="15:00-16:00" />
         {% endif %}
@@ -110,7 +110,7 @@
         <input name="dateX" value="{{ raw_data.dateX | blanknone }}" />
       </td>
       <td class="timerange">
-        <input name="timeX" value="{% if seminar.start_time and seminar.end_time %}{{ seminar.start_time.strftime('%-H:%M') }}-{{ seminar.end_time.strftime('%-H:%M') }}{% endif %}" />
+        <input name="timeX" value="{% if seminar.start_time and seminar.end_time %}{{ seminar.start_time.strftime('%H:%M') }}-{{ seminar.end_time.strftime('%H:%M') }}{% endif %}" />
       </td>
       <td class="speakerinp">
         <input name="speakerX" value="{{ raw_data.speakerX | blanknone }}" />

@@ -160,7 +160,7 @@ class WebSeminar(object):
         if t:
             if adapt and self.weekday:
                 t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
-            return t.strftime("%-H:%M")
+            return t.strftime("%H:%M")
         else:
             return ""
 
@@ -307,7 +307,7 @@ class WebSeminar(object):
     def show_input_time(self, time):
         if not time:
             return ""
-        return time.strftime("%-H:%M")
+        return time.strftime("%H:%M")
 
     def talks(self, projection=1):
         from seminars.talk import talks_search # avoid import loop
