@@ -102,7 +102,7 @@
         </tr>
         <tr>
           <td>External homepage</td>
-          <td><input style="width:500px;" name="homepage" value="{{ seminar.homepage | blanknone }}" /></td>
+          <td><input style="width:500px;" name="homepage" value="{{ seminar.homepage | blanknone }}" placeholder="https://example.org"/></td>
         </tr>
         <tr>
           <td>Online</td>
@@ -125,7 +125,7 @@
         </tr>
         <tr>
           <td>Livestream link</td>
-          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" /></td>
+          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="https://example.org"/></td>
         </tr>
         {% if not seminar.new %}
           <tr>
