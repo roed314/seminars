@@ -94,9 +94,11 @@ Content creation
 Viewing and searching
 =====================
 
-1. **flask error on date error**
+1. ** ICS calendar per seminar **
 
-1. **Filter option to show personal calendar**
+1. ** RSS feed on a query for date and seminar: Seminar (in case I didn't specify), Date, Time, Speaker, Title, Abstract **
+
+1. **flask error on date error**
 
 1. **Uniformize from saved events to favorites** should the headers say Favorite? or Saved?
 
