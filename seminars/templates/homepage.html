@@ -36,7 +36,7 @@ console.log('Form is unchanged!');
         <div class="topright">
           <table>
             <tr><td><span id="curtime">{{ usertime.strftime("%-H:%M") }}</span></td></tr>
-            <tr><td>{{ user.timezone.replace("_", " ") }}</td></tr>
+            <tr><td>{{ user.show_timezone() }}</td></tr>
           </table>
         </div>
       </div>

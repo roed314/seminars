@@ -14,10 +14,11 @@ from seminars import db
 from seminars.tokens import generate_token
 from seminars.seminar import WebSeminar
 from seminars.talk import WebTalk
+from seminars.utils import pretty_timezone
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import UTC, all_timezones, timezone
 import bisect
 from sage.misc.cachefunc import cached_method
@@ -251,6 +252,10 @@ class SeminarsUser(UserMixin):
     @property
     def tz(self):
         return timezone(self.timezone)
+
+    def show_timezone(self, dest='topmenu'):
+        # dest can be 'browse', in which case "now" isinserted, or 'selecter', in which case fixed width is used.
+        return pretty_timezone(self.timezone, dest=dest)
 
     @timezone.setter
     def timezone(self, timezone):

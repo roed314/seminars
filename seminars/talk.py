@@ -380,18 +380,17 @@ Email link to speaker
 
 def talks_header(include_seminar=True, include_subscribe=True):
     cols = []
-    cols.append("Date")
-    cols.append("Time")
+    cols.append((' colspan="2"', "Your time"))
     if include_seminar:
-        cols.append("Seminar")
-    cols.append("Speaker")
-    cols.append("Title")
+        cols.append((' class="seminar"', "Seminar"))
+    cols.append((' class="speaker"', "Speaker"))
+    cols.append((' class="title"', "Title"))
     if include_subscribe:
         if current_user.is_anonymous():
-            cols.append("")
+            cols.append(('', ""))
         else:
-            cols.append("Saved")
-    return "".join('<th%s>%s</th>' % (' class="%s"' % c.lower() if c else '', c) for c in cols)
+            cols.append((' class="saved"', "Saved"))
+    return "".join('<th%s>%s</th>' % c for c in cols)
 
 
 def can_edit_talk(seminar_id, seminar_ctr, token):

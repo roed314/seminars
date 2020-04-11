@@ -67,6 +67,8 @@ Content creation
 
 1. **Include organizer homepages in organizer table**
 
+1. **In schedule page, talks should actually be shown in seminar's time zone**
+
 1. If you change the time zone of a seminar, the time zone of the talks don't change so they show up weirdly on the edit schedule page.
 
 1. Previewing abstract doesn't take double new lines into account.

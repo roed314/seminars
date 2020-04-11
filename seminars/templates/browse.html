@@ -5,6 +5,9 @@
 <table id="filter-table">
   <tr>
     <td>
+      Times in {{ user.show_timezone("browse") }}
+    </td>
+    <td>
       {{ toggle(tglid="enable_topic_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
     <td>

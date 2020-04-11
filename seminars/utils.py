@@ -22,15 +22,31 @@ def naive_utcoffset(tz):
         except (pytz.exceptions.NonExistentTimeError, pytz.exceptions.AmbiguousTimeError):
             pass
 
-def pretty_timezone(tz):
-    foo = naive_utcoffset(tz)
-    hours, remainder = divmod(int(foo.total_seconds()), 3600)
+def pretty_timezone(tz, dest='selecter'):
+    foo = int(naive_utcoffset(tz).total_seconds())
+    hours, remainder = divmod(abs(foo), 3600)
     minutes, seconds = divmod(remainder, 60)
-    if hours < 0:
-        diff = '{:03d}:{:02d}'.format(hours, minutes)
+    if dest == 'selecter': # used in time zone selecters
+        if foo < 0:
+            diff = '-{:02d}:{:02d}'.format(hours, minutes)
+        else:
+            diff = '+{:02d}:{:02d}'.format(hours, minutes)
+        return "(UTC {}) {}".format(diff, tz)
     else:
-        diff = '+{:02d}:{:02d}'.format(hours, minutes)
-    return "(GMT {}) {}".format(diff, tz)
+        tz = tz.replace("_", " ")
+        if minutes == 0:
+            diff = "{}".format(hours)
+        else:
+            diff = '{}:{:02d}'.format(hours, minutes)
+        if foo < 0:
+            diff = "-" + diff
+        else:
+            diff = "+" + diff
+        if dest == 'browse': # used on browse page by filters
+            return "{} (now UTC {})".format(tz, diff)
+        else:
+            return "{} (UTC {})".format(tz, diff)
+
 
 timezones = [(v, pretty_timezone(v)) for v in sorted(pytz.common_timezones, key=naive_utcoffset)]
 

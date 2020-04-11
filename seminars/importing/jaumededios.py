@@ -5,7 +5,7 @@ from csv import reader
 from dateutil.parser import parse
 from seminars import db
 from seminars.seminar import seminars_lookup
-from seminars.talk import talks_lucky
+from seminars.talk import talks_lucky, talks_max
 import datetime, pytz, random
 
 def import_talks(csv_file):
@@ -18,9 +18,9 @@ def import_talks(csv_file):
                 continue
             timestamp, title, speaker, speaker_affiliation, abstract, host, seminar_id, site, in_charge, arXiv, date, start_time, end_time, timezone, approved = line
             # Make sure seminar exists
+            seminar = seminars_lookup(seminar_id)
             if not seminar:
                 continue
-            seminar = seminars_lookup(seminar_id)
             if seminar is None:
                 print("Warning: seminar %s does not exist" % seminar_id)
                 continue
@@ -57,7 +57,6 @@ def import_talks(csv_file):
                 abstract=abstract,
                 topics=topics,
                 timezone=timezone,
-                date=date,
                 start_time=start_time,
                 end_time=end_time,
                 display=True,
