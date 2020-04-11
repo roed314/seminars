@@ -158,8 +158,10 @@ class WebSeminar(object):
 
     def _show_time(self, t, adapt):
         if t:
-            if adapt and self.weekday:
+            print(t)
+            if adapt and self.weekday is not None:
                 t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
+            print(t)
             return t.strftime("%H:%M")
         else:
             return ""
@@ -239,9 +241,9 @@ class WebSeminar(object):
         if include_datetime:
             cols.append(('class="day"', self.show_day()))
             cols.append(('class="time"', self.show_start_time()))
+        cols.append(('class="name"', self.show_name()))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
-        cols.append(('class="name"', self.show_name()))
         if include_description:
             cols.append(('class="description"', self.show_description()))
         if include_subscribe:
@@ -342,10 +344,10 @@ class WebSeminar(object):
 def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
     cols = []
     if include_time:
-        cols.append(('colspan="2"', "Time"))
+        cols.append(('colspan="2"', "Your time"))
+    cols.append(('', "Name"))
     if include_institutions:
         cols.append(('', "Institutions"))
-    cols.append(('', "Name"))
     if include_description:
         cols.append(('style="min-width:280px;"', "Description"))
     if include_subscribe:

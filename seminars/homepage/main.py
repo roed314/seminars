@@ -10,6 +10,7 @@ import datetime
 import pytz
 from collections import Counter
 from lmfdb.utils.search_parsing import search_parser
+from lmfdb.utils import BasicSpacer
 from dateutil.parser import parse
 
 from lmfdb.utils import (
@@ -111,7 +112,7 @@ def talks_parser(info, query):
     parse_institution_talk(info, query)
     parse_online(info, query, prefix="talk")
     parse_offline(info, query, prefix="talk")
-    parse_substring(info, query, "talk_keywords", ["abstract"])
+    parse_substring(info, query, "talk_keywords", ["title", "abstract"])
     parse_access(info, query, prefix="talk")
 
     parse_substring(info, query, "speaker", ["speaker"])
@@ -127,7 +128,7 @@ def seminars_parser(info, query):
     parse_institution_sem(info, query)
     parse_online(info, query, prefix="seminar")
     parse_offline(info, query, prefix="seminar")
-    parse_substring(info, query, "seminar_keywords", ["description", "comments"])
+    parse_substring(info, query, "seminar_keywords", ["description", "comments", "name"])
     parse_access(info, query, prefix="seminar")
 
     parse_substring(info, query, "name", ["name"])
@@ -224,7 +225,7 @@ class TalkSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [('talks', 'Search for talks')]
+        return [('talks', 'Search for talks'), BasicSpacer("Times in %s" % (current_user.show_timezone("browse")))]
 
     def hidden(self, info):
         return [] # [("talk_start", "talk_start")]
@@ -283,7 +284,7 @@ class SemSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [('seminars', 'Search for seminars')]
+        return [('seminars', 'Search for seminars'), BasicSpacer("Times in %s" % (current_user.show_timezone("browse")))]
 
     def hidden(self, info):
         return [] # [("seminar_start", "seminar_start")]
