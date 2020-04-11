@@ -93,6 +93,34 @@ def delete_seminar(shortname):
             flash_error("Only the owner of the seminar can delete it")
             return failure()
 
+@create.route("delete/talk/<semid>/<semctr>")
+@login_required
+@email_confirmed_required
+def delete_talk(semid,semctr):
+    talk = WebTalk(semid, semctr)
+    lock = get_lock(id, request.args.get("lock"))
+    def failure():
+        return render_template("edit_talk.html",
+                               talk=talk,
+                               seminar=talk.seminar,
+                               title="Edit talk",
+                               section="Manage",
+                               subsection="edittalk",
+                               institutions=institutions(),
+                               timezones=timezones,
+                               #token=token,
+                               **extras)
+    if not talk.user_can_delete():
+        flash_error("Only the organizers of a seminar can delete talks in it")
+        return failure()
+    else:
+        if talk.delete():
+            flash("Talk deleted")
+            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 301)
+        else:
+            flash_error("Only the organizers of a seminar can delete talks in it")
+            return failure()
+
 
 @create.route("save/seminar/", methods=["POST"])
 @login_required

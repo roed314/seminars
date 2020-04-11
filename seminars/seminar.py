@@ -254,7 +254,7 @@ class WebSeminar(object):
         return [rec['email'] for rec in self.organizer_data if rec['email']] + [self.owner]
 
     def user_can_delete(self):
-        # Check whether the current user can edit the seminar
+        # Check whether the current user can delete the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
@@ -334,8 +334,8 @@ class WebSeminar(object):
                     *map(IdentifierWrapper,
                          ['id', 'talk_subscriptions', 'users', 'talk_subscriptions'])),
                                                [self.shortname]):
-                    talk_sub.remove(self.shortname)
-                    db.update({'id': i}, {'talk_subscriptions': talk_sub})
+                    del talk_sub[self.shortname]
+                    db.users.update({'id': i}, {'talk_subscriptions': talk_sub})
             return True
         else:
             return False
