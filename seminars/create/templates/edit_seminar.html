@@ -34,7 +34,11 @@
         </tr>
         <tr>
           <td>Full name</td>
-          <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:500px;" /><FONT COLOR="D3D3D3"><small>Generally, capitalize only the first word and proper names</small></FONT></td>
+          <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:500px;" /></td>
+        </tr>
+        <tr>
+          <td></td>
+            <td class="forminfo" />Generally, capitalize only the first word and proper names</small></td>
         </tr>
         <tr>
           <td>Topics</td>
@@ -145,7 +149,10 @@
         </tr>
       </table>
       <h3>Organizers</h3>
-        <FONT COLOR="D3D3D3"><small>A "curator" is typically a staff person or a student/postdoc assistant with permission to edit the seminar despite not being responsible for the scientific organization.  The organizers with "Display" checked will be visible on the seminar's page, in the order below; if in addition "Contact" is checked, their names there will be "mailto:" links.</small></FONT><br><br>
+      <p class="forminfo">
+        A "curator" is typically a staff person or a student/postdoc assistant with permission to edit the seminar despite not being responsible for the scientific organization.
+        </br>
+      The organizers with "Display" checked will be visible on the seminar's page, in the order below; if in addition "Contact" is checked, their names there will be "mailto:" links.</p>
       <table>
         <thead>
           <th>Email</th>
