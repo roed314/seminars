@@ -154,7 +154,7 @@
         <thead>
           <th>Email</th>
           <th>Name</th>
-          <th>Curator</th>
+          <th>Organizer</th>
           <th>Display</th>
           <th>Contact</th>
         </thead>
@@ -168,7 +168,9 @@
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
             </td>
             <td>
-              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if seminar.organizer_data[i].get("curator") %}checked{% endif %} />
+              {############ HOT FIX ###############}
+              {# WARNING: the header is organizer #}
+              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
             </td>
             <td>
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
