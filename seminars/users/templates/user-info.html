@@ -61,7 +61,7 @@
   <div>
       Export favorites to
       <ul class="ical-detail">
-        <li class="ical-detail">
+        <li class="ical-detail" onmouseover="$(this).notify('It may take ~24 hours for the data to sync with your calendar.', {className: 'info', position: 'bottom'})">
           <a href="{{ user.ics_gcal_link }}" target="_blank">
             <i class="fab fa-google"></i> Google Calendar
           </a>
