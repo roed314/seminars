@@ -252,7 +252,7 @@ class WebSeminar(object):
         return [rec['email'] for rec in self.organizer_data if rec['email']] + [self.owner]
 
     def user_can_delete(self):
-        # Check whether the current user can edit the seminar
+        # Check whether the current user can delete the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
