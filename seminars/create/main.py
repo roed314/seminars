@@ -100,11 +100,10 @@ def delete_talk(semid,semctr):
     talk = WebTalk(semid, semctr)
     lock = get_lock(id, request.args.get("lock"))
     def failure():
-        title = "Create talk" if talk.new else "Edit talk"
         return render_template("edit_talk.html",
                                talk=talk,
                                seminar=talk.seminar,
-                               title=title,
+                               title="Edit talk",
                                section="Manage",
                                subsection="edittalk",
                                institutions=institutions(),
@@ -117,7 +116,7 @@ def delete_talk(semid,semctr):
     else:
         if talk.delete():
             flash("Talk deleted")
-            return redirect(url_for(".index"))
+            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 301)
         else:
             flash_error("Only the organizers of a seminar can delete talks in it")
             return failure()
