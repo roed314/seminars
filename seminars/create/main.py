@@ -112,14 +112,14 @@ def delete_talk(semid,semctr):
                                #token=token,
                                **extras)
     if not talk.user_can_delete():
-        flash_error("Only the organisers of a seminar can delete talks in it")
+        flash_error("Only the organizers of a seminar can delete talks in it")
         return failure()
     else:
         if talk.delete():
             flash("Talk deleted")
             return redirect(url_for(".index"))
         else:
-            flash_error("Only the organisers of a seminar can delete talks in it")
+            flash_error("Only the organizers of a seminar can delete talks in it")
             return failure()
 
 

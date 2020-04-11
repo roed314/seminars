@@ -2,7 +2,7 @@ import pytz, datetime, random
 from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
-from lmfdb.backend.utils import DelayCommit
+from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from seminars import db
 from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, adapt_datetime, toggle
 from seminars.seminar import WebSeminar, can_edit_seminar, seminars_lookup
@@ -269,22 +269,25 @@ class WebTalk(object):
         return self.user_can_edit()
 
     def user_can_edit(self):
-        # Check whether the current user can edit the seminar
+        # Check whether the current user can edit the talk
+        # See can_edit_seminar for another permission check
+        # that takes a seminar's shortname as an argument
+        # and returns various error messages if not editable
         return (current_user.is_admin() or
                 current_user.email_confirmed and
                 (current_user.email in self.seminar.editors() or
-                 current_user.email == self.speaker_email))
+                    current_user.email == self.speaker_email))
 
     def delete(self):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.talks.delete({'id': self.id})
-                for elt in db.users.search(
-                    {'talk_subscriptions': {'$contains': self.seminar.shortname}},
-                        ['id', "talk_subscriptions"]):
-                    elt['talk_subscriptions'][self.seminar.shortname].remove(self.seminar_ctr)
-                    db.users.update({'id': elt['id']},
-                                    {'talk_subscriptions': elt['talk_subscriptions']})
+                for i, talk_sub in db._execute(SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                    *map(IdentifierWrapper,
+                         ['id', 'talk_subscriptions', 'users', 'talk_subscriptions'])),
+                                               [self.seminar.shortname]):
+                    talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
+                    db.users.update({'id': i}, {'talk_subscriptions': talk_sub})
             return True
         else:
             return False

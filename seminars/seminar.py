@@ -332,8 +332,8 @@ class WebSeminar(object):
                     *map(IdentifierWrapper,
                          ['id', 'talk_subscriptions', 'users', 'talk_subscriptions'])),
                                                [self.shortname]):
-                    talk_sub.remove(self.shortname)
-                    db.update({'id': i}, {'talk_subscriptions': talk_sub})
+                    del talk_sub[self.shortname]
+                    db.users.update({'id': i}, {'talk_subscriptions': talk_sub})
             return True
         else:
             return False
