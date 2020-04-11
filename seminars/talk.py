@@ -286,7 +286,8 @@ class WebTalk(object):
                     *map(IdentifierWrapper,
                          ['id', 'talk_subscriptions', 'users', 'talk_subscriptions'])),
                                                [self.seminar.shortname]):
-                    talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
+                    if self.seminar_ctr in talk_sub[self.seminar.shortname]:
+                        talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
                     db.users.update({'id': i}, {'talk_subscriptions': talk_sub})
             return True
         else:
