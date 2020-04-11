@@ -19,7 +19,7 @@ from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit
 from datetime import datetime, timedelta
-from pytz import UTC, all_timezones, timezone
+from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
 from sage.misc.cachefunc import cached_method
 
@@ -455,7 +455,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
 
     @property
     def tz(self):
-        return timezone(self.timezone)
+        try:
+            return timezone(self.timezone)
+        except UnknownTimeZoneError:
+            return timezone('UTC')
 
     @property
     def email_confirmed(self):
