@@ -142,15 +142,22 @@ def blanknone(x):
     return str(x)
 
 ##############################
-#    Redirects    #
+#    Redirects and errors    #
 ##############################
 
-#@app.before_request
-#def timezone_cookie_enforcer():
-#    urlparts = urlparse(request.url)
-#    if not (request.cookies.get('browser_timezone') or urlparts.path.startswith('/user/ics/')):
-#        # sets a cookie and goes back to the original url
-#        return render_template("timezone.html", url=request.url)
+
+@app.before_request
+def netloc_redirect():
+    """
+        Redirect beantheory.org, www.mathseminars.org -> mathseminars.org
+    """
+    from six.moves.urllib.parse import urlparse, urlunparse
+
+    urlparts = urlparse(request.url)
+
+    if urlparts.netloc in ["beantheory.org", "www.mathseminars.org"]:
+        replaced = urlparts._replace(netloc="mathseminars.org", scheme="https")
+        return redirect(urlunparse(replaced), code=301)
 
 
 def timestamp():
