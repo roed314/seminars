@@ -293,7 +293,14 @@ for fn in ["favicon/apple-touch-icon-57x57.png",
            "favicon/favicon-96x96.png",
            "favicon/favicon-32x32.png",
            "favicon/favicon-16x16.png",
-           "favicon/favicon-128.png"]:
+           "favicon/favicon-128.png",
+           "favicon/favicon.ico",
+           "favicon/mstile-144x144.png",
+           "favicon/mstile-150x150.png",
+           "favicon/mstile-310x150.png",
+           "favicon/mstile-310x310.png",
+           "favicon/mstile-70x70.png",
+           "favicon.ico"]:
     root_static_file(fn)
 
 
