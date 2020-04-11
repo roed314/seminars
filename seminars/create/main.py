@@ -430,6 +430,8 @@ def make_date_data(seminar):
     return seminar, all_dates, by_date
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
+@login_required
+@email_confirmed_required
 def edit_seminar_schedule():
     # It would be good to have a version of this that worked for a conference, but that's a project for later
     if request.method == 'POST':
@@ -455,6 +457,8 @@ def edit_seminar_schedule():
 
 non_speaker_cols = ["speaker_affiliation", "speaker_email", "title"]
 @create.route("save/schedule/", methods=["POST"])
+@login_required
+@email_confirmed_required
 def save_seminar_schedule():
     raw_data = request.form
     shortname = raw_data["shortname"]
