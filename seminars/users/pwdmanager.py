@@ -467,3 +467,6 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     def is_anonymous(self):
         return True
 
+    def show_timezone(self, dest='topmenu'):
+        # dest can be 'browse', in which case "now" isinserted, or 'selecter', in which case fixed width is used.
+        return pretty_timezone(self.timezone, dest=dest)
