@@ -104,7 +104,8 @@
     </tr>
     <tr>
       <td>Title</td>
-      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:500px;" /></td>
+      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:500px;" placeholder="TeX symbols are OK here" /></td>
+      <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
     </tr>
     <tr>
       <td>Slides link</td>
@@ -115,7 +116,7 @@
   <table>
     <tr>
       <td colspan="2"><textarea cols="80" rows="10"
-                                name="abstract" id="inp_abstract">{{ talk.abstract | blanknone }}</textarea>
+                                name="abstract" id="inp_abstract">{{ talk.abstract | blanknone }} placeholder="TeX symbols are OK here" </textarea>
       </td>
     </tr>
   </table>
