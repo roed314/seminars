@@ -392,14 +392,14 @@ table#edit-schedule-table {
 }
 
 #edit-schedule-table td {
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 #edit-schedule-table td.date input {
     width: 90px;
 }
 #edit-schedule-table td.timerange input {
-    width: 90px;
+    width: 92px;
 }
 #edit-schedule-table td.speakerinp input {
     width: 160px;
