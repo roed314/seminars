@@ -41,7 +41,7 @@ class WebTalk(object):
             self.seminar_id = semid
             self.seminar_ctr = None
             self.token = "%016x" % random.randrange(16 ** 16)
-            self.display = current_user.is_creator()
+            self.display = seminar.display
             self.online = getattr(
                 seminar, "online", bool(seminar.live_link)
             )

@@ -9,6 +9,13 @@
 {{seminar.show_subscribe() | safe }}
 </span>
 
+{% if not seminar.display %}
+This seminar is not publicly listed as the creator of the seminar is not yet endorsed.
+Once the creator is endorsed, the seminar and its talks will be made public.
+Once you the creator has been endorsed, he can endorse others.
+If you are seeking an endorsement, see if you know anyone on this <a href="{{ url_for('user.public_users') }}">list</a> of all seminar organizers and curators.
+{% endif %}
+
 {% if seminar.description %}<p>{{ (seminar.show_institutions() + ' ' + (seminar.description | blanknone) + seminar.show_topics()) | safe }}</p>{% endif %}
 
 {% if seminar.weekday is not none or seminar.start_time %}<p>{{ seminar.show_weektime_and_duration() }}</p>{% endif %}
