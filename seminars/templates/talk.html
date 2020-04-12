@@ -9,10 +9,10 @@
 <h1>{{talk.show_title()}}{% if not talk.display %} (hidden){% elif talk.online %} (online){% endif %}</h1>
 
 {% if not talk.display %}
-This talk and its corresponding seminar are not publicly listed as the creator of the seminar is not yet endorsed.
-Once the creator is endorsed, the seminar and its talks will be made public.
-Once you the creator has been endorsed, he can endorse others.
-If you are seeking an endorsement, see if you know anyone on this <a href="{{ url_for('user.public_users') }}">list</a> of all seminar organizers and curators.
+This talk is part of a seminar that is not publicly listed yet.
+Once the seminar's creator is endorsed, the seminar and its talks will be made public, and the seminar's creator will be able to endorse other users.
+
+If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.public_users') }}">this list</a> of all seminar organizers and curators.
 {% endif %}
 
 <div id="talk-body">
