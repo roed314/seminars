@@ -48,6 +48,7 @@ class WebSeminar(object):
             self.archived = False  # don't start out archived
             self.is_conference = False  # seminar by default
             self.frequency = 7
+            self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
             self.timezone = str(current_user.tz)
             for key, typ in db.seminars.col_type.items():

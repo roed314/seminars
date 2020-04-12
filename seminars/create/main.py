@@ -12,6 +12,7 @@ from seminars.utils import (
     flash_warning,
     localize_time,
     clean_topics,
+    adapt_datetime,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, can_edit_talk
@@ -483,7 +484,7 @@ def make_date_data(seminar):
     )
     by_date = defaultdict(list)
     for T in future_talks:
-        by_date[T.start_time.date()].append(T)
+        by_date[adapt_datetime(T.start_time, seminar.tz).date()].append(T)
     frequency = seminar.frequency
     if last_talk is None:
         if seminar.weekday is None:
@@ -509,6 +510,9 @@ def make_date_data(seminar):
     else:
         schedule_days = [next_date + i * frequency * day for i in range(SCHEDULE_LEN)]
     all_dates = sorted(set(schedule_days + list(by_date)))
+    # Fill in by_date with Nones up to the per_day value
+    for date in all_dates:
+        by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
     if seminar.start_time is None:
         if future_talks:
             seminar.start_time = future_talks[0].start_time.time()
@@ -550,7 +554,8 @@ def edit_seminar_schedule():
     )
 
 
-non_speaker_cols = ["speaker_affiliation", "speaker_email", "title"]
+required_cols = ["date", "time", "speaker"]
+optional_cols = ["speaker_affiliation", "speaker_email", "title"]
 
 
 @create.route("save/schedule/", methods=["POST"])
@@ -571,78 +576,73 @@ def save_seminar_schedule():
     ctr = curmax + 1
     updated = 0
     warned = False
-    for i in list(range(schedule_count)) + ["X"]:
+    for i in list(range(schedule_count)):
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
-        if i == "X":
-            date = raw_data.get("dateX").strip()
-            if date:
-                try:
-                    date = process_user_input(date, "date", tz=seminar.tz)
-                except ValueError as err:
-                    flash_error("invalid date %s: {0}".format(err), date)
-                    redirect(
-                        url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301,
-                    )
-            else:
-                date = None
+        speaker = process_user_input(
+            raw_data.get("speaker%s" % i, ""), "text", tz=seminar.timezone
+        )
+        if not speaker:
+            if not warned and any(
+                    raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols
+            ):
+                warned = True
+                flash_warning("Talks are only saved if you specify a speaker")
+            continue
+        date = raw_data.get("date%s" % i).strip()
+        if date:
+            try:
+                date = process_user_input(date, "date", tz=seminar.tz)
+            except ValueError as err:
+                flash_error("invalid date %s: {0}".format(err), date)
+                redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301)
         else:
-            date = datetime.date.fromisoformat(raw_data["date%s" % i])
+            date = None
+        time_input = raw_data.get("time%s" % i, "").strip()
+        if time_input:
+            try:
+                time_split = time_input.split("-")
+                if len(time_split) == 1:
+                    raise ValueError("Must specify both start and end times")
+                elif len(time_split) > 2:
+                    raise ValueError("More than one hyphen")
+                # TODO: clean this up
+                start_time = process_user_input(time_split[0], "time", seminar.tz).time()
+                end_time = process_user_input(time_split[1], "time", seminar.tz).time()
+            except ValueError as err:
+                flash_error("invalid time range %s: {0}".format(err), time_input)
+                return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+        else:
+            start_time = end_time = None
+        if any(X is None for X in [start_time, end_time, date]):
+            flash_error(
+                "You must give a date, start and end time for %s" % speaker
+            )
+            return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
         if seminar_ctr:
             # existing talk
             seminar_ctr = int(seminar_ctr)
             talk = WebTalk(shortname, seminar_ctr, seminar=seminar)
-            data = dict(talk.__dict__)
-            for col in ["speaker"] + non_speaker_cols:
-                data[col] = process_user_input(
-                    raw_data.get("%s%s" % (col, i), ""), "text", tz=seminar.timezone
-                )
+        else:
+            # new talk
+            talk = WebTalk(shortname, seminar=seminar, editing=True)
+        data = dict(talk.__dict__)
+        data["speaker"] = speaker
+        for col in optional_cols:
+            data[col] = process_user_input(
+                raw_data.get("%s%s" % (col, i), ""), "text", tz=seminar.timezone
+            )
+        data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
+        data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
+        if seminar_ctr:
             new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
             if new_version != talk:
                 updated += 1
                 new_version.save()
-        elif raw_data["speaker%s" % i].strip() and date:
-            # new talk
-            talk = WebTalk(shortname, seminar=seminar, editing=True)
-            data = dict(talk.__dict__)
-            for col in ["speaker", "speaker_affiliation", "speaker_email", "title"]:
-                data[col] = process_user_input(
-                    raw_data.get("%s%s" % (col, i), ""), "text", tz=seminar.timezone
-                )
-            time_input = raw_data.get("time%s" % i, "").strip()
-            if time_input:  # seminar may not have a time, in which case user can enter one
-                try:
-                    time_split = time_input.split("-")
-                    if len(time_split) == 1:
-                        raise ValueError("Must specify both start and end times")
-                    elif len(time_split) > 2:
-                        raise ValueError("More than one hyphen")
-                    # TODO: clean this up
-                    start_time = process_user_input(time_split[0], "time", seminar.tz).time()
-                    end_time = process_user_input(time_split[1], "time", seminar.tz).time()
-                except ValueError as err:
-                    flash_error("invalid time range %s: {0}".format(err), time_input)
-                    return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
-            elif seminar.start_time is None or seminar.end_time is None:
-                flash_error(
-                    "Since the seminar does not have a time specified, you must provide one"
-                )
-                return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
-            else:
-                start_time = seminar.start_time.time()
-                end_time = seminar.end_time.time()
-            data["start_time"] = localize_time(
-                datetime.datetime.combine(date, start_time), seminar.tz
-            )
-            data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
+        else:
             data["seminar_ctr"] = ctr
             ctr += 1
             new_version = WebTalk(talk.seminar_id, ctr, data=data)
             new_version.save()
-        elif not warned and any(
-            raw_data.get("%s%s" % (col, i), "").strip() for col in non_speaker_cols
-        ):
-            warned = True
-            flash_warning("Talks are only saved if you specify a speaker")
 
     if raw_data.get("detailctr"):
         return redirect(
