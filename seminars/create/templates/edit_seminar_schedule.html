@@ -38,7 +38,21 @@
       </td>
       {% if talk is none %}
       <td class="timerange">
-        <input name="time{{vars.i}}" value="{% if raw_data['time%s'%vars['i']] %}{{ raw_data['time%s'%vars['i']] }}{% else %}{{ seminar.start_time.strftime('%H:%M') }}-{{ seminar.end_time.strftime('%H:%M') }}{% endif %}" placeholder="15:00-16:00" />
+{% if raw_data['time%s'%vars['i']] %}
+{% set talk_time = raw_data['time%s'%vars['i']] %}
+{% else %}
+{% set talk_time = '' %}
+{% if seminar.start_time %}
+{% set talk_time = talk_time + seminar.start_time.strftime('%H:%M') %}
+{% endif %}
+{% if seminar.start_time or seminar.end_time %}
+{% set talk_time = talk_time + '-' %}
+{% endif %}
+{% if seminar.end_time %}
+{% set talk_time = talk_time + seminar.end_time.strftime('%H:%M') %}
+{% endif %}
+{% endif %}
+<input name="time{{vars.i}}" value="{{ talk_time }}" placeholder="15:00-16:00" />
       </td>
       <td class="speakerinp">
         <input name="speaker{{vars.i}}" value="{{ raw_data['speaker%s'%vars['i']] }}" />
