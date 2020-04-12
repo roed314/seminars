@@ -251,7 +251,10 @@ class SeminarsUser(UserMixin):
 
     @property
     def tz(self):
-        return timezone(self.timezone)
+        try:
+            return timezone(self.timezone)
+        except UnknownTimeZoneError:
+            return timezone('UTC')
 
     def show_timezone(self, dest='topmenu'):
         # dest can be 'browse', in which case "now" isinserted, or 'selecter', in which case fixed width is used.
@@ -405,13 +408,16 @@ class SeminarsUser(UserMixin):
     def authenticate(self, pwd):
         """
         checks if the given password for the user is valid.
-        @return: True: OK, False: wrong password.
+        @return: True: OK, False: wrong password or username
         """
         print("authenticating:", self.email)
         if 'password' not in self._data:
             logger.warning("no password data in db for '%s'!" % self.email)
             return False
-        self._authenticated = userdb.authenticate(self.email, pwd)
+        try:
+            self._authenticated = userdb.authenticate(self.email, pwd)
+        except ValueError:
+            return False
         return self._authenticated
 
     def save(self):
