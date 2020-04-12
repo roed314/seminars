@@ -3,15 +3,15 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from seminars.users.main import email_confirmed_required
 from seminars import db
-from seminars.app import app
 from seminars.create import create
 from seminars.utils import timezones, process_user_input, check_time, weekdays, flash_warning, localize_time, clean_topics
-from seminars.seminar import WebSeminar, seminars_lucky, seminars_lookup, can_edit_seminar
-from seminars.talk import WebTalk, talks_lookup, talks_max, talks_search, talks_lucky, can_edit_talk
+from seminars.seminar import WebSeminar, can_edit_seminar
+from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, can_edit_talk
 from seminars.institution import WebInstitution, can_edit_institution, institutions, institution_types, institution_known, clean_institutions
 from seminars.lock import get_lock
-from lmfdb.utils import to_dict, flash_error
-import datetime, pytz, json
+from lmfdb.utils import flash_error
+import datetime
+import pytz
 from collections import defaultdict
 
 SCHEDULE_LEN = 15 # Number of weeks to show in edit_seminar_schedule
