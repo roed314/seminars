@@ -61,7 +61,7 @@
   <div>
       Export favorites to
       <ul class="ical-detail">
-        <li class="ical-detail" onmouseover="$(this).notify('It may take ~24 hours for the data to sync with your calendar.', {className: 'info', position: 'bottom'})">
+        <li class="ical-detail">
           <a href="{{ user.ics_gcal_link }}" target="_blank">
             <i class="fab fa-google"></i> Google Calendar
           </a>
@@ -90,7 +90,7 @@
   <h2>Endorse someone</h2>
 
     <p>
-    To allow someone else to add content, enter their email address below, click endorse to generate a message; then manually cut and paste the message into an email to them, or click the "Send email" button.
+    To allow someone else to add content, enter their email address below, and click "Endorse" to generate a message; then manually cut and paste the message into an email to them, or click the "Send email" button.
     </p>
     <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
     <table>

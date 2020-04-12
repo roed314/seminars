@@ -4,8 +4,15 @@ from flask import url_for, redirect, render_template
 from flask_login import current_user
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, adapt_datetime, toggle
-from seminars.seminar import WebSeminar, can_edit_seminar, seminars_lookup
+from seminars.utils import (
+    search_distinct,
+    lucky_distinct,
+    count_distinct,
+    max_distinct,
+    adapt_datetime,
+    toggle,
+)
+from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
@@ -31,8 +38,8 @@ class WebTalk(object):
         elif data is not None:
             data = dict(data)
             # avoid Nones
-            if data.get('topics') is None:
-                data['topics'] = []
+            if data.get("topics") is None:
+                data["topics"] = []
         if seminar is None:
             seminar = WebSeminar(semid)
         self.seminar = seminar
@@ -41,17 +48,12 @@ class WebTalk(object):
             self.seminar_id = semid
             self.seminar_ctr = None
             self.token = "%016x" % random.randrange(16 ** 16)
-            self.display = current_user.is_creator()
-            self.online = getattr(
-                seminar, "online", bool(seminar.live_link)
-            )
+            self.display = seminar.display
+            self.online = getattr(seminar, "online", bool(seminar.live_link))
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
-                elif (
-                    db.seminars.col_type.get(key) == typ
-                    and getattr(seminar, key, None)
-                ):
+                elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
                     # carry over from seminar
                     setattr(self, key, getattr(seminar, key))
                 elif typ == "text":
@@ -61,32 +63,24 @@ class WebTalk(object):
                 elif typ == "timestamp with time zone":
                     setattr(self, key, None)
                 else:
-                    raise ValueError(
-                        "Need to update talk code to account for schema change"
-                    )
+                    raise ValueError("Need to update talk code to account for schema change")
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
-            if data.get('timezone'):
-                tz = pytz.timezone(data['timezone'])
-                if data.get('start_time'):
-                    data['start_time'] = adapt_datetime(data['start_time'], tz)
-                if data.get('end_time'):
-                    data['end_time'] = adapt_datetime(data['end_time'], tz)
+            if data.get("timezone"):
+                tz = pytz.timezone(data["timezone"])
+                if data.get("start_time"):
+                    data["start_time"] = adapt_datetime(data["start_time"], tz)
+                if data.get("end_time"):
+                    data["end_time"] = adapt_datetime(data["end_time"], tz)
             self.__dict__.update(data)
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
-        return "%s (%s) - %s, %s" % (
-            title,
-            self.speaker,
-            self.show_date(),
-            self.show_start_time(),
-        )
+        return "%s (%s) - %s, %s" % (title, self.speaker, self.show_date(), self.show_start_time(),)
 
     def __eq__(self, other):
         return isinstance(other, WebTalk) and all(
-            getattr(self, key, None) == getattr(other, key, None)
-            for key in db.talks.search_cols
+            getattr(self, key, None) == getattr(other, key, None) for key in db.talks.search_cols
         )
 
     def __ne__(self, other):
@@ -94,9 +88,7 @@ class WebTalk(object):
 
     def save(self):
         assert self.__dict__.get("seminar_id") and self.__dict__.get("seminar_ctr")
-        db.talks.insert_many(
-            [{col: getattr(self, col, None) for col in db.talks.search_cols}]
-        )
+        db.talks.insert_many([{col: getattr(self, col, None) for col in db.talks.search_cols}])
 
     @classmethod
     def _editable_time(cls, t):
@@ -147,7 +139,7 @@ class WebTalk(object):
         year = delta(days=365)
 
         def ans(rmk):
-            return '%s-%s (%s)' % (
+            return "%s-%s (%s)" % (
                 adapt_datetime(start).strftime("%a %b %-d, %H:%M"),
                 adapt_datetime(end).strftime("%H:%M"),
                 rmk,
@@ -228,17 +220,16 @@ class WebTalk(object):
         if raw:
             success = self.live_link
         else:
-            if self.live_link.startswith('http'):
+            if self.live_link.startswith("http"):
                 success = 'Access <a href="%s">online</a>.' % self.live_link
             else:
-                success = 'Livestream comment: %s' % self.live_link
+                success = "Livestream comment: %s" % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
             if user.is_anonymous():
-                return (
-                    'To see access link, please <a href="%s">log in</a> (anti-spam measure).'
-                    % (url_for("user.info"))
+                return 'To see access link, please <a href="%s">log in</a> (anti-spam measure).' % (
+                    url_for("user.info")
                 )
             elif not user.email_confirmed:
                 return "To see access link, please confirm your email."
@@ -262,7 +253,10 @@ class WebTalk(object):
 
     def details_link(self):
         # Submits the form and redirects to create.edit_talk
-        return '<button type="submit" class="aslink" name="detailctr" value="%s">Details</button>' % self.seminar_ctr
+        return (
+            '<button type="submit" class="aslink" name="detailctr" value="%s">Details</button>'
+            % self.seminar_ctr
+        )
 
     def user_can_delete(self):
         # Check whether the current user can delete the talk
@@ -273,22 +267,31 @@ class WebTalk(object):
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return (current_user.is_admin() or
-                current_user.email_confirmed and
-                (current_user.email in self.seminar.editors() or
-                    current_user.email == self.speaker_email))
+        return (
+            current_user.is_admin()
+            or current_user.email_confirmed
+            and (
+                current_user.email in self.seminar.editors()
+                or current_user.email == self.speaker_email
+            )
+        )
 
     def delete(self):
         if self.user_can_delete():
             with DelayCommit(db):
-                db.talks.delete({'id': self.id})
-                for i, talk_sub in db._execute(SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
-                    *map(IdentifierWrapper,
-                         ['id', 'talk_subscriptions', 'users', 'talk_subscriptions'])),
-                                               [self.seminar.shortname]):
+                db.talks.delete({"id": self.id})
+                for i, talk_sub in db._execute(
+                    SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                        *map(
+                            IdentifierWrapper,
+                            ["id", "talk_subscriptions", "users", "talk_subscriptions"],
+                        )
+                    ),
+                    [self.seminar.shortname],
+                ):
                     if self.seminar_ctr in talk_sub[self.seminar.shortname]:
                         talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
-                    db.users.update({'id': i}, {'talk_subscriptions': talk_sub})
+                    db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
             return True
         else:
             return False
@@ -298,11 +301,9 @@ class WebTalk(object):
             return ""
 
         value = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
-        return toggle(tglid="tlg" + value,
-                      value=value,
-                      checked=self.is_subscribed(),
-                      classes="subscribe")
-
+        return toggle(
+            tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
+        )
 
     def oneline(self, include_seminar=True, include_subscribe=True):
         cols = []
@@ -348,16 +349,14 @@ class WebTalk(object):
             "subject": "%s: title and abstract" % self.seminar.name,
         }
         email_to = self.speaker_email if self.speaker_email else ""
-        return  """
+        return """
 <p>
  To let someone edit this page, send them this link:
 <span class="noclick">{link}</span></br>
 <button onClick="window.open('mailto:{email_to}?{msg}')">
 Email link to speaker
 </button>""".format(
-            link=self.speaker_link(),
-            email_to=email_to,
-            msg = urlencode(data, quote_via=quote),
+            link=self.speaker_link(), email_to=email_to, msg=urlencode(data, quote_via=quote),
         )
 
     def event(self, user):
@@ -407,10 +406,10 @@ def talks_header(include_seminar=True, include_subscribe=True):
     cols.append((' class="title"', "Title"))
     if include_subscribe:
         if current_user.is_anonymous():
-            cols.append(('', ""))
+            cols.append(("", ""))
         else:
             cols.append((' class="saved"', "Saved"))
-    return "".join('<th%s>%s</th>' % c for c in cols)
+    return "".join("<th%s>%s</th>" % c for c in cols)
 
 
 def can_edit_talk(seminar_id, seminar_ctr, token):
@@ -443,11 +442,19 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
         if token:
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
-                return redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301), None
+                return (
+                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301),
+                    None,
+                )
         else:
             if not talk.user_can_edit():
-                flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
-                return redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301), None
+                flash_error(
+                    "You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr)
+                )
+                return (
+                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301),
+                    None,
+                )
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
         if resp is not None:
@@ -483,7 +490,9 @@ def _construct(seminar_dict):
                 rec["seminar_id"],
                 rec["seminar_ctr"],
                 seminar=seminar_dict.get(rec["seminar_id"]),
-                data=rec)
+                data=rec,
+            )
+
     return inner_construct
 
 
@@ -491,6 +500,7 @@ def _iterator(seminar_dict):
     def inner_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.talks._search_iterator(cur, search_cols, extra_cols, projection):
             yield _construct(seminar_dict)(rec)
+
     return inner_iterator
 
 
@@ -514,7 +524,7 @@ def talks_search(*args, **kwds):
 
     Doesn't support split_ors or raw.  Always computes count.
     """
-    seminar_dict = kwds.pop('seminar_dict', {})
+    seminar_dict = kwds.pop("seminar_dict", {})
     return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict), *args, **kwds)
 
 
@@ -522,7 +532,7 @@ def talks_lucky(*args, **kwds):
     """
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
-    seminar_dict = kwds.pop('seminar_dict', {})
+    seminar_dict = kwds.pop("seminar_dict", {})
     return lucky_distinct(db.talks, _selecter, _construct(seminar_dict), *args, **kwds)
 
 

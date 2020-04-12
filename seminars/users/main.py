@@ -1,8 +1,4 @@
 # -*- encoding: utf-8 -*-
-# this holds all the flask-login specific logic (+ url mapping an rendering templates)
-# for the user management
-# author: harald schilly <harald.schilly@univie.ac.at>
-
 from __future__ import absolute_import
 import flask
 from urllib.parse import urlencode, quote
@@ -37,7 +33,7 @@ from lmfdb import db
 assert db
 from seminars.utils import timezones
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
-import pytz, datetime
+import datetime
 
 
 login_page = Blueprint("user", __name__, template_folder="templates")
@@ -90,7 +86,7 @@ def login(**kwargs):
     password = request.form["password"]
     next = request.form["next"]
     # we always remember
-    remember = True # if request.form["remember"] == "on" else False
+    remember = True  # if request.form["remember"] == "on" else False
     user = SeminarsUser(email=email)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
@@ -134,6 +130,7 @@ def creator_required(fn):
         return fn(*args, **kwargs)
 
     return decorated_view
+
 
 def email_confirmed_required(fn):
     """
@@ -234,6 +231,7 @@ def register():
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
         from email_validator import validate_email, EmailNotValidError
+
         try:
             validate_email(email)
         except EmailNotValidError as e:
@@ -309,9 +307,7 @@ def generate_confirmation_token(email):
 
 def send_confirmation_email(email):
     token = generate_confirmation_token(email)
-    confirm_url = url_for(
-        ".confirm_email", token=token, _external=True, _scheme="https"
-    )
+    confirm_url = url_for(".confirm_email", token=token, _external=True, _scheme="https")
     html = render_template("confirm_email.html", confirm_url=confirm_url)
     subject = "Please confirm your email"
     send_email(email, subject, html)
@@ -344,9 +340,7 @@ def generate_password_token(email):
 
 def send_reset_password(email):
     token = generate_password_token(email)
-    reset_url = url_for(
-        ".reset_password_wtoken", token=token, _external=True, _scheme="https"
-    )
+    reset_url = url_for(".reset_password_wtoken", token=token, _external=True, _scheme="https")
     html = render_template("reset_password_email.html", reset_url=reset_url)
     subject = "Resetting password"
     send_email(email, subject, html)
@@ -355,16 +349,12 @@ def send_reset_password(email):
 @login_page.route("/reset_password", methods=["GET", "POST"])
 def reset_password():
     if request.method == "GET":
-        return render_template(
-            "reset_password_ask_email.html", title="Forgot Password",
-        )
+        return render_template("reset_password_ask_email.html", title="Forgot Password",)
     elif request.method == "POST":
         email = request.form["email"]
         if userdb.user_exists(email):
             send_reset_password(email)
-        flask.flash(
-            Markup("Check your mailbox for instructions on how to reset your password")
-        )
+        flask.flash(Markup("Check your mailbox for instructions on how to reset your password"))
         return redirect(url_for(".info"))
 
 
@@ -380,9 +370,7 @@ def reset_password_wtoken(token):
         flash_error("The link is invalid or has expired.")
         return redirect(url_for(".info"))
     if request.method == "GET":
-        return render_template(
-            "reset_password_wtoken.html", title="Reset password", token=token
-        )
+        return render_template("reset_password_wtoken.html", title="Reset password", token=token)
     elif request.method == "POST":
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
@@ -395,11 +383,7 @@ def reset_password_wtoken(token):
             return redirect(url_for(".reset_password_wtoken", token=token))
 
         userdb.change_password(email, pw1)
-        flask.flash(
-            Markup(
-                "Your password has been changed. Please login with your new password."
-            )
-        )
+        flask.flash(Markup("Your password has been changed. Please login with your new password."))
         return redirect(url_for(".info"))
 
 
@@ -419,8 +403,8 @@ def get_endorsing_link():
         flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
         return redirect(url_for(".info"))
     link = endorser_link(current_user, email)
-    rec = userdb.lookup(email, ['name', 'creator', 'email_confirmed'])
-    if rec is None or not rec['email_confirmed']: # No account or email unconfirmed
+    rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
+    if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
         to_send = """Hello,
 
 I am offering you permission to add content (e.g., create a seminar)
@@ -436,10 +420,12 @@ To accept this invitation:
 
 Best,
 {name}
-""".format(link=link, name=current_user.name)
+""".format(
+            link=link, name=current_user.name
+        )
         data = {
             "body": to_send,
-            "subject": "An invitation to collaborate on mathseminars.org"
+            "subject": "An invitation to collaborate on mathseminars.org",
         }
         endorsing_link = """
 <p>
@@ -449,11 +435,15 @@ Best,
 Send email
 </button>
  </p>
-""".format(link=link, email=email, msg=urlencode(data, quote_via=quote))
+""".format(
+            link=link, email=email, msg=urlencode(data, quote_via=quote)
+        )
     else:
-        target_name = rec['name']
-        if rec['creator']:
-            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
+        target_name = rec["name"]
+        if rec["creator"]:
+            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(
+                target_name=target_name
+            )
         else:
             to_send = """Dear {target_name},
 
@@ -462,10 +452,12 @@ be publicly viewable.
 
 Best,
 {name}
-""".format(name=current_user.name, target_name=target_name)
+""".format(
+                name=current_user.name, target_name=target_name
+            )
             data = {
                 "body": to_send,
-                "subject": "Endorsement to create content on mathseminars.org"
+                "subject": "Endorsement to create content on mathseminars.org",
             }
             userdb.make_creator(email, current_user._uid)
             endorsing_link = """
@@ -474,7 +466,9 @@ Best,
 <button onClick="window.open('mailto:{email}?{msg}')">
 Send email
 </button> to let them know.
-""".format(target_name=target_name, email=email, msg=urlencode(data, quote_via=quote))
+""".format(
+                target_name=target_name, email=email, msg=urlencode(data, quote_via=quote),
+            )
     session["endorsing link"] = endorsing_link
     return redirect(url_for(".info"))
 
@@ -570,12 +564,15 @@ def ics_file(token):
         bIO, attachment_filename="mathseminars.ics", as_attachment=True, add_etags=False
     )
 
+
 @login_page.route("/public/")
 @email_confirmed_required
 def public_users():
-    query = SQL("SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email WHERE users.creator = True")
+    query = SQL(
+        "SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email WHERE users.creator = True"
+    )
     public_organizers = list(userdb._execute(query))
     public_organizers.sort()
-    return render_template('public_users.html',
-                           title="Public users",
-                           public_users=public_organizers)
+    return render_template(
+        "public_users.html", title="Public users", public_users=public_organizers
+    )

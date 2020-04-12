@@ -1,8 +1,18 @@
-
 from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
-from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, allowed_shortname, topic_dict, weekdays, adapt_weektime, adapt_datetime, toggle
+from seminars.utils import (
+    search_distinct,
+    lucky_distinct,
+    count_distinct,
+    max_distinct,
+    allowed_shortname,
+    topic_dict,
+    weekdays,
+    adapt_weektime,
+    adapt_datetime,
+    toggle,
+)
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from psycopg2.sql import SQL
@@ -10,11 +20,14 @@ import pytz
 from sage.misc.lazy_attribute import lazy_attribute
 from collections import defaultdict
 from datetime import datetime, date
+
 combine = datetime.combine
 
 
 class WebSeminar(object):
-    def __init__(self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False):
+    def __init__(
+        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False
+    ):
         if data is None and not editing:
             data = seminars_lookup(shortname)
             if data is None:
@@ -22,49 +35,55 @@ class WebSeminar(object):
             data = dict(data.__dict__)
         elif data is not None:
             data = dict(data)
-            if data.get('topics') is None:
-                data['topics'] = []
-            if data.get('instructions') is None:
-                data['instructions'] = []
-        self.new = (data is None)
+            if data.get("topics") is None:
+                data["topics"] = []
+            if data.get("instructions") is None:
+                data["instructions"] = []
+        self.new = data is None
         if self.new:
             self.shortname = shortname
             self.display = current_user.is_creator()
-            self.online = True # default
-            self.access = "open" # default
-            self.archived = False # don't start out archived
-            self.is_conference = False # seminar by default
+            self.online = True  # default
+            self.access = "open"  # default
+            self.archived = False  # don't start out archived
+            self.is_conference = False  # seminar by default
             self.frequency = 7
             self.weekday = self.start_time = self.end_time = None
             self.timezone = str(current_user.tz)
             for key, typ in db.seminars.col_type.items():
-                if key == 'id' or hasattr(self, key):
+                if key == "id" or hasattr(self, key):
                     continue
-                elif typ == 'text':
-                    setattr(self, key, '')
-                elif typ == 'text[]':
+                elif typ == "text":
+                    setattr(self, key, "")
+                elif typ == "text[]":
                     setattr(self, key, [])
                 else:
                     raise ValueError("Need to update seminar code to account for schema change")
             if organizer_data is None:
-                organizer_data = [{'seminar_id': self.shortname,
-                                   'email': current_user.email,
-                                   'full_name': current_user.name,
-                                   'order': 0,
-                                   'curator': False,
-                                   'display': True,
-                                   'contact': True}]
+                organizer_data = [
+                    {
+                        "seminar_id": self.shortname,
+                        "email": current_user.email,
+                        "full_name": current_user.name,
+                        "order": 0,
+                        "curator": False,
+                        "display": True,
+                        "contact": True,
+                    }
+                ]
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
-            if data.get('timezone'):
-                tz = pytz.timezone(data['timezone'])
-                if data.get('start_time'):
-                    data['start_time'] = adapt_datetime(data['start_time'], tz)
-                if data.get('end_time'):
-                    data['end_time'] = adapt_datetime(data['end_time'], tz)
+            if data.get("timezone"):
+                tz = pytz.timezone(data["timezone"])
+                if data.get("start_time"):
+                    data["start_time"] = adapt_datetime(data["start_time"], tz)
+                if data.get("end_time"):
+                    data["end_time"] = adapt_datetime(data["end_time"], tz)
             self.__dict__.update(data)
         if organizer_data is None:
-            organizer_data = list(db.seminar_organizers.search({'seminar_id': self.shortname}, sort=['order']))
+            organizer_data = list(
+                db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
+            )
         self.organizer_data = organizer_data
 
     def __repr__(self):
@@ -72,20 +91,23 @@ class WebSeminar(object):
 
     def __eq__(self, other):
         # Note that equality ignores organizers
-        return (isinstance(other, WebSeminar) and
-                all(getattr(self, key, None) == getattr(other, key, None) for key in db.seminars.search_cols))
+        return isinstance(other, WebSeminar) and all(
+            getattr(self, key, None) == getattr(other, key, None) for key in db.seminars.search_cols
+        )
 
     def __ne__(self, other):
         return not (self == other)
 
     def save(self):
-        assert self.__dict__.get('shortname')
-        db.seminars.insert_many([{col: getattr(self, col, None) for col in db.seminars.search_cols}])
+        assert self.__dict__.get("shortname")
+        db.seminars.insert_many(
+            [{col: getattr(self, col, None) for col in db.seminars.search_cols}]
+        )
 
     def save_organizers(self):
         # Need to allow for deleting organizers, so we delete them all then add them back
         with DelayCommit(db):
-            db.seminar_organizers.delete({'seminar_id': self.shortname})
+            db.seminar_organizers.delete({"seminar_id": self.shortname})
             db.seminar_organizers.insert_many(self.organizer_data)
 
     # We use timestamps on January 1, 2020 to save start and end times
@@ -104,22 +126,26 @@ class WebSeminar(object):
 
     @lazy_attribute
     def start_time(self):
-        if self.start_timestamp is None: return None
+        if self.start_timestamp is None:
+            return None
         return self.start_timestamp.time()
 
     @lazy_attribute
     def end_time(self):
-        if self.end_timestamp is None: return None
+        if self.end_timestamp is None:
+            return None
         return self.end_timestamp.time()
 
     @lazy_attribute
     def start_timestamp(self):
-        if self.start_time is None: return None
+        if self.start_time is None:
+            return None
         return self.tz.localize(combine(date(2020, 1, 1), self.start_time))
 
     @lazy_attribute
     def end_timestamp(self):
-        if self.end_time is None: return None
+        if self.end_time is None:
+            return None
         return self.tz.localize(combine(date(2020, 1, 1), self.end_time))
 
     # These functions return time zone aware time objects in either
@@ -127,19 +153,23 @@ class WebSeminar(object):
     # Be careful: the date input is the date of the SEMINAR
 
     def start_time_seminar(self, date):
-        if self.start_time is None: return None
+        if self.start_time is None:
+            return None
         return self.tz.localize(combine(date, self.start_time))
 
     def end_time_seminar(self, date):
-        if self.end_time is None: return None
+        if self.end_time is None:
+            return None
         return self.tz.localize(combine(date, self.end_time))
 
     def start_time_user(self, date):
-        if self.start_time is None: return None
+        if self.start_time is None:
+            return None
         return self.start_time_seminar(date).astimezone(current_user.tz)
 
     def end_time_user(self, date):
-        if self.end_time is None: return None
+        if self.end_time is None:
+            return None
         return self.end_time_seminar(date).astimezone(current_user.tz)
 
     ## This function
@@ -181,7 +211,6 @@ class WebSeminar(object):
             s += "-" + self.show_end_time(adapt=adapt)
         return s
 
-
     def show_topics(self):
         if self.topics:
             return " (" + ", ".join(topic_dict()[topic] for topic in self.topics) + ")"
@@ -190,10 +219,10 @@ class WebSeminar(object):
 
     def show_name(self, external=False):
         # Link to seminar
-        kwargs = {'shortname': self.shortname}
+        kwargs = {"shortname": self.shortname}
         if external:
-            kwargs['_external'] = True
-            kwargs['_scheme'] = 'https'
+            kwargs["_external"] = True
+            kwargs["_scheme"] = "https"
         return '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
 
     def show_description(self):
@@ -208,10 +237,13 @@ class WebSeminar(object):
         if current_user.is_anonymous():
             return ""
 
-        return toggle(tglid="tlg" + self.shortname,
-                      value=self.shortname,
-                      checked=self.is_subscribed(),
-                      classes="subscribe")
+        return toggle(
+            tglid="tlg" + self.shortname,
+            value=self.shortname,
+            checked=self.is_subscribed(),
+            classes="subscribe",
+        )
+
     def show_homepage(self):
         if not self.homepage:
             return ""
@@ -221,22 +253,32 @@ class WebSeminar(object):
     def show_institutions(self):
         if self.institutions:
             links = []
-            for rec in db.institutions.search({'shortname': {'$in': self.institutions}},
-                                              ['shortname', 'name', 'homepage'], sort=['name']):
-                if rec['homepage']:
-                    links.append('<a href="%s">%s</a>' % (rec['homepage'], rec['name']))
+            for rec in db.institutions.search(
+                {"shortname": {"$in": self.institutions}},
+                ["shortname", "name", "homepage"],
+                sort=["name"],
+            ):
+                if rec["homepage"]:
+                    links.append('<a href="%s">%s</a>' % (rec["homepage"], rec["name"]))
                 else:
-                    links.append(rec['name'])
+                    links.append(rec["name"])
             return "/".join(links)
         else:
             return ""
+
     def show_comments(self):
         if self.comments:
             return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
         else:
             return ""
 
-    def oneline(self, include_institutions=True, include_datetime=True, include_description=True, include_subscribe=True):
+    def oneline(
+        self,
+        include_institutions=True,
+        include_datetime=True,
+        include_description=True,
+        include_subscribe=True,
+    ):
         cols = []
         if include_datetime:
             cols.append(('class="day"', self.show_day()))
@@ -251,39 +293,40 @@ class WebSeminar(object):
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
-        return [rec['email'] for rec in self.organizer_data if rec['email']] + [self.owner]
+        return [rec["email"] for rec in self.organizer_data if rec["email"]] + [self.owner]
 
     def user_can_delete(self):
         # Check whether the current user can delete the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return (current_user.is_admin() or
-                (current_user.email_confirmed and
-                current_user.email == self.owner))
+        return current_user.is_admin() or (
+            current_user.email_confirmed and current_user.email == self.owner
+        )
 
     def user_can_edit(self):
         # Check whether the current user can edit the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return (current_user.is_admin() or
-                (current_user.email_confirmed and
-                current_user.email in self.editors()))
+        return current_user.is_admin() or (
+            current_user.email_confirmed and current_user.email in self.editors()
+        )
 
     def _show_editors(self, label, negate=False):
         editors = []
         for rec in self.organizer_data:
-            show = rec['curator']
+            show = rec["curator"]
             if negate:
                 show = not show
-            if show and rec['display']:
-                name = rec['full_name']
+            if show and rec["display"]:
+                name = rec["full_name"]
                 if not name:
-                    if not rec['contact']: continue
-                    name = rec['email']
-                if rec['contact']:
-                    editors.append('<a href="mailto:%s">%s</a>' % (rec['email'], name))
+                    if not rec["contact"]:
+                        continue
+                    name = rec["email"]
+                if rec["contact"]:
+                    editors.append('<a href="mailto:%s">%s</a>' % (rec["email"], name))
                 else:
                     editors.append(name)
         if editors:
@@ -299,12 +342,12 @@ class WebSeminar(object):
 
     def add_talk_link(self, ptag=True):
         if current_user.email in self.editors():
-            s ='<a href="%s">Add talk</a>' % url_for("create.edit_talk", seminar_id=self.shortname)
+            s = '<a href="%s">Add talk</a>' % url_for("create.edit_talk", seminar_id=self.shortname)
             if ptag:
-                s = '<p>%s</p>' % s
+                s = "<p>%s</p>" % s
             return s
         else:
-            return ''
+            return ""
 
     def show_input_time(self, time):
         if not time:
@@ -312,54 +355,72 @@ class WebSeminar(object):
         return time.strftime("%H:%M")
 
     def talks(self, projection=1):
-        from seminars.talk import talks_search # avoid import loop
-        query = {'seminar_id': self.shortname, 'display': True}
+        from seminars.talk import talks_search  # avoid import loop
+
+        query = {"seminar_id": self.shortname, "display": True}
         if self.user_can_edit():
-            query.pop('display')
+            query.pop("display")
         return talks_search(query, projection=projection)
 
     def delete(self):
         if self.user_can_delete():
             with DelayCommit(db):
-                db.seminars.delete({'shortname': self.shortname})
-                db.talks.delete({'seminar_id': self.shortname})
-                db.seminar_organizers.delete({'seminar_id': self.shortname})
+                db.seminars.delete({"shortname": self.shortname})
+                db.talks.delete({"seminar_id": self.shortname})
+                db.seminar_organizers.delete({"seminar_id": self.shortname})
                 for elt in db.users.search(
-                    {'seminar_subscriptions': {'$contains': self.shortname}},
-                        ['id', "seminar_subscriptions"]):
-                    elt['seminar_subscriptions'].remove(self.shortname)
-                    db.users.update({'id': elt['id']},
-                                    {'seminar_subscriptions': elt['seminar_subscriptions']})
-                for i, talk_sub in db._execute(SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
-                    *map(IdentifierWrapper,
-                         ['id', 'talk_subscriptions', 'users', 'talk_subscriptions'])),
-                                               [self.shortname]):
+                    {"seminar_subscriptions": {"$contains": self.shortname}},
+                    ["id", "seminar_subscriptions"],
+                ):
+                    elt["seminar_subscriptions"].remove(self.shortname)
+                    db.users.update(
+                        {"id": elt["id"]}, {"seminar_subscriptions": elt["seminar_subscriptions"]}
+                    )
+                for i, talk_sub in db._execute(
+                    SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                        *map(
+                            IdentifierWrapper,
+                            ["id", "talk_subscriptions", "users", "talk_subscriptions"],
+                        )
+                    ),
+                    [self.shortname],
+                ):
                     del talk_sub[self.shortname]
-                    db.users.update({'id': i}, {'talk_subscriptions': talk_sub})
+                    db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
             return True
         else:
             return False
 
 
-def seminars_header(include_time=True, include_institutions=True, include_description=True, include_subscribe=True):
+def seminars_header(
+    include_time=True, include_institutions=True, include_description=True, include_subscribe=True
+):
     cols = []
     if include_time:
         cols.append(('colspan="2" class="yourtime"', "Your time"))
-    cols.append(('', "Name"))
+    cols.append(("", "Name"))
     if include_institutions:
-        cols.append(('', "Institutions"))
+        cols.append(("", "Institutions"))
     if include_description:
         cols.append(('style="min-width:280px;"', "Description"))
     if include_subscribe:
         if current_user.is_anonymous():
-            cols.append(('', ""))
+            cols.append(("", ""))
         else:
-            cols.append(('', "Saved"))
-    return "".join('<th %s>%s</th>' % pair for pair in cols)
+            cols.append(("", "Saved"))
+    return "".join("<th %s>%s</th>" % pair for pair in cols)
 
-_selecter = SQL("SELECT {0} FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")
-_counter = SQL("SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2")
-_maxer = SQL("SELECT MAX({0}) FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}")
+
+_selecter = SQL(
+    "SELECT {0} FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}"
+)
+_counter = SQL(
+    "SELECT COUNT(*) FROM (SELECT 1 FROM (SELECT DISTINCT ON (shortname) {0} FROM {1} ORDER BY shortname, id DESC) tmp{2}) tmp2"
+)
+_maxer = SQL(
+    "SELECT MAX({0}) FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}"
+)
+
 
 def _construct(organizer_dict):
     def inner_construct(rec):
@@ -367,16 +428,19 @@ def _construct(organizer_dict):
             return rec
         else:
             return WebSeminar(
-                rec['shortname'],
-                organizer_data=organizer_dict.get(rec['shortname']),
-                data=rec)
+                rec["shortname"], organizer_data=organizer_dict.get(rec["shortname"]), data=rec
+            )
+
     return inner_construct
+
 
 def _iterator(organizer_dict):
     def inner_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
             yield _construct(organizer_dict)(rec)
+
     return inner_iterator
+
 
 def seminars_count(query={}):
     """
@@ -384,8 +448,10 @@ def seminars_count(query={}):
     """
     return count_distinct(db.seminars, _counter, query)
 
+
 def seminars_max(col, constraint={}):
     return max_distinct(db.seminars, _maxer, col, constraint)
+
 
 def seminars_search(*args, **kwds):
     """
@@ -393,18 +459,25 @@ def seminars_search(*args, **kwds):
 
     Doesn't support split_ors or raw.  Always computes count.
     """
-    organizer_dict = kwds.pop('organizer_dict', {})
-    return search_distinct(db.seminars, _selecter, _counter, _iterator(organizer_dict), *args, **kwds)
+    organizer_dict = kwds.pop("organizer_dict", {})
+    return search_distinct(
+        db.seminars, _selecter, _counter, _iterator(organizer_dict), *args, **kwds
+    )
+
 
 def seminars_lucky(*args, **kwds):
     """
     Replacement for db.seminars.lucky to account for versioning, return a WebSeminar object or None.
     """
-    organizer_dict = kwds.pop('organizer_dict', {})
+    organizer_dict = kwds.pop("organizer_dict", {})
     return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict), *args, **kwds)
 
-def seminars_lookup(shortname, projection=3, label_col='shortname', organizer_dict={}):
-    return seminars_lucky({label_col: shortname}, projection=projection, organizer_dict=organizer_dict)
+
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}):
+    return seminars_lucky(
+        {label_col: shortname}, projection=projection, organizer_dict=organizer_dict
+    )
+
 
 def all_organizers():
     """
@@ -412,15 +485,20 @@ def all_organizers():
     Usable for the organizer_dict input to seminars_search, seminars_lucky and seminars_lookup
     """
     organizers = defaultdict(list)
-    for rec in db.seminar_organizers.search({}, sort=['seminar_id', 'order']):
-        organizers[rec['seminar_id']].append(rec)
+    for rec in db.seminar_organizers.search({}, sort=["seminar_id", "order"]):
+        organizers[rec["seminar_id"]].append(rec)
     return organizers
+
 
 def all_seminars():
     """
     A dictionary with keys the seminar ids and values a WebSeminar object.
     """
-    return {seminar.shortname: seminar for seminar in seminars_search({}, organizer_dict=all_organizers())}
+    return {
+        seminar.shortname: seminar
+        for seminar in seminars_search({}, organizer_dict=all_organizers())
+    }
+
 
 def can_edit_seminar(shortname, new):
     """
@@ -436,26 +514,38 @@ def can_edit_seminar(shortname, new):
                      or ``None`` (if error or seminar does not exist)
     """
     if not allowed_shortname(shortname):
-        flash_error("The identifier must be nonempty and can include only letters, numbers, hyphens and underscores.")
+        flash_error(
+            "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
+        )
         return redirect(url_for(".index"), 301), None
     seminar = seminars_lookup(shortname)
     # Check if seminar exists
     if new != (seminar is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
         return redirect(url_for(".index"), 301), None
-    if current_user.is_anonymous(): # can happen via talks, which don't check for logged in in order to support tokens
-        flash_error("You do not have permission to edit seminar %s.  Please create an account and contact the seminar organizers." % shortname)
+    if (
+        current_user.is_anonymous()
+    ):  # can happen via talks, which don't check for logged in in order to support tokens
+        flash_error(
+            "You do not have permission to edit seminar %s.  Please create an account and contact the seminar organizers."
+            % shortname
+        )
         return redirect(url_for("show_seminar", shortname=shortname), 301), None
     if not new and not current_user.is_admin():
         # Make sure user has permission to edit
-        organizer_data = db.seminar_organizers.lucky({'seminar_id': shortname, 'email':current_user.email})
+        organizer_data = db.seminar_organizers.lucky(
+            {"seminar_id": shortname, "email": current_user.email}
+        )
         if organizer_data is None:
             owner = seminar.owner
-            owner_name = db.users.lucky({'email': owner}, 'name')
+            owner_name = db.users.lucky({"email": owner}, "name")
             if owner_name:
                 owner = "%s (%s)" % (owner_name, owner)
 
-            flash_error("You do not have permission to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission." % (shortname, owner))
+            flash_error(
+                "You do not have permission to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission."
+                % (shortname, owner)
+            )
             return redirect(url_for(".index"), 301), None
     if seminar is None:
         seminar = WebSeminar(shortname, data=None, editing=True)
