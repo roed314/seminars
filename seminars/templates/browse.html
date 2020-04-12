@@ -4,20 +4,20 @@
 
 <table id="filter-table">
   <tr>
-    <td>
+    <td style="padding-right: 2em;">
       Times in {{ user.show_timezone("browse") }}
     </td>
     <td>
       {{ toggle(tglid="enable_topic_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
-    <td>
+    <td style="padding-right: 2em;">
       Filter by <a id="topic-filter-btn" class="likeknowl"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
     </td>
     {% if user.is_authenticated %}
-    <td style="padding-left: 2em;">
+    <td >
       {{ toggle(tglid="enable_calendar_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
-    <td>
+    <td style="padding-right: 2em;">
       Show only saved events
     </td>
     {% endif %}

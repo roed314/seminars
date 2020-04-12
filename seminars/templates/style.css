@@ -320,8 +320,8 @@ div.topic_cmd {
     color: {{color.header_background}};
 }
 
-#filter-table {
-    margin-left: 30px;
+#filter-table td{
+  padding-right: 0px;
 }
 
 #topic-filter-menu {
