@@ -396,7 +396,7 @@ table#edit-schedule-table {
     padding-right: 5px;
 }
 #edit-schedule-table td.date input {
-    width: 80px;
+    width: 90px;
 }
 #edit-schedule-table td.timerange input {
     width: 90px;

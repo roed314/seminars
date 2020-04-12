@@ -29,102 +29,56 @@
         <th></th>
       </tr>
     </thead>
+    {% set vars = {'i': 0} %}
     {% for date in all_dates %}
-    {% set i = loop.index0 %}
-    {% if date in by_date %}
     {% for talk in by_date[date] %}
     <tr>
       <td class="date">
-        {{ date.strftime("%a %b %-d") }}
+        <input name="date{{vars.i}}" value="{{ date.strftime('%a %b %-d') }}" />
       </td>
+      {% if talk is none %}
       <td class="timerange">
-        {{ talk.start_time.strftime("%H:%M") }}-{{ talk.end_time.strftime("%H:%M") }}
+        <input name="time{{vars.i}}" value="{% if seminar.start_time and seminar.end_time %}{{ seminar.start_time.strftime('%H:%M') }}-{{ seminar.end_time.strftime('%H:%M') }}{% else %}{{ raw_data['time%s'%i] }}{% endif %}" placeholder="15:00-16:00" />
       </td>
       <td class="speakerinp">
-        <input name="speaker{{i}}" value="{{ talk.speaker | blanknone }}" />
+        <input name="speaker{{vars.i}}" value="{{ raw_data['speaker%s'%i] }}" />
       </td>
       <td class="emailinp">
-        <input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" />
+        <input name="speaker_email{{vars.i}}" value="{{ raw_data['speaker_email%s'%i] }}" />
       </td>
       <td class="affiliationinp">
-        <input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" />
+        <input name="speaker_affiliation{{vars.i}}" value="{{ raw_data['speaker_affiliation%s'%i] | blanknone }}" />
       </td>
       <td class="titleinp">
-        <input name="title{{i}}" value="{{ talk.title | blanknone }}" />
+        <input name="title{{vars.i}}" value="{{ raw_data['title%s'%i] }}" />
+      </td>
+      <td></td>
+      <input type="hidden" name="seminar_ctr{{vars.i}}" value="" />
+    {% else %}
+      <td class="timerange">
+        <input name="time{{vars.i}}" value="{% if talk.start_time and talk.end_time %}{{ talk.show_start_time(seminar.tz) }}-{{ talk.show_end_time(seminar.tz) }}{% else %}{{ raw_data['time%s'%i] }}{% endif %}" placeholder="15:00-16:00" />
+      </td>
+      <td class="speakerinp">
+        <input name="speaker{{vars.i}}" value="{{ talk.speaker | blanknone }}" />
+      </td>
+      <td class="emailinp">
+        <input name="speaker_email{{vars.i}}" value="{{ talk.speaker_email | blanknone }}" />
+      </td>
+      <td class="affiliationinp">
+        <input name="speaker_affiliation{{vars.i}}" value="{{ talk.speaker_affiliation | blanknone }}" />
+      </td>
+      <td class="titleinp">
+        <input name="title{{vars.i}}" value="{{ talk.title | blanknone }}" />
       </td>
       <td>
         {{ talk.details_link() | safe }}
       </td>
-      <input type="hidden" name="seminar_ctr{{i}}" value="{{ talk.seminar_ctr }}" />
-      <input type="hidden" name="date{{i}}" value="{{ date.isoformat() }}" />
-    </tr>
-    {% endfor %}
-    {% else %}
-    <tr>
-      <td class="date">
-        {{ date.strftime("%a %b %-d") }}
-      </td>
-      <td class="timerange">
-        {% if seminar.start_time and seminar.end_time %}
-        {{ seminar.start_time.strftime("%H:%M") }}-{{ seminar.end_time.strftime("%H:%M") }}
-        {% else %}
-        <input name="time{{i}}" value="{{ raw_data['time%s'%i] }}" placeholder="15:00-16:00" />
-        {% endif %}
-      </td>
-      <td class="speakerinp">
-        <input name="speaker{{i}}" value="{{ raw_data['speaker%s'%i] }}" />
-      </td>
-      <td class="emailinp">
-        <input name="speaker_email{{i}}" value="{{ raw_data['speaker_email%s'%i] }}" />
-      </td>
-      <td class="affiliationinp">
-        <input name="speaker_affiliation{{i}}" value="{{ raw_data['speaker_affiliation%s'%i] | blanknone }}" />
-      </td>
-      <td class="titleinp">
-        <input name="title{{i}}" value="{{ raw_data['title%s'%i] }}" />
-      </td>
-      <td></td>
-      <input type="hidden" name="seminar_ctr{{i}}" value="" />
-      <input type="hidden" name="date{{i}}" value="{{ date.isoformat() }}" />
-    </tr>
+      <input type="hidden" name="seminar_ctr{{vars.i}}" value="{{ talk.seminar_ctr }}" />
     {% endif %}
+    </tr>
+    {% if vars.update({'i': vars.i+1}) %}{% endif %} {# hack to get around stupid Jinja forgetting variables outside loop #}
     {% endfor %}
-    <tr>
-      <td colspan="7" class="tblh3">
-        Add talk (time not listed above)
-      </td>
-    </tr>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Time</th>
-        <th>Speaker</th>
-        <th>Email</th>
-        <th>Affiliation</th>
-        <th>Title</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tr>
-      <td class="date">
-        <input name="dateX" value="{{ raw_data.dateX | blanknone }}" />
-      </td>
-      <td class="timerange">
-        <input name="timeX" value="{% if seminar.start_time and seminar.end_time %}{{ seminar.start_time.strftime('%H:%M') }}-{{ seminar.end_time.strftime('%H:%M') }}{% endif %}" />
-      </td>
-      <td class="speakerinp">
-        <input name="speakerX" value="{{ raw_data.speakerX | blanknone }}" />
-      </td>
-      <td class="emailinp">
-        <input name="emailX" value="{{ raw_data.emailX | blanknone }}" />
-      </td>
-      <td class="affiliationinp">
-        <input name="speaker_affiliationX" value="{{ raw_data.speaker_affiliationX | blanknone }}" />
-      </td>
-      <td class="titleinp">
-        <input name="titleX" value="{{ raw_data.titleX | blanknone }}" />
-      </td>
-    </tr>
+    {% endfor %}
   </table>
 </form>
 

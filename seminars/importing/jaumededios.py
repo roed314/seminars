@@ -73,7 +73,7 @@ def import_talks(csv_file):
             }
             timezone = tzdict[int(timezone[4:7])]
             tz = pytz.timezone(timezone)
-            date = parse(date).date()
+            date = parse(date, dayfirst=True).date()
             start_time = tz.localize(datetime.datetime.combine(date, parse(start_time).time()))
             end_time = tz.localize(datetime.datetime.combine(date, parse(end_time).time()))
             # Check to see if a talk at this time in the seminar already exists
@@ -84,9 +84,11 @@ def import_talks(csv_file):
                     % (speaker, seminar_id)
                 )
                 continue
-            topics = (
-                arXiv.replace(" ", "").replace("Math.", "").replace("math.", "").lower().split(",")
-            )
+            curtalk = talks_lucky({'seminar_id': seminar_id, 'start_time': start_time})
+            if curtalk is not None:
+                print("Talk at time %s (speaker %s) already exists in seminar %s; continuing" % (start_time.strftime("%a %b %d %-H:%M"), speaker, seminar_id))
+                continue
+            topics = arXiv.replace(" ","").replace("Math.", "").replace("math.", "").lower().split(",")
             if not topics:
                 topics = []
             talks.append(
