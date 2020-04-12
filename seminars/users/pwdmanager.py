@@ -23,6 +23,13 @@ from .main import logger
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
 from flask_login import UserMixin, AnonymousUserMixin
 from flask import request, url_for
+from email_validator import validate_email, EmailNotValidError
+
+def ilike_escape(email):
+    # only do this after validation
+    assert '\\' not in email
+    return email.replace('%',r'\%')
+
 
 
 class PostgresUserTable(PostgresSearchTable):
@@ -87,8 +94,13 @@ class PostgresUserTable(PostgresSearchTable):
         )
         logger.info("password for %s changed!" % email)
 
+    def lookup(self, label, projection=2):
+        return self.lucky({'email': {'$ilike': ilike_escape(email) }, projection=projection, sort=[])
+
+
     def user_exists(self, email):
-        return self.lucky({"email": email}, projection="id") is not None
+        return self.lucky({"email": {'$ilike': ilike_escape(email) }}, projection="id") is not None
+
 
     def authenticate(self, email, password):
         bcpass = self.lookup(email, projection="password")
@@ -96,13 +108,6 @@ class PostgresUserTable(PostgresSearchTable):
             raise ValueError("User not present in database!")
         return bcpass == self.bchash(password, existing_hash=bcpass)
 
-    def confirm_email(self, token):
-        email = self.lucky({"email_confirm_code": token}, "email")
-        if email is not None:
-            self.update({"email": email}, {"email_confirmed": True, "email_confirm_code": None})
-            return True
-        else:
-            return False
 
     def make_creator(self, email, endorser):
         with DelayCommit(self):
@@ -131,10 +136,9 @@ class PostgresUserTable(PostgresSearchTable):
             if self.lookup(data["email"], "id"):
                 flash_error("There is already a user registered with email = %s", data["email"])
                 return False
-            from email_validator import validate_email, EmailNotValidError
-
             try:
-                validate_email(data["email"])
+                # standerdize email
+                data["email"] = validate_email(data["email"])["email"]
             except EmailNotValidError as e:
                 flash_error("""Oops, email '%s' is not allowed. %s""", data["email"], str(e))
                 return False
