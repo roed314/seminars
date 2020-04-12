@@ -4,8 +4,8 @@ import os
 import time
 import datetime
 from urllib.parse import urlparse, urlunparse
-from flask import (Flask, g, render_template, request, make_response,
-                   redirect, url_for, current_app, abort, session)
+from flask import (Flask, render_template, request, make_response,
+                   redirect, url_for, current_app, abort)
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
