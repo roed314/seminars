@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import WebTalk, talks_search, talks_lucky
+from seminars.talk import talks_search, talks_lucky
 from seminars.utils import topics, toggle, Toggle
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
@@ -9,16 +9,14 @@ from flask_login import current_user
 import datetime
 import pytz
 from collections import Counter
-from lmfdb.utils.search_parsing import search_parser
-from lmfdb.utils import BasicSpacer
 from dateutil.parser import parse
 
 from lmfdb.utils import (
+    BasicSpacer,
     SearchArray,
     TextBox,
     SelectBox,
     to_dict,
-    search_wrap,
     flash_error,
 )
 

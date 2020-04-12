@@ -3,7 +3,6 @@ Import data from the csv file backing http://jaume.dedios.cat/math-seminars/
 """
 from csv import reader
 from dateutil.parser import parse
-from seminars import db
 from seminars.seminar import seminars_lookup
 from seminars.talk import talks_lucky, talks_max
 import datetime, pytz, random

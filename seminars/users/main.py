@@ -1,8 +1,4 @@
 # -*- encoding: utf-8 -*-
-# this holds all the flask-login specific logic (+ url mapping an rendering templates)
-# for the user management
-# author: harald schilly <harald.schilly@univie.ac.at>
-
 from __future__ import absolute_import
 import flask
 from urllib.parse import urlencode, quote
@@ -33,11 +29,10 @@ from io import BytesIO
 
 from psycopg2.sql import SQL
 from lmfdb import db
-
 assert db
 from seminars.utils import timezones
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
-import pytz, datetime
+import datetime
 
 
 login_page = Blueprint("user", __name__, template_folder="templates")

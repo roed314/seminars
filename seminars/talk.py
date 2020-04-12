@@ -5,7 +5,7 @@ from flask_login import current_user
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from seminars import db
 from seminars.utils import search_distinct, lucky_distinct, count_distinct, max_distinct, adapt_datetime, toggle
-from seminars.seminar import WebSeminar, can_edit_seminar, seminars_lookup
+from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
