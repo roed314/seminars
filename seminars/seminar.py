@@ -51,6 +51,8 @@ class WebSeminar(object):
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
             self.timezone = str(current_user.tz)
+            self.start_date = None
+            self.end_date = None
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
