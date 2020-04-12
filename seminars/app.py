@@ -3,8 +3,7 @@ from __future__ import absolute_import
 import os
 import time
 import datetime
-from urllib.parse import urlparse
-
+from urllib.parse import urlparse, urlunparse
 from flask import (Flask, g, render_template, request, make_response,
                    redirect, url_for, current_app, abort, session)
 from flask_mail import Mail, Message
@@ -151,7 +150,6 @@ def netloc_redirect():
     """
         Redirect beantheory.org, www.mathseminars.org -> mathseminars.org
     """
-    from six.moves.urllib.parse import urlparse, urlunparse
 
     urlparts = urlparse(request.url)
 

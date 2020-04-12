@@ -98,7 +98,6 @@ def delete_seminar(shortname):
 @email_confirmed_required
 def delete_talk(semid,semctr):
     talk = WebTalk(semid, semctr)
-    lock = get_lock(id, request.args.get("lock"))
     def failure():
         return render_template("edit_talk.html",
                                talk=talk,
