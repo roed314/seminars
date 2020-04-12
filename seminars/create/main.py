@@ -107,9 +107,7 @@ def delete_talk(semid,semctr):
                                section="Manage",
                                subsection="edittalk",
                                institutions=institutions(),
-                               timezones=timezones,
-                               #token=token,
-                               **extras)
+                               timezones=timezones)
     if not talk.user_can_delete():
         flash_error("Only the organizers of a seminar can delete talks in it")
         return failure()
