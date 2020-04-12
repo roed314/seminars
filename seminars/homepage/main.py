@@ -55,9 +55,11 @@ def parse_online(info, query, prefix):
     if info.get(prefix + "_online") == "yes":
         query["online"] = True
 
+
 def parse_offline(info, query, prefix):
     if info.get(prefix + "_offline") == "yes":
         query["room"] = {"$exists": True}
+
 
 def parse_substring(info, query, field, qfields, start="%", end="%"):
     if info.get(field):
@@ -73,6 +75,7 @@ def parse_access(info, query, prefix):
         query["access"] = "open"
     elif access == "users":
         query["access"] = {"$or": ["open", "users"]}
+
 
 def parse_date(info, query):
     tz = current_user.tz
@@ -105,6 +108,7 @@ def parse_video(info, query):
     if v == "yes":
         query["video_link"] = {"$not": None}
 
+
 def talks_parser(info, query):
     parse_topic(info, query, prefix="talk")
     parse_institution_talk(info, query)
@@ -118,7 +122,7 @@ def talks_parser(info, query):
     parse_substring(info, query, "title", ["title"])
     parse_date(info, query)
     parse_video(info, query)
-    query['display'] = True
+    query["display"] = True
 
 
 def seminars_parser(info, query):
@@ -130,14 +134,16 @@ def seminars_parser(info, query):
     parse_access(info, query, prefix="seminar")
 
     parse_substring(info, query, "name", ["name"])
-    query['display'] = True
+    query["display"] = True
 
 
 # Common boxes
 
 
 def institutions_shortnames():
-    return sorted(db.institutions.search({}, projection=["shortname", "name"]), key=lambda elt: elt["name"])
+    return sorted(
+        db.institutions.search({}, projection=["shortname", "name"]), key=lambda elt: elt["name"]
+    )
 
 
 textwidth = 400
@@ -155,7 +161,7 @@ class TalkSearchArray(SearchArray):
         institution = SelectBox(
             name="talk_institution",
             label="Institution",
-            options=[("", ""), ("None", "No institution", ),]
+            options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
@@ -175,18 +181,22 @@ class TalkSearchArray(SearchArray):
         access = SelectBox(
             name="talk_access",
             label="Access",
-            options=[("", ""),
-                     ("open", "Any visitor can view link"),
-                     ("users", "Any logged-in user can view link")],
+            options=[
+                ("", ""),
+                ("open", "Any visitor can view link"),
+                ("users", "Any logged-in user can view link"),
+            ],
         )
         ## number of results to display
         # count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
 
-        speaker = TextBox(name="speaker",
-                          label="Speaker",
-                          colspan=(1, 2, 1),
-                          width=textwidth,
-                          example="Pythagoras o Samios")
+        speaker = TextBox(
+            name="speaker",
+            label="Speaker",
+            colspan=(1, 2, 1),
+            width=textwidth,
+            example="Pythagoras o Samios",
+        )
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
@@ -194,11 +204,13 @@ class TalkSearchArray(SearchArray):
             width=160 * 2 - 1 * 20,
             example="Monsters University",
         )
-        title = TextBox(name="title",
-                        label="Title",
-                        colspan=(1, 2, 1),
-                        width=textwidth,
-                        example="A rigorous definition of rigorous")
+        title = TextBox(
+            name="title",
+            label="Title",
+            colspan=(1, 2, 1),
+            width=textwidth,
+            example="A rigorous definition of rigorous",
+        )
         date = TextBox(
             name="daterange",
             id="daterange",
@@ -223,10 +235,13 @@ class TalkSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [('talks', 'Search for talks'), BasicSpacer("Times in %s" % (current_user.show_timezone("browse")))]
+        return [
+            ("talks", "Search for talks"),
+            BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
+        ]
 
     def hidden(self, info):
-        return [] # [("talk_start", "talk_start")]
+        return []  # [("talk_start", "talk_start")]
 
 
 class SemSearchArray(SearchArray):
@@ -241,7 +256,7 @@ class SemSearchArray(SearchArray):
         institution = SelectBox(
             name="seminar_institution",
             label="Institution",
-            options=[("", ""), ("None", "No institution", ),]
+            options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
@@ -251,24 +266,27 @@ class SemSearchArray(SearchArray):
 
         ## keywords for seminar or talk
         keywords = TextBox(
-            name="seminar_keywords",
-            label="Keywords",
-            colspan=(1, 2, 1),
-            width=textwidth,
+            name="seminar_keywords", label="Keywords", colspan=(1, 2, 1), width=textwidth,
         )
         ## type of access
         access = SelectBox(
             name="seminar_access",
             label="Access",
-            options=[("", ""),
-                     ("open", "Any visitor can view link"),
-                     ("users", "Any logged-in user can view link")],
+            options=[
+                ("", ""),
+                ("open", "Any visitor can view link"),
+                ("users", "Any logged-in user can view link"),
+            ],
         )
         ## number of results to display
         # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
 
         name = TextBox(
-            name="name", label="Name", colspan=(1, 2, 1), width=textwidth, example="What Do They Know? Do They Know Things?? Let's Find Out!"
+            name="name",
+            label="Name",
+            colspan=(1, 2, 1),
+            width=textwidth,
+            example="What Do They Know? Do They Know Things?? Let's Find Out!",
         )
 
         self.array = [
@@ -282,26 +300,32 @@ class SemSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [('seminars', 'Search for seminars'), BasicSpacer("Times in %s" % (current_user.show_timezone("browse")))]
+        return [
+            ("seminars", "Search for seminars"),
+            BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
+        ]
 
     def hidden(self, info):
-        return [] # [("seminar_start", "seminar_start")]
+        return []  # [("seminar_start", "seminar_start")]
+
 
 @app.route("/")
 def index():
     # Eventually want some kind of cutoff on which talks are included.
-    talks = list(talks_search(
-        {"display": True, "end_time": {"$gte": datetime.datetime.now()}},
-        sort=["start_time"],
-        seminar_dict=all_seminars(),
-    ))
+    talks = list(
+        talks_search(
+            {"display": True, "end_time": {"$gte": datetime.datetime.now()}},
+            sort=["start_time"],
+            seminar_dict=all_seminars(),
+        )
+    )
     topic_counts = Counter()
     for talk in talks:
         topic_counts["ALL"] += 1
         if talk.topics:
             for topic in talk.topics:
                 topic_counts[topic] += 1
-    #menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
+    # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
         title="Math Seminars (beta)",
@@ -314,12 +338,14 @@ def index():
 
 @app.route("/search")
 def search():
-    info = to_dict(request.args,
-                   seminar_search_array=SemSearchArray(),
-                   talks_search_array=TalkSearchArray())
+    info = to_dict(
+        request.args, seminar_search_array=SemSearchArray(), talks_search_array=TalkSearchArray()
+    )
     if "search_type" not in info:
         info["talk_online"] = info["seminar_online"] = True
-        info["daterange"] = info.get("daterange", datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -"))
+        info["daterange"] = info.get(
+            "daterange", datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -")
+        )
     try:
         seminar_count = int(info["seminar_count"])
         talk_count = int(info["talk_count"])
@@ -336,23 +362,16 @@ def search():
         talk_start = info["talk_start"] = 0
     seminar_query = {}
     seminars_parser(info, seminar_query)
-    info['seminar_results'] = seminars_search(
-        seminar_query,
-        sort=["weekday", "start_time", "name"],
-        organizer_dict=all_organizers(),
-    ) # limit=seminar_count, offset=seminar_start,
+    info["seminar_results"] = seminars_search(
+        seminar_query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
+    )  # limit=seminar_count, offset=seminar_start,
     talk_query = {}
     talks_parser(info, talk_query)
-    info['talk_results'] = talks_search(
-        talk_query,
-        sort=["start_time", "speaker"],
-        seminar_dict=all_seminars()) # limit=talk_count, offset=talk_start
+    info["talk_results"] = talks_search(
+        talk_query, sort=["start_time", "speaker"], seminar_dict=all_seminars()
+    )  # limit=talk_count, offset=talk_start
     return render_template(
-        "search.html",
-        title="Search seminars",
-        info=info,
-        section="Search",
-        bread=None,
+        "search.html", title="Search seminars", info=info, section="Search", bread=None,
     )
 
 
@@ -399,26 +418,34 @@ def show_seminar(shortname):
         bread=None,
     )
 
+
 @app.route("/talk/<semid>/<int:talkid>/")
 def show_talk(semid, talkid):
-    token = request.args.get("token", "") # save the token so user can toggle between view and edit
+    token = request.args.get("token", "")  # save the token so user can toggle between view and edit
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
         return render_template("404.html", title="Talk not found")
-    kwds = dict(title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token)
+    kwds = dict(
+        title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token
+    )
     if token:
         kwds["section"] = "Manage"
         # Also want to override top menu
         from seminars.utils import top_menu
+
         menu = top_menu()
         menu[2] = (url_for("create.index"), "", "Manage")
         kwds["top_menu"] = menu
-    elif (current_user.is_admin() or
-          current_user.email_confirmed and
-          (current_user.email in talk.seminar.editors() or
-           current_user.email == talk.speaker_email)):
+    elif (
+        current_user.is_admin()
+        or current_user.email_confirmed
+        and (
+            current_user.email in talk.seminar.editors() or current_user.email == talk.speaker_email
+        )
+    ):
         kwds["section"] = "Manage"
     return render_template("talk.html", **kwds)
+
 
 @app.route("/institution/<shortname>/")
 def show_institution(shortname):
@@ -440,9 +467,7 @@ def show_institution(shortname):
 def subscribe():
     # redirect to login page if not logged in, with message about what subscription is
     # If logged in, give a link to download the .ics file, the list of seminars/talks currently followed, and instructions on adding more
-    return render_template(
-        "subscribe.html", title="Subscribe", bread=None
-    )
+    return render_template("subscribe.html", title="Subscribe", bread=None)
     raise NotImplementedError
 
 
@@ -450,11 +475,13 @@ def subscribe():
 def info():
     return render_template("info.html", title="Features", section="Info", subsection="features")
 
+
 @app.route("/faq")
 def faq():
     return render_template("faq.html", title="FAQ", section="Info", subsection="faq")
 
-#@app.route("/<topic>")
-#def by_topic(topic):
+
+# @app.route("/<topic>")
+# def by_topic(topic):
 #    # raise error if not existing topic?
 #    return search({"seminars_topic": topic, "talks_topic": topic})

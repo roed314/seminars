@@ -47,9 +47,7 @@ class PostgresUserTable(PostgresSearchTable):
         """
         if not existing_hash:
             existing_hash = bcrypt.gensalt().decode("utf-8")
-        return bcrypt.hashpw(pwd.encode("utf-8"), existing_hash.encode("utf-8")).decode(
-            "utf-8"
-        )
+        return bcrypt.hashpw(pwd.encode("utf-8"), existing_hash.encode("utf-8")).decode("utf-8")
 
     def new_user(self, **kwargs):
         """
@@ -101,9 +99,7 @@ class PostgresUserTable(PostgresSearchTable):
     def confirm_email(self, token):
         email = self.lucky({"email_confirm_code": token}, "email")
         if email is not None:
-            self.update(
-                {"email": email}, {"email_confirmed": True, "email_confirm_code": None}
-            )
+            self.update({"email": email}, {"email_confirmed": True, "email_confirm_code": None})
             return True
         else:
             return False
@@ -133,18 +129,14 @@ class PostgresUserTable(PostgresSearchTable):
         if "new_email" in data:
             data["email"] = data.pop("new_email")
             if self.lookup(data["email"], "id"):
-                flash_error(
-                    "There is already a user registered with email = %s", data["email"]
-                )
+                flash_error("There is already a user registered with email = %s", data["email"])
                 return False
             from email_validator import validate_email, EmailNotValidError
 
             try:
                 validate_email(data["email"])
             except EmailNotValidError as e:
-                flash_error(
-                    """Oops, email '%s' is not allowed. %s""", data["email"], str(e)
-                )
+                flash_error("""Oops, email '%s' is not allowed. %s""", data["email"], str(e))
                 return False
         for key in list(data.keys()):
             if key not in self.search_cols:
@@ -299,11 +291,7 @@ class SeminarsUser(UserMixin):
     @property
     def ics_gcal_link(self):
         return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
-            {
-                "cid": url_for(
-                    ".ics_file", token=self.ics, _external=True, _scheme="http"
-                )
-            }
+            {"cid": url_for(".ics_file", token=self.ics, _external=True, _scheme="http")}
         )
 
     @property

@@ -236,27 +236,19 @@ def register():
             validate_email(email)
         except EmailNotValidError as e:
             flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
-            return make_response(
-                render_template("register.html", title="Register", email=email)
-            )
+            return make_response(render_template("register.html", title="Register", email=email))
         if pw1 != pw2:
             flash_error("Oops, passwords do not match!")
-            return make_response(
-                render_template("register.html", title="Register", email=email)
-            )
+            return make_response(render_template("register.html", title="Register", email=email))
 
         if len(pw1) < 8:
             flash_error("Oops, password too short. Minimum 8 characters please!")
-            return make_response(
-                render_template("register.html", title="Register", email=email)
-            )
+            return make_response(render_template("register.html", title="Register", email=email))
 
         password = pw1
         if userdb.user_exists(email=email):
             flash_error("Sorry, email '%s' is already registered!", email)
-            return make_response(
-                render_template("register.html", title="Register", email=email)
-            )
+            return make_response(render_template("register.html", title="Register", email=email))
 
         newuser = userdb.new_user(email=email, password=password,)
 
@@ -315,9 +307,7 @@ def generate_confirmation_token(email):
 
 def send_confirmation_email(email):
     token = generate_confirmation_token(email)
-    confirm_url = url_for(
-        ".confirm_email", token=token, _external=True, _scheme="https"
-    )
+    confirm_url = url_for(".confirm_email", token=token, _external=True, _scheme="https")
     html = render_template("confirm_email.html", confirm_url=confirm_url)
     subject = "Please confirm your email"
     send_email(email, subject, html)
@@ -350,9 +340,7 @@ def generate_password_token(email):
 
 def send_reset_password(email):
     token = generate_password_token(email)
-    reset_url = url_for(
-        ".reset_password_wtoken", token=token, _external=True, _scheme="https"
-    )
+    reset_url = url_for(".reset_password_wtoken", token=token, _external=True, _scheme="https")
     html = render_template("reset_password_email.html", reset_url=reset_url)
     subject = "Resetting password"
     send_email(email, subject, html)
@@ -361,16 +349,12 @@ def send_reset_password(email):
 @login_page.route("/reset_password", methods=["GET", "POST"])
 def reset_password():
     if request.method == "GET":
-        return render_template(
-            "reset_password_ask_email.html", title="Forgot Password",
-        )
+        return render_template("reset_password_ask_email.html", title="Forgot Password",)
     elif request.method == "POST":
         email = request.form["email"]
         if userdb.user_exists(email):
             send_reset_password(email)
-        flask.flash(
-            Markup("Check your mailbox for instructions on how to reset your password")
-        )
+        flask.flash(Markup("Check your mailbox for instructions on how to reset your password"))
         return redirect(url_for(".info"))
 
 
@@ -386,9 +370,7 @@ def reset_password_wtoken(token):
         flash_error("The link is invalid or has expired.")
         return redirect(url_for(".info"))
     if request.method == "GET":
-        return render_template(
-            "reset_password_wtoken.html", title="Reset password", token=token
-        )
+        return render_template("reset_password_wtoken.html", title="Reset password", token=token)
     elif request.method == "POST":
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
@@ -401,11 +383,7 @@ def reset_password_wtoken(token):
             return redirect(url_for(".reset_password_wtoken", token=token))
 
         userdb.change_password(email, pw1)
-        flask.flash(
-            Markup(
-                "Your password has been changed. Please login with your new password."
-            )
-        )
+        flask.flash(Markup("Your password has been changed. Please login with your new password."))
         return redirect(url_for(".info"))
 
 
@@ -489,9 +467,7 @@ Best,
 Send email
 </button> to let them know.
 """.format(
-                target_name=target_name,
-                email=email,
-                msg=urlencode(data, quote_via=quote),
+                target_name=target_name, email=email, msg=urlencode(data, quote_via=quote),
             )
     session["endorsing link"] = endorsing_link
     return redirect(url_for(".info"))

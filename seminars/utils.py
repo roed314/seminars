@@ -13,7 +13,8 @@ from psycopg2.sql import SQL
 from markupsafe import Markup, escape
 from collections.abc import Iterable
 
-weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
 
 def naive_utcoffset(tz):
     for h in range(10):
@@ -22,27 +23,28 @@ def naive_utcoffset(tz):
         except (pytz.exceptions.NonExistentTimeError, pytz.exceptions.AmbiguousTimeError):
             pass
 
-def pretty_timezone(tz, dest='selecter'):
+
+def pretty_timezone(tz, dest="selecter"):
     foo = int(naive_utcoffset(tz).total_seconds())
     hours, remainder = divmod(abs(foo), 3600)
     minutes, seconds = divmod(remainder, 60)
-    if dest == 'selecter': # used in time zone selecters
+    if dest == "selecter":  # used in time zone selecters
         if foo < 0:
-            diff = '-{:02d}:{:02d}'.format(hours, minutes)
+            diff = "-{:02d}:{:02d}".format(hours, minutes)
         else:
-            diff = '+{:02d}:{:02d}'.format(hours, minutes)
+            diff = "+{:02d}:{:02d}".format(hours, minutes)
         return "(UTC {}) {}".format(diff, tz)
     else:
         tz = tz.replace("_", " ")
         if minutes == 0:
             diff = "{}".format(hours)
         else:
-            diff = '{}:{:02d}'.format(hours, minutes)
+            diff = "{}:{:02d}".format(hours, minutes)
         if foo < 0:
             diff = "-" + diff
         else:
             diff = "+" + diff
-        if dest == 'browse': # used on browse page by filters
+        if dest == "browse":  # used on browse page by filters
             return "{} (now UTC {})".format(tz, diff)
         else:
             return "{} (UTC {})".format(tz, diff)
@@ -50,14 +52,23 @@ def pretty_timezone(tz, dest='selecter'):
 
 timezones = [(v, pretty_timezone(v)) for v in sorted(pytz.common_timezones, key=naive_utcoffset)]
 
+
 def is_nighttime(t):
     if t is None:
         return False
     # These are times that might be mixed up by using a 24 hour clock
     return 1 <= t.hour < 8
 
+
 def flash_warning(warnmsg, *args):
-    flash(Markup("Warning: " + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))), "error")
+    flash(
+        Markup(
+            "Warning: "
+            + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
+        ),
+        "error",
+    )
+
 
 def check_time(start_time, end_time):
     """
@@ -73,7 +84,10 @@ def check_time(start_time, end_time):
             flash_error("Your start time is after your end time")
         return True
     if is_nighttime(start_time) or is_nighttime(end_time):
-        flash_warning("Your seminar is scheduled between midnight and 8am; if that was unintentional you should edit again using 24-hour notation or including pm")
+        flash_warning(
+            "Your seminar is scheduled between midnight and 8am; if that was unintentional you should edit again using 24-hour notation or including pm"
+        )
+
 
 def top_menu():
     if current_user.is_authenticated:
@@ -89,36 +103,49 @@ def top_menu():
         (url_for("search"), "", "Search"),
         (url_for("create.index"), "", manage),
         (url_for("info"), "", "Info"),
-        (url_for("user.info"), "", account)
+        (url_for("user.info"), "", account),
     ]
 
+
 shortname_re = re.compile("^[A-Za-z0-9_-]+$")
+
+
 def allowed_shortname(shortname):
     return bool(shortname_re.match(shortname))
+
 
 # Note the caching: if you add a topic you have to restart the server
 @cached_function
 def topics():
-    return sorted(((rec["abbreviation"], rec["name"]) for rec in db.topics.search({}, ["abbreviation", "name"])), key=lambda x: x[1].lower())
+    return sorted(
+        (
+            (rec["abbreviation"], rec["name"])
+            for rec in db.topics.search({}, ["abbreviation", "name"])
+        ),
+        key=lambda x: x[1].lower(),
+    )
+
 
 @cached_function
 def topic_dict():
     return dict(topics())
+
 
 def clean_topics(inp):
     if inp is None:
         return []
     if isinstance(inp, str):
         inp = inp.strip()
-        if inp[0] == '[' and inp[-1] == ']':
-            inp = [elt.strip().strip("'") for elt in inp[1:-1].split(',')]
-            if inp == ['']: # was an empty array
+        if inp[0] == "[" and inp[-1] == "]":
+            inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
+            if inp == [""]:  # was an empty array
                 return []
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
         inp = [elt for elt in inp if elt in dict(topics())]
     return inp
+
 
 def count_distinct(table, counter, query={}):
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
@@ -127,6 +154,7 @@ def count_distinct(table, counter, query={}):
     counter = counter.format(cols, tbl, qstr)
     cur = table._execute(counter, values)
     return int(cur.fetchone()[0])
+
 
 def max_distinct(table, maxer, col, constraint={}):
     # Note that this will return None for the max of an empty set
@@ -137,7 +165,19 @@ def max_distinct(table, maxer, col, constraint={}):
     cur = table._execute(maxer, values)
     return cur.fetchone()[0]
 
-def search_distinct(table, selecter, counter, iterator, query={}, projection=1, limit=None, offset=0, sort=None, info=None):
+
+def search_distinct(
+    table,
+    selecter,
+    counter,
+    iterator,
+    query={},
+    projection=1,
+    limit=None,
+    offset=0,
+    sort=None,
+    info=None,
+):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
 
@@ -152,7 +192,7 @@ def search_distinct(table, selecter, counter, iterator, query={}, projection=1, 
     """
     if offset < 0:
         raise ValueError("Offset cannot be negative")
-    all_cols = SQL(", ").join(map(IdentifierWrapper, ['id'] + table.search_cols))
+    all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     tbl = IdentifierWrapper(table.search_table)
@@ -182,7 +222,9 @@ def search_distinct(table, selecter, counter, iterator, query={}, projection=1, 
             offset -= (1 + (offset - nres) / limit) * limit
             if offset < 0:
                 offset = 0
-            return search_distinct(table, selecter, counter, iterator, query, projection, limit, offset, sort, info)
+            return search_distinct(
+                table, selecter, counter, iterator, query, projection, limit, offset, sort, info
+            )
         info["query"] = dict(query)
         info["number"] = nres
         info["count"] = limit
@@ -190,8 +232,9 @@ def search_distinct(table, selecter, counter, iterator, query={}, projection=1, 
         info["exact_count"] = True
     return list(results)
 
+
 def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0, sort=[]):
-    all_cols = SQL(", ").join(map(IdentifierWrapper, ['id'] + table.search_cols))
+    all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
@@ -206,6 +249,7 @@ def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0,
             rec = {k: v for k, v in zip(search_cols + extra_cols, rec)}
         return construct(rec)
 
+
 def localize_time(t, newtz=None):
     """
     Takes a time or datetime object and adds in a timezone if not already present.
@@ -217,6 +261,7 @@ def localize_time(t, newtz=None):
     else:
         return t
 
+
 def adapt_datetime(t, newtz=None):
     """
     Converts a time-zone-aware datetime object into a specified time zone
@@ -225,6 +270,7 @@ def adapt_datetime(t, newtz=None):
     if newtz is None:
         newtz = current_user.tz
     return t.astimezone(newtz)
+
 
 def adapt_weektime(t, oldtz, newtz=None, weekday=None):
     """
@@ -249,6 +295,7 @@ def adapt_weektime(t, oldtz, newtz=None, weekday=None):
     else:
         return next_t.weekday(), next_t.time()
 
+
 def process_user_input(inp, typ, tz):
     """
     INPUT:
@@ -258,9 +305,9 @@ def process_user_input(inp, typ, tz):
     """
     if inp is None:
         return None
-    if typ == 'timestamp with time zone':
+    if typ == "timestamp with time zone":
         return localize_time(parse_time(inp), tz)
-    elif typ == 'time':
+    elif typ == "time":
         # Note that parse_time, when passed a time with no date, returns
         # a datetime object with the date set to today.  This could cause different
         # relative orders around daylight savings time, so we store all times
@@ -268,26 +315,26 @@ def process_user_input(inp, typ, tz):
         t = parse_time(inp)
         t = t.replace(year=2020, month=1, day=1)
         return localize_time(t, tz)
-    elif typ == 'date':
+    elif typ == "date":
         return parse_time(inp).date()
-    elif typ == 'boolean':
-        if inp in ['yes', 'true', 'y', 't']:
+    elif typ == "boolean":
+        if inp in ["yes", "true", "y", "t"]:
             return True
-        elif inp in ['no', 'false', 'n', 'f']:
+        elif inp in ["no", "false", "n", "f"]:
             return False
         raise ValueError
-    elif typ == 'text':
+    elif typ == "text":
         # should sanitize somehow?
         return "\n".join(inp.splitlines())
-    elif typ in ['int', 'smallint', 'bigint', 'integer']:
+    elif typ in ["int", "smallint", "bigint", "integer"]:
         return int(inp)
-    elif typ == 'text[]':
+    elif typ == "text[]":
         print(repr(inp))
         inp = inp.strip()
         if inp:
-            if inp[0] == '[' and inp[-1] == ']':
-                res = [elt.strip().strip("'") for elt in inp[1:-1].split(',')]
-                if res == ['']: # was an empty array
+            if inp[0] == "[" and inp[-1] == "]":
+                res = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
+                if res == [""]:  # was an empty array
                     return []
                 else:
                     return res
@@ -306,19 +353,22 @@ def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
     return """
 <input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" onchange="{onchange}" name="{name}" {checked}>
 <label class="tgl-btn" for="{tglid}"></label>
-""".format(tglid=tglid,
-           value=value,
-           checked="checked" if checked else "",
-           classes=classes,
-           onchange=onchange,
-           name=name)
+""".format(
+        tglid=tglid,
+        value=value,
+        checked="checked" if checked else "",
+        classes=classes,
+        onchange=onchange,
+        name=name,
+    )
 
 
 class Toggle(SearchBox):
     def _input(self, info=None):
-        main = toggle(tglid="toggle_%s" % self.name,
-                      name=self.name,
-                      value="yes",
-                      checked=info is not None and info.get(self.name, False)
-                      )
+        main = toggle(
+            tglid="toggle_%s" % self.name,
+            name=self.name,
+            value="yes",
+            checked=info is not None and info.get(self.name, False),
+        )
         return '<span style="display: inline-block">%s</span>' % (main,)

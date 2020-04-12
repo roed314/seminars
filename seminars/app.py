@@ -4,8 +4,16 @@ import os
 import time
 import datetime
 from urllib.parse import urlparse, urlunparse
-from flask import (Flask, render_template, request, make_response,
-                   redirect, url_for, current_app, abort)
+from flask import (
+    Flask,
+    render_template,
+    request,
+    make_response,
+    redirect,
+    url_for,
+    current_app,
+    abort,
+)
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
@@ -22,12 +30,12 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 app = Flask(__name__)
 
 mail_settings = {
-    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_SERVER": "smtp.gmail.com",
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": 'info.mathseminars@gmail.com',
-    "MAIL_PASSWORD": os.environ.get('EMAIL_PASSWORD','')
+    "MAIL_USERNAME": "info.mathseminars@gmail.com",
+    "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD", ""),
 }
 
 app.config.update(mail_settings)
@@ -37,15 +45,23 @@ mail = Mail(app)
 # App attribute functions  #
 ############################
 
+
 def is_debug_mode():
     from flask import current_app
+
     return current_app.debug
 
+
 app.is_running = False
+
+
 def set_running():
     app.is_running = True
+
+
 def is_running():
     return app.is_running
+
 
 ############################
 # Global app configuration #
@@ -57,7 +73,8 @@ app.logger.addHandler(logger_file_handler())
 if app.debug:
     try:
         from flask_debugtoolbar import DebugToolbarExtension
-        app.config['SECRET_KEY'] = '''shh, it's a secret'''
+
+        app.config["SECRET_KEY"] = """shh, it's a secret"""
         toolbar = DebugToolbarExtension(app)
     except ImportError:
         pass
@@ -66,8 +83,8 @@ if app.debug:
 app.jinja_env.trim_blocks = True
 
 # enable break and continue in jinja loops
-app.jinja_env.add_extension('jinja2.ext.loopcontrols')
-app.jinja_env.add_extension('jinja2.ext.do')
+app.jinja_env.add_extension("jinja2.ext.loopcontrols")
+app.jinja_env.add_extension("jinja2.ext.do")
 
 # the following context processor inserts
 #  * empty info={} dict variable
@@ -81,31 +98,36 @@ def ctx_proc_userdata():
     # set the body class to some default, blueprints should
     # overwrite it with their name, using @<blueprint_object>.context_processor
     # see http://flask.pocoo.org/docs/api/?highlight=context_processor#flask.Blueprint.context_processor
-    data = {'info': {}, 'body_class': ''}
+    data = {"info": {}, "body_class": ""}
 
     # insert the default bread crumb hierarchy
     # overwrite this variable when you want to customize it
     # For example, [ ('Bread', '.'), ('Crumb', '.'), ('Hierarchy', '.')]
-    data['bread'] = None
+    data["bread"] = None
 
     # default title - Math seminars already included in base.html
-    data['title'] = r''
+    data["title"] = r""
 
     # meta_description appears in the meta tag "description"
-    data['meta_description'] = r'Welcome to Math Seminars, a listing of mathematical research seminars, talks and conferences!'
-    data['feedbackpage'] = r"https://docs.google.com/forms/d/e/1FAIpQLSdJNJ0MwBXzqZleN5ibAI9u1gPPu9Aokzsy08ot802UitiDRw/viewform"
-    data['LINK_EXT'] = lambda a, b: '<a href="%s" target="_blank">%s</a>' % (b, a)
+    data[
+        "meta_description"
+    ] = r"Welcome to Math Seminars, a listing of mathematical research seminars, talks and conferences!"
+    data[
+        "feedbackpage"
+    ] = r"https://docs.google.com/forms/d/e/1FAIpQLSdJNJ0MwBXzqZleN5ibAI9u1gPPu9Aokzsy08ot802UitiDRw/viewform"
+    data["LINK_EXT"] = lambda a, b: '<a href="%s" target="_blank">%s</a>' % (b, a)
 
     # debug mode?
-    data['DEBUG'] = is_debug_mode()
+    data["DEBUG"] = is_debug_mode()
 
-    data['topics'] = topics()
-    data['top_menu'] = top_menu()
+    data["topics"] = topics()
+    data["top_menu"] = top_menu()
 
-    data['talks_header'] = talks_header
-    data['seminars_header'] = seminars_header
+    data["talks_header"] = talks_header
+    data["seminars_header"] = seminars_header
 
     return data
+
 
 ##############################
 #      Jinja formatters      #
@@ -116,29 +138,34 @@ def ctx_proc_userdata():
 # if you want to do more than just the default, use it for example this way:
 # {{ <datetimeobject>|fmtdatetime('%H:%M:%S') }}
 @app.template_filter("fmtdatetime")
-def fmtdatetime(value, format='%Y-%m-%d %H:%M:%S'):
+def fmtdatetime(value, format="%Y-%m-%d %H:%M:%S"):
     if isinstance(value, datetime.datetime):
         return value.strftime(format)
     else:
         return "-"
 
+
 # You can use this formatter to turn newlines in a string into HTML line breaks
 @app.template_filter("nl2br")
 def nl2br(s):
-    return s.replace('\n', '<br/>\n')
+    return s.replace("\n", "<br/>\n")
+
 
 # You can use this formatter to encode a dictionary into a url string
-@app.template_filter('urlencode')
+@app.template_filter("urlencode")
 def urlencode(kwargs):
     from six.moves.urllib.parse import urlencode
+
     return urlencode(kwargs)
+
 
 # Use this to have None print as the empty string
 @app.template_filter("blanknone")
 def blanknone(x):
     if x is None:
-        return ''
+        return ""
     return str(x)
+
 
 ##############################
 #    Redirects and errors    #
@@ -159,23 +186,27 @@ def netloc_redirect():
 
 
 def timestamp():
-    return '[%s UTC]' % time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+    return "[%s UTC]" % time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+
 
 @app.errorhandler(404)
 def not_found_404(error):
-    app.logger.info('%s 404 error for URL %s %s' % (timestamp(), request.url, error.description))
-    messages = error.description if isinstance(error.description, (list, tuple)) else (error.description,)
-    return render_template("404.html", title='Page Not Found', messages=messages), 404
+    app.logger.info("%s 404 error for URL %s %s" % (timestamp(), request.url, error.description))
+    messages = (
+        error.description if isinstance(error.description, (list, tuple)) else (error.description,)
+    )
+    return render_template("404.html", title="Page Not Found", messages=messages), 404
+
 
 @app.errorhandler(500)
 def not_found_500(error):
-    app.logger.error("%s 500 error on URL %s %s"%(timestamp(), request.url, error.args))
-    return render_template("500.html", title='Error'), 500
+    app.logger.error("%s 500 error on URL %s %s" % (timestamp(), request.url, error.args))
+    return render_template("500.html", title="Error"), 500
+
 
 @app.errorhandler(503)
 def not_found_503(error):
     return render_template("503.html"), 503
-
 
 
 ##############################
@@ -184,6 +215,7 @@ def not_found_503(error):
 
 # Code for the main browse pages is contained in the homepage/ folder
 
+
 @app.route("/health")
 @app.route("/alive")
 def alive():
@@ -191,19 +223,25 @@ def alive():
     a basic health check
     """
     from . import db
+
     if db.is_alive():
         return "Bean Theory!"
     else:
         abort(503)
 
+
 @app.route("/acknowledgment")
 def acknowledgment():
-    return render_template("acknowledgment.html", title="Acknowledgments", section="Info", subsection="acknowledgments")
+    return render_template(
+        "acknowledgment.html", title="Acknowledgments", section="Info", subsection="acknowledgments"
+    )
+
 
 @app.route("/contact")
 def contact():
     t = "Contact and Feedback"
-    return render_template('contact.html', title=t, section="Info", subsection="contact")
+    return render_template("contact.html", title=t, section="Info", subsection="contact")
+
 
 @app.route("/robots.txt")
 def robots_txt():
@@ -213,10 +251,12 @@ def robots_txt():
             return open(fn).read()
     return "User-agent: *\nDisallow: / \n"
 
+
 # geeky pages have humans.txt
 @app.route("/humans.txt")
 def humans_txt():
     return render_template("acknowledgment.html", title="Acknowledgments")
+
 
 def routes():
     """
@@ -232,7 +272,8 @@ def routes():
             except Exception:
                 url = None
             links.append((url, str(rule)))
-    return sorted(links, key= lambda elt: elt[1])
+    return sorted(links, key=lambda elt: elt[1])
+
 
 @app.route("/sitemap")
 def sitemap():
@@ -252,29 +293,35 @@ def sitemap():
         + "</ul>"
     )
 
+
 ##############################
 #       CSS Styling          #
 ##############################
 
+
 @app.context_processor
 def add_colors():
     from .color import Slate
-    return {'color': Slate().dict()}
+
+    return {"color": Slate().dict()}
+
 
 @app.route("/style.css")
 def css():
     response = make_response(render_template("style.css"))
-    response.headers['Content-type'] = 'text/css'
+    response.headers["Content-type"] = "text/css"
     # don't cache css file, if in debug mode.
     if current_app.debug:
-        response.headers['Cache-Control'] = 'no-cache, no-store'
+        response.headers["Cache-Control"] = "no-cache, no-store"
     else:
-        response.headers['Cache-Control'] = 'public, max-age=600'
+        response.headers["Cache-Control"] = "public, max-age=600"
     return response
+
 
 ##############################
 #       Static files         #
 ##############################
+
 
 def root_static_file(name):
     def static_fn():
@@ -282,46 +329,52 @@ def root_static_file(name):
         if os.path.exists(fn):
             return open(fn, "rb").read()
         critical("root_static_file: file %s not found!" % fn)
-        return abort(404, 'static file %s not found.' % fn)
-    app.add_url_rule('/%s' % name, 'static_%s' % name, static_fn)
+        return abort(404, "static file %s not found." % fn)
+
+    app.add_url_rule("/%s" % name, "static_%s" % name, static_fn)
 
 
-for fn in ["favicon/apple-touch-icon-57x57.png",
-           "favicon/apple-touch-icon-114x114.png",
-           "favicon/apple-touch-icon-72x72.png",
-           "favicon/apple-touch-icon-144x144.png",
-           "favicon/apple-touch-icon-60x60.png",
-           "favicon/apple-touch-icon-120x120.png",
-           "favicon/apple-touch-icon-76x76.png",
-           "favicon/apple-touch-icon-152x152.png",
-           "favicon/favicon-196x196.png",
-           "favicon/favicon-96x96.png",
-           "favicon/favicon-32x32.png",
-           "favicon/favicon-16x16.png",
-           "favicon/favicon-128.png",
-           "favicon/favicon.ico",
-           "favicon/mstile-144x144.png",
-           "favicon/mstile-150x150.png",
-           "favicon/mstile-310x150.png",
-           "favicon/mstile-310x310.png",
-           "favicon/mstile-70x70.png",
-           "favicon.ico"]:
+for fn in [
+    "favicon/apple-touch-icon-57x57.png",
+    "favicon/apple-touch-icon-114x114.png",
+    "favicon/apple-touch-icon-72x72.png",
+    "favicon/apple-touch-icon-144x144.png",
+    "favicon/apple-touch-icon-60x60.png",
+    "favicon/apple-touch-icon-120x120.png",
+    "favicon/apple-touch-icon-76x76.png",
+    "favicon/apple-touch-icon-152x152.png",
+    "favicon/favicon-196x196.png",
+    "favicon/favicon-96x96.png",
+    "favicon/favicon-32x32.png",
+    "favicon/favicon-16x16.png",
+    "favicon/favicon-128.png",
+    "favicon/favicon.ico",
+    "favicon/mstile-144x144.png",
+    "favicon/mstile-150x150.png",
+    "favicon/mstile-310x150.png",
+    "favicon/mstile-310x310.png",
+    "favicon/mstile-70x70.png",
+    "favicon.ico",
+]:
     root_static_file(fn)
-
 
 
 ##############################
 #           Mail             #
 ##############################
 
+
 def send_email(to, subject, message):
     from html2text import html2text
+
     app.logger.info("%s sending email to %s..." % (timestamp(), to))
-    mail.send(Message(subject=subject,
-                  html=message,
-                  body=html2text(message), # a plain text version of our email
-                  sender="info.mathseminars@gmail.com",
-                  recipients=[to]))
+    mail.send(
+        Message(
+            subject=subject,
+            html=message,
+            body=html2text(message),  # a plain text version of our email
+            sender="info.mathseminars@gmail.com",
+            recipients=[to],
+        )
+    )
     app.logger.info("%s done sending email to %s" % (timestamp(), to))
-
-

@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Math Seminars - https://mathseminars.org
 # Copyright (C) 2020 by the Math Seminars authors
 #
@@ -12,6 +12,7 @@ add --debug if you are developing (auto-restart, full stacktrace in browser, ...
 """
 from __future__ import print_function, absolute_import
 import os
+
 # Needs to be done first so that other modules and gunicorn can use logging
 from lmfdb.logger import info
 from .app import app, set_running  # So that we can set it running below
@@ -48,10 +49,13 @@ from .app import app, set_running  # So that we can set it running below
 # from . import sato_tate_groups
 # assert sato_tate_groups
 from . import users
+
 assert users
 from . import homepage
+
 assert homepage
 from . import create
+
 assert create
 # from . import characters
 # assert characters
@@ -93,6 +97,7 @@ assert create
 # assert inventory_app
 
 from lmfdb.backend import db
+
 if db.is_verifying:
     raise RuntimeError("Cannot start website while verifying (SQL injection vulnerabilities)")
 
@@ -114,18 +119,20 @@ def main():
 
     if "COCALC_PROJECT_ID" in os.environ:
         from lmfdb.utils.cocalcwrap import CocalcWrap
+
         # we must accept external connections
         flask_options["host"] = "0.0.0.0"
         app.wsgi_app = CocalcWrap(app.wsgi_app)
         stars = "\n" + "*" * 80
-        info(stars +
-             "\n\033[1mCocalc\033[0m environment detected!\n" +
-             "Visit" +
-             "\n  \033[1m https://cocalc.com" +
-             app.wsgi_app.app_root +
-             " \033[0m" +
-             "\nto access this Math Seminars instance" +
-             stars
-             )
+        info(
+            stars
+            + "\n\033[1mCocalc\033[0m environment detected!\n"
+            + "Visit"
+            + "\n  \033[1m https://cocalc.com"
+            + app.wsgi_app.app_root
+            + " \033[0m"
+            + "\nto access this Math Seminars instance"
+            + stars
+        )
     set_running()
     app.run(**flask_options)
