@@ -29,6 +29,7 @@ from io import BytesIO
 
 from psycopg2.sql import SQL
 from lmfdb import db
+
 assert db
 from seminars.utils import timezones
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
@@ -85,7 +86,7 @@ def login(**kwargs):
     password = request.form["password"]
     next = request.form["next"]
     # we always remember
-    remember = True # if request.form["remember"] == "on" else False
+    remember = True  # if request.form["remember"] == "on" else False
     user = SeminarsUser(email=email)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
@@ -129,6 +130,7 @@ def creator_required(fn):
         return fn(*args, **kwargs)
 
     return decorated_view
+
 
 def email_confirmed_required(fn):
     """
@@ -229,23 +231,32 @@ def register():
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
         from email_validator import validate_email, EmailNotValidError
+
         try:
             validate_email(email)
         except EmailNotValidError as e:
             flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
-            return make_response(render_template("register.html", title="Register", email=email))
+            return make_response(
+                render_template("register.html", title="Register", email=email)
+            )
         if pw1 != pw2:
             flash_error("Oops, passwords do not match!")
-            return make_response(render_template("register.html", title="Register", email=email))
+            return make_response(
+                render_template("register.html", title="Register", email=email)
+            )
 
         if len(pw1) < 8:
             flash_error("Oops, password too short. Minimum 8 characters please!")
-            return make_response(render_template("register.html", title="Register", email=email))
+            return make_response(
+                render_template("register.html", title="Register", email=email)
+            )
 
         password = pw1
         if userdb.user_exists(email=email):
             flash_error("Sorry, email '%s' is already registered!", email)
-            return make_response(render_template("register.html", title="Register", email=email))
+            return make_response(
+                render_template("register.html", title="Register", email=email)
+            )
 
         newuser = userdb.new_user(email=email, password=password,)
 
@@ -414,8 +425,8 @@ def get_endorsing_link():
         flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
         return redirect(url_for(".info"))
     link = endorser_link(current_user, email)
-    rec = userdb.lookup(email, ['name', 'creator', 'email_confirmed'])
-    if rec is None or not rec['email_confirmed']: # No account or email unconfirmed
+    rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
+    if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
         to_send = """Hello,
 
 I am offering you permission to add content (e.g., create a seminar)
@@ -431,10 +442,12 @@ To accept this invitation:
 
 Best,
 {name}
-""".format(link=link, name=current_user.name)
+""".format(
+            link=link, name=current_user.name
+        )
         data = {
             "body": to_send,
-            "subject": "An invitation to collaborate on mathseminars.org"
+            "subject": "An invitation to collaborate on mathseminars.org",
         }
         endorsing_link = """
 <p>
@@ -444,11 +457,15 @@ Best,
 Send email
 </button>
  </p>
-""".format(link=link, email=email, msg=urlencode(data, quote_via=quote))
+""".format(
+            link=link, email=email, msg=urlencode(data, quote_via=quote)
+        )
     else:
-        target_name = rec['name']
-        if rec['creator']:
-            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
+        target_name = rec["name"]
+        if rec["creator"]:
+            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(
+                target_name=target_name
+            )
         else:
             to_send = """Dear {target_name},
 
@@ -457,10 +474,12 @@ be publicly viewable.
 
 Best,
 {name}
-""".format(name=current_user.name, target_name=target_name)
+""".format(
+                name=current_user.name, target_name=target_name
+            )
             data = {
                 "body": to_send,
-                "subject": "Endorsement to create content on mathseminars.org"
+                "subject": "Endorsement to create content on mathseminars.org",
             }
             userdb.make_creator(email, current_user._uid)
             endorsing_link = """
@@ -469,7 +488,11 @@ Best,
 <button onClick="window.open('mailto:{email}?{msg}')">
 Send email
 </button> to let them know.
-""".format(target_name=target_name, email=email, msg=urlencode(data, quote_via=quote))
+""".format(
+                target_name=target_name,
+                email=email,
+                msg=urlencode(data, quote_via=quote),
+            )
     session["endorsing link"] = endorsing_link
     return redirect(url_for(".info"))
 
@@ -565,12 +588,15 @@ def ics_file(token):
         bIO, attachment_filename="mathseminars.ics", as_attachment=True, add_etags=False
     )
 
+
 @login_page.route("/public/")
 @email_confirmed_required
 def public_users():
-    query = SQL("SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email WHERE users.creator = True")
+    query = SQL(
+        "SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email WHERE users.creator = True"
+    )
     public_organizers = list(userdb._execute(query))
     public_organizers.sort()
-    return render_template('public_users.html',
-                           title="Public users",
-                           public_users=public_organizers)
+    return render_template(
+        "public_users.html", title="Public users", public_users=public_organizers
+    )
