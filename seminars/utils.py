@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 from dateutil.parser import parse as parse_time
 import pytz, re
 from six import string_types
