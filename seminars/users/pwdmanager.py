@@ -380,6 +380,9 @@ class SeminarsUser(UserMixin):
             self._data["talk_subscriptions"][shortname].remove(ctr)
             self._dirty = True
             return 200, "Removed from favorites"
+        else:
+            return 200, "Already removed from favorites"
+
 
     def is_anonymous(self):
         """required by flask-login user class"""
