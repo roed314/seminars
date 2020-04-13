@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+echo 'Killing supervisord ...'
+kill -TERM `cat /home/mathseminars/supervisord.pid`
+echo 'Killing gunicorn ...'
+kill -TERM `cat /home/mathseminars/gunicorn.pid`;
+done
+echo '... and done!'

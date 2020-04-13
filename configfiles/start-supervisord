@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+supervisord -c /home/mathseminars/seminars/config/supervisord.conf
