@@ -196,6 +196,14 @@ class WebTalk(object):
     def show_title(self):
         return self.title if self.title else "TBA"
 
+
+
+    def show_link_title(self):
+        return "<a href={url}>{title}</a>".format(
+            url=url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr),
+            title=self.show_title()
+        )
+
     def show_knowl_title(self):
         return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
             title=self.show_title(),
@@ -327,6 +335,7 @@ class WebTalk(object):
         cols.append(('class="talktitle"', self.show_knowl_title()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
+        cols.append(('style="display: none;"', self.show_link_title()))
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def show_comments(self):

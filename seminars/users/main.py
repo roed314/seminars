@@ -495,7 +495,7 @@ def endorse_wtoken(token):
         return redirect(url_for(".info"))
     if current_user.is_creator():
         flash_error("Account already has creator privileges.")
-    elif current_user.email != email:
+    elif current_user.email.lower() != email.lower():
         flash_error("The link is not valid for this account.")
     else:
         userdb.make_creator(current_user.email, int(endorser))

@@ -253,8 +253,8 @@ class SeminarsUser(UserMixin):
             return timezone('UTC')
 
     def show_timezone(self, dest="topmenu"):
-        # dest can be 'browse', in which case "now" isinserted, or 'selecter', in which case fixed width is used.
-        return pretty_timezone(self.timezone, dest=dest)
+        # dest can be 'browse', in which case "now" is inserted, or 'selecter', in which case fixed width is used.
+        return pretty_timezone(self.tz, dest=dest)
 
     @timezone.setter
     def timezone(self, timezone):
@@ -380,6 +380,9 @@ class SeminarsUser(UserMixin):
             self._data["talk_subscriptions"][shortname].remove(ctr)
             self._dirty = True
             return 200, "Removed from favorites"
+        else:
+            return 200, "Already removed from favorites"
+
 
     def is_anonymous(self):
         """required by flask-login user class"""
@@ -477,5 +480,5 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
         return True
 
     def show_timezone(self, dest="topmenu"):
-        # dest can be 'browse', in which case "now" isinserted, or 'selecter', in which case fixed width is used.
-        return pretty_timezone(self.timezone, dest=dest)
+        # dest can be 'browse', in which case "now" is inserted, or 'selecter', in which case fixed width is used.
+        return pretty_timezone(self.tz, dest=dest)

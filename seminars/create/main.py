@@ -594,9 +594,7 @@ def save_seminar_schedule():
                 date = process_user_input(date, "date", tz=seminar.tz)
             except ValueError as err:
                 flash_error("invalid date %s: {0}".format(err), date)
-                redirect(
-                    url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301,
-                )
+                redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301)
         else:
             date = None
         time_input = raw_data.get("time%s" % i, "").strip()
