@@ -485,101 +485,87 @@ def save_talk():
 def make_date_data(seminar, begin, end):
     shortname = seminar.shortname
     day = datetime.timedelta(days=1)
+    today = datetime.datetime.now(tz=pytz.timezone(seminar.timezone)).date()
+    if begin is None or seminar.start_time is None or seminar.end_time is None:
+        future_talk = talks_lucky(
+            {"seminar_id": shortname, "start_time": {"$exists": True, "$gte": today}}, sort=["start_time"]
+        )
+        last_talk = talks_lucky(
+            {"seminar_id": shortname, "start_time": {"$exists": True, "$lt": today}}, sort=[("start_time", -1)],
+        )
+
     frequency = seminar.frequency
+    if frequency is None:
+        frequency = 1 if seminar.is_conference else 7
     query = {}
     if begin is None:
-        if seminar.is_conference and seminar.start_date:
-            begin = seminar.start_date
-                schedule_len = int((seminar.end_date - begin) / day) + 1
-                frequency = 1
+        if seminar.is_conference:
+            if seminar.start_date:
+                begin = seminar.start_date
             else:
-                frequency = None
-        elif end is None:
-            now = datetime.datetime.now(tz=pytz.timezone(seminar.timezone))
-            begin = now.date() # Initial guess
-            last_talk = talks_lucky(
-                {"seminar_id": shortname, "start_time": {"$lt": begin}}, sort=[("start_time", -1)],
-            )
-            if last_talk is None:
-                if seminar.weekday is None:
-                    if future_talks:
+                begin = today
+        else:
+            if seminar.weekday is not None and frequency == 7:
+                begin = today
+                # Weekly meetings: take the next one
+                while begin.weekday() != seminar.weekday:
+                    begin += day
+            else:
+                # Try to figure out a plan from future and past talks
+                if future_talk is None:
+                    if last_talk is None:
+                        # Give up
+                        begin = today
+                    else:
+                        begin = last_talk.start_time.date()
+                        while begin < today:
+                            begin += frequency * day
+                else:
+                    begin = future_talk.start_time.date()
+                    while begin >= today:
+                        begin -= frequency * day
+                    begin += frequency * day
                 seminar.weekday = future_talks[0].start_time.weekday()
-            else:
-                # No talks and no weekday information.  We just use today.
-                seminar.weekday = datetime.datetime.now(
-                    tz=pytz.timezone(seminar.timezone)
-                ).weekday()
-        next_date = today
-        while next_date.weekday() != seminar.weekday:
-            next_date += day
-    elif frequency and frequency > 0:
-        next_date = last_talk.start_time.date()
-        while next_date < today:
-            next_date += seminar.frequency * day
-    else:
-        next_date = today
-        frequency = None
-
-        elif frequency is not None:
-            begin = end - (SCHEDULE_LEN-1)*frequency*day
-    if begin is not None:
-        query["$gte"] = begin
     if end is None:
-        if seminar.is_conference and seminar.end_date:
-            end = seminar.end_date
-        elif begin is not None:
+        if seminar.is_conference:
+            if seminar.end_date:
+                end = seminar.end_date
+                schedule_len = int((end - begin) / (frequency*day)) + 1
+            else:
+                end = begin + 6*day
+                schedule_len = 7
+        else:
             end = begin + (SCHEDULE_LEN-1)*frequency*day
-    if end is not None:
-        query["$lt"] = end + day # add a day since we want to allow talks on the final day
-    if end < start:
-        frequency = None
-
-    if frequency is None:
-        schedule_days = []
+            schedule_len = SCHEDULE_LEN
     else:
+        schedule_len = abs(int((end - begin) / (frequency*day))) + 1
+    # add a day since we want to allow talks on the final day
+    if end < begin:
+        # Only possible by user input
+        frequency = -frequency
+        query = {"$gte": end, "$lt": begin + day}
+    else:
+        query = {"$gte": begin, "$lt": end + day}
+    schedule_days = [begin + i * frequency * day for i in range(schedule_len)]
     scheduled_talks = list(
-        talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"])
+        talks_search({"seminar_id": shortname, "start_time": query})
     )
     by_date = defaultdict(list)
     for T in scheduled_talks:
         by_date[adapt_datetime(T.start_time, seminar.tz).date()].append(T)
-    frequency = seminar.frequency
-    if last_talk is None:
-        if seminar.weekday is None:
-            if future_talks:
-                seminar.weekday = future_talks[0].start_time.weekday()
-            else:
-                # No talks and no weekday information.  We just use today.
-                seminar.weekday = datetime.datetime.now(
-                    tz=pytz.timezone(seminar.timezone)
-                ).weekday()
-        next_date = today
-        while next_date.weekday() != seminar.weekday:
-            next_date += day
-    elif frequency and frequency > 0:
-        next_date = last_talk.start_time.date()
-        while next_date < today:
-            next_date += seminar.frequency * day
-    else:
-        next_date = today
-        frequency = None
-    if frequency is None:
-        schedule_days = []
-    else:
-        schedule_days = [next_date + i * frequency * day for i in range(SCHEDULE_LEN)]
-    all_dates = sorted(set(schedule_days + list(by_date)))
+    all_dates = sorted(set(schedule_days + list(by_date)), reverse=(end < begin))
     # Fill in by_date with Nones up to the per_day value
     for date in all_dates:
         by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
     if seminar.start_time is None:
-        if future_talks:
-            seminar.start_time = future_talks[0].start_time.time()
-        elif last_talk is not None:
+        if future_talk is not None and future_talk.start_time:
+            seminar.start_time = future_talk.start_time.time()
+        elif last_talk is not None and last_talk.start_time:
             seminar.start_time = last_talk.start_time.time()
     if seminar.end_time is None:
-        if future_talks:
+        if future_talk is not None and future_talk.start_time:
             seminar.end_time = future_talks[0].end_time.time()
-        elif last_talk is not None:
+        elif last_talk is not None and last_talk.start_time:
             seminar.end_time = last_talk.end_time.time()
     return seminar, all_dates, by_date
 
