@@ -456,7 +456,7 @@ def save_talk():
         except Exception as err:
             return make_error(talk, col, err)
     data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data,get("language"))
+    data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(talk)
