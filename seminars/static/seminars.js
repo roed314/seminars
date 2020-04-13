@@ -39,38 +39,58 @@ function getCookie(name) {
 function eraseCookie(name) {
     document.cookie = name+'=; Max-Age=-99999999;';
 }
-function addTopic(topic) {
-    var cur_topics = getCookie("topics");
-    if (cur_topics) {
-        cur_topics = cur_topics + "," + topic;
+function addToCookie(item, cookie) {
+    var cur_items = getCookie(cookie);
+    if (cur_items) {
+        cur_items = cur_items + "," + item;
     } else {
-        cur_topics = topic;
+        cur_items = item;
     }
-    setCookie("topics", cur_topics);
-    return cur_topics;
+    setCookie(cookie, cur_items);
+    return cur_items;
 }
-function removeTopic(topic) {
-    var cur_topics = getCookie("topics");
-    cur_topics = cur_topics.replace(topic, "").replace(",,",",");
-    if (cur_topics.startsWith(",")) cur_topics = cur_topics.slice(1);
-    if (cur_topics.endsWith(",")) cur_topics = cur_topics.slice(0, -1);
-    setCookie("topics", cur_topics);
-    return cur_topics;
+function removeFromCookie(item, cookie) {
+    var cur_items = getCookie(cookie);
+    cur_items = cur_items.replace(item, "").replace(",,",",");
+    if (cur_items.startsWith(",")) cur_items = cur_items.slice(1);
+    if (cur_items.endsWith(",")) cur_items = cur_items.slice(0, -1);
+    setCookie(cookie, cur_items);
+    return cur_items;
 }
 
 function topicFiltering() {
     return $('#enable_topic_filter').is(":checked");
 }
+function languageFiltering() {
+    return $('#enable_language_filter').is(":checked");
+}
 function calFiltering() {
     return $('#enable_calendar_filter').is(":checked");
 }
 
-function setTopicLinks() {
+function setLanguageLinks() {
+    var cur_languages = getCookie("languages");
+    if (cur_languages == null) {
+        setCookie("languages", "en");
+        cur_languages = "en";
+        setCookie("filter_language", "0");
+    } else {
+        $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_languages"))));
+    }
+    cur_languages = cur_languages.split(",");
+    for (var i=0; i<cur_languages.length; i++) {
+        $("#langlink-" + cur_languages[i]).addClass("languageselected");
+        $(".lang-" + cur_languages[i]).removeClass("language-filtered");
+    }
+}
+function setLinks() {
+    setLanguageLinks();
     var cur_topics = getCookie("topics");
     $(".talk").addClass("topic-filtered");
     if (cur_topics == null) {
         setCookie("topics", "");
         setCookie("filter_topic", "0");
+        // filter_language set in setLanguageLinks(), since we added it after launch
         setCookie("filter_calendar", "0");
         // Set the following in preparation so we don't need to worry about them not existing.
         setCookie("filter_location", "0");
@@ -86,14 +106,42 @@ function setTopicLinks() {
         toggleFilters(null);
     }
 }
+function toggleLanguage(id) {
+    var toggler = $("#" + id);
+    console.log(id);
+    var lang = id.substring(9); // langlink-*
+    var talks = $(".lang-" + lang);
+    if (toggler.hasClass("languageselected")) {
+        toggler.removeClass("languageselected");
+        cur_langs = removeFromCookie(lang, "languages").split(",");
+        for (i=0; i<cur_langs.length; i++) {
+            talks = talks.not(".lang-" + cur_langs[i]);
+        }
+        talks.addClass("language-filtered");
+        if (languageFiltering()) {
+            talks.hide();
+            apply_striping();
+        }
+    } else {
+        toggler.addClass("languageselected");
+        addToCookie(lang, "languages");
+        talks.removeClass("language-filtered");
+        if (languageFiltering()) {
+            // elements may be filtered by other criteria
+            talks = talksToShow(talks);
+            talks.show();
+            apply_striping();
+        }
+    }
+}
 function toggleTopic(id) {
     var toggler = $("#" + id);
     console.log(id);
-    var topic = id.substring(10);
+    var topic = id.substring(10); // topiclink-*
     var talks = $(".topic-" + topic);
     if (toggler.hasClass("topicselected")) {
         toggler.removeClass("topicselected");
-        cur_topics = removeTopic(topic).split(",");
+        cur_topics = removeFromCookie(topic, "topic").split(",");
         for (i=0; i<cur_topics.length; i++) {
             talks = talks.not(".topic-" + cur_topics[i]);
         }
@@ -104,7 +152,7 @@ function toggleTopic(id) {
         }
     } else {
         toggler.addClass("topicselected");
-        addTopic(topic);
+        addToCookie(topic, "topic");
         talks.removeClass("topic-filtered");
         if (topicFiltering()) {
             // elements may be filtered by other criteria
@@ -145,7 +193,7 @@ function clearAllTopics() {
     }
 }
 
-var filter_classes = [['.topic-filtered', topicFiltering], ['.calendar-filtered', calFiltering]]
+var filter_classes = [['.topic-filtered', topicFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering]]
 function talksToShow(talks) {
     for (i=0; i<filter_classes.length; i++) {
         if (filter_classes[i][1]()) {
@@ -172,17 +220,6 @@ function toggleFilters(id) {
 function apply_striping() {
   $('#browse-talks tbody tr:visible:odd').css('background', '#E3F2FD');
   $('#browse-talks tbody tr:visible:even').css('background', 'none');
-  /*
-    // Not sure if this gives the same order as $('.talk')
-    var rows = $('#browse-talks tbody tr');
-    rows.find('tr:visible').each(function(i) {
-        if (i%2) {
-            $(this).css('background', '#f7f7f7');
-        } else {
-            $(this).css('background', 'none');
-        };
-    });
-  */
 }
 
 function tickClock() {
@@ -200,9 +237,81 @@ function tickClock() {
     $("#curtime").text(curtime);
 }
 
+var selectPureClassNames = {
+    select: "select-pure__select",
+    dropdownShown: "select-pure__select--opened",
+    multiselect: "select-pure__select--multiple",
+    label: "select-pure__label",
+    placeholder: "select-pure__placeholder",
+    dropdown: "select-pure__options",
+    option: "select-pure__option",
+    autocompleteInput: "select-pure__autocomplete",
+    selectedLabel: "select-pure__selected-label",
+    selectedOption: "select-pure__option--selected",
+    placeholderHidden: "select-pure__placeholder--hidden",
+    optionHidden: "select-pure__option--hidden",
+};
+function makeTopicSelector(topicOptions, initialTopics) {
+    function callback_topics(value) {
+        $('input[name="topics"]')[0].value = '[' + value + ']';
+    }
+    return new SelectPure("#topic_selector", {
+        onChange: callback_topics,
+        options: topicOptions,
+        multiple: true,
+        autocomplete: true,
+        icon: "fa fa-times",
+        inlineIcon: false,
+        value: initialTopics,
+        classNames: selectPureClassNames,
+    });
+}
+function defaultLanguage() {
+    var languages = getCookie("languages");
+    if (!languages) {
+        return "en";
+    } else {
+        languages = languages.split(",");
+        if (languages.includes("en")) {
+            return "en";
+        } else {
+            languages.sort();
+            return languages[0];
+        }
+    }
+}
+
+function makeInstitutionSelector(instOptions, initialInstitutions) {
+    function callback_institutions(value) {
+        $('input[name="institutions"]')[0].value = '[' + value + ']';
+    }
+    return new SelectPure("#institution_selector", {
+        onChange: callback_institutions,
+        options: instOptions,
+        multiple: true,
+        autocomplete: true,
+        icon: "fa fa-times",
+        inlineIcon: false,
+        value: initialInstitutions,
+        classNames: selectPureClassNames,
+    });
+}
+function makeLanguageSelector(langOptions, initialLanguage) {
+    function callback_language(value) {
+        $('input[name="language"]')[0].value = value;
+    }
+    return new SelectPure("#language_selector", {
+        onChange: callback_language,
+        options: langOptions,
+        autocomplete: true,
+        value: initialLanguage,
+        classNames: selectPureClassNames,
+    });
+}
+
 $(document).ready(function () {
 
-    setTopicLinks();
+    setLinks();
 
     $('.toggler-nav').click(
         function (evt) {
@@ -214,6 +323,11 @@ $(document).ready(function () {
         function (evt) {
             evt.preventDefault();
             toggleTopic(this.id);
+        });
+    $('.language_toggle').click(
+        function (evt) {
+            evt.preventDefault();
+            toggleLanguage(this.id);
         });
 
     var today = new Date();

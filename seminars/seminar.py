@@ -51,6 +51,8 @@ class WebSeminar(object):
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
             self.timezone = str(current_user.tz)
+            self.start_date = None
+            self.end_date = None
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -227,7 +229,10 @@ class WebSeminar(object):
         return '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
 
     def show_description(self):
-        return self.description
+        if self.description:
+            return self.description
+        else:
+            return ""
 
     def is_subscribed(self):
         if current_user.is_anonymous():

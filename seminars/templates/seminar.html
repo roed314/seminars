@@ -11,9 +11,9 @@
 
 {% if not seminar.display %}
 <p>
-This seminar is not publicly listed as the creator of the seminar is not yet endorsed.
-Once the creator is endorsed, the seminar and its talks will be made public.
-Once you the creator has been endorsed, he can endorse others.
+This seminar is not publicly listed, since the creator of the seminar is not yet endorsed.
+Once the creator is endorsed, the seminar and its talks will be made public, and the
+creator will be able to endorse others.
 If you are seeking an endorsement, see if you know anyone on this <a href="{{ url_for('user.public_users') }}">list</a> of all seminar organizers and curators.
 </p>
 {% endif %}
@@ -32,6 +32,8 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
   {{ seminar.show_organizers() | safe }}
   {{ seminar.show_curators() | safe }}
 </table>
+
+
 
 {% if seminar.comments %}<p>{{ seminar.show_comments() | safe }}</p>{% endif %}
 

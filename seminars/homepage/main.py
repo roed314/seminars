@@ -1,13 +1,14 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import topics, toggle, Toggle
+from seminars.utils import topics, toggle, Toggle, all_languages, simplify_language_name
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky
 from flask_login import current_user
 import datetime
 import pytz
+import iso639
 from collections import Counter
 from dateutil.parser import parse
 
@@ -108,6 +109,10 @@ def parse_video(info, query):
     if v == "yes":
         query["video_link"] = {"$not": None}
 
+def parse_language(info, query, prefix):
+    v = info.get(prefix + "_language")
+    if v:
+        query["language"] = v
 
 def talks_parser(info, query):
     parse_topic(info, query, prefix="talk")
@@ -122,6 +127,7 @@ def talks_parser(info, query):
     parse_substring(info, query, "title", ["title"])
     parse_date(info, query)
     parse_video(info, query)
+    parse_language(info, query, prefix="talk")
     query["display"] = True
 
 
@@ -132,6 +138,7 @@ def seminars_parser(info, query):
     parse_offline(info, query, prefix="seminar")
     parse_substring(info, query, "seminar_keywords", ["description", "comments", "name"])
     parse_access(info, query, prefix="seminar")
+    parse_language(info, query, prefix="seminar")
 
     parse_substring(info, query, "name", ["name"])
     query["display"] = True
@@ -220,13 +227,19 @@ class TalkSearchArray(SearchArray):
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
+        lang_dict = all_languages()
+        language = SelectBox(
+            name="talk_language",
+            label="Language",
+            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.talks.distinct('language')) if code != "en"]
+        )
         video = Toggle(name="video", label="Has video")
         self.array = [
             [topic, keywords],
             [institution, title],
             [online, speaker],
-            [offline],
-            [access, affiliation],
+            [offline, affiliation],
+            [access, language],
             [video, date],
             # [count],
         ]
@@ -266,7 +279,7 @@ class SemSearchArray(SearchArray):
 
         ## keywords for seminar or talk
         keywords = TextBox(
-            name="seminar_keywords", label="Keywords", colspan=(1, 2, 1), width=textwidth,
+            name="seminar_keywords", label="Keywords", width=textwidth,
         )
         ## type of access
         access = SelectBox(
@@ -278,13 +291,18 @@ class SemSearchArray(SearchArray):
                 ("users", "Any logged-in user can view link"),
             ],
         )
+        lang_dict = all_languages()
+        language = SelectBox(
+            name="seminar_language",
+            label="Language",
+            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.seminars.distinct('language')) if code != "en"]
+        )
         ## number of results to display
         # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
 
         name = TextBox(
             name="name",
             label="Name",
-            colspan=(1, 2, 1),
             width=textwidth,
             example="What Do They Know? Do They Know Things?? Let's Find Out!",
         )
@@ -292,7 +310,8 @@ class SemSearchArray(SearchArray):
         self.array = [
             [topic, keywords],
             [institution, name],
-            [online, access],
+            [language, access],
+            [online],
             # [count],
         ]
 
@@ -320,16 +339,22 @@ def index():
         )
     )
     topic_counts = Counter()
+    language_counts = Counter()
     for talk in talks:
-        topic_counts["ALL"] += 1
         if talk.topics:
             for topic in talk.topics:
                 topic_counts[topic] += 1
+        language_counts[talk.language] += 1
+    lang_dict = all_languages()
+    languages = [(ab, lang_dict[code]) for code in language_counts]
+    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
         title="Math Seminars (beta)",
         topic_counts=topic_counts,
+        languages=languages,
+        language_counts=language_counts,
         talks=talks,
         section="Browse",
         toggle=toggle,
