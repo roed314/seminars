@@ -9,7 +9,7 @@ export TEXINPUTS=.:$SAGE_ROOT/local/share/texmf:
 # GIT_DIR points to the bare git repository containing both beta and prod branches
 
 branch=${0##*-}
-export GIT_WORK_TREE="/home/mathseminars/seminars-git-$branch"
+export GIT_WORK_TREE="/home/mathseminars/seminars-git-${branch}"
 cd $GIT_WORK_TREE
-echo "Running: gunicorn -c configfiles/gunicorn-config-$branch seminars.website:app"
+echo "Running: gunicorn -c configfiles/gunicorn-config-${branch} seminars.website:app"
 echo "gunicorn -c configfiles/gunicorn-config seminars.website:app" | $SAGE -sh
