@@ -4,3 +4,4 @@ python-dateutil
 Flask-Mail
 itsdangerous
 icalendar
+iso639
