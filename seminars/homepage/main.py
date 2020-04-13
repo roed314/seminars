@@ -346,7 +346,7 @@ def index():
                 topic_counts[topic] += 1
         language_counts[talk.language] += 1
     lang_dict = all_languages()
-    languages = [(code, lang_dict[code]) for code in language_counts]
+    languages = [(code, lang_dict[code]) for code in language_counts if code]
     languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
