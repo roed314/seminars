@@ -17,7 +17,7 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
-from seminars.utils import topics, top_menu, all_languages
+from seminars.utils import topics, top_menu, languages_dict
 from .seminar import seminars_header
 from .talk import talks_header
 
@@ -125,7 +125,7 @@ def ctx_proc_userdata():
 
     data["talks_header"] = talks_header
     data["seminars_header"] = seminars_header
-    data["all_languages"] = all_languages()
+    data["languages_dict"] = languages_dict()
 
     return data
 

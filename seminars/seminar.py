@@ -40,6 +40,7 @@ class WebSeminar(object):
             if data.get("instructions") is None:
                 data["instructions"] = []
         self.new = data is None
+        print(self.new)
         if self.new:
             self.shortname = shortname
             self.display = current_user.is_creator()
