@@ -12,4 +12,4 @@ branch=${0##*-}
 export GIT_WORK_TREE="/home/mathseminars/seminars-git-${branch}"
 cd $GIT_WORK_TREE
 echo "Running: gunicorn -c configfiles/gunicorn-config-${branch} seminars.website:app"
-echo "gunicorn -c configfiles/gunicorn-config seminars.website:app" | $SAGE -sh
+echo "gunicorn -c configfiles/gunicorn-config-${branch} seminars.website:app" | $SAGE -sh
