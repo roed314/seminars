@@ -12,6 +12,7 @@ from seminars.utils import (
     flash_warning,
     localize_time,
     clean_topics,
+    clean_language,
     adapt_datetime,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
@@ -222,6 +223,7 @@ def save_seminar():
             return make_error(shortname, col, err)
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
+    data["language"] = clean_language(data.get("language"))
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
@@ -465,6 +467,7 @@ def save_talk():
         except Exception as err:
             return make_error(talk, col, err)
     data["topics"] = clean_topics(data.get("topics"))
+    data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(talk)

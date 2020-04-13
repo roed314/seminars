@@ -247,7 +247,7 @@ const instOptions = [
 ];
 
 const langOptions = [
-  {% for code, name in all_languages.items() %}
+  {% for code, name in languages_dict.items() %}
   {
     label: "{{ name }}",
     value: "{{ code }}",
