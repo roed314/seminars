@@ -117,7 +117,7 @@ class PostgresUserTable(PostgresSearchTable):
             # Could do this with a join...
             from seminars.seminar import seminars_search
 
-            for sem in seminars_search({"owner": email}, "shortname"):
+            for sem in seminars_search({"owner": {'$ilike': ilike_escape(email)}, "shortname"):
                 db.talks.update({"seminar_id": sem}, {"display": True})
 
     def save(self, data):
@@ -171,7 +171,7 @@ class SeminarsUser(UserMixin):
         if email:
             if not isinstance(email, string_types):
                 raise Exception("Email is not a string, %s" % email)
-            query = {"email": email}
+            query = {'$ilike': ilike_escape(email)}
         else:
             query = {"id": int(uid)}
 
