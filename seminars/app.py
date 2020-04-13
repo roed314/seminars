@@ -402,7 +402,7 @@ def git_infos():
                 [git_contains_cmd, contains],
                 [git_reflog_cmd, reflog],
                 [git_graphlog_cmd, graphlog]]
-        summary = "\n".join("$ %s\n%s" % (c, o) for c, o in pairs)
+        summary = "\n".join("$ %s\n%s" % (c, str(o)) for c, o in pairs)
         return rev, date, summary
     except Exception:
         return '-', '-', '-'
