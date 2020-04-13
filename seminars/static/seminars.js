@@ -141,7 +141,7 @@ function toggleTopic(id) {
     var talks = $(".topic-" + topic);
     if (toggler.hasClass("topicselected")) {
         toggler.removeClass("topicselected");
-        cur_topics = removeFromCookie(topic, "topic").split(",");
+        cur_topics = removeFromCookie(topic, "topics").split(",");
         for (i=0; i<cur_topics.length; i++) {
             talks = talks.not(".topic-" + cur_topics[i]);
         }
@@ -152,7 +152,7 @@ function toggleTopic(id) {
         }
     } else {
         toggler.addClass("topicselected");
-        addToCookie(topic, "topic");
+        addToCookie(topic, "topics");
         talks.removeClass("topic-filtered");
         if (topicFiltering()) {
             // elements may be filtered by other criteria
