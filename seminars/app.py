@@ -410,7 +410,7 @@ def git_infos():
 
 
 @app.route("/raw_info")
-def info():
+def raw_info():
     from socket import gethostname
     output = ""
     output += "HOSTNAME = %s\n\n" % gethostname()
