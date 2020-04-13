@@ -17,9 +17,11 @@ weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 
 
 def naive_utcoffset(tz):
+    if isinstance(tz, str):
+        tz = pytz.timezone(tz)
     for h in range(10):
         try:
-            return pytz.timezone(tz).utcoffset(datetime.now() + timedelta(hours=h))
+            return tz.utcoffset(datetime.now() + timedelta(hours=h))
         except (pytz.exceptions.NonExistentTimeError, pytz.exceptions.AmbiguousTimeError):
             pass
 
@@ -35,7 +37,7 @@ def pretty_timezone(tz, dest="selecter"):
             diff = "+{:02d}:{:02d}".format(hours, minutes)
         return "(UTC {}) {}".format(diff, tz)
     else:
-        tz = tz.replace("_", " ")
+        tz = str(tz).replace("_", " ")
         if minutes == 0:
             diff = "{}".format(hours)
         else:
