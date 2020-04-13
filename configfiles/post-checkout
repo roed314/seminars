@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -e
+
+dir=`git rev-parse --show-toplevel`
+branch=${dir##*-}
+ #$(git rev-parse --abbrev-ref HEAD)
+pHEAD=$1
+nHEAD=$2
+flag=$3
+if [  "$pHEAD" != "$nHEAD" ]
+then
+    echo "not match"
+fi
+
+if [  "$pHEAD" != "$nHEAD"  -a  $flag -eq 1  ]
+then
+    echo "updating $branch"
+    echo 'git HEAD now at' `git rev-parse HEAD`
+    bash ~/restart-$branch
+else
+    echo "not updating $branch"
+fi
+
+set +e
