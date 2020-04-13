@@ -60,6 +60,13 @@ console.log('Form is unchanged!');
     {% endfor %}
     </div>
   </div>
+  <div id="language-filter-menu">
+    {% for ab, name in languages %}
+      <div class="language_toggle" id="langlink-{{ab}}">
+        {{name}} ({{language_counts[ab]}})
+      </div>
+    {% endfor %}
+  </div>
 {% elif section in ["Manage", "Create"] %}
   <div id="manage-submenu">
     <header class="inner">

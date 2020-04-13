@@ -76,7 +76,7 @@ class WebTalk(object):
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
-        return "%s (%s) - %s, %s" % (title, self.speaker, self.show_date(), self.show_start_time(),)
+        return "%s (%s) - %s, %s" % (title, self.speaker, self.show_date(), self.show_start_time(self.timezone),)
 
     def __eq__(self, other):
         return isinstance(other, WebTalk) and all(

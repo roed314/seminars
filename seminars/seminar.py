@@ -229,7 +229,10 @@ class WebSeminar(object):
         return '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
 
     def show_description(self):
-        return self.description
+        if self.description:
+            return self.description
+        else:
+            return ""
 
     def is_subscribed(self):
         if current_user.is_anonymous():

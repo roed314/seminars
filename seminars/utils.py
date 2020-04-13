@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse as parse_time
-import pytz, re
+import pytz, re, iso639
 from six import string_types
 from flask import url_for, flash
 from flask_login import current_user
@@ -60,6 +60,15 @@ def is_nighttime(t):
         return False
     # These are times that might be mixed up by using a 24 hour clock
     return 1 <= t.hour < 8
+
+def simplify_language_name(name):
+    name = name.split(';')[0]
+    if '(' in name:
+        name = name[:name.find('(')-1]
+    return name
+
+def all_languages():
+    return {lang['iso639_1']: simplify_language_name(lang['name']) for lang in iso639.data if lang['iso639_1']}
 
 
 def flash_warning(warnmsg, *args):
