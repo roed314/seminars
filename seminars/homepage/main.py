@@ -20,6 +20,7 @@ from lmfdb.utils import (
     to_dict,
     flash_error,
 )
+from lmfdb.utils.search_parsing import collapse_ors
 
 
 def get_now():
@@ -65,8 +66,7 @@ def parse_offline(info, query, prefix):
 def parse_substring(info, query, field, qfields, start="%", end="%"):
     if info.get(field):
         kwds = [elt.strip() for elt in info.get(field).split(",") if elt.strip()]
-        for qfield in qfields:
-            query[qfield] = {"$or": [{"$ilike": start + elt + end} for elt in kwds]}
+        collapse_ors(["$or", [{qfield: {"$ilike": start + elt + end}} for elt in kwds for qfield in qfields]], query)
 
 
 def parse_access(info, query, prefix):
