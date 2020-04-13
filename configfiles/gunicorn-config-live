@@ -1,0 +1,15 @@
+bind = "0.0.0.0:9091"
+workers = 15
+SESSION_PROTECTION = None
+#daemon = True
+pidfile = '/home/mathseminars/gunicorn-live.pid'
+#
+errorlog = '/home/mathseminars/logs/live/errorlog'
+accesslog = '/home/mathseminars/logs/live/accesslog'
+loglevel = 'info' # change to 'debug' for more output
+#
+default_proc_name = 'mathseminars-live'
+timeout = 30
+max_requests = 1000
+# The maximum size of HTTP request line in bytes.
+limit_request_line = 8190
