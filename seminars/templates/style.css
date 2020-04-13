@@ -334,6 +334,10 @@ div.topic_cmd {
     text-align: center;
 }
 
+#make_semconf td.forminfo {
+    padding-bottom: 15px;
+}
+
 #past_talks {
     display: none;
 }

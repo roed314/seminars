@@ -52,6 +52,7 @@ def index():
         seminars=seminars,
         conferences=conferences,
         institution_known=institution_known,
+        institutions=institutions(),
         section=manage,
         subsection="home",
         title=manage,
@@ -72,8 +73,18 @@ def edit_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
+    if new:
+        seminar.is_conference = process_user_input(data.get("is_conference"), "boolean", None)
+        if seminar.is_conference:
+            seminar.frequency = 1
+            seminar.per_day = 4
+        seminar.name = data.get("name", "")
+        seminar.institutions = clean_institutions(data.get("institutions"))
+        if seminar.institutions:
+            seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
     lock = get_lock(shortname, data.get("lock"))
-    title = "Create seminar" if new else "Edit properties"
+    title = "conference" if seminar.is_conference else "seminar"
+    title = "Create " + title if new else "Edit " + title + " properties"
     manage = "Manage" if current_user.is_organizer() else "Create"
     return render_template(
         "edit_seminar.html",
@@ -471,19 +482,66 @@ def save_talk():
     return redirect(url_for(".edit_talk", **edit_kwds), 301)
 
 
-def make_date_data(seminar):
+def make_date_data(seminar, begin, end):
     shortname = seminar.shortname
-    now = datetime.datetime.now(tz=pytz.timezone(seminar.timezone))
-    today = now.date()
     day = datetime.timedelta(days=1)
-    last_talk = talks_lucky(
-        {"seminar_id": shortname, "start_time": {"$lte": now}}, sort=[("start_time", -1)],
-    )
-    future_talks = list(
-        talks_search({"seminar_id": shortname, "start_time": {"$gte": now}}, sort=["start_time"])
+    frequency = seminar.frequency
+    query = {}
+    if begin is None:
+        if seminar.is_conference and seminar.start_date:
+            begin = seminar.start_date
+                schedule_len = int((seminar.end_date - begin) / day) + 1
+                frequency = 1
+            else:
+                frequency = None
+        elif end is None:
+            now = datetime.datetime.now(tz=pytz.timezone(seminar.timezone))
+            begin = now.date() # Initial guess
+            last_talk = talks_lucky(
+                {"seminar_id": shortname, "start_time": {"$lt": begin}}, sort=[("start_time", -1)],
+            )
+            if last_talk is None:
+                if seminar.weekday is None:
+                    if future_talks:
+                seminar.weekday = future_talks[0].start_time.weekday()
+            else:
+                # No talks and no weekday information.  We just use today.
+                seminar.weekday = datetime.datetime.now(
+                    tz=pytz.timezone(seminar.timezone)
+                ).weekday()
+        next_date = today
+        while next_date.weekday() != seminar.weekday:
+            next_date += day
+    elif frequency and frequency > 0:
+        next_date = last_talk.start_time.date()
+        while next_date < today:
+            next_date += seminar.frequency * day
+    else:
+        next_date = today
+        frequency = None
+
+        elif frequency is not None:
+            begin = end - (SCHEDULE_LEN-1)*frequency*day
+    if begin is not None:
+        query["$gte"] = begin
+    if end is None:
+        if seminar.is_conference and seminar.end_date:
+            end = seminar.end_date
+        elif begin is not None:
+            end = begin + (SCHEDULE_LEN-1)*frequency*day
+    if end is not None:
+        query["$lt"] = end + day # add a day since we want to allow talks on the final day
+    if end < start:
+        frequency = None
+
+    if frequency is None:
+        schedule_days = []
+    else:
+    scheduled_talks = list(
+        talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"])
     )
     by_date = defaultdict(list)
-    for T in future_talks:
+    for T in scheduled_talks:
         by_date[adapt_datetime(T.start_time, seminar.tz).date()].append(T)
     frequency = seminar.frequency
     if last_talk is None:
@@ -539,8 +597,17 @@ def edit_seminar_schedule():
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
-    seminar, all_dates, by_date = make_date_data(seminar)
-    title = "Edit schedule"
+    def parse_date(key):
+        date = data.get(key)
+        if date:
+            try:
+                begin = parse_user_input(date, "date", seminar.tz)
+            except ValueError:
+                pass
+    begin = parse_date("begin")
+    end = parse_date("end")
+    seminar, all_dates, by_date = make_date_data(seminar, begin, end)
+    title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(
         "edit_seminar_schedule.html",
         seminar=seminar,
