@@ -331,7 +331,6 @@ def process_user_input(inp, typ, tz):
     elif typ in ["int", "smallint", "bigint", "integer"]:
         return int(inp)
     elif typ == "text[]":
-        print(repr(inp))
         inp = inp.strip()
         if inp:
             if inp[0] == "[" and inp[-1] == "]":

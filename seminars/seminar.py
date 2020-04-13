@@ -191,10 +191,8 @@ class WebSeminar(object):
 
     def _show_time(self, t, adapt):
         if t:
-            print(t)
             if adapt and self.weekday is not None:
                 t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
-            print(t)
             return t.strftime("%H:%M")
         else:
             return ""

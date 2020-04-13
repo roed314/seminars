@@ -173,7 +173,6 @@ def info():
 @login_required
 def set_info():
     for k, v in request.form.items():
-        print(k, v)
         setattr(current_user, k, v)
     previous_email = current_user.email
     if current_user.save():
@@ -328,6 +327,8 @@ def confirm_email(token):
             user.email_confirmed = True
             user.save()
             flask.flash("You have confirmed your email. Thanks!", "success")
+            if user.is_creator():
+                flask.flash("Someone already endorsed you! You can now create seminars.", "success")
     return redirect(url_for(".info"))
 
 

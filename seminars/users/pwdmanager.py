@@ -7,7 +7,7 @@ import bcrypt
 import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
-from seminars.seminar import WebSeminar
+from seminars.seminar import WebSeminar, seminars_lucky
 from seminars.talk import WebTalk
 from seminars.utils import pretty_timezone
 from lmfdb.backend.searchtable import PostgresSearchTable
@@ -71,7 +71,7 @@ class PostgresUserTable(PostgresSearchTable):
         """
         for col in ["email", "password"]:
             assert col in kwargs
-        kwargs["email"] = validate_email(kwargs["email"])["email"]
+        email = kwargs["email"] = validate_email(kwargs["email"])["email"]
         kwargs["password"] = self.bchash(kwargs["password"])
         if "endorser" not in kwargs:
             kwargs["endorser"] = None
@@ -85,7 +85,7 @@ class PostgresUserTable(PostgresSearchTable):
         assert tz == "" or tz in all_timezones
         kwargs["location"] = None
         kwargs["created"] = datetime.now(UTC)
-        self.insert_many(kwargs)
+        self.insert_many([kwargs])
         newuser = SeminarsUser(email=email)
         return newuser
 
@@ -98,7 +98,7 @@ class PostgresUserTable(PostgresSearchTable):
         )
         logger.info("password for %s changed!" % email)
 
-    def lookup(self, label, projection=2):
+    def lookup(self, email, projection=2):
         return self.lucky({'email': ilike_query(email) }, projection=projection, sort=[])
 
 
@@ -174,7 +174,7 @@ class SeminarsUser(UserMixin):
         if email:
             if not isinstance(email, string_types):
                 raise Exception("Email is not a string, %s" % email)
-            query = ilike_query(email)
+            query = {'email': ilike_query(email)}
         else:
             query = {"id": int(uid)}
 
@@ -196,9 +196,9 @@ class SeminarsUser(UserMixin):
         if self.email_confirmed:
             # try to endorse if the user is the organizer of some seminar
             if not self.creator and self._organizer:
-                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, record=seminar_id)
+                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, 'seminar_id')
                 owner = seminars_lucky({'shortname': shortname}, 'owner')
-                owner_id = int(self.lookup(owner, 'id'))
+                owner_id = int(userdb.lookup(owner, 'id'))
                 self.endorser = owner_id # must set endorser first
                 self.creator = True # it already saves
             # TODO or if it is in some list
@@ -432,7 +432,7 @@ class SeminarsUser(UserMixin):
     def creator(self, creator):
         self._data["creator"] = creator
         if creator:
-            assert self.endorser is not None:
+            assert self.endorser is not None
             userdb.make_creator(self.email, int(self.endorser)) # it already saves
 
 
