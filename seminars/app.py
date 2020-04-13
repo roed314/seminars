@@ -379,3 +379,44 @@ def send_email(to, subject, message):
         )
     )
     app.logger.info("%s done sending email to %s" % (timestamp(), to))
+
+
+
+def git_infos():
+    try:
+        from subprocess import Popen, PIPE
+        # cwd should be the root of git repo
+        cwd = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
+        git_rev_cmd = '''git rev-parse HEAD'''
+        git_date_cmd = '''git show --format="%ci" -s HEAD'''
+        git_contains_cmd = '''git branch --contains HEAD'''
+        git_reflog_cmd = '''git reflog -n5'''
+        git_graphlog_cmd = '''git log --graph  -n 10'''
+        rev = Popen([git_rev_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        date = Popen([git_date_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        contains = Popen([git_contains_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        reflog = Popen([git_reflog_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        graphlog = Popen([git_graphlog_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        pairs = [[git_rev_cmd, rev],
+                [git_date_cmd, date],
+                [git_contains_cmd, contains],
+                [git_reflog_cmd, reflog],
+                [git_graphlog_cmd, graphlog]]
+        summary = "\n".join("$ %s\n%s" % (c, o) for c, o in pairs)
+        return rev, date, summary
+    except Exception:
+        return '-', '-', '-'
+
+
+
+@app.route("/raw_info")
+def info():
+    from socket import gethostname
+    output = ""
+    output += "HOSTNAME = %s\n\n" % gethostname()
+    output += "# PostgreSQL info\n"
+    output += "\n# GIT info\n"
+    output += git_infos()[-1]
+    output += "\n\n"
+    return output.replace("\n", "<br>")
+
