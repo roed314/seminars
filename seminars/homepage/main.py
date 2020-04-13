@@ -231,7 +231,7 @@ class TalkSearchArray(SearchArray):
         language = SelectBox(
             name="talk_language",
             label="Language",
-            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.talks.distinct('language')) if code != "en"]
+            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted([elt for elt in db.talks.distinct('language') if elt is not None]) if code != "en"]
         )
         video = Toggle(name="video", label="Has video")
         self.array = [
@@ -295,7 +295,7 @@ class SemSearchArray(SearchArray):
         language = SelectBox(
             name="seminar_language",
             label="Language",
-            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.seminars.distinct('language')) if code != "en"]
+            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted([elt for elt in db.talks.distinct('language') if elt is not None]) if code != "en"]
         )
         ## number of results to display
         # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
