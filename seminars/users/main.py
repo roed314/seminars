@@ -498,9 +498,8 @@ def endorse_wtoken(token):
     elif current_user.email.lower() != email.lower():
         flash_error("The link is not valid for this account.")
     else:
-        current_user.endorser = int(endorser)
-        current_user.creator = True
-        current_user.save()
+        current_user.endorser = int(endorser) # must set endorser first
+        current_user.creator = True # this will update the db
         flask.flash("You can now create seminars. Thanks!", "success")
     return redirect(url_for(".info"))
 
