@@ -90,9 +90,9 @@ def login(**kwargs):
     # we always remember
     remember = True  # if request.form["remember"] == "on" else False
     user = SeminarsUser(email=email)
-    if user and user.authenticate(password):
+    if user and user.check_password(password):
+        # this is where we set current_user = user
         login_user(user, remember=remember)
-        print(user.is_authenticated)
         if user.name:
             flask.flash(Markup("Hello %s, your login was successful!" % user.name))
         else:

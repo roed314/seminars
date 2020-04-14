@@ -178,6 +178,7 @@ class SeminarsUser(UserMixin):
 
         user_row = userdb.lucky(query, projection=SeminarsUser.properties)
         if user_row:
+            self._authenticated = True
             self._data.update(user_row)
             self._uid = str(self._data["id"])
 
@@ -187,7 +188,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def name(self):
-        return self._data.get("name")
+        return self._data.get("name", "")
 
     @name.setter
     def name(self, name):
@@ -196,18 +197,18 @@ class SeminarsUser(UserMixin):
 
     @property
     def email(self):
-        return self._data.get("email")
+        return self._data.get("email", "")
 
     @email.setter
     def email(self, email):
-        if email != self._data.get("email"):
+        if email != self._data.get("email", ""):
             self._data["new_email"] = email
             self._data["email_confirmed"] = False
             self._dirty = True
 
     @property
     def homepage(self):
-        return self._data.get("homepage")
+        return self._data.get("homepage", "")
 
     @homepage.setter
     def homepage(self, url):
@@ -216,7 +217,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def email_confirmed(self):
-        return self._data.get("email_confirmed")
+        return self._data.get("email_confirmed", False)
 
     @email_confirmed.setter
     def email_confirmed(self, email_confirmed):
@@ -225,7 +226,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def affiliation(self):
-        return self._data.get("affiliation")
+        return self._data.get("affiliation", "")
 
     @affiliation.setter
     def affiliation(self, affiliation):
@@ -243,7 +244,7 @@ class SeminarsUser(UserMixin):
     def raw_timezone(self):
         # For the user info page, we want to allow the user to set their time zone to blank,
         # which is interpreted as the browser's timezone for other uses.
-        return self._data.get("timezone")
+        return self._data.get("timezone", "")
 
     @property
     def tz(self):
@@ -276,7 +277,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def location(self):
-        return self._data.get("location")
+        return self._data.get("location", "")
 
     @location.setter
     def location(self, location):
@@ -338,7 +339,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def talk_subscriptions(self):
-        return self._data["talk_subscriptions"]
+        return self._data.get("talk_subscriptions", {})
 
     @property
     def talks(self):
@@ -393,7 +394,6 @@ class SeminarsUser(UserMixin):
         """required by flask-login user class"""
         self._authenticated = is_authenticated
 
-
     @property
     def is_anonymous(self):
         """required by flask-login user class"""
@@ -420,20 +420,18 @@ class SeminarsUser(UserMixin):
             and db.seminar_organizers.count({"email": self.email}) > 0
         )
 
-    def authenticate(self, pwd):
+    def check_password(self, pwd):
         """
         checks if the given password for the user is valid.
         @return: True: OK, False: wrong password or username
         """
-        print("authenticating:", self.email)
         if "password" not in self._data:
             logger.warning("no password data in db for '%s'!" % self.email)
             return False
         try:
-            self._authenticated = userdb.authenticate(self.email, pwd)
+             return userdb.authenticate(self.email, pwd)
         except ValueError:
             return False
-        return self._authenticated
 
     def save(self):
         if not self._dirty:
