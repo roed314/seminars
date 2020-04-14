@@ -320,7 +320,7 @@ def send_confirmation_email(email):
         send_email(email, subject, html)
     except:
         flash_error('Unable to send confirmation email, please email <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> to confirm')
-        app.logger.error("%s unable to send email to %s due to error: %s" (timestamp(), email, sys.exc_info()[0]))
+        app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
         return
 
 
