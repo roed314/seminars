@@ -31,7 +31,7 @@ from psycopg2.sql import SQL
 from lmfdb import db
 
 assert db
-from seminars.utils import timezones
+from seminars.utils import timezones, timestamp
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import datetime
 
@@ -182,7 +182,8 @@ def set_info():
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))
     if previous_email != current_user.email:
-        send_confirmation_email(current_user.email)
+        if send_confirmation_email(current_user.email):
+            flask.flash(Markup("New confirmation email has been sent!"))
     return redirect(url_for(".info"))
 
 
@@ -201,8 +202,8 @@ def list_subscriptions():
 @login_page.route("/send_confirmation_email")
 @login_required
 def resend_confirmation_email():
-    send_confirmation_email(current_user.email)
-    flask.flash(Markup("New email has been sent!"))
+    if send_confirmation_email(current_user.email):
+        flask.flash(Markup("New confirmation email has been sent!"))
     return redirect(url_for(".info"))
 
 
@@ -313,7 +314,14 @@ def send_confirmation_email(email):
     confirm_url = url_for(".confirm_email", token=token, _external=True, _scheme="https")
     html = render_template("confirm_email.html", confirm_url=confirm_url)
     subject = "Please confirm your email"
-    send_email(email, subject, html)
+    try:
+        send_email(email, subject, html)
+        return True
+    except:
+        import sys
+        flash_error('Unable to send email confirmation link, please contact <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> directly to confirm your email')
+        app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
+        return False
 
 
 
