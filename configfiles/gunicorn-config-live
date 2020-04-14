@@ -1,3 +1,5 @@
+# WARNING: after editing this file don't forget to copy it to
+# /home/mathseminars/seminars-git-live/gunicorn-config.py
 bind = "0.0.0.0:9091"
 workers = 15
 SESSION_PROTECTION = None
