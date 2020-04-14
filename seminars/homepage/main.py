@@ -478,8 +478,19 @@ def show_institution(shortname):
         return render_template("404.html", title="Institution not found")
     institution = WebInstitution(shortname, data=institution)
     section = "Manage" if current_user.is_creator else None
+    query = {"institutions": {"$contains": shortname}}
+    if not current_user.is_admin:
+        query["display"] = True
+    events = list(seminars_search(
+        query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
+    ))
+    seminars = [S for S in events if not S.is_conference]
+    conferences = [S for S in events if S.is_conference]
+    conferences.sort(key=lambda S:(S.start_date, S.name))
     return render_template(
         "institution.html",
+        seminars=seminars,
+        conferences=conferences,
         title="View institution",
         institution=institution,
         section=section,
