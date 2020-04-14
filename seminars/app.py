@@ -30,12 +30,12 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 app = Flask(__name__)
 
 mail_settings = {
-    "MAIL_SERVER": "smtp.gmail.com",
+    "MAIL_SERVER": "heaviside.mit.edu",
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": "info.mathseminars@gmail.com",
-    "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD", ""),
+    "MAIL_USERNAME": "matheseminarsnoreply",
+    "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD_MIT", ""),
 }
 
 app.config.update(mail_settings)
@@ -374,7 +374,7 @@ def send_email(to, subject, message):
             subject=subject,
             html=message,
             body=html2text(message),  # a plain text version of our email
-            sender="info.mathseminars@gmail.com",
+            sender="matheseminarsnoreply@math.mit.edu",
             recipients=[to],
         )
     )

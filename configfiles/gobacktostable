@@ -1,2 +1,2 @@
-pushd /home/mathseminars/seminars-git-live/ && git fetch && git checkout -f origin/stable && git submodule update && bash /home/mathseminars/restart-live && popd
+pushd /home/mathseminars/seminars-git-live/ && git fetch && git checkout -f origin/stable && git submodule update && popd
 
