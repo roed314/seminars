@@ -468,7 +468,7 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
 
     @property
     def is_admin(self):
-        return self._data.get("admin", False)
+        return False
 
     def get_id(self):
         return
