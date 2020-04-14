@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
 import flask
-import sys
+import sys, time
 from urllib.parse import urlencode, quote
 from functools import wraps
 from seminars.app import app, send_email
@@ -35,7 +35,6 @@ assert db
 from seminars.utils import timezones
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import datetime
-from app import timestamp
 
 
 login_page = Blueprint("user", __name__, template_folder="templates")
@@ -61,6 +60,8 @@ def get_username(uid):
     """returns the name of user @uid"""
     return SeminarsUser(uid).name
 
+def timestamp():
+    return "[%s UTC]" % time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
 # globally define user properties and username
 @app.context_processor
