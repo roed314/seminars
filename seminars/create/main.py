@@ -472,7 +472,7 @@ def save_talk():
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
-    if check_time(new_version.start_time, new_version.end_time):
+    if check_time(new_version.start_time, new_version.end_time, check_past=True):
         return make_error(talk)
     if new_version == talk:
         flash("No changes made to talk.")
@@ -691,8 +691,11 @@ def save_seminar_schedule():
                 # TODO: clean this up
                 start_time = process_user_input(time_split[0], "time", seminar.tz).time()
                 end_time = process_user_input(time_split[1], "time", seminar.tz).time()
+                if check_time(start_time, end_time):
+                    raise ValueError
             except ValueError as err:
-                flash_error("invalid time range %s: {0}".format(err), time_input)
+                if str(err):
+                    flash_error("invalid time range %s: {0}".format(err), time_input)
                 return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
         else:
             start_time = end_time = None

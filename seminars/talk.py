@@ -243,7 +243,7 @@ class WebTalk(object):
             if self.live_link.startswith("http"):
                 success = 'Access <a href="%s">online</a>.' % self.live_link
             else:
-                success = "Livestream comment: %s" % self.live_link
+                success = "Livestream access: %s" % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
