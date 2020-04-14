@@ -1,5 +1,10 @@
 {% extends 'homepage.html' %}
 {% block content %}
+{{ user.is_authenticated }}
+<br>
+{{ user.is_anonymous }}
+{{ user.something }}
+
 {% if not user.is_authenticated %}
   <h1>You are not logged in</h1>
 

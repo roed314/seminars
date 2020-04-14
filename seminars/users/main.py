@@ -87,18 +87,18 @@ def login(**kwargs):
     if not email or not password:
         flash_error("Oops! Wrong username or password.")
         return redirect(url_for(".info"))
-    next = request.form["next"]
     # we always remember
     remember = True  # if request.form["remember"] == "on" else False
     user = SeminarsUser(email=email)
     if user and user.authenticate(password):
         login_user(user, remember=remember)
+        print(user.is_authenticated)
         if user.name:
             flask.flash(Markup("Hello %s, your login was successful!" % user.name))
         else:
             flask.flash(Markup("Hello, your login was successful!"))
         logger.info("login: '%s' - '%s'" % (user.get_id(), user.name))
-        return redirect(next or url_for(".info"))
+        return redirect(url_for(".info"))
     flash_error("Oops! Wrong username or password.")
     return redirect(url_for(".info"))
 

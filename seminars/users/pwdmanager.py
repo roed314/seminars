@@ -388,10 +388,16 @@ class SeminarsUser(UserMixin):
         """required by flask-login user class"""
         return self._authenticated
 
+    @is_authenticated.setter
+    def is_authenticated(self, is_authenticated):
+        """required by flask-login user class"""
+        self._authenticated = is_authenticated
+
+
     @property
     def is_anonymous(self):
         """required by flask-login user class"""
-        return not self.is_authenticated
+        return not self._authenticated
 
     @property
     def is_active(self):
