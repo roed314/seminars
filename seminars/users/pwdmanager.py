@@ -400,7 +400,9 @@ class SeminarsUser(UserMixin):
     @property
     def is_active(self):
         """required by flask-login user class"""
-        return self.email_confirmed
+        # It would be nice to have active tied to email_confirmed,
+        # But then users can't see their info page to be able to confirm their email
+        return True
 
     @property
     def is_admin(self):
