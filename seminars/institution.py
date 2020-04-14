@@ -112,7 +112,7 @@ def can_edit_institution(shortname, new):
         flash_error(
             "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
         )
-        return redirect(url_for(".index"), 301), None
+        return redirect(url_for("list_institutions"), 301), None
     institution = db.institutions.lookup(shortname)
     # Check if institution exists
     if new != (institution is None):

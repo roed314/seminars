@@ -218,13 +218,21 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_name(self, external=False):
+    def show_name(self, external=False, show_attributes=False):
         # Link to seminar
         kwargs = {"shortname": self.shortname}
         if external:
             kwargs["_external"] = True
             kwargs["_scheme"] = "https"
-        return '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
+        link = '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
+        if show_attributes:
+            if not self.display:
+                link += " (hidden)"
+            elif self.archived:
+                link += " (inactive)"
+            elif self.online:
+                link += " (online)"
+        return link
 
     def show_description(self):
         if self.description:
@@ -266,7 +274,7 @@ class WebSeminar(object):
                     links.append('<a href="%s">%s</a>' % (rec["homepage"], rec["name"]))
                 else:
                     links.append(rec["name"])
-            return "/".join(links)
+            return " / ".join(links)
         else:
             return ""
 
@@ -282,12 +290,13 @@ class WebSeminar(object):
         include_datetime=True,
         include_description=True,
         include_subscribe=True,
+        show_attributes=False,
     ):
         cols = []
         if include_datetime:
             cols.append(('class="day"', self.show_day()))
             cols.append(('class="time"', self.show_start_time()))
-        cols.append(('class="name"', self.show_name()))
+        cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
         if include_description:
