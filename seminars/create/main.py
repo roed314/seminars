@@ -9,6 +9,7 @@ from seminars.utils import (
     process_user_input,
     check_time,
     weekdays,
+    short_weekdays,
     flash_warning,
     localize_time,
     clean_topics,
@@ -497,6 +498,21 @@ def make_date_data(seminar, data):
                 pass
     begin = parse_date("begin")
     end = parse_date("end")
+    frequency = data.get("frequency")
+    try:
+        frequency = int(frequency)
+    except Exception:
+        frequency = None
+    if not frequency or frequency < 0:
+        frequency = seminar.frequency
+        if not frequency or frequency < 0:
+            frequency = 1 if seminar.is_conference else 7
+    try:
+        weekday = short_weekdays.index(data.get("weekday", "")[:3])
+    except ValueError:
+        weekday = None
+    if weekday is None:
+        weekday = seminar.weekday
     shortname = seminar.shortname
     day = datetime.timedelta(days=1)
     today = datetime.datetime.now(tz=pytz.timezone(seminar.timezone)).date()
@@ -508,15 +524,6 @@ def make_date_data(seminar, data):
             {"seminar_id": shortname, "start_time": {"$exists": True, "$lt": today}}, sort=[("start_time", -1)],
         )
 
-    frequency = data.get("frequency")
-    try:
-        frequency = int(frequency)
-    except Exception:
-        frequency = None
-    if not frequency:
-        frequency = seminar.frequency
-        if not frequency:
-            frequency = 1 if seminar.is_conference else 7
     query = {}
     if begin is None:
         if seminar.is_conference:
@@ -525,11 +532,9 @@ def make_date_data(seminar, data):
             else:
                 begin = today
         else:
-            if seminar.weekday is not None and frequency == 7:
+            if weekday is not None and frequency == 7:
                 begin = today
-                # Weekly meetings: take the next one
-                while begin.weekday() != seminar.weekday:
-                    begin += day
+                # Will set to next weekday below
             else:
                 # Try to figure out a plan from future and past talks
                 if future_talk is None:
@@ -545,6 +550,10 @@ def make_date_data(seminar, data):
                     while begin >= today:
                         begin -= frequency * day
                     begin += frequency * day
+    if not seminar.is_conference and seminar.weekday is not None:
+        # Weekly meetings: take the next one
+        while begin.weekday() != weekday:
+            begin += day
     if end is None:
         if seminar.is_conference:
             if seminar.end_date:
@@ -635,9 +644,6 @@ def save_seminar_schedule():
     frequency = raw_data.get("frequency")
     try:
         frequency = int(frequency)
-        if frequency != seminar.frequency and frequency > 0:
-            seminar.frequency = frequency
-            seminar.save()
     except Exception:
         pass
     schedule_count = int(raw_data["schedule_count"])
@@ -730,4 +736,4 @@ def save_seminar_schedule():
         if warned:
             return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
         else:
-            return redirect(url_for(".edit_seminar_schedule", shortname=shortname, begin=raw_data.get('begin'), end=raw_data.get('end'), frequency=raw_data.get('frequency')), 301)
+            return redirect(url_for(".edit_seminar_schedule", shortname=shortname, begin=raw_data.get('begin'), end=raw_data.get('end'), frequency=raw_data.get('frequency'), weekday=raw_data.get('weekday')), 301)

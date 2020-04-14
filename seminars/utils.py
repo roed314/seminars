@@ -14,6 +14,7 @@ from markupsafe import Markup, escape
 from collections.abc import Iterable
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
 def naive_utcoffset(tz):
