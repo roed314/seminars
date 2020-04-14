@@ -330,7 +330,7 @@ class WebSeminar(object):
                         continue
                     name = rec["email"]
                 if rec["contact"]:
-                    editors.append('<a href="%s">%s</a>' % (rec["email"], name))
+                    editors.append('<a href="mailto:%s">%s</a>' % (rec["email"], name))
                 else:
                     editors.append(name)
         if editors:
