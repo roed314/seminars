@@ -67,8 +67,15 @@ def simplify_language_name(name):
         name = name[:name.find('(')-1]
     return name
 
-def all_languages():
+@cached_function
+def languages_dict():
     return {lang['iso639_1']: simplify_language_name(lang['name']) for lang in iso639.data if lang['iso639_1']}
+
+def clean_language(inp):
+    if inp not in languages_dict():
+        return 'en'
+    else:
+        return inp
 
 
 def flash_warning(warnmsg, *args):

@@ -1,14 +1,13 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import topics, toggle, Toggle, all_languages, simplify_language_name
+from seminars.utils import topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky
 from flask_login import current_user
 import datetime
 import pytz
-import iso639
 from collections import Counter
 from dateutil.parser import parse
 
@@ -227,11 +226,11 @@ class TalkSearchArray(SearchArray):
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
-        lang_dict = all_languages()
+        lang_dict = languages_dict()
         language = SelectBox(
             name="talk_language",
             label="Language",
-            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted([elt for elt in db.talks.distinct('language') if elt != 'None']) if code != "en"]
+            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.talks.distinct('language')) if code != "en"]
         )
         video = Toggle(name="video", label="Has video")
         self.array = [
@@ -291,11 +290,11 @@ class SemSearchArray(SearchArray):
                 ("users", "Any logged-in user can view link"),
             ],
         )
-        lang_dict = all_languages()
+        lang_dict = languages_dict()
         language = SelectBox(
             name="seminar_language",
             label="Language",
-            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted([elt for elt in db.talks.distinct('language') if elt != 'None']) if code != "en"]
+            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.talks.distinct('language')) if code != "en"]
         )
         ## number of results to display
         # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
@@ -344,9 +343,8 @@ def index():
         if talk.topics:
             for topic in talk.topics:
                 topic_counts[topic] += 1
-        if talk.language and talk.language != 'None':
-            language_counts[talk.language] += 1
-    lang_dict = all_languages()
+        language_counts[talk.language] += 1
+    lang_dict = languages_dict()
     languages = [(code, lang_dict[code]) for code in language_counts]
     languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")

@@ -191,10 +191,8 @@ class WebSeminar(object):
 
     def _show_time(self, t, adapt):
         if t:
-            print(t)
             if adapt and self.weekday is not None:
                 t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
-            print(t)
             return t.strftime("%H:%M")
         else:
             return ""
@@ -359,6 +357,11 @@ class WebSeminar(object):
         if not time:
             return ""
         return time.strftime("%H:%M")
+
+    def show_input_date(self, date):
+        if not date:
+            return ""
+        return date.strftime("%b %d, %Y")
 
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop

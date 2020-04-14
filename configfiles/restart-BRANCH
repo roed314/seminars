@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# change to script's dir
+#cd `dirname "$0"`
+
+# uses the name of the script to restart the gunicorn instance
+branch=${0##*-}
+
+echo restarting $branch server
+
+# delete all cached .pyc files
+find /home/mathseminars/seminars-git-$branch -name '*.pyc' -delete
+
+# restart server
+kill -HUP `cat /home/mathseminars/gunicorn-$branch.pid`
+
+echo '... done'

@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-supervisord -c /home/mathseminars/seminars/configfiles/supervisord.conf
+supervisord -c /home/mathseminars/seminars-git-master/configfiles/supervisord.conf

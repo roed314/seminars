@@ -348,7 +348,7 @@ class SeminarsUser(UserMixin):
                 try:
                     res.append(WebTalk(shortname, ctr))
                 except ValueError:
-                    self._data["talk_subscriptions"][shortname].delete(ctr)
+                    self._data["talk_subscriptions"][shortname].remove(ctr)
                     self._dirty = True
 
         if self._dirty:

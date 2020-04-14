@@ -1,0 +1,2 @@
+pushd /home/mathseminars/seminars-git-live/ && git fetch && git checkout -f origin/stable && git submodule update && popd
+

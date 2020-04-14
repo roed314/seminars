@@ -17,7 +17,7 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
-from seminars.utils import topics, top_menu, all_languages
+from seminars.utils import topics, top_menu, languages_dict
 from .seminar import seminars_header
 from .talk import talks_header
 
@@ -30,12 +30,12 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 app = Flask(__name__)
 
 mail_settings = {
-    "MAIL_SERVER": "smtp.gmail.com",
+    "MAIL_SERVER": "heaviside.mit.edu",
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": "info.mathseminars@gmail.com",
-    "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD", ""),
+    "MAIL_USERNAME": "matheseminarsnoreply",
+    "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD_MIT", ""),
 }
 
 app.config.update(mail_settings)
@@ -125,7 +125,7 @@ def ctx_proc_userdata():
 
     data["talks_header"] = talks_header
     data["seminars_header"] = seminars_header
-    data["all_languages"] = all_languages()
+    data["languages_dict"] = languages_dict()
 
     return data
 
@@ -374,8 +374,49 @@ def send_email(to, subject, message):
             subject=subject,
             html=message,
             body=html2text(message),  # a plain text version of our email
-            sender="info.mathseminars@gmail.com",
+            sender="matheseminarsnoreply@math.mit.edu",
             recipients=[to],
         )
     )
     app.logger.info("%s done sending email to %s" % (timestamp(), to))
+
+
+
+def git_infos():
+    try:
+        from subprocess import Popen, PIPE
+        # cwd should be the root of git repo
+        cwd = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
+        git_rev_cmd = '''git rev-parse HEAD'''
+        git_date_cmd = '''git show --format="%ci" -s HEAD'''
+        git_contains_cmd = '''git branch --contains HEAD'''
+        git_reflog_cmd = '''git reflog -n5'''
+        git_graphlog_cmd = '''git log --graph  -n 10'''
+        rev = Popen([git_rev_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        date = Popen([git_date_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        contains = Popen([git_contains_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        reflog = Popen([git_reflog_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        graphlog = Popen([git_graphlog_cmd], shell=True, stdout=PIPE, cwd=cwd).communicate()[0]
+        pairs = [[git_rev_cmd, rev],
+                [git_date_cmd, date],
+                [git_contains_cmd, contains],
+                [git_reflog_cmd, reflog],
+                [git_graphlog_cmd, graphlog]]
+        summary = "\n".join("$ %s\n%s" % (c, o.decode('utf8')) for c, o in pairs)
+        return rev, date, summary
+    except Exception:
+        return '-', '-', '-'
+
+
+
+@app.route("/raw_info")
+def raw_info():
+    from socket import gethostname
+    output = ""
+    output += "HOSTNAME = %s\n\n" % gethostname()
+    output += "# PostgreSQL info\n"
+    output += "\n# GIT info\n"
+    output += git_infos()[-1]
+    output += "\n\n"
+    return output.replace("\n", "<br>")
+

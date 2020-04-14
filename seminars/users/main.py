@@ -84,6 +84,9 @@ def login(**kwargs):
     # remember = True sets a cookie to remember the user
     email = request.form["email"]
     password = request.form["password"]
+    if not email or not password:
+        flash_error("Oops! Wrong username or password.")
+        return redirect(url_for(".info"))
     next = request.form["next"]
     # we always remember
     remember = True  # if request.form["remember"] == "on" else False

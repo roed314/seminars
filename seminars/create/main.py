@@ -12,6 +12,7 @@ from seminars.utils import (
     flash_warning,
     localize_time,
     clean_topics,
+    clean_language,
     adapt_datetime,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
@@ -52,6 +53,7 @@ def index():
         seminars=seminars,
         conferences=conferences,
         institution_known=institution_known,
+        institutions=institutions(),
         section=manage,
         subsection="home",
         title=manage,
@@ -72,8 +74,18 @@ def edit_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
+    if new:
+        seminar.is_conference = process_user_input(data.get("is_conference"), "boolean", None)
+        if seminar.is_conference:
+            seminar.frequency = 1
+            seminar.per_day = 4
+        seminar.name = data.get("name", "")
+        seminar.institutions = clean_institutions(data.get("institutions"))
+        if seminar.institutions:
+            seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
     lock = get_lock(shortname, data.get("lock"))
-    title = "Create seminar" if new else "Edit properties"
+    title = "conference" if seminar.is_conference else "seminar"
+    title = "Create " + title if new else "Edit " + title + " properties"
     manage = "Manage" if current_user.is_organizer() else "Create"
     return render_template(
         "edit_seminar.html",
@@ -211,6 +223,7 @@ def save_seminar():
             return make_error(shortname, col, err)
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
+    data["language"] = clean_language(data.get("language"))
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
@@ -271,6 +284,8 @@ def edit_institution():
     resp, institution = can_edit_institution(shortname, new)
     if resp is not None:
         return resp
+    if new:
+        institution.name = data.get("name", "")
     # Don't use locks for institutions since there's only one non-admin able to edit.
     title = "Create institution" if new else "Edit institution"
     return render_template(
@@ -454,6 +469,7 @@ def save_talk():
         except Exception as err:
             return make_error(talk, col, err)
     data["topics"] = clean_topics(data.get("topics"))
+    data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(talk)
@@ -471,60 +487,109 @@ def save_talk():
     return redirect(url_for(".edit_talk", **edit_kwds), 301)
 
 
-def make_date_data(seminar):
+def make_date_data(seminar, data):
+    def parse_date(key):
+        date = data.get(key)
+        if date:
+            try:
+                return process_user_input(date, "date", seminar.tz)
+            except ValueError:
+                pass
+    begin = parse_date("begin")
+    end = parse_date("end")
     shortname = seminar.shortname
-    now = datetime.datetime.now(tz=pytz.timezone(seminar.timezone))
-    today = now.date()
     day = datetime.timedelta(days=1)
-    last_talk = talks_lucky(
-        {"seminar_id": shortname, "start_time": {"$lte": now}}, sort=[("start_time", -1)],
-    )
-    future_talks = list(
-        talks_search({"seminar_id": shortname, "start_time": {"$gte": now}}, sort=["start_time"])
+    today = datetime.datetime.now(tz=pytz.timezone(seminar.timezone)).date()
+    if begin is None or seminar.start_time is None or seminar.end_time is None:
+        future_talk = talks_lucky(
+            {"seminar_id": shortname, "start_time": {"$exists": True, "$gte": today}}, sort=["start_time"]
+        )
+        last_talk = talks_lucky(
+            {"seminar_id": shortname, "start_time": {"$exists": True, "$lt": today}}, sort=[("start_time", -1)],
+        )
+
+    frequency = data.get("frequency")
+    try:
+        frequency = int(frequency)
+    except Exception:
+        frequency = None
+    if not frequency:
+        frequency = seminar.frequency
+        if not frequency:
+            frequency = 1 if seminar.is_conference else 7
+    query = {}
+    if begin is None:
+        if seminar.is_conference:
+            if seminar.start_date:
+                begin = seminar.start_date
+            else:
+                begin = today
+        else:
+            if seminar.weekday is not None and frequency == 7:
+                begin = today
+                # Weekly meetings: take the next one
+                while begin.weekday() != seminar.weekday:
+                    begin += day
+            else:
+                # Try to figure out a plan from future and past talks
+                if future_talk is None:
+                    if last_talk is None:
+                        # Give up
+                        begin = today
+                    else:
+                        begin = last_talk.start_time.date()
+                        while begin < today:
+                            begin += frequency * day
+                else:
+                    begin = future_talk.start_time.date()
+                    while begin >= today:
+                        begin -= frequency * day
+                    begin += frequency * day
+    if end is None:
+        if seminar.is_conference:
+            if seminar.end_date:
+                end = seminar.end_date
+                schedule_len = int((end - begin) / (frequency*day)) + 1
+            else:
+                end = begin + 6*day
+                schedule_len = 7
+        else:
+            end = begin + (SCHEDULE_LEN-1)*frequency*day
+            schedule_len = SCHEDULE_LEN
+    else:
+        schedule_len = abs(int((end - begin) / (frequency*day))) + 1
+    seminar.frequency = frequency
+    data["begin"] = seminar.show_input_date(begin)
+    data["end"] = seminar.show_input_date(end)
+    # add a day since we want to allow talks on the final day
+    if end < begin:
+        # Only possible by user input
+        frequency = -frequency
+        query = {"$gte": end, "$lt": begin + day}
+    else:
+        query = {"$gte": begin, "$lt": end + day}
+    schedule_days = [begin + i * frequency * day for i in range(schedule_len)]
+    scheduled_talks = list(
+        talks_search({"seminar_id": shortname, "start_time": query})
     )
     by_date = defaultdict(list)
-    for T in future_talks:
+    for T in scheduled_talks:
         by_date[adapt_datetime(T.start_time, seminar.tz).date()].append(T)
-    frequency = seminar.frequency
-    if last_talk is None:
-        if seminar.weekday is None:
-            if future_talks:
-                seminar.weekday = future_talks[0].start_time.weekday()
-            else:
-                # No talks and no weekday information.  We just use today.
-                seminar.weekday = datetime.datetime.now(
-                    tz=pytz.timezone(seminar.timezone)
-                ).weekday()
-        next_date = today
-        while next_date.weekday() != seminar.weekday:
-            next_date += day
-    elif frequency and frequency > 0:
-        next_date = last_talk.start_time.date()
-        while next_date < today:
-            next_date += seminar.frequency * day
-    else:
-        next_date = today
-        frequency = None
-    if frequency is None:
-        schedule_days = []
-    else:
-        schedule_days = [next_date + i * frequency * day for i in range(SCHEDULE_LEN)]
-    all_dates = sorted(set(schedule_days + list(by_date)))
+    all_dates = sorted(set(schedule_days + list(by_date)), reverse=(end < begin))
     # Fill in by_date with Nones up to the per_day value
     for date in all_dates:
         by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
     if seminar.start_time is None:
-        if future_talks:
-            seminar.start_time = future_talks[0].start_time.time()
-        elif last_talk is not None:
+        if future_talk is not None and future_talk.start_time:
+            seminar.start_time = future_talk.start_time.time()
+        elif last_talk is not None and last_talk.start_time:
             seminar.start_time = last_talk.start_time.time()
     if seminar.end_time is None:
-        if future_talks:
-            seminar.end_time = future_talks[0].end_time.time()
-        elif last_talk is not None:
+        if future_talk is not None and future_talk.start_time:
+            seminar.end_time = future_talk.end_time.time()
+        elif last_talk is not None and last_talk.start_time:
             seminar.end_time = last_talk.end_time.time()
     return seminar, all_dates, by_date
-
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
 @login_required
@@ -532,15 +597,15 @@ def make_date_data(seminar):
 def edit_seminar_schedule():
     # It would be good to have a version of this that worked for a conference, but that's a project for later
     if request.method == "POST":
-        data = request.form
+        data = dict(request.form)
     else:
-        data = request.args
+        data = dict(request.args)
     shortname = data.get("shortname", "")
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
-    seminar, all_dates, by_date = make_date_data(seminar)
-    title = "Edit schedule"
+    seminar, all_dates, by_date = make_date_data(seminar, data)
+    title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(
         "edit_seminar_schedule.html",
         seminar=seminar,
@@ -567,6 +632,14 @@ def save_seminar_schedule():
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
+    frequency = raw_data.get("frequency")
+    try:
+        frequency = int(frequency)
+        if frequency != seminar.frequency and frequency > 0:
+            seminar.frequency = frequency
+            seminar.save()
+    except Exception:
+        pass
     schedule_count = int(raw_data["schedule_count"])
     # FIXME not being used
     # update_times = bool(raw_data.get("update_times"))
