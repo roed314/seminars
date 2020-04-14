@@ -3,10 +3,7 @@
 
 <div class="text_content">
 <h1>{% if seminar.homepage %}<a href="{{seminar.homepage}}">{{seminar.name}}</a>{% else %}{{seminar.name}}{% endif %}</h1>
-<p> To add a talk at a regularly scheduled time, enter Speaker (and optionally Email, Affiliation, and Title) in row(s) of the table; and then click "Save changes" or any "Details" link.</p>
-
-<p>To add a talk at <i>any</i> time, under <a href="#add_new_talk">Add talk</a>, enter Date, Start and End times, and Speaker (and optionally Email, Affiliation, and Title); then click "Save changes" or any "Details" link.</p>
-
+<p> To add a talk, enter Date, Time and Speaker (and optionally Email, Affiliation, and Title) in row(s) of the table; and then click any button or "Details" link.</p>
 
 <p>All times are shown in the seminar's time zone, {{ seminar.timezone }}.</p>
 </div>
@@ -16,6 +13,18 @@
   <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
   <input type="hidden" name="schedule_count" value="{{ all_dates | length }}" />
   <input type="hidden" name="referrer" value="schedule" />
+  <table id="edit-schedule-refresh">
+    <tr>
+      <th style="padding-left:0px;padding-right:0px;">Start date</th>
+      <td><input name="begin" value="{{ raw_data.begin }}" style="width:120px;" /></td>
+      <th style="padding-right:0px;">End date</th>
+      <td><input name="end" value="{{ raw_data.end}}" style="width:120px;" /></td>
+      <th style="padding-right:0px;">Talks every</th>
+      <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:60px;"/></td>
+      <th style="padding-left:0px;">day{% if seminar.frequency != 1 %}s{% endif %} <button type="submit" name="refresh" value="yes" style="margin-left:20px;">Refresh</button></th>
+    </tr>
+  </table>
+  <br>
   <div><div class="inlineh2">Upcoming schedule</div> <button type="submit" class="textbottom">Save changes</button> <a style="margin-left: 30px" href="{{ url_for('.edit_seminar_schedule', shortname=seminar.shortname) }}">Cancel changes</a></div>
   <table id="edit-schedule-table">
     <thead>
