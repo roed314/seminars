@@ -71,7 +71,7 @@ console.log('Form is unchanged!');
   <div id="manage-submenu">
     <header class="inner">
       <div class="submenu-inner">
-        {% if user.is_creator() %}
+        {% if user.is_creator %}
           <div class="submenu-nav{% if subsection == 'home' %} submenu-active{% endif %}">
             <a href="{{ url_for('create.index') }}">Seminars</a>
           </div>
@@ -85,7 +85,7 @@ console.log('Form is unchanged!');
           <div class="submenu-nav{% if subsection == 'viewinst' %} submenu-active{% endif %}">
             <a href="{{ url_for('show_institution', shortname=institution.shortname) }}">View institution</a>
           </div>
-          {% if user.is_admin() or user.email == institution.admin %}
+          {% if user.is_admin or user.email == institution.admin %}
             <div class="submenu-nav{% if subsection == 'editinst' %} submenu-active{% endif %}">
               <a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit properties</a>
             </div>
