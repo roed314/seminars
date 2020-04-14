@@ -28,7 +28,10 @@ def clean_institutions(inp):
         return []
     if isinstance(inp, str):
         inp = inp.strip()
-        if inp[0] == "[" and inp[-1] == "]":
+        if not inp:
+            # User might not have interacted with the institutions selector at all
+            return []
+        elif inp[0] == "[" and inp[-1] == "]":
             inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
             if inp == [""]:  # was an empty array
                 return []
