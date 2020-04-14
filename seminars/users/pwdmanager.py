@@ -478,6 +478,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
         return None
 
     @property
+    def name(self):
+        return ""
+
+    @property
     def timezone(self):
         return request.cookies.get("browser_timezone", "UTC")
 
