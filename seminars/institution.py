@@ -115,7 +115,7 @@ def can_edit_institution(shortname, new):
     if new != (institution is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
         return redirect(url_for(".index"), 301), None
-    if not new and not current_user.is_admin():
+    if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         if institution["admin"] != current_user.email:
             owner_name = db.users.lucky({"email": institution.admin}, "full_name")

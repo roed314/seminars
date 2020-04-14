@@ -117,7 +117,7 @@ def top_menu():
         account = "Account"
     else:
         account = "Login"
-    if current_user.is_organizer():
+    if current_user.is_organizer:
         manage = "Manage"
     else:
         manage = "Create"
@@ -352,7 +352,6 @@ def process_user_input(inp, typ, tz):
     elif typ in ["int", "smallint", "bigint", "integer"]:
         return int(inp)
     elif typ == "text[]":
-        print(repr(inp))
         inp = inp.strip()
         if inp:
             if inp[0] == "[" and inp[-1] == "]":
