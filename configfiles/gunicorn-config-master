@@ -1,5 +1,6 @@
 # WARNING: after editing this file don't forget to copy it to
-# /home/mathseminars/seminars-git-master/gunicorn-config.py
+# /home/mathseminars/seminars-git-master/gunicorn-config-master.py
+# as gunicorn doesn't handle well the config file being part of the repo
 bind = "0.0.0.0:9093"
 workers = 15
 SESSION_PROTECTION = None

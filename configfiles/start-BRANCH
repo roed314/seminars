@@ -11,5 +11,5 @@ export TEXINPUTS=.:$SAGE_ROOT/local/share/texmf:
 branch=${0##*-}
 export GIT_WORK_TREE="/home/mathseminars/seminars-git-${branch}"
 cd $GIT_WORK_TREE
-echo "Running: gunicorn -c gunicorn-config.py seminars.website:app"
-echo "gunicorn -c gunicorn-config.py seminars.website:app" | $SAGE -sh
+echo "Running: gunicorn -c gunicorn-config-${branch}.py seminars.website:app"
+echo "gunicorn -c gunicorn-config-${branch}.py seminars.website:app" | $SAGE -sh
