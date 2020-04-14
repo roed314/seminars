@@ -26,6 +26,10 @@ def naive_utcoffset(tz):
             pass
 
 
+def timestamp():
+    return "[%s UTC]" % datetime.now(tz=pytz.UTC).strftime("%Y-%m-%d %H:%M:%S")
+
+
 def pretty_timezone(tz, dest="selecter"):
     foo = int(naive_utcoffset(tz).total_seconds())
     hours, remainder = divmod(abs(foo), 3600)

@@ -31,7 +31,7 @@ from psycopg2.sql import SQL
 from lmfdb import db
 
 assert db
-from seminars.utils import timezones
+from seminars.utils import timezones, timestamp
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import datetime
 
@@ -182,7 +182,8 @@ def set_info():
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))
     if previous_email != current_user.email:
-        send_confirmation_email(current_user.email)
+        if send_confirmation_email(current_user.email):
+            flask.flash(Markup("New confirmation email has been sent!"))
     return redirect(url_for(".info"))
 
 
@@ -201,8 +202,8 @@ def list_subscriptions():
 @login_page.route("/send_confirmation_email")
 @login_required
 def resend_confirmation_email():
-    send_confirmation_email(current_user.email)
-    flask.flash(Markup("New email has been sent!"))
+    if send_confirmation_email(current_user.email):
+        flask.flash(Markup("New confirmation email has been sent!"))
     return redirect(url_for(".info"))
 
 
@@ -313,10 +314,66 @@ def send_confirmation_email(email):
     confirm_url = url_for(".confirm_email", token=token, _external=True, _scheme="https")
     html = render_template("confirm_email.html", confirm_url=confirm_url)
     subject = "Please confirm your email"
-    send_email(email, subject, html)
+    try:
+        send_email(email, subject, html)
+        return True
+    except:
+        import sys
+        flash_error('Unable to send email confirmation link, please contact <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> directly to confirm your email')
+        app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
+        return False
+
+
+
+
+import os
+@login_page.route("/sendlostemails")
+@housekeeping
+def send_lost_emails():
+    def send_confirmation_email_fix(email):
+        token = generate_confirmation_token(email)
+        confirm_url = 'https://mathseminars.org/' + url_for(".confirm_email", token=token)
+        html = render_template("confirm_email.html", confirm_url=confirm_url)
+        subject = "Please confirm your email"
+        send_email(email, subject, html)
+
+    def send_reset_password_fix(email):
+        token = generate_password_token(email)
+        reset_url = 'https://mathseminars.org/'  + url_for(".reset_password_wtoken", token=token)
+        html = render_template("reset_password_email.html", reset_url=reset_url)
+        subject = "Resetting password"
+        send_email(email, subject, html)
+    root_path = os.path.abspath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+    )
+    out = ""
+    if os.path.exists(os.path.join(root_path, 'confirmation_emails.txt')):
+        with open(os.path.join(root_path, 'confirmation_emails.txt')) as F:
+            out += "confirmation_emails.txt\n"
+            for email in F.readlines():
+                email = email.rstrip('\n')
+                try:
+                    send_confirmation_email_fix(email)
+                    out += email +  ', success\n'
+                except Exception:
+                    out += email +  ', fail\n'
+    if os.path.exists(os.path.join(root_path, 'reset_emails.txt')):
+        with open(os.path.join(root_path, 'reset_emails.txt')) as F:
+            out += "reset_emails.txt\n"
+            for email in F.readlines():
+                email = email.rstrip('\n')
+                try:
+                    send_reset_password_fix(email)
+                    out += email +  ', success\n'
+                except Exception:
+                    out += email +  ', fail\n'
+
+    return out.replace("\n", "<br>")
+
 
 
 @login_page.route("/confirm/<token>")
+@login_required
 def confirm_email(token):
     try:
         # the users have 24h to confirm their email
@@ -324,12 +381,13 @@ def confirm_email(token):
     except Exception:
         flash_error("The confirmation link is invalid or has expired.")
     else:
-        user = SeminarsUser(email=email)
-        if user.email_confirmed:
+        if current_user.email.lower() != email.lower():
+            flash_error("The link is not valid for this account.")
+        elif current_user.email_confirmed:
             flash_error("Email already confirmed.")
         else:
-            user.email_confirmed = True
-            user.save()
+            current_user.email_confirmed = True
+            current_user.save()
             flask.flash("You have confirmed your email. Thanks!", "success")
     return redirect(url_for(".info"))
 
@@ -393,8 +451,8 @@ def reset_password_wtoken(token):
 # endorsement
 
 
-@login_required
 @login_page.route("/endorse", methods=["POST"])
+@login_required
 @creator_required
 def get_endorsing_link():
     email = request.form["email"]
@@ -569,6 +627,7 @@ def ics_file(token):
 
 
 @login_page.route("/public/")
+@login_required
 @email_confirmed_required
 def public_users():
     query = SQL(
