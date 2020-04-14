@@ -30,7 +30,7 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 app = Flask(__name__)
 
 mail_settings = {
-    "MAIL_SERVER": "heaviside",
+    "MAIL_SERVER": "heaviside.mit.edu",
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
