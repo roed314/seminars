@@ -489,11 +489,12 @@ def save_talk():
 
 
 def make_date_data(seminar, data):
+    tz = seminar.tz
     def parse_date(key):
         date = data.get(key)
         if date:
             try:
-                return process_user_input(date, "date", seminar.tz)
+                return process_user_input(date, "date", tz)
             except ValueError:
                 pass
     begin = parse_date("begin")
@@ -515,16 +516,17 @@ def make_date_data(seminar, data):
         weekday = seminar.weekday
     shortname = seminar.shortname
     day = datetime.timedelta(days=1)
-    today = datetime.datetime.now(tz=pytz.timezone(seminar.timezone)).date()
+    now = datetime.datetime.now(tz=tz)
+    today = now.date()
+    midnight_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
     if begin is None or seminar.start_time is None or seminar.end_time is None:
         future_talk = talks_lucky(
-            {"seminar_id": shortname, "start_time": {"$exists": True, "$gte": today}}, sort=["start_time"]
+            {"seminar_id": shortname, "start_time": {"$exists": True, "$gte": midnight_today}}, sort=["start_time"]
         )
         last_talk = talks_lucky(
-            {"seminar_id": shortname, "start_time": {"$exists": True, "$lt": today}}, sort=[("start_time", -1)],
+            {"seminar_id": shortname, "start_time": {"$exists": True, "$lt": midnight_today}}, sort=[("start_time", -1)],
         )
 
-    query = {}
     if begin is None:
         if seminar.is_conference:
             if seminar.start_date:
@@ -570,20 +572,22 @@ def make_date_data(seminar, data):
     seminar.frequency = frequency
     data["begin"] = seminar.show_input_date(begin)
     data["end"] = seminar.show_input_date(end)
+    midnight_begin = localize_time(datetime.datetime.combine(begin, datetime.time()), tz)
+    midnight_end = localize_time(datetime.datetime.combine(end, datetime.time()), tz)
     # add a day since we want to allow talks on the final day
     if end < begin:
         # Only possible by user input
         frequency = -frequency
-        query = {"$gte": end, "$lt": begin + day}
+        query = {"$gte": midnight_end, "$lt": midnight_begin + day}
     else:
-        query = {"$gte": begin, "$lt": end + day}
+        query = {"$gte": midnight_begin, "$lt": midnight_end + day}
     schedule_days = [begin + i * frequency * day for i in range(schedule_len)]
     scheduled_talks = list(
         talks_search({"seminar_id": shortname, "start_time": query})
     )
     by_date = defaultdict(list)
     for T in scheduled_talks:
-        by_date[adapt_datetime(T.start_time, seminar.tz).date()].append(T)
+        by_date[adapt_datetime(T.start_time, tz).date()].append(T)
     all_dates = sorted(set(schedule_days + list(by_date)), reverse=(end < begin))
     # Fill in by_date with Nones up to the per_day value
     for date in all_dates:

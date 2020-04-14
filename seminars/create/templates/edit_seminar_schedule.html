@@ -20,11 +20,14 @@
       <td><input name="begin" value="{{ raw_data.begin }}" style="width:120px;" /></td>
       <th style="padding-right:0px;">End date</th>
       <td><input name="end" value="{{ raw_data.end}}" style="width:120px;" /></td>
+      {% if not seminar.is_conference %}
       <th style="padding-right:0px;">Talks on</th>
       <td><input name="weekday" value="{{ seminar.show_day(truncate=False) }}" style="width:80px;" /></td>
       <th style="padding-right:0px;">every</th>
       <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:60px;"/></td>
-      <th style="padding-left:0px;">day{% if seminar.frequency != 1 %}s{% endif %} <button type="submit" name="refresh" value="yes" style="margin-left:20px;">Refresh</button></th>
+      <th style="padding-left:0px;">day{% if seminar.frequency != 1 %}s{% endif %}</th>
+      {% endif %}
+      <td style="padding-left:20px;"><button type="submit" name="refresh" value="yes">Refresh</button></td>
     </tr>
   </table>
   <br>
