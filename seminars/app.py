@@ -36,7 +36,7 @@ mail_settings = {
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": "matheseminarsnoreply",
+    "MAIL_USERNAME": "mathseminarsnoreply",
     "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD_MIT", ""),
 }
 
@@ -371,20 +371,15 @@ def send_email(to, subject, message):
     from html2text import html2text
 
     app.logger.info("%s sending email to %s..." % (timestamp(), to))
-    try:
-        mail.send(
-            Message(
-                subject=subject,
-                html=message,
-                body=html2text(message),  # a plain text version of our email
-                sender="matheseminarsnoreply@math.mit.edu",
-                recipients=[to],
-            )
+    mail.send(
+        Message(
+            subject=subject,
+            html=message,
+            body=html2text(message),  # a plain text version of our email
+            sender="typomatheseminarsnoreply@math.mit.edu",
+            recipients=[to],
         )
-    except:
-        flash_error("Unable to send email, please email mathseminars.org.")
-        app.logger.error("%s unable to send email to %s due to error: %s" (timestamp(), to, sys.exc_info()[0]))
-        return
+    )
     app.logger.info("%s done sending email to %s" % (timestamp(), to))
 
 

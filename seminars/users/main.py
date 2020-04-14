@@ -313,7 +313,12 @@ def send_confirmation_email(email):
     confirm_url = url_for(".confirm_email", token=token, _external=True, _scheme="https")
     html = render_template("confirm_email.html", confirm_url=confirm_url)
     subject = "Please confirm your email"
-    send_email(email, subject, html)
+    try:
+        send_email(email, subject, html)
+    except:
+        flash_error("Unable to send confirmation email, please email mathseminars@math.mit.edu to confirm")
+        app.logger.error("%s unable to send email to %s due to error: %s" (timestamp(), to, sys.exc_info()[0]))
+        return
 
 
 @login_page.route("/confirm/<token>")
