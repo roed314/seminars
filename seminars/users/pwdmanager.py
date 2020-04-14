@@ -16,8 +16,6 @@ from lmfdb.backend.utils import DelayCommit
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
-from sage.misc.cachefunc import cached_method
-
 from .main import logger
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
@@ -141,7 +139,6 @@ class PostgresUserTable(PostgresSearchTable):
         for key in list(data.keys()):
             if key not in self.search_cols:
                 data.pop(key)
-                print("Popped", key)
         with DelayCommit(db):
             if "email" in data:
                 newemail = data["email"]
@@ -171,8 +168,8 @@ class SeminarsUser(UserMixin):
         else:
             query = {"id": int(uid)}
 
-        self._uid = uid
         self._authenticated = False
+        self._uid = None
         self._dirty = False  # flag if we have to save
         self._data = dict([(_, None) for _ in SeminarsUser.properties])
 
@@ -181,6 +178,7 @@ class SeminarsUser(UserMixin):
             self._authenticated = True
             self._data.update(user_row)
             self._uid = str(self._data["id"])
+
 
     @property
     def id(self):

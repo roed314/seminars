@@ -292,7 +292,7 @@ def change_password():
 def logout():
     logout_user()
     flask.flash(Markup("You are logged out now. Have a nice day!"))
-    return redirect(request.args.get("next") or request.referrer or url_for(".info"))
+    return redirect(url_for(".info"))
 
 
 @login_page.route("/admin")
