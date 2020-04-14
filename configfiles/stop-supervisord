@@ -2,6 +2,8 @@
 echo 'Killing supervisord ...'
 kill -TERM `cat /home/mathseminars/supervisord.pid`
 echo 'Killing gunicorn ...'
-kill -TERM `cat /home/mathseminars/gunicorn.pid`;
+for branch in live stable master; do
+  echo branch = $branch
+  kill -TERM `cat /home/mathseminars/gunicorn-$branch.pid`;
 done
 echo '... and done!'
