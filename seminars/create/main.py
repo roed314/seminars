@@ -730,4 +730,4 @@ def save_seminar_schedule():
         if warned:
             return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
         else:
-            return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 301)
+            return redirect(url_for(".edit_seminar_schedule", shortname=shortname, begin=raw_data.get('begin'), end=raw_data.get('end'), frequency=raw_data.get('frequency')), 301)
