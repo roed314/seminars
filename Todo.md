@@ -10,20 +10,14 @@ Bugs
 
 1. swap curator fails
 
-1. start date for seminar (if doesn't meet weekly)
-
 1. (only) change display on endorsement
 
 1. change email changes email everywhere with a delay commit
 
 
 
-
-
 Admin
 =====
-
-1. Disable case sensitivity for emails
 
 1. Add ability to request endorsement, then update public_users.html with a link.
 
@@ -33,7 +27,7 @@ Admin
 
 1. add captcha to reset password and register
 
-1. Use gmail's api or some other api
+1. Use MIT to send mail
 
 1. Forward back to page once you log in: https://github.com/LMFDB/lmfdb/blob/master/lmfdb/users/main.py#L251
 
@@ -47,29 +41,9 @@ Content creation
 
 1. **add text explaing hidden seminar**
 
-1. **Makes sure that content creators can cancel or delete talks and seminars if they want.**
-
-1. **For conference, enter dates rather than frequency**
-
-1. **Remove aliases**
-
-1. **Add details links back in to view seminars**
+1. **Remove aliases from institution schema**
 
 1. **Token keeps showing up when saving a talk**
-
-1. **No good way to add/edit past talks**
-
-1. **Add text to right advising capitalization standards**
-
-1. **If time is past, make today not show up on edit schedule**
-
-1. **Add a mailing list link**
-
-1. **Include organizer homepages in organizer table**
-
-1. **In schedule page, talks should actually be shown in seminar's time zone**
-
-1. If you change the time zone of a seminar, the time zone of the talks don't change so they show up weirdly on the edit schedule page.
 
 1. Previewing abstract doesn't take double new lines into account.
 
