@@ -367,18 +367,18 @@ for fn in [
 
 def send_email(to, subject, message):
     from html2text import html2text
-
-    app.logger.info("%s sending email to %s..." % (timestamp(), to))
+    sender="mathseminarsnoreply@math.mit.edu"
+    app.logger.info("%s sending email from %s to %s..." % (timestamp(), sender, to))
     mail.send(
         Message(
             subject=subject,
             html=message,
             body=html2text(message),  # a plain text version of our email
-            sender="mathseminarsnoreply@math.mit.edu",
+            sender=sender,
             recipients=[to],
         )
     )
-    app.logger.info("%s done sending email to %s" % (timestamp(), to))
+    app.logger.info("%s sending email from %s to %s..." % (timestamp(), sender, to))
 
 
 

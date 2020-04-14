@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
 import flask
-import sys, time
 from urllib.parse import urlencode, quote
 from functools import wraps
 from seminars.app import app, send_email
@@ -32,7 +31,7 @@ from psycopg2.sql import SQL
 from lmfdb import db
 
 assert db
-from seminars.utils import timezones
+from seminars.utils import timezones, timestamp
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import datetime
 
@@ -59,9 +58,6 @@ login_manager.anonymous_user = SeminarsAnonymousUser
 def get_username(uid):
     """returns the name of user @uid"""
     return SeminarsUser(uid).name
-
-def timestamp():
-    return "[%s UTC]" % time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
 # globally define user properties and username
 @app.context_processor
@@ -185,7 +181,8 @@ def set_info():
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))
     if previous_email != current_user.email:
-        send_confirmation_email(current_user.email)
+        if send_confirmation_email(current_user.email):
+            flask.flash(Markup("New confirmation email has been sent!"))
     return redirect(url_for(".info"))
 
 
@@ -204,8 +201,8 @@ def list_subscriptions():
 @login_page.route("/send_confirmation_email")
 @login_required
 def resend_confirmation_email():
-    send_confirmation_email(current_user.email)
-    flask.flash(Markup("New email has been sent!"))
+    if send_confirmation_email(current_user.email):
+        flask.flash(Markup("New confirmation email has been sent!"))
     return redirect(url_for(".info"))
 
 
@@ -318,11 +315,12 @@ def send_confirmation_email(email):
     subject = "Please confirm your email"
     try:
         send_email(email, subject, html)
+        return True
     except:
+        import sys
         flash_error('Unable to send email confirmation link, please contact <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> directly to confirm your email')
         app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
-        return
-
+        return False
 
 
 
