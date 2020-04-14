@@ -466,6 +466,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     def is_organizer(self):
         return False
 
+    @property
+    def is_admin(self):
+        return self._data.get("admin", False)
+
     def get_id(self):
         return
 
