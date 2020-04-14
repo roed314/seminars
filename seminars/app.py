@@ -34,7 +34,7 @@ mail_settings = {
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": "matheseminarsnoreply",
+    "MAIL_USERNAME": "mathseminarsnoreply",
     "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD_MIT", ""),
 }
 
@@ -374,7 +374,7 @@ def send_email(to, subject, message):
             subject=subject,
             html=message,
             body=html2text(message),  # a plain text version of our email
-            sender="matheseminarsnoreply@math.mit.edu",
+            sender="mathseminarsnoreply@math.mit.edu",
             recipients=[to],
         )
     )
