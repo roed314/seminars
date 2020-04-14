@@ -374,7 +374,7 @@ def send_email(to, subject, message):
             subject=subject,
             html=message,
             body=html2text(message),  # a plain text version of our email
-            sender="matheseminarsnoreply@math.mit.edu",
+            sender="mathseminarsnoreply@math.mit.edu",
             recipients=[to],
         )
     )
