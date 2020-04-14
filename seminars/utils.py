@@ -116,7 +116,7 @@ def top_menu():
         account = "Account"
     else:
         account = "Login"
-    if current_user.is_organizer():
+    if current_user.is_organizer:
         manage = "Manage"
     else:
         manage = "Create"

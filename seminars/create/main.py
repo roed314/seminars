@@ -47,7 +47,7 @@ def index():
             conferences.append(seminar)
         else:
             seminars.append(seminar)
-    manage = "Manage" if current_user.is_organizer() else "Create"
+    manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "create_index.html",
         seminars=seminars,
@@ -57,7 +57,7 @@ def index():
         section=manage,
         subsection="home",
         title=manage,
-        user_is_creator=current_user.is_creator(),
+        user_is_creator=current_user.is_creator,
     )
 
 
@@ -86,7 +86,7 @@ def edit_seminar():
     lock = get_lock(shortname, data.get("lock"))
     title = "conference" if seminar.is_conference else "seminar"
     title = "Create " + title if new else "Edit " + title + " properties"
-    manage = "Manage" if current_user.is_organizer() else "Create"
+    manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "edit_seminar.html",
         seminar=seminar,
@@ -105,7 +105,7 @@ def edit_seminar():
 @email_confirmed_required
 def delete_seminar(shortname):
     seminar = WebSeminar(shortname)
-    manage = "Manage" if current_user.is_organizer() else "Create"
+    manage = "Manage" if current_user.is_organizer else "Create"
     lock = get_lock(shortname, request.args.get("lock"))
 
     def failure():
@@ -178,7 +178,7 @@ def save_seminar():
         if err is not None:
             flash_error("Error processing %s: {0}".format(err), col)
         seminar = WebSeminar(shortname, data=raw_data)
-        manage = "Manage" if current_user.is_organizer() else "Create"
+        manage = "Manage" if current_user.is_organizer else "Create"
         return render_template(
             "edit_seminar.html",
             seminar=seminar,
@@ -191,7 +191,7 @@ def save_seminar():
     if seminar.new:
         data = {
             "shortname": shortname,
-            "display": current_user.is_creator(),
+            "display": current_user.is_creator,
             "owner": current_user.email,
             "archived": False,
         }

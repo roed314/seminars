@@ -303,7 +303,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def seminar_subscriptions(self):
-        return self._data["seminar_subscriptions"]
+        return self._data.get("seminar_subscriptions", [])
 
     @property
     def seminars(self):
@@ -383,26 +383,34 @@ class SeminarsUser(UserMixin):
         else:
             return 200, "Already removed from favorites"
 
+    @property
+    def is_authenticated(self):
+        """required by flask-login user class"""
+        return self._authenticated
 
+    @property
     def is_anonymous(self):
         """required by flask-login user class"""
         return not self.is_authenticated
 
+    @property
+    def is_active(self):
+        """required by flask-login user class"""
+        return self.email_confirmed
+
+    @property
     def is_admin(self):
         return self._data.get("admin", False)
 
-    def make_admin(self):
-        self._data["admin"] = True
-        self._dirty = True
-
+    @property
     def is_creator(self):
         return self._data.get("creator", False)
 
-    @cached_method
+    @property
     def is_organizer(self):
         return (
-            self.is_admin()
-            or self.is_creator()
+            self.is_admin
+            or self.is_creator
             and db.seminar_organizers.count({"email": self.email}) > 0
         )
 
@@ -432,27 +440,30 @@ class SeminarsUser(UserMixin):
         self._dirty = False
         return True
 
-
 class SeminarsAnonymousUser(AnonymousUserMixin):
     """
     The sole purpose of this Anonymous User is the 'is_admin' method
     and probably others.
     """
 
-    def is_admin(self):
+    @property
+    def is_authenticated(self):
         return False
 
-    def is_creator(self):
+    @property
+    def is_active(self):
         return False
 
+    @property
+    def is_anonymous(self):
+        return True
+
+    @property
     def is_organizer(self):
         return False
 
-    def name(self):
-        return "Anonymous"
-
-    def pending_requests(self):
-        return 0
+    def get_id(self):
+        return
 
     @property
     def email(self):
@@ -472,12 +483,6 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     @property
     def email_confirmed(self):
         return False
-
-    # For versions of flask_login earlier than 0.3.0,
-    # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a
-    # property. To match the behavior of SeminarsUser, we make it callable always.
-    def is_anonymous(self):
-        return True
 
     def show_timezone(self, dest="topmenu"):
         # dest can be 'browse', in which case "now" is inserted, or 'selecter', in which case fixed width is used.

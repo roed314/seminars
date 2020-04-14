@@ -112,7 +112,7 @@ def admin_required(fn):
     @login_required
     def decorated_view(*args, **kwargs):
         logger.info("admin access attempt by %s" % current_user.get_id())
-        if not current_user.is_admin():
+        if not current_user.is_admin:
             return flask.abort(403)  # access denied
         return fn(*args, **kwargs)
 
@@ -128,7 +128,7 @@ def creator_required(fn):
     @login_required
     def decorated_view(*args, **kwargs):
         logger.info("creator access attempt by %s" % current_user.get_id())
-        if not current_user.is_creator():
+        if not current_user.is_creator:
             return flask.abort(403)  # access denied
         return fn(*args, **kwargs)
 
@@ -554,7 +554,7 @@ def endorse_wtoken(token):
     except Exception:
         return flask.abort(404, "The link is invalid or has expired.")
         return redirect(url_for(".info"))
-    if current_user.is_creator():
+    if current_user.is_creator:
         flash_error("Account already has creator privileges.")
     elif current_user.email.lower() != email.lower():
         flash_error("The link is not valid for this account.")

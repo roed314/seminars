@@ -42,7 +42,7 @@ class WebSeminar(object):
         self.new = data is None
         if self.new:
             self.shortname = shortname
-            self.display = current_user.is_creator()
+            self.display = current_user.is_creator
             self.online = True  # default
             self.access = "open"  # default
             self.archived = False  # don't start out archived
@@ -233,12 +233,12 @@ class WebSeminar(object):
             return ""
 
     def is_subscribed(self):
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             return False
         return self.shortname in current_user.seminar_subscriptions
 
     def show_subscribe(self):
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             return ""
 
         return toggle(
@@ -304,7 +304,7 @@ class WebSeminar(object):
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_admin() or (
+        return current_user.is_admin or (
             current_user.email_confirmed and current_user.email == self.owner
         )
 
@@ -313,7 +313,7 @@ class WebSeminar(object):
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_admin() or (
+        return current_user.is_admin or (
             current_user.email_confirmed and current_user.email in self.editors()
         )
 
@@ -413,7 +413,7 @@ def seminars_header(
     if include_description:
         cols.append(('style="min-width:280px;"', "Description"))
     if include_subscribe:
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             cols.append(("", ""))
         else:
             cols.append(("", "Saved"))
@@ -533,14 +533,14 @@ def can_edit_seminar(shortname, new):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
         return redirect(url_for(".index"), 301), None
     if (
-        current_user.is_anonymous()
+        current_user.is_anonymous
     ):  # can happen via talks, which don't check for logged in in order to support tokens
         flash_error(
             "You do not have permission to edit seminar %s.  Please create an account and contact the seminar organizers."
             % shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 301), None
-    if not new and not current_user.is_admin():
+    if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         organizer_data = db.seminar_organizers.lucky(
             {"seminar_id": shortname, "email": current_user.email}
