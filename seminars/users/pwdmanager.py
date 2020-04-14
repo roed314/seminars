@@ -16,8 +16,6 @@ from lmfdb.backend.utils import DelayCommit
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
-from sage.misc.cachefunc import cached_method
-
 from .main import logger
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
@@ -141,7 +139,6 @@ class PostgresUserTable(PostgresSearchTable):
         for key in list(data.keys()):
             if key not in self.search_cols:
                 data.pop(key)
-                print("Popped", key)
         with DelayCommit(db):
             if "email" in data:
                 newemail = data["email"]
@@ -171,15 +168,17 @@ class SeminarsUser(UserMixin):
         else:
             query = {"id": int(uid)}
 
-        self._uid = uid
         self._authenticated = False
+        self._uid = None
         self._dirty = False  # flag if we have to save
         self._data = dict([(_, None) for _ in SeminarsUser.properties])
 
         user_row = userdb.lucky(query, projection=SeminarsUser.properties)
         if user_row:
+            self._authenticated = True
             self._data.update(user_row)
             self._uid = str(self._data["id"])
+
 
     @property
     def id(self):
@@ -187,7 +186,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def name(self):
-        return self._data.get("name")
+        return self._data.get("name", "")
 
     @name.setter
     def name(self, name):
@@ -196,18 +195,18 @@ class SeminarsUser(UserMixin):
 
     @property
     def email(self):
-        return self._data.get("email")
+        return self._data.get("email", "")
 
     @email.setter
     def email(self, email):
-        if email != self._data.get("email"):
+        if email != self._data.get("email", ""):
             self._data["new_email"] = email
             self._data["email_confirmed"] = False
             self._dirty = True
 
     @property
     def homepage(self):
-        return self._data.get("homepage")
+        return self._data.get("homepage", "")
 
     @homepage.setter
     def homepage(self, url):
@@ -216,7 +215,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def email_confirmed(self):
-        return self._data.get("email_confirmed")
+        return self._data.get("email_confirmed", False)
 
     @email_confirmed.setter
     def email_confirmed(self, email_confirmed):
@@ -225,7 +224,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def affiliation(self):
-        return self._data.get("affiliation")
+        return self._data.get("affiliation", "")
 
     @affiliation.setter
     def affiliation(self, affiliation):
@@ -243,7 +242,7 @@ class SeminarsUser(UserMixin):
     def raw_timezone(self):
         # For the user info page, we want to allow the user to set their time zone to blank,
         # which is interpreted as the browser's timezone for other uses.
-        return self._data.get("timezone")
+        return self._data.get("timezone", "")
 
     @property
     def tz(self):
@@ -276,7 +275,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def location(self):
-        return self._data.get("location")
+        return self._data.get("location", "")
 
     @location.setter
     def location(self, location):
@@ -303,7 +302,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def seminar_subscriptions(self):
-        return self._data["seminar_subscriptions"]
+        return self._data.get("seminar_subscriptions", [])
 
     @property
     def seminars(self):
@@ -338,7 +337,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def talk_subscriptions(self):
-        return self._data["talk_subscriptions"]
+        return self._data.get("talk_subscriptions", {})
 
     @property
     def talks(self):
@@ -383,43 +382,56 @@ class SeminarsUser(UserMixin):
         else:
             return 200, "Already removed from favorites"
 
+    @property
+    def is_authenticated(self):
+        """required by flask-login user class"""
+        return self._authenticated
 
+    @is_authenticated.setter
+    def is_authenticated(self, is_authenticated):
+        """required by flask-login user class"""
+        self._authenticated = is_authenticated
+
+    @property
     def is_anonymous(self):
         """required by flask-login user class"""
-        return not self.is_authenticated
+        return not self._authenticated
 
+    @property
+    def is_active(self):
+        """required by flask-login user class"""
+        # It would be nice to have active tied to email_confirmed,
+        # But then users can't see their info page to be able to confirm their email
+        return True
+
+    @property
     def is_admin(self):
         return self._data.get("admin", False)
 
-    def make_admin(self):
-        self._data["admin"] = True
-        self._dirty = True
-
+    @property
     def is_creator(self):
         return self._data.get("creator", False)
 
-    @cached_method
+    @property
     def is_organizer(self):
         return (
-            self.is_admin()
-            or self.is_creator()
+            self.is_admin
+            or self.is_creator
             and db.seminar_organizers.count({"email": self.email}) > 0
         )
 
-    def authenticate(self, pwd):
+    def check_password(self, pwd):
         """
         checks if the given password for the user is valid.
         @return: True: OK, False: wrong password or username
         """
-        print("authenticating:", self.email)
         if "password" not in self._data:
             logger.warning("no password data in db for '%s'!" % self.email)
             return False
         try:
-            self._authenticated = userdb.authenticate(self.email, pwd)
+             return userdb.authenticate(self.email, pwd)
         except ValueError:
             return False
-        return self._authenticated
 
     def save(self):
         if not self._dirty:
@@ -432,27 +444,30 @@ class SeminarsUser(UserMixin):
         self._dirty = False
         return True
 
-
 class SeminarsAnonymousUser(AnonymousUserMixin):
     """
     The sole purpose of this Anonymous User is the 'is_admin' method
     and probably others.
     """
 
-    def is_admin(self):
+    @property
+    def is_authenticated(self):
         return False
 
-    def is_creator(self):
+    @property
+    def is_active(self):
         return False
 
+    @property
+    def is_anonymous(self):
+        return True
+
+    @property
     def is_organizer(self):
         return False
 
-    def name(self):
-        return "Anonymous"
-
-    def pending_requests(self):
-        return 0
+    def get_id(self):
+        return
 
     @property
     def email(self):
@@ -472,12 +487,6 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     @property
     def email_confirmed(self):
         return False
-
-    # For versions of flask_login earlier than 0.3.0,
-    # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a
-    # property. To match the behavior of SeminarsUser, we make it callable always.
-    def is_anonymous(self):
-        return True
 
     def show_timezone(self, dest="topmenu"):
         # dest can be 'browse', in which case "now" is inserted, or 'selecter', in which case fixed width is used.
