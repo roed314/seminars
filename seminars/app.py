@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import os
-import sys
 import time
 import datetime
 from urllib.parse import urlparse, urlunparse
@@ -18,7 +17,6 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler, critical
-from lmfdb.utils import flash_error
 from seminars.utils import topics, top_menu, languages_dict
 from .seminar import seminars_header
 from .talk import talks_header

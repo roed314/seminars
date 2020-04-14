@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
 import flask
+import sys
 from urllib.parse import urlencode, quote
 from functools import wraps
 from seminars.app import app, send_email
@@ -34,6 +35,7 @@ assert db
 from seminars.utils import timezones
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import datetime
+from app import timestamp
 
 
 login_page = Blueprint("user", __name__, template_folder="templates")
@@ -317,7 +319,7 @@ def send_confirmation_email(email):
         send_email(email, subject, html)
     except:
         flash_error("Unable to send confirmation email, please email mathseminars@math.mit.edu to confirm")
-        app.logger.error("%s unable to send email to %s due to error: %s" (timestamp(), to, sys.exc_info()[0]))
+        app.logger.error("%s unable to send email to %s due to error: %s" (timestamp(), email, sys.exc_info()[0]))
         return
 
 
