@@ -1,14 +1,13 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import topics, toggle, Toggle, languages_dict, simplify_language_name
+from seminars.utils import topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky
 from flask_login import current_user
 import datetime
 import pytz
-import iso639
 from collections import Counter
 from dateutil.parser import parse
 

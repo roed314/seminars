@@ -364,7 +364,7 @@ class WebSeminar(object):
     def show_input_date(self, date):
         if not date:
             return ""
-        return date.strftime("%Y-%m-%d")
+        return date.strftime("%b %d, %Y")
 
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
