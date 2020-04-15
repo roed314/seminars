@@ -170,9 +170,11 @@ def save_seminar():
     if resp is not None:
         return resp
 
-    def make_error(shortname, col=None, err=None):
+    def make_error(shortname, col=None, err=None, msg=None):
         if err is not None:
             flash_error("Error processing %s: {0}".format(err), col)
+        if msg is not None:
+            flash_error(msg)
         seminar = WebSeminar(shortname, data=raw_data)
         manage = "Manage" if current_user.is_organizer else "Create"
         return render_template(
@@ -227,6 +229,7 @@ def save_seminar():
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     organizer_data = []
+    display_count = 0
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
@@ -245,15 +248,18 @@ def save_seminar():
                 #     D[col] = "http://" + data[col]
             except Exception as err:
                 return make_error(shortname, col, err)
-        if D.get("email") or D.get("full_name"):
+        if D.get("homepage") or D.get("email") or D.get("full_name"):
             D["order"] = len(organizer_data)
-            ####### HOT FIX ####################
-            # WARNING the header on the template
-            # says organizer and we have agreed
-            # that one is either an organizer or
-            # a curator
+            # WARNING the header on the template says organizer
+            # but it sets the database column curator, so the 
+            # boolean needs to be inverted
             D["curator"] = not D["curator"]
+            if D["display"]:
+                display_count += 1
             organizer_data.append(D)
+    if display_count == 0:
+       return make_error(shortname,msg="At least one organizer or curator must be displayed.") 
+
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(shortname)
