@@ -14,6 +14,7 @@ from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
 from flask import flash
 from lmfdb.backend.utils import DelayCommit
+from lmfdb.logger import critical
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
@@ -144,8 +145,9 @@ class PostgresUserTable(PostgresSearchTable):
             if self.user_exists(data["email"]):
                 flash_error("There is already a user registered with email = %s", data["email"])
                 return False
-        for key in list(data.keys()):
+        for key in list(data):
             if key not in self.search_cols:
+                critical("Need to update pwdmanager code to account for schema change key=%s" % key)
                 data.pop(key)
         with DelayCommit(db):
             if "email" in data:
