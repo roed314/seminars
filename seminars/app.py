@@ -18,6 +18,7 @@ from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
 from seminars.utils import topics, top_menu, languages_dict
+from seminars.knowls import static_knowl
 from .seminar import seminars_header
 from .talk import talks_header
 
@@ -129,6 +130,7 @@ def ctx_proc_userdata():
     data["talks_header"] = talks_header
     data["seminars_header"] = seminars_header
     data["languages_dict"] = languages_dict()
+    data["static_knowl"] = static_knowl
 
     return data
 
