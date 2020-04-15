@@ -1,7 +1,7 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import topics, toggle, Toggle
+from seminars.utils import topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky
@@ -19,6 +19,7 @@ from lmfdb.utils import (
     to_dict,
     flash_error,
 )
+from lmfdb.utils.search_parsing import collapse_ors
 
 
 def get_now():
@@ -64,8 +65,7 @@ def parse_offline(info, query, prefix):
 def parse_substring(info, query, field, qfields, start="%", end="%"):
     if info.get(field):
         kwds = [elt.strip() for elt in info.get(field).split(",") if elt.strip()]
-        for qfield in qfields:
-            query[qfield] = {"$or": [{"$ilike": start + elt + end} for elt in kwds]}
+        collapse_ors(["$or", [{qfield: {"$ilike": start + elt + end}} for elt in kwds for qfield in qfields]], query)
 
 
 def parse_access(info, query, prefix):
@@ -108,6 +108,10 @@ def parse_video(info, query):
     if v == "yes":
         query["video_link"] = {"$not": None}
 
+def parse_language(info, query, prefix):
+    v = info.get(prefix + "_language")
+    if v:
+        query["language"] = v
 
 def talks_parser(info, query):
     parse_topic(info, query, prefix="talk")
@@ -122,6 +126,7 @@ def talks_parser(info, query):
     parse_substring(info, query, "title", ["title"])
     parse_date(info, query)
     parse_video(info, query)
+    parse_language(info, query, prefix="talk")
     query["display"] = True
 
 
@@ -132,6 +137,7 @@ def seminars_parser(info, query):
     parse_offline(info, query, prefix="seminar")
     parse_substring(info, query, "seminar_keywords", ["description", "comments", "name"])
     parse_access(info, query, prefix="seminar")
+    parse_language(info, query, prefix="seminar")
 
     parse_substring(info, query, "name", ["name"])
     query["display"] = True
@@ -220,13 +226,19 @@ class TalkSearchArray(SearchArray):
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
+        lang_dict = languages_dict()
+        language = SelectBox(
+            name="talk_language",
+            label="Language",
+            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.talks.distinct('language')) if code != "en"]
+        )
         video = Toggle(name="video", label="Has video")
         self.array = [
             [topic, keywords],
             [institution, title],
             [online, speaker],
-            [offline],
-            [access, affiliation],
+            [offline, affiliation],
+            [access, language],
             [video, date],
             # [count],
         ]
@@ -266,7 +278,7 @@ class SemSearchArray(SearchArray):
 
         ## keywords for seminar or talk
         keywords = TextBox(
-            name="seminar_keywords", label="Keywords", colspan=(1, 2, 1), width=textwidth,
+            name="seminar_keywords", label="Keywords", width=textwidth,
         )
         ## type of access
         access = SelectBox(
@@ -278,13 +290,18 @@ class SemSearchArray(SearchArray):
                 ("users", "Any logged-in user can view link"),
             ],
         )
+        lang_dict = languages_dict()
+        language = SelectBox(
+            name="seminar_language",
+            label="Language",
+            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.talks.distinct('language')) if code != "en"]
+        )
         ## number of results to display
         # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
 
         name = TextBox(
             name="name",
             label="Name",
-            colspan=(1, 2, 1),
             width=textwidth,
             example="What Do They Know? Do They Know Things?? Let's Find Out!",
         )
@@ -292,7 +309,8 @@ class SemSearchArray(SearchArray):
         self.array = [
             [topic, keywords],
             [institution, name],
-            [online, access],
+            [language, access],
+            [online],
             # [count],
         ]
 
@@ -320,16 +338,22 @@ def index():
         )
     )
     topic_counts = Counter()
+    language_counts = Counter()
     for talk in talks:
-        topic_counts["ALL"] += 1
         if talk.topics:
             for topic in talk.topics:
                 topic_counts[topic] += 1
+        language_counts[talk.language] += 1
+    lang_dict = languages_dict()
+    languages = [(code, lang_dict[code]) for code in language_counts]
+    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
         title="Math Seminars (beta)",
         topic_counts=topic_counts,
+        languages=languages,
+        language_counts=language_counts,
         talks=talks,
         section="Browse",
         toggle=toggle,
@@ -377,7 +401,7 @@ def search():
 
 @app.route("/institutions/")
 def list_institutions():
-    section = "Manage" if current_user.is_creator() else None
+    section = "Manage" if current_user.is_creator else None
     return render_template(
         "institutions.html",
         title="Institutions",
@@ -403,7 +427,7 @@ def show_seminar(shortname):
             past.append(talk)
     future.sort(key=lambda talk: talk.start_time)
     past.sort(key=lambda talk: talk.start_time, reverse=True)
-    if current_user.email in seminar.editors() or current_user.is_admin():
+    if current_user.email in seminar.editors() or current_user.is_admin:
         section = "Manage"
     else:
         section = None
@@ -437,7 +461,7 @@ def show_talk(semid, talkid):
         menu[2] = (url_for("create.index"), "", "Manage")
         kwds["top_menu"] = menu
     elif (
-        current_user.is_admin()
+        current_user.is_admin
         or current_user.email_confirmed
         and (
             current_user.email in talk.seminar.editors() or current_user.email == talk.speaker_email
@@ -453,9 +477,20 @@ def show_institution(shortname):
     if institution is None:
         return render_template("404.html", title="Institution not found")
     institution = WebInstitution(shortname, data=institution)
-    section = "Manage" if current_user.is_creator() else None
+    section = "Manage" if current_user.is_creator else None
+    query = {"institutions": {"$contains": shortname}}
+    if not current_user.is_admin:
+        query["display"] = True
+    events = list(seminars_search(
+        query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
+    ))
+    seminars = [S for S in events if not S.is_conference]
+    conferences = [S for S in events if S.is_conference]
+    conferences.sort(key=lambda S:(S.start_date, S.name))
     return render_template(
         "institution.html",
+        seminars=seminars,
+        conferences=conferences,
         title="View institution",
         institution=institution,
         section=section,

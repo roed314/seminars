@@ -294,20 +294,20 @@ body.knowl #header {
     font-size: 18px;
 }
 
-#top-menu a, #topic-filter-menu a, #top-menu span {
+#top-menu a, #topic-filter-menu a, #language-filter-menu a, #top-menu span {
     text-decoration: none;
     color: #aaaaaa;
     font-family: sans-serif;
     padding: 10px 25px 10px 25px;
 }
 
-div.topic_toggle {
+div.topic_toggle, div.language_toggle {
     display: inline-block;
     min-width: 15%;
     padding: 5px;
     color: #aaaaaa;
 }
-div.topic_toggle:hover, div.topic_cmd {
+div.topic_toggle:hover, div.language_toggle:hover, div.topic_cmd {
     cursor: pointer;
 }
 div.topic_cmd {
@@ -324,7 +324,7 @@ div.topic_cmd {
   padding-right: 0px;
 }
 
-#topic-filter-menu {
+#topic-filter-menu, #language-filter-menu {
     display: none;
     background: {{color.header_background}};
 }
@@ -332,6 +332,13 @@ div.topic_cmd {
 #javascript-explanation {
     padding: 5px;
     text-align: center;
+}
+
+#make_semconf td.forminfo, #make_inst td.forminfo {
+    padding-bottom: 15px;
+}
+#make_semconf th {
+    text-align: left;
 }
 
 #past_talks {
@@ -352,7 +359,7 @@ div.topic_cmd {
     color: {{color.header_background}};
 }
 
-div.topicselected {
+div.topicselected, div.languageselected {
     color: {{color.header_background}};
     background: #aaaaaa;
 }

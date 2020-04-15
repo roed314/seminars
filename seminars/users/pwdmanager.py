@@ -7,17 +7,16 @@ import bcrypt
 import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
-from seminars.seminar import WebSeminar, seminars_lucky
+from seminars.seminar import WebSeminar, seminars_search
 from seminars.talk import WebTalk
 from seminars.utils import pretty_timezone
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
+from flask import flash
 from lmfdb.backend.utils import DelayCommit
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
-from sage.misc.cachefunc import cached_method
-
 from .main import logger
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
@@ -148,7 +147,6 @@ class PostgresUserTable(PostgresSearchTable):
         for key in list(data.keys()):
             if key not in self.search_cols:
                 data.pop(key)
-                print("Popped", key)
         with DelayCommit(db):
             if "email" in data:
                 newemail = data["email"]
@@ -178,31 +176,40 @@ class SeminarsUser(UserMixin):
         else:
             query = {"id": int(uid)}
 
-        self._uid = uid
         self._authenticated = False
+        self._uid = None
         self._dirty = False  # flag if we have to save
         self._data = dict([(_, None) for _ in SeminarsUser.properties])
 
         user_row = userdb.lucky(query, projection=SeminarsUser.properties)
         if user_row:
+            self._authenticated = True
             self._data.update(user_row)
             self._uid = str(self._data["id"])
-
-        self._organizer = db.seminar_organizers.count({"email": ilike_query(self.email)}, record=False) > 0
+            self._organizer = db.seminar_organizers.count({"email": ilike_query(self.email)}, record=False) > 0
+            self.try_to_endorse()
 
 
 
     def try_to_endorse(self):
-        if self.email_confirmed:
-            # try to endorse if the user is the organizer of some seminar
-            if not self.creator and self._organizer:
-                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, 'seminar_id')
-                owner = seminars_lucky({'shortname': shortname}, 'owner')
-                owner_id = int(userdb.lookup(owner, 'id'))
-                self.endorser = owner_id # must set endorser first
+        if self.email_confirmed and not self.is_creator:
+            preendorsed = db.preendorsed_users.lucky({"email": ilike_query(self.email)})
+            if preendorsed:
+                self.endorser = preendorsed['endorser'] # must set endorser first
                 self.creator = True # it already saves
-            # TODO or if it is in some list
+                db.preendorsed_users.delete({"email": ilike_query(self.email)})
+                return True
+            # try to endorse if the user is the organizer of some seminar
+            if self._organizer:
+                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, 'seminar_id')
+                for owner in seminars_search({'shortname': shortname}, 'owner'):
+                    owner = userdb.lucky(owner, ['creator', 'id'])
+                    if owner['creator']:
+                        self.endorser = owner['id'] # must set endorser first
+                        self.creator = True # it already saves
+                        return True
 
+        return False
 
     @property
     def id(self):
@@ -210,7 +217,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def name(self):
-        return self._data.get("name")
+        return self._data.get("name", "")
 
     @name.setter
     def name(self, name):
@@ -219,18 +226,18 @@ class SeminarsUser(UserMixin):
 
     @property
     def email(self):
-        return self._data.get("email")
+        return self._data.get("email", "")
 
     @email.setter
     def email(self, email):
-        if email != self._data.get("email"):
+        if email != self._data.get("email", ""):
             self._data["new_email"] = email
             self._data["email_confirmed"] = False
             self._dirty = True
 
     @property
     def homepage(self):
-        return self._data.get("homepage")
+        return self._data.get("homepage", "")
 
     @homepage.setter
     def homepage(self, url):
@@ -239,7 +246,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def email_confirmed(self):
-        return self._data.get("email_confirmed")
+        return self._data.get("email_confirmed", False)
 
     @email_confirmed.setter
     def email_confirmed(self, email_confirmed):
@@ -251,7 +258,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def affiliation(self):
-        return self._data.get("affiliation")
+        return self._data.get("affiliation", "")
 
     @affiliation.setter
     def affiliation(self, affiliation):
@@ -269,7 +276,7 @@ class SeminarsUser(UserMixin):
     def raw_timezone(self):
         # For the user info page, we want to allow the user to set their time zone to blank,
         # which is interpreted as the browser's timezone for other uses.
-        return self._data.get("timezone")
+        return self._data.get("timezone", "")
 
     @property
     def tz(self):
@@ -302,7 +309,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def location(self):
-        return self._data.get("location")
+        return self._data.get("location", "")
 
     @location.setter
     def location(self, location):
@@ -329,7 +336,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def seminar_subscriptions(self):
-        return self._data["seminar_subscriptions"]
+        return self._data.get("seminar_subscriptions", [])
 
     @property
     def seminars(self):
@@ -364,7 +371,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def talk_subscriptions(self):
-        return self._data["talk_subscriptions"]
+        return self._data.get("talk_subscriptions", {})
 
     @property
     def talks(self):
@@ -374,7 +381,7 @@ class SeminarsUser(UserMixin):
                 try:
                     res.append(WebTalk(shortname, ctr))
                 except ValueError:
-                    self._data["talk_subscriptions"][shortname].delete(ctr)
+                    self._data["talk_subscriptions"][shortname].remove(ctr)
                     self._dirty = True
 
         if self._dirty:
@@ -409,18 +416,33 @@ class SeminarsUser(UserMixin):
         else:
             return 200, "Already removed from favorites"
 
+    @property
+    def is_authenticated(self):
+        """required by flask-login user class"""
+        return self._authenticated
 
+    @is_authenticated.setter
+    def is_authenticated(self, is_authenticated):
+        """required by flask-login user class"""
+        self._authenticated = is_authenticated
+
+    @property
     def is_anonymous(self):
         """required by flask-login user class"""
-        return not self.is_authenticated
+        return not self._authenticated
 
+    @property
+    def is_active(self):
+        """required by flask-login user class"""
+        # It would be nice to have active tied to email_confirmed,
+        # But then users can't see their info page to be able to confirm their email
+        return True
+
+    @property
     def is_admin(self):
         return self._data.get("admin", False)
 
-    def make_admin(self):
-        self._data["admin"] = True
-        self._dirty = True
-
+    @property
     def is_creator(self):
         return self._data.get("creator", False)
 
@@ -431,20 +453,22 @@ class SeminarsUser(UserMixin):
     @creator.setter
     def creator(self, creator):
         self._data["creator"] = creator
+        self._dirty = True
         if creator:
             assert self.endorser is not None
             userdb.make_creator(self.email, int(self.endorser)) # it already saves
+            flash("Someone endorsed you! You can now create seminars.", "success")
 
-
+    @property
     def is_organizer(self):
         return (
-            self.is_admin()
-            or self.is_creator()
+            self.is_admin
+            or self.is_creator
             and self._organizer
         )
 
 
-    def authenticate(self, pwd):
+    def check_password(self, pwd):
         """
         checks if the given password for the user is valid.
         @return: True: OK, False: wrong password or username
@@ -453,12 +477,9 @@ class SeminarsUser(UserMixin):
             logger.warning("no password data in db for '%s'!" % self.email)
             return False
         try:
-            self._authenticated = userdb.authenticate(self.email, pwd)
+             return userdb.authenticate(self.email, pwd)
         except ValueError:
             return False
-        if self._authenticated:
-            self.try_to_endorse()
-        return self._authenticated
 
     def save(self):
         if not self._dirty:
@@ -471,31 +492,42 @@ class SeminarsUser(UserMixin):
         self._dirty = False
         return True
 
-
 class SeminarsAnonymousUser(AnonymousUserMixin):
     """
     The sole purpose of this Anonymous User is the 'is_admin' method
     and probably others.
     """
 
-    def is_admin(self):
+    @property
+    def is_authenticated(self):
         return False
 
-    def is_creator(self):
+    @property
+    def is_active(self):
         return False
 
+    @property
+    def is_anonymous(self):
+        return True
+
+    @property
     def is_organizer(self):
         return False
 
-    def name(self):
-        return "Anonymous"
+    @property
+    def is_admin(self):
+        return False
 
-    def pending_requests(self):
-        return 0
+    def get_id(self):
+        return
 
     @property
     def email(self):
         return None
+
+    @property
+    def name(self):
+        return ""
 
     @property
     def timezone(self):
@@ -511,12 +543,6 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     @property
     def email_confirmed(self):
         return False
-
-    # For versions of flask_login earlier than 0.3.0,
-    # AnonymousUserMixin.is_anonymous() is callable. For later versions, it's a
-    # property. To match the behavior of SeminarsUser, we make it callable always.
-    def is_anonymous(self):
-        return True
 
     def show_timezone(self, dest="topmenu"):
         # dest can be 'browse', in which case "now" is inserted, or 'selecter', in which case fixed width is used.

@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% if user.email in talk.seminar.editors() or user.is_admin() %}
+{% if user.email in talk.seminar.editors() or user.is_admin %}
 <p>{{ talk.send_speaker_link() | safe }}</p>
 {% endif %}
 
@@ -24,7 +24,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   </p>
 
   <p>
-    {{ talk.show_time_and_duration() | safe }}
+    {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}
   </p>
 
   <p>

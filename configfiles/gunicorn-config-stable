@@ -1,0 +1,18 @@
+# WARNING: after editing this file don't forget to copy it to
+# /home/mathseminars/seminars-git-stable/gunicorn-config-stable.py
+# as gunicorn doesn't handle well the config file being part of the repo
+bind = "0.0.0.0:9092"
+workers = 15
+SESSION_PROTECTION = None
+#daemon = True
+pidfile = '/home/mathseminars/gunicorn-stable.pid'
+#
+errorlog = '/home/mathseminars/logs/stable/errorlog'
+accesslog = '/home/mathseminars/logs/stable/accesslog'
+loglevel = 'info' # change to 'debug' for more output
+#
+default_proc_name = 'mathseminars-stable'
+timeout = 30
+max_requests = 1000
+# The maximum size of HTTP request line in bytes.
+limit_request_line = 8190

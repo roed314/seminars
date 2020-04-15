@@ -28,7 +28,10 @@ def clean_institutions(inp):
         return []
     if isinstance(inp, str):
         inp = inp.strip()
-        if inp[0] == "[" and inp[-1] == "]":
+        if not inp:
+            # User might not have interacted with the institutions selector at all
+            return []
+        elif inp[0] == "[" and inp[-1] == "]":
             inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
             if inp == [""]:  # was an empty array
                 return []
@@ -109,13 +112,13 @@ def can_edit_institution(shortname, new):
         flash_error(
             "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
         )
-        return redirect(url_for(".index"), 301), None
+        return redirect(url_for("list_institutions"), 301), None
     institution = db.institutions.lookup(shortname)
     # Check if institution exists
     if new != (institution is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
         return redirect(url_for(".index"), 301), None
-    if not new and not current_user.is_admin():
+    if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         if institution["admin"] != current_user.email:
             owner_name = db.users.lucky({"email": institution.admin}, "full_name")

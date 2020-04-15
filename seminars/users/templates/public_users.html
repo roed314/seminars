@@ -14,7 +14,7 @@
       {% endif %}
     </td>
     <td>
-      {% if current_user.is_creator() or not current_user.email %}
+      {% if current_user.is_creator or not current_user.email %}
       <a href="mailto:{{email}}">Email</a>
       {% else %}
       <a href="mailto:{{email}}">Email</a>
