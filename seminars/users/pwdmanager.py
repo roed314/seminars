@@ -147,7 +147,7 @@ class PostgresUserTable(PostgresSearchTable):
                 return False
         for key in list(data):
             if key not in self.search_cols:
-                critical("Need to update pwdmanage code to account for schema change key=%s" % key)
+                critical("Need to update pwdmanager code to account for schema change key=%s" % key)
                 data.pop(key)
         with DelayCommit(db):
             if "email" in data:
