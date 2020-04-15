@@ -107,6 +107,8 @@ class PostgresUserTable(PostgresSearchTable):
 
 
     def authenticate(self, email, password):
+        if not email:
+            raise ValueError("User not present in database!")
         bcpass = self.lookup(email, projection="password")
         if bcpass is None:
             raise ValueError("User not present in database!")
