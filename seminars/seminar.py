@@ -86,7 +86,7 @@ class WebSeminar(object):
             # start_time and end_time are stored in postgres as datetime.datetimes's (offset from 1/1/2020) but we treat them as datetime.time's
             # anyone who wants to use them as datetime's should use start_timestamp and end_timestamp
             if self.start_time:
-                self.start_time = self_start_time.time()
+                self.start_time = self.start_time.time()
             if self.end_time:
                 self.end_time = self.end_time.time()
         if organizer_data is None:
