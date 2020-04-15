@@ -16,7 +16,7 @@ from flask import (
 )
 from flask_mail import Mail, Message
 
-from lmfdb.logger import logger_file_handler, critical
+from lmfdb.logger import logger_file_handler
 from seminars.utils import topics, top_menu, languages_dict
 from .seminar import seminars_header
 from .talk import talks_header

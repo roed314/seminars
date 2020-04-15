@@ -4,6 +4,7 @@ from seminars import db
 from seminars.utils import allowed_shortname
 from lmfdb.utils import flash_error
 from collections.abc import Iterable
+from lmfdb.logger import critical
 
 institution_types = [
     ("university", "University"),
@@ -64,11 +65,11 @@ class WebInstitution(object):
                     continue
                 elif typ == "text":
                     setattr(self, key, "")
-                elif typ == "cube":
-                    # TODO: Need to deal with location
-                    setattr(self, key, None)
+                elif typ == "text[]":
+                    setattr(self, key, [])
                 else:
-                    raise ValueError("Need to update institution code to account for schema change")
+                    critical("Need to update institution code to account for schema change key=%s" % key)
+                    setattr(self, key, None)
         else:
             self.__dict__.update(data)
 

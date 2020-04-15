@@ -201,6 +201,9 @@ def save_seminar():
     data["timezone"] = tz = raw_data.get("timezone")
     tz = pytz.timezone(tz)
 
+    # This seems like a risky hack.  We want to treat start_time/end_time as times of day which will be converted
+    # to timestamps offset from 1/1/2020 by process_user_input whtn the type is "time", but unilaterally converting
+    # all timestamps to times seems risky.  What if we want the user to enter a datetime in the future?
     def replace(a):
         if a == "timestamp with time zone":
             return "time"
@@ -587,14 +590,14 @@ def make_date_data(seminar, data):
         by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
     if seminar.start_time is None:
         if future_talk is not None and future_talk.start_time:
-            seminar.start_time = future_talk.start_time.time()
+            seminar.start_time = future_talk.start_time
         elif last_talk is not None and last_talk.start_time:
-            seminar.start_time = last_talk.start_time.time()
+            seminar.start_time = last_talk.start_time
     if seminar.end_time is None:
         if future_talk is not None and future_talk.start_time:
-            seminar.end_time = future_talk.end_time.time()
+            seminar.end_time = future_talk.end_time
         elif last_talk is not None and last_talk.start_time:
-            seminar.end_time = last_talk.end_time.time()
+            seminar.end_time = last_talk.end_time
     return seminar, all_dates, by_date
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
