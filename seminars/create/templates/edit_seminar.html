@@ -134,6 +134,10 @@
           </td>
         </tr>
         <tr>
+          <td>Livestream link</td>
+          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+        </tr>
+        <tr>
           <td>Access</td>
           <td>
             <select name="access" style="width:510px;">
@@ -142,10 +146,6 @@
               <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Endorsed users can view link</option>
             </select>
           </td>
-        </tr>
-        <tr>
-          <td>Livestream link</td>
-          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="https://example.org"/></td>
         </tr>
         {% if not seminar.new %}
           <tr>
