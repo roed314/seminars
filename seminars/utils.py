@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time, date
 from dateutil.parser import parse as parse_time
-import pytz, re
+import pytz, re, iso639
 from six import string_types
 from flask import url_for, flash
 from flask_login import current_user
@@ -14,6 +14,7 @@ from markupsafe import Markup, escape
 from collections.abc import Iterable
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
 def naive_utcoffset(tz):
@@ -24,6 +25,10 @@ def naive_utcoffset(tz):
             return tz.utcoffset(datetime.now() + timedelta(hours=h))
         except (pytz.exceptions.NonExistentTimeError, pytz.exceptions.AmbiguousTimeError):
             pass
+
+
+def timestamp():
+    return "[%s UTC]" % datetime.now(tz=pytz.UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def pretty_timezone(tz, dest="selecter"):
@@ -61,6 +66,22 @@ def is_nighttime(t):
     # These are times that might be mixed up by using a 24 hour clock
     return 1 <= t.hour < 8
 
+def simplify_language_name(name):
+    name = name.split(';')[0]
+    if '(' in name:
+        name = name[:name.find('(')-1]
+    return name
+
+@cached_function
+def languages_dict():
+    return {lang['iso639_1']: simplify_language_name(lang['name']) for lang in iso639.data if lang['iso639_1']}
+
+def clean_language(inp):
+    if inp not in languages_dict():
+        return 'en'
+    else:
+        return inp
+
 
 def flash_warning(warnmsg, *args):
     flash(
@@ -72,9 +93,11 @@ def flash_warning(warnmsg, *args):
     )
 
 
-def check_time(start_time, end_time):
+def check_time(start_time, end_time, check_past=False):
     """
     Flashes errors/warnings and returns True when an error should be raised.
+
+    Input start and end time can be either naive or timezone aware, but must be timezone aware if check_past is True.
     """
     if start_time is None or end_time is None:
         # Users are allowed to not fill in a time
@@ -87,8 +110,22 @@ def check_time(start_time, end_time):
         return True
     if is_nighttime(start_time) or is_nighttime(end_time):
         flash_warning(
-            "Your seminar is scheduled between midnight and 8am; if that was unintentional you should edit again using 24-hour notation or including pm"
+            "Your talk is scheduled between midnight and 8am. Please edit again using 24-hour notation or including pm if that was unintentional"
         )
+    # Python doesn't support subtracting times
+    if (isinstance(start_time, time) and isinstance(end_time, time) and
+        datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time) > timedelta(hours=8) or
+        isinstance(start_time, datetime) and isinstance(end_time, datetime) and
+        end_time - start_time > timedelta(hours=8)):
+        flash_warning(
+            "Your talk lasts for more than 8 hours.  Please edit again if that was unintented"
+        )
+    if check_past:
+        now = datetime.now(tz=pytz.UTC)
+        if start_time < now:
+            flash_warning(
+                "The start time of your talk is in the past.  Please edit again if that was unintended"
+            )
 
 
 def top_menu():
@@ -96,7 +133,7 @@ def top_menu():
         account = "Account"
     else:
         account = "Login"
-    if current_user.is_organizer():
+    if current_user.is_organizer:
         manage = "Manage"
     else:
         manage = "Create"

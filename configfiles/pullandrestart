@@ -1,1 +1,0 @@
-pushd /home/mathseminars/seminars/ && git pull && git submodule update && bash /home/mathseminars/seminars/configfiles/restart && popd

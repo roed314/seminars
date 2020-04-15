@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+SAGE_ROOT=/home/sage/sage-9.0
+SAGE=$SAGE_ROOT/sage
+
+# These two lines copied from ~/common:
+export TEXINPUTS=.:$SAGE_ROOT/local/share/texmf:
+# export GIT_DIR='/home/lmfdb/lmfdb.git/'
+# GIT_DIR points to the bare git repository containing both beta and prod branches
+
+branch=${0##*-}
+export GIT_WORK_TREE="/home/mathseminars/seminars-git-${branch}"
+cd $GIT_WORK_TREE
+echo "Running: gunicorn -c gunicorn-config-${branch}.py seminars.website:app"
+echo "gunicorn -c gunicorn-config-${branch}.py seminars.website:app" | $SAGE -sh

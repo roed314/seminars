@@ -42,7 +42,7 @@ class WebSeminar(object):
         self.new = data is None
         if self.new:
             self.shortname = shortname
-            self.display = current_user.is_creator()
+            self.display = current_user.is_creator
             self.online = True  # default
             self.access = "open"  # default
             self.archived = False  # don't start out archived
@@ -218,24 +218,35 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_name(self, external=False):
+    def show_name(self, external=False, show_attributes=False):
         # Link to seminar
         kwargs = {"shortname": self.shortname}
         if external:
             kwargs["_external"] = True
             kwargs["_scheme"] = "https"
-        return '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
+        link = '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
+        if show_attributes:
+            if not self.display:
+                link += " (hidden)"
+            elif self.archived:
+                link += " (inactive)"
+            elif self.online:
+                link += " (online)"
+        return link
 
     def show_description(self):
-        return self.description
+        if self.description:
+            return self.description
+        else:
+            return ""
 
     def is_subscribed(self):
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             return False
         return self.shortname in current_user.seminar_subscriptions
 
     def show_subscribe(self):
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             return ""
 
         return toggle(
@@ -263,7 +274,7 @@ class WebSeminar(object):
                     links.append('<a href="%s">%s</a>' % (rec["homepage"], rec["name"]))
                 else:
                     links.append(rec["name"])
-            return "/".join(links)
+            return " / ".join(links)
         else:
             return ""
 
@@ -279,12 +290,13 @@ class WebSeminar(object):
         include_datetime=True,
         include_description=True,
         include_subscribe=True,
+        show_attributes=False,
     ):
         cols = []
         if include_datetime:
             cols.append(('class="day"', self.show_day()))
             cols.append(('class="time"', self.show_start_time()))
-        cols.append(('class="name"', self.show_name()))
+        cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
         if include_description:
@@ -301,7 +313,7 @@ class WebSeminar(object):
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_admin() or (
+        return current_user.is_admin or (
             current_user.email_confirmed and current_user.email == self.owner
         )
 
@@ -310,7 +322,7 @@ class WebSeminar(object):
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_admin() or (
+        return current_user.is_admin or (
             current_user.email_confirmed and current_user.email in self.editors()
         )
 
@@ -354,6 +366,11 @@ class WebSeminar(object):
         if not time:
             return ""
         return time.strftime("%H:%M")
+
+    def show_input_date(self, date):
+        if not date:
+            return ""
+        return date.strftime("%b %d, %Y")
 
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
@@ -405,7 +422,7 @@ def seminars_header(
     if include_description:
         cols.append(('style="min-width:280px;"', "Description"))
     if include_subscribe:
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             cols.append(("", ""))
         else:
             cols.append(("", "Saved"))
@@ -525,14 +542,14 @@ def can_edit_seminar(shortname, new):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
         return redirect(url_for(".index"), 301), None
     if (
-        current_user.is_anonymous()
+        current_user.is_anonymous
     ):  # can happen via talks, which don't check for logged in in order to support tokens
         flash_error(
             "You do not have permission to edit seminar %s.  Please create an account and contact the seminar organizers."
             % shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 301), None
-    if not new and not current_user.is_admin():
+    if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         organizer_data = db.seminar_organizers.lucky(
             {"seminar_id": shortname, "email": current_user.email}

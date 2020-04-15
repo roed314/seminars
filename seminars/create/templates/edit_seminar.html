@@ -23,6 +23,8 @@
         <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
         <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
         <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
+        <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
+        <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
       <table>
         <tr>
           <td>
@@ -38,25 +40,49 @@
           <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
         </tr>
         <tr>
+          <td>Short description</td>
+          <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:500px;" placeholder="research seminar" maxlength="60"/></td>
+        </tr>
+        <tr>
+          <td style="white-space:nowrap">External homepage</td>
+          <td><input style="width:500px;" name="homepage" value="{{ seminar.homepage | blanknone }}" placeholder="https://example.org"/></td>
+        </tr>
+        <tr>
           <td>Topics</td>
           <td>
             <span id="topic_selector"></span>
           </td>
         </tr>
         <tr>
-          <td>Short description</td>
-          <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:500px;" placeholder="research seminar" maxlength="60"/></td>
-        </tr>
-        <tr>
           <td>Institutions</td>
           <td>
             <span id="institution_selector"></span>
           </td>
-          <td><a href="{{ url_for('list_institutions') }}" target="_blank">Add new institution</a> (reload this page afterward)</td>
         </tr>
         <tr>
-          <td>Meeting day</td>
+          <td>Default language</td>
           <td>
+            <span id="language_selector"></span>
+          </td>
+        </tr>
+
+        {% if seminar.is_conference %}
+        <tr>
+          <td style="padding-top: 20px">Start date</td>
+          <td style="padding-top: 20px">
+            <input name="start_date" style="width:500px;" value="{{ seminar.show_input_date(seminar.start_date) }}" placeholder="2020-01-27" />
+          </td>
+        </tr>
+        <tr>
+          <td>End date</td>
+          <td>
+            <input name="end_date" style="width:500px;" value="{{ seminar.show_input_date(seminar.end_date) }}" placeholder="2020-01-31" />
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td style="padding-top: 20px">Meeting day</td>
+          <td style="padding-top: 20px">
             <select name="weekday" style="width:510px;">
               <option value=""></option>
               {% for wkday in weekdays %}
@@ -66,9 +92,10 @@
           </td>
         </tr>
         <tr>
-          <td>Frequency (in days)</td>
+          <td style="white-space:nowrap">Frequency (in days)</td>
           <td><input name="frequency" style="width:500px;" value="{{ seminar.frequency | blanknone }}" /></td>
         </tr>
+        {% endif %}
         <tr>
           <td>Talks per day</td>
           <td><input name="per_day" style="width:500px;" value="{{ seminar.per_day | blanknone }}" /></td>
@@ -83,6 +110,7 @@
             </select>
           </td>
         </tr>
+        {% if not seminar.is_conference %}
         <tr>
           <td>Start time</td>
           <td><input name="start_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.start_time) }}" placeholder="15:00"/></td>
@@ -91,22 +119,10 @@
           <td>End time</td>
           <td><input name="end_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.end_time) }}" placeholder="16:00"/></td>
         </tr>
+        {% endif %}
         <tr>
-          <td>Room</td>
-          <td><input name="room" value="{{ seminar.room | blanknone }}" style="width:500px;" /></td>
-        </tr>
-        <tr>
-          <td>Conference</td>
-          <td>
-            <select name="is_conference" style="width:510px;">
-              <option value="yes"{% if seminar.is_conference %} selected{% endif %}>yes</option>
-              <option value="no"{% if not seminar.is_conference %} selected{% endif %}>no</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>External homepage</td>
-          <td><input style="width:500px;" name="homepage" value="{{ seminar.homepage | blanknone }}" placeholder="https://example.org"/></td>
+          <td style="padding-top: 20px">Room</td>
+          <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:500px;" /></td>
         </tr>
         <tr>
           <td>Online</td>
@@ -199,7 +215,7 @@
       {% else %}
         <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">Cancel changes</a>
         {% if seminar.user_can_delete() %}
-        <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="unsaved = false;return confirm('Are you sure you want to delete this item?');">
+        <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="unsaved = false;return confirm('Are you sure you want to PERMANENTLY delete this {% if seminar.is_conference %}conference{% else %}seminar{% endif %} and all of its talks?');">
           <button type="button">
             Delete seminar
           </button>
@@ -230,51 +246,27 @@ const instOptions = [
   {% endfor %}
 ];
 
-
+const langOptions = [
+  {% for code, name in languages_dict.items() %}
+  {
+    label: "{{ name }}",
+    value: "{{ code }}",
+  },
+  {% endfor %}
+];
 
 $(document).ready(function() {
-
-function callback_topics(value) {
-  $('input[name="topics"]')[0].value = '[' + value + ']';
-};
-var classNames = {
-    select: "select-pure__select",
-    dropdownShown: "select-pure__select--opened",
-    multiselect: "select-pure__select--multiple",
-    label: "select-pure__label",
-    placeholder: "select-pure__placeholder",
-    dropdown: "select-pure__options",
-    option: "select-pure__option",
-    autocompleteInput: "select-pure__autocomplete",
-    selectedLabel: "select-pure__selected-label",
-    selectedOption: "select-pure__option--selected",
-    placeholderHidden: "select-pure__placeholder--hidden",
-    optionHidden: "select-pure__option--hidden",
-  };
-var topicSelector = new SelectPure("#topic_selector", {
-  onChange: callback_topics,
-  options: topicOptions,
-  multiple: true,
-  autocomplete: true,
-  icon: "fa fa-times",
-  inlineIcon: false,
-  value: {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
-  classNames: classNames,
-});
-
-function callback_institutions(value) {
-  $('input[name="institutions"]')[0].value = '[' + value + ']';
-};
-var instSelector = new SelectPure("#institution_selector", {
-  onChange: callback_institutions,
-  options: instOptions,
-  multiple: true,
-  autocomplete: true,
-  icon: "fa fa-times",
-  inlineIcon: false,
-  value: {% if seminar.new or not seminar.institutions %}[]{% else %}{{ seminar.institutions | safe }}{% endif %},
-  classNames: classNames,
-});
+  var topicSelector = makeTopicSelector(
+    topicOptions,
+    {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
+  );
+  var instSelector = makeInstitutionSelector(
+    instOptions,
+    {{ seminar.institutions | safe }},
+  );
+  var langSelector = makeLanguageSelector(
+    langOptions,
+    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %});
 });
 
 

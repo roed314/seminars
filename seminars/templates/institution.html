@@ -18,5 +18,38 @@
     <td>{{ institution.admin_link() | safe }}</td>
   </tr>
 </table>
+{% if seminars %}
+<h2>Seminars</h2>
+<div id="institutional_seminars">
+  <table>
+    <thead>
+      <tr>
+        {{ seminars_header(include_institutions=False) | safe }}
+      </tr>
+    </thead>
+    {% for seminar in seminars %}
+    <tr>
+      {{ seminar.oneline(include_institutions=False, show_attributes=user.is_admin) | safe }}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+{% if conferences %}
+<h2>Conferences</h2>
+<div id="institutional_conferences">
+  <table>
+    <thead>
+      <tr>
+        {{ seminars_header(include_institutions=False) | safe }}
+      </tr>
+    </thead>
+    {% for conference in conferences %}
+    <tr>
+      {{ conference.oneline(include_institutions=False, show_attributes=user.is_admin) | safe }}
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
 
 {% endblock %}

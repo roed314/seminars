@@ -28,7 +28,7 @@
               {{ seminars_header() | safe }}
             </tr>
           </thead>
-          {% for seminar in info.seminar_results: %}
+          {% for seminar in info.seminar_results %}
           <tr>
             {{ seminar.oneline() | safe }}
           </tr>
@@ -48,7 +48,7 @@
               {{  talks_header(include_seminar=False) | safe }}
             </tr>
           </thead>
-          {% for talk in info.talk_results: %}
+          {% for talk in info.talk_results %}
           <tr>
             {{ talk.oneline(include_seminar=False) | safe }}
           </tr>
