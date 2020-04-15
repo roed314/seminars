@@ -85,9 +85,9 @@ class WebSeminar(object):
             self.__dict__.update(data)
             # start_time and end_time are stored in postgres as datetime.datetimes's (offset from 1/1/2020) but we treat them as datetime.time's
             # anyone who wants to use them as datetime's should use start_timestamp and end_timestamp
-            if type(self.start_time) == datetime.datetime:
+            if self.start_time:
                 self.start_time = self_start_time.time()
-            if type(self.end_time) == datetime.datetime:
+            if self.end_time:
                 self.end_time = self.end_time.time()
         if organizer_data is None:
             organizer_data = list(
