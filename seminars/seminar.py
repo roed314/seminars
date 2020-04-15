@@ -287,10 +287,10 @@ class WebSeminar(object):
             return ""
 
     def show_organizers(self):
-        return self._show_editors("Organizers", negate=True)
+        return self._show_editors("Organizers")
 
     def show_curators(self):
-        return self._show_editors("Curators")
+        return self._show_editors("Curators", curators=True)
 
     def add_talk_link(self, ptag=True):
         if current_user.email in self.editors():
