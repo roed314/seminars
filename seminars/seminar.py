@@ -19,7 +19,7 @@ from psycopg2.sql import SQL
 import pytz
 from sage.misc.lazy_attribute import lazy_attribute
 from collections import defaultdict
-from datetime import datetime, date
+from datetime import datetime
 from lmfdb.logger import critical
 
 combine = datetime.combine
@@ -83,6 +83,7 @@ class WebSeminar(object):
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
             self.__dict__.update(data)
+            # start_time and end_time are datetime.datetimes's (offset from 1/1/2020)
         if organizer_data is None:
             organizer_data = list(
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
@@ -117,65 +118,9 @@ class WebSeminar(object):
     # so that we have a well defined conversion between time zone and UTC offset (which
     # is how postgres/psycopg2 stores its time zones).
 
-    # These functions allow a user to specify either start_time or start_timestamp,
-    # end_time or end_timestamp.  The _time versions are time-zone naive, since they're
-    # not tied to a day.
-
-    # We also support not specifying times (though in this case you can't add either time)
-
     @property
     def tz(self):
         return pytz.timezone(self.timezone)
-
-    @lazy_attribute
-    def start_time(self):
-        if self.start_timestamp is None:
-            return None
-        return self.start_timestamp.time()
-
-    @lazy_attribute
-    def end_time(self):
-        if self.end_timestamp is None:
-            return None
-        return self.end_timestamp.time()
-
-    @lazy_attribute
-    def start_timestamp(self):
-        if self.start_time is None:
-            return None
-        return self.tz.localize(combine(date(2020, 1, 1), self.start_time))
-
-    @lazy_attribute
-    def end_timestamp(self):
-        if self.end_time is None:
-            return None
-        return self.tz.localize(combine(date(2020, 1, 1), self.end_time))
-
-    # These functions return time zone aware time objects in either
-    # the user's time zone or the seminar's time zone.
-    # Be careful: the date input is the date of the SEMINAR
-
-    def start_time_seminar(self, date):
-        if self.start_time is None:
-            return None
-        return self.tz.localize(combine(date, self.start_time))
-
-    def end_time_seminar(self, date):
-        if self.end_time is None:
-            return None
-        return self.tz.localize(combine(date, self.end_time))
-
-    def start_time_user(self, date):
-        if self.start_time is None:
-            return None
-        return self.start_time_seminar(date).astimezone(current_user.tz)
-
-    def end_time_user(self, date):
-        if self.end_time is None:
-            return None
-        return self.end_time_seminar(date).astimezone(current_user.tz)
-
-    ## This function
 
     def show_day(self, truncate=True):
         if self.weekday is None:
@@ -190,6 +135,7 @@ class WebSeminar(object):
             return d
 
     def _show_time(self, t, adapt):
+        """ t is a datetime, adapt is a boolean """
         if t:
             if adapt and self.weekday is not None:
                 t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
