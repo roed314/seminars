@@ -587,14 +587,14 @@ def make_date_data(seminar, data):
         by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
     if seminar.start_time is None:
         if future_talk is not None and future_talk.start_time:
-            seminar.start_time = future_talk.start_time.time()
+            seminar.start_time = future_talk.start_time
         elif last_talk is not None and last_talk.start_time:
-            seminar.start_time = last_talk.start_time.time()
+            seminar.start_time = last_talk.start_time
     if seminar.end_time is None:
         if future_talk is not None and future_talk.start_time:
-            seminar.end_time = future_talk.end_time.time()
+            seminar.end_time = future_talk.end_time
         elif last_talk is not None and last_talk.start_time:
-            seminar.end_time = last_talk.end_time.time()
+            seminar.end_time = last_talk.end_time
     return seminar, all_dates, by_date
 
 @create.route("edit/schedule/", methods=["GET", "POST"])

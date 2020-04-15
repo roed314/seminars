@@ -122,18 +122,6 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
-    @lazy_attribute
-    def start_timeofday(self):
-        if self.start_time is None:
-            return None
-        return self.start_time.time()
-
-    @lazy_attribute
-    def end_timeofday(self):
-        if self.end_time is None:
-            return None
-        return self.end_time.time()
-
     def show_day(self, truncate=True):
         if self.weekday is None:
             return ""
