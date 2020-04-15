@@ -205,7 +205,7 @@ class SeminarsUser(UserMixin):
             if self._organizer:
                 shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, 'seminar_id')
                 for owner in seminars_search({'shortname': shortname}, 'owner'):
-                    owner = userdb.lucky(owner, ['creator', 'id'])
+                    owner = userdb.lookup(owner, ['creator', 'id'])
                     if owner['creator']:
                         self.endorser = owner['id'] # must set endorser first
                         self.creator = True # it already saves
