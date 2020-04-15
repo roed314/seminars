@@ -87,8 +87,11 @@ class WebTalk(object):
         return not (self == other)
 
     def save(self):
-        assert self.__dict__.get("seminar_id") and self.__dict__.get("seminar_ctr")
-        db.talks.insert_many([{col: getattr(self, col, None) for col in db.talks.search_cols}])
+        data = {col: getattr(self, col, None) for col in db.talks.search_cols}
+        assert data.get("seminar_id") and data.get("seminar_ctr")
+        data["edited_by"] = int(current_user.id)
+        data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
+        db.talks.insert_many([data])
 
     @classmethod
     def _editable_time(cls, t):
