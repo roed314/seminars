@@ -82,7 +82,7 @@
   </div>
   {% endif %}
 
-  {% if user.is_creator() %}
+  {% if user.is_creator %}
   <h2>Adding content</h2>
   <p>
     To add content or manage the seminars that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.

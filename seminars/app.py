@@ -27,7 +27,10 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 #         Main app         #
 ############################
 
-app = Flask(__name__)
+app = Flask(__name__,
+            static_url_path='',
+            static_folder='static',
+            )
 
 mail_settings = {
     "MAIL_SERVER": "heaviside.mit.edu",
@@ -317,47 +320,6 @@ def css():
     else:
         response.headers["Cache-Control"] = "public, max-age=600"
     return response
-
-
-##############################
-#       Static files         #
-##############################
-
-
-def root_static_file(name):
-    def static_fn():
-        fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", name)
-        if os.path.exists(fn):
-            return open(fn, "rb").read()
-        critical("root_static_file: file %s not found!" % fn)
-        return abort(404, "static file %s not found." % fn)
-
-    app.add_url_rule("/%s" % name, "static_%s" % name, static_fn)
-
-
-for fn in [
-    "favicon/apple-touch-icon-57x57.png",
-    "favicon/apple-touch-icon-114x114.png",
-    "favicon/apple-touch-icon-72x72.png",
-    "favicon/apple-touch-icon-144x144.png",
-    "favicon/apple-touch-icon-60x60.png",
-    "favicon/apple-touch-icon-120x120.png",
-    "favicon/apple-touch-icon-76x76.png",
-    "favicon/apple-touch-icon-152x152.png",
-    "favicon/favicon-196x196.png",
-    "favicon/favicon-96x96.png",
-    "favicon/favicon-32x32.png",
-    "favicon/favicon-16x16.png",
-    "favicon/favicon-128.png",
-    "favicon/favicon.ico",
-    "favicon/mstile-144x144.png",
-    "favicon/mstile-150x150.png",
-    "favicon/mstile-310x150.png",
-    "favicon/mstile-310x310.png",
-    "favicon/mstile-70x70.png",
-    "favicon.ico",
-]:
-    root_static_file(fn)
 
 
 ##############################

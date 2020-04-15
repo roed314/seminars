@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="text_content">
-{% if not user.is_creator() %}
+{% if not user.is_creator %}
 <p>
   You are currently not endorsed.
   If you want to add seminars to the site, you need to be endorsed by someone on the site.
@@ -14,7 +14,7 @@
 {% endif %}
 
 {% if user.affiliation and not institution_known(user.affiliation) %}
-<p> Your affiliation doesn't appear to be on our list of institutions.  You may want to <a href="{{ url_for('list_institutions') }}">create your institution</a> before creating a seminar.
+<p> Your affiliation doesn't appear to be on our list of institutions.  You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a seminar.
 {% endif %}
 
 <h2>Create a seminar or conference</h2>
@@ -34,14 +34,14 @@
     </tr>
     <tr>
       <th>Identifier</th>
-      <td><input name="shortname" /></td>
+      <td><input name="shortname" placeholder="ShortLabel" /></td>
     </tr>
     <tr>
-      <td class="forminfo" colspan="2">The identifier is a short label, used in the URL, containing only letters, numbers, hyphens and underscores - no spaces.</td>
+      <td class="forminfo" colspan="2">The identifier is used in the URL, so use only letters, numbers, hyphens and underscores - no spaces.</td>
     </tr>
     <tr>
       <th>Full name</th>
-      <td><input size="40" name="name" style="width:500px;" /></td>
+      <td><input size="40" name="name" style="width:500px;" placeholder="Pangaea analysis seminar"/></td>
     </tr>
     <tr>
       <td class="forminfo" colspan="2">Generally, capitalize only the first word and proper names.</td>
@@ -51,6 +51,9 @@
       <td>
         <span id="institution_selector"></span>
       </td>
+    <tr>
+      <td class="forminfo" colspan="2">If an institution associated with the seminar isn't in the dropdown list, <a href="{{ url_for('list_institutions') }}">add it</a> before or after creating the seminar.</td>
+    </tr>
     <tr>
       <td><button type="submit">Create</button></td>
     </tr>

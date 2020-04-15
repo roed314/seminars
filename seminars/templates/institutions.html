@@ -3,7 +3,7 @@
 {% block content %}
 <div class="text_content">
 
-{% if user.is_creator() %}
+{% if user.is_creator %}
 <p>If your institution is not listed here, you can add it so that seminars can be associated with it later.</p>
 
 <h2>Add institution</h2>
@@ -13,14 +13,14 @@
   <table id="make_inst">
     <tr>
       <th>Identifier:</th>
-      <td><input name="shortname" /></td>
+      <td><input name="shortname" placeholder="ShortLabel"/></td>
     </tr>
     <tr>
-      <td class="forminfo" colspan="2">The identifier is a short label, used in the URL, containing only letters, numbers, hyphens and underscores - no spaces.</td>
+      <td class="forminfo" colspan="2">The identifier is used in the URL, so use only letters, numbers, hyphens and underscores - no spaces.</td>
     </tr>
     <tr>
       <th>Name</th>
-      <td><input size="40" name="name" style="width:500px;" /></td>
+      <td><input size="40" name="name" style="width:500px;" placeholder="University of Pangaea" /></td>
     </tr>
     <tr>
       <td><button type="submit">Create</button></td>

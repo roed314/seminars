@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time, date
 from dateutil.parser import parse as parse_time
 import pytz, re, iso639
 from six import string_types
@@ -14,6 +14,7 @@ from markupsafe import Markup, escape
 from collections.abc import Iterable
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
 def naive_utcoffset(tz):
@@ -92,9 +93,11 @@ def flash_warning(warnmsg, *args):
     )
 
 
-def check_time(start_time, end_time):
+def check_time(start_time, end_time, check_past=False):
     """
     Flashes errors/warnings and returns True when an error should be raised.
+
+    Input start and end time can be either naive or timezone aware, but must be timezone aware if check_past is True.
     """
     if start_time is None or end_time is None:
         # Users are allowed to not fill in a time
@@ -107,8 +110,22 @@ def check_time(start_time, end_time):
         return True
     if is_nighttime(start_time) or is_nighttime(end_time):
         flash_warning(
-            "Your seminar is scheduled between midnight and 8am; if that was unintentional you should edit again using 24-hour notation or including pm"
+            "Your talk is scheduled between midnight and 8am. Please edit again using 24-hour notation or including pm if that was unintentional"
         )
+    # Python doesn't support subtracting times
+    if (isinstance(start_time, time) and isinstance(end_time, time) and
+        datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time) > timedelta(hours=8) or
+        isinstance(start_time, datetime) and isinstance(end_time, datetime) and
+        end_time - start_time > timedelta(hours=8)):
+        flash_warning(
+            "Your talk lasts for more than 8 hours.  Please edit again if that was unintented"
+        )
+    if check_past:
+        now = datetime.now(tz=pytz.UTC)
+        if start_time < now:
+            flash_warning(
+                "The start time of your talk is in the past.  Please edit again if that was unintended"
+            )
 
 
 def top_menu():
@@ -116,7 +133,7 @@ def top_menu():
         account = "Account"
     else:
         account = "Login"
-    if current_user.is_organizer():
+    if current_user.is_organizer:
         manage = "Manage"
     else:
         manage = "Create"
@@ -351,7 +368,6 @@ def process_user_input(inp, typ, tz):
     elif typ in ["int", "smallint", "bigint", "integer"]:
         return int(inp)
     elif typ == "text[]":
-        print(repr(inp))
         inp = inp.strip()
         if inp:
             if inp[0] == "[" and inp[-1] == "]":

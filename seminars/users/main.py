@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
 import flask
+from email_validator import validate_email, EmailNotValidError
 from urllib.parse import urlencode, quote
 from functools import wraps
 from seminars.app import app, send_email
@@ -28,9 +29,8 @@ from icalendar import Calendar
 from io import BytesIO
 
 from psycopg2.sql import SQL
-from lmfdb import db
+from seminars import db
 
-assert db
 from seminars.utils import timezones, timestamp
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import datetime
@@ -87,18 +87,18 @@ def login(**kwargs):
     if not email or not password:
         flash_error("Oops! Wrong username or password.")
         return redirect(url_for(".info"))
-    next = request.form["next"]
     # we always remember
     remember = True  # if request.form["remember"] == "on" else False
     user = SeminarsUser(email=email)
-    if user and user.authenticate(password):
+    if user and user.check_password(password):
+        # this is where we set current_user = user
         login_user(user, remember=remember)
         if user.name:
             flask.flash(Markup("Hello %s, your login was successful!" % user.name))
         else:
             flask.flash(Markup("Hello, your login was successful!"))
         logger.info("login: '%s' - '%s'" % (user.get_id(), user.name))
-        return redirect(next or url_for(".info"))
+        return redirect(url_for(".info"))
     flash_error("Oops! Wrong username or password.")
     return redirect(url_for(".info"))
 
@@ -112,7 +112,7 @@ def admin_required(fn):
     @login_required
     def decorated_view(*args, **kwargs):
         logger.info("admin access attempt by %s" % current_user.get_id())
-        if not current_user.is_admin():
+        if not current_user.is_admin:
             return flask.abort(403)  # access denied
         return fn(*args, **kwargs)
 
@@ -125,10 +125,10 @@ def creator_required(fn):
     """
 
     @wraps(fn)
-    @login_required
+    @email_confirmed_required
     def decorated_view(*args, **kwargs):
         logger.info("creator access attempt by %s" % current_user.get_id())
-        if not current_user.is_creator():
+        if not current_user.is_creator:
             return flask.abort(403)  # access denied
         return fn(*args, **kwargs)
 
@@ -176,7 +176,6 @@ def info():
 @login_required
 def set_info():
     for k, v in request.form.items():
-        print(k, v)
         setattr(current_user, k, v)
     previous_email = current_user.email
     if current_user.save():
@@ -187,16 +186,6 @@ def set_info():
     return redirect(url_for(".info"))
 
 
-@login_page.route("/seminars")
-@creator_required
-def list_seminars():
-    raise NotImplementedError
-
-
-@login_page.route("/subscriptions")
-@creator_required
-def list_subscriptions():
-    raise NotImplementedError
 
 
 @login_page.route("/send_confirmation_email")
@@ -206,8 +195,6 @@ def resend_confirmation_email():
         flask.flash(Markup("New confirmation email has been sent!"))
     return redirect(url_for(".info"))
 
-
-# The analogous function creator_required is not defined, since we want to allow normal users to creat things that won't be displayed until they're approved as a creator.
 
 
 def housekeeping(fn):
@@ -234,8 +221,6 @@ def register():
         email = request.form["email"]
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
-        from email_validator import validate_email, EmailNotValidError
-
         try:
             validate_email(email)
         except EmailNotValidError as e:
@@ -292,7 +277,7 @@ def change_password():
 def logout():
     logout_user()
     flask.flash(Markup("You are logged out now. Have a nice day!"))
-    return redirect(request.args.get("next") or request.referrer or url_for(".info"))
+    return redirect(url_for(".info"))
 
 
 @login_page.route("/admin")
@@ -452,20 +437,18 @@ def reset_password_wtoken(token):
 
 
 @login_page.route("/endorse", methods=["POST"])
-@login_required
 @creator_required
 def get_endorsing_link():
     email = request.form["email"]
-    from email_validator import validate_email, EmailNotValidError
-
     try:
-        validate_email(email)
+        email = validate_email(email)['email']
     except EmailNotValidError as e:
         flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
         return redirect(url_for(".info"))
     link = endorser_link(current_user, email)
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
+        db.preendorsed_users.insert_many([{'email': email, 'endorser': current_user._uid}])
         to_send = """Hello,
 
 I am offering you permission to add content (e.g., create a seminar)
@@ -477,12 +460,13 @@ To accept this invitation:
 
 2. Click on the link the system emails you, to confirm your email address.
 
-3. Go to {link}
+3. Now any content you create will be publicly viewable.
+
 
 Best,
 {name}
 """.format(
-            link=link, name=current_user.name
+            name=current_user.name
         )
         data = {
             "body": to_send,
@@ -490,12 +474,11 @@ Best,
         }
         endorsing_link = """
 <p>
- The link to endorse {email} is</br>
- <span class="noclick">{link}</span></br>
+When {email} registers and confirms their email they will be able to create content.</br>
 <button onClick="window.open('mailto:{email}?{msg}')">
 Send email
-</button>
- </p>
+</button> to let them know.
+</p>
 """.format(
             link=link, email=email, msg=urlencode(data, quote_via=quote)
         )
@@ -527,6 +510,7 @@ Best,
 <button onClick="window.open('mailto:{email}?{msg}')">
 Send email
 </button> to let them know.
+</p>
 """.format(
                 target_name=target_name, email=email, msg=urlencode(data, quote_via=quote),
             )
@@ -554,14 +538,13 @@ def endorse_wtoken(token):
     except Exception:
         return flask.abort(404, "The link is invalid or has expired.")
         return redirect(url_for(".info"))
-    if current_user.is_creator():
+    if current_user.is_creator:
         flash_error("Account already has creator privileges.")
     elif current_user.email.lower() != email.lower():
         flash_error("The link is not valid for this account.")
     else:
-        userdb.make_creator(current_user.email, int(endorser))
-        current_user.save()
-        flask.flash("You can now create seminars. Thanks!", "success")
+        current_user.endorser = int(endorser) # must set endorser first
+        current_user.creator = True # this will update the db
     return redirect(url_for(".info"))
 
 
