@@ -144,7 +144,7 @@ class PostgresUserTable(PostgresSearchTable):
             if self.user_exists(data["email"]):
                 flash_error("There is already a user registered with email = %s", data["email"])
                 return False
-        for key in list(data.keys()):
+        for key in list(data):
             if key not in self.search_cols:
                 data.pop(key)
         with DelayCommit(db):

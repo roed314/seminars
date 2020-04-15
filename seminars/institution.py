@@ -64,11 +64,10 @@ class WebInstitution(object):
                     continue
                 elif typ == "text":
                     setattr(self, key, "")
-                elif typ == "cube":
-                    # TODO: Need to deal with location
-                    setattr(self, key, None)
+                elif typ == "text[]":
+                    setattr(self, key, [])
                 else:
-                    raise ValueError("Need to update institution code to account for schema change")
+                    setattr(self, key, None)
         else:
             self.__dict__.update(data)
 

@@ -37,8 +37,8 @@ class WebSeminar(object):
             data = dict(data)
             if data.get("topics") is None:
                 data["topics"] = []
-            if data.get("instructions") is None:
-                data["instructions"] = []
+            if data.get("institutions") is None:
+                data["institutions"] = []
         self.new = data is None
         if self.new:
             self.shortname = shortname
@@ -51,8 +51,6 @@ class WebSeminar(object):
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
             self.timezone = str(current_user.tz)
-            self.start_date = None
-            self.end_date = None
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -61,7 +59,7 @@ class WebSeminar(object):
                 elif typ == "text[]":
                     setattr(self, key, [])
                 else:
-                    raise ValueError("Need to update seminar code to account for schema change")
+                    setattr(self, key, None)
             if organizer_data is None:
                 organizer_data = [
                     {

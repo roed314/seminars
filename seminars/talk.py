@@ -60,10 +60,8 @@ class WebTalk(object):
                     setattr(self, key, "")
                 elif typ == "text[]":
                     setattr(self, key, [])
-                elif typ == "timestamp with time zone":
-                    setattr(self, key, None)
                 else:
-                    raise ValueError("Need to update talk code to account for schema change")
+                    setattr(self, key, None)
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
             if data.get("timezone"):
