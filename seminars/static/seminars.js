@@ -97,6 +97,7 @@ function setLinks() {
         setCookie("filter_time", "0");
     } else {
         $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
+        $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
         $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
         cur_topics = cur_topics.split(",");
         for (var i=0; i<cur_topics.length; i++) {
