@@ -21,7 +21,7 @@
       <th style="padding-right:0px;">End date</th>
       <td><input name="end" value="{{ raw_data.end}}" style="width:120px;" /></td>
       {% if not seminar.is_conference %}
-      <th style="padding-right:0px;">Talks on</th>
+      <th style="padding-right:0px;">New timeslots on</th>
       <td><input name="weekday" value="{{ seminar.show_day(truncate=False) }}" style="width:80px;" /></td>
       <th style="padding-right:0px;">every</th>
       <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:60px;"/></td>
