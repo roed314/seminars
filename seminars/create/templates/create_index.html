@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="text_content">
-{% if not user.is_creator() %}
+{% if not user.is_creator %}
 <p>
   You are currently not endorsed.
   If you want to add seminars to the site, you need to be endorsed by someone on the site.
@@ -19,14 +19,39 @@
 
 <h2>Create a seminar or conference</h2>
 
-<p>The identifier is a short label for your seminar, used in its URL.  It should consist only of letters, numbers, hyphens and underscores - no spaces.  The <i>full</i> name of your seminar will be entered <i>after</i> clicking Create.</p>
-
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
-  <table>
+  <input type="hidden" name="institutions" value=""/>
+  <table id="make_semconf">
     <tr>
-      <td>Identifier:</td>
+      <th>Type</th>
+      <td>
+        <select name="is_conference" style="width:100px;">
+          <option value="yes">conference</option>
+          <option value="no" selected>seminar</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <th>Identifier</th>
       <td><input name="shortname" /></td>
+    </tr>
+    <tr>
+      <td class="forminfo" colspan="2">The identifier is a short label, used in the URL, containing only letters, numbers, hyphens and underscores - no spaces.</td>
+    </tr>
+    <tr>
+      <th>Full name</th>
+      <td><input size="40" name="name" style="width:500px;" /></td>
+    </tr>
+    <tr>
+      <td class="forminfo" colspan="2">Generally, capitalize only the first word and proper names.</td>
+    </tr>
+    <tr>
+      <th>Institutions</th>
+      <td>
+        <span id="institution_selector"></span>
+      </td>
+    <tr>
       <td><button type="submit">Create</button></td>
     </tr>
   </table>
@@ -60,5 +85,21 @@
 <p>To add a talk, create a seminar first.</p>
 {% endif %}
 </div>
+
+<script type="text/javascript">
+
+const instOptions = [
+  {% for iid, name in institutions %}
+  {
+    label: "{{ name }}",
+    value: "{{ iid }}",
+  },
+  {% endfor %}
+];
+
+$(document).ready(function() {
+  var instSelector = makeInstitutionSelector(instOptions, []);
+});
+</script>
 
 {% endblock %}

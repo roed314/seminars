@@ -243,11 +243,11 @@ class WebTalk(object):
             if self.live_link.startswith("http"):
                 success = 'Access <a href="%s">online</a>.' % self.live_link
             else:
-                success = "Livestream comment: %s" % self.live_link
+                success = "Livestream access: %s" % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
-            if user.is_anonymous():
+            if user.is_anonymous:
                 return 'To see access link, please <a href="%s">log in</a> (anti-spam measure).' % (
                     url_for("user.info")
                 )
@@ -256,7 +256,7 @@ class WebTalk(object):
             else:
                 return success
         elif self.access == "endorsed":
-            if user.is_creator():
+            if user.is_creator:
                 return success
             else:
                 # TODO: add link to an explanation of endorsement
@@ -265,7 +265,7 @@ class WebTalk(object):
             return ""
 
     def is_subscribed(self):
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             return False
         if self.seminar_id in current_user.seminar_subscriptions:
             return True
@@ -288,7 +288,7 @@ class WebTalk(object):
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
         return (
-            current_user.is_admin()
+            current_user.is_admin
             or current_user.email_confirmed
             and (
                 current_user.email in self.seminar.editors()
@@ -317,7 +317,7 @@ class WebTalk(object):
             return False
 
     def show_subscribe(self):
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             return ""
 
         value = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
@@ -426,7 +426,7 @@ def talks_header(include_seminar=True, include_subscribe=True):
     cols.append((' class="speaker"', "Speaker"))
     cols.append((' class="title"', "Title"))
     if include_subscribe:
-        if current_user.is_anonymous():
+        if current_user.is_anonymous:
             cols.append(("", ""))
         else:
             cols.append((' class="saved"', "Saved"))
