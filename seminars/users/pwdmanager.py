@@ -28,7 +28,7 @@ from email_validator import validate_email, EmailNotValidError
 def ilike_escape(email):
     # only do this after validation
     assert '\\' not in email
-    return email.replace('%',r'\%')
+    return email.replace('%',r'\%').replace('_',r'\_')
 
 def ilike_query(email):
     return {'$ilike': ilike_escape(email)}
@@ -91,7 +91,7 @@ class PostgresUserTable(PostgresSearchTable):
 
     def change_password(self, email, newpwd):
         self.update(
-            query=ilike_query(email),
+            query={'email': ilike_query(email)},
             changes={"password": self.bchash(newpwd)},
             resort=False,
             restat=False,
