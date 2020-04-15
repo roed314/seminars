@@ -249,6 +249,8 @@ def save_seminar():
             except Exception as err:
                 return make_error(shortname, col, err)
         if D.get("homepage") or D.get("email") or D.get("full_name"):
+            if not D.get("full_name"):
+                return make_error(shortname,msg="Organizer name cannot be blank")
             D["order"] = len(organizer_data)
             # WARNING the header on the template says organizer
             # but it sets the database column curator, so the 
