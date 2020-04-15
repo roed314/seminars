@@ -278,7 +278,7 @@ class WebSeminar(object):
             show = rec["curator"] if curators else not rec["curator"]
             if show and rec["display"]:
                 link = rec["homepage"] if rec["homepage"] else "mailto:%s"%(rec["email"])
-                name = rec["name"] if rec["name"] else link
+                name = rec["full_name"] if rec["full_name"] else link
                 if name:
                     editors.append('<a href="%s">%s</a>' % (link, name))
         if editors:
