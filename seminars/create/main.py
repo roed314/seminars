@@ -201,6 +201,9 @@ def save_seminar():
     data["timezone"] = tz = raw_data.get("timezone")
     tz = pytz.timezone(tz)
 
+    # This seems like a risky hack.  We want to treat start_time/end_time as times of day which will be converted
+    # to timestamps offset from 1/1/2020 by process_user_input whtn the type is "time", but unilaterally converting
+    # all timestamps to times seems risky.  What if we want the user to enter a datetime in the future?
     def replace(a):
         if a == "timestamp with time zone":
             return "time"
