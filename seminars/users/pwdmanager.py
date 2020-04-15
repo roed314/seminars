@@ -99,6 +99,8 @@ class PostgresUserTable(PostgresSearchTable):
         logger.info("password for %s changed!" % email)
 
     def lookup(self, email, projection=2):
+        if not email:
+            return None
         return self.lucky({'email': ilike_query(email) }, projection=projection, sort=[])
 
 
@@ -107,8 +109,6 @@ class PostgresUserTable(PostgresSearchTable):
 
 
     def authenticate(self, email, password):
-        if not email:
-            raise ValueError("User not present in database!")
         bcpass = self.lookup(email, projection="password")
         if bcpass is None:
             raise ValueError("User not present in database!")
