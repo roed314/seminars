@@ -20,6 +20,7 @@ import pytz
 from sage.misc.lazy_attribute import lazy_attribute
 from collections import defaultdict
 from datetime import datetime, date
+from lmfdb.logger import critical
 
 combine = datetime.combine
 
@@ -59,6 +60,7 @@ class WebSeminar(object):
                 elif typ == "text[]":
                     setattr(self, key, [])
                 else:
+                    critical("Need to update seminar code to account for schema change key=%s" % key)
                     setattr(self, key, None)
             if organizer_data is None:
                 organizer_data = [

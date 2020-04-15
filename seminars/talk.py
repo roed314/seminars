@@ -17,6 +17,7 @@ from lmfdb.utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
 from icalendar import Event
+from lmfdb.logger import critical
 
 
 class WebTalk(object):
@@ -61,6 +62,7 @@ class WebTalk(object):
                 elif typ == "text[]":
                     setattr(self, key, [])
                 else:
+                    critical("Need to update talk code to account for schema change key=%s" % key)
                     setattr(self, key, None)
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
