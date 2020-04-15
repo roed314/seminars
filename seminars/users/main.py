@@ -268,7 +268,7 @@ def register():
 def change_password():
     email = current_user.email
     pw_old = request.form["oldpwd"]
-    if not current_user.authenticate(pw_old):
+    if not current_user.check_password(pw_old):
         flash_error("Ooops, old password is wrong!")
         return redirect(url_for(".info"))
 
