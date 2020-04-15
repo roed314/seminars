@@ -7,11 +7,12 @@ import bcrypt
 import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
-from seminars.seminar import WebSeminar, seminars_lucky
+from seminars.seminar import WebSeminar, seminars_search
 from seminars.talk import WebTalk
 from seminars.utils import pretty_timezone
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
+from flask import flash
 from lmfdb.backend.utils import DelayCommit
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
@@ -186,19 +187,29 @@ class SeminarsUser(UserMixin):
             self._data.update(user_row)
             self._uid = str(self._data["id"])
             self._organizer = db.seminar_organizers.count({"email": ilike_query(self.email)}, record=False) > 0
+            self.try_to_endorse()
 
 
 
     def try_to_endorse(self):
-        if self.email_confirmed:
-            # try to endorse if the user is the organizer of some seminar
-            if not self.creator and self._organizer:
-                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, 'seminar_id')
-                owner = seminars_lucky({'shortname': shortname}, 'owner')
-                owner_id = int(userdb.lookup(owner, 'id'))
-                self.endorser = owner_id # must set endorser first
+        if self.email_confirmed and not self.is_creator:
+            preendorsed = db.preendorsed_users.lucky({"email": ilike_query(self.email)})
+            if preendorsed:
+                self.endorser = preendorsed['endorser'] # must set endorser first
                 self.creator = True # it already saves
-            # TODO or if it is in some list
+                db.preendorsed_users.delete({"email": ilike_query(self.email)})
+                return True
+            # try to endorse if the user is the organizer of some seminar
+            if self._organizer:
+                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, 'seminar_id')
+                for owner in seminars_search({'shortname': shortname}, 'owner'):
+                    owner = userdb.lucky(owner, ['creator', 'id'])
+                    if owner['creator']:
+                        self.endorser = owner['id'] # must set endorser first
+                        self.creator = True # it already saves
+                        return True
+
+        return False
 
     @property
     def id(self):
@@ -442,15 +453,17 @@ class SeminarsUser(UserMixin):
     @creator.setter
     def creator(self, creator):
         self._data["creator"] = creator
+        self._dirty = True
         if creator:
             assert self.endorser is not None
             userdb.make_creator(self.email, int(self.endorser)) # it already saves
+            flash("Someone endorsed you! You can now create seminars.", "success")
 
     @property
     def is_organizer(self):
         return (
-            self.is_admin()
-            or self.is_creator()
+            self.is_admin
+            or self.is_creator
             and self._organizer
         )
 
