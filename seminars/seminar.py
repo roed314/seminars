@@ -82,6 +82,12 @@ class WebSeminar(object):
                     data["start_time"] = adapt_datetime(data["start_time"], tz)
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
+            # start_time and end_time are stored in postgres as datetime.datetimes's (offset from 1/1/2020) but we treat them as datetime.time's
+            # anyone who wants to use them as datetime's should use start_timestamp and end_timestamp
+            if data.get("start_time"):
+                data["start_time"] = data["start_time"].time()
+            if data.get("end_time"):
+                data["start_time"] = data["end_time"].time()
             self.__dict__.update(data)
         if organizer_data is None:
             organizer_data = list(
