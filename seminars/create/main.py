@@ -253,8 +253,8 @@ def save_seminar():
             if D["email"]:
                 try:
                     D["email"] = validate_email(D["email"])["email"]
-                except EmailNotValidError as e:
-                    errmsgs.append(format_errmsg("the string %s is not a valid email address. %s"%(str(e)),D["email"]))
+                except EmailNotValidError as err:
+                    errmsgs.append(format_errmsg("the string %s is not a valid email address: {0}".format(err),D["email"]))
                 email_count += 1
             if D["homepage"]:
                 if not validate_url(D["homepage"]):
@@ -462,8 +462,8 @@ def save_talk():
             if col.endswith("email") and data[col]:
                 try:
                     data[col] = validate_email(data[col])["email"]
-                except EmailNotValidError as e:
-                    errmsgs.append(format_errmsg("the string %s is not a valid email address. %s"%(str(e)),data[col]))
+                except EmailNotValidError as err:
+                    errmsgs.append(format_errmsg("the string %s is not a valid email address: {0}".format(err), data[col]))
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("acces type %s invalid", data[col]))
         except Exception as err:
@@ -660,6 +660,7 @@ def save_seminar_schedule():
     ctr = curmax + 1
     updated = 0
     warned = False
+    errmsgs = []
     for i in list(range(schedule_count)):
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
         speaker = process_user_input(
@@ -677,8 +678,7 @@ def save_seminar_schedule():
             try:
                 date = process_user_input(date, "date", tz=seminar.tz)
             except ValueError as err:
-                flash_error("invalid date %s: {0}".format(err), date)
-                redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301)
+                errmsgs.append(format_errmsg("Unable to process input %s for date: {0}".format(err), date))
         else:
             date = None
         time_input = raw_data.get("time%s" % i, "").strip()
@@ -695,16 +695,30 @@ def save_seminar_schedule():
                 if check_time(start_time, end_time):
                     raise ValueError
             except ValueError as err:
-                if str(err):
-                    flash_error("invalid time range %s: {0}".format(err), time_input)
-                return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+                errmsgs.append(format_errmsg("Unable to process input %s for time: {0}".format(err), time_input))
         else:
             start_time = end_time = None
         if any(X is None for X in [start_time, end_time, date]):
-            flash_error(
-                "You must give a date, start and end time for %s" % speaker
-            )
-            return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+            errmsgs.append(format_errmsg("You must give a date, start and end time for %s",speaker))
+        for col in optional_cols:
+            try:
+                val = raw_data.get(col, "").strip()
+                if not val:
+                    data[col] = None
+                else:
+                    data[col] = process_user_input(val, db.talks.col_type[col], tz=tz)
+                if col.endswith("email") and data[col]:
+                    try:
+                        data[col] = validate_email(data[col])["email"]
+                    except EmailNotValidError as err:
+                        errmsgs.append(format_errmsg("the string %s is not a valid email address: {0}".format(err), data[col]))
+            except Exception as err:
+                errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+
+        # Don't try to create new_version using invalid input
+        if errmsgs:
+            return show_input_errors(errmsgs)
+
         if seminar_ctr:
             # existing talk
             seminar_ctr = int(seminar_ctr)
@@ -714,10 +728,7 @@ def save_seminar_schedule():
             talk = WebTalk(shortname, seminar=seminar, editing=True)
         data = dict(talk.__dict__)
         data["speaker"] = speaker
-        for col in optional_cols:
-            data[col] = process_user_input(
-                raw_data.get("%s%s" % (col, i), ""), "text", tz=seminar.timezone
-            )
+
         data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
         data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
         if seminar_ctr:
