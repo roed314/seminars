@@ -75,8 +75,8 @@
       <td>
         <select name="access" style="width:510px;">
           <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view link</option>
-          <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Logged-in users can view link</option>
-          <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Endorsed users can view link</option>
+          <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
+          <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
         </select>
       </td>
     </tr>

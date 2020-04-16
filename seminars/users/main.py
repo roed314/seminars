@@ -489,30 +489,22 @@ Send email
                 target_name=target_name
             )
         else:
-            to_send = """Dear {target_name},
-
-I have endorsed you on mathseminars.org and any content you create will
-be publicly viewable.
-
-Best,
-{name}
-""".format(
-                name=current_user.name, target_name=target_name
-            )
-            data = {
-                "body": to_send,
-                "subject": "Endorsement to create content on mathseminars.org",
-            }
-            userdb.make_creator(email, current_user._uid)
-            endorsing_link = """
+            welcome = "Hello" if not target_name else ("Dear " + target_name)
+            to_send = """{welcome},<br>
 <p>
- {target_name} is now able to create content.</br>
-<button onClick="window.open('mailto:{email}?{msg}')">
-Send email
-</button> to let them know.
+You have been endorsed you on mathseminars.org and any content you create will
+be publicly viewable.
 </p>
-""".format(
-                target_name=target_name, email=email, msg=urlencode(data, quote_via=quote),
+<p>
+Thanks for using mathseminars.org!
+</p>
+
+""".format(welcome=welcome)
+            subject = "Endorsement to create content on mathseminars.org"
+            send_email(email, subject, to_send)
+            userdb.make_creator(email, int(current_user.id))
+            endorsing_link = "<p>{target_name} is now able to create content.</p> ".format(
+                target_name=target_name if target_name else email
             )
     session["endorsing link"] = endorsing_link
     return redirect(url_for(".info"))

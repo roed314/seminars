@@ -24,7 +24,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% endif %}
 {% if seminar.description %}
   <p>
-    {{(seminar.description | blanknone) + seminar.show_topics() | safe }}
+    Description: {{(seminar.description | blanknone) + seminar.show_topics() | safe }}
   </p>
  {% endif %}
 

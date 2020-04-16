@@ -104,10 +104,11 @@ class WebSeminar(object):
         return not (self == other)
 
     def save(self):
-        assert self.__dict__.get("shortname")
-        db.seminars.insert_many(
-            [{col: getattr(self, col, None) for col in db.seminars.search_cols}]
-        )
+        data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
+        assert data.get("shortname")
+        data["edited_by"] = int(current_user.id)
+        data["edited_at"] = datetime.now(tz=pytz.UTC)
+        db.seminars.insert_many([data])
 
     def save_organizers(self):
         # Need to allow for deleting organizers, so we delete them all then add them back

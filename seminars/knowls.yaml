@@ -1,0 +1,5 @@
+organizer:
+  title: Organizer
+  contents: |
+    Check this box for organizers of the seminar responsible for its scientific content, inviting speakers, etc.
+    Leave this box unchecked for users who should be able to edit the seminar but are not responsible for its content.

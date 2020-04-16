@@ -134,18 +134,18 @@
           </td>
         </tr>
         <tr>
+          <td>Livestream link</td>
+          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+        </tr>
+        <tr>
           <td>Access</td>
           <td>
             <select name="access" style="width:510px;">
               <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view link</option>
-              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Logged-in users can view link</option>
-              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Endorsed users can view link</option>
+              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
+              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
             </select>
           </td>
-        </tr>
-        <tr>
-          <td>Livestream link</td>
-          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="https://example.org"/></td>
         </tr>
         {% if not seminar.new %}
           <tr>
@@ -159,7 +159,7 @@
           </tr>
         {% endif %}
         <tr>
-          <td colspan="2">Comments</td>
+          <td colspan="2" style="padding-top: 10px">Comments</td>
         </tr>
         <tr>
           <td colspan="2"><textarea cols="76" rows="5" name="comments">{{ seminar.comments | blanknone }}</textarea></td>
@@ -174,9 +174,9 @@
       <table>
         <thead>
           <th>Name</th>
-          <th>Homepage</th>
-          <th>Email</th>
-          <th>Organizer</th>
+          <th>{{ KNOWL("homepage") }}</th>
+          <th>{{ KNOWL("email") }}</th>
+          <th>{{ KNOWL("organizer") }}</th>
           <th>Display</th>
         </thead>
         {% for i in range(10) %}
