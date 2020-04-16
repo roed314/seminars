@@ -457,17 +457,17 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             seminar_ctr = int(seminar_ctr)
         except ValueError:
             flash_error("Invalid talk id")
-            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None
+            return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
     if seminar_ctr != "":
         talk = talks_lookup(seminar_id, seminar_ctr)
         if talk is None:
             flash_error("Talk does not exist")
-            return redirect(url_for("show_seminar", shortname=seminar_id), 301), None
+            return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
         if token:
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
                 return (
-                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301),
+                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 302),
                     None,
                 )
         else:
@@ -476,7 +476,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
                     "You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr)
                 )
                 return (
-                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 301),
+                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 302),
                     None,
                 )
     else:
@@ -486,7 +486,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
         if seminar.new:
             # TODO: This is where you might insert the ability to create a talk without first making a seminar
             flash_error("You must first create the seminar %s" % seminar_id)
-            return redirect(url_for(".edit_seminar", shortname=seminar_id), 301)
+            return redirect(url_for(".edit_seminar", shortname=seminar_id), 302)
         if new:
             talk = WebTalk(seminar_id, seminar=seminar, editing=True)
         else:
