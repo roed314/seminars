@@ -12,7 +12,7 @@ from lmfdb.utils.search_boxes import SearchBox
 from psycopg2.sql import SQL
 from markupsafe import Markup, escape
 from collections.abc import Iterable
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
