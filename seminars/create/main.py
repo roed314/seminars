@@ -261,7 +261,7 @@ def save_seminar():
     if display_count == 0:
        errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
     if email_count == 0:
-       errmsgs.append(format_errmsg("At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s", "email"
+       errmsgs.append(format_errmsg("At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s", "email",
                                     "This information will not be displayed if homepage is set or display is not checked."))
     # Don't try to create new_version using invalid input
     if errmsgs:
