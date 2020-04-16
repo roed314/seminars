@@ -163,6 +163,7 @@ def delete_talk(semid, semctr):
 @create.route("save/seminar/", methods=["POST"])
 @email_confirmed_required
 def save_seminar():
+    bad_data = False
     raw_data = request.form
     shortname = raw_data["shortname"]
     new = raw_data.get("new") == "yes"
@@ -207,7 +208,6 @@ def save_seminar():
             return "time"
         return a
 
-    err = False
     for col in db.seminars.search_cols:
         if col in data:
             continue
@@ -219,7 +219,7 @@ def save_seminar():
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
             flash_error("Error processing %s: {0}".format(err), col)
-            err = True
+            bad_data = True
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -246,7 +246,7 @@ def save_seminar():
                 #     D[col] = "http://" + data[col]
             except Exception as err:
                 flash_error("Error processing %s: {0}".format(err), col)
-                err = True
+                bad_data = True
         if D.get("homepage") or D.get("email") or D.get("full_name"):
             if not D.get("full_name"):
                 return make_error(shortname,msg="Organizer name cannot be blank")
@@ -260,8 +260,8 @@ def save_seminar():
             organizer_data.append(D)
     if display_count == 0:
        flash_error("At least one organizer or curator must be displayed.") 
-       err = True
-    if err:
+       bad_data = True
+    if bad_data:
         return make_error(shortname, data=data)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
