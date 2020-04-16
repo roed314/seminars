@@ -176,7 +176,7 @@ def delete_talk(semid, semctr):
     else:
         if talk.delete():
             flash("Talk deleted")
-            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 301)
+            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 302)
         else:
             flash_error("Only the organizers of a seminar can delete talks in it")
             return failure()
@@ -294,7 +294,7 @@ def save_seminar():
         new_version.save_organizers()
         if not seminar.new:
             flash("Seminar organizers updated!")
-    return redirect(url_for(".edit_seminar", shortname=shortname), 301)
+    return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
 
 @create.route("edit/institution/", methods=["GET", "POST"])
@@ -374,14 +374,14 @@ def save_institution():
         new_version.save()
         edittype = "created" if new else "edited"
         flash("Institution %s successfully!" % edittype)
-    return redirect(url_for(".edit_institution", shortname=shortname), 301)
+    return redirect(url_for(".edit_institution", shortname=shortname), 302)
 
 
 @create.route("edit/talk/<seminar_id>/<seminar_ctr>/<token>")
 def edit_talk_with_token(seminar_id, seminar_ctr, token):
     # For emailing, where encoding ampersands in a mailto link is difficult
     return redirect(
-        url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr, token=token), 301,
+        url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr, token=token), 302,
     )
 
 
@@ -415,7 +415,7 @@ def edit_talk():
             start_time = localize_time(datetime.datetime.combine(date, start_time), tz)
             end_time = localize_time(datetime.datetime.combine(date, end_time), tz)
         except ValueError:
-            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 301)
+            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 302)
         talk.start_time = start_time
         talk.end_time = end_time
     # lock = get_lock(seminar_id, data.get("lock"))
@@ -497,7 +497,7 @@ def save_talk():
         edit_kwds["token"] = token
     else:
         edit_kwds.pop("token", None)
-    return redirect(url_for(".edit_talk", **edit_kwds), 301)
+    return redirect(url_for(".edit_talk", **edit_kwds), 302)
 
 
 def make_date_data(seminar, data):
@@ -687,7 +687,7 @@ def save_seminar_schedule():
                 date = process_user_input(date, "date", tz=seminar.tz)
             except ValueError as err:
                 flash_error("invalid date %s: {0}".format(err), date)
-                redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 301)
+                redirect(url_for(".edit_seminar_schedule", shortname=shortname, **raw_data), 302)
         else:
             date = None
         time_input = raw_data.get("time%s" % i, "").strip()
@@ -706,14 +706,14 @@ def save_seminar_schedule():
             except ValueError as err:
                 if str(err):
                     flash_error("invalid time range %s: {0}".format(err), time_input)
-                return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+                return redirect(url_for(".edit_seminar_schedule", **raw_data), 302)
         else:
             start_time = end_time = None
         if any(X is None for X in [start_time, end_time, date]):
             flash_error(
                 "You must give a date, start and end time for %s" % speaker
             )
-            return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+            return redirect(url_for(".edit_seminar_schedule", **raw_data), 302)
         if seminar_ctr:
             # existing talk
             seminar_ctr = int(seminar_ctr)
@@ -745,12 +745,12 @@ def save_seminar_schedule():
             url_for(
                 ".edit_talk", seminar_id=shortname, seminar_ctr=int(raw_data.get("detailctr")),
             ),
-            301,
+            302,
         )
     else:
         if updated or ctr > curmax + 1:
             flash("%s talks updated, %s talks created" % (updated, ctr - curmax - 1))
         if warned:
-            return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
+            return redirect(url_for(".edit_seminar_schedule", **raw_data), 302)
         else:
-            return redirect(url_for(".edit_seminar_schedule", shortname=shortname, begin=raw_data.get('begin'), end=raw_data.get('end'), frequency=raw_data.get('frequency'), weekday=raw_data.get('weekday')), 301)
+            return redirect(url_for(".edit_seminar_schedule", shortname=shortname, begin=raw_data.get('begin'), end=raw_data.get('end'), frequency=raw_data.get('frequency'), weekday=raw_data.get('weekday')), 302)
