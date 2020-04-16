@@ -142,8 +142,8 @@
           <td>
             <select name="access" style="width:510px;">
               <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view link</option>
-              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Logged-in users can view link</option>
-              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Endorsed users can view link</option>
+              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
+              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
             </select>
           </td>
         </tr>
@@ -159,7 +159,7 @@
           </tr>
         {% endif %}
         <tr>
-          <td colspan="2">Comments</td>
+          <td colspan="2" style="padding-top: 10px">Comments</td>
         </tr>
         <tr>
           <td colspan="2"><textarea cols="76" rows="5" name="comments">{{ seminar.comments | blanknone }}</textarea></td>
@@ -174,7 +174,7 @@
         <thead>
           <th>Email</th>
           <th>Name</th>
-          <th>Organizer</th>
+          <th>{{ KNOWL("organizer") }}</th>
           <th>Display</th>
           <th>Contact</th>
         </thead>

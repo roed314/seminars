@@ -31,7 +31,11 @@ def ilike_escape(email):
     return email.replace('%',r'\%').replace('_',r'\_')
 
 def ilike_query(email):
-    return {'$ilike': ilike_escape(email)}
+    if isinstance(email, str):
+        return {'$ilike': ilike_escape(email)}
+    else:
+        # no email, no query
+        return None
 
 
 

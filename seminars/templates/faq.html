@@ -14,7 +14,7 @@
         in the text "Filter by topic", click "topic" to open the topics menu,
         press "Clear all" (if necessary) to deselect all topics,
         click on "combinatorics",
-        and adjust the slider to the left of "Filter by topic".
+        and adjust the "Filter by topic" slider to the right.
         You can also select more than one topic.
         To close the topics menu, click "topic" again.</p>
     </li>
@@ -44,6 +44,9 @@
             Moreover, on the Account page, they can export these to their own calendars.
           </li>
           <li>
+            Registered users can view all livestream links for connecting online to a talk.  (Many livestream links are viewable to all, but some seminar organizers may restrict access to registered users.)
+          </li>
+          <li>
             Registered users, once endorsed, can create their own seminars and conferences for others to see.
           </li>
         </ol>
@@ -57,19 +60,16 @@
     </li>
     <li>
       <h4>
-        What should do if I cannot connect to an online talk?  What if I need a link or password that is not listed?
+        What should I do if I cannot connect to an online talk?  What if I need a link or password that is not listed?
       </h4>
       <p>
-        You should first check the external web site for the seminar, which you can usually reach by clicking
-        on the name of the seminar on the seminar's home page on mathseminars.org.  Many seminars post
-        passwords just before each talk starts, or they send them via email to users who have subscribed to their
+        Check the seminar's external webpage, usually reachable by clicking
+        on the seminar name at the seminar's page at mathseminars.org.  Many seminars post
+        passwords just before each talk starts or email them to users subscribed to their
         mailing list.
       </p>
       <p>
-        If you are still having trouble connecting to a talk your best bet is to contact one of the seminar's
-        organizers; note that you may need to go to the external web site to find their contact details.
-        Contacting a curator is not likely to help; the organizers are the ones who know all the passowrds and other
-        details necessary to connect to an online event.
+        If you are still having trouble, contact one of the seminar's scientific organizers; you may need to go to the external webpage to find their contact details.
       </p>
     </li>
     <li>
@@ -94,7 +94,13 @@
         How can I endorse other users?
       </h4>
       <p>
-        Once you are endorsed, you will be able to endorse others by typing their name in the "Endorse someone" section of your <a href="{{ url_for('user.info')}}">account</a> page.  We ask that you only endorse people in a position to reasonably organize or curate seminars (mostly, but not exclusively, math academics).
+        Once you are endorsed yourself, 
+        click on the <a href="{{ url_for('user.info')}}">Account</a> tab, 
+        scroll down to "Endorse someone to add content", 
+        enter the email address of the person you would like to endorse, 
+        and click "Endorse".
+        Make an effort to verify beforehand that the email address is associated with 
+        someone who would be adding appropriate content (generally mathematicians or mathematics department staff).
       </p>
     </li>
     <li>
@@ -104,9 +110,9 @@
       <p>
         The seminar organizers will likely be grateful for the assistance in spreading the word about their seminar.
         We suggest notifying them that you plan to add their seminar to this site.
-        When entering the seminar details, uncheck the "Organizer" checkbox;
-        if you then check "Display" and "Contact", the seminar page will list you as a curator instead of an organizer,
-        and a link to your email address will be shown so that the organizers (or others) can contact you if there are any errors.
+        When entering the seminar details, uncheck the "Organizer" checkbox to the right of your name;
+        if you then check "Display", the seminar page will list you as a curator instead of an organizer,
+        and the organizers (or others) will be able to contact you if there are any errors.
       </p>
     </li>
     <li>
@@ -115,7 +121,7 @@
       </h4>
       <p>
         Hopefully that person contacted you or left contact information on the seminar page.
-        If so, that person can endorse you and then add you to the list of organizers of the seminar, at which point you will be able to edit it.
+        If so, ask that person to endorse you and to add you to the list of organizers of the seminar; then you can edit it.
         If you don't want the seminar listed on this site, please ask <a href="mailto:edgarc@mit.edu">Edgar Costa</a> or <a href="mailto:roed@mit.edu">David Roe</a> to remove it.
       </p>
     </li>
@@ -130,19 +136,17 @@
       <h4>
         I added a topic to my seminar; why aren't the talks in my seminar listed when I filter by that topic?
       </h4>
-      Talks inherit any topics the seminar has at the time they are created but are not affected by subsequent
-      changes to the seminar's topics.  If you forget to set a topic for your seminar before creating talks in it,
-      you will need to add the topic to each talk.  The same applies to language and other properties
-      that a talk inherits from its seminar, including room, livestream, and access.  Seminar properties are
-      used as default values for corresponding properties of new talks as they are created, but changes to
-      seminar properties do not affect talks that have already been created.
+      Talks inherit the seminar's attributes <i>at the time the talks are created</i> but are not affected by subsequent
+      edits to the seminar.  If you want your seminar's new topic to apply to talks previously added to the seminar, 
+      you need to add the topic manually to each such talk.  The same applies to other attributes, 
+      such as language, room, livestream, and access.
     </li>
     <li>
       <h4>
-        How do I add to the FAQ?
+        What if I have a question not addressed here?
       </h4>
       <p>
-        Ask questions via the <a href="{{feedbackpage}}" target="_blank">Feedback page</a>!
+        Please <a href="{{ url_for('contact') }}">contact us</a>!</p>
       </p>
     </li>
   </ul>

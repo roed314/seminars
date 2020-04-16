@@ -345,7 +345,7 @@ div.topic_cmd {
     display: none;
 }
 
-#talk-body {
+.talk-body {
     max-width: 700px;
 }
 
