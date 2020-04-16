@@ -255,7 +255,7 @@ class WebSeminar(object):
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
-        return [rec["email"] for rec in self.organizer_data if rec["email"]] + [self.owner]
+        return [rec["email"].lower() for rec in self.organizer_data if rec["email"]] + [self.owner.lower()]
 
     def user_can_delete(self):
         # Check whether the current user can delete the seminar
@@ -263,7 +263,7 @@ class WebSeminar(object):
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
         return current_user.is_admin or (
-            current_user.email_confirmed and current_user.email == self.owner
+            current_user.email_confirmed and current_user.email.lower() == self.owner.lower()
         )
 
     def user_can_edit(self):
@@ -272,7 +272,7 @@ class WebSeminar(object):
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
         return current_user.is_admin or (
-            current_user.email_confirmed and current_user.email in self.editors()
+            current_user.email_confirmed and current_user.email.lower() in self.editors()
         )
 
     def _show_editors(self, label, curators=False):
@@ -479,36 +479,31 @@ def can_edit_seminar(shortname, new):
         flash_error(
             "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
         )
-        return redirect(url_for(".index"), 301), None
+        return redirect(url_for(".index"), 302), None
     seminar = seminars_lookup(shortname)
     # Check if seminar exists
     if new != (seminar is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
-        return redirect(url_for(".index"), 301), None
-    if (
-        current_user.is_anonymous
-    ):  # can happen via talks, which don't check for logged in in order to support tokens
+        return redirect(url_for(".index"), 302), None
+    # can happen via talks, which don't check for logged in in order to support tokens
+    if current_user.is_anonymous:
         flash_error(
             "You do not have permission to edit seminar %s.  Please create an account and contact the seminar organizers."
             % shortname
         )
-        return redirect(url_for("show_seminar", shortname=shortname), 301), None
-    if not new and not current_user.is_admin:
-        # Make sure user has permission to edit
-        organizer_data = db.seminar_organizers.lucky(
-            {"seminar_id": shortname, "email": current_user.email}
-        )
-        if organizer_data is None:
-            owner = seminar.owner
-            owner_name = db.users.lucky({"email": owner}, "name")
-            if owner_name:
-                owner = "%s (%s)" % (owner_name, owner)
+        return redirect(url_for("show_seminar", shortname=shortname), 302), None
+    # Make sure user has permission to edit
+    if not new and not seminar.user_can_edit():
+        owner = seminar.owner
+        owner_name = db.users.lucky({"email": owner}, "name")
+        if owner_name:
+            owner = "%s (%s)" % (owner_name, owner)
 
-            flash_error(
-                "You do not have permission to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission."
-                % (shortname, owner)
-            )
-            return redirect(url_for(".index"), 301), None
+        flash_error(
+            "You do not have permission to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission."
+            % (shortname, owner)
+        )
+        return redirect(url_for(".index"), 302), None
     if seminar is None:
         seminar = WebSeminar(shortname, data=None, editing=True)
     return None, seminar

@@ -524,6 +524,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
         return False
 
     @property
+    def is_creator(self):
+        return False
+
+    @property
     def is_admin(self):
         return False
 
