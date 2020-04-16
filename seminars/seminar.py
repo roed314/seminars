@@ -17,7 +17,6 @@ from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from psycopg2.sql import SQL
 import pytz
-from sage.misc.lazy_attribute import lazy_attribute
 from collections import defaultdict
 from datetime import datetime
 from lmfdb.logger import critical
@@ -40,6 +39,8 @@ class WebSeminar(object):
                 data["topics"] = []
             if data.get("institutions") is None:
                 data["institutions"] = []
+            if data.get("timezone") is None:
+                data["timesone"] = str(current_user.tz)
         self.new = data is None
         if self.new:
             self.shortname = shortname
@@ -273,32 +274,27 @@ class WebSeminar(object):
             current_user.email_confirmed and current_user.email.lower() in self.editors()
         )
 
-    def _show_editors(self, label, negate=False):
+    def _show_editors(self, label, curators=False):
+        """ shows organizors (or curators if curators is True) """
         editors = []
         for rec in self.organizer_data:
-            show = rec["curator"]
-            if negate:
-                show = not show
+            show = rec["curator"] if curators else not rec["curator"]
             if show and rec["display"]:
-                name = rec["full_name"]
-                if not name:
-                    if not rec["contact"]:
-                        continue
-                    name = rec["email"]
-                if rec["contact"]:
-                    editors.append('<a href="mailto:%s">%s</a>' % (rec["email"], name))
-                else:
-                    editors.append(name)
+                link = rec["homepage"] if rec["homepage"] else "mailto:%s"%(rec["email"])
+                name = rec["full_name"] if rec["full_name"] else link
+                if name:
+                    editors.append('<a href="%s">%s</a>' % (link, name) if link else name)
+
         if editors:
             return "<tr><td>%s:</td><td>%s</td></tr>" % (label, ", ".join(editors))
         else:
             return ""
 
     def show_organizers(self):
-        return self._show_editors("Organizers", negate=True)
+        return self._show_editors("Organizers")
 
     def show_curators(self):
-        return self._show_editors("Curators")
+        return self._show_editors("Curators", curators=True)
 
     def add_talk_link(self, ptag=True):
         if current_user.email in self.editors():
