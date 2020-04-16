@@ -170,13 +170,8 @@ def save_seminar():
     if resp is not None:
         return resp
 
-    def make_error(shortname, col=None, err=None, msg=None):
-        if err is not None:
-            flash_error("Error processing %s: {0}".format(err), col)
-        if msg is not None:
-            flash_error(msg)
-        return
-        seminar = WebSeminar(shortname, data=None, editing=True)
+    def make_error(shortname, data=None):
+        seminar = WebSeminar(shortname, data=data)
         manage = "Manage" if current_user.is_organizer else "Create"
         return render_template(
             "edit_seminar.html",
@@ -212,6 +207,7 @@ def save_seminar():
             return "time"
         return a
 
+    err = False
     for col in db.seminars.search_cols:
         if col in data:
             continue
@@ -222,7 +218,8 @@ def save_seminar():
             else:
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
-            return make_error(shortname, col, err)
+            flash_error("Error processing %s: {0}".format(err), col)
+            err = True
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -248,7 +245,8 @@ def save_seminar():
                 # if col == 'homepage' and val and not val.startswith("http"):
                 #     D[col] = "http://" + data[col]
             except Exception as err:
-                return make_error(shortname, col, err)
+                flash_error("Error processing %s: {0}".format(err), col)
+                err = True
         if D.get("homepage") or D.get("email") or D.get("full_name"):
             if not D.get("full_name"):
                 return make_error(shortname,msg="Organizer name cannot be blank")
@@ -261,8 +259,10 @@ def save_seminar():
                 display_count += 1
             organizer_data.append(D)
     if display_count == 0:
-       return make_error(shortname,msg="At least one organizer or curator must be displayed.") 
-
+       flash_error("At least one organizer or curator must be displayed.") 
+       err = True
+    if err:
+        return make_error(shortname, col, err)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(shortname)
