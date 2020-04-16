@@ -225,14 +225,15 @@ def save_seminar():
             if col in D:
                 continue
             name = "org_%s%s" % (col, i)
+            typ = db.seminar_organizers.col_type[col]
             try:
                 val = raw_data.get(name)
                 if val == "":
                     D[col] = None
                 elif val is None:
-                    D[col] = False  # checkboxes
+                    D[col] = False if type == "boolean" else None  # checkboxes
                 else:
-                    D[col] = process_user_input(val, db.seminar_organizers.col_type[col], tz=tz)
+                    D[col] = process_user_input(val, typ, tz=tz)
                 # if col == 'homepage' and val and not val.startswith("http"):
                 #     D[col] = "http://" + data[col]
             except Exception as err:
@@ -266,11 +267,9 @@ def save_seminar():
         new_version.save()
         edittype = "created" if new else "edited"
         flash("Seminar %s successfully!" % edittype)
-    elif seminar.organizer_data == new_version.organizer_data:
+    elif list_of_dicts_equal(seminar.organizer_data,new_version.organizer_data):
         flash("No changes made to seminar.")
     if seminar.new or seminar.organizer_data != new_version.organizer_data:
-        print(seminar.organizer_data)
-        print(new_version.organizer_data)
         new_version.save_organizers()
         if not seminar.new:
             flash("Seminar organizers updated!")
