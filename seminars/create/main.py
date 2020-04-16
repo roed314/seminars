@@ -175,6 +175,7 @@ def save_seminar():
             flash_error("Error processing %s: {0}".format(err), col)
         if msg is not None:
             flash_error(msg)
+        return
         seminar = WebSeminar(shortname, data=None, editing=True)
         manage = "Manage" if current_user.is_organizer else "Create"
         return render_template(
