@@ -68,6 +68,7 @@ class WebSeminar(object):
                     {
                         "seminar_id": self.shortname,
                         "email": current_user.email,
+                        "homepage": current_user.homepage,
                         "full_name": current_user.name,
                         "order": 0,
                         "curator": False,
@@ -478,19 +479,19 @@ def can_edit_seminar(shortname, new):
         flash_error(
             "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
         )
-        return redirect(url_for(".index"), 301), None
+        return redirect(url_for(".index"), 302), None
     seminar = seminars_lookup(shortname)
     # Check if seminar exists
     if new != (seminar is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
-        return redirect(url_for(".index"), 301), None
+        return redirect(url_for(".index"), 302), None
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(
             "You do not have permission to edit seminar %s.  Please create an account and contact the seminar organizers."
             % shortname
         )
-        return redirect(url_for("show_seminar", shortname=shortname), 301), None
+        return redirect(url_for("show_seminar", shortname=shortname), 302), None
     # Make sure user has permission to edit
     if not new and not seminar.user_can_edit():
         owner = seminar.owner
@@ -502,7 +503,7 @@ def can_edit_seminar(shortname, new):
             "You do not have permission to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission."
             % (shortname, owner)
         )
-        return redirect(url_for(".index"), 301), None
+        return redirect(url_for(".index"), 302), None
     if seminar is None:
         seminar = WebSeminar(shortname, data=None, editing=True)
     return None, seminar

@@ -442,6 +442,30 @@ def show_seminar(shortname):
         bread=None,
     )
 
+@app.route("/seminar_raw/<shortname>")
+def show_seminar_raw(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None:
+        return render_template("404.html", title="Seminar not found")
+    talks = seminar.talks(projection=3)
+    now = get_now()
+    future = []
+    past = []
+    for talk in talks:
+        if talk.end_time >= now:
+            future.append(talk)
+        else:
+            past.append(talk)
+    future.sort(key=lambda talk: talk.start_time)
+    past.sort(key=lambda talk: talk.start_time, reverse=True)
+    return render_template(
+        "seminar_raw.html",
+        title=seminar.name,
+        future=future,
+        past=past,
+        seminar=seminar
+    )
+
 
 @app.route("/talk/<semid>/<int:talkid>/")
 def show_talk(semid, talkid):
@@ -497,13 +521,6 @@ def show_institution(shortname):
         subsection="viewinst",
     )
 
-
-@app.route("/subscribe")
-def subscribe():
-    # redirect to login page if not logged in, with message about what subscription is
-    # If logged in, give a link to download the .ics file, the list of seminars/talks currently followed, and instructions on adding more
-    return render_template("subscribe.html", title="Subscribe", bread=None)
-    raise NotImplementedError
 
 
 @app.route("/info")
