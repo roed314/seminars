@@ -473,7 +473,7 @@ class SeminarsUser(UserMixin):
         return (
             self.is_admin
             or self.is_creator
-            and self._organizer
+            or self._organizer
         )
 
 
