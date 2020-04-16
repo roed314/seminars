@@ -605,7 +605,7 @@ def make_date_data(seminar, data):
             seminar.end_time = future_talk.end_time
         elif last_talk is not None and last_talk.start_time:
             seminar.end_time = last_talk.end_time
-    return seminar, all_dates, by_date
+    return seminar, all_dates, by_date, len(all_dates)*seminar.per_day
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
 @email_confirmed_required
@@ -619,9 +619,7 @@ def edit_seminar_schedule():
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
-    seminar, all_dates, by_date = make_date_data(seminar, data)
-    print(all_dates)
-    print(by_date)
+    seminar, all_dates, by_date, slots = make_date_data(seminar, data)
     title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(
         "edit_seminar_schedule.html",
@@ -629,7 +627,7 @@ def edit_seminar_schedule():
         all_dates=all_dates,
         by_date=by_date,
         weekdays=weekdays,
-        slots=str(len(all_dates)*len(by_date)),
+        slots=slots,
         raw_data=data,
         title=title,
         section="Manage",
