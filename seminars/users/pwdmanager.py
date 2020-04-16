@@ -7,12 +7,14 @@ import bcrypt
 import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
-from seminars.seminar import WebSeminar
+from seminars.seminar import WebSeminar, seminars_search
 from seminars.talk import WebTalk
 from seminars.utils import pretty_timezone
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
+from flask import flash
 from lmfdb.backend.utils import DelayCommit
+from lmfdb.logger import critical
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
@@ -21,6 +23,21 @@ from .main import logger
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
 from flask_login import UserMixin, AnonymousUserMixin
 from flask import request, url_for
+from email_validator import validate_email, EmailNotValidError
+
+def ilike_escape(email):
+    # only do this after validation
+    assert '\\' not in email
+    return email.replace('%',r'\%').replace('_',r'\_')
+
+def ilike_query(email):
+    if isinstance(email, str):
+        return {'$ilike': ilike_escape(email)}
+    else:
+        # no email, no query
+        return None
+
+
 
 
 class PostgresUserTable(PostgresSearchTable):
@@ -58,7 +75,7 @@ class PostgresUserTable(PostgresSearchTable):
         """
         for col in ["email", "password"]:
             assert col in kwargs
-        email = kwargs.pop("email")
+        email = kwargs["email"] = validate_email(kwargs["email"])["email"]
         kwargs["password"] = self.bchash(kwargs["password"])
         if "endorser" not in kwargs:
             kwargs["endorser"] = None
@@ -72,21 +89,26 @@ class PostgresUserTable(PostgresSearchTable):
         assert tz == "" or tz in all_timezones
         kwargs["location"] = None
         kwargs["created"] = datetime.now(UTC)
-        self.upsert({"email": email}, kwargs)
+        self.insert_many([kwargs])
         newuser = SeminarsUser(email=email)
         return newuser
 
     def change_password(self, email, newpwd):
         self.update(
-            query={"email": email},
+            query={'email': ilike_query(email)},
             changes={"password": self.bchash(newpwd)},
             resort=False,
             restat=False,
         )
         logger.info("password for %s changed!" % email)
 
+    def lookup(self, email, projection=2):
+        return self.lucky({'email': ilike_query(email) }, projection=projection, sort=[])
+
+
     def user_exists(self, email):
-        return self.lucky({"email": email}, projection="id") is not None
+        return self.lucky({"email": ilike_query(email)}, projection="id") is not None
+
 
     def authenticate(self, email, password):
         bcpass = self.lookup(email, projection="password")
@@ -94,23 +116,16 @@ class PostgresUserTable(PostgresSearchTable):
             raise ValueError("User not present in database!")
         return bcpass == self.bchash(password, existing_hash=bcpass)
 
-    def confirm_email(self, token):
-        email = self.lucky({"email_confirm_code": token}, "email")
-        if email is not None:
-            self.update({"email": email}, {"email_confirmed": True, "email_confirm_code": None})
-            return True
-        else:
-            return False
 
     def make_creator(self, email, endorser):
         with DelayCommit(self):
-            db.users.update({"email": email}, {"creator": True, "endorser": endorser})
+            db.users.update({"email": ilike_query(email)}, {"creator": True, "endorser": endorser})
             # Update all of this user's created seminars and talks
-            db.seminars.update({"owner": email}, {"display": True})
+            db.seminars.update({"owner": ilike_query(email)}, {"display": True})
             # Could do this with a join...
             from seminars.seminar import seminars_search
 
-            for sem in seminars_search({"owner": email}, "shortname"):
+            for sem in seminars_search({"owner": ilike_query(email)}, "shortname"):
                 db.talks.update({"seminar_id": sem}, {"display": True})
 
     def save(self, data):
@@ -123,30 +138,29 @@ class PostgresUserTable(PostgresSearchTable):
             raise ValueError("user does not exist")
         if not data:
             raise ValueError("no data to save")
-        # FIXME: update email on every other tables, seminar_subscriptions, seminars.owner
         if "new_email" in data:
             data["email"] = data.pop("new_email")
-            if self.lookup(data["email"], "id"):
-                flash_error("There is already a user registered with email = %s", data["email"])
-                return False
-            from email_validator import validate_email, EmailNotValidError
-
             try:
-                validate_email(data["email"])
+                # standerdize email
+                data["email"] = validate_email(data["email"])["email"]
             except EmailNotValidError as e:
                 flash_error("""Oops, email '%s' is not allowed. %s""", data["email"], str(e))
                 return False
-        for key in list(data.keys()):
+            if self.user_exists(data["email"]):
+                flash_error("There is already a user registered with email = %s", data["email"])
+                return False
+        for key in list(data):
             if key not in self.search_cols:
+                critical("Need to update pwdmanager code to account for schema change key=%s" % key)
                 data.pop(key)
         with DelayCommit(db):
             if "email" in data:
                 newemail = data["email"]
-                db.institutions.update({"admin": email}, {"admin": newemail})
-                db.seminars.update({"owner": email}, {"owner": newemail})
-                db.seminar_organizers.update({"email": email}, {"email": newemail})
-                db.talks.update({"speaker_email": email}, {"speaker_email": newemail})
-            self.update({"email": email}, data)
+                db.institutions.update({"admin": ilike_query(email)}, {"admin": newemail})
+                db.seminars.update({"owner": ilike_query(email)}, {"owner": newemail})
+                db.seminar_organizers.update({"email": ilike_query(email)}, {"email": newemail})
+                db.talks.update({"speaker_email": ilike_query(email)}, {"speaker_email": newemail})
+            self.update({"email": ilike_query(email)}, data)
         return True
 
 
@@ -164,7 +178,7 @@ class SeminarsUser(UserMixin):
         if email:
             if not isinstance(email, string_types):
                 raise Exception("Email is not a string, %s" % email)
-            query = {"email": email}
+            query = {'email': ilike_query(email)}
         else:
             query = {"id": int(uid)}
 
@@ -178,7 +192,30 @@ class SeminarsUser(UserMixin):
             self._authenticated = True
             self._data.update(user_row)
             self._uid = str(self._data["id"])
+            self._organizer = db.seminar_organizers.count({"email": ilike_query(self.email)}, record=False) > 0
+            self.try_to_endorse()
 
+
+
+    def try_to_endorse(self):
+        if self.email_confirmed and not self.is_creator:
+            preendorsed = db.preendorsed_users.lucky({"email": ilike_query(self.email)})
+            if preendorsed:
+                self.endorser = preendorsed['endorser'] # must set endorser first
+                self.creator = True # it already saves
+                db.preendorsed_users.delete({"email": ilike_query(self.email)})
+                return True
+            # try to endorse if the user is the organizer of some seminar
+            if self._organizer:
+                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, 'seminar_id')
+                for owner in seminars_search({'shortname': shortname}, 'owner'):
+                    owner = userdb.lookup(owner, ['creator', 'id'])
+                    if owner and owner.get('creator'):
+                        self.endorser = owner['id'] # must set endorser first
+                        self.creator = True # it already saves
+                        return True
+
+        return False
 
     @property
     def id(self):
@@ -220,6 +257,9 @@ class SeminarsUser(UserMixin):
     @email_confirmed.setter
     def email_confirmed(self, email_confirmed):
         self._data["email_confirmed"] = email_confirmed
+        if email_confirmed:
+            self.try_to_endorse()
+
         self._dirty = True
 
     @property
@@ -413,12 +453,26 @@ class SeminarsUser(UserMixin):
         return self._data.get("creator", False)
 
     @property
+    def creator(self):
+        return self._data.get("creator", False)
+
+    @creator.setter
+    def creator(self, creator):
+        self._data["creator"] = creator
+        self._dirty = True
+        if creator:
+            assert self.endorser is not None
+            userdb.make_creator(self.email, int(self.endorser)) # it already saves
+            flash("Someone endorsed you! You can now create seminars.", "success")
+
+    @property
     def is_organizer(self):
         return (
             self.is_admin
             or self.is_creator
-            and db.seminar_organizers.count({"email": self.email}) > 0
+            and self._organizer
         )
+
 
     def check_password(self, pwd):
         """

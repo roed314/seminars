@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import render_template, request, redirect, url_for, flash
-from flask_login import login_required, current_user
+from flask_login import current_user
 from seminars.users.main import email_confirmed_required
 from seminars import db
 from seminars.create import create
@@ -36,7 +36,6 @@ SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 
 
 @create.route("manage/")
-@login_required
 @email_confirmed_required
 def index():
     # TODO: use a join for the following query
@@ -63,7 +62,6 @@ def index():
 
 
 @create.route("edit/seminar/", methods=["GET", "POST"])
-@login_required
 @email_confirmed_required
 def edit_seminar():
     if request.method == "POST":
@@ -102,7 +100,6 @@ def edit_seminar():
 
 
 @create.route("delete/seminar/<shortname>")
-@login_required
 @email_confirmed_required
 def delete_seminar(shortname):
     seminar = WebSeminar(shortname)
@@ -135,7 +132,6 @@ def delete_seminar(shortname):
 
 
 @create.route("delete/talk/<semid>/<semctr>")
-@login_required
 @email_confirmed_required
 def delete_talk(semid, semctr):
     talk = WebTalk(semid, semctr)
@@ -165,7 +161,6 @@ def delete_talk(semid, semctr):
 
 
 @create.route("save/seminar/", methods=["POST"])
-@login_required
 @email_confirmed_required
 def save_seminar():
     raw_data = request.form
@@ -206,6 +201,9 @@ def save_seminar():
     data["timezone"] = tz = raw_data.get("timezone")
     tz = pytz.timezone(tz)
 
+    # This seems like a risky hack.  We want to treat start_time/end_time as times of day which will be converted
+    # to timestamps offset from 1/1/2020 by process_user_input whtn the type is "time", but unilaterally converting
+    # all timestamps to times seems risky.  What if we want the user to enter a datetime in the future?
     def replace(a):
         if a == "timestamp with time zone":
             return "time"
@@ -273,7 +271,6 @@ def save_seminar():
 
 
 @create.route("edit/institution/", methods=["GET", "POST"])
-@login_required
 @email_confirmed_required
 def edit_institution():
     if request.method == "POST":
@@ -301,7 +298,6 @@ def edit_institution():
 
 
 @create.route("save/institution/", methods=["POST"])
-@login_required
 @email_confirmed_required
 def save_institution():
     raw_data = request.form
@@ -594,18 +590,17 @@ def make_date_data(seminar, data):
         by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
     if seminar.start_time is None:
         if future_talk is not None and future_talk.start_time:
-            seminar.start_time = future_talk.start_time.time()
+            seminar.start_time = future_talk.start_time
         elif last_talk is not None and last_talk.start_time:
-            seminar.start_time = last_talk.start_time.time()
+            seminar.start_time = last_talk.start_time
     if seminar.end_time is None:
         if future_talk is not None and future_talk.start_time:
-            seminar.end_time = future_talk.end_time.time()
+            seminar.end_time = future_talk.end_time
         elif last_talk is not None and last_talk.start_time:
-            seminar.end_time = last_talk.end_time.time()
+            seminar.end_time = last_talk.end_time
     return seminar, all_dates, by_date
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
-@login_required
 @email_confirmed_required
 def edit_seminar_schedule():
     # It would be good to have a version of this that worked for a conference, but that's a project for later
@@ -637,7 +632,6 @@ optional_cols = ["speaker_affiliation", "speaker_email", "title"]
 
 
 @create.route("save/schedule/", methods=["POST"])
-@login_required
 @email_confirmed_required
 def save_seminar_schedule():
     raw_data = request.form
