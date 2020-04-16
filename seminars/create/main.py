@@ -732,7 +732,7 @@ def save_seminar_schedule():
         # Don't try to create new_version using invalid input
         if errmsgs:
             return show_input_errors(errmsgs)
-
+        print("saving talk for speaker %s"%data["speaker"])
         if seminar_ctr:
             new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
             if new_version != talk:
@@ -752,8 +752,7 @@ def save_seminar_schedule():
             301,
         )
     else:
-        if updated or ctr > curmax + 1:
-            flash("%s talks updated, %s talks created" % (updated, ctr - curmax - 1))
+        flash("%s talks updated, %s talks created" % (updated, ctr - curmax - 1))
         if warned:
             return redirect(url_for(".edit_seminar_schedule", **raw_data), 301)
         else:
