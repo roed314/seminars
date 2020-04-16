@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, time, date
 from dateutil.parser import parse as parse_time
 import pytz, re, iso639
 from six import string_types
-from flask import url_for, flash
+from flask import url_for, flash, render_template
 from flask_login import current_user
 from seminars import db
 from sage.misc.cachefunc import cached_function

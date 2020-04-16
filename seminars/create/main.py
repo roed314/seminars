@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import current_user
-from markupsafe import Markup, escape
 from seminars.users.main import email_confirmed_required
 from seminars import db
 from seminars.create import create
@@ -211,7 +210,7 @@ def save_seminar():
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     for col in ["frequency","per_day"]:
         if data[col] is not None and data[col] < 1:
-        errmsgs.append(format_errmsg("Unable to process input %s for %s: a positive integer is required", raw_data.get(col), col))
+            errmsgs.append(format_errmsg("Unable to process input %s for %s: a positive integer is required", raw_data.get(col), col))
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
