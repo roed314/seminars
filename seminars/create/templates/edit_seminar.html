@@ -173,11 +173,11 @@
       their name will be linked to their home page, and if homepage is not set but email is set their name will have a mailto link.</p>
       <table>
         <thead>
-          <th>Name</th>
+          <th>{{ KNOWL("full_name") }}</th>
           <th>{{ KNOWL("homepage") }}</th>
           <th>{{ KNOWL("email") }}</th>
           <th>{{ KNOWL("organizer") }}</th>
-          <th>Display</th>
+          <th>{{ KNOWL("display") }}</th>
         </thead>
         {% for i in range(10) %}
         <tr>
