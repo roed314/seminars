@@ -5,6 +5,7 @@ from seminars.utils import allowed_shortname
 from lmfdb.utils import flash_error
 from collections.abc import Iterable
 from lmfdb.logger import critical
+import datetime
 
 institution_types = [
     ("university", "University"),
