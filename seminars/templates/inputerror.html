@@ -1,0 +1,20 @@
+{% extends 'homepage.html' %}
+{% block content %}
+
+<div class="announce red">
+<div>Unable to save data</div>
+A problem occured while trying to save the input you entered:
+{% if messages %}
+<ul>
+{% for msg in messages %}
+<li>{{msg}}</li>
+{% endfor %}
+</ul>
+{% elif message %}
+<br>
+{{ message }}
+</div>
+
+Please press the back button on your browser, correct the problems noted above, then press save again.
+
+{% endblock %}

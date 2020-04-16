@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import current_user
+from markupsafe import Markup, escape
 from seminars.users.main import email_confirmed_required
 from seminars import db
 from seminars.create import create
@@ -34,6 +35,8 @@ from collections import defaultdict
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 
+def format_errmsg (errmsg, *args):
+    Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
 @create.route("manage/")
 @email_confirmed_required
@@ -163,13 +166,13 @@ def delete_talk(semid, semctr):
 @create.route("save/seminar/", methods=["POST"])
 @email_confirmed_required
 def save_seminar():
-    bad_data = False
     raw_data = request.form
     shortname = raw_data["shortname"]
     new = raw_data.get("new") == "yes"
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
+    errmsgs = []
 
     def make_error(shortname, data=None):
         seminar = WebSeminar(shortname, data=data)
@@ -182,6 +185,11 @@ def save_seminar():
             institutions=institutions(),
             lock=None,
         )
+    def input_error(errmsgs):
+        assert errmsgs
+        for msg in errmsgs:
+            flash(msg,"error")
+        return render_template("inputerror.html",messages=errmsgs)
 
     if seminar.new:
         data = {
@@ -218,8 +226,7 @@ def save_seminar():
             else:
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
-            flash_error("Error processing %s: {0}".format(err), col)
-            bad_data = True
+            errmsgs.append(format_errmsg("Error processing %s: {0}".format(err), col))
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -245,8 +252,7 @@ def save_seminar():
                 # if col == 'homepage' and val and not val.startswith("http"):
                 #     D[col] = "http://" + data[col]
             except Exception as err:
-                flash_error("Error processing %s: {0}".format(err), col)
-                bad_data = True
+                errmsgs.append(format_errmsg("Error processing %s: {0}".format(err), col))
         if D.get("homepage") or D.get("email") or D.get("full_name"):
             if not D.get("full_name"):
                 return make_error(shortname,msg="Organizer name cannot be blank")
@@ -259,10 +265,9 @@ def save_seminar():
                 display_count += 1
             organizer_data.append(D)
     if display_count == 0:
-       flash_error("At least one organizer or curator must be displayed.") 
-       bad_data = True
-    if bad_data:
-        return make_error(shortname, data=data)
+       errmsgs.append(format_errmsg("Error processing %s: {0}".format(err), col))
+    if errmsgs:
+        return input_error(errmsgs)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(shortname)
