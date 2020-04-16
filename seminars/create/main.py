@@ -174,22 +174,12 @@ def save_seminar():
         return resp
     errmsgs = []
 
-    def make_error(shortname, data=None):
-        seminar = WebSeminar(shortname, data=data)
-        manage = "Manage" if current_user.is_organizer else "Create"
-        return render_template(
-            "edit_seminar.html",
-            seminar=seminar,
-            title="Edit seminar error",
-            section=manage,
-            institutions=institutions(),
-            lock=None,
-        )
     def input_error(errmsgs):
         assert errmsgs
         for msg in errmsgs:
-            flash(msg,"error")
-        return render_template("inputerror.html",messages=errmsgs)
+            print msg
+            flash_error(msg)
+        return render_template("inputerror.html")
 
     if seminar.new:
         data = {
