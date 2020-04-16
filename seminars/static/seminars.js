@@ -97,6 +97,7 @@ function setLinks() {
         setCookie("filter_time", "0");
     } else {
         $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
+        $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
         $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
         cur_topics = cur_topics.split(",");
         for (var i=0; i<cur_topics.length; i++) {
@@ -440,7 +441,8 @@ $(document).ready(function(){
         var elem = $(this);
         function success(msg) {
           // this is the row
-          $(elem[0].parentElement.parentElement).notify(msg, {className: "success", position:"right" });
+          var row = elem[0].parentElement.parentElement;
+          $(row).notify(msg, {className: "success", position:"right" });
           //evt.stopPropagation();
           var value = elem[0].value;
           // is a seminar
@@ -452,9 +454,9 @@ $(document).ready(function(){
           } else {
             // for the browse page
             if( elem.is(":checked") ) {
-              elem.removeClass("calendar-filtered");
+              $(row).removeClass("calendar-filtered");
             } else {
-              elem.addClass("calendar-filtered");
+              $(row).addClass("calendar-filtered");
             }
           }
         }
