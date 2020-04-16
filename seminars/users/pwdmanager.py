@@ -2,7 +2,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 from __future__ import absolute_import
-from six import string_types
 import bcrypt
 import urllib.parse
 from seminars import db
@@ -109,6 +108,8 @@ class PostgresUserTable(PostgresSearchTable):
 
 
     def user_exists(self, email):
+        if not email:
+            return False
         return self.lucky({"email": ilike_query(email)}, projection="id") is not None
 
 
@@ -178,7 +179,7 @@ class SeminarsUser(UserMixin):
 
     def __init__(self, uid=None, email=None):
         if email:
-            if not isinstance(email, string_types):
+            if not isinstance(email, str):
                 raise Exception("Email is not a string, %s" % email)
             query = {'email': ilike_query(email)}
         else:
