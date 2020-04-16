@@ -700,6 +700,19 @@ def save_seminar_schedule():
             start_time = end_time = None
         if any(X is None for X in [start_time, end_time, date]):
             errmsgs.append(format_errmsg("You must give a date, start and end time for %s",speaker))
+
+        if seminar_ctr:
+            # existing talk
+            seminar_ctr = int(seminar_ctr)
+            talk = WebTalk(shortname, seminar_ctr, seminar=seminar)
+        else:
+            # new talk
+            talk = WebTalk(shortname, seminar=seminar, editing=True)
+        data = dict(talk.__dict__)
+        data["speaker"] = speaker
+        data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
+        data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
+
         for col in optional_cols:
             try:
                 val = raw_data.get(col, "").strip()
@@ -719,18 +732,6 @@ def save_seminar_schedule():
         if errmsgs:
             return show_input_errors(errmsgs)
 
-        if seminar_ctr:
-            # existing talk
-            seminar_ctr = int(seminar_ctr)
-            talk = WebTalk(shortname, seminar_ctr, seminar=seminar)
-        else:
-            # new talk
-            talk = WebTalk(shortname, seminar=seminar, editing=True)
-        data = dict(talk.__dict__)
-        data["speaker"] = speaker
-
-        data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
-        data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
         if seminar_ctr:
             new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
             if new_version != talk:
