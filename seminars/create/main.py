@@ -680,6 +680,7 @@ def save_seminar_schedule():
         else:
             date = None
         time_input = raw_data.get("time%s" % i, "").strip()
+        start_time = end_time = None
         if time_input:
             try:
                 time_split = time_input.split("-")
@@ -694,8 +695,6 @@ def save_seminar_schedule():
                     raise ValueError
             except ValueError as err:
                 errmsgs.append(format_errmsg("Unable to process input %s for time: {0}".format(err), time_input))
-        else:
-            start_time = end_time = None
         if any(X is None for X in [start_time, end_time, date]):
             errmsgs.append(format_errmsg("You must give a date, start and end time for %s",speaker))
 
