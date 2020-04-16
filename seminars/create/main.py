@@ -372,7 +372,7 @@ def save_institution():
             if col == "homepage" and data[col] and not validate_url(data[col]):
                 errmsgs.append(format_errmsg("invalid %s, the string %s is not a valid url", col, data[col]))
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
-                errmsgs.append(format_errmsg("acces type %s invalid", data[col]))
+                errmsgs.append(format_errmsg("access type %s invalid", data[col]))
         except Exception as err:
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
     # Don't try to create new_version using invalid input
@@ -491,7 +491,7 @@ def save_talk():
                 except EmailNotValidError as err:
                     errmsgs.append(format_errmsg("unable to process input %s for email: {0}".format(err), data[col]))
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
-                errmsgs.append(format_errmsg("acces type %s invalid", data[col]))
+                errmsgs.append(format_errmsg("access type %s invalid", data[col]))
         except Exception as err:
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     data["topics"] = clean_topics(data.get("topics"))
