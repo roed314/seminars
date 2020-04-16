@@ -21,7 +21,7 @@ short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 def validate_url(x):
     try:
         result = urlparse(x)
-        return all([result.scheme, result.netloc, result.path])
+        return all([result.scheme, result.netloc])
     except:
         return False
 
