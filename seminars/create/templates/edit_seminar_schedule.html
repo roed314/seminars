@@ -11,7 +11,7 @@
 <form action="{{ url_for('.save_seminar_schedule') }}" method="POST">
   <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
-  <input type="hidden" name="schedule_count" value="{{ all_dates | length }}" />
+  <input type="hidden" name="slots" value="{{ slots }}" />
   <input type="hidden" name="referrer" value="schedule" />
   <h2>Show</h2>
   <table id="edit-schedule-refresh">

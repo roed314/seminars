@@ -619,7 +619,7 @@ def edit_seminar_schedule():
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
-    seminar, all_dates, by_date = make_date_data(seminar, data)
+    seminar, all_dates, by_date, slots = make_date_data(seminar, data)
     title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(
         "edit_seminar_schedule.html",
@@ -627,6 +627,7 @@ def edit_seminar_schedule():
         all_dates=all_dates,
         by_date=by_date,
         weekdays=weekdays,
+        slots=len(all_dates)*len(by_date)
         raw_data=data,
         title=title,
         section="Manage",
@@ -651,8 +652,8 @@ def save_seminar_schedule():
         frequency = int(frequency)
     except Exception:
         pass
-    schedule_count = int(raw_data["schedule_count"])
-    print("schedule count %d"%schedule_count)
+    slots = int(raw_data["slots"])
+    print("slots = %d"%slots)
     curmax = talks_max("seminar_ctr", {"seminar_id": shortname})
     if curmax is None:
         curmax = 0
@@ -660,7 +661,7 @@ def save_seminar_schedule():
     updated = 0
     warned = False
     errmsgs = []
-    for i in list(range(schedule_count)):
+    for i in list(range(slots)):
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
         speaker = process_user_input(
             raw_data.get("speaker%s" % i, ""), "text", tz=seminar.timezone
