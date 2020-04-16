@@ -260,7 +260,7 @@ def save_seminar():
                 if not validate_url(D["homepage"]):
                     errmsgs.append(format_errmsg("invalid homepage, the string %s is not a valid URL",D["homepage"])) 
             if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
-                flash_warning("The email address %s of organizer %s will be publicily visible, set homepage or disable display to prevent this.",D["email"],D["full_name"])
+                flash_warning("The email address %s of organizer %s will be publicily visible.<br>Set homepage or disable display to prevent this.",D["email"],D["full_name"])
             organizer_data.append(D)
     if display_count == 0:
        errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
