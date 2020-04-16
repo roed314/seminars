@@ -15,6 +15,8 @@ from seminars.utils import (
     clean_topics,
     clean_language,
     adapt_datetime,
+    format_errmsg,
+    show_input_errors,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar, seminars_search
 from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, can_edit_talk
@@ -34,7 +36,6 @@ import pytz
 from collections import defaultdict
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
-
 
 @create.route("manage/")
 @email_confirmed_required
@@ -190,20 +191,7 @@ def save_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
-
-    def make_error(shortname, col=None, err=None):
-        if err is not None:
-            flash_error("Error processing %s: {0}".format(err), col)
-        seminar = WebSeminar(shortname, data=raw_data)
-        manage = "Manage" if current_user.is_organizer else "Create"
-        return render_template(
-            "edit_seminar.html",
-            seminar=seminar,
-            title="Edit seminar error",
-            section=manage,
-            institutions=institutions(),
-            lock=None,
-        )
+    errmsgs = []
 
     if seminar.new:
         data = {
@@ -240,7 +228,10 @@ def save_seminar():
             else:
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
-            return make_error(shortname, col, err)
+            errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+    for col in ["frequency","per_day"]:
+        if data[col] is not None and data[col] < 1:
+            errmsgs.append(format_errmsg("Unable to process input %s for %s: a positive integer is required", raw_data.get(col), col))
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -248,36 +239,51 @@ def save_seminar():
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     organizer_data = []
+    display_count = email_count = 0
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
             if col in D:
                 continue
             name = "org_%s%s" % (col, i)
+            typ = db.seminar_organizers.col_type[col]
             try:
                 val = raw_data.get(name)
                 if val == "":
                     D[col] = None
                 elif val is None:
-                    D[col] = False  # checkboxes
+                    D[col] = False if type == "boolean" else None  # checkboxes
                 else:
-                    D[col] = process_user_input(val, db.seminar_organizers.col_type[col], tz=tz)
+                    D[col] = process_user_input(val, typ, tz=tz)
                 # if col == 'homepage' and val and not val.startswith("http"):
                 #     D[col] = "http://" + data[col]
             except Exception as err:
-                return make_error(shortname, col, err)
-        if D.get("email") or D.get("full_name"):
+                errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+        if D.get("homepage") or D.get("email") or D.get("full_name"):
+            if not D.get("full_name"):
+                errmsgs.append(format_errmsg("Organizer %s cannot be blank", "name"))
             D["order"] = len(organizer_data)
-            ####### HOT FIX ####################
-            # WARNING the header on the template
-            # says organizer and we have agreed
-            # that one is either an organizer or
-            # a curator
+            # WARNING the header on the template says organizer
+            # but it sets the database column curator, so the 
+            # boolean needs to be inverted
             D["curator"] = not D["curator"]
+            if D["display"]:
+                display_count += 1
+            if D["email"]:
+                email_count += 1
             organizer_data.append(D)
+    if display_count == 0:
+       errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
+    if email_count == 0:
+       errmsgs.append(format_errmsg("At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s", "email",
+                                    "Note that the email will not be public if homepage is set or display is not checked, it is used only to identify the organizer."))
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
-        return make_error(shortname)
+        errmsgs.append(format_errmsg("Incompatible or invalid start time %s and end time %s", new_version.start_time, new_version.end_time))
+        return show_input_errors(errmsgs)
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
@@ -437,22 +443,7 @@ def save_talk():
     )
     if resp is not None:
         return resp
-
-    def make_error(talk, col=None, err=None):
-        if err is not None:
-            flash_error("Error processing %s: {0}".format(err), col)
-        talk = WebTalk(talk.seminar_id, talk.seminar_ctr, data=raw_data)
-        title = "Create talk error" if talk.new else "Edit talk error"
-        return render_template(
-            "edit_talk.html",
-            talk=talk,
-            seminar=talk.seminar,
-            title=title,
-            section="Manage",
-            subsection="edittalk",
-            institutions=institutions(),
-            timezones=timezones,
-        )
+    errmsgs = []
 
     data = {
         "seminar_id": talk.seminar_id,
@@ -485,12 +476,16 @@ def save_talk():
             if col == "access" and val not in ["open", "users", "endorsed"]:
                 raise ValueError("Invalid access type")
         except Exception as err:
-            return make_error(talk, col, err)
+            errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
     if check_time(new_version.start_time, new_version.end_time, check_past=True):
-        return make_error(talk)
+        errmsgs.append(format_errmsg("Incompatible or invalid start time %s and end time %s", new_version.start_time, new_version.end_time))
+        return show_input_errors(errmsgs)
     if new_version == talk:
         flash("No changes made to talk.")
     else:
