@@ -667,9 +667,7 @@ def save_seminar_schedule():
             raw_data.get("speaker%s" % i, ""), "text", tz=seminar.timezone
         )
         if not speaker:
-            if not warned and any(
-                    raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols
-            ):
+            if not warned and any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
                 warned = True
                 flash_warning("Talks are only saved if you specify a speaker")
             continue
@@ -715,7 +713,7 @@ def save_seminar_schedule():
 
         for col in optional_cols:
             try:
-                val = raw_data.get(col, "").strip()
+                val = ata[col] = process_user_input(raw_data.get("%s%s" % (col, i), ""), "text", tz=seminar.timezone)
                 if not val:
                     data[col] = None
                 else:
