@@ -173,6 +173,7 @@ def save_seminar():
     def make_error(shortname, col=None, err=None, msg=None):
         if err is not None:
             flash_error("Error processing %s: {0}".format(err), col)
+            return failure()
         if msg is not None:
             flash_error(msg)
         seminar = WebSeminar(shortname)
