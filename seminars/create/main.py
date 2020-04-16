@@ -16,6 +16,8 @@ from seminars.utils import (
     clean_topics,
     clean_language,
     adapt_datetime,
+    format_errmsg,
+    show_input_errors,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, can_edit_talk
@@ -34,18 +36,6 @@ import pytz
 from collections import defaultdict
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
-
-def format_errmsg (errmsg, *args):
-    """ Foramts an error message prefixed by "Error" (so don't start your errmsg with the word error) in red text with arguments in black """
-    return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
-
-def show_input_errors(errmsgs):
-    """ Flashes a list of specific user input error messages then displays a generic message telling the user to fix the problems and resubmit. """
-    assert errmsgs
-    for msg in errmsgs:
-        flash(msg,"error")
-    return render_template("inputerror.html",messages=errmsgs)
-
 
 @create.route("manage/")
 @email_confirmed_required
@@ -219,6 +209,9 @@ def save_seminar():
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+    for col in ["frequency","per_day"]:
+        if data[col] is not None and data[col] < 1:
+        errmsgs.append(format_errmsg("Unable to process input %s for %s: a positive integer is required", raw_data.get(col), col))
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -262,7 +255,7 @@ def save_seminar():
        errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
     if email_count == 0:
        errmsgs.append(format_errmsg("At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s", "email",
-                                    "This information will not be displayed if homepage is set or display is not checked."))
+                                    "Note that the email will not be public if homepage is set or display is not checked, it is used only to identify the organizer."))
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)

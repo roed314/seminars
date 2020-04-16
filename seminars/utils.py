@@ -385,6 +385,19 @@ def process_user_input(inp, typ, tz):
         raise ValueError("Unrecognized type %s" % typ)
 
 
+def format_errmsg (errmsg, *args):
+    """ Foramts an error message prefixed by "Error" (so don't start your errmsg with the word error) in red text with arguments in black """
+    return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
+
+def show_input_errors(errmsgs):
+    """ Flashes a list of specific user input error messages then displays a generic message telling the user to fix the problems and resubmit. """
+    assert errmsgs
+    for msg in errmsgs:
+        flash(msg,"error")
+    return render_template("inputerror.html",messages=errmsgs)
+
+
+
 def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
     if classes:
         classes += " "
