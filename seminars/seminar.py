@@ -283,7 +283,8 @@ class WebSeminar(object):
                 link = rec["homepage"] if rec["homepage"] else "mailto:%s"%(rec["email"])
                 name = rec["full_name"] if rec["full_name"] else link
                 if name:
-                    editors.append('<a href="%s">%s</a>' % (link, name))
+                    editors.append('<a href="%s">%s</a>' % (link, name) if link else name)
+
         if editors:
             return "<tr><td>%s:</td><td>%s</td></tr>" % (label, ", ".join(editors))
         else:
