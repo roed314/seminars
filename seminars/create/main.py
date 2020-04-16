@@ -177,7 +177,7 @@ def save_seminar():
     def input_error(errmsgs):
         assert errmsgs
         for msg in errmsgs:
-            print msg
+            print(msg)
             flash_error(msg)
         return render_template("inputerror.html")
 
