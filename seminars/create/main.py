@@ -215,7 +215,7 @@ def save_seminar():
             else:
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
         except Exception as err:
-            errmsgs.append(format_errmsg("Error processing %s: {0}".format(err), col))
+            errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -241,10 +241,10 @@ def save_seminar():
                 # if col == 'homepage' and val and not val.startswith("http"):
                 #     D[col] = "http://" + data[col]
             except Exception as err:
-                errmsgs.append(format_errmsg("Error processing %s: {0}".format(err), col))
+                errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
         if D.get("homepage") or D.get("email") or D.get("full_name"):
             if not D.get("full_name"):
-                errmsgs.append(format_errmsg("Organizer/curator name cannot be blank"))
+                errmsgs.append(format_errmsg("Organizer %s cannot be blank", "name"))
             D["order"] = len(organizer_data)
             # WARNING the header on the template says organizer
             # but it sets the database column curator, so the 
@@ -258,8 +258,8 @@ def save_seminar():
     if display_count == 0:
        errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
     if email_count == 0:
-       errmsgs.append(format_errmsg("At least one organizer or curator needs an email address (to ensure someone can maintain this listing).<br>%s",
-                                    "This email will not be displayed if the homepage is set (or the display box is not checked)."))
+       errmsgs.append(format_errmsg("At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s", "email"
+                                    "This information will not be displayed if homepage is set or display is not checked."))
     if errmsgs:
         return input_error(errmsgs)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
