@@ -269,6 +269,8 @@ def save_seminar():
     elif seminar.organizer_data == new_version.organizer_data:
         flash("No changes made to seminar.")
     if seminar.new or seminar.organizer_data != new_version.organizer_data:
+        print(seminar.organizer_data)
+        print(new_version.organizer_data)
         new_version.save_organizers()
         if not seminar.new:
             flash("Seminar organizers updated!")
