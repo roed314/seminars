@@ -263,10 +263,12 @@ def save_seminar():
     if email_count == 0:
        errmsgs.append(format_errmsg("At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s", "email"
                                     "This information will not be displayed if homepage is set or display is not checked."))
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
         errmsgs.append(format_errmsg("Incompatible or invalid start time %s and end time %s", new_version.start_time, new_version.end_time))
-    if errmsgs:
         return show_input_errors(errmsgs)
     if seminar.new or new_version != seminar:
         new_version.save()
@@ -463,10 +465,12 @@ def save_talk():
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
     if check_time(new_version.start_time, new_version.end_time, check_past=True):
         errmsgs.append(format_errmsg("Incompatible or invalid start time %s and end time %s", new_version.start_time, new_version.end_time))
-    if errmsgs:
         return show_input_errors(errmsgs)
     if new_version == talk:
         flash("No changes made to talk.")
