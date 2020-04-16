@@ -16,7 +16,7 @@ from seminars.utils import (
     clean_language,
     adapt_datetime,
 )
-from seminars.seminar import WebSeminar, can_edit_seminar
+from seminars.seminar import WebSeminar, can_edit_seminar, seminars_search
 from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, can_edit_talk
 from seminars.institution import (
     WebInstitution,
@@ -27,6 +27,7 @@ from seminars.institution import (
     clean_institutions,
 )
 from seminars.lock import get_lock
+from seminars.users.pwdmanager import ilike_query
 from lmfdb.utils import flash_error
 import datetime
 import pytz
@@ -39,14 +40,34 @@ SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 @email_confirmed_required
 def index():
     # TODO: use a join for the following query
-    seminars = []
-    conferences = []
-    for semid in db.seminar_organizers.search({"email": current_user.email}, "seminar_id"):
+    seminars = {}
+    conferences = {}
+    def key(elt):
+        role_key = {'organizer': 0, 'curator': 1, 'creator': 3}
+        return (role_key[elt[1]], elt[0].name)
+
+    for rec in db.seminar_organizers.search({"email": ilike_query(current_user.email)},
+                                            ["seminar_id", "curator"]):
+        semid = rec['seminar_id']
+        role = 'curator' if rec['curator'] else 'organizer'
         seminar = WebSeminar(semid)
+        pair = (seminar, role)
         if seminar.is_conference:
-            conferences.append(seminar)
+            conferences[semid] = pair
         else:
-            seminars.append(seminar)
+            seminars[semid] = pair
+    role = "creator"
+    for semid in seminars_search({"owner": ilike_query(current_user.email)}, "shortname"):
+        if semid not in seminars and semid not in conferences:
+            seminar = WebSeminar(semid)
+            pair = (seminar, role)
+            if seminar.is_conference:
+                conferences[semid] = pair
+            else:
+                seminars[semid] = pair
+    seminars = sorted(seminars.values(), key=key)
+    conferences = sorted(conferences.values(), key=key)
+
     manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "create_index.html",
