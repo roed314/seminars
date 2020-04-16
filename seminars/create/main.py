@@ -262,7 +262,7 @@ def save_seminar():
        flash_error("At least one organizer or curator must be displayed.") 
        err = True
     if err:
-        return make_error(shortname, col, err)
+        return make_error(shortname, data=data)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
         return make_error(shortname)
