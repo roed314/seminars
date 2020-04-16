@@ -267,7 +267,7 @@ def save_seminar():
         new_version.save()
         edittype = "created" if new else "edited"
         flash("Seminar %s successfully!" % edittype)
-    elif list_of_dicts_equal(seminar.organizer_data,new_version.organizer_data):
+    elif seminar.organizer_data == new_version.organizer_data:
         flash("No changes made to seminar.")
     if seminar.new or seminar.organizer_data != new_version.organizer_data:
         new_version.save_organizers()
