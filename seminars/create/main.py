@@ -713,11 +713,11 @@ def save_seminar_schedule():
 
         for col in optional_cols:
             try:
-                val = ata[col] = process_user_input(raw_data.get("%s%s" % (col, i), ""), "text", tz=seminar.timezone)
+                val = raw_data.get("%s%s" % (col, i), "")
                 if not val:
                     data[col] = None
                 else:
-                    data[col] = process_user_input(val, db.talks.col_type[col], tz=tz)
+                    data[col] = process_user_input(val, db.talks.col_type[col], tz=seminar.timezone)
                 if col.endswith("email") and data[col]:
                     try:
                         data[col] = validate_email(data[col])["email"]
