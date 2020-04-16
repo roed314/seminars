@@ -68,6 +68,7 @@ class WebSeminar(object):
                     {
                         "seminar_id": self.shortname,
                         "email": current_user.email,
+                        "homepage": current_user.homepage,
                         "full_name": current_user.name,
                         "order": 0,
                         "curator": False,

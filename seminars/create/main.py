@@ -17,6 +17,7 @@ from seminars.utils import (
     adapt_datetime,
     format_errmsg,
     show_input_errors,
+    validate_url,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, can_edit_talk
@@ -33,6 +34,7 @@ from lmfdb.utils import flash_error
 import datetime
 import pytz
 from collections import defaultdict
+from email_validator import validate_email, EmailNotValidError
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 
@@ -237,10 +239,10 @@ def save_seminar():
                 # if col == 'homepage' and val and not val.startswith("http"):
                 #     D[col] = "http://" + data[col]
             except Exception as err:
-                errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+                errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
         if D.get("homepage") or D.get("email") or D.get("full_name"):
             if not D.get("full_name"):
-                errmsgs.append(format_errmsg("Organizer %s cannot be blank", "name"))
+                errmsgs.append(format_errmsg("organizer %s cannot be blank", "name"))
             D["order"] = len(organizer_data)
             # WARNING the header on the template says organizer
             # but it sets the database column curator, so the 
@@ -249,7 +251,16 @@ def save_seminar():
             if D["display"]:
                 display_count += 1
             if D["email"]:
+                try:
+                    D["email"] = validate_email(D["email"])["email"]
+                except EmailNotValidError as e:
+                    errmsgs.append(format_errmsg("the string %s is not a valid email address. %s"%(str(e)),D["email"]))
                 email_count += 1
+            if D["homepage"]:
+                if not validate_url(D["homepage"]):
+                    errmsgs.append(format_errmsg("invalid homepage, the string %s is not a valid URL",D["homepage"])) 
+            if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
+                flash_warning("The email address %o of organizer %o will be publicily visible, set homepage or disable display to prevent this.",D["email"],D["full_name"])
             organizer_data.append(D)
     if display_count == 0:
        errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
@@ -316,6 +327,7 @@ def save_institution():
     data = {}
     data["timezone"] = tz = raw_data.get("timezone", "UTC")
     tz = pytz.timezone(tz)
+    errmsgs = []
     for col in db.institutions.search_cols:
         if col in data:
             continue
@@ -326,26 +338,20 @@ def save_institution():
             else:
                 data[col] = process_user_input(val, db.institutions.col_type[col], tz=tz)
             if col == "admin":
-                userdata = db.users.lookup(val)
+                userdata = db.users.lookup(data[col])
                 if userdata is None:
-                    raise ValueError("%s must have account on this site" % val)
-            if col == "homepage" and val and not val.startswith("http"):
-                data[col] = "http://" + data[col]
-            if col == "access" and val not in ["open", "users", "endorsed"]:
-                raise ValueError("Invalid access type")
+                    errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
+                elif not userdata["creator"]:
+                    errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
+            if col == "homepage" and data[col] and not validate_url(data[col]):
+                errmsgs.append(format_errmsg("invalid %s, the string %s is not a valid url", col, data[col]))
+            if col == "access" and data[col] not in ["open", "users", "endorsed"]:
+                errmsgs.append(format_errmsg("acces type %s invalid", data[col]))
         except Exception as err:
-            # TODO: this probably needs to be a redirect to change the URL?  We want to save the data the user entered.
-            flash_error("Error processing %s: %s" % (col, err))
-            institution = WebInstitution(shortname, data=raw_data)
-            return render_template(
-                "edit_institution.html",
-                institution=institution,
-                institution_types=institution_types,
-                timezones=timezones,
-                title="Edit institution error",
-                section="Manage",
-                subsection="editinst",
-            )
+            errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
     new_version = WebInstitution(shortname, data=data)
     if new_version == institution:
         flash("No changes made to institution.")
@@ -450,10 +456,16 @@ def save_talk():
                 data[col] = None
             else:
                 data[col] = process_user_input(val, db.talks.col_type[col], tz=tz)
-            if col == "speaker_homepage" and val and not val.startswith("http"):
-                data[col] = "http://" + data[col]
-            if col == "access" and val not in ["open", "users", "endorsed"]:
-                raise ValueError("Invalid access type")
+            if col.endswith("link") and data[col]:
+                if not validate_url(data[col]):
+                    errmsgs.append(format_errmsg("invalid %s, the string %s is not a valid url", col, data[col]))
+            if col.endswith("email") and data[col]:
+                try:
+                    data[col] = validate_email(data[col])["email"]
+                except EmailNotValidError as e:
+                    errmsgs.append(format_errmsg("the string %s is not a valid email address. %s"%(str(e)),data[col]))
+            if col == "access" and data[col] not in ["open", "users", "endorsed"]:
+                errmsgs.append(format_errmsg("acces type %s invalid", data[col]))
         except Exception as err:
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     data["topics"] = clean_topics(data.get("topics"))
