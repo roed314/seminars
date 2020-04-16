@@ -1,20 +1,20 @@
 {% extends 'homepage.html' %}
 {% block content %}
 
-<div class="announce red">
-<div>Unable to save data</div>
-A problem occured while trying to save the input you entered:
-{% if messages %}
-<ul>
-{% for msg in messages %}
-<li>{{msg}}</li>
-{% endfor %}
-</ul>
-{% elif message %}
-<br>
-{{ message }}
-<p>Please press the back button on your browser, correct the problems noted above, then press save again.</p>
+<div class="announce error">
+<div>
+One or more errors occured while processing the input you entered.
 </div>
 
+
+<span style='color:black'>
+<div>
+Please press the back button on your browser, correct the errors listed above and press the save button again.
+<br>
+If you do not see any error message listed above, or if the error messages do not make clear what the problem is,
+please help us to improve the website by <a href="{{ feedbackpage }}">reporting the problem</a>.
+</div>
+</span>
+</div>
 
 {% endblock %}
