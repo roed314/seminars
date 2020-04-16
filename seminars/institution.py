@@ -86,19 +86,14 @@ class WebInstitution(object):
         return not (self == other)
 
     def save(self):
+        data = {col: getattr(self, col, None) for col in db.institutions.search_cols}
+        data["edited_by"] = int(current_user.id)
+        data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
         if self.new:
-            db.institutions.insert_many(
-                [{col: getattr(self, col, None) for col in db.institutions.search_cols}]
-            )
+            db.institutions.insert_many([data])
         else:
-            db.institutions.upsert(
-                {"shortname": self.shortname},
-                {
-                    col: getattr(self, col, None)
-                    for col in db.institutions.search_cols
-                    if col not in ["id", "shortname"]
-                },
-            )
+            assert data.get("shortname")
+            db.institutions.upsert({"shortname": self.shortname}, data)
 
     def admin_link(self):
         userdata = db.users.lookup(self.admin)

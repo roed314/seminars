@@ -1,0 +1,23 @@
+organizer_name:
+  title: Name
+  contents: |
+    The full name of the organizer (or curator) that will be displayed on the seminar's home page.  This cannot be left blank.
+homepage:
+  title: Homepage
+  contents: |
+    The URL of the homepage of the organizer (or curator) that their name will be linked to on the "view seminar" page.
+    Specifying the homepage ensures that their email address will be hidden.  Many organizers obfuscate their email addresses on their homepages and we want to preserve this obfuscation.
+email:
+  title: Email
+  contents: |
+    The email address of the organizer (or curator).  This will only be displayed if the homepage is not specified and the display box is checked.
+    In all other cases it is used only to identify the organizer's user account and will give them permission to edit the seminar (assuming the register using this email address).
+organizer:
+  title: Organizer
+  contents: |
+    Check this box for organizers of the seminar responsible for its scientific content, inviting speakers, etc.
+    Leave this box unchecked for users who should be able to edit the seminar but are not responsible for its content; these users will be listed as "Curators" on the seminar's home page.
+display:
+  title: Display
+  contents: |
+    Check this box for oragnizers (or curators) whose names should appear on the seminar's home page.  This box must be checked for at least one organizer or curator.

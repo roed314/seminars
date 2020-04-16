@@ -172,7 +172,9 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
   </head>
 
   <body class="{{ body_class }}">
-
+{% macro KNOWL(kid, title=none) -%}
+{{ static_knowl(kid, title) | safe }}
+{%- endmacro %}
     {% block body -%}{%- endblock body %}
   </body>
 </html>
