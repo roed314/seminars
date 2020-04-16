@@ -539,6 +539,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
         return None
 
     @property
+    def homepage(self):
+        return None
+
+    @property
     def name(self):
         return ""
 
