@@ -36,7 +36,16 @@ from collections import defaultdict
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 
 def format_errmsg (errmsg, *args):
+    """ Foramts an error message prefixed by "Error" (so don't start your errmsg with the word error) in red text with arguments in black """
     return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
+
+def show_input_errors(errmsgs):
+    """ Flashes a list of specific user input error messages then displays a generic message telling the user to fix the problems and resubmit. """
+    assert errmsgs
+    for msg in errmsgs:
+        flash(msg,"error")
+    return render_template("inputerror.html",messages=errmsgs)
+
 
 @create.route("manage/")
 @email_confirmed_required
@@ -174,12 +183,6 @@ def save_seminar():
         return resp
     errmsgs = []
 
-    def input_error(errmsgs):
-        assert errmsgs
-        for msg in errmsgs:
-            flash(msg,"error")
-        return render_template("inputerror.html",messages=errmsgs)
-
     if seminar.new:
         data = {
             "shortname": shortname,
@@ -260,11 +263,11 @@ def save_seminar():
     if email_count == 0:
        errmsgs.append(format_errmsg("At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s", "email"
                                     "This information will not be displayed if homepage is set or display is not checked."))
-    if errmsgs:
-        return input_error(errmsgs)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     if check_time(new_version.start_time, new_version.end_time):
-        return make_error(shortname)
+        errmsgs.append(format_errmsg("Incompatible or invalid start time %s and end time %s", new_version.start_time, new_version.end_time))
+    if errmsgs:
+        return show_input_errors(errmsgs)
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
@@ -424,22 +427,7 @@ def save_talk():
     )
     if resp is not None:
         return resp
-
-    def make_error(talk, col=None, err=None):
-        if err is not None:
-            flash_error("Error processing %s: {0}".format(err), col)
-        talk = WebTalk(talk.seminar_id, talk.seminar_ctr, data=raw_data)
-        title = "Create talk error" if talk.new else "Edit talk error"
-        return render_template(
-            "edit_talk.html",
-            talk=talk,
-            seminar=talk.seminar,
-            title=title,
-            section="Manage",
-            subsection="edittalk",
-            institutions=institutions(),
-            timezones=timezones,
-        )
+    errmsgs = []
 
     data = {
         "seminar_id": talk.seminar_id,
@@ -472,12 +460,14 @@ def save_talk():
             if col == "access" and val not in ["open", "users", "endorsed"]:
                 raise ValueError("Invalid access type")
         except Exception as err:
-            return make_error(talk, col, err)
+            errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
     if check_time(new_version.start_time, new_version.end_time, check_past=True):
-        return make_error(talk)
+        errmsgs.append(format_errmsg("Incompatible or invalid start time %s and end time %s", new_version.start_time, new_version.end_time))
+    if errmsgs:
+        return show_input_errors(errmsgs)
     if new_version == talk:
         flash("No changes made to talk.")
     else:
