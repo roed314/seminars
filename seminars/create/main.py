@@ -698,6 +698,10 @@ def save_seminar_schedule():
         if any(X is None for X in [start_time, end_time, date]):
             errmsgs.append(format_errmsg("You must give a date, start and end time for %s",speaker))
 
+        # we need to flag date and time errors now
+        if errmsgs:
+            return show_input_errors(errmsgs)
+
         if seminar_ctr:
             # existing talk
             seminar_ctr = int(seminar_ctr)
