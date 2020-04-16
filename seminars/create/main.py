@@ -36,7 +36,7 @@ from collections import defaultdict
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 
 def format_errmsg (errmsg, *args):
-    Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
+    return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
 @create.route("manage/")
 @email_confirmed_required
@@ -177,9 +177,8 @@ def save_seminar():
     def input_error(errmsgs):
         assert errmsgs
         for msg in errmsgs:
-            print(msg)
-            flash_error(msg)
-        return render_template("inputerror.html")
+            flash(msg,"error")
+        return render_template("inputerror.html",messages=errmsgs)
 
     if seminar.new:
         data = {
@@ -224,7 +223,7 @@ def save_seminar():
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     organizer_data = []
-    display_count = 0
+    display_count = email_count = 0
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
@@ -245,7 +244,7 @@ def save_seminar():
                 errmsgs.append(format_errmsg("Error processing %s: {0}".format(err), col))
         if D.get("homepage") or D.get("email") or D.get("full_name"):
             if not D.get("full_name"):
-                return make_error(shortname,msg="Organizer name cannot be blank")
+                errmsgs.append(format_errmsg("Organizer/curator name cannot be blank"))
             D["order"] = len(organizer_data)
             # WARNING the header on the template says organizer
             # but it sets the database column curator, so the 
@@ -253,9 +252,14 @@ def save_seminar():
             D["curator"] = not D["curator"]
             if D["display"]:
                 display_count += 1
+            if D["email"]:
+                email_count += 1
             organizer_data.append(D)
     if display_count == 0:
-       errmsgs.append(format_errmsg("Error processing %s: {0}".format(err), col))
+       errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
+    if email_count == 0:
+       errmsgs.append(format_errmsg("At least one organizer or curator needs an email address (to ensure someone can maintain this listing).<br>%s",
+                                    "This email will not be displayed if the homepage is set (or the display box is not checked)."))
     if errmsgs:
         return input_error(errmsgs)
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
