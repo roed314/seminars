@@ -441,7 +441,8 @@ $(document).ready(function(){
         var elem = $(this);
         function success(msg) {
           // this is the row
-          $(elem[0].parentElement.parentElement).notify(msg, {className: "success", position:"right" });
+          var row = elem[0].parentElement.parentElement;
+          $(row).notify(msg, {className: "success", position:"right" });
           //evt.stopPropagation();
           var value = elem[0].value;
           // is a seminar
@@ -453,9 +454,9 @@ $(document).ready(function(){
           } else {
             // for the browse page
             if( elem.is(":checked") ) {
-              elem.removeClass("calendar-filtered");
+              $(row).removeClass("calendar-filtered");
             } else {
-              elem.addClass("calendar-filtered");
+              $(row).addClass("calendar-filtered");
             }
           }
         }
