@@ -652,8 +652,7 @@ def save_seminar_schedule():
     except Exception:
         pass
     schedule_count = int(raw_data["schedule_count"])
-    # FIXME not being used
-    # update_times = bool(raw_data.get("update_times"))
+    print("schedule count %d"%schedule_count)
     curmax = talks_max("seminar_ctr", {"seminar_id": shortname})
     if curmax is None:
         curmax = 0
