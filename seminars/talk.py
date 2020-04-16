@@ -126,20 +126,20 @@ class WebTalk(object):
         Otherwise, show the date only if different from the date of the start time in that time zone.
         """
         # This is used in show_time_and_duration, and needs to include the ending date if different (might not be the same in current user's time zone)
-        t = adapt_datetime(self.end_time, tz)
+        t = adapt_datetime(self.end_time, newtz=tz)
         if tz is not None:
             return t.strftime("%H:%M")
-        t0 = adapt_datetime(self.start_time, tz)
+        t0 = adapt_datetime(self.start_time, newtz=tz)
         if t0.date() == t.date():
             return t.strftime("%H:%M")
         else:
             return t.strftime("%a %b %-d, %H:%M")
 
-    def show_date(self):
+    def show_date(self, tz=None):
         if self.start_time is None:
             return ""
         else:
-            return adapt_datetime(self.start_time).strftime("%a %b %-d")
+            return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %-d")
 
     def show_time_and_duration(self):
         start = self.start_time
@@ -328,10 +328,13 @@ class WebTalk(object):
             tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
         )
 
-    def oneline(self, include_seminar=True, include_subscribe=True):
+    def oneline(self,
+                include_seminar=True,
+                include_subscribe=True,
+                tz=None):
         cols = []
-        cols.append(('class="date"', self.show_date()))
-        cols.append(('class="time"', self.show_start_time()))
+        cols.append(('class="date"', self.show_date(tz=tz)))
+        cols.append(('class="time"', self.show_start_time(tz=tz)))
         if include_seminar:
             cols.append(('class="seminar"', self.show_seminar()))
         cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
@@ -421,9 +424,9 @@ Email link to speaker
         return event
 
 
-def talks_header(include_seminar=True, include_subscribe=True):
+def talks_header(include_seminar=True, include_subscribe=True, datetime_header="Your time"):
     cols = []
-    cols.append((' colspan="2" class="yourtime"', "Your time"))
+    cols.append((' colspan="2" class="yourtime"', datetime_header))
     if include_seminar:
         cols.append((' class="seminar"', "Seminar"))
     cols.append((' class="speaker"', "Speaker"))
