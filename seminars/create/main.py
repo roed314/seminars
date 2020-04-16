@@ -461,7 +461,7 @@ def save_talk():
                 data[col] = None
             else:
                 data[col] = process_user_input(val, db.talks.col_type[col], tz=tz)
-            if col.endswith("link") and data[col]:
+            if (col.endswith("homepage") or col.endswith("link")) and data[col]:
                 if not validate_url(data[col]):
                     errmsgs.append(format_errmsg("invalid %s, the string %s is not a valid url", col, data[col]))
             if col.endswith("email") and data[col]:
