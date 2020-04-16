@@ -627,7 +627,7 @@ def edit_seminar_schedule():
         all_dates=all_dates,
         by_date=by_date,
         weekdays=weekdays,
-        slots=len(all_dates)*len(by_date),
+        slots=str(len(all_dates)*len(by_date)),
         raw_data=data,
         title=title,
         section="Manage",
