@@ -619,7 +619,7 @@ def edit_seminar_schedule():
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
-    seminar, all_dates, by_date make_date_data(seminar, data)
+    seminar, all_dates, by_date = make_date_data(seminar, data)
     print(all_dates)
     print(by_date)
     title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
