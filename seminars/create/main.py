@@ -254,7 +254,7 @@ def save_seminar():
                 try:
                     D["email"] = validate_email(D["email"])["email"]
                 except EmailNotValidError as err:
-                    errmsgs.append(format_errmsg("the string %s is not a valid email address: {0}".format(err),D["email"]))
+                    errmsgs.append(format_errmsg("unable to process input %s for eamil: {0}".format(err),D["email"]))
                 email_count += 1
             if D["homepage"]:
                 if not validate_url(D["homepage"]):
@@ -463,7 +463,7 @@ def save_talk():
                 try:
                     data[col] = validate_email(data[col])["email"]
                 except EmailNotValidError as err:
-                    errmsgs.append(format_errmsg("the string %s is not a valid email address: {0}".format(err), data[col]))
+                    errmsgs.append(format_errmsg("unable to process input %s for email: {0}".format(err), data[col]))
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("acces type %s invalid", data[col]))
         except Exception as err:
@@ -725,7 +725,7 @@ def save_seminar_schedule():
                     try:
                         data[col] = validate_email(data[col])["email"]
                     except EmailNotValidError as err:
-                        errmsgs.append(format_errmsg("the string %s is not a valid email address: {0}".format(err), data[col]))
+                        errmsgs.append(format_errmsg("unable to process input %s for email: {0}".format(err), data[col]))
             except Exception as err:
                 errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
 
