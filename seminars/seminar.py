@@ -39,6 +39,8 @@ class WebSeminar(object):
                 data["topics"] = []
             if data.get("institutions") is None:
                 data["institutions"] = []
+            if data.get("timezone") is None:
+                data["timesone"] = str(current_user.tz)
         self.new = data is None
         if self.new:
             self.shortname = shortname
