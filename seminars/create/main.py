@@ -362,10 +362,11 @@ def save_seminar():
             continue
         try:
             val = raw_data.get(col)
+            typ = db.seminars.col_type[col]
             if not val:
-                data[col] = False if type == "boolean" else None  # checkboxes
+                data[col] = False if typ == "boolean" else None  # checkboxes
             else:
-                data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
+                data[col] = process_user_input(val, replace(typ), tz=tz)
             if col.endswith("link") and data[col]:
                 # allow "see comments" in live link
                 if not validate_url(data[col]) and not (col == "live_link" and data[col] == "see comments"):
@@ -407,7 +408,7 @@ def save_seminar():
                 if val == "":
                     D[col] = None
                 elif val is None:
-                    D[col] = False if type == "boolean" else None  # checkboxes
+                    D[col] = False if typ == "boolean" else None  # checkboxes
                 else:
                     D[col] = process_user_input(val, typ, tz=tz)
                 # if col == 'homepage' and val and not val.startswith("http"):
@@ -536,10 +537,11 @@ def save_institution():
             continue
         try:
             val = raw_data.get(col)
+            typ = db.institutions.col_type[col]
             if not val:
-                data[col] = None
+                data[col] = False if typ == "boolean" else None  # checkboxes
             else:
-                data[col] = process_user_input(val, db.institutions.col_type[col], tz=tz)
+                data[col] = process_user_input(val, typ, tz=tz)
             if col == "admin":
                 userdata = db.users.lookup(data[col])
                 if userdata is None:
@@ -661,10 +663,11 @@ def save_talk():
             continue
         try:
             val = raw_data.get(col, "").strip()
+            typ = db.talks.col_type[col]
             if not val:
-                data[col] = None
+                data[col] = False if typ == "boolean" else None  # checkboxes
             else:
-                data[col] = process_user_input(val, db.talks.col_type[col], tz=tz)
+                data[col] = process_user_input(val, typ, tz=tz)
             if (col.endswith("homepage") or col.endswith("link")) and data[col]:
                 if not validate_url(data[col]) and not (col == "live_link" and data[col] == "see comments"):
                     errmsgs.append(

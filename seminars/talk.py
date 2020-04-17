@@ -88,6 +88,7 @@ class WebTalk(object):
     def __eq__(self, other):
         return isinstance(other, WebTalk) and all(
             getattr(self, key, None) == getattr(other, key, None) for key in db.talks.search_cols
+            if key not in ["edited_at", "edited_by"]
         )
 
     def __ne__(self, other):

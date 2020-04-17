@@ -102,6 +102,7 @@ class WebSeminar(object):
         # Note that equality ignores organizers
         return isinstance(other, WebSeminar) and all(
             getattr(self, key, None) == getattr(other, key, None) for key in db.seminars.search_cols
+            if key not in ["edited_at", "edited_by"]
         )
 
     def __ne__(self, other):
