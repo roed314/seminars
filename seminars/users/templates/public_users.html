@@ -3,7 +3,7 @@
 {% block content %}
 
 <table>
-  {% for affiliation, name, email, homepage in public_users %}
+  {% for affiliation, homepage, name in public_users %}
   <tr>
     <td>{{ affiliation }}</td>
     <td><a href="{{ homepage }}">{{ name }}</a></td>
