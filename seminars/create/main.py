@@ -234,7 +234,8 @@ def save_seminar():
             else:
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
             if col.endswith("link") and data[col]:
-                if not validate_url(data[col]):
+                # allow "see comments" in live link
+                if not validate_url(data[col]) and not (col == "live_link" and data[col] == "see comments"):
                     errmsgs.append(
                         format_errmsg(
                             "invalid %s, the string %s is not a valid url", col, data[col],
