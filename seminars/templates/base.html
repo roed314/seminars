@@ -14,16 +14,12 @@
     console.log("cookies enabled");
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if( document.cookie.includes('browser_timezone') ) {
-      //console.log("has cookie");
-      console.log(document.cookie);
     } else {
-      document.cookie = "browser_timezone=" + tz + ";path=/"
-      //console.log("adding cookie");
-      //console.log(document.cookie);
+      document.cookie = "browser_timezone=" + tz + ";path=/";
       location.reload();
     }
     } else {
-      //console.log("cookies disabled");
+      console.log("cookies disabled");
   }
   </script>
     <link id="style_css" href="{{ url_for('css') }}" rel="stylesheet" type="text/css" />
