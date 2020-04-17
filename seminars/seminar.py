@@ -42,11 +42,11 @@ class WebSeminar(object):
             if data.get("timezone") is None:
                 data["timesone"] = str(current_user.tz)
         self.new = data is None
+        self.deleted = False
         if self.new:
             self.shortname = shortname
             self.display = current_user.is_creator
             self.online = True  # default
-            self.deleted = False
             self.access = "open"  # default
             self.archived = False  # don't start out archived
             self.is_conference = False  # seminar by default
