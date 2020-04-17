@@ -46,6 +46,7 @@ class WebSeminar(object):
             self.shortname = shortname
             self.display = current_user.is_creator
             self.online = True  # default
+            self.deleted = False
             self.access = "open"  # default
             self.archived = False  # don't start out archived
             self.is_conference = False  # seminar by default

@@ -1,0 +1,20 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+{% if user.is_admin() or seminar.owner == user.email %}
+
+<p>Your seminar, {{seminar.name}}, has been deleted.</p>
+
+<ul>
+  <li><a href="{{ url_for('.revive_seminar', shortname=seminar.shortname) }}">Revive</a> (will also revive all talks)</li>
+  <li><a href="{{ url_for('.permdelete_seminar', shortname=seminar.shortname) }}">Delete permanently</a></li>
+</ul>
+
+{% else %}
+
+<p>The seminar {{seminar.name}} has been deleted.</p>
+
+{% endif %}
+
+{% endblock %}

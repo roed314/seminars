@@ -1,0 +1,20 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+{% if talk.seminar.owner == user.email %}
+
+<p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted.</p>
+
+<ul>
+  <li><a href="{{ url_for('.revive_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr) }}">Revive</a></li>
+  <li><a href="{{ url_for('.permdelete_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr) }}">Delete permanently</a></li>
+</ul>
+
+{% else %}
+
+<p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted.</p>
+
+{% endif %}
+
+{% endblock %}
