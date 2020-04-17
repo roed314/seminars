@@ -90,7 +90,7 @@ def login(**kwargs):
     # we always remember
     remember = True  # if request.form["remember"] == "on" else False
     user = SeminarsUser(email=email)
-    if user and user.check_password(password):
+    if user.email and user.check_password(password):
         # this is where we set current_user = user
         login_user(user, remember=remember)
         if user.name:

@@ -64,7 +64,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 </div>
 <div id="future_talks">
   {% if future %}
-  <table>
+  <table class="ntdata">
     <thead>
       <tr>
         {{ talks_header(include_seminar=False) | safe }}
@@ -80,7 +80,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 </div>
 {% if past %}
 <div id="past_talks">
-  <table>
+  <table class="ntdata">
     <thead>
       <tr>
         {{ talks_header(include_seminar=False) | safe }}
