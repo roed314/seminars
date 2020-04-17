@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, time, date
 from dateutil.parser import parse as parse_time
 import pytz, re, iso639
 from six import string_types
-from flask import url_for, flash
+from flask import url_for, flash, render_template
 from flask_login import current_user
 from seminars import db
 from sage.misc.cachefunc import cached_function
@@ -12,9 +12,18 @@ from lmfdb.utils.search_boxes import SearchBox
 from psycopg2.sql import SQL
 from markupsafe import Markup, escape
 from collections.abc import Iterable
+from urllib.parse import urlparse
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+
+def validate_url(x):
+    try:
+        result = urlparse(x)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
 
 
 def naive_utcoffset(tz):
@@ -66,19 +75,26 @@ def is_nighttime(t):
     # These are times that might be mixed up by using a 24 hour clock
     return 1 <= t.hour < 8
 
+
 def simplify_language_name(name):
-    name = name.split(';')[0]
-    if '(' in name:
-        name = name[:name.find('(')-1]
+    name = name.split(";")[0]
+    if "(" in name:
+        name = name[: name.find("(") - 1]
     return name
+
 
 @cached_function
 def languages_dict():
-    return {lang['iso639_1']: simplify_language_name(lang['name']) for lang in iso639.data if lang['iso639_1']}
+    return {
+        lang["iso639_1"]: simplify_language_name(lang["name"])
+        for lang in iso639.data
+        if lang["iso639_1"]
+    }
+
 
 def clean_language(inp):
     if inp not in languages_dict():
-        return 'en'
+        return "en"
     else:
         return inp
 
@@ -113,10 +129,15 @@ def check_time(start_time, end_time, check_past=False):
             "Your talk is scheduled between midnight and 8am. Please edit again using 24-hour notation or including pm if that was unintentional"
         )
     # Python doesn't support subtracting times
-    if (isinstance(start_time, time) and isinstance(end_time, time) and
-        datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time) > timedelta(hours=8) or
-        isinstance(start_time, datetime) and isinstance(end_time, datetime) and
-        end_time - start_time > timedelta(hours=8)):
+    if (
+        isinstance(start_time, time)
+        and isinstance(end_time, time)
+        and datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time)
+        > timedelta(hours=8)
+        or isinstance(start_time, datetime)
+        and isinstance(end_time, datetime)
+        and end_time - start_time > timedelta(hours=8)
+    ):
         flash_warning(
             "Your talk lasts for more than 8 hours.  Please edit again if that was unintented"
         )
@@ -383,6 +404,28 @@ def process_user_input(inp, typ, tz):
             return []
     else:
         raise ValueError("Unrecognized type %s" % typ)
+
+
+def format_errmsg(errmsg, *args):
+    return Markup(
+        "Error: "
+        + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
+    )
+
+
+def format_warning(errmsg, *args):
+    return Markup(
+        "Warning: "
+        + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
+    )
+
+
+def show_input_errors(errmsgs):
+    """ Flashes a list of specific user input error messages then displays a generic message telling the user to fix the problems and resubmit. """
+    assert errmsgs
+    for msg in errmsgs:
+        flash(msg, "error")
+    return render_template("inputerror.html", messages=errmsgs)
 
 
 def toggle(tglid, value, checked=False, classes="", onchange="", name=""):

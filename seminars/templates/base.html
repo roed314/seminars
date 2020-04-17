@@ -165,14 +165,12 @@ ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www')
 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 })();
     </script>
-
-    {% if body_class == "checklist" -%}
-      <base target="page">
-      {%- endif %}
   </head>
 
   <body class="{{ body_class }}">
-
+{% macro KNOWL(kid, title=none) -%}
+{{ static_knowl(kid, title) | safe }}
+{%- endmacro %}
     {% block body -%}{%- endblock body %}
   </body>
 </html>

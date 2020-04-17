@@ -5,6 +5,7 @@ from seminars.utils import allowed_shortname
 from lmfdb.utils import flash_error
 from collections.abc import Iterable
 from lmfdb.logger import critical
+import datetime, pytz
 
 institution_types = [
     ("university", "University"),
@@ -68,7 +69,9 @@ class WebInstitution(object):
                 elif typ == "text[]":
                     setattr(self, key, [])
                 else:
-                    critical("Need to update institution code to account for schema change key=%s" % key)
+                    critical(
+                        "Need to update institution code to account for schema change key=%s" % key
+                    )
                     setattr(self, key, None)
         else:
             self.__dict__.update(data)
@@ -86,19 +89,14 @@ class WebInstitution(object):
         return not (self == other)
 
     def save(self):
+        data = {col: getattr(self, col, None) for col in db.institutions.search_cols}
+        data["edited_by"] = int(current_user.id)
+        data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
         if self.new:
-            db.institutions.insert_many(
-                [{col: getattr(self, col, None) for col in db.institutions.search_cols}]
-            )
+            db.institutions.insert_many([data])
         else:
-            db.institutions.upsert(
-                {"shortname": self.shortname},
-                {
-                    col: getattr(self, col, None)
-                    for col in db.institutions.search_cols
-                    if col not in ["id", "shortname"]
-                },
-            )
+            assert data.get("shortname")
+            db.institutions.upsert({"shortname": self.shortname}, data)
 
     def admin_link(self):
         userdata = db.users.lookup(self.admin)
@@ -113,12 +111,12 @@ def can_edit_institution(shortname, new):
         flash_error(
             "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
         )
-        return redirect(url_for("list_institutions"), 301), None
+        return redirect(url_for("list_institutions"), 302), None
     institution = db.institutions.lookup(shortname)
     # Check if institution exists
     if new != (institution is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
-        return redirect(url_for(".index"), 301), None
+        return redirect(url_for(".index"), 302), None
     if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         if institution["admin"] != current_user.email:
@@ -130,7 +128,7 @@ def can_edit_institution(shortname, new):
                 "You do not have permission to edit %s.  Contact the institution admin, %s, and ask them to fix any errors."
                 % (institution.name, owner)
             )
-            return redirect(url_for(".index"), 301), None
+            return redirect(url_for(".index"), 302), None
     if institution is None:
         institution = WebInstitution(shortname, data=None, editing=True)
     return None, institution

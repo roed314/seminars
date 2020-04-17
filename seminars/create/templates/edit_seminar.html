@@ -134,18 +134,19 @@
           </td>
         </tr>
         <tr>
+          <td>Livestream link</td>
+          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+          <td class="forminfo" />Enter "see comments" if the link is not fixed and explain in the comments how to get the link.</td>
+        </tr>
+        <tr>
           <td>Access</td>
           <td>
             <select name="access" style="width:510px;">
               <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view link</option>
-              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Logged-in users can view link</option>
-              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Endorsed users can view link</option>
+              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
+              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
             </select>
           </td>
-        </tr>
-        <tr>
-          <td>Livestream link</td>
-          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="https://example.org"/></td>
         </tr>
         {% if not seminar.new %}
           <tr>
@@ -159,7 +160,7 @@
           </tr>
         {% endif %}
         <tr>
-          <td colspan="2">Comments</td>
+          <td colspan="2" style="padding-top: 10px">Comments</td>
         </tr>
         <tr>
           <td colspan="2"><textarea cols="76" rows="5" name="comments">{{ seminar.comments | blanknone }}</textarea></td>
@@ -169,41 +170,42 @@
       <p class="forminfo">
         Normally, leave "Organizer" checked; uncheck for a staff/student/postdoc assistant with permission to edit the seminar despite not being responsible for the scientific organization.
         </br>
-      Anyone with "Display" checked will be visible on the seminar's page, in the order below (in a separate list of "Curators" if "Organizer" is not checked); if in addition "Contact" is checked, their names there will be "mailto:" links.</p>
+      Anyone with "Display" checked will be visible on the seminar's page, in the order below (in a separate list of "Curators" if "Organizer" is not checked).  If homepage is set
+      their name will be linked to their home page, and if homepage is not set but email is set their name will have a mailto link.</p>
       <table>
         <thead>
-          <th>Email</th>
-          <th>Name</th>
-          <th>Organizer</th>
-          <th>Display</th>
-          <th>Contact</th>
+          <th>{{ KNOWL("organizer_name") }}</th>
+          <th>{{ KNOWL("homepage") }}</th>
+          <th>{{ KNOWL("email") }}</th>
+          <th>{{ KNOWL("organizer") }}</th>
+          <th>{{ KNOWL("display") }}</th>
         </thead>
         {% for i in range(10) %}
         <tr>
           {% if i < (seminar.organizer_data | length) %}
             <td>
-              <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px"/>
-            </td>
-            <td>
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
             </td>
             <td>
-              {############ HOT FIX ###############}
-              {# WARNING: the header is organizer #}
+              <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px"/>
+            </td>
+            <td>
+              <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px"/>
+            </td>
+            <td>
+              {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
+              {# but it is displayed in a column labeleled "organizer" so it is checked when curator is false #}
               <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
             </td>
             <td>
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
             </td>
-            <td>
-              <input type="checkbox" name="org_contact{{i}}" value="yes" {% if seminar.organizer_data[i].get("contact") %}checked{% endif %} />
-            </td>
           {% else %}
-            <td><input name="org_email{{i}}" style="width:220px;" /></td>
             <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
+            <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
+            <td><input name="org_email{{i}}" style="width:220px;" /></td>
             <td><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
             <td><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
-            <td><input type="checkbox" name="org_contact{{i}}" value="yes" /></td>
           {% endif %}
         </tr>
         {% endfor %}
