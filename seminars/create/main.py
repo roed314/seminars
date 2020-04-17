@@ -727,7 +727,6 @@ def save_seminar_schedule():
     except Exception:
         pass
     slots = int(raw_data["slots"])
-    print("slots = %d" % slots)
     curmax = talks_max("seminar_ctr", {"seminar_id": shortname})
     if curmax is None:
         curmax = 0
@@ -826,7 +825,6 @@ def save_seminar_schedule():
         # Don't try to create new_version using invalid input
         if errmsgs:
             return show_input_errors(errmsgs)
-        print("saving talk for speaker %s" % data["speaker"])
         if seminar_ctr:
             new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
             if new_version != talk:
