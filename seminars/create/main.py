@@ -215,7 +215,7 @@ def revive_seminar(shortname):
     else:
         db.seminars.update({"shortname": shortname}, {"deleted": False})
         db.talks.update({"seminar_id": shortname}, {"deleted": False})
-        flash("Seminar %s revived" % shortname)
+        flash("Seminar %s revived.  You should reset the organizers, and note that any users that were subscribed no longer are." % shortname)
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
 @create.route("permdelete/seminar/<shortname>")
@@ -298,7 +298,7 @@ def revive_talk(semid, semctr):
         return redirect(url_for(".edit_talk", seminar_id=semid, seminar_ctr=semctr), 302)
     else:
         db.talks.update({"seminar_id": semid, "seminar_ctr": semctr}, {"deleted": False})
-        flash("Talk revived")
+        flash("Talk revived.  Note that any users who were subscribed no longer are.")
         return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
 
 @create.route("permdelete/talk/<semid>/<int:semctr>")
