@@ -84,11 +84,16 @@ def import_talks(csv_file):
                     % (speaker, seminar_id)
                 )
                 continue
-            curtalk = talks_lucky({'seminar_id': seminar_id, 'start_time': start_time})
+            curtalk = talks_lucky({"seminar_id": seminar_id, "start_time": start_time})
             if curtalk is not None:
-                print("Talk at time %s (speaker %s) already exists in seminar %s; continuing" % (start_time.strftime("%a %b %d %-H:%M"), speaker, seminar_id))
+                print(
+                    "Talk at time %s (speaker %s) already exists in seminar %s; continuing"
+                    % (start_time.strftime("%a %b %d %-H:%M"), speaker, seminar_id)
+                )
                 continue
-            topics = arXiv.replace(" ","").replace("Math.", "").replace("math.", "").lower().split(",")
+            topics = (
+                arXiv.replace(" ", "").replace("Math.", "").replace("math.", "").lower().split(",")
+            )
             if not topics:
                 topics = []
             talks.append(
