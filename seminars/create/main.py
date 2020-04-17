@@ -270,7 +270,7 @@ def save_seminar():
                 errmsgs.append(format_errmsg("organizer %s cannot be blank", "name"))
             D["order"] = len(organizer_data)
             # WARNING the header on the template says organizer
-            # but it sets the database column curator, so the 
+            # but it sets the database column curator, so the
             # boolean needs to be inverted
             D["curator"] = not D["curator"]
             if D["display"]:
@@ -279,11 +279,11 @@ def save_seminar():
                 try:
                     D["email"] = validate_email(D["email"])["email"]
                 except EmailNotValidError as err:
-                    errmsgs.append(format_errmsg("unable to process input %s for eamil: {0}".format(err),D["email"]))
+                    errmsgs.append(format_errmsg("unable to process input %s for email: {0}".format(err), D["email"]))
                 email_count += 1
             if D["homepage"]:
                 if not validate_url(D["homepage"]):
-                    errmsgs.append(format_errmsg("invalid homepage, the string %s is not a valid URL",D["homepage"])) 
+                    errmsgs.append(format_errmsg("invalid homepage, the string %s is not a valid URL", D["homepage"]))
             if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
                 flash(format_warning("The email address %s of organizer %s will be publicily visible.<br>%s",
                       D["email"],D["full_name"],"Set homepage or disable display to prevent this."), "error")
