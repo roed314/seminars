@@ -28,7 +28,6 @@ from markupsafe import Markup
 from icalendar import Calendar
 from io import BytesIO
 
-from psycopg2.sql import SQL
 from seminars import db
 
 from seminars.utils import timezones, timestamp
