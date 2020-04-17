@@ -221,9 +221,9 @@ def count_distinct(table, counter, query={}, include_deleted=False):
 
 def max_distinct(table, maxer, col, constraint={}, include_deleted=False):
     # Note that this will return None for the max of an empty set
-    query = dict(query)
+    constraint = dict(constraint)
     if not include_deleted:
-        query["deleted"] = False
+        constraint["deleted"] = False
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
     tbl = IdentifierWrapper(table.search_table)
     qstr, values = table._build_query(constraint, sort=[])

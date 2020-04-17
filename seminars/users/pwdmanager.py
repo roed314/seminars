@@ -507,7 +507,7 @@ class SeminarsUser(UserMixin):
         return True
 
     def delete(self):
-        userdb.delete(self._uid)
+        userdb.delete(self._data)
 
 class SeminarsAnonymousUser(AnonymousUserMixin):
     """
