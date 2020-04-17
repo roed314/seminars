@@ -46,10 +46,10 @@ class WebTalk(object):
             seminar = WebSeminar(semid, deleted=deleted)
         self.seminar = seminar
         self.new = data is None
+        self.deleted=False
         if self.new:
             self.seminar_id = semid
             self.seminar_ctr = None
-            self.deleted = False
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = seminar.display
             self.online = getattr(seminar, "online", bool(seminar.live_link))

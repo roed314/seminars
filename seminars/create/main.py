@@ -345,7 +345,6 @@ def save_seminar():
             "display": seminar.display,
             "owner": seminar.owner,
         }
-    data["deleted"] = False
     # Have to get time zone first
     data["timezone"] = tz = raw_data.get("timezone")
     tz = pytz.timezone(tz)
@@ -644,7 +643,6 @@ def save_talk():
         "seminar_id": talk.seminar_id,
         "token": talk.token,
         "display": talk.display,  # could be being edited by anonymous user
-        "deleted": True,
     }
     if talk.new:
         curmax = talks_max("seminar_ctr", {"seminar_id": talk.seminar_id})
