@@ -363,7 +363,7 @@ def save_seminar():
         try:
             val = raw_data.get(col)
             if not val:
-                data[col] = None
+                data[col] = False if type == "boolean" else None  # checkboxes
             else:
                 data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
             if col.endswith("link") and data[col]:
