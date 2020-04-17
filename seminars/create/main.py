@@ -84,7 +84,7 @@ def index():
     for semid, semctr in db._execute(
             # ~~* is case insensitive amtch
             SQL("""
-SELECT {Ttalks}.{Csemid}, {Ttalks}.{Csemctr}
+SELECT DISTINCT ON ({Ttalks}.{Csemid}, {Ttalks}.{Csemctr}) {Ttalks}.{Csemid}, {Ttalks}.{Csemctr}
 FROM {Ttalks} INNER JOIN {Tsems} ON {Ttalks}.{Csemid} = {Tsems}.{Csname}
 WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
             """).format(
