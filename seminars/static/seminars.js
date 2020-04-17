@@ -311,6 +311,34 @@ function makeLanguageSelector(langOptions, initialLanguage) {
 }
 
 $(document).ready(function () {
+  if (navigator.cookieEnabled) {
+    if(! document.cookie.includes('cookie_banner')) {
+      console.log("showing banner");
+      $.notify.addStyle('banner', {
+        html: "<div><div class='message' data-notify-html='message'/><div><button class='yes' data-notify-text='button'></button></div></div></div>",
+      });
+
+      //listen for click events from this style
+      $(document).on('click', '.notifyjs-banner-base .yes', function() {
+        //hide notification
+        $(this).trigger('notify-hide');
+        document.cookie = "cookie_banner=nomore;path=/";
+      });
+      $.notify({
+        message: 'This website uses cookies to improve your experience.',
+        button: 'Got it!'
+      }, {
+        style: 'banner',
+        position: 'b r',
+        autoHide: false,
+        clickToHide: false
+      });
+    }
+  }
+});
+
+
+$(document).ready(function () {
 
     setLinks();
 

@@ -275,6 +275,14 @@ def logout():
     flask.flash(Markup("You are logged out now. Have a nice day!"))
     return redirect(url_for(".info"))
 
+@login_page.route("/permanently_deleteme")
+@login_required
+def permanently_deleteme():
+    current_user.delete()
+    logout_user()
+    flask.flash(Markup("Your account has been deleted.  Have a nice day!"))
+    return redirect(url_for(".info"))
+
 
 @login_page.route("/admin")
 @login_required
@@ -445,40 +453,43 @@ def get_endorsing_link():
     link = endorser_link(current_user, email)
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
-        db.preendorsed_users.insert_many([{"email": email, "endorser": current_user._uid}])
-        to_send = """Hello,
+        if db.preendorsed_users.count({'email':email}):
+            endorsing_link = "<p>{0} has already been pre-endorsed.</p>".format(email)
+        else:
+            db.preendorsed_users.insert_many([{"email": email, "endorser": current_user._uid}])
+            to_send = """Hello,
 
-I am offering you permission to add content (e.g., create a seminar)
-on the mathseminars.org website.
+    I am offering you permission to add content (e.g., create a seminar)
+    on the mathseminars.org website.
 
-To accept this invitation:
+    To accept this invitation:
 
-1. Register at https://mathseminars.org/user/register/ using this email address.
+    1. Register at https://mathseminars.org/user/register/ using this email address.
 
-2. Click on the link the system emails you, to confirm your email address.
+    2. Click on the link the system emails you, to confirm your email address.
 
-3. Now any content you create will be publicly viewable.
+    3. Now any content you create will be publicly viewable.
 
 
-Best,
-{name}
-""".format(
-            name=current_user.name
-        )
-        data = {
-            "body": to_send,
-            "subject": "An invitation to collaborate on mathseminars.org",
-        }
-        endorsing_link = """
-<p>
-When {email} registers and confirms their email they will be able to create content.</br>
-<button onClick="window.open('mailto:{email}?{msg}')">
-Send email
-</button> to let them know.
-</p>
-""".format(
-            link=link, email=email, msg=urlencode(data, quote_via=quote)
-        )
+    Best,
+    {name}
+    """.format(
+                name=current_user.name
+            )
+            data = {
+                "body": to_send,
+                "subject": "An invitation to collaborate on mathseminars.org",
+            }
+            endorsing_link = """
+    <p>
+    When {email} registers and confirms their email they will be able to create content.</br>
+    <button onClick="window.open('mailto:{email}?{msg}')">
+    Send email
+    </button> to let them know.
+    </p>
+    """.format(
+                link=link, email=email, msg=urlencode(data, quote_via=quote)
+            )
     else:
         target_name = rec["name"]
         if rec["creator"]:
