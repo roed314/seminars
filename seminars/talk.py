@@ -94,7 +94,11 @@ class WebTalk(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
-        data["edited_by"] = int(current_user.id)
+        try:
+            data["edited_by"] = int(current_user.id)
+        except (ValueError, AttributeError):
+            # Talks can be edited by anonymous users with a token, with no id
+            data["edited_by"] = -1
         data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
