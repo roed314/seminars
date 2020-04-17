@@ -28,7 +28,6 @@ from markupsafe import Markup
 from icalendar import Calendar
 from io import BytesIO
 
-from psycopg2.sql import SQL
 from seminars import db
 
 from seminars.utils import timezones, timestamp
@@ -313,10 +312,7 @@ def send_confirmation_email(email):
         flash_error(
             'Unable to send email confirmation link, please contact <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> directly to confirm your email'
         )
-        app.logger.error(
-            "%s unable to send email to %s due to error: %s"
-            % (timestamp(), email, sys.exc_info()[0])
-        )
+        app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
         return False
 
 
@@ -340,9 +336,7 @@ def send_lost_emails():
         subject = "Resetting password"
         send_email(email, subject, html)
 
-    root_path = os.path.abspath(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-    )
+    root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
     out = ""
     if os.path.exists(os.path.join(root_path, "confirmation_emails.txt")):
         with open(os.path.join(root_path, "confirmation_emails.txt")) as F:
@@ -459,46 +453,47 @@ def get_endorsing_link():
     link = endorser_link(current_user, email)
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
-        db.preendorsed_users.insert_many([{"email": email, "endorser": current_user._uid}])
-        to_send = """Hello,
+        if db.preendorsed_users.count({'email':email}):
+            endorsing_link = "<p>{0} has already been pre-endorsed.</p>".format(email)
+        else:
+            db.preendorsed_users.insert_many([{"email": email, "endorser": current_user._uid}])
+            to_send = """Hello,
 
-I am offering you permission to add content (e.g., create a seminar)
-on the mathseminars.org website.
+    I am offering you permission to add content (e.g., create a seminar)
+    on the mathseminars.org website.
 
-To accept this invitation:
+    To accept this invitation:
 
-1. Register at https://mathseminars.org/user/register/ using this email address.
+    1. Register at https://mathseminars.org/user/register/ using this email address.
 
-2. Click on the link the system emails you, to confirm your email address.
+    2. Click on the link the system emails you, to confirm your email address.
 
-3. Now any content you create will be publicly viewable.
+    3. Now any content you create will be publicly viewable.
 
 
-Best,
-{name}
-""".format(
-            name=current_user.name
-        )
-        data = {
-            "body": to_send,
-            "subject": "An invitation to collaborate on mathseminars.org",
-        }
-        endorsing_link = """
-<p>
-When {email} registers and confirms their email they will be able to create content.</br>
-<button onClick="window.open('mailto:{email}?{msg}')">
-Send email
-</button> to let them know.
-</p>
-""".format(
-            link=link, email=email, msg=urlencode(data, quote_via=quote)
-        )
+    Best,
+    {name}
+    """.format(
+                name=current_user.name
+            )
+            data = {
+                "body": to_send,
+                "subject": "An invitation to collaborate on mathseminars.org",
+            }
+            endorsing_link = """
+    <p>
+    When {email} registers and confirms their email they will be able to create content.</br>
+    <button onClick="window.open('mailto:{email}?{msg}')">
+    Send email
+    </button> to let them know.
+    </p>
+    """.format(
+                link=link, email=email, msg=urlencode(data, quote_via=quote)
+            )
     else:
         target_name = rec["name"]
         if rec["creator"]:
-            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(
-                target_name=target_name
-            )
+            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
         else:
             welcome = "Hello" if not target_name else ("Dear " + target_name)
             to_send = """{welcome},<br>
@@ -609,20 +604,17 @@ def ics_file(token):
     bIO = BytesIO()
     bIO.write(cal.to_ical())
     bIO.seek(0)
-    return send_file(
-        bIO, attachment_filename="mathseminars.ics", as_attachment=True, add_etags=False
-    )
+    return send_file(bIO, attachment_filename="mathseminars.ics", as_attachment=True, add_etags=False)
 
 
 @login_page.route("/public/")
 @login_required
 @email_confirmed_required
 def public_users():
-    query = SQL(
-        "SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email WHERE users.creator = True"
+    user_list = sorted(
+        [
+            (r["affiliation"], r["name"], r["homepage"])
+            for r in db.users.search({"homepage": {"$ne": ""}, "name": {"$ne": ""}, "creator": True})
+        ]
     )
-    public_organizers = list(userdb._execute(query))
-    public_organizers.sort()
-    return render_template(
-        "public_users.html", title="Public users", public_users=public_organizers
-    )
+    return render_template("public_users.html", title="Public users", public_users=user_list)
