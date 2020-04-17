@@ -30,9 +30,10 @@ class WebTalk(object):
         editing=False,
         showing=False,
         saving=False,
+        deleted=False,
     ):
         if data is None and not editing:
-            data = talks_lookup(semid, semctr)
+            data = talks_lookup(semid, semctr, include_deleted=deleted)
             if data is None:
                 raise ValueError("Talk %s/%s does not exist" % (semid, semctr))
             data = dict(data.__dict__)
@@ -42,7 +43,7 @@ class WebTalk(object):
             if data.get("topics") is None:
                 data["topics"] = []
         if seminar is None:
-            seminar = WebSeminar(semid)
+            seminar = WebSeminar(semid, deleted=deleted)
         self.seminar = seminar
         self.new = data is None
         if self.new:
@@ -309,7 +310,8 @@ class WebTalk(object):
     def delete(self):
         if self.user_can_delete():
             with DelayCommit(db):
-                db.talks.delete({"id": self.id})
+                db.talks.update({"seminar_id": self.seminar_id, "seminar_ctr": self.seminar_ctr},
+                                {"deleted": True})
                 for i, talk_sub in db._execute(
                     SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
                         *map(
@@ -321,7 +323,7 @@ class WebTalk(object):
                 ):
                     if self.seminar_ctr in talk_sub[self.seminar.shortname]:
                         talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
-                    db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+                        db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
             return True
         else:
             return False
@@ -535,18 +537,18 @@ def _iterator(seminar_dict):
     return inner_iterator
 
 
-def talks_count(query={}):
+def talks_count(query={}, include_deleted=False):
     """
     Replacement for db.talks.count to account for versioning and so that we don't cache results.
     """
-    return count_distinct(db.talks, _counter, query)
+    return count_distinct(db.talks, _counter, query, include_deleted)
 
 
-def talks_max(col, constraint={}):
+def talks_max(col, constraint={}, include_deleted=False):
     """
     Replacement for db.talks.max to account for versioning and so that we don't cache results.
     """
-    return max_distinct(db.talks, _maxer, col, constraint)
+    return max_distinct(db.talks, _maxer, col, constraint, include_deleted)
 
 
 def talks_search(*args, **kwds):
@@ -567,9 +569,10 @@ def talks_lucky(*args, **kwds):
     return lucky_distinct(db.talks, _selecter, _construct(seminar_dict), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
+        include_deleted=include_deleted,
     )

@@ -26,10 +26,10 @@ combine = datetime.combine
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False
+        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False, deleted=False
     ):
         if data is None and not editing:
-            data = seminars_lookup(shortname)
+            data = seminars_lookup(shortname, include_deleted=deleted)
             if data is None:
                 raise ValueError("Seminar %s does not exist" % shortname)
             data = dict(data.__dict__)
@@ -333,10 +333,13 @@ class WebSeminar(object):
         return talks_search(query, projection=projection)
 
     def delete(self):
+        # We don't actually delete from the seminars and talks tables but instead just
+        # set the deleted flag.  We actually delete from seminar_organizers and subscriptions
+        # since these are less important.
         if self.user_can_delete():
             with DelayCommit(db):
-                db.seminars.delete({"shortname": self.shortname})
-                db.talks.delete({"seminar_id": self.shortname})
+                db.seminars.update({"shortname": self.shortname}, {"deleted": True})
+                db.talks.update({"seminar_id": self.shortname}, {"deleted": True})
                 db.seminar_organizers.delete({"seminar_id": self.shortname})
                 for elt in db.users.search(
                     {"seminar_subscriptions": {"$contains": self.shortname}},
@@ -344,7 +347,8 @@ class WebSeminar(object):
                 ):
                     elt["seminar_subscriptions"].remove(self.shortname)
                     db.users.update(
-                        {"id": elt["id"]}, {"seminar_subscriptions": elt["seminar_subscriptions"]}
+                        {"id": elt["id"]},
+                        {"seminar_subscriptions": elt["seminar_subscriptions"]}
                     )
                 for i, talk_sub in db._execute(
                     SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
@@ -412,15 +416,15 @@ def _iterator(organizer_dict):
     return inner_iterator
 
 
-def seminars_count(query={}):
+def seminars_count(query={}, include_deleted=False):
     """
     Replacement for db.seminars.count to account for versioning.
     """
-    return count_distinct(db.seminars, _counter, query)
+    return count_distinct(db.seminars, _counter, query, include_deleted)
 
 
-def seminars_max(col, constraint={}):
-    return max_distinct(db.seminars, _maxer, col, constraint)
+def seminars_max(col, constraint={}, include_deleted=False):
+    return max_distinct(db.seminars, _maxer, col, constraint, include_deleted)
 
 
 def seminars_search(*args, **kwds):
@@ -443,9 +447,9 @@ def seminars_lucky(*args, **kwds):
     return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False):
     return seminars_lucky(
-        {label_col: shortname}, projection=projection, organizer_dict=organizer_dict
+        {label_col: shortname}, projection=projection, organizer_dict=organizer_dict, include_deleted=include_deleted
     )
 
 
@@ -488,11 +492,16 @@ def can_edit_seminar(shortname, new):
             "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
         )
         return redirect(url_for(".index"), 302), None
-    seminar = seminars_lookup(shortname)
+    seminar = seminars_lookup(shortname, include_deleted=True)
     # Check if seminar exists
     if new != (seminar is None):
-        flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
+        if seminar is not None and seminar.deleted:
+            flash_error("Identifier %s is reserved by a seminar that has been deleted" % shortname)
+        else:
+            flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
         return redirect(url_for(".index"), 302), None
+    if seminar is not None and seminar.deleted:
+        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302)
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(

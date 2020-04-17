@@ -276,6 +276,14 @@ def logout():
     flask.flash(Markup("You are logged out now. Have a nice day!"))
     return redirect(url_for(".info"))
 
+@login_page.route("/permanently_deleteme")
+@login_required
+def permanently_deleteme():
+    current_user.delete()
+    logout_user()
+    flask.flash(Markup("Your account has been deleted.  Have a nice day!"))
+    return redirect(url_for(".info"))
+
 
 @login_page.route("/admin")
 @login_required
