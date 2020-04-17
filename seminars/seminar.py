@@ -61,7 +61,9 @@ class WebSeminar(object):
                 elif typ == "text[]":
                     setattr(self, key, [])
                 else:
-                    critical("Need to update seminar code to account for schema change key=%s" % key)
+                    critical(
+                        "Need to update seminar code to account for schema change key=%s" % key
+                    )
                     setattr(self, key, None)
             if organizer_data is None:
                 organizer_data = [
@@ -255,7 +257,9 @@ class WebSeminar(object):
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
-        return [rec["email"].lower() for rec in self.organizer_data if rec["email"]] + [self.owner.lower()]
+        return [rec["email"].lower() for rec in self.organizer_data if rec["email"]] + [
+            self.owner.lower()
+        ]
 
     def user_can_delete(self):
         # Check whether the current user can delete the seminar
@@ -281,7 +285,11 @@ class WebSeminar(object):
         for rec in self.organizer_data:
             show = rec["curator"] if curators else not rec["curator"]
             if show and rec["display"]:
-                link = rec["homepage"] if rec["homepage"] else ("mailto:%s"%(rec["email"]) if rec["email"] else "")
+                link = (
+                    rec["homepage"]
+                    if rec["homepage"]
+                    else ("mailto:%s" % (rec["email"]) if rec["email"] else "")
+                )
                 name = rec["full_name"] if rec["full_name"] else link
                 if name:
                     editors.append('<a href="%s">%s</a>' % (link, name) if link else name)

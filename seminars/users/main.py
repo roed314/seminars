@@ -186,15 +186,12 @@ def set_info():
     return redirect(url_for(".info"))
 
 
-
-
 @login_page.route("/send_confirmation_email")
 @login_required
 def resend_confirmation_email():
     if send_confirmation_email(current_user.email):
         flask.flash(Markup("New confirmation email has been sent!"))
     return redirect(url_for(".info"))
-
 
 
 def housekeeping(fn):
@@ -304,57 +301,63 @@ def send_confirmation_email(email):
         return True
     except:
         import sys
-        flash_error('Unable to send email confirmation link, please contact <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> directly to confirm your email')
-        app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
+
+        flash_error(
+            'Unable to send email confirmation link, please contact <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> directly to confirm your email'
+        )
+        app.logger.error(
+            "%s unable to send email to %s due to error: %s"
+            % (timestamp(), email, sys.exc_info()[0])
+        )
         return False
 
 
-
-
 import os
+
+
 @login_page.route("/sendlostemails")
 @housekeeping
 def send_lost_emails():
     def send_confirmation_email_fix(email):
         token = generate_confirmation_token(email)
-        confirm_url = 'https://mathseminars.org/' + url_for(".confirm_email", token=token)
+        confirm_url = "https://mathseminars.org/" + url_for(".confirm_email", token=token)
         html = render_template("confirm_email.html", confirm_url=confirm_url)
         subject = "Please confirm your email"
         send_email(email, subject, html)
 
     def send_reset_password_fix(email):
         token = generate_password_token(email)
-        reset_url = 'https://mathseminars.org/'  + url_for(".reset_password_wtoken", token=token)
+        reset_url = "https://mathseminars.org/" + url_for(".reset_password_wtoken", token=token)
         html = render_template("reset_password_email.html", reset_url=reset_url)
         subject = "Resetting password"
         send_email(email, subject, html)
+
     root_path = os.path.abspath(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
     )
     out = ""
-    if os.path.exists(os.path.join(root_path, 'confirmation_emails.txt')):
-        with open(os.path.join(root_path, 'confirmation_emails.txt')) as F:
+    if os.path.exists(os.path.join(root_path, "confirmation_emails.txt")):
+        with open(os.path.join(root_path, "confirmation_emails.txt")) as F:
             out += "confirmation_emails.txt\n"
             for email in F.readlines():
-                email = email.rstrip('\n')
+                email = email.rstrip("\n")
                 try:
                     send_confirmation_email_fix(email)
-                    out += email +  ', success\n'
+                    out += email + ", success\n"
                 except Exception:
-                    out += email +  ', fail\n'
-    if os.path.exists(os.path.join(root_path, 'reset_emails.txt')):
-        with open(os.path.join(root_path, 'reset_emails.txt')) as F:
+                    out += email + ", fail\n"
+    if os.path.exists(os.path.join(root_path, "reset_emails.txt")):
+        with open(os.path.join(root_path, "reset_emails.txt")) as F:
             out += "reset_emails.txt\n"
             for email in F.readlines():
-                email = email.rstrip('\n')
+                email = email.rstrip("\n")
                 try:
                     send_reset_password_fix(email)
-                    out += email +  ', success\n'
+                    out += email + ", success\n"
                 except Exception:
-                    out += email +  ', fail\n'
+                    out += email + ", fail\n"
 
     return out.replace("\n", "<br>")
-
 
 
 @login_page.route("/confirm/<token>")
@@ -441,14 +444,14 @@ def reset_password_wtoken(token):
 def get_endorsing_link():
     email = request.form["email"]
     try:
-        email = validate_email(email)['email']
+        email = validate_email(email)["email"]
     except EmailNotValidError as e:
         flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
         return redirect(url_for(".info"))
     link = endorser_link(current_user, email)
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
-        db.preendorsed_users.insert_many([{'email': email, 'endorser': current_user._uid}])
+        db.preendorsed_users.insert_many([{"email": email, "endorser": current_user._uid}])
         to_send = """Hello,
 
 I am offering you permission to add content (e.g., create a seminar)
@@ -499,7 +502,9 @@ be publicly viewable.
 Thanks for using mathseminars.org!
 </p>
 
-""".format(welcome=welcome)
+""".format(
+                welcome=welcome
+            )
             subject = "Endorsement to create content on mathseminars.org"
             send_email(email, subject, to_send)
             userdb.make_creator(email, int(current_user.id))
@@ -535,8 +540,8 @@ def endorse_wtoken(token):
     elif current_user.email.lower() != email.lower():
         flash_error("The link is not valid for this account.")
     else:
-        current_user.endorser = int(endorser) # must set endorser first
-        current_user.creator = True # this will update the db
+        current_user.endorser = int(endorser)  # must set endorser first
+        current_user.creator = True  # this will update the db
     return redirect(url_for(".info"))
 
 

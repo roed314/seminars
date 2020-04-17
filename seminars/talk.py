@@ -76,7 +76,12 @@ class WebTalk(object):
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
-        return "%s (%s) - %s, %s" % (title, self.speaker, self.show_date(), self.show_start_time(self.timezone),)
+        return "%s (%s) - %s, %s" % (
+            title,
+            self.speaker,
+            self.show_date(),
+            self.show_start_time(self.timezone),
+        )
 
     def __eq__(self, other):
         return isinstance(other, WebTalk) and all(
@@ -89,7 +94,11 @@ class WebTalk(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
-        data["edited_by"] = int(current_user.id)
+        try:
+            data["edited_by"] = int(current_user.id)
+        except (ValueError, AttributeError):
+            # Talks can be edited by anonymous users with a token, with no id
+            data["edited_by"] = -1
         data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
@@ -199,12 +208,10 @@ class WebTalk(object):
     def show_title(self):
         return self.title if self.title else "TBA"
 
-
-
     def show_link_title(self):
         return "<a href={url}>{title}</a>".format(
             url=url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr),
-            title=self.show_title()
+            title=self.show_title(),
         )
 
     def show_knowl_title(self):
@@ -328,10 +335,7 @@ class WebTalk(object):
             tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
         )
 
-    def oneline(self,
-                include_seminar=True,
-                include_subscribe=True,
-                tz=None):
+    def oneline(self, include_seminar=True, include_subscribe=True, tz=None):
         cols = []
         cols.append(('class="date"', self.show_date(tz=tz)))
         cols.append(('class="time"', self.show_start_time(tz=tz)))
