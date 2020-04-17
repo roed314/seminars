@@ -28,7 +28,6 @@ from markupsafe import Markup
 from icalendar import Calendar
 from io import BytesIO
 
-from psycopg2.sql import SQL
 from seminars import db
 
 from seminars.utils import timezones, timestamp
@@ -305,10 +304,7 @@ def send_confirmation_email(email):
         flash_error(
             'Unable to send email confirmation link, please contact <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> directly to confirm your email'
         )
-        app.logger.error(
-            "%s unable to send email to %s due to error: %s"
-            % (timestamp(), email, sys.exc_info()[0])
-        )
+        app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
         return False
 
 
@@ -332,9 +328,7 @@ def send_lost_emails():
         subject = "Resetting password"
         send_email(email, subject, html)
 
-    root_path = os.path.abspath(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-    )
+    root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
     out = ""
     if os.path.exists(os.path.join(root_path, "confirmation_emails.txt")):
         with open(os.path.join(root_path, "confirmation_emails.txt")) as F:
@@ -488,9 +482,7 @@ Send email
     else:
         target_name = rec["name"]
         if rec["creator"]:
-            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(
-                target_name=target_name
-            )
+            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
         else:
             welcome = "Hello" if not target_name else ("Dear " + target_name)
             to_send = """{welcome},<br>
@@ -601,20 +593,17 @@ def ics_file(token):
     bIO = BytesIO()
     bIO.write(cal.to_ical())
     bIO.seek(0)
-    return send_file(
-        bIO, attachment_filename="mathseminars.ics", as_attachment=True, add_etags=False
-    )
+    return send_file(bIO, attachment_filename="mathseminars.ics", as_attachment=True, add_etags=False)
 
 
 @login_page.route("/public/")
 @login_required
 @email_confirmed_required
 def public_users():
-    query = SQL(
-        "SELECT users.affiliation, users.name, users.email, users.homepage FROM users JOIN (SELECT DISTINCT email FROM seminar_organizers WHERE contact) as organizers ON users.email = organizers.email WHERE users.creator = True"
+    user_list = sorted(
+        [
+            (r["affiliation"], r["name"], r["homepage"])
+            for r in db.users.search({"homepage": {"$ne": ""}, "name": {"$ne": ""}, "creator": True})
+        ]
     )
-    public_organizers = list(userdb._execute(query))
-    public_organizers.sort()
-    return render_template(
-        "public_users.html", title="Public users", public_users=public_organizers
-    )
+    return render_template("public_users.html", title="Public users", public_users=user_list)

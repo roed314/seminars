@@ -3,23 +3,10 @@
 {% block content %}
 
 <table>
-  {% for affiliation, name, email, homepage in public_users %}
+  {% for affiliation, name, homepage in public_users %}
   <tr>
     <td>{{ affiliation }}</td>
-    <td>
-      {% if homepage %}
-      <a href="{{homepage}}">{{name}}</a>
-      {% else %}
-      {{name}}
-      {% endif %}
-    </td>
-    <td>
-      {% if current_user.is_creator or not current_user.email %}
-      <a href="mailto:{{email}}">Email</a>
-      {% else %}
-      <a href="mailto:{{email}}">Email</a>
-      {% endif %}
-    </td>
+    <td><a href="{{ homepage }}">{{ name }}</a></td>
   </tr>
   {% endfor %}
 </table>
