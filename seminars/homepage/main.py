@@ -65,7 +65,13 @@ def parse_offline(info, query, prefix):
 def parse_substring(info, query, field, qfields, start="%", end="%"):
     if info.get(field):
         kwds = [elt.strip() for elt in info.get(field).split(",") if elt.strip()]
-        collapse_ors(["$or", [{qfield: {"$ilike": start + elt + end}} for elt in kwds for qfield in qfields]], query)
+        collapse_ors(
+            [
+                "$or",
+                [{qfield: {"$ilike": start + elt + end}} for elt in kwds for qfield in qfields],
+            ],
+            query,
+        )
 
 
 def parse_access(info, query, prefix):
@@ -108,10 +114,12 @@ def parse_video(info, query):
     if v == "yes":
         query["video_link"] = {"$not": None}
 
+
 def parse_language(info, query, prefix):
     v = info.get(prefix + "_language")
     if v:
         query["language"] = v
+
 
 def talks_parser(info, query):
     parse_topic(info, query, prefix="talk")
@@ -230,7 +238,12 @@ class TalkSearchArray(SearchArray):
         language = SelectBox(
             name="talk_language",
             label="Language",
-            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.talks.distinct('language')) if code != "en"]
+            options=[("", ""), ("en", "English")]
+            + [
+                (code, lang_dict[code])
+                for code in sorted(db.talks.distinct("language"))
+                if code != "en"
+            ],
         )
         video = Toggle(name="video", label="Has video")
         self.array = [
@@ -277,9 +290,7 @@ class SemSearchArray(SearchArray):
         # offline = Toggle(name="seminar_offline", label="Offline")
 
         ## keywords for seminar or talk
-        keywords = TextBox(
-            name="seminar_keywords", label="Keywords", width=textwidth,
-        )
+        keywords = TextBox(name="seminar_keywords", label="Keywords", width=textwidth,)
         ## type of access
         access = SelectBox(
             name="seminar_access",
@@ -294,7 +305,12 @@ class SemSearchArray(SearchArray):
         language = SelectBox(
             name="seminar_language",
             label="Language",
-            options=[("", ""), ("en", "English")] + [(code, lang_dict[code]) for code in sorted(db.talks.distinct('language')) if code != "en"]
+            options=[("", ""), ("en", "English")]
+            + [
+                (code, lang_dict[code])
+                for code in sorted(db.talks.distinct("language"))
+                if code != "en"
+            ],
         )
         ## number of results to display
         # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
@@ -442,6 +458,7 @@ def show_seminar(shortname):
         bread=None,
     )
 
+
 @app.route("/seminar_raw/<shortname>")
 def show_seminar_raw(shortname):
     seminar = seminars_lucky({"shortname": shortname})
@@ -459,11 +476,7 @@ def show_seminar_raw(shortname):
     future.sort(key=lambda talk: talk.start_time)
     past.sort(key=lambda talk: talk.start_time, reverse=True)
     return render_template(
-        "seminar_raw.html",
-        title=seminar.name,
-        future=future,
-        past=past,
-        seminar=seminar
+        "seminar_raw.html", title=seminar.name, future=future, past=past, seminar=seminar
     )
 
 
@@ -505,12 +518,14 @@ def show_institution(shortname):
     query = {"institutions": {"$contains": shortname}}
     if not current_user.is_admin:
         query["display"] = True
-    events = list(seminars_search(
-        query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
-    ))
+    events = list(
+        seminars_search(
+            query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
+        )
+    )
     seminars = [S for S in events if not S.is_conference]
     conferences = [S for S in events if S.is_conference]
-    conferences.sort(key=lambda S:(S.start_date, S.name))
+    conferences.sort(key=lambda S: (S.start_date, S.name))
     return render_template(
         "institution.html",
         seminars=seminars,
@@ -520,7 +535,6 @@ def show_institution(shortname):
         section=section,
         subsection="viewinst",
     )
-
 
 
 @app.route("/info")
