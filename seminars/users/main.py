@@ -445,7 +445,7 @@ def get_endorsing_link():
     link = endorser_link(current_user, email)
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
-        if db.preendorse_users.count({'email':email}):
+        if db.preendorsed_users.count({'email':email}):
             endorsing_link = "<p>{0} has already been pre-endorsed.</p>".format(email)
         else:
             db.preendorsed_users.insert_many([{"email": email, "endorser": current_user._uid}])
