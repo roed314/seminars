@@ -644,6 +644,7 @@ def save_talk():
         "seminar_id": talk.seminar_id,
         "token": talk.token,
         "display": talk.display,  # could be being edited by anonymous user
+        "deleted": True,
     }
     if talk.new:
         curmax = talks_max("seminar_ctr", {"seminar_id": talk.seminar_id})
