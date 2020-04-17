@@ -106,7 +106,7 @@ def parse_date(info, query):
 def parse_video(info, query):
     v = info.get("video")
     if v == "yes":
-        query["video_link"] = {"$not": None}
+        query["video_link"] = {"$ne": None}
 
 def parse_language(info, query, prefix):
     v = info.get(prefix + "_language")
