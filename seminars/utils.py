@@ -116,7 +116,7 @@ def sanity_check_times(start_time, end_time):
         return
     if start_time > end_time:
         end_time = end_time + timedelta(days=1)
-    if start_time + timedelta(hours=8) > end_time:
+    if start_time + timedelta(hours=8) < end_time:
         flash_warning ("Time range exceeds 8 hours, please update if that was unintended.")
     if is_nighttime(start_time) or is_nighttime(end_time):
         flash_warning(
