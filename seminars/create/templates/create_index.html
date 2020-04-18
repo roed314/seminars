@@ -22,7 +22,7 @@
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
   <input type="hidden" name="institutions" value=""/>
-  <table id="make_semconf" style="width:600px;">
+  <table id="make_semconf">
     <tr>
       <th>{{ KNOWL("is_conference") }}</th>
       <td>
@@ -31,7 +31,7 @@
           <option value="no" selected>seminar</option>
         </select>
       </td>
-      <td class="forminfo">Click the blue captions for instructions.</td>
+      <td class="forminfo" style="width:200px;">Click the blue captions for instructions.</td>
     </tr>
     <tr>
       <th>{{ KNOWL("shortname") }}</th>
