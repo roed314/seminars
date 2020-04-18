@@ -390,6 +390,8 @@ def save_seminar():
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
+            print(D)
+            print("col: %s"%(col))
             if col in D:
                 continue
             name = "org_%s%s" % (col, i)
