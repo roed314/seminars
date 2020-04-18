@@ -396,6 +396,7 @@ def save_seminar():
             typ = db.seminar_organizers.col_type[col]
             try:
                 val = raw_data.get(name, "")
+                print("col: %s, typ: %s, val: %s"%(val, col, typ))
                 D[col] = process_user_input(val, col, typ, tz)
             except Exception as err:
                 errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
