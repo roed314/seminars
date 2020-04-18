@@ -33,6 +33,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
       {% if talk.slides_link %} {{ talk.show_slides_link() | safe }} {% endif %}
       {% if talk.paper_link %} {{ talk.show_video_link() | safe }} {% endif %})
   </p>
+  {% endif %}
 
   {% if talk.abstract %}
     <h3> Abstract </h3>
