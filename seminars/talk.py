@@ -53,6 +53,7 @@ class WebTalk(object):
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = seminar.display
             self.online = getattr(seminar, "online", bool(seminar.live_link))
+            self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -123,6 +124,10 @@ class WebTalk(object):
         """
         return self._editable_time(self.end_time)
 
+    @property
+    def tz(self):
+        return pytz.timezone(self.timezone)
+
     def show_start_time(self, tz=None):
         return adapt_datetime(self.start_time, tz).strftime("%H:%M")
 
@@ -153,7 +158,7 @@ class WebTalk(object):
         else:
             return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %-d")
 
-    def show_time_and_duration(self):
+    def show_time_and_duration(self, adapt=True):
         start = self.start_time
         end = self.end_time
         now = datetime.datetime.now(pytz.utc)
@@ -164,11 +169,12 @@ class WebTalk(object):
         week = delta(weeks=1)
         month = delta(days=30.4)
         year = delta(days=365)
+        newtz = None if adapt else self.tz
 
         def ans(rmk):
             return "%s-%s (%s)" % (
-                adapt_datetime(start).strftime("%a %b %-d, %H:%M"),
-                adapt_datetime(end).strftime("%H:%M"),
+                adapt_datetime(start, newtz=newtz).strftime("%a %b %-d, %H:%M"),
+                adapt_datetime(end, newtz=newtz).strftime("%H:%M"),
                 rmk,
             )
 
