@@ -14,7 +14,11 @@
   <input type="hidden" name="token" value="{{ talk.token }}"/>
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
-  <table>
+  <table style="width: 100%">
+    <colgroup>
+      <col span="1" style="width: 20%;">
+      <col span="1" style="width: 80%;">
+    </colgroup>
     <tr>
       <td>
         Seminar
@@ -26,19 +30,19 @@
     <tr>
       <td>Topics</td>
       <td>
-        <span id="topic_selector" style="width:600px;"></span>
+        <span id="topic_selector"></span>
       </td>
     </tr>
     <tr>
       <td>Language</td>
       <td>
-        <span id="language_selector" style="width:600px;"></span>
+        <span id="language_selector"></span>
       </td>
     </tr>
     <tr>
       <td>Time zone</td>
       <td>
-        <select name="timezone" style="width:600px;">
+        <select name="timezone">
           {% for tz, disp in timezones %}
           <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
           {% endfor %}
