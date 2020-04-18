@@ -399,6 +399,7 @@ def save_seminar():
                 D[col] = process_user_input(val, col, typ, tz)
             except Exception as err:
                 errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
+        print D
         if D["homepage"] or D["email"] or D["full_name"]:
             if not D["full_name"]:
                 errmsgs.append(format_errmsg("organizer %s cannot be blank", "name"))
