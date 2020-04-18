@@ -39,7 +39,6 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
     <h3> Abstract </h3>
     {{ talk.show_abstract() | safe }}
   {% endif %}
-  {% if talk.paper_link %}
 
   {% if talk.comments and talk.comments != talk.seminar.comments %}
   <hr>
