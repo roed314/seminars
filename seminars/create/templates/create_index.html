@@ -18,7 +18,6 @@
 {% endif %}
 
 <h2>Create a seminar or conference</h2>
-<small>(click blue captions for instructions)</small>
 
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
@@ -32,7 +31,7 @@
           <option value="no" selected>seminar</option>
         </select>
       </td>
-      <td class="forminfo" style="width:200px;"><p style="width:300px;">Click the blue captions for instructions.</p></td>
+      <td class="forminfo"><p style="width:200px;">Click the blue captions for instructions.</p></td>
     </tr>
     <tr>
       <th>{{ KNOWL("shortname") }}</th>
@@ -41,11 +40,12 @@
     <tr>
       <th>{{ KNOWL("name") }}</th>
       <td><input size="60" name="name" style="width:500px;" maxlength="100" placeholder="Pangaea analysis seminar"/></td>
-      <td class="forminfo">Capitalize only first word and proper names.</td>
+      <td class="forminfo">Capitalizefirst word and proper names.</td>
     </tr>
     <tr>
       <th>{{ KNOWL("institutions") }}</th>
       <td><span id="institution_selector"></span></td>
+      <td class="forminfo">you can add these latter.</td>
     <tr>
       <td><button type="submit">Create</button></td>
     </tr>
