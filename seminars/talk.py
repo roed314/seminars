@@ -53,7 +53,7 @@ class WebTalk(object):
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = seminar.display
             self.online = getattr(seminar, "online", bool(seminar.live_link))
-            self.tz = seminar.tz
+            self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
