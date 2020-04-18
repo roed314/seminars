@@ -26,19 +26,19 @@
     <tr>
       <td>Topics</td>
       <td>
-        <span id="topic_selector"></span>
+        <span id="topic_selector" style="width:600px;"></span>
       </td>
     </tr>
     <tr>
       <td>Language</td>
       <td>
-        <span id="language_selector"></span>
+        <span id="language_selector" style="width:600px;"></span>
       </td>
     </tr>
     <tr>
       <td>Time zone</td>
       <td>
-        <select name="timezone" style="width:510px;">
+        <select name="timezone" style="width:600px;">
           {% for tz, disp in timezones %}
           <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
           {% endfor %}
