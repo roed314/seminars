@@ -27,7 +27,6 @@ class WebTalk(object):
         semctr=None,
         data=None,
         seminar=None,
-        tz=None,
         editing=False,
         showing=False,
         saving=False,
@@ -71,11 +70,11 @@ class WebTalk(object):
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
             if data.get("timezone"):
-                self.tz = pytz.timezone(data["timezone"])
+                tz = pytz.timezone(data["timezone"])
                 if data.get("start_time"):
-                    data["start_time"] = adapt_datetime(data["start_time"], self.tz)
+                    data["start_time"] = adapt_datetime(data["start_time"], tz)
                 if data.get("end_time"):
-                    data["end_time"] = adapt_datetime(data["end_time"], self.tz)
+                    data["end_time"] = adapt_datetime(data["end_time"], tz)
             self.__dict__.update(data)
 
     def __repr__(self):
@@ -124,6 +123,10 @@ class WebTalk(object):
         A version of the start time for editing
         """
         return self._editable_time(self.end_time)
+
+    @property
+    def tz(self):
+        return pytz.timezone(self.timezone)
 
     def show_start_time(self, tz=None):
         return adapt_datetime(self.start_time, tz).strftime("%H:%M")
