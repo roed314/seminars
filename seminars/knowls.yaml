@@ -10,7 +10,7 @@ shortname:
     The identifier of the seminar (or conference) is a string of up to 32 characters that will be included in all URL links to the seminar and talks that take place in it.
     It must consist of letters (case sensitive), numbers, hypens and undersores, with no spaces.
     The identifier is permanent and cannot be changed; only identifiers of permanently deleted seminars can be reused.
-seminar_name:
+name:
   title: Full name
   contents: |
     The full name of the seminar or conference.  This will appear on brwose and search pages and can be changed at any time.
