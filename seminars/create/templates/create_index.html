@@ -24,36 +24,28 @@
   <input type="hidden" name="institutions" value=""/>
   <table id="make_semconf">
     <tr>
-      <th>Type</th>
+      <th>{{ KNOWL("is_conference") }}</th>
       <td>
         <select name="is_conference" style="width:100px;">
           <option value="yes">conference</option>
           <option value="no" selected>seminar</option>
         </select>
       </td>
+      <td class="forminfo">Click the blue captions for instructions.</td>
     </tr>
     <tr>
-      <th>Identifier</th>
-      <td><input name="shortname" placeholder="ShortLabel" /></td>
+      <th>{{ KNOWL("shortname") }}</th>
+      <td><input name="shortname" placeholder="MySeminar or Riemann200" maxlength="32"/></td>
     </tr>
     <tr>
-      <td class="forminfo" colspan="2">The identifier is used in the URL, so use only letters, numbers, hyphens and underscores - no spaces.</td>
+      <th>{{ KNOWL("name") }}</th>
+      <td><input size="40" name="name" style="width:500px;" maxlength="100" placeholder="Pangaea analysis seminar"/></td>
+      <td class="forminfo">Capitalize only first word and proper names.</td>
     </tr>
     <tr>
-      <th>Full name</th>
-      <td><input size="40" name="name" style="width:500px;" placeholder="Pangaea analysis seminar"/></td>
-    </tr>
-    <tr>
-      <td class="forminfo" colspan="2">Generally, capitalize only the first word and proper names.</td>
-    </tr>
-    <tr>
-      <th>Institutions</th>
-      <td>
-        <span id="institution_selector"></span>
-      </td>
-    <tr>
-      <td class="forminfo" colspan="2">If a relevant institution isn't in the dropdown list, <a href="{{ url_for('list_institutions') }}">add it</a> before or after creating the seminar, after you are endorsed.</td>
-    </tr>
+      <th>{{ KNOWL("institutions") }}</th>
+      <td><span id="institution_selector"></span></td>
+      <td class="forminfo">You can create and add institutions later if you need to.</td>
     <tr>
       <td><button type="submit">Create</button></td>
     </tr>
