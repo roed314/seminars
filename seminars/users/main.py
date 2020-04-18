@@ -218,7 +218,7 @@ def register():
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
         try:
-            validate_email(email)
+            email = validate_email(email)['email']
         except EmailNotValidError as e:
             flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
             return make_response(render_template("register.html", title="Register", email=email))
