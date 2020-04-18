@@ -22,6 +22,9 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   <p>{{ talk.show_speaker_and_seminar() | safe }}</p>
 
   <p>{{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}</p>
+  {% if (not talk.online or talk.room) and talk.timezone != current_user.timezone %}
+    <p>{{ talk.show_time_and_duration(adapt=False) | safe }} in talk time zone, {{ talk.timezone.replace("_", " ") }}.</p>
+  {% endif %}
 
   <p>
     {% if not talk.is_past() %} {{ talk.show_live_link() | safe }} {% endif %}
