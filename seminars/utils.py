@@ -12,6 +12,7 @@ from psycopg2.sql import SQL
 from markupsafe import Markup, escape
 from collections.abc import Iterable
 from urllib.parse import urlparse
+from email_validator import validate_email
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -84,11 +85,7 @@ def simplify_language_name(name):
 
 @cached_function
 def languages_dict():
-    return {
-        lang["iso639_1"]: simplify_language_name(lang["name"])
-        for lang in iso639.data
-        if lang["iso639_1"]
-    }
+    return {lang["iso639_1"]: simplify_language_name(lang["name"]) for lang in iso639.data if lang["iso639_1"]}
 
 
 def clean_language(inp):
@@ -100,12 +97,10 @@ def clean_language(inp):
 
 def flash_warning(warnmsg, *args):
     flash(
-        Markup(
-            "Warning: "
-            + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
-        ),
+        Markup("Warning: " + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))),
         "error",
     )
+
 
 def sanity_check_times(start_time, end_time):
     """
@@ -117,7 +112,7 @@ def sanity_check_times(start_time, end_time):
     if start_time > end_time:
         end_time = end_time + timedelta(days=1)
     if start_time + timedelta(hours=8) < end_time:
-        flash_warning ("Time range exceeds 8 hours, please update if that was unintended.")
+        flash_warning("Time range exceeds 8 hours, please update if that was unintended.")
     if is_nighttime(start_time) or is_nighttime(end_time):
         flash_warning(
             "Time range includes monring hours before 6am. Please update using 24-hour notation, or specify am/pm, if that was unintentional."
@@ -153,10 +148,7 @@ def allowed_shortname(shortname):
 @cached_function
 def topics():
     return sorted(
-        (
-            (rec["abbreviation"], rec["name"])
-            for rec in db.topics.search({}, ["abbreviation", "name"])
-        ),
+        ((rec["abbreviation"], rec["name"]) for rec in db.topics.search({}, ["abbreviation", "name"])),
         key=lambda x: x[1].lower(),
     )
 
@@ -267,9 +259,7 @@ def search_distinct(
             offset -= (1 + (offset - nres) / limit) * limit
             if offset < 0:
                 offset = 0
-            return search_distinct(
-                table, selecter, counter, iterator, query, projection, limit, offset, sort, info
-            )
+            return search_distinct(table, selecter, counter, iterator, query, projection, limit, offset, sort, info)
         info["query"] = dict(query)
         info["number"] = nres
         info["count"] = limit
@@ -344,17 +334,18 @@ def adapt_weektime(t, oldtz, newtz=None, weekday=None):
         return next_t.weekday(), next_t.time()
 
 
-def process_user_input(inp, typ, tz):
+def process_user_input(inp, col, typ, tz):
     """
     INPUT:
 
-    - ``inp`` -- unsanitized input, as a string
+    - ``inp`` -- unsanitized input, as a string (or None)
+    - ''col'' -- column name (names ending in ''link'', ''page'', ''time'', ''email'' get special handling
     - ``typ`` -- a Postgres type, as a string
     """
-    if inp is None:
-        return None
-    if typ == "timestamp with time zone":
-        return localize_time(parse_time(inp), tz)
+    if inp:
+        inp = inp.strip()
+    if not inp:
+        return False if typ == "boolean" else ("" if typ == "text" else None)
     elif typ == "time":
         # Note that parse_time, when passed a time with no date, returns
         # a datetime object with the date set to today.  This could cause different
@@ -363,6 +354,14 @@ def process_user_input(inp, typ, tz):
         t = parse_time(inp)
         t = t.replace(year=2020, month=1, day=1)
         return localize_time(t, tz)
+    elif (col.endswith("page") or col.endswith("link")) and typ == "text":
+        if inp != "see comments" and not validate_url(inp):
+            raise ValueError("Invalid URL")
+        return inp
+    elif col.endswith("email") and typ == "text":
+        return validate_email(inp.strip())["email"]
+    elif typ == "timestamp with time zone":
+        return localize_time(parse_time(inp), tz)
     elif typ == "date":
         return parse_time(inp).date()
     elif typ == "boolean":
@@ -370,14 +369,13 @@ def process_user_input(inp, typ, tz):
             return True
         elif inp in ["no", "false", "n", "f"]:
             return False
-        raise ValueError
+        raise ValueError("Invalid boolean")
     elif typ == "text":
         # should sanitize somehow?
         return "\n".join(inp.splitlines())
     elif typ in ["int", "smallint", "bigint", "integer"]:
         return int(inp)
     elif typ == "text[]":
-        inp = inp.strip()
         if inp:
             if inp[0] == "[" and inp[-1] == "]":
                 res = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
@@ -395,17 +393,11 @@ def process_user_input(inp, typ, tz):
 
 
 def format_errmsg(errmsg, *args):
-    return Markup(
-        "Error: "
-        + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
-    )
+    return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
 
 def format_warning(errmsg, *args):
-    return Markup(
-        "Warning: "
-        + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
-    )
+    return Markup("Warning: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
 
 def show_input_errors(errmsgs):
@@ -423,12 +415,7 @@ def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
 <input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" onchange="{onchange}" name="{name}" {checked}>
 <label class="tgl-btn" for="{tglid}"></label>
 """.format(
-        tglid=tglid,
-        value=value,
-        checked="checked" if checked else "",
-        classes=classes,
-        onchange=onchange,
-        name=name,
+        tglid=tglid, value=value, checked="checked" if checked else "", classes=classes, onchange=onchange, name=name,
     )
 
 
