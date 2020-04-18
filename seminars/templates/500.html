@@ -9,11 +9,11 @@ Whoops, we ran into a problem (our fault, not yours).
 
 <span style='color:black'>
 <div>
-<p>This error has been logged and will be brought to the attention of the developers.
-If there are further details you can provide, or you would simply like us to let you
-know when the problem is fixed or help you work aroundd the problem, please
-report this bug on our <a href="{{ feedbackpage }}">feedback page</a> and
-included the following information in your report:
+<p>This error has been logged and will be brought to our attention.
+If there are further details you can provide, or if you would simply like us to let you
+know when the problem is fixed or help you work around it,
+please fill out our <a href="{{ feedbackpage }}">feedback page</a> and
+include the following information in your report:
 </p>
 <p>
 {% if request.referrer %}
@@ -23,11 +23,11 @@ Referring URL: "{{ request.referrer }}".<br>
 Problem URL: "{{ request.url }}".
 {% endif %}
 </p>
+<p>We apologize for the inconvenience!</p>
 </div>
-<div>We apologize for the inconvenience!</div>
 
 {% if request.referrer %}
-<div><a href="{{ request.referrer }}">click here to go back</a></div>
+<div><a href="{{ request.referrer }}">Click here to go back.</a></div>
 {% endif %}
 
 </span>
