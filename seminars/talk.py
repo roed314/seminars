@@ -277,6 +277,18 @@ class WebTalk(object):
         else:  # should never happen
             return ""
 
+    def show_paper_link(self):
+        return '<a href="%s">paper</a>'%(self.paper_link) if self.paper_link else ""
+
+    def show_slides_link(self):
+        return '<a href="%s">paper</a>'%(self.slides_link) if self.slides_link else ""
+
+    def show_video_link(self):
+        return '<a href="%s">paper</a>'%(self.video_link) if self.video_link else ""
+
+    def is_past(self):
+        return self.end_time < datetime.datetime.now(pytz.utc)
+
     def is_subscribed(self):
         if current_user.is_anonymous:
             return False
