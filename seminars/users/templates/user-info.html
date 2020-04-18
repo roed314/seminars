@@ -187,6 +187,11 @@
    </table>
   </form>
 
+  <h2>Delete account</h2>
+
+<p> You can delete your account here, removing all personal information we store of about you from our database (though talks and seminars you've created will remain).</p>
+
+<p><a href="{{ url_for('user.permanently_deleteme') }}" onclick="return confirm('Are you sure you want to PERMANENTLY delete your account?');">Permanently delete account</a></p>
 
 
 {# this script constructs a url and shows it as a link, just for testing #}

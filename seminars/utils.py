@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, time, date
+from datetime import datetime, timedelta
 from dateutil.parser import parse as parse_time
 import pytz, re, iso639
 from six import string_types
@@ -7,12 +7,12 @@ from flask_login import current_user
 from seminars import db
 from sage.misc.cachefunc import cached_function
 from lmfdb.backend.utils import IdentifierWrapper
-from lmfdb.utils import flash_error
 from lmfdb.utils.search_boxes import SearchBox
 from psycopg2.sql import SQL
 from markupsafe import Markup, escape
 from collections.abc import Iterable
 from urllib.parse import urlparse
+from email_validator import validate_email
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -73,7 +73,7 @@ def is_nighttime(t):
     if t is None:
         return False
     # These are times that might be mixed up by using a 24 hour clock
-    return 1 <= t.hour < 8
+    return 1 <= t.hour < 6
 
 
 def simplify_language_name(name):
@@ -85,11 +85,7 @@ def simplify_language_name(name):
 
 @cached_function
 def languages_dict():
-    return {
-        lang["iso639_1"]: simplify_language_name(lang["name"])
-        for lang in iso639.data
-        if lang["iso639_1"]
-    }
+    return {lang["iso639_1"]: simplify_language_name(lang["name"]) for lang in iso639.data if lang["iso639_1"]}
 
 
 def clean_language(inp):
@@ -101,52 +97,26 @@ def clean_language(inp):
 
 def flash_warning(warnmsg, *args):
     flash(
-        Markup(
-            "Warning: "
-            + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
-        ),
+        Markup("Warning: " + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))),
         "error",
     )
 
 
-def check_time(start_time, end_time, check_past=False):
+def sanity_check_times(start_time, end_time):
     """
-    Flashes errors/warnings and returns True when an error should be raised.
-
-    Input start and end time can be either naive or timezone aware, but must be timezone aware if check_past is True.
+    Flashes warnings if time range seems suspsicious.  Note that end_time is (by definition) greater than start_time
     """
     if start_time is None or end_time is None:
         # Users are allowed to not fill in a time
         return
     if start_time > end_time:
-        if is_nighttime(end_time):
-            flash_error("Your start time is after your end time; perhaps you forgot pm")
-        else:
-            flash_error("Your start time is after your end time")
-        return True
+        end_time = end_time + timedelta(days=1)
+    if start_time + timedelta(hours=8) < end_time:
+        flash_warning("Time range exceeds 8 hours, please update if that was unintended.")
     if is_nighttime(start_time) or is_nighttime(end_time):
         flash_warning(
-            "Your talk is scheduled between midnight and 8am. Please edit again using 24-hour notation or including pm if that was unintentional"
+            "Time range includes monring hours before 6am. Please update using 24-hour notation, or specify am/pm, if that was unintentional."
         )
-    # Python doesn't support subtracting times
-    if (
-        isinstance(start_time, time)
-        and isinstance(end_time, time)
-        and datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time)
-        > timedelta(hours=8)
-        or isinstance(start_time, datetime)
-        and isinstance(end_time, datetime)
-        and end_time - start_time > timedelta(hours=8)
-    ):
-        flash_warning(
-            "Your talk lasts for more than 8 hours.  Please edit again if that was unintented"
-        )
-    if check_past:
-        now = datetime.now(tz=pytz.UTC)
-        if start_time < now:
-            flash_warning(
-                "The start time of your talk is in the past.  Please edit again if that was unintended"
-            )
 
 
 def top_menu():
@@ -178,10 +148,7 @@ def allowed_shortname(shortname):
 @cached_function
 def topics():
     return sorted(
-        (
-            (rec["abbreviation"], rec["name"])
-            for rec in db.topics.search({}, ["abbreviation", "name"])
-        ),
+        ((rec["abbreviation"], rec["name"]) for rec in db.topics.search({}, ["abbreviation", "name"])),
         key=lambda x: x[1].lower(),
     )
 
@@ -207,7 +174,10 @@ def clean_topics(inp):
     return inp
 
 
-def count_distinct(table, counter, query={}):
+def count_distinct(table, counter, query={}, include_deleted=False):
+    query = dict(query)
+    if not include_deleted:
+        query["deleted"] = {"$or": [False, {"$exists": False}]}
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
     tbl = IdentifierWrapper(table.search_table)
     qstr, values = table._build_query(query, sort=[])
@@ -216,8 +186,11 @@ def count_distinct(table, counter, query={}):
     return int(cur.fetchone()[0])
 
 
-def max_distinct(table, maxer, col, constraint={}):
+def max_distinct(table, maxer, col, constraint={}, include_deleted=False):
     # Note that this will return None for the max of an empty set
+    constraint = dict(constraint)
+    if not include_deleted:
+        constraint["deleted"] = {"$or": [False, {"$exists": False}]}
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
     tbl = IdentifierWrapper(table.search_table)
     qstr, values = table._build_query(constraint, sort=[])
@@ -237,6 +210,7 @@ def search_distinct(
     offset=0,
     sort=None,
     info=None,
+    include_deleted=False,
 ):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -252,6 +226,9 @@ def search_distinct(
     """
     if offset < 0:
         raise ValueError("Offset cannot be negative")
+    query = dict(query)
+    if not include_deleted:
+        query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
@@ -282,9 +259,7 @@ def search_distinct(
             offset -= (1 + (offset - nres) / limit) * limit
             if offset < 0:
                 offset = 0
-            return search_distinct(
-                table, selecter, counter, iterator, query, projection, limit, offset, sort, info
-            )
+            return search_distinct(table, selecter, counter, iterator, query, projection, limit, offset, sort, info)
         info["query"] = dict(query)
         info["number"] = nres
         info["count"] = limit
@@ -293,7 +268,10 @@ def search_distinct(
     return list(results)
 
 
-def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0, sort=[]):
+def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0, sort=[], include_deleted=False):
+    query = dict(query)
+    if not include_deleted:
+        query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
@@ -356,25 +334,36 @@ def adapt_weektime(t, oldtz, newtz=None, weekday=None):
         return next_t.weekday(), next_t.time()
 
 
-def process_user_input(inp, typ, tz):
+def process_user_input(inp, col, typ, tz):
     """
     INPUT:
 
-    - ``inp`` -- unsanitized input, as a string
+    - ``inp`` -- unsanitized input, as a string (or None)
+    - ''col'' -- column name (names ending in ''link'', ''page'', ''time'', ''email'' get special handling
     - ``typ`` -- a Postgres type, as a string
     """
-    if inp is None:
-        return None
-    if typ == "timestamp with time zone":
-        return localize_time(parse_time(inp), tz)
+    if inp:
+        inp = inp.strip()
+    if not inp:
+        return False if typ == "boolean" else ("" if typ == "text" else None)
     elif typ == "time":
         # Note that parse_time, when passed a time with no date, returns
         # a datetime object with the date set to today.  This could cause different
         # relative orders around daylight savings time, so we store all times
         # as datetimes on Jan 1, 2020.
+        if inp.isdigit():
+            inp += ":00"  # treat numbers as times not dates
         t = parse_time(inp)
         t = t.replace(year=2020, month=1, day=1)
         return localize_time(t, tz)
+    elif (col.endswith("page") or col.endswith("link")) and typ == "text":
+        if not validate_url(inp) and not (col == "live_link" and inp == "see comments"):
+            raise ValueError("Invalid URL")
+        return inp
+    elif col.endswith("email") and typ == "text":
+        return validate_email(inp.strip())["email"]
+    elif typ == "timestamp with time zone":
+        return localize_time(parse_time(inp), tz)
     elif typ == "date":
         return parse_time(inp).date()
     elif typ == "boolean":
@@ -382,14 +371,13 @@ def process_user_input(inp, typ, tz):
             return True
         elif inp in ["no", "false", "n", "f"]:
             return False
-        raise ValueError
+        raise ValueError("Invalid boolean")
     elif typ == "text":
         # should sanitize somehow?
         return "\n".join(inp.splitlines())
     elif typ in ["int", "smallint", "bigint", "integer"]:
         return int(inp)
     elif typ == "text[]":
-        inp = inp.strip()
         if inp:
             if inp[0] == "[" and inp[-1] == "]":
                 res = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
@@ -407,17 +395,11 @@ def process_user_input(inp, typ, tz):
 
 
 def format_errmsg(errmsg, *args):
-    return Markup(
-        "Error: "
-        + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
-    )
+    return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
 
 def format_warning(errmsg, *args):
-    return Markup(
-        "Warning: "
-        + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
-    )
+    return Markup("Warning: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
 
 def show_input_errors(errmsgs):
@@ -435,12 +417,7 @@ def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
 <input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" onchange="{onchange}" name="{name}" {checked}>
 <label class="tgl-btn" for="{tglid}"></label>
 """.format(
-        tglid=tglid,
-        value=value,
-        checked="checked" if checked else "",
-        classes=classes,
-        onchange=onchange,
-        name=name,
+        tglid=tglid, value=value, checked="checked" if checked else "", classes=classes, onchange=onchange, name=name,
     )
 
 

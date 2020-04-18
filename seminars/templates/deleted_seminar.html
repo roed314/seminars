@@ -1,0 +1,20 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+{% if user.is_admin or seminar.owner == user.email %}
+
+<p>Your seminar, {{seminar.name}}, has been deleted with all of its talks.  They will no longer show up in search results or on the browse page.</p>
+
+<ul>
+  <li><a href="{{ url_for('.revive_seminar', shortname=seminar.shortname) }}">Revive</a> (will also revive all talks)</li>
+  <li><a href="{{ url_for('.permdelete_seminar', shortname=seminar.shortname) }}" onclick="return confirm('Are you sure you want to permanently delete this seminar and all of its talks?  This cannot be undone.');">Delete permanently</a></li>
+</ul>
+
+{% else %}
+
+<p>The seminar {{seminar.name}} has been deleted.</p>
+
+{% endif %}
+
+{% endblock %}

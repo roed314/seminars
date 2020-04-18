@@ -83,6 +83,7 @@ class WebInstitution(object):
         return isinstance(other, WebInstitution) and all(
             getattr(self, key, None) == getattr(other, key, None)
             for key in db.institutions.search_cols
+            if key not in ["edited_at", "edited_by"]
         )
 
     def __ne__(self, other):
@@ -105,7 +106,8 @@ class WebInstitution(object):
             userdata["name"] if userdata["name"] else self.admin,
         )
 
-
+### FIXME ###
+# Should always return a WebInstitution object but currently may returna dictionary or WebObject
 def can_edit_institution(shortname, new):
     if not allowed_shortname(shortname):
         flash_error(
