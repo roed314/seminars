@@ -623,11 +623,13 @@ def save_talk():
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["speaker"]:
         errmegs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
-    data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
+    if data["start_time"] is None or data["end_time"] is None:
+        errmsg.append("Talks must have both a start and end time.")
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
+    data["topics"] = clean_topics(data.get("topics"))
+    data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
     sanity_check_times(new_version.start_time, new_version.end_time)
     if new_version == talk:
