@@ -367,6 +367,7 @@ def save_seminar():
             typ = "time"
         try:
             val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
@@ -390,20 +391,16 @@ def save_seminar():
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
-            print(D)
-            print("col: %s"%(col))
             if col in D:
                 continue
             name = "org_%s%s" % (col, i)
             typ = db.seminar_organizers.col_type[col]
             try:
                 val = raw_data.get(name, "")
-                print("col: %s, typ: %s, val: %s"%(val, col, typ))
+                D[col] = None # make sure col is present even if process_user_input fails
                 D[col] = process_user_input(val, col, typ, tz)
-                printf("D[%s] = %s"%(col,D[col]))
             except Exception as err:
                 errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
-        print(D)
         if D["homepage"] or D["email"] or D["full_name"]:
             if not D["full_name"]:
                 errmsgs.append(format_errmsg("organizer %s cannot be blank", "name"))
@@ -503,6 +500,7 @@ def save_institution():
         typ = db.institutions.col_type[col]
         try:
             val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
             if col == "admin":
                 userdata = db.users.lookup(data[col])
@@ -612,6 +610,7 @@ def save_talk():
         typ = db.talks.col_type[col]
         try:
             val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
@@ -875,6 +874,7 @@ def save_seminar_schedule():
             typ = db.talks.col_type[col]
             try:
                 val = raw_data.get("%s%s" % (col, i), "")
+                data[col] = None # make sure col is present even if process_user_input fails
                 data[col] = process_user_input(val, col, typ, tz)
             except Exception as err:
                 errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
