@@ -45,7 +45,7 @@
         </tr>
         <tr>
           <td>Institutions</td>
-          <td><span id="institution_selector" style="width:600px;"></span></td>
+          <td><span id="institution_selector" style="width:610px;"></span></td>
         </tr>
         <tr>
           <td>Topics</td>
@@ -89,7 +89,7 @@
 
         <tr>
           <td>Talks per day</td>
-          <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:500px;" /></td>
+          <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" /></td>
         </tr>
         <tr>
           <td>Time zone</td>
@@ -143,7 +143,7 @@
           <tr>
             <td>Archived</td>
             <td>
-              <select name="archived" style="width:510px;">
+              <select name="archived" style="width:610px;">
                 <option value="yes"{% if seminar.archived %} selected{% endif %}>yes</option>
                 <option value="no"{% if not seminar.archived %} selected{% endif %}>no</option>
               </select>
