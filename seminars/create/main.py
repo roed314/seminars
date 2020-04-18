@@ -737,6 +737,7 @@ def make_date_data(seminar, data):
     all_dates = sorted(set(schedule_days + list(by_date)), reverse=(end < begin))
     # Fill in by_date with Nones up to the per_day value
     for date in all_dates:
+        print("seminar.per_day = %s"%(seminar.per_day))
         by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
     if seminar.start_time is None:
         if future_talk is not None and future_talk.start_time:
