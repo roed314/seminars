@@ -832,11 +832,11 @@ def save_seminar_schedule():
             try:
                 time_split = time_input.split("-")
                 if len(time_split) < 2:
-                    raise ValueError("You specify both a start and end time.")
+                    raise ValueError("Invalid time range.")
                 elif len(time_split) > 2:
                     raise ValueError("Time range contains more than one hyphen, expected hh:mm-hh:mm.")
                 if not time_split[0].strip() or not time_split[1].strip():
-                    raise ValueError("You must specify both a start and end time.")
+                    raise ValueError("Invalid time range.")
                 # TODO: clean this up
                 start_time = process_user_input(time_split[0], "start_time", "time", tz)
                 end_time = process_user_input(time_split[1], "end_time", "time", tz)
