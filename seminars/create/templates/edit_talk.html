@@ -16,7 +16,7 @@
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <table>
     <tr>
-      <td style="width:200px;">Seminar</td>
+      <td style="width:100px;">Seminar</td>
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
@@ -24,7 +24,7 @@
     <tr>
       <td>Topics</td>
       <td>
-        <span id="topic_selector" style="width:600px;"></span>
+        <span id="topic_selector" style="width:610px;"></span>
       </td>
     </tr>
     <tr>
@@ -36,7 +36,7 @@
     <tr>
       <td>Time zone</td>
       <td>
-        <select name="timezone" style="width:600px;">
+        <select name="timezone" style="width:610px;">
           {% for tz, disp in timezones %}
           <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
           {% endfor %}
@@ -58,7 +58,7 @@
     <tr>
       <td>Online</td>
       <td>
-        <select name="online" style="width:600px;">
+        <select name="online" style="width:610px;">
           <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
           <option value="no"{% if not talk.online %} selected{% endif %}>no</option>
         </select>
@@ -72,7 +72,7 @@
     <tr>
       <td>Access</td>
       <td>
-        <select name="access" style="width:600px;">
+        <select name="access" style="width:610px;">
           <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view link</option>
           <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
           <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
@@ -83,13 +83,13 @@
       <td colspan="2">Comments</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="76" rows="5" name="comments">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="100" rows="5" name="comments">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
   </table>
-  <hr style="width: 700px;">
+  <hr style="width:800px;">
   <table>
     <tr>
-      <td>Speaker</td>
+      <td style="width:200px">Speaker</td>
       <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
