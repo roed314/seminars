@@ -789,7 +789,6 @@ optional_cols = ["speaker_affiliation", "speaker_email", "title"]
 def save_seminar_schedule():
     raw_data = request.form
     shortname = raw_data["shortname"]
-    print(garbage) # Test new 500 page
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
