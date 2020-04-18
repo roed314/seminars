@@ -281,10 +281,10 @@ class WebTalk(object):
         return '<a href="%s">paper</a>'%(self.paper_link) if self.paper_link else ""
 
     def show_slides_link(self):
-        return '<a href="%s">paper</a>'%(self.slides_link) if self.slides_link else ""
+        return '<a href="%s">slides</a>'%(self.slides_link) if self.slides_link else ""
 
     def show_video_link(self):
-        return '<a href="%s">paper</a>'%(self.video_link) if self.video_link else ""
+        return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
 
     def is_past(self):
         return self.end_time < datetime.datetime.now(pytz.utc)
@@ -365,6 +365,9 @@ class WebTalk(object):
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def show_comments(self):
+        if self.comments != self.seminar.comments:
+            print self.comments
+            print self.seminar.comments
         if self.comments:
             return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
         else:
