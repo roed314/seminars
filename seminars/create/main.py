@@ -825,7 +825,7 @@ def save_seminar_schedule():
             except Exception as err: # should only be ValueError's but let's be cautious
                 errmsgs.append(format_errmsg("Unable to process input %s for date: {0}".format(err), date))
         else:
-            date = None
+            errmsgs.append(format_errmsg("You must specify a date for the talk by %s", speaker))
         time_input = raw_data.get("time%s" % i, "").strip()
         start_time = end_time = None
         if time_input:
@@ -838,14 +838,17 @@ def save_seminar_schedule():
                 if not time_split[0].strip() or not time_split[1].strip():
                     raise ValueError("You must specify both a start and end time.")
                 # TODO: clean this up
-                start_time = process_user_input(time_split[0], "start_time", "time", tz).time()
-                end_time = process_user_input(time_split[1], "end_time", "time", tz).time()
+                start_time = process_user_input(time_split[0], "start_time", "time", tz)
+                end_time = process_user_input(time_split[1], "end_time", "time", tz)
             except Exception as err:
                 errmsgs.append(format_errmsg("Unable to process input %s for time: {0}".format(err), time_input,))
-        if any(X is None for X in [start_time, end_time, date]):
-            errmsgs.append(format_errmsg("You must give a date, start, and end time for %s", speaker))
+        if any(X is None for X in [start_time, end_time]):
+            errmsgs.append(format_errmsg("You must specify a start and end time for the talk by speaker %s", speaker))
+        else:
+            start_time = start_time.time()
+            end_time = end_time.time()
 
-        # we need to flag date and time errors now
+        # we need to flag date and time errors before we go any further
         if errmsgs:
             return show_input_errors(errmsgs)
 
