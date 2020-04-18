@@ -339,6 +339,7 @@ def save_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
+    print(type(seminar))
     errmsgs = []
 
     if seminar.new:
@@ -489,6 +490,7 @@ def save_institution():
     resp, institution = can_edit_institution(shortname, new)
     if resp is not None:
         return resp
+    print(type(institution))
 
     data = {}
     data["timezone"] = tz = raw_data.get("timezone", "UTC")
@@ -519,7 +521,7 @@ def save_institution():
     if errmsgs:
         return show_input_errors(errmsgs)
     new_version = WebInstitution(shortname, data=data)
-    print(institution)
+    print(type(institution))
     print(new_version)
     if new_version == institution:
         flash("No changes made to institution.")
