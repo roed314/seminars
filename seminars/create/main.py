@@ -400,6 +400,7 @@ def save_seminar():
                 val = raw_data.get(name, "")
                 print("col: %s, typ: %s, val: %s"%(val, col, typ))
                 D[col] = process_user_input(val, col, typ, tz)
+                printf("D[%s] = %s"%(col,D[col]))
             except Exception as err:
                 errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
         print(D)
