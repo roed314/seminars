@@ -20,8 +20,8 @@ from seminars.utils import (
     show_input_errors,
     validate_url,
 )
-from seminars.seminar import WebSeminar, can_edit_seminar, seminars_search
-from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, can_edit_talk
+from seminars.seminar import WebSeminar, can_edit_seminar, seminars_search, seminars_lookup
+from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, talks_lookup, can_edit_talk
 from seminars.institution import (
     WebInstitution,
     can_edit_institution,
@@ -31,8 +31,10 @@ from seminars.institution import (
     clean_institutions,
 )
 from seminars.lock import get_lock
-from seminars.users.pwdmanager import ilike_query
+from seminars.users.pwdmanager import ilike_query, ilike_escape
 from lmfdb.utils import flash_error
+from lmfdb.backend.utils import IdentifierWrapper
+from psycopg2.sql import SQL
 import datetime
 from datetime import timedelta
 import pytz
@@ -48,6 +50,8 @@ def index():
     # TODO: use a join for the following query
     seminars = {}
     conferences = {}
+    deleted_seminars = []
+    deleted_talks = []
 
     def key(elt):
         role_key = {"organizer": 0, "curator": 1, "creator": 3}
@@ -65,22 +69,45 @@ def index():
         else:
             seminars[semid] = pair
     role = "creator"
-    for semid in seminars_search({"owner": ilike_query(current_user.email)}, "shortname"):
+    for semid in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_deleted=True):
         if semid not in seminars and semid not in conferences:
-            seminar = WebSeminar(semid)
+            seminar = WebSeminar(semid, deleted=True) # allow deleted
             pair = (seminar, role)
-            if seminar.is_conference:
+            if seminar.deleted:
+                deleted_seminars.append(seminar)
+            elif seminar.is_conference:
                 conferences[semid] = pair
             else:
                 seminars[semid] = pair
     seminars = sorted(seminars.values(), key=key)
     conferences = sorted(conferences.values(), key=key)
+    deleted_seminars.sort(key=lambda sem: sem.name)
+    for semid, semctr in db._execute(
+            # ~~* is case insensitive amtch
+            SQL("""
+SELECT DISTINCT ON ({Ttalks}.{Csemid}, {Ttalks}.{Csemctr}) {Ttalks}.{Csemid}, {Ttalks}.{Csemctr}
+FROM {Ttalks} INNER JOIN {Tsems} ON {Ttalks}.{Csemid} = {Tsems}.{Csname}
+WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
+            """).format(
+                Ttalks=IdentifierWrapper("talks"),
+                Tsems=IdentifierWrapper("seminars"),
+                Csemid=IdentifierWrapper("seminar_id"),
+                Csemctr=IdentifierWrapper("seminar_ctr"),
+                Csname=IdentifierWrapper("shortname"),
+                Cowner=IdentifierWrapper("owner"),
+                Cdel=IdentifierWrapper("deleted"),
+            ), [ilike_escape(current_user.email), True, False]):
+        talk = WebTalk(semid, semctr, deleted=True)
+        deleted_talks.append(talk)
+    deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
     manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "create_index.html",
         seminars=seminars,
         conferences=conferences,
+        deleted_seminars=deleted_seminars,
+        deleted_talks=deleted_talks,
         institution_known=institution_known,
         institutions=institutions(),
         section=manage,
@@ -131,7 +158,11 @@ def edit_seminar():
 @create.route("delete/seminar/<shortname>")
 @email_confirmed_required
 def delete_seminar(shortname):
-    seminar = WebSeminar(shortname)
+    try:
+        seminar = WebSeminar(shortname)
+    except ValueError as err:
+        flash_error(str(err))
+        return redirect(url_for(".index"), 302)
     manage = "Manage" if current_user.is_organizer else "Create"
     lock = get_lock(shortname, request.args.get("lock"))
 
@@ -148,22 +179,76 @@ def delete_seminar(shortname):
             lock=lock,
         )
 
-    if not seminar.user_can_delete():
+    if not seminar or not seminar.user_can_delete():
         flash_error("Only the owner of the seminar can delete it")
         return failure()
     else:
         if seminar.delete():
             flash("Seminar deleted")
-            return redirect(url_for(".index"))
+            return redirect(url_for(".deleted_seminar", shortname=shortname), 302)
         else:
             flash_error("Only the owner of the seminar can delete it")
             return failure()
 
+@create.route("deleted/seminar/<shortname>")
+@email_confirmed_required
+def deleted_seminar(shortname):
+    try:
+        seminar = WebSeminar(shortname, deleted=True)
+    except ValueError as err:
+        flash_error(str(err))
+        return redirect(url_for(".index"), 302)
+    return render_template("deleted_seminar.html", seminar=seminar, title="Deleted")
 
-@create.route("delete/talk/<semid>/<semctr>")
+@create.route("revive/seminar/<shortname>")
+@email_confirmed_required
+def revive_seminar(shortname):
+    data = seminars_lookup(shortname, include_deleted=True)
+
+    if data is None:
+        flash_error("Seminar %s was deleted permanently", shortname)
+        return redirect(url_for(".index"), 302)
+    if not current_user.is_admin and data.owner != current_user:
+        flash_error("You do not have permission to revive seminar %s", shortname)
+        return redirect(url_for(".index"), 302)
+    if not data.deleted:
+        flash_error("Seminar %s was not deleted, so cannot be revived", shortname)
+    else:
+        db.seminars.update({"shortname": shortname}, {"deleted": False})
+        db.talks.update({"seminar_id": shortname}, {"deleted": False})
+        flash("Seminar %s revived.  You should reset the organizers, and note that any users that were subscribed no longer are." % shortname)
+    return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+
+@create.route("permdelete/seminar/<shortname>")
+@email_confirmed_required
+def permdelete_seminar(shortname):
+    data = seminars_lookup(shortname, include_deleted=True)
+
+    if data is None:
+        flash_error("Seminar %s already deleted permanently", shortname)
+        return redirect(url_for(".index"), 302)
+    if not current_user.is_admin and data.owner != current_user:
+        flash_error("You do not have permission to delete seminar %s", shortname)
+        return redirect(url_for(".index"), 302)
+    if not data.deleted:
+        flash_error("You must delete seminar %s first", shortname)
+        return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+    else:
+        db.seminars.delete({"shortname": shortname})
+        db.talks.delete({"seminar_id": shortname})
+        flash("Seminar %s permanently deleted" % shortname)
+        return redirect(url_for(".index"), 302)
+
+
+
+@create.route("delete/talk/<semid>/<int:semctr>")
 @email_confirmed_required
 def delete_talk(semid, semctr):
-    talk = WebTalk(semid, semctr)
+    try:
+        talk = WebTalk(semid, semctr)
+    except ValueError as err:
+        flash_error(str(err))
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
 
     def failure():
         return render_template(
@@ -187,6 +272,54 @@ def delete_talk(semid, semctr):
         else:
             flash_error("Only the organizers of a seminar can delete talks in it")
             return failure()
+
+@create.route("deleted/talk/<semid>/<int:semctr>")
+@email_confirmed_required
+def deleted_talk(semid, semctr):
+    try:
+        talk = WebTalk(semid, semctr, deleted=True)
+    except ValueError as err:
+        flash_error(str(err))
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+    return render_template("deleted_talk.html", talk=talk, title="Deleted")
+
+@create.route("revive/talk/<semid>/<int:semctr>")
+@email_confirmed_required
+def revive_talk(semid, semctr):
+    talk = talks_lookup(semid, semctr, include_deleted=True)
+
+    if talk is None:
+        flash_error("Talk %s/%s was deleted permanently", semid, semctr)
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+    if not current_user.is_admin and talk.seminar.owner != current_user:
+        flash_error("You do not have permission to revive this talk")
+        return redirect(url_for(".index"), 302)
+    if not talk.deleted:
+        flash_error("Talk %s/%s was not deleted, so cannot be revived", semid, semctr)
+        return redirect(url_for(".edit_talk", seminar_id=semid, seminar_ctr=semctr), 302)
+    else:
+        db.talks.update({"seminar_id": semid, "seminar_ctr": semctr}, {"deleted": False})
+        flash("Talk revived.  Note that any users who were subscribed no longer are.")
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+
+@create.route("permdelete/talk/<semid>/<int:semctr>")
+@email_confirmed_required
+def permdelete_talk(semid, semctr):
+    talk = talks_lookup(semid, semctr, include_deleted=True)
+
+    if talk is None:
+        flash_error("Talk %s/%s already deleted permanently", semid, semctr)
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+    if not current_user.is_admin and talk.seminar.owner != current_user:
+        flash_error("You do not have permission to delete this seminar")
+        return redirect(url_for(".index"), 302)
+    if not talk.deleted:
+        flash_error("You must delete talk %s/%s first", semid, semctr)
+        return redirect(url_for(".edit_talk", seminar_id=semid, seminar_ctr=semctr), 302)
+    else:
+        db.talks.delete({"seminar_id": semid, "seminar_ctr": semctr})
+        flash("Talk %s/%s permanently deleted" % (semid, semctr))
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
 
 
 @create.route("save/seminar/", methods=["POST"])
@@ -222,8 +355,9 @@ def save_seminar():
             continue
         try:
             val = raw_data.get(col)
+            typ = db.seminars.col_type[col]
             if not val:
-                data[col] = None
+                data[col] = False if typ == "boolean" else None  # checkboxes
             else:
                 typ = "time" if col.endswith("_time") else db.seminars.col_type[col]
                 data[col] = process_user_input(val, typ, tz=tz)
@@ -268,7 +402,7 @@ def save_seminar():
                 if val == "":
                     D[col] = None
                 elif val is None:
-                    D[col] = False if type == "boolean" else None  # checkboxes
+                    D[col] = False if typ == "boolean" else None  # checkboxes
                 else:
                     D[col] = process_user_input(val, typ, tz=tz)
                 # if col == 'homepage' and val and not val.startswith("http"):
@@ -390,10 +524,11 @@ def save_institution():
             continue
         try:
             val = raw_data.get(col)
+            typ = db.institutions.col_type[col]
             if not val:
-                data[col] = None
+                data[col] = False if typ == "boolean" else None  # checkboxes
             else:
-                data[col] = process_user_input(val, db.institutions.col_type[col], tz=tz)
+                data[col] = process_user_input(val, typ, tz=tz)
             if col == "admin":
                 userdata = db.users.lookup(data[col])
                 if userdata is None:
@@ -515,10 +650,11 @@ def save_talk():
             continue
         try:
             val = raw_data.get(col, "").strip()
+            typ = db.talks.col_type[col]
             if not val:
-                data[col] = None
+                data[col] = False if typ == "boolean" else None  # checkboxes
             else:
-                data[col] = process_user_input(val, db.talks.col_type[col], tz=tz)
+                data[col] = process_user_input(val, typ, tz=tz)
             if (col.endswith("homepage") or col.endswith("link")) and data[col]:
                 if not validate_url(data[col]) and not (col == "live_link" and data[col] == "see comments"):
                     errmsgs.append(

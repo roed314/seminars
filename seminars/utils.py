@@ -182,7 +182,10 @@ def clean_topics(inp):
     return inp
 
 
-def count_distinct(table, counter, query={}):
+def count_distinct(table, counter, query={}, include_deleted=False):
+    query = dict(query)
+    if not include_deleted:
+        query["deleted"] = {"$or": [False, {"$exists": False}]}
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
     tbl = IdentifierWrapper(table.search_table)
     qstr, values = table._build_query(query, sort=[])
@@ -191,8 +194,11 @@ def count_distinct(table, counter, query={}):
     return int(cur.fetchone()[0])
 
 
-def max_distinct(table, maxer, col, constraint={}):
+def max_distinct(table, maxer, col, constraint={}, include_deleted=False):
     # Note that this will return None for the max of an empty set
+    constraint = dict(constraint)
+    if not include_deleted:
+        constraint["deleted"] = {"$or": [False, {"$exists": False}]}
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
     tbl = IdentifierWrapper(table.search_table)
     qstr, values = table._build_query(constraint, sort=[])
@@ -212,6 +218,7 @@ def search_distinct(
     offset=0,
     sort=None,
     info=None,
+    include_deleted=False,
 ):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -227,6 +234,9 @@ def search_distinct(
     """
     if offset < 0:
         raise ValueError("Offset cannot be negative")
+    query = dict(query)
+    if not include_deleted:
+        query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
@@ -268,7 +278,10 @@ def search_distinct(
     return list(results)
 
 
-def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0, sort=[]):
+def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0, sort=[], include_deleted=False):
+    query = dict(query)
+    if not include_deleted:
+        query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))

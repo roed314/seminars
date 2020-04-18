@@ -163,6 +163,17 @@ class PostgresUserTable(PostgresSearchTable):
             self.update({"email": ilike_query(email)}, data)
         return True
 
+    def delete(self, data):
+        # We keep the uid in the users table (so that it doesn't get reused), but remove all personal information
+        uid = data["id"]
+        email = data["email"]
+        with DelayCommit(db):
+            # We probably have code that assumes that admin/owner isn't None....
+            db.institutions.update({"admin": ilike_query(email)}, {"admin": "mathseminars-dev@googlegroups.com"})
+            db.seminars.update({"owner": ilike_query(email)}, {"owner": "mathseminars-dev@googlegroups.com"})
+            db.seminar_organizers.delete({"email": ilike_query(email)})
+            db.talks.update({"speaker_email": ilike_query(email)}, {"speaker_email": ""})
+            self.update({"id": uid}, {key: None for key in self.search_cols})
 
 userdb = PostgresUserTable()
 
@@ -495,6 +506,8 @@ class SeminarsUser(UserMixin):
         self._dirty = False
         return True
 
+    def delete(self):
+        userdb.delete(self._data)
 
 class SeminarsAnonymousUser(AnonymousUserMixin):
     """
