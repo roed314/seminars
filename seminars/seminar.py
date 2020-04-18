@@ -12,6 +12,7 @@ from seminars.utils import (
     adapt_weektime,
     adapt_datetime,
     toggle,
+    make_links,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
