@@ -519,6 +519,8 @@ def save_institution():
     if errmsgs:
         return show_input_errors(errmsgs)
     new_version = WebInstitution(shortname, data=data)
+    print(institution)
+    print(new_version)
     if new_version == institution:
         flash("No changes made to institution.")
     else:
