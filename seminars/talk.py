@@ -58,8 +58,8 @@ class WebTalk(object):
                 if key == "id" or hasattr(self, key):
                     continue
                 elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
-                    # carry over from seminar
-                    setattr(self, key, getattr(seminar, key))
+                    # carry over from seminar, but not comments
+                    setattr(self, key, getattr(seminar, key) if key != "comments" else "")
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
