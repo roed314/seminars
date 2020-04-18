@@ -27,63 +27,53 @@
         <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
       <table>
         <tr>
-          <td>
-            Identifier
-          </td>
-          <td>
-            {{ seminar.shortname }}
-          </td>
+          <td style="width:150px;">Identifier</td>
+          <td>{{ seminar.shortname }}</td>
         </tr>
         <tr>
           <td>Full name</td>
-          <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:500px;" /></td>
+          <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" /></td>
           <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
         </tr>
         <tr>
           <td>Short description</td>
-          <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:500px;" placeholder="research seminar" maxlength="60"/></td>
+          <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" placeholder="research seminar" maxlength="60"/></td>
         </tr>
         <tr>
           <td style="white-space:nowrap">External homepage</td>
-          <td><input style="width:500px;" name="homepage" value="{{ seminar.homepage | blanknone }}" placeholder="https://example.org"/></td>
-        </tr>
-        <tr>
-          <td>Topics</td>
-          <td>
-            <span id="topic_selector"></span>
-          </td>
+          <td><input name="homepage" value="{{ seminar.homepage | blanknone }}" style="width:600px;" placeholder="https://example.org"/></td>
         </tr>
         <tr>
           <td>Institutions</td>
-          <td>
-            <span id="institution_selector"></span>
-          </td>
+          <td><span id="institution_selector" style="width:600px;"></span></td>
+        </tr>
+        <tr>
+          <td>Topics</td>
+          <td><span id="topic_selector" style="width:610px;"></span></td>
         </tr>
         <tr>
           <td>Default language</td>
-          <td>
-            <span id="language_selector"></span>
-          </td>
+          <td><span id="language_selector" style="width:600px;"></span></td>
         </tr>
 
         {% if seminar.is_conference %}
         <tr>
           <td style="padding-top: 20px">Start date</td>
           <td style="padding-top: 20px">
-            <input name="start_date" style="width:500px;" value="{{ seminar.show_input_date(seminar.start_date) }}" placeholder="2020-01-27" />
+            <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
           </td>
         </tr>
         <tr>
           <td>End date</td>
           <td>
-            <input name="end_date" style="width:500px;" value="{{ seminar.show_input_date(seminar.end_date) }}" placeholder="2020-01-31" />
+            <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
           </td>
         </tr>
         {% else %}
         <tr>
           <td style="padding-top: 20px">Meeting day</td>
           <td style="padding-top: 20px">
-            <select name="weekday" style="width:510px;">
+            <select name="weekday" style="width:610px;">
               <option value=""></option>
               {% for wkday in weekdays %}
                 <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
@@ -93,17 +83,18 @@
         </tr>
         <tr>
           <td style="white-space:nowrap">Frequency (in days)</td>
-          <td><input name="frequency" style="width:500px;" value="{{ seminar.frequency | blanknone }}" /></td>
+          <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:600px;"/></td>
         </tr>
         {% endif %}
+
         <tr>
           <td>Talks per day</td>
-          <td><input name="per_day" style="width:500px;" value="{{ seminar.per_day | blanknone }}" /></td>
+          <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:500px;" /></td>
         </tr>
         <tr>
           <td>Time zone</td>
           <td>
-            <select name="timezone" style="width:510px;">
+            <select name="timezone" style="width:610px;">
               {% for tz, disp in timezones %}
                 <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
               {% endfor %}
@@ -113,21 +104,21 @@
         {% if not seminar.is_conference %}
         <tr>
           <td>Start time</td>
-          <td><input name="start_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.start_time) }}" placeholder="15:00"/></td>
+          <td><input name="start_time" value="{{ seminar.show_input_time(seminar.start_time) }}" style="width:600px;" placeholder="15:00"/></td>
         </tr>
         <tr>
           <td>End time</td>
-          <td><input name="end_time" style="width:500px;" value="{{ seminar.show_input_time(seminar.end_time) }}" placeholder="16:00"/></td>
+          <td><input name="end_time" value="{{ seminar.show_input_time(seminar.end_time) }}" style="width:600px;" placeholder="16:00"/></td>
         </tr>
         {% endif %}
         <tr>
           <td style="padding-top: 20px">Room</td>
-          <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:500px;" /></td>
+          <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" /></td>
         </tr>
         <tr>
           <td>Online</td>
           <td>
-            <select name="online" style="width:510px;">
+            <select name="online" style="width:610px;">
               <option value="yes"{% if seminar.online %} selected{% endif %}>yes</option>
               <option value="no"{% if not seminar.online %} selected{% endif %}>no</option>
             </select>
@@ -135,13 +126,13 @@
         </tr>
         <tr>
           <td>Livestream link</td>
-          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:500px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
           <td class="forminfo" />Enter "see comments" if the link is not fixed and explain in the comments how to get the link.</td>
         </tr>
         <tr>
           <td>Access</td>
           <td>
-            <select name="access" style="width:510px;">
+            <select name="access" style="width:610px;">
               <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view link</option>
               <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
               <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
@@ -163,7 +154,7 @@
           <td colspan="2" style="padding-top: 10px">Comments</td>
         </tr>
         <tr>
-          <td colspan="2"><textarea cols="76" rows="7" name="comments">{{ seminar.comments | blanknone }}</textarea></td>
+          <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments">{{ seminar.comments | blanknone }}</textarea></td>
         </tr>
       </table>
       <h3>Organizers</h3>
