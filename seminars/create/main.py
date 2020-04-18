@@ -736,9 +736,9 @@ def make_date_data(seminar, data):
         by_date[adapt_datetime(T.start_time, tz).date()].append(T)
     all_dates = sorted(set(schedule_days + list(by_date)), reverse=(end < begin))
     # Fill in by_date with Nones up to the per_day value
+    per_day = seminar.per_day if seminar.per_day else 1
     for date in all_dates:
-        print("seminar.per_day = %s"%(seminar.per_day))
-        by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
+        by_date[date].extend([None] * (per_day - len(by_date[date])))
     if seminar.start_time is None:
         if future_talk is not None and future_talk.start_time:
             seminar.start_time = future_talk.start_time
@@ -749,7 +749,7 @@ def make_date_data(seminar, data):
             seminar.end_time = future_talk.end_time
         elif last_talk is not None and last_talk.start_time:
             seminar.end_time = last_talk.end_time
-    return seminar, all_dates, by_date, len(all_dates) * seminar.per_day
+    return seminar, all_dates, by_date, len(all_dates) * per_day
 
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
