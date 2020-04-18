@@ -51,15 +51,15 @@
     </tr>
     <tr>
       <td>Start</td>
-      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:500px;" /></td>
+      <td><input name="start_time" value="{{ talk.editable_start_time() }}"/></td>
     </tr>
     <tr>
       <td>End</td>
-      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:500px;" /></td>
+      <td><input name="end_time" value="{{ talk.editable_end_time() }}" /></td>
     </tr>
     <tr>
       <td>Room</td>
-      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:500px;" /></td>
+      <td><input name="room" value="{{ talk.room | blanknone }}" /></td>
     </tr>
     <tr>
       <td>Online</td>
@@ -71,7 +71,7 @@
       </td>
     </tr>
     <tr>
-      <td>Livestream link</td>
+      <td>Live link</td>
       <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:500px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
           <td class="forminfo" />Enter "see comments" if the link is not fixed and explain in the seminar or talk comments how to get the link.</td>
     </tr>
@@ -93,18 +93,22 @@
     </tr>
   </table>
   <hr style="width: 700px;">
-  <table>
+  <table style="width: 100%">
+    <colgroup>
+      <col span="1" style="width: 20%;">
+      <col span="1" style="width: 80%;">
+    </colgroup>
     <tr>
       <td>Speaker</td>
-      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:500px;" /></td>
+      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" /></td>
     </tr>
     <tr>
       <td>Speaker email</td>
-      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:500px;" /></td>
+      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" /></td>
     </tr>
     <tr>
       <td>Speaker affiliation</td>
-      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:500px;" /></td>
+      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" /></td>
     </tr>
     <tr>
       <td>Speaker homepage</td>
@@ -112,20 +116,20 @@
     </tr>
     <tr>
       <td>Title</td>
-      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:500px;" placeholder="TeX symbols are OK here" /></td>
+      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" placeholder="TeX symbols are OK here" /></td>
       <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
     </tr>
     <tr>
       <td>Paper link</td>
-      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:500px;" /></td>
+      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" /></td>
     </tr>
     <tr>
       <td>Slides link</td>
-      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:500px;" /></td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" /></td>
     </tr>
     <tr>
       <td>Video link</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:500px;" /></td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" /></td>
     </tr>
   </table>
   <h3>Abstract</h3>
