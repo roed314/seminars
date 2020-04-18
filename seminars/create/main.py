@@ -622,9 +622,9 @@ def save_talk():
         except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["speaker"]:
-        errmegs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
+        errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
     if data["start_time"] is None or data["end_time"] is None:
-        errmsg.append("Talks must have both a start and end time.")
+        errmsgs.append("Talks must have both a start and end time.")
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
