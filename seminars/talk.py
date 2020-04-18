@@ -11,6 +11,7 @@ from seminars.utils import (
     max_distinct,
     adapt_datetime,
     toggle,
+    make_links,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -365,20 +366,14 @@ class WebTalk(object):
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def show_comments(self):
-        if self.comments != self.seminar.comments:
-            print(self.comments)
-            print(self.seminar.comments)
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
         else:
             return ""
 
-    def split_abstract(self):
-        return self.abstract.split("\n\n")
-
     def show_abstract(self):
         if self.abstract:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.split_abstract())
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
         else:
             return "<p>TBA</p>"
 

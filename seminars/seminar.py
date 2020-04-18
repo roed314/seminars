@@ -233,7 +233,7 @@ class WebSeminar(object):
 
     def show_comments(self):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
         else:
             return ""
 
