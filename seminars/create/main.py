@@ -367,8 +367,9 @@ def save_seminar():
             typ = "time"
         try:
             val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
-        except Exception as err:
+        except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Seminar name cannot be blank")
@@ -396,8 +397,9 @@ def save_seminar():
             typ = db.seminar_organizers.col_type[col]
             try:
                 val = raw_data.get(name, "")
+                D[col] = None # make sure col is present even if process_user_input fails
                 D[col] = process_user_input(val, col, typ, tz)
-            except Exception as err:
+            except Exception as err: # should only be ValueError's but let's be cautious
                 errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
         if D["homepage"] or D["email"] or D["full_name"]:
             if not D["full_name"]:
@@ -498,6 +500,7 @@ def save_institution():
         typ = db.institutions.col_type[col]
         try:
             val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
             if col == "admin":
                 userdata = db.users.lookup(data[col])
@@ -505,7 +508,7 @@ def save_institution():
                     errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
                 elif not userdata["creator"]:
                     errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
-        except Exception as err:
+        except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
     # Don't try to create new_version using invalid input
     if errmsgs:
@@ -607,10 +610,11 @@ def save_talk():
         typ = db.talks.col_type[col]
         try:
             val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
-        except Exception as err:
+        except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -818,28 +822,33 @@ def save_seminar_schedule():
         if date:
             try:
                 date = process_user_input(date, "date", "date", tz)
-            except ValueError as err:
+            except Exception as err: # should only be ValueError's but let's be cautious
                 errmsgs.append(format_errmsg("Unable to process input %s for date: {0}".format(err), date))
         else:
-            date = None
+            errmsgs.append(format_errmsg("You must specify a date for the talk by %s", speaker))
         time_input = raw_data.get("time%s" % i, "").strip()
         start_time = end_time = None
         if time_input:
             try:
                 time_split = time_input.split("-")
-                if len(time_split) == 1:
-                    raise ValueError("Must specify both start and end times")
+                if len(time_split) < 2:
+                    raise ValueError("Invalid time range.")
                 elif len(time_split) > 2:
-                    raise ValueError("More than one hyphen")
+                    raise ValueError("Time range contains more than one hyphen, expected hh:mm-hh:mm.")
+                if not time_split[0].strip() or not time_split[1].strip():
+                    raise ValueError("Invalid time range.")
                 # TODO: clean this up
-                start_time = process_user_input(time_split[0], "start_time", "time", tz).time()
-                end_time = process_user_input(time_split[1], "end_time", "time", tz).time()
-            except ValueError as err:
+                start_time = process_user_input(time_split[0], "start_time", "time", tz)
+                end_time = process_user_input(time_split[1], "end_time", "time", tz)
+            except Exception as err:
                 errmsgs.append(format_errmsg("Unable to process input %s for time: {0}".format(err), time_input,))
-        if any(X is None for X in [start_time, end_time, date]):
-            errmsgs.append(format_errmsg("You must give a date, start and end time for %s", speaker))
+        if any(X is None for X in [start_time, end_time]):
+            errmsgs.append(format_errmsg("You must specify a start and end time for the talk by speaker %s", speaker))
+        else:
+            start_time = start_time.time()
+            end_time = end_time.time()
 
-        # we need to flag date and time errors now
+        # we need to flag date and time errors before we go any further
         if errmsgs:
             return show_input_errors(errmsgs)
 
@@ -870,6 +879,7 @@ def save_seminar_schedule():
             typ = db.talks.col_type[col]
             try:
                 val = raw_data.get("%s%s" % (col, i), "")
+                data[col] = None # make sure col is present even if process_user_input fails
                 data[col] = process_user_input(val, col, typ, tz)
             except Exception as err:
                 errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))

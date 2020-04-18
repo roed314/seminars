@@ -351,6 +351,8 @@ def process_user_input(inp, col, typ, tz):
         # a datetime object with the date set to today.  This could cause different
         # relative orders around daylight savings time, so we store all times
         # as datetimes on Jan 1, 2020.
+        if inp.isdigit():
+            inp += ":00"  # treat numbers as times not dates
         t = parse_time(inp)
         t = t.replace(year=2020, month=1, day=1)
         return localize_time(t, tz)
