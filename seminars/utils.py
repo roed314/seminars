@@ -346,7 +346,7 @@ def process_user_input(inp, col, typ, tz):
         inp = inp.strip()
     if not inp:
         return False if typ == "boolean" else ("" if typ == "text" else None)
-    elif col.endswith("time") and typ == "timestamp with time zone":
+    elif typ == "time":
         # Note that parse_time, when passed a time with no date, returns
         # a datetime object with the date set to today.  This could cause different
         # relative orders around daylight savings time, so we store all times
@@ -354,8 +354,7 @@ def process_user_input(inp, col, typ, tz):
         t = parse_time(inp)
         t = t.replace(year=2020, month=1, day=1)
         return localize_time(t, tz)
-    elif (col.endswith("page") or col.endwith("link")) and typ == "text":
-        inp = inp.strip()
+    elif (col.endswith("page") or col.endswith("link")) and typ == "text":
         if inp != "see comments" and not validate_url(inp):
             raise ValueError("Invalid URL")
         return inp

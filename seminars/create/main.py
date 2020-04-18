@@ -362,11 +362,16 @@ def save_seminar():
         if col in data:
             continue
         typ = db.seminars.col_type[col]
+        ### Hack to be removed ###
+        if col.endswith("time") and typ == "timestamp with time zone":
+            typ = "time"
         try:
             val = raw_data.get(col, "")
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+    if not data["name"]:
+
     for col in ["frequency", "per_day"]:
         if data[col] is not None and data[col] < 1:
             errmsgs.append(
@@ -600,7 +605,7 @@ def save_talk():
         typ = db.talks.col_type[col]
         try:
             val = raw_data.get(col, "")
-            process_user_input(val, col, typ, tz)
+            data[col] = process_user_input(val, col, typ, tz)
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
         except Exception as err:
