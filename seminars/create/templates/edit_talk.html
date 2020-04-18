@@ -16,7 +16,7 @@
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <table>
     <tr>
-      <td style="width:100px;">Seminar</td>
+      <td style="width:150px;">Seminar</td>
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
@@ -83,13 +83,13 @@
       <td colspan="2">Comments</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="100" rows="5" name="comments">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="96" rows="5" name="comments">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
   </table>
   <hr style="width:800px;">
   <table>
     <tr>
-      <td style="width:200px">Speaker</td>
+      <td style="width:150px">Speaker</td>
       <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
