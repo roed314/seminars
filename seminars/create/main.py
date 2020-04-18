@@ -371,7 +371,7 @@ def save_seminar():
         except Exception as err:
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
-
+        errmsgs.append("Seminar name cannot be blank")
     for col in ["frequency", "per_day"]:
         if data[col] is not None and data[col] < 1:
             errmsgs.append(
