@@ -369,7 +369,7 @@ def save_seminar():
             val = raw_data.get(col, "")
             data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
-        except Exception as err:
+        except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Seminar name cannot be blank")
@@ -399,7 +399,7 @@ def save_seminar():
                 val = raw_data.get(name, "")
                 D[col] = None # make sure col is present even if process_user_input fails
                 D[col] = process_user_input(val, col, typ, tz)
-            except Exception as err:
+            except Exception as err: # should only be ValueError's but let's be cautious
                 errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
         if D["homepage"] or D["email"] or D["full_name"]:
             if not D["full_name"]:
@@ -508,7 +508,7 @@ def save_institution():
                     errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
                 elif not userdata["creator"]:
                     errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
-        except Exception as err:
+        except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
     # Don't try to create new_version using invalid input
     if errmsgs:
@@ -614,7 +614,7 @@ def save_talk():
             data[col] = process_user_input(val, col, typ, tz)
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
-        except Exception as err:
+        except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -822,7 +822,7 @@ def save_seminar_schedule():
         if date:
             try:
                 date = process_user_input(date, "date", "date", tz)
-            except ValueError as err:
+            except Exception as err: # should only be ValueError's but let's be cautious
                 errmsgs.append(format_errmsg("Unable to process input %s for date: {0}".format(err), date))
         else:
             date = None
@@ -831,17 +831,19 @@ def save_seminar_schedule():
         if time_input:
             try:
                 time_split = time_input.split("-")
-                if len(time_split) == 1:
-                    raise ValueError("Must specify both start and end times")
+                if len(time_split) < 2:
+                    raise ValueError("You specify both a start and end time.")
                 elif len(time_split) > 2:
-                    raise ValueError("More than one hyphen")
+                    raise ValueError("Time range contains more than one hyphen, expected hh:mm-hh:mm.")
+                if not time_split[0].strip() or not time_split[1].strip():
+                    raise ValueError("You must specify both a start and end time.")
                 # TODO: clean this up
                 start_time = process_user_input(time_split[0], "start_time", "time", tz).time()
                 end_time = process_user_input(time_split[1], "end_time", "time", tz).time()
-            except ValueError as err:
+            except Exception as err:
                 errmsgs.append(format_errmsg("Unable to process input %s for time: {0}".format(err), time_input,))
         if any(X is None for X in [start_time, end_time, date]):
-            errmsgs.append(format_errmsg("You must give a date, start and end time for %s", speaker))
+            errmsgs.append(format_errmsg("You must give a date, start, and end time for %s", speaker))
 
         # we need to flag date and time errors now
         if errmsgs:
