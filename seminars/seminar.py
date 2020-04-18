@@ -129,10 +129,10 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
-    def show_day(self, truncate=True):
+    def show_day(self, truncate=True, adapt=True):
         if self.weekday is None:
             return ""
-        elif self.start_time is None:
+        elif self.start_time is None or not adapt:
             d = weekdays[self.weekday]
         else:
             d = weekdays[adapt_weektime(self.start_time, self.tz, weekday=self.weekday)[0]]
@@ -157,7 +157,7 @@ class WebSeminar(object):
         return self._show_time(self.end_time, adapt)
 
     def show_weektime_and_duration(self, adapt=True):
-        s = self.show_day(truncate=False)
+        s = self.show_day(truncate=False,adapt=adapt)
         if s:
             s += ", "
         s += self.show_start_time(adapt=adapt)
