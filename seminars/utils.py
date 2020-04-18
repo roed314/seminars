@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, time, date
+from datetime import datetime, timedelta
 from dateutil.parser import parse as parse_time
 import pytz, re, iso639
 from six import string_types
@@ -7,7 +7,6 @@ from flask_login import current_user
 from seminars import db
 from sage.misc.cachefunc import cached_function
 from lmfdb.backend.utils import IdentifierWrapper
-from lmfdb.utils import flash_error
 from lmfdb.utils.search_boxes import SearchBox
 from psycopg2.sql import SQL
 from markupsafe import Markup, escape
@@ -73,7 +72,7 @@ def is_nighttime(t):
     if t is None:
         return False
     # These are times that might be mixed up by using a 24 hour clock
-    return 1 <= t.hour < 8
+    return 1 <= t.hour < 6
 
 
 def simplify_language_name(name):
@@ -108,45 +107,21 @@ def flash_warning(warnmsg, *args):
         "error",
     )
 
-
-def check_time(start_time, end_time, check_past=False):
+def sanity_check_times(start_time, end_time):
     """
-    Flashes errors/warnings and returns True when an error should be raised.
-
-    Input start and end time can be either naive or timezone aware, but must be timezone aware if check_past is True.
+    Flashes warnings if time range seems suspsicious.  Note that end_time is (by definition) greater than start_time
     """
     if start_time is None or end_time is None:
         # Users are allowed to not fill in a time
         return
     if start_time > end_time:
-        if is_nighttime(end_time):
-            flash_error("Your start time is after your end time; perhaps you forgot pm")
-        else:
-            flash_error("Your start time is after your end time")
-        return True
+        end_time = end_time + timedelta(days=1)
+    if start_time + timedelta(hours=8) < end_time:
+        flash_warning ("Time range exceeds 8 hours, please update if that was unintended.")
     if is_nighttime(start_time) or is_nighttime(end_time):
         flash_warning(
-            "Your talk is scheduled between midnight and 8am. Please edit again using 24-hour notation or including pm if that was unintentional"
+            "Time range includes monring hours before 6am. Please update using 24-hour notation, or specify am/pm, if that was unintentional."
         )
-    # Python doesn't support subtracting times
-    if (
-        isinstance(start_time, time)
-        and isinstance(end_time, time)
-        and datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time)
-        > timedelta(hours=8)
-        or isinstance(start_time, datetime)
-        and isinstance(end_time, datetime)
-        and end_time - start_time > timedelta(hours=8)
-    ):
-        flash_warning(
-            "Your talk lasts for more than 8 hours.  Please edit again if that was unintented"
-        )
-    if check_past:
-        now = datetime.now(tz=pytz.UTC)
-        if start_time < now:
-            flash_warning(
-                "The start time of your talk is in the past.  Please edit again if that was unintended"
-            )
 
 
 def top_menu():

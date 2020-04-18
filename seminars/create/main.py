@@ -7,7 +7,6 @@ from seminars.create import create
 from seminars.utils import (
     timezones,
     process_user_input,
-    check_time,
     weekdays,
     short_weekdays,
     flash_warning,
@@ -15,6 +14,7 @@ from seminars.utils import (
     clean_topics,
     clean_language,
     adapt_datetime,
+    sanity_check_times,
     format_errmsg,
     format_warning,
     show_input_errors,
@@ -36,6 +36,7 @@ from lmfdb.utils import flash_error
 from lmfdb.backend.utils import IdentifierWrapper
 from psycopg2.sql import SQL
 import datetime
+from datetime import timedelta
 import pytz
 from collections import defaultdict
 from email_validator import validate_email, EmailNotValidError
@@ -349,14 +350,6 @@ def save_seminar():
     data["timezone"] = tz = raw_data.get("timezone")
     tz = pytz.timezone(tz)
 
-    # This seems like a risky hack.  We want to treat start_time/end_time as times of day which will be converted
-    # to timestamps offset from 1/1/2020 by process_user_input whtn the type is "time", but unilaterally converting
-    # all timestamps to times seems risky.  What if we want the user to enter a datetime in the future?
-    def replace(a):
-        if a == "timestamp with time zone":
-            return "time"
-        return a
-
     for col in db.seminars.search_cols:
         if col in data:
             continue
@@ -366,7 +359,8 @@ def save_seminar():
             if not val:
                 data[col] = False if typ == "boolean" else None  # checkboxes
             else:
-                data[col] = process_user_input(val, replace(typ), tz=tz)
+                typ = "time" if col.endswith("_time") else db.seminars.col_type[col]
+                data[col] = process_user_input(val, typ, tz=tz)
             if col.endswith("link") and data[col]:
                 # allow "see comments" in live link
                 if not validate_url(data[col]) and not (col == "live_link" and data[col] == "see comments"):
@@ -468,16 +462,9 @@ def save_seminar():
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
+
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
-    if check_time(new_version.start_time, new_version.end_time):
-        errmsgs.append(
-            format_errmsg(
-                "Incompatible or invalid start time %s and end time %s",
-                new_version.start_time,
-                new_version.end_time,
-            )
-        )
-        return show_input_errors(errmsgs)
+    sanity_check_times(new_version.start_time, new_version.end_time)
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
@@ -696,15 +683,7 @@ def save_talk():
     if errmsgs:
         return show_input_errors(errmsgs)
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
-    if check_time(new_version.start_time, new_version.end_time, check_past=True):
-        errmsgs.append(
-            format_errmsg(
-                "Incompatible or invalid start time %s and end time %s",
-                new_version.start_time,
-                new_version.end_time,
-            )
-        )
-        return show_input_errors(errmsgs)
+    sanity_check_times(new_version.start_time, new_version.end_time)
     if new_version == talk:
         flash("No changes made to talk.")
     else:
@@ -884,8 +863,7 @@ def save_seminar_schedule():
     except Exception:
         pass
     slots = int(raw_data["slots"])
-    print("slots = %d" % slots)
-    curmax = talks_max("seminar_ctr", {"seminar_id": shortname}, include_deleted=True)
+    curmax = talks_max("seminar_ctr", {"seminar_id": shortname})
     if curmax is None:
         curmax = 0
     ctr = curmax + 1
@@ -924,8 +902,6 @@ def save_seminar_schedule():
                 # TODO: clean this up
                 start_time = process_user_input(time_split[0], "time", seminar.tz).time()
                 end_time = process_user_input(time_split[1], "time", seminar.tz).time()
-                if check_time(start_time, end_time):
-                    raise ValueError
             except ValueError as err:
                 errmsgs.append(
                     format_errmsg(
@@ -953,6 +929,14 @@ def save_seminar_schedule():
         data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
         data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
 
+        # if end_time < start_time push it to the next day
+        if end_time < start_time:
+            data["end_time"] += timedelta(days=int(1))
+        assert data["end_time"] >= data["start_time"]
+
+        if data["start_time"] + timedelta(hours=int(8)) < data["end_time"]:
+            flash_warning("Talk for speaker %s is longer than 8 hours; if this was not intended, please check (24-hour) times.", data["speaker"])
+
         for col in optional_cols:
             try:
                 val = raw_data.get("%s%s" % (col, i), "")
@@ -977,7 +961,6 @@ def save_seminar_schedule():
         # Don't try to create new_version using invalid input
         if errmsgs:
             return show_input_errors(errmsgs)
-        print("saving talk for speaker %s" % data["speaker"])
         if seminar_ctr:
             new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
             if new_version != talk:
