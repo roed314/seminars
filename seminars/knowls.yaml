@@ -13,7 +13,9 @@ shortname:
 name:
   title: Full name
   contents: |
-    The full name of the seminar or conference.  This will appear on brwose and search pages and can be changed at any time.
+    The full name of the seminar (or conference).  This will appear on brwose and search pages and can be changed at any time.
+    Like wikipedia, mathseminars.org uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> for seminar names and talk titles.
+    This means that only the first word and proper nouns should be capitalized.
 institutions:
   title: Institutions
   contents: |
