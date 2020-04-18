@@ -27,6 +27,7 @@ class WebTalk(object):
         semctr=None,
         data=None,
         seminar=None,
+        tz=None,
         editing=False,
         showing=False,
         saving=False,
@@ -53,6 +54,7 @@ class WebTalk(object):
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = seminar.display
             self.online = getattr(seminar, "online", bool(seminar.live_link))
+            self.tz = seminar.tz
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -69,11 +71,11 @@ class WebTalk(object):
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
             if data.get("timezone"):
-                tz = pytz.timezone(data["timezone"])
+                self.tz = pytz.timezone(data["timezone"])
                 if data.get("start_time"):
-                    data["start_time"] = adapt_datetime(data["start_time"], tz)
+                    data["start_time"] = adapt_datetime(data["start_time"], self.tz)
                 if data.get("end_time"):
-                    data["end_time"] = adapt_datetime(data["end_time"], tz)
+                    data["end_time"] = adapt_datetime(data["end_time"], self.tz)
             self.__dict__.update(data)
 
     def __repr__(self):
