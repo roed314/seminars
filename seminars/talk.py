@@ -366,8 +366,8 @@ class WebTalk(object):
 
     def show_comments(self):
         if self.comments != self.seminar.comments:
-            print self.comments
-            print self.seminar.comments
+            print(self.comments)
+            print(self.seminar.comments)
         if self.comments:
             return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
         else:
