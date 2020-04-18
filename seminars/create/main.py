@@ -502,18 +502,26 @@ def save_institution():
             val = raw_data.get(col, "")
             data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
-            if col == "admin":
+            if col == "admin":                
                 userdata = db.users.lookup(data[col])
                 if userdata is None:
-                    errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
+                    if not data[col]:
+                        errmsgs.append("You must specify the email address of the maintainer.")
+                    else:
+                        errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
                 elif not userdata["creator"]:
                     errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
         except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
+    if not data["name"]:
+        errmsgs.append("Institution name cannot be blank.")
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
     new_version = WebInstitution(shortname, data=data)
+    ### FIXME ###
+    # The comparison below always fails because can_edit_institution returns a dictionary
+    # see FIXME at line 110 of institution.py
     if new_version == institution:
         flash("No changes made to institution.")
     else:
@@ -616,11 +624,15 @@ def save_talk():
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
         except Exception as err: # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
-    data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
+    if not data["speaker"]:
+        errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
+    if data["start_time"] is None or data["end_time"] is None:
+        errmsgs.append("Talks must have both a start and end time.")
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
+    data["topics"] = clean_topics(data.get("topics"))
+    data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
     sanity_check_times(new_version.start_time, new_version.end_time)
     if new_version == talk:
@@ -817,6 +829,9 @@ def save_seminar_schedule():
             if not warned and any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
                 warned = True
                 flash_warning("Talks are only saved if you specify a speaker")
+            elif not warned and seminar_ctr and not any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
+                warned = True
+                flash_warning("To delete an existing talk, click Details and then click delete on the Edit talk page")
             continue
         date = raw_data.get("date%s" % i).strip()
         if date:
