@@ -11,6 +11,7 @@ from seminars.utils import (
     max_distinct,
     adapt_datetime,
     toggle,
+    make_links,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -58,8 +59,8 @@ class WebTalk(object):
                 if key == "id" or hasattr(self, key):
                     continue
                 elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
-                    # carry over from seminar
-                    setattr(self, key, getattr(seminar, key))
+                    # carry over from seminar, but not comments
+                    setattr(self, key, getattr(seminar, key) if key != "comments" else "")
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
@@ -283,6 +284,18 @@ class WebTalk(object):
         else:  # should never happen
             return ""
 
+    def show_paper_link(self):
+        return '<a href="%s">paper</a>'%(self.paper_link) if self.paper_link else ""
+
+    def show_slides_link(self):
+        return '<a href="%s">slides</a>'%(self.slides_link) if self.slides_link else ""
+
+    def show_video_link(self):
+        return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
+
+    def is_past(self):
+        return self.end_time < datetime.datetime.now(pytz.utc)
+
     def is_subscribed(self):
         if current_user.is_anonymous:
             return False
@@ -360,16 +373,13 @@ class WebTalk(object):
 
     def show_comments(self):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
         else:
             return ""
 
-    def split_abstract(self):
-        return self.abstract.split("\n\n")
-
     def show_abstract(self):
         if self.abstract:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.split_abstract())
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
         else:
             return "<p>TBA</p>"
 
