@@ -22,7 +22,7 @@
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
   <input type="hidden" name="institutions" value=""/>
-  <table id="make_semconf">
+  <table id="make_semconf" style="width:500px;">
     <tr>
       <th>{{ KNOWL("is_conference") }}</th>
       <td>
@@ -35,11 +35,11 @@
     </tr>
     <tr>
       <th>{{ KNOWL("shortname") }}</th>
-      <td><input name="shortname" placeholder="MySeminar or Riemann200" maxlength="32"/></td>
+      <td><input size="20" name="shortname" placeholder="MySeminar or Riemann200" maxlength="32"/></td>
     </tr>
     <tr>
       <th>{{ KNOWL("name") }}</th>
-      <td><input size="40" name="name" style="width:500px;" maxlength="100" placeholder="Pangaea analysis seminar"/></td>
+      <td><input size="60" name="name" style="width:500px;" maxlength="100" placeholder="Pangaea analysis seminar"/></td>
       <td class="forminfo">Capitalize only first word and proper names.</td>
     </tr>
     <tr>
