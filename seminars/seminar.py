@@ -495,7 +495,6 @@ def can_edit_seminar(shortname, new):
         )
         return redirect(url_for(".index"), 302), None
     seminar = seminars_lookup(shortname, include_deleted=True)
-    print(type(seminar))
     # Check if seminar exists
     if new != (seminar is None):
         if seminar is not None and seminar.deleted:
@@ -526,5 +525,4 @@ def can_edit_seminar(shortname, new):
         return redirect(url_for(".index"), 302), None
     if seminar is None:
         seminar = WebSeminar(shortname, data=None, editing=True)
-    print(type(seminar))
     return None, seminar
