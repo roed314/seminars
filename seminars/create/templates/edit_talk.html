@@ -16,7 +16,7 @@
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <table>
     <tr>
-      <td sytle="width:200px;">Seminar</td>
+      <td style="width:200px;">Seminar</td>
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
