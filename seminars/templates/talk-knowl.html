@@ -34,6 +34,11 @@
   {% endif %}
 
 </div>
-  <div align="right">
-    <a href="{{url_for("show_talk", semid=talk.seminar_id, talkid=talk.seminar_ctr)}}">Talk page</a>
-  </div>
+{% if talk.user_can_edit() %}
+<div align="right">
+  <a href="{{url_for("edit_talk", semid=talk.seminar_id, talkid=talk.seminar_ctr)}}">Edit talk</a>
+</div>
+{% endif %}
+<div align="right">
+  <a href="{{url_for("show_talk", semid=talk.seminar_id, talkid=talk.seminar_ctr)}}">View talk</a>
+</div>
