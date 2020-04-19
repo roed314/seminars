@@ -123,7 +123,7 @@ def parse_language(info, query, prefix):
 def talks_parser(info, query):
     parse_topic(info, query, prefix="talk")
     parse_institution_talk(info, query)
-    parse_venue(info, query, prefix="talk")
+    #parse_venue(info, query, prefix="talk")
     parse_substring(info, query, "talk_keywords", ["title", "abstract"])
     parse_access(info, query, prefix="talk")
 
@@ -139,7 +139,7 @@ def talks_parser(info, query):
 def seminars_parser(info, query):
     parse_topic(info, query, prefix="seminar")
     parse_institution_sem(info, query)
-    parse_venue(info, query, prefix="seminar")
+    #parse_venue(info, query, prefix="seminar")
     parse_substring(info, query, "seminar_keywords", ["description", "comments", "name"])
     parse_access(info, query, prefix="seminar")
     parse_language(info, query, prefix="seminar")
@@ -251,10 +251,10 @@ class TalkSearchArray(SearchArray):
         self.array = [
             [topic, keywords],
             [institution, title],
-            [venue, speaker],
+            [language, speaker],
             [access, affiliation],
-            [language, date],
-            [video],
+            [video, date],
+            # [venue],
             # [count],
         ]
 
@@ -333,7 +333,7 @@ class SemSearchArray(SearchArray):
             [topic, keywords],
             [institution, name],
             [language, access],
-            [venue],
+            # [venue],
             # [count],
         ]
 
