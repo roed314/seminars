@@ -32,16 +32,17 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
           <option value="no" selected>seminar</option>
         </select>
       </td>
-      <td class="forminfo"><p style="width:150px;">Click blue captions for an explanation of each item.</p></td>
+      <td class="forminfo"><p style="width:230px;">Click blue captions for more details.</p></td>
     </tr>
     <tr>
       <th>{{ KNOWL("seminar_name") }}</th>
-      <td><input size="60" name="name" style="width:500px;" maxlength="100" placeholder="Terra firma topology colloquium"/></td>
+      <td><input name="name" style="width:500px;" maxlength="100" placeholder="Terra firma topology colloquium"/></td>
       <td class="forminfo">Capitalize first word and proper nouns.</td>
     </tr>
     <tr>
       <th>{{ KNOWL("seminar_shortname") }}</th>
-      <td><input size="20" name="shortname" placeholder="TeaAndTopology" maxlength="32"/></td>
+      <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="32"/></td>
+      <td class="forminfo">Use 3-32 characters, no spaces.
     </tr>
     <tr>
       <th>{{ KNOWL("institutions") }}</th>

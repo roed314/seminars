@@ -12,13 +12,14 @@
   <input type="hidden" name="new" value="yes"/>
   <table id="make_inst">
     <tr>
-      <th>{{ KNOWL("institution_shortname") }}</th>
-      <td><input name="shortname" placeholder="UPan" maxlength="32"/></td>
-      <td class="forminfo"><p style="width:150px;">Click blue captions for an explanation of each item.</p></td>
+      <th>{{ KNOWL("institution_name") }}</th>
+      <td><input name="name" style="width:500px;" placeholder="University of Pangaea" maxlength="64"/></td>
+      <td class="forminfo"><p style="width:230px;">Click blue captions for more details.</p></td>
     </tr>
     <tr>
-      <th>{{ KNOWL("institution_name") }}</th>
-      <td><input size="40" name="name" style="width:500px;" placeholder="University of Pangaea" maxlength="64"/></td>
+      <th>{{ KNOWL("institution_shortname") }}</th>
+      <td><input name="shortname" style="width:500px;" placeholder="UPan" maxlength="32"/></td>
+      <td class="forminfo">Use 3-32 characters, no spaces.
     </tr>
     <tr>
       <td><button type="submit">Create</button></td>
