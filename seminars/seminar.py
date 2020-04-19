@@ -490,9 +490,9 @@ def can_edit_seminar(shortname, new):
     - ``seminar`` -- a WebSeminar object, as returned by ``seminars_lookup(shortname)``,
                      or ``None`` (if error or seminar does not exist)
     """
-    if not allowed_shortname(shortname):
+    if not allowed_shortname(shortname) or len(shortname) < 3 or len(shortname) > 32:
         flash_error(
-            "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
+            "The identifier must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores."
         )
         return redirect(url_for(".index"), 302), None
     seminar = seminars_lookup(shortname, include_deleted=True)
