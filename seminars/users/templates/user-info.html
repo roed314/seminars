@@ -92,7 +92,7 @@
     <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
     <table>
       <tr>
-        <td style="width:50px;">
+        <td style="width:70px;">
           Email
         </td>
         <td>
@@ -140,7 +140,7 @@
     <tr>
       <td>Timezone</td>
       <td>
-        <select name="timezone" style="width:350px;">
+        <select name="timezone" style="width:356px;">
         {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
