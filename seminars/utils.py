@@ -20,7 +20,7 @@ short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 def validate_url(x):
     if not (x.startswith("http://") or x.startswith("https://")):
-        return false
+        return False
     try:
         result = urlparse(x)
         return all([result.scheme, result.netloc])
