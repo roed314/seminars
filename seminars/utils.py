@@ -19,6 +19,8 @@ short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
 def validate_url(x):
+    if not (x.startswith("http://") or x.startswith("https://")):
+        return false
     try:
         result = urlparse(x)
         return all([result.scheme, result.netloc])
@@ -29,10 +31,8 @@ def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
     tokens = x.split(' ')
     for i in range(len(tokens)):
-        if tokens[i].startswith("https://"):
-            tokens[i] = '<a href="%s">%s</a>'%(tokens[i], tokens[i][8:])
-        if tokens[i].startswith("http://"):
-            tokens[i] = '<a href="%s">%s</a>'%(tokens[i], tokens[i][7:])
+        if validate_url(tokens[i]):
+            tokens[i] = '<a href="%s">%s</a>'%(tokens[i], tokens[i][tokens[i].index("//")+2:])
     return ' '.join(tokens)
 
 def naive_utcoffset(tz):

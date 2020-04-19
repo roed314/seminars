@@ -92,7 +92,7 @@
           <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" /></td>
         </tr>
         <tr>
-          <td>{{ KNOWL("timezone") }}</td>
+          <td>{{ ASTKNOWL("timezone") }}</td>
           <td>
             <select name="timezone" style="width:610px;">
               {% for tz, disp in timezones %}
