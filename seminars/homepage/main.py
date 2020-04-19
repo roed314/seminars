@@ -3,6 +3,7 @@ from seminars import db
 from seminars.talk import talks_search, talks_lucky
 from seminars.utils import topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
+from seminars.knowls import static_knowl
 from flask import render_template, request, url_for
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky
 from flask_login import current_user
@@ -177,8 +178,7 @@ class TalkSearchArray(SearchArray):
 
         venue = SelectBox(
             name="talk_venue",
-            label="Venue",
-            knowl="venue",
+            label=static_knowl("venue"),
             options=[("", ""),
                      ("online", "online"),
                      ("in-person", "in-person")
@@ -289,8 +289,7 @@ class SemSearchArray(SearchArray):
 
         venue = SelectBox(
             name="talk_venue",
-            label="Venue",
-            knowl="venue",
+            label=static_knowl("venue"),
             options=[("", ""),
                      ("online", "online"),
                      ("in-person", "in-person")
