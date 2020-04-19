@@ -1,16 +1,26 @@
+institution_shortname:
+  title: Identifier
+  contents: |
+    Each institution must be given a unique indentifier consisting of 2 to 32 letters, numbers, hyphens, or underscores.
+    You may choose any identifier that is not already in use; when you press create you will be alerted if the identifier you entered is already in use.
+    This identifier is permanent and cannot be changed.
+institution_name:
+  title: Name
+  contents: |
+    The name of your institution that will be displayed when associating institutions to seminars and conferences.  This can be changed.
 is_conference:
   title: Type
   contents: |
     Seminars are best used for series of talks that recur at regular intervals (every Tuesday and Thursday, or every other Wednesday, for example).
     Conferences are events with a fixed start and end date (usually a more or less consecutive sequence of days with some number of talks per day).
     For the most part seminars and conferences are treated identically on our site, the main difference is in how the grid for the talk schedule is layed out.
-shortname:
+seminar_shortname:
   title: Identifier
   contents: |
     Each seminar (or conference) has a unique indentifier consisting of 3 to 32 letters, numbers, hyphens, or underscores (no spaces) that
     will be included in all URL links to the seminar and its associated talks.  You may choose any identifier that is not already in use;
     when you press create you will be told if the identifier you entered is already in use.  This identifier is permanent and cannot be changed.
-name:
+seminar_name:
   title: Full name
   contents: |
     The full name of the seminar (or conference) that will appear on our brwose and search pages; this can be changed at any time.
