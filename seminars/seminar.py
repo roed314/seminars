@@ -248,8 +248,13 @@ class WebSeminar(object):
     ):
         cols = []
         if include_datetime:
-            cols.append(('class="day"', self.show_day()))
-            cols.append(('class="time"', self.show_start_time()))
+            t = adapt_datetime(self.next_talk_time)
+            if t is None:
+                cols.append(('class="date"', ""))
+                cols.append(('class="time"', ""))
+            else:
+                cols.append(('class="date"', t.strftime("%a %b %-d")))
+                cols.append(('class="time"', t.strftime("%H:%M")))
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
@@ -335,6 +340,18 @@ class WebSeminar(object):
             query.pop("display")
         return talks_search(query, projection=projection)
 
+    @property
+    def next_talk_time(self):
+        try:
+            return self._next_talk_time
+        except AttributeError:
+            self._next_talk_time = next_talk(self.shortname)
+            return self._next_talk_time
+
+    @next_talk_time.setter
+    def next_talk_time(self, t):
+        self._next_talk_time = t
+
     def delete(self):
         # We don't actually delete from the seminars and talks tables but instead just
         # set the deleted flag.  We actually delete from seminar_organizers and subscriptions
@@ -374,7 +391,7 @@ def seminars_header(
 ):
     cols = []
     if include_time:
-        cols.append(('colspan="2" class="yourtime"', "Your time"))
+        cols.append(('colspan="2" class="yourtime"', "Next talk"))
     cols.append(("", "Name"))
     if include_institutions:
         cols.append(("", "Institutions"))
@@ -401,7 +418,7 @@ _maxer = SQL(
 
 def _construct(organizer_dict):
     def inner_construct(rec):
-        if isinstance(rec, str):
+        if not isinstance(rec, dict):
             return rec
         else:
             return WebSeminar(
@@ -476,6 +493,35 @@ def all_seminars():
         for seminar in seminars_search({}, organizer_dict=all_organizers())
     }
 
+def next_talks(query=None):
+    """
+    A dictionary with keys the seminar_ids and values datetimes (either the next talk in that seminar, or datetime.max if no talk scheduled so that they sort at the end.
+    """
+    if query is None:
+        query = {"start_time": {"$gte": datetime.now(pytz.UTC)}}
+    ans = defaultdict(lambda: pytz.UTC.localize(datetime.max))
+    from seminars.talk import _counter as talks_counter
+    _selecter = SQL("""
+SELECT DISTINCT ON (seminar_id) {0} FROM
+(SELECT DISTINCT ON (seminar_id, seminar_ctr) {1} FROM {2} ORDER BY seminar_id, seminar_ctr, id DESC) tmp{3}
+""")
+    for rec in search_distinct(
+            db.talks,
+            _selecter,
+            talks_counter,
+            db.talks._search_iterator,
+            query,
+            projection=["seminar_id", "start_time"],
+            sort=["seminar_id", "start_time"]):
+        ans[rec["seminar_id"]] = rec["start_time"]
+    return ans
+
+def next_talk(shortname):
+    """
+    Gets the next talk time in a single seminar.  Note that if you need this information for many seminars, the `next_talks` function will be faster.
+    """
+    from seminars.talk import talks_lucky
+    return talks_lucky({"seminar_id": shortname, "start_time": {"$gte": datetime.now(pytz.UTC)}}, projection="start_time", sort=["start_time"])
 
 def can_edit_seminar(shortname, new):
     """

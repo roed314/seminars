@@ -5,7 +5,7 @@ from seminars.utils import topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import render_template, request, url_for
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talks
 from flask_login import current_user
 import datetime
 import pytz
@@ -409,9 +409,19 @@ def search():
         talk_start = info["talk_start"] = 0
     seminar_query = {}
     seminars_parser(info, seminar_query)
-    info["seminar_results"] = seminars_search(
-        seminar_query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
-    )  # limit=seminar_count, offset=seminar_start,
+    # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
+    # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
+    # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
+    # The second downside is that we need to do two queries.
+    results = list(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    ntdict = next_talks()
+    for R in results:
+        R.next_talk_time = ntdict[R.shortname]
+    results.sort(key=lambda R: (R.next_talk_time, R.name))
+    for R in results:
+        if R.next_talk_time.replace(tzinfo=None) == datetime.datetime.max:
+            R.next_talk_time = None
+    info["seminar_results"] = results
     talk_query = {}
     talks_parser(info, talk_query)
     info["talk_results"] = talks_search(
