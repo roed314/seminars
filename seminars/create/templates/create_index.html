@@ -5,16 +5,20 @@
 <div class="text_content">
 {% if not user.is_creator %}
 <p>
-  You are currently not endorsed.
-  If you want to add seminars to the site, you need to be endorsed by someone on the site.
-  Once you have been endorsed, you can
-  endorse others. See if you know anyone on this <a href="{{ url_for('user.public_users') }}">list</a> of
-  all seminar organizers and curators if you are seeking an
-  endorsement.
-{% endif %}
-
+  Welcome!  It looks like your account yet to be endorsed, but please feel free to start creating seminars (but not insitutions).
+  For the moment any content you create will be visible only to you, but once your account has been endorsed all the seminars and talks you have registered will appear on our public browse and search pages.
+</p>
+<p>
+  Your accountcan be endorsed by anyone with an account on our site who has already been endorsed.
+  You may peruse this <a href="{{ url_for('user.public_users') }}">list</a>  to see if you know someone who can endorse your account, or you can <a href="mailto:mathseminars@math.mit.edu">email us</a> for an endorsement.
+  If you do email us, please include a link to a page at your home institution, an arXiv preprint you posted, or a published paper in which your email address appears so
+  that we can be sure it is really you.
+</p>
+{% else %}
 {% if user.affiliation and not institution_known(user.affiliation) %}
-<p> Your affiliation doesn't appear to be on our list of institutions.  You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a seminar, after you are endorsed.
+<p> Your affiliation does not appear to be on our list of institutions.
+You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a seminar or conference.  Alternativley, you can create a seminar now and add an institution to it later.
+{% endif %}
 {% endif %}
 
 <h2>Create a seminar or conference</h2>
@@ -24,36 +28,28 @@
   <input type="hidden" name="institutions" value=""/>
   <table id="make_semconf">
     <tr>
-      <th>Type</th>
+      <th>{{ KNOWL("is_conference") }}</th>
       <td>
         <select name="is_conference" style="width:100px;">
           <option value="yes">conference</option>
           <option value="no" selected>seminar</option>
         </select>
       </td>
+      <td class="forminfo"><p style="width:150px;">Click blue captions for an explanation of each item.</p></td>
     </tr>
     <tr>
-      <th>Identifier</th>
-      <td><input name="shortname" placeholder="ShortLabel" /></td>
+      <th>{{ KNOWL("seminar_shortname") }}</th>
+      <td><input size="20" name="shortname" placeholder="TeaAndTopology" maxlength="32"/></td>
     </tr>
     <tr>
-      <td class="forminfo" colspan="2">The identifier is used in the URL, so use only letters, numbers, hyphens and underscores - no spaces.</td>
+      <th>{{ KNOWL("seminar_name") }}</th>
+      <td><input size="60" name="name" style="width:500px;" maxlength="100" placeholder="Terra firma topology colloquium"/></td>
+      <td class="forminfo">Capitalize first word and proper nouns.</td>
     </tr>
     <tr>
-      <th>Full name</th>
-      <td><input size="40" name="name" style="width:500px;" placeholder="Pangaea analysis seminar"/></td>
-    </tr>
-    <tr>
-      <td class="forminfo" colspan="2">Generally, capitalize only the first word and proper names.</td>
-    </tr>
-    <tr>
-      <th>Institutions</th>
-      <td>
-        <span id="institution_selector"></span>
-      </td>
-    <tr>
-      <td class="forminfo" colspan="2">If a relevant institution isn't in the dropdown list, <a href="{{ url_for('list_institutions') }}">add it</a> before or after creating the seminar, after you are endorsed.</td>
-    </tr>
+      <th>{{ KNOWL("institutions") }}</th>
+      <td><span id="institution_selector"></span></td>
+      <td class="forminfo">You can also add these latter.</td>
     <tr>
       <td><button type="submit">Create</button></td>
     </tr>
