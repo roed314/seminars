@@ -6,15 +6,15 @@
   <input type="hidden" name="new" value="{{ 'yes' if institution.new else 'no' }}"/>
   <table>
     <tr>
-      <td>{{ KNOWl('institution_shortname') }}</td>
+      <td>{{ KNOWL('institution_shortname') }}</td>
       <td>{{ institution.shortname }}</td>
     </tr>
     <tr>
-      <td>{{ ASTKNOWl('institution_Name') }}</td>
+      <td>{{ ASTKNOWL('institution_Name') }}</td>
       <td><input name="name" id="sname" value="{{ institution.name | blanknone }}" style="width:500px;" /></td>
     </tr>
     <tr>
-      <td>{{ ASTKNOWl('institution_type') }}</td>
+      <td>{{ ASTKNOWL('institution_type') }}</td>
       <td>
         <select name="type" style="width:510px;">
           {% for itype, disp in institution_types %}
