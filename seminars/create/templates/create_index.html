@@ -9,7 +9,7 @@
   For the moment any content you create will be visible only to you, but once your account has been endorsed all the seminars and talks you added will appear on our public browse and search pages.
 </p>
 <p>
-  Any endorsed user on our site can endorse you, so please peruse <a href="{{ url_for('user.public_users') }}">this list</a> to see if you know someone who can endorse your account.  Alternatively, <a href="mailto:mathseminars@math.mit.edu">email the administrators</a> for an endorsement; include a link to a page at your home institution, an arXiv preprint you posted, or a published paper in which your email address appears so that we can be sure it is really you.
+  Any endorsed user on our site can endorse you, so please peruse <a href="{{ url_for('user.public_users') }}">this list</a> to see if you know someone who can endorse your account.  Alternatively, <a href="mailto:mathseminars@math.mit.edu">email the administrators</a> for an endorsement.  So that we can be sure it is really you, include a link to something containing your email address: a page at your home institution, an arXiv preprint you posted, or a published paper.
 </p>
 {% else %}
 {% if user.affiliation and not institution_known(user.affiliation) %}
