@@ -5,19 +5,16 @@
 <div class="text_content">
 {% if not user.is_creator %}
 <p>
-  Welcome!  It looks like your account yet to be endorsed, but please feel free to start creating seminars (but not insitutions).
-  For the moment any content you create will be visible only to you, but once your account has been endorsed all the seminars and talks you have registered will appear on our public browse and search pages.
+  Welcome!  Please feel free to start creating seminars.
+  For the moment any content you create will be visible only to you, but once your account has been endorsed, all the seminars and talks you added will instantly appear on the public browse and search pages.
 </p>
 <p>
-  Your accountcan be endorsed by anyone with an account on our site who has already been endorsed.
-  You may peruse this <a href="{{ url_for('user.public_users') }}">list</a>  to see if you know someone who can endorse your account, or you can <a href="mailto:mathseminars@math.mit.edu">email us</a> for an endorsement.
-  If you do email us, please include a link to a page at your home institution, an arXiv preprint you posted, or a published paper in which your email address appears so
-  that we can be sure it is really you.
+  Any endorsed user on our site can endorse you, so please peruse <a href="{{ url_for('user.public_users') }}">this list</a> to see if you know someone who can endorse your account.  Alternatively, <a href="mailto:mathseminars@math.mit.edu">email the administrators</a> for an endorsement; include a link to something containing your email address (a page at your institution, an arXiv preprint you posted, or a published paper, say), so that we can be sure it is really you!
 </p>
 {% else %}
 {% if user.affiliation and not institution_known(user.affiliation) %}
 <p> Your affiliation does not appear to be on our list of institutions.
-You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a seminar or conference.  Alternativley, you can create a seminar now and add an institution to it later.
+You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a seminar or conference.  Alternatively, you can create a seminar now and add an institution to it later.
 {% endif %}
 {% endif %}
 
@@ -50,7 +47,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     <tr>
       <th>{{ KNOWL("institutions") }}</th>
       <td><span id="institution_selector"></span></td>
-      <td class="forminfo">You can also add these latter.</td>
+      <td class="forminfo">You can also add these later.</td>
     <tr>
       <td><button type="submit">Create</button></td>
     </tr>
