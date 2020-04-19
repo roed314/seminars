@@ -67,7 +67,7 @@ institutions:
 topics:
   title: Topics
   contents: |
-    You may associate zero or more topics to a talk, seminar, or conference.  Each topic correspond to an arXiv subject class (for example "number theory" is <a href="https://arxiv.org/list/math.NT/reccent>math.NT</a>).
+    You may associate zero or more topics to a talk, seminar, or conference.  Each topic corresponds to an arXiv subject class; for example number theory is <a href="https://arxiv.org/list/math.NT/reccent">math.NT</a>.
     When a new talk is created, it inherits all the topics of the seminar or conference to which it belongs; these can then be customized for any particular talk.
     Changing the topics of a seminar or conference has no impact on existing talks, it is relevant only to new talks and to users searching seminars or conferences by topic.
 language:
