@@ -373,6 +373,8 @@ def save_seminar():
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Seminar name cannot be blank")
+    if seminar.is_conference and data["start_time"] and data["end_time"] and data["end_time"] < data["start_time"]:
+        errmsgs.append("End date cannot precede start date")
     for col in ["frequency", "per_day"]:
         if data[col] is not None and data[col] < 1:
             errmsgs.append(

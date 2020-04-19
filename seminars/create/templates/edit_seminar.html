@@ -33,7 +33,7 @@
         <tr>
           <td>{{ ASTKNOWL("seminar_name") }}</td>
           <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" /></td>
-          <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
+          <td class="forminfo" />Capitalize first word and proper nouns.</td>
         </tr>
         <tr>
           <td>{{ KNOWL("seminar_description") }}</td>
@@ -58,13 +58,13 @@
 
         {% if seminar.is_conference %}
         <tr>
-          <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
+          <td style="padding-top: 20px">{{ KNOWL("start_date") }}</td>
           <td style="padding-top: 20px">
             <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
           </td>
         </tr>
         <tr>
-          <td> {{ ASTKNOWL("end_date") }}</td>
+          <td> {{ KNOWL("end_date") }}</td>
           <td>
             <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
           </td>
@@ -100,6 +100,7 @@
               {% endfor %}
             </select>
           </td>
+          <td class="forminfo" />Be sure to set this correctly.</td>
         </tr>
         {% if not seminar.is_conference %}
         <tr>
