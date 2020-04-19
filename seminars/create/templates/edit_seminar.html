@@ -44,11 +44,11 @@
           <td><input name="homepage" value="{{ seminar.homepage | blanknone }}" style="width:600px;" placeholder="https://example.org"/></td>
         </tr>
         <tr>
-          <td>{{ KNOWL("seminar_institutions") }}</td>
+          <td>{{ KNOWL("institutions") }}</td>
           <td><span id="institution_selector" style="width:610px;"></span></td>
         </tr>
         <tr>
-          <td>{{ KNOWL("seminar_topics") }}</td>
+          <td>{{ KNOWL("topics") }}</td>
           <td><span id="topic_selector" style="width:610px;"></span></td>
         </tr>
         <tr>
@@ -103,16 +103,16 @@
         </tr>
         {% if not seminar.is_conference %}
         <tr>
-          <td>{{ KNOWL("seminar_start time") }}</td>
+          <td>{{ KNOWL("seminar_start_time") }}</td>
           <td><input name="start_time" value="{{ seminar.show_input_time(seminar.start_time) }}" style="width:600px;" placeholder="15:00"/></td>
         </tr>
         <tr>
-          <td>{{ KNOWL("seminar_end time") }}</td>
+          <td>{{ KNOWL("seminar_end_time") }}</td>
           <td><input name="end_time" value="{{ seminar.show_input_time(seminar.end_time) }}" style="width:600px;" placeholder="16:00"/></td>
         </tr>
         {% endif %}
         <tr>
-          <td style="padding-top: 20px">Room</td>
+          <td style="padding-top: 20px">{{ KNOWL("Room") }}</td>
           <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" /></td>
         </tr>
         <tr>

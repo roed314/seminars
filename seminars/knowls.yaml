@@ -56,6 +56,10 @@ seminar_description:
   contents: |
     A short desciption of your seminar or conference that will be displayed in our search pages along with the name and institutions.
     Here you might indicate, for example, whether this is a research seminar or a learning seminar.  The short desription can be at most 50 characters long.
+institution_homepage:
+  title: Homepage
+  contents: |
+    The external homepage of your seminar or conference (if one exists).  This should be a URL beginning with "http://" or "https://" (the latter is preferred, if availalble).
 institutions:
   title: Institutions
   contents: |
@@ -146,10 +150,10 @@ access:
     everyone who visits mathseminars.org, only to users  who have created an account on mathseminars.org, or only to endorsed users of mathseminars.org.
     When a new talk is created the access setting is copied from the seminar or conference to which it belongs and may then be changed.    
     If the livestream link is not set this value is ignored.
-access:
+archived:
   title: Archived
   contents: |
-    TBA
+    Use this to indiate that your seminar is no longer meeting.
 access:
   title: Comments
   contents: |
