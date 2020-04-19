@@ -58,7 +58,7 @@ def parse_venue(info, query, prefix):
     if value == "online":
         query["online"] = True
     elif value == "in-person":
-        query["room"] = {"$exists": True}
+        query["room"] = {"$and": [{"$exists": True}, {"$ne": ""}]}
 
 
 def parse_substring(info, query, field, qfields, start="%", end="%"):
@@ -288,7 +288,7 @@ class SemSearchArray(SearchArray):
         )
 
         venue = SelectBox(
-            name="talk_venue",
+            name="seminar_venue",
             label=static_knowl("venue"),
             options=[("", ""),
                      ("online", "online"),
