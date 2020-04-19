@@ -44,7 +44,8 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     </tr>
     <tr>
       <th>{{ KNOWL("seminar_shortname") }}</th>
-      <td><input size="20" name="shortname" placeholder="TeaAndTopology" maxlength="32"/></td>
+      <td><input size="60" name="shortname" placeholder="TeaAndTopology" maxlength="32"/></td>
+      <td class="forminfo">Must be 3-32 letters/numbers/dashs/hyphens, no spaces.
     </tr>
     <tr>
       <th>{{ KNOWL("institutions") }}</th>
