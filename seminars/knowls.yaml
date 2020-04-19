@@ -1,3 +1,60 @@
+institution_shortname:
+  title: Identifier
+  contents: |
+    Each institution must be given a unique indentifier consisting of 2 to 32 letters, numbers, hyphens, or underscores.
+    You may choose any identifier that is not already in use; when you press create you will be alerted if the identifier you entered is already in use.
+    This identifier is permanent and cannot be changed.
+institution_name:
+  title: Name
+  contents: |
+    The name of your institution that will be displayed when associating institutions to seminars and conferences.  This can be changed.
+institution_type:
+  title: Type
+  contents: |
+    The type of your institution, which may be a university, a research institute, a corporation, or something else.
+institution_homepage:
+  title: Homepage
+  contents: |
+    The homepage of your institution.  This should be a URL beginning with "http://" or "https://" (the latter is preferred, if availalble).
+institution_city:
+  title: City
+  contents: |
+    The name of the city in which your institution is located, followed by the state/province/region (if relevant), and the country.
+institution_timezone:
+  title: Time zone
+  contents: |
+    The time zone in which your institution resides.
+    The drop down list provides a list of time zones you may choose from, along with their current UTC offset,
+    which may change depending on the date depending on adjustments made to account for local daylight savings time adjustments.
+    Be sure to choose a time zone that actually matches the time zone of your institution, not just one that happens to have the same UTC offset at the moment.
+institution_admin:
+  title: Maintainer
+  contents: |
+    The email address of the mathseminars.org user account responsible for creating or maaintaining this institution's listing.
+    This is set to the email address of the user who created the institution by default but can be set to the email address of any endorsed user.
+is_conference:
+  title: Type
+  contents: |
+    Choose <i>seminar</i> for a recurring series of talks spread out over weeks.
+    Choose <i>conference</i> for an event lasting a few days with talks each day.
+    Our site treats seminars and conferences identically for the most part; the main difference is the layout when editing the talk schedule.
+seminar_shortname:
+  title: Identifier
+  contents: |
+    Each seminar and conference has a unique identifier consisting of 3 to 32 letters, numbers, hyphens, and underscores (no spaces).
+    It will be included in all URL links to the seminar and its associated talks.
+    When you press create, you will be told if the identifier you entered is already in use.
+    After creation, the identifier cannot be changed.
+seminar_name:
+  title: Name
+  contents: |
+    This is the full name of the seminar or conference, to appear on the browse and search pages. It can be changed at any time.
+    Like Wikipedia, mathseminars.org uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> for seminar names and talk titles:
+    only the first word and proper nouns should be capitalized. 
+institutions:
+  title: Institutions
+  contents: |
+    You may associate zero or more institutions to a seminar or conference.   The list of institutions can be changed at any time.
 organizer_name:
   title: Name
   contents: |
@@ -21,3 +78,8 @@ display:
   title: Display
   contents: |
     Check this box for oragnizers (or curators) whose names should appear on the seminar's home page.  This box must be checked for at least one organizer or curator.
+venue:
+  title: Venue
+  contents: |
+    Selecting "online" limits search results to talks that are accessible online.
+    Selecting "in-person" limits search results to talks that exist as an in-person meeting; some of these may also be accessible online.

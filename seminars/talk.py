@@ -11,6 +11,7 @@ from seminars.utils import (
     max_distinct,
     adapt_datetime,
     toggle,
+    make_links,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -53,12 +54,13 @@ class WebTalk(object):
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = seminar.display
             self.online = getattr(seminar, "online", bool(seminar.live_link))
+            self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
                 elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
-                    # carry over from seminar
-                    setattr(self, key, getattr(seminar, key))
+                    # carry over from seminar, but not comments
+                    setattr(self, key, getattr(seminar, key) if key != "comments" else "")
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
@@ -123,6 +125,10 @@ class WebTalk(object):
         """
         return self._editable_time(self.end_time)
 
+    @property
+    def tz(self):
+        return pytz.timezone(self.timezone)
+
     def show_start_time(self, tz=None):
         return adapt_datetime(self.start_time, tz).strftime("%H:%M")
 
@@ -153,7 +159,7 @@ class WebTalk(object):
         else:
             return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %-d")
 
-    def show_time_and_duration(self):
+    def show_time_and_duration(self, adapt=True):
         start = self.start_time
         end = self.end_time
         now = datetime.datetime.now(pytz.utc)
@@ -164,11 +170,12 @@ class WebTalk(object):
         week = delta(weeks=1)
         month = delta(days=30.4)
         year = delta(days=365)
+        newtz = None if adapt else self.tz
 
         def ans(rmk):
             return "%s-%s (%s)" % (
-                adapt_datetime(start).strftime("%a %b %-d, %H:%M"),
-                adapt_datetime(end).strftime("%H:%M"),
+                adapt_datetime(start, newtz=newtz).strftime("%a %b %-d, %H:%M"),
+                adapt_datetime(end, newtz=newtz).strftime("%H:%M"),
                 rmk,
             )
 
@@ -277,6 +284,18 @@ class WebTalk(object):
         else:  # should never happen
             return ""
 
+    def show_paper_link(self):
+        return '<a href="%s">paper</a>'%(self.paper_link) if self.paper_link else ""
+
+    def show_slides_link(self):
+        return '<a href="%s">slides</a>'%(self.slides_link) if self.slides_link else ""
+
+    def show_video_link(self):
+        return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
+
+    def is_past(self):
+        return self.end_time < datetime.datetime.now(pytz.utc)
+
     def is_subscribed(self):
         if current_user.is_anonymous:
             return False
@@ -354,16 +373,13 @@ class WebTalk(object):
 
     def show_comments(self):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
         else:
             return ""
 
-    def split_abstract(self):
-        return self.abstract.split("\n\n")
-
     def show_abstract(self):
         if self.abstract:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.split_abstract())
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
         else:
             return "<p>TBA</p>"
 

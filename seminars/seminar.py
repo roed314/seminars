@@ -12,6 +12,7 @@ from seminars.utils import (
     adapt_weektime,
     adapt_datetime,
     toggle,
+    make_links,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -129,10 +130,10 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
-    def show_day(self, truncate=True):
+    def show_day(self, truncate=True, adapt=True):
         if self.weekday is None:
             return ""
-        elif self.start_time is None:
+        elif self.start_time is None or not adapt:
             d = weekdays[self.weekday]
         else:
             d = weekdays[adapt_weektime(self.start_time, self.tz, weekday=self.weekday)[0]]
@@ -157,7 +158,7 @@ class WebSeminar(object):
         return self._show_time(self.end_time, adapt)
 
     def show_weektime_and_duration(self, adapt=True):
-        s = self.show_day(truncate=False)
+        s = self.show_day(truncate=False,adapt=adapt)
         if s:
             s += ", "
         s += self.show_start_time(adapt=adapt)
@@ -233,7 +234,7 @@ class WebSeminar(object):
 
     def show_comments(self):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
         else:
             return ""
 
@@ -535,9 +536,9 @@ def can_edit_seminar(shortname, new):
     - ``seminar`` -- a WebSeminar object, as returned by ``seminars_lookup(shortname)``,
                      or ``None`` (if error or seminar does not exist)
     """
-    if not allowed_shortname(shortname):
+    if not allowed_shortname(shortname) or len(shortname) < 3 or len(shortname) > 32:
         flash_error(
-            "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
+            "The identifier must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores."
         )
         return redirect(url_for(".index"), 302), None
     seminar = seminars_lookup(shortname, include_deleted=True)

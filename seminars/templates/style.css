@@ -337,7 +337,7 @@ div.topic_cmd {
 #make_semconf td.forminfo, #make_inst td.forminfo {
     padding-bottom: 15px;
 }
-#make_semconf th {
+#make_semconf th, #make_inst th {
     text-align: left;
 }
 
@@ -767,7 +767,7 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
 .forminfo {
    font-size: 80%;
    font-style: italic;
-   color: {{color.grey}};
+   color: {RGC(70,70,70)};
    vertical-align: top;
 }
 
