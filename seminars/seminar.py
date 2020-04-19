@@ -253,7 +253,7 @@ class WebSeminar(object):
                 cols.append(('class="date"', ""))
                 cols.append(('class="time"', ""))
             else:
-                cols.append(('class="date"', t.strftime("%a")))
+                cols.append(('class="date"', t.strftime("%a %b %-d")))
                 cols.append(('class="time"', t.strftime("%H:%M")))
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
@@ -499,7 +499,7 @@ def next_talks(query=None):
     """
     if query is None:
         query = {"start_time": {"$gte": datetime.now(pytz.UTC)}}
-    ans = defaultdict(lambda: datetime.max)
+    ans = defaultdict(lambda: pytz.UTC.localize(datetime.max))
     from seminars.talk import _counter as talks_counter
     _selecter = SQL("""
 SELECT DISTINCT ON (seminar_id) {0} FROM

@@ -413,13 +413,13 @@ def search():
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
-    results = seminars_search(seminar_query, organizer_dict=all_organizers())
+    results = list(seminars_search(seminar_query, organizer_dict=all_organizers()))
     ntdict = next_talks()
     for R in results:
         R.next_talk_time = ntdict[R.shortname]
     results.sort(key=lambda R: (R.next_talk_time, R.name))
     for R in results:
-        if R.next_talk_time == datetime.datetime.max:
+        if R.next_talk_time.replace(tzinfo=None) == datetime.datetime.max:
             R.next_talk_time = None
     info["seminar_results"] = results
     talk_query = {}
