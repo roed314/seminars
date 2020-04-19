@@ -50,11 +50,115 @@ seminar_name:
   contents: |
     This is the full name of the seminar or conference, to appear on the browse and search pages. It can be changed at any time.
     Like Wikipedia, mathseminars.org uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> for seminar names and talk titles:
-    only the first word and proper nouns should be capitalized. 
+    only the first word and proper nouns should be capitalized.
+seminar_description: 
+  title: Short description
+  contents: |
+    A short desciption of your seminar or conference that will be displayed in our search pages along with the name and institutions.
+    Here you might indicate, for example, whether this is a research seminar or a learning seminar.  The short desription can be at most 50 characters long.
 institutions:
   title: Institutions
   contents: |
     You may associate zero or more institutions to a seminar or conference.   The list of institutions can be changed at any time.
+topics:
+  title: Topics
+  contents: |
+    You may associate zero or more topics to a talk, seminar, or conference.  Each topic correspond to an arXiv subject class (for example "number theory" is <a href="https://arxiv.org/list/math.NT/reccent>math.NT</a>).
+    When a new talk is created, it inherits all the topics of the seminar or conference to which it belongs; these can then be customized for any particular talk.
+    Changing the topics of a seminar or conference has no impact on existing talks, it is relevant only to new talks and to users searching seminars or conferences by topic.
+language:
+  title: Language
+  contents: |
+    Each talk, seminar, and conference has an associated language (English by default).
+    When a new talk is created it inherits the language of its seminar or conference; this can then be changed for any particular talk.
+    Changing the language of a seminar or conference has no impact on existing talks, it is relevant only to new talks and to users searching seminars or conferences by language.
+weekday:
+  title: Meeting day
+  contents: |
+    Set this attribute if your seminar meets on a particular day of the week (even if your seminar does not meet every week).
+    If specified, this value will be used to layout the scheduling grid for adding talks to your seminar.
+    <br><br>
+    We are aware that many seminars meet on two or more particular days each week and plan to support this option in the near future.
+    For the moment we suggest either setting the meeting day to the first day of the week your seminar meets and then editing the dates on the scheduling grid,
+    or not setting the meeting day and setting the frequency to 1, which will give you a scheulding grid with slots for each day.
+frequency:
+  title: Frequency
+  contents: |
+    Specify the frequency of your seminar if it meets at regular intervals(every 7 or 14 days, for example).
+    If your seminar does not meet on a particular day of the week you can set the frequency to 1 to get a scheduling grid with a slot for each day.
+per_day:
+  title: Talks per day
+  contents: |
+    The number of talks you expect to take place each day your seminar or conference meets.
+    This is used only to determine the number of slots to create in your scheduling grid; you can always add more talks on a particular day if you wish.
+start_date:
+  title: Start date
+  contents: |
+    The date on which your conference begins.
+end_date:
+  title: End date
+  contents: |
+    The date on which your conference ends.
+seminar_start_time:
+  title: Start time
+  contents: |
+    The time of day your seminar usually meets, specified in 24 hour format (so 4 or 4:00 is 4AM, use 16:00 for 4PM).
+seminar_end_time:
+  title: End time
+  contents: |
+    The time of day your seminar usually ends, specified in 24 hour format (so 4 or 4:00 is 4AM, use 16:00 for 4PM).
+timezone:
+  title: Timezone
+  contents: |
+    Each talk, seminar, and conference has a timezone that determines how dates and times associated to the event will be interpreted.
+    Even if your event has no particular physical location, you must set this so that we know how to interperet dates and times that you enter.
+    Note that a timezone is in general not the same as a UTC offset, since it takes adjustments for daylight savings time into account,
+    but you can choose UTC as your timezone if you wish.
+    <br><br>
+    Dates and times shown to visitors of mathseminars.org are automatically translated into the taken of their user account or of their
+    computer.  This includes organizers who are adding talks to seminars or conferences; when editing a schedule the timezone of the seminar
+    or conference will be used, but when browsing talks your user timezone will be used.
+room:
+  title: Room
+  contents: |
+    The physical location of a talk, seminar, or conference; leave this blank for events that take place solely online.
+    When a new talk is created the room is copied from the seminar or conference to which it belongs but may then be changed.
+    Note that changing the room of a seminar or conference has no impact on talks that have already been created.
+    You can use the comments to provide detailed instructions and a link to a map to help visitors find the room.
+online:
+  title: Online
+  contents: |
+    If your seminar can be attended online, indicate that here.  Seminars that provide a live feed of a meeting in a physical location should
+    put the location as the Room and set the online option to yes.
+live_link:
+  title: Livestream link
+  contents: |
+    Events taking place online should list the URL of the livestream here.
+    For seminars and conferences, if the livestream link is not the same for each talk you can put "see comments" here and then
+    explain in the comments section how to get the livestream link for each talk.
+    When a new talk is created the livestream link is copied from the seminar or conference to which it belongs and may then be changed.
+    <br><br>
+    If your livestream requires a password you should indicate in the comments how participants can obtain the password.
+access:
+  title: Access
+  contents: |
+    For talks, seminars, and conferences with a livestream link this determines whether the link will be shown to
+    everyone who visits mathseminars.org, only to users  who have created an account on mathseminars.org, or only to endorsed users of mathseminars.org.
+    When a new talk is created the access setting is copied from the seminar or conference to which it belongs and may then be changed.    
+    If the livestream link is not set this value is ignored.
+access:
+  title: Archived
+  contents: |
+    TBA
+access:
+  title: Comments
+  contents: |
+    Use the comments field to add additional information about yout talk, seminar, or conferenee, especially details on how
+    to find the room or access the live link.  You can use include links to external pages here.  Any token beginning with
+    "http://" or "https://" will automatically appear as a link and you can also use HTML hyperlinks.
+    <br><br>
+    When a talk is displayed the comments for **both** the talk and the seminar are displayed, so there is no need to repeat information.
+    Use the seminar comments for information applicable to every talk and the talk comments for information specific to a talk.
 organizer_name:
   title: Name
   contents: |
