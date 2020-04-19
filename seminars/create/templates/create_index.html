@@ -6,15 +6,15 @@
 {% if not user.is_creator %}
 <p>
   You are currently not endorsed.
+  You are welcome to create seminars and talkk, but they will not be visible to anyone else until your account has been endorsed, nor can you create institutions.
   If you want to add seminars to the site, you need to be endorsed by someone on the site.
-  Once you have been endorsed, you can
-  endorse others. See if you know anyone on this <a href="{{ url_for('user.public_users') }}">list</a> of
-  all seminar organizers and curators if you are seeking an
-  endorsement.
+  Once you have been endorsed, you can  endorse others.
+  See if you know anyone on this <a href="{{ url_for('user.public_users') }}">list</a> of
+  seminar organizers and curators, or you can <a href="mailto:mathseminars@math.mit.edu>email us</a> to request an endorsement.
 {% endif %}
 
 {% if user.affiliation and not institution_known(user.affiliation) %}
-<p> Your affiliation doesn't appear to be on our list of institutions.  You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a seminar, after you are endorsed.
+<p> Your affiliation doesn't appear to be on our list of institutions.  You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a seminar or conference, or you can create the seminar now and add an institution later.
 {% endif %}
 
 <h2>Create a seminar or conference</h2>
@@ -31,7 +31,7 @@
           <option value="no" selected>seminar</option>
         </select>
       </td>
-      <td class="forminfo"><p style="width:200px; color:#606060;">Click blue captions for instructions.</p></td>
+      <td class="forminfo"><p style="width:200px;">Click blue captions for instructions.</p></td>
     </tr>
     <tr>
       <th>{{ KNOWL("shortname") }}</th>
