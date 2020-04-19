@@ -109,9 +109,9 @@ class WebInstitution(object):
 ### FIXME ###
 # Should always return a WebInstitution object but currently may returna dictionary or WebObject
 def can_edit_institution(shortname, new):
-    if not allowed_shortname(shortname):
+    if not allowed_shortname(shortname) or len(shortname) < 2 or len(shortname) > 32:
         flash_error(
-            "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
+            "The identifier must be 2 to 32 characters in length and can include only letters, numbers, hyphens and underscores."
         )
         return redirect(url_for("list_institutions"), 302), None
     institution = db.institutions.lookup(shortname)

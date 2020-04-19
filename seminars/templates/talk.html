@@ -19,30 +19,39 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 {% endif %}
 
 <div class="talk-body">
-  <p>
-    {{ talk.show_speaker_and_seminar() | safe }}
-  </p>
+  <p>{{ talk.show_speaker_and_seminar() | safe }}</p>
+
+  <p>{{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}</p>
+  {% if (not talk.online or talk.room) and talk.timezone != current_user.timezone %}
+    <p>{{ talk.show_time_and_duration(adapt=False) | safe }} in talk time zone, {{ talk.timezone.replace("_", " ") }}.</p>
+  {% endif %}
 
   <p>
-    {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}
+    {% if not talk.is_past() %} {{ talk.show_live_link() | safe }} {% endif %}
+    {% if talk.room %} Lecture held in {{ talk.room }}. {% endif %}
   </p>
 
-  <p>
-    {{ talk.show_live_link() | safe }}
-    {% if talk.room %}
-    Lecture held in {{ talk.room }}.
-    {% endif %}
+  {% if talk.paper_link or talk.slides_link or talk.video_link %}
+  <p>({% if talk.paper_link %} {{ talk.show_paper_link() | safe }} {% endif %}
+      {% if talk.slides_link %} {{ talk.show_slides_link() | safe }} {% endif %}
+      {% if talk.paper_link %} {{ talk.show_video_link() | safe }} {% endif %})
   </p>
+  {% endif %}
 
+  {% if talk.abstract %}
+    <h3> Abstract </h3>
+    {{ talk.show_abstract() | safe }}
+  {% endif %}
 
-  <h3> Abstract </h3>
-  {{ talk.show_abstract() | safe }}
-
-  {% if talk.comments %}
+  {% if talk.comments and talk.comments != talk.seminar.comments %}
   <hr>
   <p>{{talk.show_comments() | safe}}</p>
   {% endif %}
 
+  {% if talk.seminar.comments %}
+  <hr>
+  <p>{{talk.seminar.show_comments() | safe}}</p>
+  {% endif %}
 </div>
 
 {% endblock %}
