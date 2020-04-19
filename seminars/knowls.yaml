@@ -56,10 +56,10 @@ seminar_description:
   contents: |
     A short desciption of your seminar or conference that will be displayed in our search pages along with the name and institutions.
     Here you might indicate, for example, whether this is a research seminar or a learning seminar.  The short desription can be at most 50 characters long.
-institution_homepage:
+seminar_homepage:
   title: Homepage
   contents: |
-    The external homepage of your seminar or conference (if one exists).  This should be a URL beginning with "http://" or "https://" (the latter is preferred, if availalble).
+    The external homepage of your seminar or conference, if one exists.  This should be a URL beginning with "http://" or "https://" (the latter is preferred, if availalble).
 institutions:
   title: Institutions
   contents: |
