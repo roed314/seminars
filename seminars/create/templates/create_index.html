@@ -35,12 +35,12 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
       <td class="forminfo"><p style="width:230px;">Click blue captions for more details.</p></td>
     </tr>
     <tr>
-      <th>{{ KNOWL("seminar_name") }}<span style="color:red">*</span></th>
+      <th>{{ KNOWL("seminar_name") }} <span style="color:red; font-weight:normal">*</span></th>
       <td><input name="name" style="width:500px;" maxlength="100" placeholder="Terra firma topology colloquium"/></td>
       <td class="forminfo">Capitalize first word and proper nouns.</td>
     </tr>
     <tr>
-      <th>{{ KNOWL("seminar_shortname") }} </th>
+      <th>{{ KNOWL("seminar_shortname") }} <span style="color:red; font-weight:normal">*</span></th>
       <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="32"/></td>
       <td class="forminfo">Use 3-32 characters, no spaces.
     </tr>
