@@ -291,7 +291,6 @@ class WebTalk(object):
         return '<a href="%s">slides</a>'%(self.slides_link) if self.slides_link else ""
 
     def show_video_link(self):
-        print("video link %s"%(self.video_link))
         return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
 
     def is_past(self):
