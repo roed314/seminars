@@ -7,13 +7,14 @@ is_conference:
 shortname:
   title: Identifier
   contents: |
-    Each seminar (or conference) must be given a unique indentifier consisting of up to 32 letters, numbers, hyphens, or underscores (no spaces) that
-    will be included in all URL links to the seminar and its associated talks.  This identifier is permanent and cannot be changed.
+    Each seminar (or conference) has a unique indentifier consisting of 3 to 32 letters, numbers, hyphens, or underscores (no spaces) that
+    will be included in all URL links to the seminar and its associated talks.  You may choose any identifier that is not already in use;
+    when you press create you will be told if the identifier you entered is already in use.  This identifier is permanent and cannot be changed.
 name:
   title: Full name
   contents: |
-    The full name of the seminar (or conference) that will appear on our brwose and search pages; this be changed at any time.
-    Like wikipedia, mathseminars.org uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> for seminar names and talk titles.
+    The full name of the seminar (or conference) that will appear on our brwose and search pages; this can be changed at any time.
+    Like Wikipedia, mathseminars.org uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> for seminar names and talk titles.
     This means that only the first word and proper nouns should be capitalized.
 institutions:
   title: Institutions
