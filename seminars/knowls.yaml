@@ -78,3 +78,8 @@ display:
   title: Display
   contents: |
     Check this box for oragnizers (or curators) whose names should appear on the seminar's home page.  This box must be checked for at least one organizer or curator.
+venue:
+  title: Venue
+  contents: |
+    Selecting "online" limits search results to talks that are accessible online.
+    Selecting "in-person" limits search results to talks that exist as an in-person meeting; some of these may also be accessible online.
