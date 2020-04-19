@@ -25,7 +25,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   <input type="hidden" name="institutions" value=""/>
   <table id="make_semconf">
     <tr>
-      <th>{{ KNOWL("is_conference") }}<span style="color:red; font-weight:normal">*</span></th>
+      <td>{{ ASTKNOWL("is_conference") }}</td>
       <td>
         <select name="is_conference" style="width:100px;">
           <option value="yes">conference</option>
@@ -35,17 +35,17 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
       <td class="forminfo"><p style="width:230px;">Click blue captions for more details. Asterisks denote required items.</p></td>
     </tr>
     <tr>
-      <th>{{ KNOWL("seminar_name") }}<span style="color:red; font-weight:normal">*</span></th>
+      <td>{{ ASTKNOWL("seminar_name") }}</td>
       <td><input name="name" style="width:500px;" maxlength="100" placeholder="Terra firma topology colloquium"/></td>
       <td class="forminfo">Capitalize first word and proper nouns.</td>
     </tr>
     <tr>
-      <th>{{ KNOWL("seminar_shortname") }}<span style="color:red; font-weight:normal">*</span></th>
+      <td>{{ ASTKNOWL("seminar_shortname") }}</td>
       <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="32"/></td>
       <td class="forminfo">Use 3-32 characters, no spaces.
     </tr>
     <tr>
-      <th>{{ KNOWL("institutions") }}</th>
+      <td>{{ KNOWL("institutions") }}</td>
       <td><span id="institution_selector"></span></td>
       <td class="forminfo">You can also add these later.</td>
     <tr>
