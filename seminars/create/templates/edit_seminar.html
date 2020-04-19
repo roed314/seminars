@@ -112,7 +112,7 @@
         </tr>
         {% endif %}
         <tr>
-          <td style="padding-top: 20px">{{ KNOWL("Room") }}</td>
+          <td style="padding-top: 20px">{{ KNOWL("room") }}</td>
           <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" /></td>
         </tr>
         <tr>
@@ -151,7 +151,7 @@
           </tr>
         {% endif %}
         <tr>
-          <td colspan="2" style="padding-top: 10px">Comments</td>
+          <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>
         </tr>
         <tr>
           <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments">{{ seminar.comments | blanknone }}</textarea></td>

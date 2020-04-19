@@ -154,7 +154,7 @@ archived:
   title: Archived
   contents: |
     Use this to indiate that your seminar is no longer meeting.
-access:
+comments:
   title: Comments
   contents: |
     Use the comments field to add additional information about yout talk, seminar, or conferenee, especially details on how
