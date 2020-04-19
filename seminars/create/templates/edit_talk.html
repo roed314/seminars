@@ -16,25 +16,25 @@
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <table>
     <tr>
-      <td style="width:150px;">Seminar</td>
+      <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
     </tr>
     <tr>
-      <td>Topics</td>
+      <td>{{ KNOWL("topics") }}</td>
       <td>
         <span id="topic_selector" style="width:610px;"></span>
       </td>
     </tr>
     <tr>
-      <td>Language</td>
+      <td>{{ ASTKNOWL("language") }}</td>
       <td>
         <span id="language_selector" style="width:600px;"></span>
       </td>
     </tr>
     <tr>
-      <td>Time zone</td>
+      <td>{{ ASTKNOWL("timezone" }}</td>
       <td>
         <select name="timezone" style="width:610px;">
           {% for tz, disp in timezones %}
@@ -44,19 +44,19 @@
       </td>
     </tr>
     <tr>
-      <td>Start</td>
+      <td>{{ ASTKNOWL("talk_start_time") }}</td>
       <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>End</td>
+      <td>{{ ASTKNOWL("talk_end_time") }}</td>
       <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Room</td>
+      <td>{{ KNOWL("room") }}</td>
       <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Online</td>
+      <td>{{ ASTKNOWL("online") }}</td>
       <td>
         <select name="online" style="width:610px;">
           <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
@@ -65,12 +65,12 @@
       </td>
     </tr>
     <tr>
-      <td>Livestream link</td>
+      <td>{{ KNOWL("live_link") }}</td>
       <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
           <td class="forminfo" />Enter "see comments" if the link is not fixed and explain in the seminar or talk comments how to get the link.</td>
     </tr>
     <tr>
-      <td>Access</td>
+      <td>{{ KNOWL("access") }}</td>
       <td>
         <select name="access" style="width:610px;">
           <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view link</option>
@@ -80,7 +80,7 @@
       </td>
     </tr>
     <tr>
-      <td colspan="2">Comments</td>
+      <td colspan="2">{{ KNOWL("comments") }}</td>
     </tr>
     <tr>
       <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; seminar comments will appear immediately after talk comments.">{{ talk.comments | blanknone }}</textarea></td>

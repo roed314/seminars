@@ -27,7 +27,7 @@
         <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
       <table>
         <tr>
-          <td style="width:150px;"></td>
+          <td style="width:150px;">{{ KNOWL("seminar_id") }}</td>
           <td>{{ seminar.shortname }}</td>
         </tr>
         <tr>

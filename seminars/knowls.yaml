@@ -45,6 +45,10 @@ seminar_shortname:
     It will be included in all URL links to the seminar and its associated talks.
     When you press create, you will be told if the identifier you entered is already in use.
     After creation, the identifier cannot be changed.
+seminar_id:
+  title: Identifier
+  contents: |
+    The unique identifier of this seminar or conference on mathseminars.org.  This cannot be changed.
 seminar_name:
   title: Name
   contents: |
@@ -186,3 +190,12 @@ display:
   title: Display
   contents: |
     Check this box for oragnizers (or curators) whose names should appear on the seminar's home page.  This box must be checked for at least one organizer or curator.
+seminar:
+  title: Seminar
+  contents: |
+    The name of the seminar to which this talk belongs.
+conference:
+  title: Conference
+  contents: |
+    The name of the conference to which this talk belongs.
+
