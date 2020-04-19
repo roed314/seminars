@@ -158,7 +158,7 @@ def info():
         title = section = "Login"
     return render_template(
         "user-info.html",
-        next=request.args.get("next"),
+        next=request.args.get("next", ''),
         title=title,
         section=section,
         timezones=timezones,
