@@ -8,6 +8,30 @@ institution_name:
   title: Name
   contents: |
     The name of your institution that will be displayed when associating institutions to seminars and conferences.  This can be changed.
+institution_type:
+  title: Type
+  contents: |
+    The type of your institution, which may be a university, a research institute, a corporation, or something else.
+institution_homepage:
+  title: Homepage
+  contents: |
+    The homepage of your institution.  This should be a URL beginning with "http://" or "https://" (the latter is preferred, if availalble).
+institution_city:
+  title: City
+  contents: |
+    The name of the city in which your institution is located, followed by the state/province/region (if relevant), and the country.
+institution_timezone:
+  title: Time zone
+  contents: |
+    The time zone in which your institution resides.
+    The drop down list provides a list of time zones you may choose from, along with their current UTC offset,
+    which may change depending on the date depending on adjustments made to account for local daylight savings time adjustments.
+    Be sure to choose a time zone that actually matches the time zone of your institution, not just one that happens to have the same UTC offset at the moment.
+institution_admin:
+  title: Maintainer
+  contents: |
+    The email address of the mathseminars.org user account responsible for creating or maaintaining this institution's listing.
+    This is set to the email address of the user who created the institution by default but can be set to the email address of any endorsed user.
 is_conference:
   title: Type
   contents: |
