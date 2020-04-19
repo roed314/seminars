@@ -25,22 +25,22 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   <input type="hidden" name="institutions" value=""/>
   <table id="make_semconf">
     <tr>
-      <th>{{ KNOWL("is_conference") }}</th>
+      <th>{{ KNOWL("is_conference") }}<span style="color:red; font-weight:normal">*</span></th>
       <td>
         <select name="is_conference" style="width:100px;">
           <option value="yes">conference</option>
           <option value="no" selected>seminar</option>
         </select>
       </td>
-      <td class="forminfo"><p style="width:230px;">Click blue captions for more details.</p></td>
+      <td class="forminfo"><p style="width:230px;">Click blue captions for more details. Asterisks denote required items.</p></td>
     </tr>
     <tr>
-      <th>{{ KNOWL("seminar_name") }} <span style="color:red; font-weight:normal">*</span></th>
+      <th>{{ KNOWL("seminar_name") }}<span style="color:red; font-weight:normal">*</span></th>
       <td><input name="name" style="width:500px;" maxlength="100" placeholder="Terra firma topology colloquium"/></td>
       <td class="forminfo">Capitalize first word and proper nouns.</td>
     </tr>
     <tr>
-      <th>{{ KNOWL("seminar_shortname") }} <span style="color:red; font-weight:normal">*</span></th>
+      <th>{{ KNOWL("seminar_shortname") }}<span style="color:red; font-weight:normal">*</span></th>
       <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="32"/></td>
       <td class="forminfo">Use 3-32 characters, no spaces.
     </tr>
