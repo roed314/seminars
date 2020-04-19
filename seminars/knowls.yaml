@@ -1,32 +1,24 @@
 is_conference:
   title: Type
   contents: |
-    Seminars are best used for series of talks that recur at more or less regular intervals (every Tuesday and Thursday, or every other Wednesday for example).
+    Seminars are best used for series of talks that recur at regular intervals (every Tuesday and Thursday, or every other Wednesday, for example).
     Conferences are events with a fixed start and end date (usually a more or less consecutive sequence of days with some number of talks per day).
     For the most part seminars and conferences are treated identically on our site, the main difference is in how the grid for the talk schedule is layed out.
 shortname:
   title: Identifier
   contents: |
-    The identifier of the seminar (or conference) is a string of up to 32 characters that will be included in all URL links to the seminar and talks that take place in it.
-    It must consist of letters (case sensitive), numbers, hypens and undersores, with no spaces.
-    The identifier is permanent and cannot be changed; only identifiers of permanently deleted seminars can be reused.
+    Each seminar (or conference) must be given a unique indentifier consisting of up to 32 letters, numbers, hyphens, or underscores (no spaces) that
+    will be included in all URL links to the seminar and its associated talks.  This identifier is permanent and cannot be changed.
 name:
   title: Full name
   contents: |
-    The full name of the seminar (or conference).  This will appear on brwose and search pages and can be changed at any time.
+    The full name of the seminar (or conference) that will appear on our brwose and search pages; this be changed at any time.
     Like wikipedia, mathseminars.org uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> for seminar names and talk titles.
     This means that only the first word and proper nouns should be capitalized.
 institutions:
   title: Institutions
   contents: |
-    List of insitutions hosting or associated with the seminar (or conference).  These can be changed at any time and need not be specified now (or ever).
-    If you wish to add an institution that is not currenlty listed you can create it by clicking on the Institutions tab.  If your account has not
-    yet been endorsed you will not be able to create new institutions, but feel free to create your seminar now if you wish.
-    Once you account has been endorsed you can create the insitution and add it to your seminar.
-    <br><br>
-    You can get your account endorsed by anyone with an endorsed account (<a href="https://mathseminars.org/user/public">listed here</a>), or you can
-    <a href="mailto:mathseminars@math.mit.edu">email us</a> to request an endorsement (to help us verify your identity, please include a link to your
-    insitutional profile page, an arXiv preprint, or published mathematics paper that includes your email contact information).
+    You may associate one or more institutions to a seminar (or conference).  The list of institutions may be empty and can be changed at any time.
 organizer_name:
   title: Name
   contents: |
