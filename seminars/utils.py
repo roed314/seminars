@@ -29,11 +29,11 @@ def validate_url(x):
 
 def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
-    tokens = x.split()
+    tokens = re.split(r'(\s+)',x))
     for i in range(len(tokens)):
         if validate_url(tokens[i]):
             tokens[i] = '<a href="%s">%s</a>'%(tokens[i], tokens[i][tokens[i].index("//")+2:])
-    return ' '.join(tokens)
+    return ''.join(tokens)
 
 def naive_utcoffset(tz):
     if isinstance(tz, str):
