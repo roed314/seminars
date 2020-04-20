@@ -191,8 +191,7 @@
         </tr>
         {% endfor %}
       </table>
-      <a style="margin-left: 30px; font-weight: bold;" onclick="unsaved = false;" href="{{ url_for('create.save_seminar') }}">Save changes</a>
-<!--      <button type="submit" onclick="unsaved = false;return true;">Save</button> -->
+      <button type="submit" onclick="unsaved = false;return true;">Save</button>
 
       {% if seminar.new %}
         <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('create.index') }}">Cancel creation</a>
