@@ -53,9 +53,7 @@ seminar_name:
     This is the full name of the seminar or conference, to appear on the browse and search pages. It can be changed at any time.
     Like Wikipedia, mathseminars.org uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> for seminar names and talk titles:
     only the first word and proper nouns should be capitalized.
-<<<<<<< HEAD
-=======
-seminar_description: 
+seminar_description:
   title: Short description
   contents: |
     A short desciption of your seminar or conference that will be displayed in our search pages along with the name and institutions.
@@ -64,7 +62,6 @@ seminar_homepage:
   title: Homepage
   contents: |
     The external homepage of your seminar or conference, if one exists.  This should be a URL beginning with "http".
->>>>>>> 5232f3e615445865a3e823273a9a1bc1055d314c
 institutions:
   title: Institutions
   contents: |

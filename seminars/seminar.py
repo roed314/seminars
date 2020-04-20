@@ -116,13 +116,15 @@ class WebSeminar(object):
         """
         return (self.owner == current_user.email or
                 current_user.is_admin or
-                self.display and (self.visibility > 0 or current_user.email in self.editors()))
+                # TODO: remove temporary measure of allowing visibility None
+                self.display and (self.visibility is None or self.visibility > 0 or current_user.email in self.editors()))
 
     def searchable(self):
         """
         Whether this seminar should show up in search results (and whether its talks should show up on the browse page)
         """
-        return self.display and self.visibility > 1
+        # TODO: remove temporary measure of allowing visibility None
+        return self.display and (self.visibility is None or self.visibility > 1)
 
     def save(self):
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
@@ -187,13 +189,19 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_name(self, external=False, show_attributes=False):
+    def show_name(self, homepage_link=False, external=False, show_attributes=False):
         # Link to seminar
-        kwargs = {"shortname": self.shortname}
-        if external:
-            kwargs["_external"] = True
-            kwargs["_scheme"] = "https"
-        link = '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
+        if homepage_link:
+            if self.homepage:
+                link = '<a href="%s">%s</a>' % (self.homepage, self.name)
+            else:
+                link = self.name
+        else:
+            kwargs = {"shortname": self.shortname}
+            if external:
+                kwargs["_external"] = True
+                kwargs["_scheme"] = "https"
+            link = '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
         if show_attributes:
             if not self.display:
                 link += " (hidden)"

@@ -105,7 +105,7 @@ class WebTalk(object):
         """
         return (self.seminar.owner == current_user.email or
                 current_user.is_admin or
-                self.display and (self.seminar.visibility > 0 and not self.hidden or
+                self.display and ((self.seminar.visibility is None or self.seminar.visibility > 0) and not self.hidden or
                                   current_user.email in self.seminar.editors()))
 
     def searchable(self):
@@ -233,7 +233,7 @@ class WebTalk(object):
             else:
                 return ans("%s years ago" % (round(ago / year)))
 
-    def show_title(self, visiblity_info=False):
+    def show_title(self, visibility_info=False):
         title = self.title if self.title else "TBA"
         if visibility_info:
             if not self.display:

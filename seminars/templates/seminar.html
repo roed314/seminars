@@ -2,9 +2,9 @@
 
 {% block content %}
 
-  <span style="display: inline-flex">
-<h1 style="padding-right: 0.5em;">
-  {% if seminar.homepage %}<a href="{{seminar.homepage}}">{{seminar.name}}</a>{% else %}{{seminar.name}}{% endif %}{% if not seminar.display %} (hidden){% elif seminar.archived %} (inactive){% elif seminar.online %} (online){% endif %}
+<span style="display: inline-flex">
+  <h1 style="padding-right: 0.5em;">
+    {{ seminar.show_name(homepage_link=True, show_attributes=True) | safe }}
 </h1>
 {{seminar.show_subscribe() | safe }}
 </span>

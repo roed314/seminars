@@ -41,6 +41,7 @@
         <td align="center">{{ KNOWL("speaker_email") }}</td>
         <td align="center">{{ KNOWL("speaker_affiliation") }}</td>
         <td align="center">{{ KNOWL("title") }}</td>
+        <th align="center">{{ KNOWL("hidden") }}</td>
         <td></td>
       </tr>
     </thead>
@@ -81,6 +82,9 @@
       <td class="titleinp">
         <input name="title{{vars.i}}" value="{{ raw_data['title%s'%vars['i']] }}" />
       </td>
+      <td>
+        <input type="checkbox" name="hidden{{vars.i}}" value="yes" {% if raw_data['hidden%s'%vars['i']] == "yes" %} checked {% endif %} />
+      </td>
       <td></td>
       <input type="hidden" name="seminar_ctr{{vars.i}}" value="" />
     {% else %}
@@ -98,6 +102,9 @@
       </td>
       <td class="titleinp">
         <input name="title{{vars.i}}" value="{{ talk.title | blanknone }}" />
+      </td>
+      <td>
+        <input type="checkbox" name="hidden{{vars.i}}" value="yes"{% if talk.hidden %} checked {% endif %} />
       </td>
       <td>
         {{ talk.details_link() | safe }}

@@ -801,7 +801,7 @@ def edit_seminar_schedule():
 
 
 required_cols = ["date", "time", "speaker"]
-optional_cols = ["speaker_affiliation", "speaker_email", "title"]
+optional_cols = ["speaker_affiliation", "speaker_email", "title", "hidden"]
 
 
 @create.route("save/schedule/", methods=["POST"])

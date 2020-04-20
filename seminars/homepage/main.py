@@ -4,7 +4,7 @@ from seminars.talk import talks_search, talks_lucky
 from seminars.utils import topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
-from flask import render_template, request, url_for
+from flask import render_template, request, redirect, url_for
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talks
 from flask_login import current_user
 import datetime
@@ -134,7 +134,8 @@ def talks_parser(info, query):
     parse_video(info, query)
     parse_language(info, query, prefix="talk")
     query["display"] = True
-    query["hidden"] = False
+    # TODO: remove this temporary measure allowing hidden to be None
+    query["hidden"] = {"$or": [False, {"$exists": False}]}
     # These are necessary but not succificient conditions to display the talk
     # Also need that the seminar has visibility 2.
 
@@ -360,7 +361,7 @@ def index():
     talks = list(
         talks_search(
             {"display": True,
-             "hidden": False,
+             "hidden": {"$or": [False, {"$exists": False}]},
              "end_time": {"$gte": datetime.datetime.now()}},
             sort=["start_time"],
             seminar_dict=all_seminars(),
