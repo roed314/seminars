@@ -101,8 +101,8 @@ class WebInstitution(object):
 
     def admin_link(self):
         rec = db.users.lookup(self.admin)
-        link = (rec["homepage"] if rec["homepage"] else ("mailto:%s" % (rec["email"]) if rec["email"] else ""))
-        return '<a href="%s">%s</a>' % (link, rec["name"] if rec["name"] else self.admin)
+        link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
+        return '<a href="%s"><i>%s</i></a>' % (link, "Contact this page's maintainer.")
 
 ### FIXME ###
 # Should always return a WebInstitution object but currently may returna dictionary or WebObject

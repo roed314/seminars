@@ -84,6 +84,7 @@ h2.link > a {
     text-align: center;
     font-size: 75%;
     color: {{color.footer_text}};
+    min-height: 15px;
 }
 
 #content > ul {
@@ -220,6 +221,7 @@ body.knowl #header {
     padding-top: 10px;
     /* display: inline-block; */
     color: {{color.header_text_title}};
+    min-height: 32px;
 }
 
 #header #title .katex{
@@ -299,6 +301,7 @@ body.knowl #header {
     color: #aaaaaa;
     font-family: sans-serif;
     padding: 10px 25px 10px 25px;
+    min-height: 20px;
 }
 
 div.topic_toggle, div.language_toggle {
@@ -632,6 +635,7 @@ body > .debug {
   font-size: 95%;
   /* line-height: 135%; */
   padding-right: 10px;
+  min-height: calc(100vh - 217px);
 }
 
 #content blockquote
