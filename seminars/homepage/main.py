@@ -12,11 +12,13 @@ import pytz
 from collections import Counter
 from dateutil.parser import parse
 
-from lmfdb.utils import (
+from lmfdb.utils.search_boxes import (
     BasicSpacer,
     SearchArray,
     TextBox,
     SelectBox,
+)
+from lmfdb.utils.utilities import (
     to_dict,
     flash_error,
 )
