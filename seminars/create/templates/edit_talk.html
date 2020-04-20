@@ -16,19 +16,19 @@
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <table>
     <tr>
-      <td style="width:150px;">Seminar</td>
+      <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
     </tr>
     <tr>
-      <td>Topics</td>
+      <td>{{ KNOWL("topics") }}</td>
       <td>
         <span id="topic_selector" style="width:610px;"></span>
       </td>
     </tr>
     <tr>
-      <td>Language</td>
+      <td>{{ ASTKNOWL("language") }}</td>
       <td>
         <span id="language_selector" style="width:600px;"></span>
       </td>
@@ -36,7 +36,7 @@
     {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
     <tr>
-      <td>Time zone</td>
+      <td>{{ ASTKNOWL("timezone") }}</td>
       <td>
         <select name="timezone" style="width:610px;">
           {% for tz, disp in timezones %}
@@ -46,19 +46,19 @@
       </td>
     </tr>
     <tr>
-      <td>Start</td>
+      <td>{{ ASTKNOWL("talk_start_time") }}</td>
       <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>End</td>
+      <td>{{ ASTKNOWL("talk_end_time") }}</td>
       <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Room</td>
-      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" /></td>
+      <td>{{ KNOWL("room") }}</td>
+      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building" /></td>
     </tr>
     <tr>
-      <td>Online</td>
+      <td>{{ ASTKNOWL("online") }}</td>
       <td>
         <select name="online" style="width:610px;">
           <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
@@ -67,12 +67,12 @@
       </td>
     </tr>
     <tr>
-      <td>Livestream link</td>
+      <td>{{ KNOWL("live_link") }}</td>
       <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
           <td class="forminfo" />Enter "see comments" if the link is not fixed and explain in the seminar or talk comments how to get the link.</td>
     </tr>
     <tr>
-      <td>Access</td>
+      <td>{{ KNOWL("access") }}</td>
       <td>
         <select name="access" style="width:610px;">
           <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view link</option>
@@ -97,7 +97,7 @@
     {% endif %}
     {% endif %} {# attributes only organizers can edit #}
     <tr>
-      <td colspan="2">Comments</td>
+      <td colspan="2">{{ KNOWL("comments") }}</td>
     </tr>
     <tr>
       <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; seminar comments will appear immediately after talk comments.">{{ talk.comments | blanknone }}</textarea></td>
@@ -106,37 +106,39 @@
   <hr style="width:800px;">
   <table>
     <tr>
-      <td style="width:150px">Speaker</td>
-      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" /></td>
+      <td style="width:150px">{{ KNOWL("speaker") }}</td>
+      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" placeholder="Firstname Lastname"/></td>
     </tr>
     <tr>
-      <td>Speaker email</td>
-      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" /></td>
+      <td>{{ KNOWL("speaker_email") }}</td>
+      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" placeholder="someone@upan.edu"/></td>
+      <td class="forminfo" />Visible only to organizers.</td>
     </tr>
     <tr>
-      <td>Speaker affiliation</td>
-      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" /></td>
+      <td>{{ KNOWL("speaker_affiliation") }}</td>
+      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" placeholder="University of Pangaea" /></td>
     </tr>
     <tr>
-      <td>Speaker homepage</td>
-      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" /></td>
+      <td>{{ KNOWL("speaker_homepage") }}</td>
+      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone"/></td>
+      <td class="forminfo" />Please set if available.</td>
     </tr>
     <tr>
-      <td>Title</td>
+      <td>{{ KNOWL("title") }}</td>
       <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" placeholder="TeX symbols are OK here" /></td>
-      <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
+      <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
     </tr>
     <tr>
-      <td>Paper link</td>
-      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" /></td>
+      <td>{{ KNOWL("paper_link") }}</td>
+      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" placeholder="https://arxiv.org/abs/9999.99999"/></td>
     </tr>
     <tr>
-      <td>Slides link</td>
-      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" /></td>
+      <td>{{ KNOWL("slide_link") }}</td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
     </tr>
     <tr>
-      <td>Video link</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" /></td>
+      <td>{{ KNOWL("video_link") }}</td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
     </tr>
   </table>
   <h3>Abstract</h3>
