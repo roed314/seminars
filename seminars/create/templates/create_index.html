@@ -5,11 +5,7 @@
 <div class="text_content">
 {% if not user.is_creator %}
 <p>
-  Welcome!  Please feel free to start creating seminars.
-  For the moment any content you create will be visible only to you, but once your account has been endorsed, all the seminars and talks you added will instantly appear on the public browse and search pages.
-</p>
-<p>
-  Any endorsed user on our site can endorse you, so please peruse <a href="{{ url_for('user.public_users') }}">this list</a> to see if you know someone who can endorse your account.  Alternatively, <a href="mailto:mathseminars@math.mit.edu">email the administrators</a> for an endorsement; include a link to something containing your email address (a page at your institution, an arXiv preprint you posted, or a published paper, say), so that we can be sure it is really you!
+  Welcome!  Please feel free to start creating seminars.  For the moment any content you create will be visible only to you, but once your account has been endorsed, all the seminars and talks you added will instantly appear on the public browse and search pages.  To get endorsed, visit the <a href="{{ url_for('user.public_users') }}">list of public users</a> and follow the instructions there.
 </p>
 {% else %}
 {% if user.affiliation and not institution_known(user.affiliation) %}
