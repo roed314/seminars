@@ -2,6 +2,7 @@ from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
 from seminars.utils import allowed_shortname
+from seminars.users.pwdmanager import userdb
 from lmfdb.utils import flash_error
 from collections.abc import Iterable
 from lmfdb.logger import critical
@@ -100,9 +101,9 @@ class WebInstitution(object):
             db.institutions.upsert({"shortname": self.shortname}, data)
 
     def admin_link(self):
-        rec = db.users.lookup(self.admin)
-        link = (rec["homepage"] if rec["homepage"] else ("mailto:%s" % (rec["email"]) if rec["email"] else ""))
-        return '<a href="%s">%s</a>' % (link, rec["name"] if rec["name"] else self.admin)
+        rec = userdb.lookup(self.admin)
+        link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
+        return '<a href="%s"><i>%s</i></a>' % (link, "Contact this page's maintainer.")
 
 ### FIXME ###
 # Should always return a WebInstitution object but currently may returna dictionary or WebObject
@@ -119,11 +120,10 @@ def can_edit_institution(shortname, new):
         return redirect(url_for(".index"), 302), None
     if not new and not current_user.is_admin:
         # Make sure user has permission to edit
-        if institution["admin"] != current_user.email:
-            owner_name = db.users.lucky({"email": institution.admin}, "full_name")
-            owner = "<%s %s>" % (owner_name, institution.admin)
-            if owner_name:
-                owner = owner_name + " " + owner
+        if institution["admin"].lower() != current_user.email.lower():
+            rec = userdb.lookup(institution.admin, "full_name")
+            link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
+            owner = "%s (%s)" % (rec['name'], link)
             flash_error(
                 "You do not have permission to edit %s.  Contact the institution admin, %s, and ask them to fix any errors."
                 % (institution.name, owner)

@@ -13,10 +13,6 @@
     <td>Time zone</td>
     <td>{{ institution.timezone }}</td>
   </tr>
-  <tr>
-    <td>Maintainer</td>
-    <td>{{ institution.admin_link() | safe }}</td>
-  </tr>
 </table>
 {% if seminars %}
 <h2>Seminars</h2>
@@ -51,5 +47,7 @@
     {% endfor %}
   </table>
 {% endif %}
+<br><br>
+<p align="right"><small>{{ institution.admin_link() | safe }}</small></p>
 
 {% endblock %}

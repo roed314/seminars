@@ -545,6 +545,22 @@ SELECT DISTINCT ON (seminar_id) {0} FROM
         ans[rec["seminar_id"]] = rec["start_time"]
     return ans
 
+def next_talk_sorted(results):
+    """
+    Sort a list of WebSeminars by when their next talk is (and add the next_talk_time attribute to each seminar).
+
+    Returns the sorted list.
+    """
+    results = list(results)
+    ntdict = next_talks()
+    for R in results:
+        R.next_talk_time = ntdict[R.shortname]
+    results.sort(key=lambda R: (R.next_talk_time, R.name))
+    for R in results:
+        if R.next_talk_time.replace(tzinfo=None) == datetime.max:
+            R.next_talk_time = None
+    return results
+
 def next_talk(shortname):
     """
     Gets the next talk time in a single seminar.  Note that if you need this information for many seminars, the `next_talks` function will be faster.
@@ -589,16 +605,11 @@ def can_edit_seminar(shortname, new):
         return redirect(url_for("show_seminar", shortname=shortname), 302), None
     # Make sure user has permission to edit
     if not new and not seminar.user_can_edit():
-        owner = seminar.owner
-        owner_name = db.users.lucky({"email": owner}, "name")
-        if owner_name:
-            owner = "%s (%s)" % (owner_name, owner)
-
         flash_error(
-            "You do not have permission to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission."
-            % (shortname, owner)
+            "You do not have permission to edit seminar %s.  Please contact the seminar organizers."
+            % shortname
         )
-        return redirect(url_for(".index"), 302), None
+        return redirect(url_for("show_seminar", shortname=shortname), 302), None
     if seminar is None:
         seminar = WebSeminar(shortname, data=None, editing=True)
     return None, seminar
