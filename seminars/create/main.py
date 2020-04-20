@@ -346,7 +346,6 @@ def save_seminar():
             "shortname": shortname,
             "display": current_user.is_creator,
             "owner": current_user.email,
-            "archived": False,
         }
     else:
         data = {

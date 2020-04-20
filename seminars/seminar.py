@@ -50,7 +50,6 @@ class WebSeminar(object):
             self.online = True  # default
             self.access = "open"  # default
             self.visibility = 2 # public by default, once display is set to True
-            self.archived = False  # don't start out archived
             self.is_conference = False  # seminar by default
             self.frequency = 7
             self.per_day = 1
