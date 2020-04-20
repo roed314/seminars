@@ -20,6 +20,7 @@
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
+      <td style="width:250px;"></td>
     </tr>
     <tr>
       <td>{{ KNOWL("topics") }}</td>
@@ -95,6 +96,7 @@
     <tr>
       <td>{{ KNOWL("speaker_email") }}</td>
       <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" placeholder="someone@upan.edu"/></td>
+      <td class="forminfo" />Visible only to organizers.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("speaker_affiliation") }}</td>
@@ -103,11 +105,12 @@
     <tr>
       <td>{{ KNOWL("speaker_homepage") }}</td>
       <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone"/></td>
+      <td class="forminfo" />Please set if available.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("title") }}</td>
       <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" placeholder="TeX symbols are OK here" /></td>
-      <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
+      <td class="forminfo" />Capitalize first word and proper nouns.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("paper_link") }}</td>

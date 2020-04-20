@@ -220,7 +220,7 @@ speaker_homepage:
     The homepage of the speaker.
     The speaker name will be linked to the speaker homepage if specified, and this link will appear on our main page for browsing talks.
     This link is useful to visitors of mathseminars.org who may not know the speaker, and it improves the speaker's visibility within the mathematical community.
-    We strongly encourage organizers to fill this in, or to ask the speaker do so when the enter their title or abstract using the edit link for this page.
+    We encourage organizers to fill this in, or to ask the speaker do so when the enter their title or abstract using the edit link for this page.
 title:
   title: Title
   contents: |
