@@ -15,7 +15,7 @@ institution_type:
 institution_homepage:
   title: Homepage
   contents: |
-    The homepage of your institution.  This should be a URL beginning with "http://" or "https://" (the latter is preferred, if availalble).
+    The homepage of your institution.  This should be a URL beginning with "http".
 institution_city:
   title: City
   contents: |
@@ -42,7 +42,7 @@ seminar_shortname:
   title: Identifier
   contents: |
     Each seminar and conference has a unique identifier consisting of 3 to 32 letters, numbers, hyphens, and underscores (no spaces).
-    It will be included in all URL links to the seminar and its associated talks.
+    It will be included in all URLs links for the seminar and its associated talks.
     When you press create, you will be told if the identifier you entered is already in use.
     After creation, the identifier cannot be changed.
 seminar_id:
@@ -63,7 +63,7 @@ seminar_description:
 seminar_homepage:
   title: Homepage
   contents: |
-    The external homepage of your seminar or conference, if one exists.  This should be a URL beginning with "http://" or "https://" (the latter is preferred, if availalble).
+    The external homepage of your seminar or conference, if one exists.  This should be a URL beginning with "http".
 institutions:
   title: Institutions
   contents: |
@@ -198,4 +198,43 @@ conference:
   title: Conference
   contents: |
     The name of the conference to which this talk belongs.
-
+talk_start_time:
+  title: Start
+  contents: |
+    The time this talk starts in the time zone specified above.
+talk_end_time:
+  title: End
+  contents: |
+    The time this talk ends in the time zone specified above.
+speaker:
+  title: Speaker
+  contents: |
+    The full name of the speaker for this talk.
+speaker_email:
+  title: Speaker email
+  contents: |
+    The email address of the speaker for this talk.  This is only visible to organizers of the seminar or conference to which the talk belongs.
+speaker_affiliation:
+  title: Speaker affiliation
+  contents: |
+    The affiliation of the speaker.  This need not be an institution listed on mathseminars.org.
+speaker_homepage:
+  title: Speaker homepage
+  contents: |
+    The homepage of the speaker.  This should be a URL beggining with "http".
+    The speaker name will be linked to the speaker homepage if specified and will appear on the main browse page.
+    This is useful to visitors of mathseminars.org who may not know the speaker and it helps to improve the speaker's visibility to the mathematical community.
+    We strongly encourage organizers to fill this in, or to have the speaker do so when the enter their title or abstractt using the edit link for this page.
+title:
+  title: Title
+    The title of the talk.  As with seminar and conference names, this should be in <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>,
+    with only the first word and proper nouns captilaized.
+paper_link:
+  title: Paper link
+    A URL link to a paper related to the talk.
+slide_link:
+  title: Slide link
+    A URL link to a slide presentation used in the talk.  This may be set either before or after the talk.
+video_link:
+  title: Video link
+    A URL link to a video recording of the talk.

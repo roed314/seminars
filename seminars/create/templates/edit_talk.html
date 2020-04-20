@@ -89,36 +89,36 @@
   <hr style="width:800px;">
   <table>
     <tr>
-      <td style="width:150px">Speaker</td>
+      <td style="width:150px">{{ KNOWL("speaker") }}</td>
       <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Speaker email</td>
+      <td>{{ KNOWL("speaker_email") }}</td>
       <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Speaker affiliation</td>
+      <td>{{ KNOWL("speaker_affiliation") }}</td>
       <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Speaker homepage</td>
+      <td>{{ KNWOL("speaker_homepage") }}</td>
       <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Title</td>
+      <td>{{ KNOWL("title") }}</td>
       <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" placeholder="TeX symbols are OK here" /></td>
       <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
     </tr>
     <tr>
-      <td>Paper link</td>
+      <td>{{ KNOWL("paper_link") }}</td>
       <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Slides link</td>
+      <td>{{ KNOWL("slide_link") }}</td>
       <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Video link</td>
+      <td>{{ KNOWL("video_link") }}</td>
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" /></td>
     </tr>
   </table>
