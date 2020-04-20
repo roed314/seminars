@@ -155,11 +155,11 @@
       their name will be linked to their home page, and if homepage is not set but email is set their name will have a mailto link.</p>
       <table>
         <thead>
-          <td align="right">{{ KNOWL("organizer_name") }}</td>
-          <td align="right">{{ KNOWL("homepage") }}</td>
-          <td align="right">{{ KNOWL("email") }}</td>
-          <td align="right">{{ KNOWL("organizer") }}</td>
-          <td align="right">{{ KNOWL("display") }}</td>
+          <td align="center">{{ KNOWL("organizer_name") }}</td>
+          <td align="center">{{ KNOWL("homepage") }}</td>
+          <td align="center">{{ KNOWL("email") }}</td>
+          <td align="center">{{ KNOWL("organizer") }}</td>
+          <td align="center">{{ KNOWL("display") }}</td>
         </thead>
         {% for i in range(10) %}
         <tr>
@@ -173,20 +173,20 @@
             <td>
               <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px"/>
             </td>
-            <td>
+            <td align="center">
               {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
               {# but it is displayed in a column labeleled "organizer" so it is checked when curator is false #}
               <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
             </td>
-            <td>
+            <td align="center">
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
             </td>
           {% else %}
             <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
             <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
             <td><input name="org_email{{i}}" style="width:220px;" /></td>
-            <td align="right"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
-            <td align="right"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
+            <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
+            <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
           {% endif %}
         </tr>
         {% endfor %}
