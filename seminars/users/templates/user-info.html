@@ -92,8 +92,8 @@
     <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
     <table>
       <tr>
-        <td>
-          Email:
+        <td style="width:75px;">
+          Email
         </td>
         <td>
           <input name="email" size="30" tabindex="1" />
@@ -110,11 +110,11 @@
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
       <tr>
-        <td>Created:</td>
+        <td>Created</td>
         <td>{{ user.created|fmtdatetime }}</td>
       </tr>
       <tr>
-        <td>Email:</td>
+        <td>Email</td>
         <td><input name="email" value="{{user.email}}" size="30" tabindex="1" /></td>
         {% if not user.email_confirmed %}
         <td>
@@ -123,24 +123,24 @@
         {%endif%}
       </tr>
       <tr>
-        <td>Name:</td>
+        <td>Name</td>
         <td><input name="name" value="{{user.name}}" size="30" tabindex="1" /></td>
         <td/>
       </tr>
       <tr>
-        <td>Affiliation:</td>
+        <td>Affiliation</td>
         <td><input name="affiliation" value="{{user.affiliation}}" size="30" tabindex="1" /></td>
         <td/>
       </tr>
       <tr>
-        <td>Homepage:</td>
+        <td>Homepage</td>
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" /></td>
         <td id="urltest" /></td>
       </tr>
     <tr>
-      <td>Timezone:</td>
+      <td>Timezone</td>
       <td>
-        <select name="timezone">
+        <select name="timezone" style="width:356px;">
         {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
@@ -169,15 +169,15 @@
   <form action="{{ url_for('.change_password') }}" method="POST" name="changepassword">
    <table>
     <tr>
-     <td>Old Password:</td>
-     <td><input name="oldpwd" type="password" /></td>
+     <td>Old Password</td>
+     <td><input name="oldpwd" type="password" style="width:260px;"/></td>
      <tr><td colspan="2" class="forminfo" />Don't use a password that you use elsewhere!</tr>
-     <tr><td>New Password:</td>
-         <td><input id="pw1" name="password1" type="password" /></td>
+     <tr><td>New Password</td>
+         <td><input id="pw1" name="password1" type="password" style="width:260px;"/></td>
          <td class="forminfo" id="pw1status" style="color: {{color.red}};"></td></tr>
      </tr>
-     <tr><td>New Password (repeat):</td>
-         <td><input id="pw2" name="password2" type="password" /></td>
+     <tr><td>New Password (repeat)</td>
+         <td><input id="pw2" name="password2" type="password" style="width:260px;"/></td>
          <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td></tr>
     <tr>
      <tr><td colspan="2" class="spacing" /></tr>
@@ -187,6 +187,11 @@
    </table>
   </form>
 
+  <h2>Delete account</h2>
+
+<p> Deleting your account will remove all personal information about you from our database (your favorites, the "details" above, etc.), though talks and seminars you've created will remain.</p>
+
+<p><a href="{{ url_for('user.permanently_deleteme') }}" onclick="return confirm('Are you sure you want to PERMANENTLY delete your account?');">Permanently delete account</a></p>
 
 
 {# this script constructs a url and shows it as a link, just for testing #}

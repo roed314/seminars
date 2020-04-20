@@ -7,7 +7,6 @@ from seminars.create import create
 from seminars.utils import (
     timezones,
     process_user_input,
-    check_time,
     weekdays,
     short_weekdays,
     flash_warning,
@@ -15,13 +14,13 @@ from seminars.utils import (
     clean_topics,
     clean_language,
     adapt_datetime,
+    sanity_check_times,
     format_errmsg,
     format_warning,
     show_input_errors,
-    validate_url,
 )
-from seminars.seminar import WebSeminar, can_edit_seminar, seminars_search
-from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, can_edit_talk
+from seminars.seminar import WebSeminar, can_edit_seminar, seminars_search, seminars_lookup
+from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, talks_lookup, can_edit_talk
 from seminars.institution import (
     WebInstitution,
     can_edit_institution,
@@ -31,12 +30,14 @@ from seminars.institution import (
     clean_institutions,
 )
 from seminars.lock import get_lock
-from seminars.users.pwdmanager import ilike_query
+from seminars.users.pwdmanager import ilike_query, ilike_escape
 from lmfdb.utils import flash_error
+from lmfdb.backend.utils import IdentifierWrapper
+from psycopg2.sql import SQL
 import datetime
+from datetime import timedelta
 import pytz
 from collections import defaultdict
-from email_validator import validate_email, EmailNotValidError
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 
@@ -47,14 +48,14 @@ def index():
     # TODO: use a join for the following query
     seminars = {}
     conferences = {}
+    deleted_seminars = []
+    deleted_talks = []
 
     def key(elt):
         role_key = {"organizer": 0, "curator": 1, "creator": 3}
         return (role_key[elt[1]], elt[0].name)
 
-    for rec in db.seminar_organizers.search(
-        {"email": ilike_query(current_user.email)}, ["seminar_id", "curator"]
-    ):
+    for rec in db.seminar_organizers.search({"email": ilike_query(current_user.email)}, ["seminar_id", "curator"]):
         semid = rec["seminar_id"]
         role = "curator" if rec["curator"] else "organizer"
         seminar = WebSeminar(semid)
@@ -64,22 +65,49 @@ def index():
         else:
             seminars[semid] = pair
     role = "creator"
-    for semid in seminars_search({"owner": ilike_query(current_user.email)}, "shortname"):
+    for semid in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_deleted=True):
         if semid not in seminars and semid not in conferences:
-            seminar = WebSeminar(semid)
+            seminar = WebSeminar(semid, deleted=True)  # allow deleted
             pair = (seminar, role)
-            if seminar.is_conference:
+            if seminar.deleted:
+                deleted_seminars.append(seminar)
+            elif seminar.is_conference:
                 conferences[semid] = pair
             else:
                 seminars[semid] = pair
     seminars = sorted(seminars.values(), key=key)
     conferences = sorted(conferences.values(), key=key)
+    deleted_seminars.sort(key=lambda sem: sem.name)
+    for semid, semctr in db._execute(
+        # ~~* is case insensitive amtch
+        SQL(
+            """
+SELECT DISTINCT ON ({Ttalks}.{Csemid}, {Ttalks}.{Csemctr}) {Ttalks}.{Csemid}, {Ttalks}.{Csemctr}
+FROM {Ttalks} INNER JOIN {Tsems} ON {Ttalks}.{Csemid} = {Tsems}.{Csname}
+WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
+            """
+        ).format(
+            Ttalks=IdentifierWrapper("talks"),
+            Tsems=IdentifierWrapper("seminars"),
+            Csemid=IdentifierWrapper("seminar_id"),
+            Csemctr=IdentifierWrapper("seminar_ctr"),
+            Csname=IdentifierWrapper("shortname"),
+            Cowner=IdentifierWrapper("owner"),
+            Cdel=IdentifierWrapper("deleted"),
+        ),
+        [ilike_escape(current_user.email), True, False],
+    ):
+        talk = WebTalk(semid, semctr, deleted=True)
+        deleted_talks.append(talk)
+    deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
     manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "create_index.html",
         seminars=seminars,
         conferences=conferences,
+        deleted_seminars=deleted_seminars,
+        deleted_talks=deleted_talks,
         institution_known=institution_known,
         institutions=institutions(),
         section=manage,
@@ -102,7 +130,7 @@ def edit_seminar():
     if resp is not None:
         return resp
     if new:
-        seminar.is_conference = process_user_input(data.get("is_conference"), "boolean", None)
+        seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", None)
         if seminar.is_conference:
             seminar.frequency = 1
             seminar.per_day = 4
@@ -130,7 +158,11 @@ def edit_seminar():
 @create.route("delete/seminar/<shortname>")
 @email_confirmed_required
 def delete_seminar(shortname):
-    seminar = WebSeminar(shortname)
+    try:
+        seminar = WebSeminar(shortname)
+    except ValueError as err:
+        flash_error(str(err))
+        return redirect(url_for(".index"), 302)
     manage = "Manage" if current_user.is_organizer else "Create"
     lock = get_lock(shortname, request.args.get("lock"))
 
@@ -147,22 +179,81 @@ def delete_seminar(shortname):
             lock=lock,
         )
 
-    if not seminar.user_can_delete():
+    if not seminar or not seminar.user_can_delete():
         flash_error("Only the owner of the seminar can delete it")
         return failure()
     else:
         if seminar.delete():
             flash("Seminar deleted")
-            return redirect(url_for(".index"))
+            return redirect(url_for(".deleted_seminar", shortname=shortname), 302)
         else:
             flash_error("Only the owner of the seminar can delete it")
             return failure()
 
 
-@create.route("delete/talk/<semid>/<semctr>")
+@create.route("deleted/seminar/<shortname>")
+@email_confirmed_required
+def deleted_seminar(shortname):
+    try:
+        seminar = WebSeminar(shortname, deleted=True)
+    except ValueError as err:
+        flash_error(str(err))
+        return redirect(url_for(".index"), 302)
+    return render_template("deleted_seminar.html", seminar=seminar, title="Deleted")
+
+
+@create.route("revive/seminar/<shortname>")
+@email_confirmed_required
+def revive_seminar(shortname):
+    data = seminars_lookup(shortname, include_deleted=True)
+
+    if data is None:
+        flash_error("Seminar %s was deleted permanently", shortname)
+        return redirect(url_for(".index"), 302)
+    if not current_user.is_admin and data.owner != current_user:
+        flash_error("You do not have permission to revive seminar %s", shortname)
+        return redirect(url_for(".index"), 302)
+    if not data.deleted:
+        flash_error("Seminar %s was not deleted, so cannot be revived", shortname)
+    else:
+        db.seminars.update({"shortname": shortname}, {"deleted": False})
+        db.talks.update({"seminar_id": shortname}, {"deleted": False})
+        flash(
+            "Seminar %s revived.  You should reset the organizers, and note that any users that were subscribed no longer are."
+            % shortname
+        )
+    return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+
+
+@create.route("permdelete/seminar/<shortname>")
+@email_confirmed_required
+def permdelete_seminar(shortname):
+    data = seminars_lookup(shortname, include_deleted=True)
+
+    if data is None:
+        flash_error("Seminar %s already deleted permanently", shortname)
+        return redirect(url_for(".index"), 302)
+    if not current_user.is_admin and data.owner != current_user:
+        flash_error("You do not have permission to delete seminar %s", shortname)
+        return redirect(url_for(".index"), 302)
+    if not data.deleted:
+        flash_error("You must delete seminar %s first", shortname)
+        return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+    else:
+        db.seminars.delete({"shortname": shortname})
+        db.talks.delete({"seminar_id": shortname})
+        flash("Seminar %s permanently deleted" % shortname)
+        return redirect(url_for(".index"), 302)
+
+
+@create.route("delete/talk/<semid>/<int:semctr>")
 @email_confirmed_required
 def delete_talk(semid, semctr):
-    talk = WebTalk(semid, semctr)
+    try:
+        talk = WebTalk(semid, semctr)
+    except ValueError as err:
+        flash_error(str(err))
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
 
     def failure():
         return render_template(
@@ -186,6 +277,57 @@ def delete_talk(semid, semctr):
         else:
             flash_error("Only the organizers of a seminar can delete talks in it")
             return failure()
+
+
+@create.route("deleted/talk/<semid>/<int:semctr>")
+@email_confirmed_required
+def deleted_talk(semid, semctr):
+    try:
+        talk = WebTalk(semid, semctr, deleted=True)
+    except ValueError as err:
+        flash_error(str(err))
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+    return render_template("deleted_talk.html", talk=talk, title="Deleted")
+
+
+@create.route("revive/talk/<semid>/<int:semctr>")
+@email_confirmed_required
+def revive_talk(semid, semctr):
+    talk = talks_lookup(semid, semctr, include_deleted=True)
+
+    if talk is None:
+        flash_error("Talk %s/%s was deleted permanently", semid, semctr)
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+    if not current_user.is_admin and talk.seminar.owner != current_user:
+        flash_error("You do not have permission to revive this talk")
+        return redirect(url_for(".index"), 302)
+    if not talk.deleted:
+        flash_error("Talk %s/%s was not deleted, so cannot be revived", semid, semctr)
+        return redirect(url_for(".edit_talk", seminar_id=semid, seminar_ctr=semctr), 302)
+    else:
+        db.talks.update({"seminar_id": semid, "seminar_ctr": semctr}, {"deleted": False})
+        flash("Talk revived.  Note that any users who were subscribed no longer are.")
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+
+
+@create.route("permdelete/talk/<semid>/<int:semctr>")
+@email_confirmed_required
+def permdelete_talk(semid, semctr):
+    talk = talks_lookup(semid, semctr, include_deleted=True)
+
+    if talk is None:
+        flash_error("Talk %s/%s already deleted permanently", semid, semctr)
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+    if not current_user.is_admin and talk.seminar.owner != current_user:
+        flash_error("You do not have permission to delete this seminar")
+        return redirect(url_for(".index"), 302)
+    if not talk.deleted:
+        flash_error("You must delete talk %s/%s first", semid, semctr)
+        return redirect(url_for(".edit_talk", seminar_id=semid, seminar_ctr=semctr), 302)
+    else:
+        db.talks.delete({"seminar_id": semid, "seminar_ctr": semctr})
+        flash("Talk %s/%s permanently deleted" % (semid, semctr))
+        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
 
 
 @create.route("save/seminar/", methods=["POST"])
@@ -216,42 +358,26 @@ def save_seminar():
     data["timezone"] = tz = raw_data.get("timezone")
     tz = pytz.timezone(tz)
 
-    # This seems like a risky hack.  We want to treat start_time/end_time as times of day which will be converted
-    # to timestamps offset from 1/1/2020 by process_user_input whtn the type is "time", but unilaterally converting
-    # all timestamps to times seems risky.  What if we want the user to enter a datetime in the future?
-    def replace(a):
-        if a == "timestamp with time zone":
-            return "time"
-        return a
-
     for col in db.seminars.search_cols:
         if col in data:
             continue
+        typ = db.seminars.col_type[col]
+        ### Hack to be removed ###
+        if col.endswith("time") and typ == "timestamp with time zone":
+            typ = "time"
         try:
-            val = raw_data.get(col)
-            if not val:
-                data[col] = None
-            else:
-                data[col] = process_user_input(val, replace(db.seminars.col_type[col]), tz=tz)
-            if col.endswith("link") and data[col]:
-                # allow "see comments" in live link
-                if not validate_url(data[col]) and not (col == "live_link" and data[col] == "see comments"):
-                    errmsgs.append(
-                        format_errmsg(
-                            "invalid %s, the string %s is not a valid url", col, data[col],
-                        )
-                    )
-        except Exception as err:
-            errmsgs.append(
-                format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col)
-            )
+            val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
+            data[col] = process_user_input(val, col, typ, tz)
+        except Exception as err: # should only be ValueError's but let's be cautious
+            errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+    if not data["name"]:
+        errmsgs.append("Seminar name cannot be blank")
     for col in ["frequency", "per_day"]:
         if data[col] is not None and data[col] < 1:
             errmsgs.append(
                 format_errmsg(
-                    "Unable to process input %s for %s: a positive integer is required",
-                    raw_data.get(col),
-                    col,
+                    "Unable to process input %s for %s: a positive integer is required", raw_data.get(col, ""), col,
                 )
             )
     data["institutions"] = clean_institutions(data.get("institutions"))
@@ -270,21 +396,13 @@ def save_seminar():
             name = "org_%s%s" % (col, i)
             typ = db.seminar_organizers.col_type[col]
             try:
-                val = raw_data.get(name)
-                if val == "":
-                    D[col] = None
-                elif val is None:
-                    D[col] = False if type == "boolean" else None  # checkboxes
-                else:
-                    D[col] = process_user_input(val, typ, tz=tz)
-                # if col == 'homepage' and val and not val.startswith("http"):
-                #     D[col] = "http://" + data[col]
-            except Exception as err:
-                errmsgs.append(
-                    format_errmsg("unable to process input %s for %s: {0}".format(err), val, col)
-                )
-        if D.get("homepage") or D.get("email") or D.get("full_name"):
-            if not D.get("full_name"):
+                val = raw_data.get(name, "")
+                D[col] = None # make sure col is present even if process_user_input fails
+                D[col] = process_user_input(val, col, typ, tz)
+            except Exception as err: # should only be ValueError's but let's be cautious
+                errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
+        if D["homepage"] or D["email"] or D["full_name"]:
+            if not D["full_name"]:
                 errmsgs.append(format_errmsg("organizer %s cannot be blank", "name"))
             D["order"] = len(organizer_data)
             # WARNING the header on the template says organizer
@@ -293,23 +411,6 @@ def save_seminar():
             D["curator"] = not D["curator"]
             if D["display"]:
                 display_count += 1
-            if D["email"]:
-                try:
-                    D["email"] = validate_email(D["email"])["email"]
-                except EmailNotValidError as err:
-                    errmsgs.append(
-                        format_errmsg(
-                            "unable to process input %s for email: {0}".format(err), D["email"],
-                        )
-                    )
-                email_count += 1
-            if D["homepage"]:
-                if not validate_url(D["homepage"]):
-                    errmsgs.append(
-                        format_errmsg(
-                            "invalid homepage, the string %s is not a valid URL", D["homepage"],
-                        )
-                    )
             if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
                 flash(
                     format_warning(
@@ -320,6 +421,8 @@ def save_seminar():
                     ),
                     "error",
                 )
+            if D["email"]:
+                email_count += 1
             organizer_data.append(D)
     if display_count == 0:
         errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
@@ -334,16 +437,9 @@ def save_seminar():
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
+
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
-    if check_time(new_version.start_time, new_version.end_time):
-        errmsgs.append(
-            format_errmsg(
-                "Incompatible or invalid start time %s and end time %s",
-                new_version.start_time,
-                new_version.end_time,
-            )
-        )
-        return show_input_errors(errmsgs)
+    sanity_check_times(new_version.start_time, new_version.end_time)
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
@@ -401,34 +497,31 @@ def save_institution():
     for col in db.institutions.search_cols:
         if col in data:
             continue
+        typ = db.institutions.col_type[col]
         try:
-            val = raw_data.get(col)
-            if not val:
-                data[col] = None
-            else:
-                data[col] = process_user_input(val, db.institutions.col_type[col], tz=tz)
-            if col == "admin":
+            val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
+            data[col] = process_user_input(val, col, typ, tz)
+            if col == "admin":                
                 userdata = db.users.lookup(data[col])
                 if userdata is None:
-                    errmsgs.append(
-                        format_errmsg("user %s does not have an account on this site", data[col])
-                    )
+                    if not data[col]:
+                        errmsgs.append("You must specify the email address of the maintainer.")
+                    else:
+                        errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
                 elif not userdata["creator"]:
                     errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
-            if col == "homepage" and data[col] and not validate_url(data[col]):
-                errmsgs.append(
-                    format_errmsg("invalid %s, the string %s is not a valid url", col, data[col])
-                )
-            if col == "access" and data[col] not in ["open", "users", "endorsed"]:
-                errmsgs.append(format_errmsg("access type %s invalid", data[col]))
-        except Exception as err:
-            errmsgs.append(
-                format_errmsg("unable to process input %s for %s: {0}".format(err), val, col)
-            )
+        except Exception as err: # should only be ValueError's but let's be cautious
+            errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
+    if not data["name"]:
+        errmsgs.append("Institution name cannot be blank.")
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
     new_version = WebInstitution(shortname, data=data)
+    ### FIXME ###
+    # The comparison below always fails because can_edit_institution returns a dictionary
+    # see FIXME at line 110 of institution.py
     if new_version == institution:
         flash("No changes made to institution.")
     else:
@@ -441,9 +534,7 @@ def save_institution():
 @create.route("edit/talk/<seminar_id>/<seminar_ctr>/<token>")
 def edit_talk_with_token(seminar_id, seminar_ctr, token):
     # For emailing, where encoding ampersands in a mailto link is difficult
-    return redirect(
-        url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr, token=token), 302,
-    )
+    return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr, token=token), 302,)
 
 
 @create.route("edit/talk/", methods=["GET", "POST"])
@@ -467,12 +558,12 @@ def edit_talk():
         extras = {}
     # The seminar schedule page adds in a date and times
     if data.get("date", "").strip():
-        tz = pytz.timezone(talk.seminar.timezone)
-        date = process_user_input(data["date"], "date", tz)
+        tz = talk.seminar.tz
+        date = process_user_input(data["date"], "date", "date", tz)
         try:
             # TODO: clean this up
-            start_time = process_user_input(data.get("start_time"), "time", tz)
-            end_time = process_user_input(data.get("end_time"), "time", tz)
+            start_time = process_user_input(data.get("start_time"), "start_time", "time", tz)
+            end_time = process_user_input(data.get("end_time"), "end_time", "time", tz)
             start_time = localize_time(datetime.datetime.combine(date, start_time), tz)
             end_time = localize_time(datetime.datetime.combine(date, end_time), tz)
         except ValueError:
@@ -499,9 +590,7 @@ def edit_talk():
 def save_talk():
     raw_data = request.form
     token = raw_data.get("token", "")
-    resp, talk = can_edit_talk(
-        raw_data.get("seminar_id", ""), raw_data.get("seminar_ctr", ""), token
-    )
+    resp, talk = can_edit_talk(raw_data.get("seminar_id", ""), raw_data.get("seminar_ctr", ""), token)
     if resp is not None:
         return resp
     errmsgs = []
@@ -526,49 +615,26 @@ def save_talk():
     for col in db.talks.search_cols:
         if col in data:
             continue
+        typ = db.talks.col_type[col]
         try:
-            val = raw_data.get(col, "").strip()
-            if not val:
-                data[col] = None
-            else:
-                data[col] = process_user_input(val, db.talks.col_type[col], tz=tz)
-            if (col.endswith("homepage") or col.endswith("link")) and data[col]:
-                if not validate_url(data[col]) and not (col == "live_link" and data[col] == "see comments"):
-                    errmsgs.append(
-                        format_errmsg(
-                            "invalid %s, the string %s is not a valid url", col, data[col],
-                        )
-                    )
-            if col.endswith("email") and data[col]:
-                try:
-                    data[col] = validate_email(data[col])["email"]
-                except EmailNotValidError as err:
-                    errmsgs.append(
-                        format_errmsg(
-                            "unable to process input %s for email: {0}".format(err), data[col],
-                        )
-                    )
+            val = raw_data.get(col, "")
+            data[col] = None # make sure col is present even if process_user_input fails
+            data[col] = process_user_input(val, col, typ, tz)
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
-        except Exception as err:
-            errmsgs.append(
-                format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col)
-            )
-    data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
+        except Exception as err: # should only be ValueError's but let's be cautious
+            errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+    if not data["speaker"]:
+        errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
+    if data["start_time"] is None or data["end_time"] is None:
+        errmsgs.append("Talks must have both a start and end time.")
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
+    data["topics"] = clean_topics(data.get("topics"))
+    data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
-    if check_time(new_version.start_time, new_version.end_time, check_past=True):
-        errmsgs.append(
-            format_errmsg(
-                "Incompatible or invalid start time %s and end time %s",
-                new_version.start_time,
-                new_version.end_time,
-            )
-        )
-        return show_input_errors(errmsgs)
+    sanity_check_times(new_version.start_time, new_version.end_time)
     if new_version == talk:
         flash("No changes made to talk.")
     else:
@@ -590,7 +656,7 @@ def make_date_data(seminar, data):
         date = data.get(key)
         if date:
             try:
-                return process_user_input(date, "date", tz)
+                return process_user_input(date, "date", "date", tz)
             except ValueError:
                 pass
 
@@ -618,8 +684,7 @@ def make_date_data(seminar, data):
     midnight_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
     if begin is None or seminar.start_time is None or seminar.end_time is None:
         future_talk = talks_lucky(
-            {"seminar_id": shortname, "start_time": {"$exists": True, "$gte": midnight_today},},
-            sort=["start_time"],
+            {"seminar_id": shortname, "start_time": {"$exists": True, "$gte": midnight_today},}, sort=["start_time"],
         )
         last_talk = talks_lucky(
             {"seminar_id": shortname, "start_time": {"$exists": True, "$lt": midnight_today},},
@@ -687,8 +752,9 @@ def make_date_data(seminar, data):
         by_date[adapt_datetime(T.start_time, tz).date()].append(T)
     all_dates = sorted(set(schedule_days + list(by_date)), reverse=(end < begin))
     # Fill in by_date with Nones up to the per_day value
+    per_day = seminar.per_day if seminar.per_day else 1
     for date in all_dates:
-        by_date[date].extend([None] * (seminar.per_day - len(by_date[date])))
+        by_date[date].extend([None] * (per_day - len(by_date[date])))
     if seminar.start_time is None:
         if future_talk is not None and future_talk.start_time:
             seminar.start_time = future_talk.start_time
@@ -699,7 +765,7 @@ def make_date_data(seminar, data):
             seminar.end_time = future_talk.end_time
         elif last_talk is not None and last_talk.start_time:
             seminar.end_time = last_talk.end_time
-    return seminar, all_dates, by_date, len(all_dates) * seminar.per_day
+    return seminar, all_dates, by_date, len(all_dates) * per_day
 
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
@@ -748,7 +814,6 @@ def save_seminar_schedule():
     except Exception:
         pass
     slots = int(raw_data["slots"])
-    print("slots = %d" % slots)
     curmax = talks_max("seminar_ctr", {"seminar_id": shortname})
     if curmax is None:
         curmax = 0
@@ -756,52 +821,49 @@ def save_seminar_schedule():
     updated = 0
     warned = False
     errmsgs = []
+    tz = seminar.tz
     for i in list(range(slots)):
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
-        speaker = process_user_input(raw_data.get("speaker%s" % i, ""), "text", tz=seminar.timezone)
+        speaker = process_user_input(raw_data.get("speaker%s" % i, ""), "speaker", "text", tz)
         if not speaker:
-            if not warned and any(
-                raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols
-            ):
+            if not warned and any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
                 warned = True
                 flash_warning("Talks are only saved if you specify a speaker")
+            elif not warned and seminar_ctr and not any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
+                warned = True
+                flash_warning("To delete an existing talk, click Details and then click delete on the Edit talk page")
             continue
         date = raw_data.get("date%s" % i).strip()
         if date:
             try:
-                date = process_user_input(date, "date", tz=seminar.tz)
-            except ValueError as err:
-                errmsgs.append(
-                    format_errmsg("Unable to process input %s for date: {0}".format(err), date)
-                )
+                date = process_user_input(date, "date", "date", tz)
+            except Exception as err: # should only be ValueError's but let's be cautious
+                errmsgs.append(format_errmsg("Unable to process input %s for date: {0}".format(err), date))
         else:
-            date = None
+            errmsgs.append(format_errmsg("You must specify a date for the talk by %s", speaker))
         time_input = raw_data.get("time%s" % i, "").strip()
         start_time = end_time = None
         if time_input:
             try:
                 time_split = time_input.split("-")
-                if len(time_split) == 1:
-                    raise ValueError("Must specify both start and end times")
+                if len(time_split) < 2:
+                    raise ValueError("Invalid time range.")
                 elif len(time_split) > 2:
-                    raise ValueError("More than one hyphen")
+                    raise ValueError("Time range contains more than one hyphen, expected hh:mm-hh:mm.")
+                if not time_split[0].strip() or not time_split[1].strip():
+                    raise ValueError("Invalid time range.")
                 # TODO: clean this up
-                start_time = process_user_input(time_split[0], "time", seminar.tz).time()
-                end_time = process_user_input(time_split[1], "time", seminar.tz).time()
-                if check_time(start_time, end_time):
-                    raise ValueError
-            except ValueError as err:
-                errmsgs.append(
-                    format_errmsg(
-                        "Unable to process input %s for time: {0}".format(err), time_input,
-                    )
-                )
-        if any(X is None for X in [start_time, end_time, date]):
-            errmsgs.append(
-                format_errmsg("You must give a date, start and end time for %s", speaker)
-            )
+                start_time = process_user_input(time_split[0], "start_time", "time", tz)
+                end_time = process_user_input(time_split[1], "end_time", "time", tz)
+            except Exception as err:
+                errmsgs.append(format_errmsg("Unable to process input %s for time: {0}".format(err), time_input,))
+        if any(X is None for X in [start_time, end_time]):
+            errmsgs.append(format_errmsg("You must specify a start and end time for the talk by speaker %s", speaker))
+        else:
+            start_time = start_time.time()
+            end_time = end_time.time()
 
-        # we need to flag date and time errors now
+        # we need to flag date and time errors before we go any further
         if errmsgs:
             return show_input_errors(errmsgs)
 
@@ -817,31 +879,29 @@ def save_seminar_schedule():
         data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
         data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
 
+        # if end_time < start_time push it to the next day
+        if end_time < start_time:
+            data["end_time"] += timedelta(days=int(1))
+        assert data["end_time"] >= data["start_time"]
+
+        if data["start_time"] + timedelta(hours=int(8)) < data["end_time"]:
+            flash_warning(
+                "Talk for speaker %s is longer than 8 hours; if this was not intended, please check (24-hour) times.",
+                data["speaker"],
+            )
+
         for col in optional_cols:
+            typ = db.talks.col_type[col]
             try:
                 val = raw_data.get("%s%s" % (col, i), "")
-                if not val:
-                    data[col] = None
-                else:
-                    data[col] = process_user_input(val, db.talks.col_type[col], tz=seminar.timezone)
-                if col.endswith("email") and data[col]:
-                    try:
-                        data[col] = validate_email(data[col])["email"]
-                    except EmailNotValidError as err:
-                        errmsgs.append(
-                            format_errmsg(
-                                "unable to process input %s for email: {0}".format(err), data[col],
-                            )
-                        )
+                data[col] = None # make sure col is present even if process_user_input fails
+                data[col] = process_user_input(val, col, typ, tz)
             except Exception as err:
-                errmsgs.append(
-                    format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col)
-                )
+                errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
 
         # Don't try to create new_version using invalid input
         if errmsgs:
             return show_input_errors(errmsgs)
-        print("saving talk for speaker %s" % data["speaker"])
         if seminar_ctr:
             new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
             if new_version != talk:
@@ -854,12 +914,7 @@ def save_seminar_schedule():
             new_version.save()
 
     if raw_data.get("detailctr"):
-        return redirect(
-            url_for(
-                ".edit_talk", seminar_id=shortname, seminar_ctr=int(raw_data.get("detailctr")),
-            ),
-            302,
-        )
+        return redirect(url_for(".edit_talk", seminar_id=shortname, seminar_ctr=int(raw_data.get("detailctr")),), 302,)
     else:
         flash("%s talks updated, %s talks created" % (updated, ctr - curmax - 1))
         if warned:

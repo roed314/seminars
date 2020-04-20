@@ -337,7 +337,7 @@ div.topic_cmd {
 #make_semconf td.forminfo, #make_inst td.forminfo {
     padding-bottom: 15px;
 }
-#make_semconf th {
+#make_semconf th, #make_inst th {
     text-align: left;
 }
 
@@ -767,7 +767,7 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
 .forminfo {
    font-size: 80%;
    font-style: italic;
-   color: {{color.grey}};
+   color: {RGC(70,70,70)};
    vertical-align: top;
 }
 
@@ -2714,4 +2714,38 @@ li.ical-detail {
 
 .noclick {
   color: #933e20;
+}
+
+.notifyjs-banner-base {
+  padding: 20px;
+  position: relative;
+  display: inline-flex;
+  background: {{color.header_background}};
+  color: #ccc;
+  box-shadow: 0px 5px 5px {{color.header_shadow}};
+}
+
+.notifyjs-banner-base .message {
+  font-size: 14px;
+  font-weight: bold;
+  max-width: 206px;
+  margin: auto;
+}
+
+.notifyjs-banner-base button {
+background: #FFFFFF;
+color: #333333;
+border-radius: 0px;
+border: 2px #FFFFFF solid;
+min-height: 1.6em;
+min-width: 1.6em;
+padding: 0.7em 1.6rem;
+line-height: 1;
+text-align: center;
+cursor: pointer;
+text-decoration: none;
+font-weight: 600;
+font-size: 1rem;
+border: 0px;
+max-width: 150px;
 }

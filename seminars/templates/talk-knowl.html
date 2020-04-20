@@ -7,22 +7,34 @@
   </p>
 
   <p>
-    {{ talk.show_live_link() | safe }}
-    {% if talk.room %}
-    Lecture held in {{ talk.room }}.
-    {% endif %}
+    {% if not talk.is_past() %} {{ talk.show_live_link() | safe }} {% endif %}
+    {% if talk.room %} Lecture held in {{ talk.room }}. {% endif %}
   </p>
 
-  <h3>Abstract</h3>
-  {{ talk.show_abstract() | safe}}
+  {% if talk.paper_link or talk.slides_link or talk.video_link %}
+  <p>({% if talk.paper_link %} {{ talk.show_paper_link() | safe }} {% endif %}
+      {% if talk.slides_link %} {{ talk.show_slides_link() | safe }} {% endif %}
+      {% if talk.video_link %} {{ talk.show_video_link() | safe }} {% endif %})
+  </p>
+  {% endif %}
 
+  {% if talk.abstract %}
+    <h3> Abstract </h3>
+    {{ talk.show_abstract() | safe }}
+  {% endif %}
 
-  {% if talk.comments %}
+  {% if talk.comments and talk.comments != talk.seminar.comments %}
   <hr>
   <p>{{talk.show_comments() | safe}}</p>
   {% endif %}
 
+  {% if talk.seminar.comments %}
+  <hr>
+  <p>{{talk.seminar.show_comments() | safe}}</p>
+  {% endif %}
+
 </div>
-  <div align="right">
-    <a href="{{url_for("show_talk", semid=talk.seminar_id, talkid=talk.seminar_ctr)}}">Talk's home page</a>
-  </div>
+<div align="right">
+  {% if talk.user_can_edit() %}<a href="{{url_for("create.edit_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr)}}">Edit talk</a><br>{% endif %}
+  <a href="{{url_for("show_talk", semid=talk.seminar_id, talkid=talk.seminar_ctr)}}">View talk</a>
+</div>

@@ -3,27 +3,31 @@
 
 <div class="announce error">
 <div>
-The page you are looking for has produced a server error.
+Whoops, we ran into a problem (our fault, not yours).
 </div>
 
 
 <span style='color:black'>
 <div>
-To help us improve the website, please 
-<a href="{{ feedbackpage }}">report this page's URL</a>
+<p>This error has been logged and will be brought to our attention.<p>
+</p>
+If there are further details you can provide, or if you would like us to let you
+know when the problem is fixed, please use our <a href="{{ feedbackpage }}">feedback page</a>
+to report the problem and include the following in your report (cut and paste):
+</p>
+<p>
 {% if request.referrer %}
-"{{ request.url }}" as well as the URL of the page you 
-are coming from "{{ request.referrer }}".
+Problem URL: "{{ request.url }}"<br>
+Referring URL: "{{ request.referrer }}".<br>
 {% else %}
-"{{ request.url }}".
+Problem URL: "{{ request.url }}".
 {% endif %}
+</p>
+<p>We apologize for the inconvenience!</p>
 </div>
 
-
-{# <div>Please keep your faith in mathematics!</div> #}
-
 {% if request.referrer %}
-<div><a href="{{ request.referrer }}">jump back</a></div>
+<div><a href="{{ request.referrer }}">Click here to go back.</a></div>
 {% endif %}
 
 </span>

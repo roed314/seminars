@@ -16,9 +16,7 @@
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <table>
     <tr>
-      <td>
-        Seminar
-      </td>
+      <td style="width:150px;">Seminar</td>
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
@@ -26,19 +24,19 @@
     <tr>
       <td>Topics</td>
       <td>
-            <span id="topic_selector"></span>
+        <span id="topic_selector" style="width:610px;"></span>
       </td>
     </tr>
     <tr>
       <td>Language</td>
       <td>
-        <span id="language_selector"></span>
+        <span id="language_selector" style="width:600px;"></span>
       </td>
     </tr>
     <tr>
       <td>Time zone</td>
       <td>
-        <select name="timezone" style="width:510px;">
+        <select name="timezone" style="width:610px;">
           {% for tz, disp in timezones %}
           <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
           {% endfor %}
@@ -47,20 +45,20 @@
     </tr>
     <tr>
       <td>Start</td>
-      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:500px;" /></td>
+      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" /></td>
     </tr>
     <tr>
       <td>End</td>
-      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:500px;" /></td>
+      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
     </tr>
     <tr>
       <td>Room</td>
-      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:500px;" /></td>
+      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
       <td>Online</td>
       <td>
-        <select name="online" style="width:510px;">
+        <select name="online" style="width:610px;">
           <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
           <option value="no"{% if not talk.online %} selected{% endif %}>no</option>
         </select>
@@ -68,13 +66,13 @@
     </tr>
     <tr>
       <td>Livestream link</td>
-      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:500px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
           <td class="forminfo" />Enter "see comments" if the link is not fixed and explain in the seminar or talk comments how to get the link.</td>
     </tr>
     <tr>
       <td>Access</td>
       <td>
-        <select name="access" style="width:510px;">
+        <select name="access" style="width:610px;">
           <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view link</option>
           <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
           <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
@@ -82,53 +80,53 @@
       </td>
     </tr>
     <tr>
-      <td>Videorecording link</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:500px;" /></td>
-    </tr>
-    <tr>
       <td colspan="2">Comments</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="80" rows="3" name="comments">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; seminar comments will appear immediately after talk comments.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
   </table>
-  <hr style="width: 700px;">
+  <hr style="width:800px;">
   <table>
     <tr>
-      <td>Speaker</td>
-      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:500px;" /></td>
+      <td style="width:150px">Speaker</td>
+      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
       <td>Speaker email</td>
-      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:500px;" /></td>
+      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
       <td>Speaker affiliation</td>
-      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:500px;" /></td>
+      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
       <td>Speaker homepage</td>
-      <td><input style="width:500px;" name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" /></td>
+      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
       <td>Title</td>
-      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:500px;" placeholder="TeX symbols are OK here" /></td>
+      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" placeholder="TeX symbols are OK here" /></td>
       <td class="forminfo" />Generally, capitalize only the first word and proper names.</td>
     </tr>
     <tr>
-      <td>Slides link</td>
-      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:500px;" /></td>
+      <td>Paper link</td>
+      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" /></td>
     </tr>
     <tr>
-      <td>Paper link</td>
-      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:500px;" /></td>
+      <td>Slides link</td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" /></td>
+    </tr>
+    <tr>
+      <td>Video link</td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" /></td>
     </tr>
   </table>
   <h3>Abstract</h3>
   <table>
     <tr>
       <td colspan="2">
-        <textarea cols="80" rows="10" name="abstract" id="inp_abstract" placeholder="TeX symbols are OK here">{{talk.abstract | blanknone }}</textarea>
+        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" placeholder="TeX symbols are OK here">{{talk.abstract | blanknone }}</textarea>
       </td>
     </tr>
   </table>
@@ -158,7 +156,7 @@
 
 <div id="view-wrapper" class="knowl" style="width:670px;">
   <div id="view-preview">
-    <h1 id="view-title"></h1>
+    <h2 id="view-title"></h2>
     <div id="view-abstract"></div>
   </div>
 </div>

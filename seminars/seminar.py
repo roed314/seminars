@@ -12,6 +12,7 @@ from seminars.utils import (
     adapt_weektime,
     adapt_datetime,
     toggle,
+    make_links,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -26,10 +27,10 @@ combine = datetime.combine
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False
+        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False, deleted=False
     ):
         if data is None and not editing:
-            data = seminars_lookup(shortname)
+            data = seminars_lookup(shortname, include_deleted=deleted)
             if data is None:
                 raise ValueError("Seminar %s does not exist" % shortname)
             data = dict(data.__dict__)
@@ -42,6 +43,7 @@ class WebSeminar(object):
             if data.get("timezone") is None:
                 data["timesone"] = str(current_user.tz)
         self.new = data is None
+        self.deleted = False
         if self.new:
             self.shortname = shortname
             self.display = current_user.is_creator
@@ -101,6 +103,7 @@ class WebSeminar(object):
         # Note that equality ignores organizers
         return isinstance(other, WebSeminar) and all(
             getattr(self, key, None) == getattr(other, key, None) for key in db.seminars.search_cols
+            if key not in ["edited_at", "edited_by"]
         )
 
     def __ne__(self, other):
@@ -127,10 +130,10 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
-    def show_day(self, truncate=True):
+    def show_day(self, truncate=True, adapt=True):
         if self.weekday is None:
             return ""
-        elif self.start_time is None:
+        elif self.start_time is None or not adapt:
             d = weekdays[self.weekday]
         else:
             d = weekdays[adapt_weektime(self.start_time, self.tz, weekday=self.weekday)[0]]
@@ -155,7 +158,7 @@ class WebSeminar(object):
         return self._show_time(self.end_time, adapt)
 
     def show_weektime_and_duration(self, adapt=True):
-        s = self.show_day(truncate=False)
+        s = self.show_day(truncate=False,adapt=adapt)
         if s:
             s += ", "
         s += self.show_start_time(adapt=adapt)
@@ -231,7 +234,7 @@ class WebSeminar(object):
 
     def show_comments(self):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
         else:
             return ""
 
@@ -333,10 +336,13 @@ class WebSeminar(object):
         return talks_search(query, projection=projection)
 
     def delete(self):
+        # We don't actually delete from the seminars and talks tables but instead just
+        # set the deleted flag.  We actually delete from seminar_organizers and subscriptions
+        # since these are less important.
         if self.user_can_delete():
             with DelayCommit(db):
-                db.seminars.delete({"shortname": self.shortname})
-                db.talks.delete({"seminar_id": self.shortname})
+                db.seminars.update({"shortname": self.shortname}, {"deleted": True})
+                db.talks.update({"seminar_id": self.shortname}, {"deleted": True})
                 db.seminar_organizers.delete({"seminar_id": self.shortname})
                 for elt in db.users.search(
                     {"seminar_subscriptions": {"$contains": self.shortname}},
@@ -344,7 +350,8 @@ class WebSeminar(object):
                 ):
                     elt["seminar_subscriptions"].remove(self.shortname)
                     db.users.update(
-                        {"id": elt["id"]}, {"seminar_subscriptions": elt["seminar_subscriptions"]}
+                        {"id": elt["id"]},
+                        {"seminar_subscriptions": elt["seminar_subscriptions"]}
                     )
                 for i, talk_sub in db._execute(
                     SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
@@ -412,15 +419,15 @@ def _iterator(organizer_dict):
     return inner_iterator
 
 
-def seminars_count(query={}):
+def seminars_count(query={}, include_deleted=False):
     """
     Replacement for db.seminars.count to account for versioning.
     """
-    return count_distinct(db.seminars, _counter, query)
+    return count_distinct(db.seminars, _counter, query, include_deleted)
 
 
-def seminars_max(col, constraint={}):
-    return max_distinct(db.seminars, _maxer, col, constraint)
+def seminars_max(col, constraint={}, include_deleted=False):
+    return max_distinct(db.seminars, _maxer, col, constraint, include_deleted)
 
 
 def seminars_search(*args, **kwds):
@@ -443,9 +450,9 @@ def seminars_lucky(*args, **kwds):
     return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False):
     return seminars_lucky(
-        {label_col: shortname}, projection=projection, organizer_dict=organizer_dict
+        {label_col: shortname}, projection=projection, organizer_dict=organizer_dict, include_deleted=include_deleted
     )
 
 
@@ -483,16 +490,21 @@ def can_edit_seminar(shortname, new):
     - ``seminar`` -- a WebSeminar object, as returned by ``seminars_lookup(shortname)``,
                      or ``None`` (if error or seminar does not exist)
     """
-    if not allowed_shortname(shortname):
+    if not allowed_shortname(shortname) or len(shortname) < 3 or len(shortname) > 32:
         flash_error(
-            "The identifier must be nonempty and can include only letters, numbers, hyphens and underscores."
+            "The identifier must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores."
         )
         return redirect(url_for(".index"), 302), None
-    seminar = seminars_lookup(shortname)
+    seminar = seminars_lookup(shortname, include_deleted=True)
     # Check if seminar exists
     if new != (seminar is None):
-        flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
+        if seminar is not None and seminar.deleted:
+            flash_error("Identifier %s is reserved by a seminar that has been deleted" % shortname)
+        else:
+            flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
         return redirect(url_for(".index"), 302), None
+    if seminar is not None and seminar.deleted:
+        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302)
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(

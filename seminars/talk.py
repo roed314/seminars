@@ -11,6 +11,7 @@ from seminars.utils import (
     max_distinct,
     adapt_datetime,
     toggle,
+    make_links,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -30,9 +31,10 @@ class WebTalk(object):
         editing=False,
         showing=False,
         saving=False,
+        deleted=False,
     ):
         if data is None and not editing:
-            data = talks_lookup(semid, semctr)
+            data = talks_lookup(semid, semctr, include_deleted=deleted)
             if data is None:
                 raise ValueError("Talk %s/%s does not exist" % (semid, semctr))
             data = dict(data.__dict__)
@@ -42,21 +44,23 @@ class WebTalk(object):
             if data.get("topics") is None:
                 data["topics"] = []
         if seminar is None:
-            seminar = WebSeminar(semid)
+            seminar = WebSeminar(semid, deleted=deleted)
         self.seminar = seminar
         self.new = data is None
+        self.deleted=False
         if self.new:
             self.seminar_id = semid
             self.seminar_ctr = None
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = seminar.display
             self.online = getattr(seminar, "online", bool(seminar.live_link))
+            self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
                 elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
-                    # carry over from seminar
-                    setattr(self, key, getattr(seminar, key))
+                    # carry over from seminar, but not comments
+                    setattr(self, key, getattr(seminar, key) if key != "comments" else "")
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
@@ -86,6 +90,7 @@ class WebTalk(object):
     def __eq__(self, other):
         return isinstance(other, WebTalk) and all(
             getattr(self, key, None) == getattr(other, key, None) for key in db.talks.search_cols
+            if key not in ["edited_at", "edited_by"]
         )
 
     def __ne__(self, other):
@@ -120,6 +125,10 @@ class WebTalk(object):
         """
         return self._editable_time(self.end_time)
 
+    @property
+    def tz(self):
+        return pytz.timezone(self.timezone)
+
     def show_start_time(self, tz=None):
         return adapt_datetime(self.start_time, tz).strftime("%H:%M")
 
@@ -150,7 +159,7 @@ class WebTalk(object):
         else:
             return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %-d")
 
-    def show_time_and_duration(self):
+    def show_time_and_duration(self, adapt=True):
         start = self.start_time
         end = self.end_time
         now = datetime.datetime.now(pytz.utc)
@@ -161,11 +170,12 @@ class WebTalk(object):
         week = delta(weeks=1)
         month = delta(days=30.4)
         year = delta(days=365)
+        newtz = None if adapt else self.tz
 
         def ans(rmk):
             return "%s-%s (%s)" % (
-                adapt_datetime(start).strftime("%a %b %-d, %H:%M"),
-                adapt_datetime(end).strftime("%H:%M"),
+                adapt_datetime(start, newtz=newtz).strftime("%a %b %-d, %H:%M"),
+                adapt_datetime(end, newtz=newtz).strftime("%H:%M"),
                 rmk,
             )
 
@@ -274,6 +284,18 @@ class WebTalk(object):
         else:  # should never happen
             return ""
 
+    def show_paper_link(self):
+        return '<a href="%s">paper</a>'%(self.paper_link) if self.paper_link else ""
+
+    def show_slides_link(self):
+        return '<a href="%s">slides</a>'%(self.slides_link) if self.slides_link else ""
+
+    def show_video_link(self):
+        return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
+
+    def is_past(self):
+        return self.end_time < datetime.datetime.now(pytz.utc)
+
     def is_subscribed(self):
         if current_user.is_anonymous:
             return False
@@ -309,7 +331,8 @@ class WebTalk(object):
     def delete(self):
         if self.user_can_delete():
             with DelayCommit(db):
-                db.talks.delete({"id": self.id})
+                db.talks.update({"seminar_id": self.seminar_id, "seminar_ctr": self.seminar_ctr},
+                                {"deleted": True})
                 for i, talk_sub in db._execute(
                     SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
                         *map(
@@ -321,7 +344,7 @@ class WebTalk(object):
                 ):
                     if self.seminar_ctr in talk_sub[self.seminar.shortname]:
                         talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
-                    db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+                        db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
             return True
         else:
             return False
@@ -350,16 +373,13 @@ class WebTalk(object):
 
     def show_comments(self):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.comments.split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
         else:
             return ""
 
-    def split_abstract(self):
-        return self.abstract.split("\n\n")
-
     def show_abstract(self):
         if self.abstract:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in self.split_abstract())
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
         else:
             return "<p>TBA</p>"
 
@@ -535,18 +555,18 @@ def _iterator(seminar_dict):
     return inner_iterator
 
 
-def talks_count(query={}):
+def talks_count(query={}, include_deleted=False):
     """
     Replacement for db.talks.count to account for versioning and so that we don't cache results.
     """
-    return count_distinct(db.talks, _counter, query)
+    return count_distinct(db.talks, _counter, query, include_deleted)
 
 
-def talks_max(col, constraint={}):
+def talks_max(col, constraint={}, include_deleted=False):
     """
     Replacement for db.talks.max to account for versioning and so that we don't cache results.
     """
-    return max_distinct(db.talks, _maxer, col, constraint)
+    return max_distinct(db.talks, _maxer, col, constraint, include_deleted)
 
 
 def talks_search(*args, **kwds):
@@ -567,9 +587,10 @@ def talks_lucky(*args, **kwds):
     return lucky_distinct(db.talks, _selecter, _construct(seminar_dict), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
+        include_deleted=include_deleted,
     )
