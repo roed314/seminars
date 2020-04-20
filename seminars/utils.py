@@ -314,6 +314,8 @@ def adapt_datetime(t, newtz=None):
     Converts a time-zone-aware datetime object into a specified time zone
     (current user's time zone by default).
     """
+    if t is None:
+        return None
     if newtz is None:
         newtz = current_user.tz
     return t.astimezone(newtz)

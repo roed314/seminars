@@ -534,7 +534,9 @@ _maxer = SQL(
 
 def _construct(seminar_dict):
     def inner_construct(rec):
-        if isinstance(rec, str):
+        # The following would break if we had jsonb columns holding dictionaries in the talks table,
+        # but that's not currently true.
+        if not isinstance(rec, dict):
             return rec
         else:
             return WebTalk(

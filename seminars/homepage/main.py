@@ -3,8 +3,9 @@ from seminars import db
 from seminars.talk import talks_search, talks_lucky
 from seminars.utils import topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
+from seminars.knowls import static_knowl
 from flask import render_template, request, url_for
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talks
 from flask_login import current_user
 import datetime
 import pytz
@@ -52,14 +53,12 @@ def parse_institution_talk(info, query, prefix="talk"):
         query["seminar_id"] = {"$in": sem_shortnames}
 
 
-def parse_online(info, query, prefix):
-    if info.get(prefix + "_online") == "yes":
+def parse_venue(info, query, prefix):
+    value = info.get(prefix + "_venue")
+    if value == "online":
         query["online"] = True
-
-
-def parse_offline(info, query, prefix):
-    if info.get(prefix + "_offline") == "yes":
-        query["room"] = {"$exists": True}
+    elif value == "in-person":
+        query["room"] = {"$and": [{"$exists": True}, {"$ne": ""}]}
 
 
 def parse_substring(info, query, field, qfields, start="%", end="%"):
@@ -124,8 +123,7 @@ def parse_language(info, query, prefix):
 def talks_parser(info, query):
     parse_topic(info, query, prefix="talk")
     parse_institution_talk(info, query)
-    parse_online(info, query, prefix="talk")
-    parse_offline(info, query, prefix="talk")
+    #parse_venue(info, query, prefix="talk")
     parse_substring(info, query, "talk_keywords", ["title", "abstract"])
     parse_access(info, query, prefix="talk")
 
@@ -141,8 +139,7 @@ def talks_parser(info, query):
 def seminars_parser(info, query):
     parse_topic(info, query, prefix="seminar")
     parse_institution_sem(info, query)
-    parse_online(info, query, prefix="seminar")
-    parse_offline(info, query, prefix="seminar")
+    #parse_venue(info, query, prefix="seminar")
     parse_substring(info, query, "seminar_keywords", ["description", "comments", "name"])
     parse_access(info, query, prefix="seminar")
     parse_language(info, query, prefix="seminar")
@@ -179,9 +176,14 @@ class TalkSearchArray(SearchArray):
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
-        ## online only?
-        online = Toggle(name="talk_online", label="Online")
-        offline = Toggle(name="talk_offline", label="Offline")
+        venue = SelectBox(
+            name="talk_venue",
+            label=static_knowl("venue"),
+            options=[("", ""),
+                     ("online", "online"),
+                     ("in-person", "in-person")
+                     ]
+        )
 
         ## keywords for seminar or talk
         keywords = TextBox(
@@ -249,10 +251,10 @@ class TalkSearchArray(SearchArray):
         self.array = [
             [topic, keywords],
             [institution, title],
-            [online, speaker],
-            [offline, affiliation],
-            [access, language],
+            [language, speaker],
+            [access, affiliation],
             [video, date],
+            # [venue],
             # [count],
         ]
 
@@ -285,9 +287,14 @@ class SemSearchArray(SearchArray):
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
-        ## online only?
-        online = Toggle(name="seminar_online", label="Online")
-        # offline = Toggle(name="seminar_offline", label="Offline")
+        venue = SelectBox(
+            name="seminar_venue",
+            label=static_knowl("venue"),
+            options=[("", ""),
+                     ("online", "online"),
+                     ("in-person", "in-person")
+                     ]
+        )
 
         ## keywords for seminar or talk
         keywords = TextBox(name="seminar_keywords", label="Keywords", width=textwidth,)
@@ -326,7 +333,7 @@ class SemSearchArray(SearchArray):
             [topic, keywords],
             [institution, name],
             [language, access],
-            [online],
+            # [venue],
             # [count],
         ]
 
@@ -402,9 +409,19 @@ def search():
         talk_start = info["talk_start"] = 0
     seminar_query = {}
     seminars_parser(info, seminar_query)
-    info["seminar_results"] = seminars_search(
-        seminar_query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
-    )  # limit=seminar_count, offset=seminar_start,
+    # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
+    # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
+    # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
+    # The second downside is that we need to do two queries.
+    results = list(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    ntdict = next_talks()
+    for R in results:
+        R.next_talk_time = ntdict[R.shortname]
+    results.sort(key=lambda R: (R.next_talk_time, R.name))
+    for R in results:
+        if R.next_talk_time.replace(tzinfo=None) == datetime.datetime.max:
+            R.next_talk_time = None
+    info["seminar_results"] = results
     talk_query = {}
     talks_parser(info, talk_query)
     info["talk_results"] = talks_search(
