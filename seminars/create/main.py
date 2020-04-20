@@ -346,7 +346,6 @@ def save_seminar():
             "shortname": shortname,
             "display": current_user.is_creator,
             "owner": current_user.email,
-            "archived": False,
         }
     else:
         data = {
@@ -373,6 +372,8 @@ def save_seminar():
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Seminar name cannot be blank")
+    if seminar.is_conference and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
+        errmsgs.append("End date cannot precede start date")
     for col in ["frequency", "per_day"]:
         if data[col] is not None and data[col] < 1:
             errmsgs.append(
@@ -515,6 +516,8 @@ def save_institution():
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Institution name cannot be blank.")
+    if not data["homepage"]:
+        errmsgs.append("Institution homepage cannot be blank.")
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
@@ -797,7 +800,7 @@ def edit_seminar_schedule():
 
 
 required_cols = ["date", "time", "speaker"]
-optional_cols = ["speaker_affiliation", "speaker_email", "title"]
+optional_cols = ["speaker_affiliation", "speaker_email", "title", "hidden"]
 
 
 @create.route("save/schedule/", methods=["POST"])

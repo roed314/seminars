@@ -96,6 +96,24 @@ class WebTalk(object):
     def __ne__(self, other):
         return not (self == other)
 
+    def visible(self):
+        """
+        Whether this talk should be shown to the current user
+
+        The visibility of a talk is at most the visibility of the seminar,
+        but it can also be hidden even if the seminar is public.
+        """
+        return (self.seminar.owner == current_user.email or
+                current_user.is_admin or
+                self.display and ((self.seminar.visibility is None or self.seminar.visibility > 0) and not self.hidden or
+                                  current_user.email in self.seminar.editors()))
+
+    def searchable(self):
+        """
+        Whether this talk should show up on browse and search results.
+        """
+        return self.display and not self.hidden and self.seminar.searchable()
+
     def save(self):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
@@ -215,8 +233,20 @@ class WebTalk(object):
             else:
                 return ans("%s years ago" % (round(ago / year)))
 
-    def show_title(self):
-        return self.title if self.title else "TBA"
+    def show_title(self, visibility_info=False):
+        title = self.title if self.title else "TBA"
+        if visibility_info:
+            if not self.display:
+                title += " (hidden)"
+            elif self.hidden:
+                title += " (private)"
+            elif self.seminar.visibility == 0:
+                title += " (seminar private)"
+            elif self.seminar.visibility == 1:
+                title += " (seminar unlisted)"
+            elif self.online:
+                title += " (online)"
+        return title
 
     def show_link_title(self):
         return "<a href={url}>{title}</a>".format(
@@ -534,7 +564,9 @@ _maxer = SQL(
 
 def _construct(seminar_dict):
     def inner_construct(rec):
-        if isinstance(rec, str):
+        # The following would break if we had jsonb columns holding dictionaries in the talks table,
+        # but that's not currently true.
+        if not isinstance(rec, dict):
             return rec
         else:
             return WebTalk(

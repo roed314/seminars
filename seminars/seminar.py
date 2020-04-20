@@ -49,7 +49,7 @@ class WebSeminar(object):
             self.display = current_user.is_creator
             self.online = True  # default
             self.access = "open"  # default
-            self.archived = False  # don't start out archived
+            self.visibility = 2 # public by default, once display is set to True
             self.is_conference = False  # seminar by default
             self.frequency = 7
             self.per_day = 1
@@ -108,6 +108,22 @@ class WebSeminar(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def visible(self):
+        """
+        Whether this seminar should be shown to the current user
+        """
+        return (self.owner == current_user.email or
+                current_user.is_admin or
+                # TODO: remove temporary measure of allowing visibility None
+                self.display and (self.visibility is None or self.visibility > 0 or current_user.email in self.editors()))
+
+    def searchable(self):
+        """
+        Whether this seminar should show up in search results (and whether its talks should show up on the browse page)
+        """
+        # TODO: remove temporary measure of allowing visibility None
+        return self.display and (self.visibility is None or self.visibility > 1)
 
     def save(self):
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
@@ -172,21 +188,34 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_name(self, external=False, show_attributes=False):
+    def show_name(self, homepage_link=False, external=False, show_attributes=False):
         # Link to seminar
-        kwargs = {"shortname": self.shortname}
-        if external:
-            kwargs["_external"] = True
-            kwargs["_scheme"] = "https"
-        link = '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
+        if homepage_link:
+            if self.homepage:
+                link = '<a href="%s">%s</a>' % (self.homepage, self.name)
+            else:
+                link = self.name
+        else:
+            kwargs = {"shortname": self.shortname}
+            if external:
+                kwargs["_external"] = True
+                kwargs["_scheme"] = "https"
+            link = '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
         if show_attributes:
-            if not self.display:
-                link += " (hidden)"
-            elif self.archived:
-                link += " (inactive)"
-            elif self.online:
-                link += " (online)"
+            link += self.show_attributes()
         return link
+
+    def show_attributes(self):
+        if not self.display:
+            return " (hidden)"
+        elif self.visibility == 0:
+            return " (private)"
+        elif self.visibility == 1:
+            return " (unlisted)"
+        elif self.online:
+            return " (online)"
+        else:
+            return ""
 
     def show_description(self):
         if self.description:
@@ -248,8 +277,13 @@ class WebSeminar(object):
     ):
         cols = []
         if include_datetime:
-            cols.append(('class="day"', self.show_day()))
-            cols.append(('class="time"', self.show_start_time()))
+            t = adapt_datetime(self.next_talk_time)
+            if t is None:
+                cols.append(('class="date"', ""))
+                cols.append(('class="time"', ""))
+            else:
+                cols.append(('class="date"', t.strftime("%a %b %-d")))
+                cols.append(('class="time"', t.strftime("%H:%M")))
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
@@ -330,10 +364,22 @@ class WebSeminar(object):
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
 
-        query = {"seminar_id": self.shortname, "display": True}
+        query = {"seminar_id": self.shortname, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
         if self.user_can_edit():
             query.pop("display")
         return talks_search(query, projection=projection)
+
+    @property
+    def next_talk_time(self):
+        try:
+            return self._next_talk_time
+        except AttributeError:
+            self._next_talk_time = next_talk(self.shortname)
+            return self._next_talk_time
+
+    @next_talk_time.setter
+    def next_talk_time(self, t):
+        self._next_talk_time = t
 
     def delete(self):
         # We don't actually delete from the seminars and talks tables but instead just
@@ -374,7 +420,7 @@ def seminars_header(
 ):
     cols = []
     if include_time:
-        cols.append(('colspan="2" class="yourtime"', "Your time"))
+        cols.append(('colspan="2" class="yourtime"', "Next talk"))
     cols.append(("", "Name"))
     if include_institutions:
         cols.append(("", "Institutions"))
@@ -401,7 +447,7 @@ _maxer = SQL(
 
 def _construct(organizer_dict):
     def inner_construct(rec):
-        if isinstance(rec, str):
+        if not isinstance(rec, dict):
             return rec
         else:
             return WebSeminar(
@@ -476,6 +522,35 @@ def all_seminars():
         for seminar in seminars_search({}, organizer_dict=all_organizers())
     }
 
+def next_talks(query=None):
+    """
+    A dictionary with keys the seminar_ids and values datetimes (either the next talk in that seminar, or datetime.max if no talk scheduled so that they sort at the end.
+    """
+    if query is None:
+        query = {"start_time": {"$gte": datetime.now(pytz.UTC)}}
+    ans = defaultdict(lambda: pytz.UTC.localize(datetime.max))
+    from seminars.talk import _counter as talks_counter
+    _selecter = SQL("""
+SELECT DISTINCT ON (seminar_id) {0} FROM
+(SELECT DISTINCT ON (seminar_id, seminar_ctr) {1} FROM {2} ORDER BY seminar_id, seminar_ctr, id DESC) tmp{3}
+""")
+    for rec in search_distinct(
+            db.talks,
+            _selecter,
+            talks_counter,
+            db.talks._search_iterator,
+            query,
+            projection=["seminar_id", "start_time"],
+            sort=["seminar_id", "start_time"]):
+        ans[rec["seminar_id"]] = rec["start_time"]
+    return ans
+
+def next_talk(shortname):
+    """
+    Gets the next talk time in a single seminar.  Note that if you need this information for many seminars, the `next_talks` function will be faster.
+    """
+    from seminars.talk import talks_lucky
+    return talks_lucky({"seminar_id": shortname, "start_time": {"$gte": datetime.now(pytz.UTC)}}, projection="start_time", sort=["start_time"])
 
 def can_edit_seminar(shortname, new):
     """
