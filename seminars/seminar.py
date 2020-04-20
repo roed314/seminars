@@ -203,15 +203,20 @@ class WebSeminar(object):
                 kwargs["_scheme"] = "https"
             link = '<a href="%s">%s</a>' % (url_for("show_seminar", **kwargs), self.name)
         if show_attributes:
-            if not self.display:
-                link += " (hidden)"
-            elif self.visibility == 0:
-                link += " (private)"
-            elif self.visibility == 1:
-                link += " (unlisted)"
-            elif self.online:
-                link += " (online)"
+            link += self.show_attributes()
         return link
+
+    def show_attributes(self):
+        if not self.display:
+            return " (hidden)"
+        elif self.visibility == 0:
+            return " (private)"
+        elif self.visibility == 1:
+            return " (unlisted)"
+        elif self.online:
+            return " (online)"
+        else:
+            return ""
 
     def show_description(self):
         if self.description:
@@ -360,7 +365,7 @@ class WebSeminar(object):
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
 
-        query = {"seminar_id": self.shortname, "display": True, "hidden": False}
+        query = {"seminar_id": self.shortname, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
         if self.user_can_edit():
             query.pop("display")
         return talks_search(query, projection=projection)
