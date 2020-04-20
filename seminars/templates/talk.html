@@ -6,7 +6,7 @@
 <p>{{ talk.send_speaker_link() | safe }}</p>
 {% endif %}
 
-<h1>{{talk.show_title()}}{% if not talk.display %} (hidden){% elif talk.online %} (online){% endif %}</h1>
+<h1>{{talk.show_title(visibility_info=True)}}</h1>
 
 {% if not talk.display %}
 <p>

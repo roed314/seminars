@@ -80,7 +80,6 @@ def body_class():
 @login_page.route("/login", methods=["POST"])
 def login(**kwargs):
     # login and validate the user …
-    # remember = True sets a cookie to remember the user
     email = request.form["email"]
     password = request.form["password"]
     if not email or not password:
@@ -97,7 +96,7 @@ def login(**kwargs):
         else:
             flask.flash(Markup("Hello, your login was successful!"))
         logger.info("login: '%s' - '%s'" % (user.get_id(), user.name))
-        return redirect(url_for(".info"))
+        return redirect(request.form.get("next") or url_for(".info"))
     flash_error("Oops! Wrong username or password.")
     return redirect(url_for(".info"))
 
@@ -159,7 +158,7 @@ def info():
         title = section = "Login"
     return render_template(
         "user-info.html",
-        info=info,
+        next=request.args.get("next", ''),
         title=title,
         section=section,
         timezones=timezones,
@@ -597,8 +596,14 @@ def ics_file(token):
     cal.add("X-WR-CALNAME", "mathseminars.org")
 
     for talk in user.talks:
+        # Organizers may have hidden talk
+        if talk.hidden or talk.seminar.visibility == 0:
+            continue
         cal.add_component(talk.event(user))
     for seminar in user.seminars:
+        # Organizers may have hidden seminar
+        if seminar.visibility == 0:
+            continue
         for talk in seminar.talks():
             cal.add_component(talk.event(user))
     bIO = BytesIO()
