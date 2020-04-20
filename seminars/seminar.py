@@ -609,7 +609,7 @@ def can_edit_seminar(shortname, new):
             "You do not have permission to edit seminar %s.  Please contact the seminar organizers."
             % shortname
         )
-        return redirect(url_for("show_seminar", shortname=shortname), 302), Non
+        return redirect(url_for("show_seminar", shortname=shortname), 302), None
     if seminar is None:
         seminar = WebSeminar(shortname, data=None, editing=True)
     return None, seminar
