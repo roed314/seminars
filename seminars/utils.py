@@ -29,7 +29,7 @@ def validate_url(x):
 
 def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
-    tokens = re.split(r'(\s+)',x))
+    tokens = re.split(r'(\s+)',x)
     for i in range(len(tokens)):
         if validate_url(tokens[i]):
             tokens[i] = '<a href="%s">%s</a>'%(tokens[i], tokens[i][tokens[i].index("//")+2:])
