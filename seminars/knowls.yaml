@@ -161,7 +161,7 @@ comments:
     to find the room or access the live link.  You can use include links to external pages here.  Any token beginning with
     "http://" or "https://" will automatically appear as a link and you can also use HTML hyperlinks.
     <br><br>
-    When a talk is displayed the comments for **both** the talk and the seminar are displayed; there is no need to repeat information.
+    When a talk is displayed the comments for both the talk and the seminar are displayed; there is no need to repeat information.
     Use the seminar comments for information applicable to every talk and use the talk comments for information specific to that talk.
 organizer_name:
   title: Name
