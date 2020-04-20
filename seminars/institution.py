@@ -2,7 +2,7 @@ from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
 from seminars.utils import allowed_shortname
-from seminar.users.pwdmanager import userdb
+from seminars.users.pwdmanager import userdb
 from lmfdb.utils import flash_error
 from collections.abc import Iterable
 from lmfdb.logger import critical
