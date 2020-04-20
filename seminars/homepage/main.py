@@ -184,12 +184,12 @@ class TalkSearchArray(SearchArray):
                      ("in-person", "in-person")
                      ]
         )
+        assert venue
 
         ## keywords for seminar or talk
         keywords = TextBox(
             name="talk_keywords",
             label="Keywords",
-            knowl="keywords",
             colspan=(1, 2, 1),
             width=textwidth,
         )
@@ -295,6 +295,7 @@ class SemSearchArray(SearchArray):
                      ("in-person", "in-person")
                      ]
         )
+        assert venue
 
         ## keywords for seminar or talk
         keywords = TextBox(name="seminar_keywords", label="Keywords", width=textwidth,)
