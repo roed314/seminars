@@ -83,13 +83,13 @@
         </tr>
         <tr>
           <td>{{ KNOWL("frequency", "Frequency (in days)") }}</td>
-          <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:600px;"/></td>
+          <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:600px;" placeholder="7"/></td>
         </tr>
         {% endif %}
 
         <tr>
           <td>{{ KNOWL("per_day") }}</td>
-          <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" /></td>
+          <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
         </tr>
         <tr>
           <td>{{ ASTKNOWL("timezone") }}</td>
@@ -114,7 +114,7 @@
         {% endif %}
         <tr>
           <td style="padding-top: 20px">{{ KNOWL("room") }}</td>
-          <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" /></td>
+          <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building"/></td>
         </tr>
         <tr>
           <td>{{ ASTKNOWL("online") }}</td>
@@ -140,17 +140,6 @@
             </select>
           </td>
         </tr>
-        {% if not seminar.new %}
-          <tr>
-            <td>{{ KNOWL("archived") }}</td>
-            <td>
-              <select name="archived" style="width:610px;">
-                <option value="yes"{% if seminar.archived %} selected{% endif %}>yes</option>
-                <option value="no"{% if not seminar.archived %} selected{% endif %}>no</option>
-              </select>
-            </td>
-          </tr>
-        {% endif %}
         <tr>
           <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>
         </tr>

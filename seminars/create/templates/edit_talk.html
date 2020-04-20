@@ -53,7 +53,7 @@
     </tr>
     <tr>
       <td>{{ KNOWL("room") }}</td>
-      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" /></td>
+      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building" /></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("online") }}</td>
@@ -90,19 +90,19 @@
   <table>
     <tr>
       <td style="width:150px">{{ KNOWL("speaker") }}</td>
-      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" /></td>
+      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" placeholder="Firstname Lastname"/></td>
     </tr>
     <tr>
       <td>{{ KNOWL("speaker_email") }}</td>
-      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" /></td>
+      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" placeholder="someone@upan.edu/></td>
     </tr>
     <tr>
       <td>{{ KNOWL("speaker_affiliation") }}</td>
-      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" /></td>
+      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" placeholder="University of Pangaea" /></td>
     </tr>
     <tr>
       <td>{{ KNOWL("speaker_homepage") }}</td>
-      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" /></td>
+      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone"/></td>
     </tr>
     <tr>
       <td>{{ KNOWL("title") }}</td>
@@ -111,15 +111,15 @@
     </tr>
     <tr>
       <td>{{ KNOWL("paper_link") }}</td>
-      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" /></td>
+      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" placeholder="https://arxiv.org/abs/9999.99999"/></td>
     </tr>
     <tr>
       <td>{{ KNOWL("slide_link") }}</td>
-      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" /></td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
     </tr>
     <tr>
       <td>{{ KNOWL("video_link") }}</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" /></td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
     </tr>
   </table>
   <h3>Abstract</h3>
