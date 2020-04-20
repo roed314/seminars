@@ -56,16 +56,16 @@ institutions:
 organizer_name:
   title: Name
   contents: |
-    Enter the full name of the organizer.  This must be nonempty for each organizer.  Names for which the Display box is checked will appear on the seminar's page.
+    Enter the full name of the organizer.  This must be nonempty for each organizer.  Names for which the Display box is checked will appear on the seminar's page, in the order given here.
 homepage:
   title: Homepage
   contents: |
-    Enter the URL of each organizer's homepage.  Each organizer name displayed on the seminar's page will be a link to this URL.
+    Enter the URL of the organizer's homepage.  Each organizer name displayed on the seminar's page will be a link to this URL.
     Specifying the homepage ensures that the organizer's email address remains hidden.  (Many organizers obfuscate their email addresses on their homepages, and we want to preserve this obfuscation.)
 email:
   title: Email
   contents: |
-    Enter the organizer's email address.  A user who logs in using this email address will be able to edit the seminar.  The email address will be displayed only if the Display box is checked and the homepage is not specified.
+    Enter the organizer's email address, which will be displayed only if the Display box is checked and the homepage is not specified.  A user who logs in to mathseminars.org using this email address will be able to edit the seminar.
 organizer:
   title: Organizer
   contents: |
