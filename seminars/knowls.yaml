@@ -1,37 +1,35 @@
 institution_shortname:
   title: Identifier
   contents: |
-    Each institution must be given a unique indentifier consisting of 2 to 32 letters, numbers, hyphens, or underscores.
-    You may choose any identifier that is not already in use; when you press create you will be alerted if the identifier you entered is already in use.
-    This identifier is permanent and cannot be changed.
+    Each institution must be given a unique identifier consisting of 2 to 32 letters, numbers, hyphens, or underscores.
+    When you press Create, you will be alerted if the identifier is already in use.
+    After creation, the identifier cannot be changed.
 institution_name:
   title: Name
   contents: |
-    The name of your institution that will be displayed when associating institutions to seminars and conferences.  This can be changed.
+    Enter the full name of the institution.  If the institution is associated to a seminar or conference, this name will be displayed on that seminar's page.  The name can be changed.
 institution_type:
   title: Type
   contents: |
-    The type of your institution, which may be a university, a research institute, a corporation, or something else.
+    Enter the type of your institution: university, research institute, corporation, or something else.
 institution_homepage:
   title: Homepage
   contents: |
-    The homepage of your institution.  This should be a URL beginning with "http://" or "https://" (the latter is preferred, if availalble).
+    Enter the homepage of your institution.  This should be a URL beginning with "http://" or "https://" (the latter is preferred).
 institution_city:
   title: City
   contents: |
-    The name of the city in which your institution is located, followed by the state/province/region (if relevant), and the country.
+    Enter city in which your institution is located, followed by the state/province/region (if relevant), and the country.
 institution_timezone:
   title: Time zone
   contents: |
-    The time zone in which your institution resides.
-    The drop down list provides a list of time zones you may choose from, along with their current UTC offset,
-    which may change depending on the date depending on adjustments made to account for local daylight savings time adjustments.
-    Be sure to choose a time zone that actually matches the time zone of your institution, not just one that happens to have the same UTC offset at the moment.
+    From the drop-down list, select the time zone in which your institution resides.
+    <i>Warning:</i> Different time zones with the same current <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a> offset may switch to daylight saving time on different dates, so choose the precise time zone, not just one with the correct UTC offset.
 institution_admin:
   title: Maintainer
   contents: |
-    The email address of the mathseminars.org user account responsible for creating or maaintaining this institution's listing.
-    This is set to the email address of the user who created the institution by default but can be set to the email address of any endorsed user.
+    Enter the email address of the mathseminars.org user account responsible for creating or maintaining this institution's listing.
+    This is set to the email address of the user who created the institution by default, but can be set to the email address of any endorsed user.
 is_conference:
   title: Type
   contents: |
@@ -58,26 +56,25 @@ institutions:
 organizer_name:
   title: Name
   contents: |
-    The full name of the organizer (or curator) that will be displayed on the seminar's home page.  This cannot be left blank.
+    Enter the full name of the organizer.  This must be nonempty for each organizer.  Names for which the Display box is checked will appear on the seminar's page.
 homepage:
   title: Homepage
   contents: |
-    The URL of the homepage of the organizer (or curator) that their name will be linked to on the "view seminar" page.
-    Specifying the homepage ensures that their email address will be hidden.  Many organizers obfuscate their email addresses on their homepages and we want to preserve this obfuscation.
+    Enter the URL of each organizer's homepage.  Each organizer name displayed on the seminar's page will be a link to this URL.
+    Specifying the homepage ensures that the organizer's email address remains hidden.  (Many organizers obfuscate their email addresses on their homepages, and we want to preserve this obfuscation.)
 email:
   title: Email
   contents: |
-    The email address of the organizer (or curator).  This will only be displayed if the homepage is not specified and the display box is checked.
-    In all other cases it is used only to identify the organizer's user account and will give them permission to edit the seminar (assuming the register using this email address).
+    Enter the organizer's email address.  A user who logs in using this email address will be able to edit the seminar.  The email address will be displayed only if the Display box is checked and the homepage is not specified.
 organizer:
   title: Organizer
   contents: |
     Check this box for organizers of the seminar responsible for its scientific content, inviting speakers, etc.
-    Leave this box unchecked for users who should be able to edit the seminar but are not responsible for its content; these users will be listed as "Curators" on the seminar's home page.
+    Uncheck this box for anyone else who should be able to edit the seminar (perhaps a staff/student/postdoc assistant); these people will be listed as "Curators" on the seminar's page, if the Display box is checked.
 display:
   title: Display
   contents: |
-    Check this box for oragnizers (or curators) whose names should appear on the seminar's home page.  This box must be checked for at least one organizer or curator.
+    Check this box for an organizer or curator whose name should appear on the seminar's home page.  This box must be checked for at least one organizer or curator with a homepage or email address.
 venue:
   title: Venue
   contents: |
