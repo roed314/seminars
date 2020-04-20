@@ -78,12 +78,29 @@
         If you are still having trouble, contact one of the seminar's scientific organizers; you may need to go to the external webpage to find their contact details.
       </p>
     </li>
-    <li>
+  <li>
+      <h4>
+        What is the difference between a registered user and an endorsed user?
+      </h4>
+      <p>Endorsed users have higher privileges:
+        <ol><li>They can make their newly created seminars and conferences visible to others.</li>
+          <li>They can add institutions to the site, so that seminars can be later associated with them.</li>
+          <li>They can endorse other users.</li>
+    </ol>
+  </p>
+    </li>
+   <li>
+      <h4>
+        How do I get endorsed?
+      </h4>
+     <p>Go to the <a href="{{ url_for('user.public_users') }}">list of public users</a> and follow the instructions there.</p>
+    </li>
+   <li>
       <h4>
         How do I create a new seminar?
       </h4>
       <p><ol><li><a href="{{ url_for('user.register') }}">Register</a> for an account.</li>
-          <li>Get your account endorsed by some other endorsed user.  (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
+     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.  (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
           <li>Click on the <a href="{{ url_for('create.index')}}">Create</a> tab and follow the instructions there.  (Note: After creating your first seminar, the "Create" tab will be renamed as "Manage".)</li>
         </ol></p>
     </li>
