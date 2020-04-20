@@ -248,4 +248,4 @@ talk_time_range:
     The start and end times of the talk in 24 hour format, separated by a hyphen, for example 10:00-11:00.
     <br><br>
     Use 23:00-01:00 for a talk that starts at 11pm and ends at 1am the next day.
-    Note that 12:30-1:30 denotes a talk that is 13 hours long (you will be warned about talks that last longer than 8 hours), use 12:30-13:30 if you actually want a one hour talk that begins at 12:30 pm.
+    Note that 12:30-1:30 denotes a talk that is 13 hours long (you will be warned about talks that last longer than 8 hours); you probably want to use 12:30-13:30 instead.
