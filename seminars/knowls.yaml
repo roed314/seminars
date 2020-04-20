@@ -227,14 +227,18 @@ speaker_homepage:
     We strongly encourage organizers to fill this in, or to have the speaker do so when the enter their title or abstractt using the edit link for this page.
 title:
   title: Title
+  contents: |
     The title of the talk.  As with seminar and conference names, this should be in <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>,
     with only the first word and proper nouns captilaized.
 paper_link:
   title: Paper link
+  contents: |
     A URL link to a paper related to the talk.
 slide_link:
   title: Slide link
+  contents: |
     A URL link to a slide presentation used in the talk.  This may be set either before or after the talk.
 video_link:
   title: Video link
+  contents: |
     A URL link to a video recording of the talk.
