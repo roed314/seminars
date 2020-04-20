@@ -55,6 +55,16 @@
           <td>Default language</td>
           <td><span id="language_selector" style="width:600px;"></span></td>
         </tr>
+        <tr>
+          <td>{{KNOWL("visibility")}}</td>
+          <td>
+            <select name="visibility" style="width:610px;">
+              <option value="2"{% if seminar.visibility == 2 %} selected{% endif %}>public</option>
+              <option value="1"{% if seminar.visibility == 1 %} selected{% endif %}>unlisted</option>
+              <option value="0"{% if seminar.visibility == 0 %} selected{% endif %}>private</option>
+            </select>
+          </td>
+        </tr>
 
         {% if seminar.is_conference %}
         <tr>

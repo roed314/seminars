@@ -33,6 +33,8 @@
         <span id="language_selector" style="width:600px;"></span>
       </td>
     </tr>
+    {# only seminar organizers can edit the following attributes #}
+    {% if talk.seminar.user_can_edit() %}
     <tr>
       <td>Time zone</td>
       <td>
@@ -79,6 +81,21 @@
         </select>
       </td>
     </tr>
+    {% else %}
+    <tr>
+      <td colspan="2">{{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezon %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}</td>
+    </tr>
+    {% if (not talk.online or talk.room) and talk.timezone != current_user.timezone %}
+    <tr>
+      <td colspan="2">{{ talk.show_time_and_duration(adapt=False) | safe }} in talk time zone, {{ talk.timezone.replace("_", " ") }}.</td>
+    </tr>
+    {% endif %}
+    {% if talk.live_link %}
+    <tr>
+      <td colspan="2">Livestream access: {{ talk.live_link }}</td>
+    </tr>
+    {% endif %}
+    {% endif %} {# attributes only organizers can edit #}
     <tr>
       <td colspan="2">Comments</td>
     </tr>

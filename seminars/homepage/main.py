@@ -134,6 +134,9 @@ def talks_parser(info, query):
     parse_video(info, query)
     parse_language(info, query, prefix="talk")
     query["display"] = True
+    query["hidden"] = False
+    # These are necessary but not succificient conditions to display the talk
+    # Also need that the seminar has visibility 2.
 
 
 def seminars_parser(info, query):
@@ -146,6 +149,7 @@ def seminars_parser(info, query):
 
     parse_substring(info, query, "name", ["name"])
     query["display"] = True
+    query["visibility"] = 2
 
 
 # Common boxes
@@ -355,11 +359,15 @@ def index():
     # Eventually want some kind of cutoff on which talks are included.
     talks = list(
         talks_search(
-            {"display": True, "end_time": {"$gte": datetime.datetime.now()}},
+            {"display": True,
+             "hidden": False,
+             "end_time": {"$gte": datetime.datetime.now()}},
             sort=["start_time"],
             seminar_dict=all_seminars(),
         )
     )
+    # Filtering on display and hidden isn't sufficient since the seminar could be private
+    talks = [talk for talk in talks if talk.searchable()]
     topic_counts = Counter()
     language_counts = Counter()
     for talk in talks:
@@ -424,9 +432,12 @@ def search():
     info["seminar_results"] = results
     talk_query = {}
     talks_parser(info, talk_query)
-    info["talk_results"] = talks_search(
+    talks = talks_search(
         talk_query, sort=["start_time", "speaker"], seminar_dict=all_seminars()
     )  # limit=talk_count, offset=talk_start
+    # The talk query isn't sufficient since we don't do a join so don't have access to whether the seminar is private
+    talks = [talk for talk in talks if talk.searchable()]
+    info["talk_results"] = talks
     return render_template(
         "search.html", title="Search seminars", info=info, section="Search", bread=None,
     )
@@ -449,6 +460,9 @@ def show_seminar(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
         return render_template("404.html", title="Seminar not found")
+    if not seminar.visible():
+        flash_error("You do not have permission to view %s", seminar.name)
+        return redirect(url_for("search"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
     future = []
@@ -479,7 +493,7 @@ def show_seminar(shortname):
 @app.route("/seminar_raw/<shortname>")
 def show_seminar_raw(shortname):
     seminar = seminars_lucky({"shortname": shortname})
-    if seminar is None:
+    if seminar is None or not seminar.visible():
         return render_template("404.html", title="Seminar not found")
     talks = seminar.talks(projection=3)
     now = get_now()

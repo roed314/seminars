@@ -50,7 +50,7 @@ seminar_name:
   contents: |
     This is the full name of the seminar or conference, to appear on the browse and search pages. It can be changed at any time.
     Like Wikipedia, mathseminars.org uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> for seminar names and talk titles:
-    only the first word and proper nouns should be capitalized. 
+    only the first word and proper nouns should be capitalized.
 institutions:
   title: Institutions
   contents: |
@@ -83,3 +83,10 @@ venue:
   contents: |
     Selecting "online" limits search results to talks that are accessible online.
     Selecting "in-person" limits search results to talks that exist as an in-person meeting; some of these may also be accessible online.
+visibility:
+  title: Visibility
+  contents: |
+    Choose <i>public</i> if you want any user to be able to see the seminar and its talks.
+    Choose <i>unlisted</i> if you want to be able to share links to the seminar and its talks with others but have it not listed on the browser or search pages.
+    Choose <i>private</i> if you only want organizers to be able to see the seminar and its talks.
+    Note that you must be endorsed in order for your seminars to be visible to anyone else, but your setting will become active once you get endorsed.

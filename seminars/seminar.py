@@ -49,6 +49,7 @@ class WebSeminar(object):
             self.display = current_user.is_creator
             self.online = True  # default
             self.access = "open"  # default
+            self.visibility = 2 # public by default, once display is set to True
             self.archived = False  # don't start out archived
             self.is_conference = False  # seminar by default
             self.frequency = 7
@@ -108,6 +109,20 @@ class WebSeminar(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def visible(self):
+        """
+        Whether this seminar should be shown to the current user
+        """
+        return (self.owner == current_user.email or
+                current_user.is_admin or
+                self.display and (self.visibility > 0 or current_user.email in self.editors()))
+
+    def searchable(self):
+        """
+        Whether this seminar should show up in search results (and whether its talks should show up on the browse page)
+        """
+        return self.display and self.visibility > 1
 
     def save(self):
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
@@ -182,8 +197,10 @@ class WebSeminar(object):
         if show_attributes:
             if not self.display:
                 link += " (hidden)"
-            elif self.archived:
-                link += " (inactive)"
+            elif self.visibility == 0:
+                link += " (private)"
+            elif self.visibility == 1:
+                link += " (unlisted)"
             elif self.online:
                 link += " (online)"
         return link
@@ -335,7 +352,7 @@ class WebSeminar(object):
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
 
-        query = {"seminar_id": self.shortname, "display": True}
+        query = {"seminar_id": self.shortname, "display": True, "hidden": False}
         if self.user_can_edit():
             query.pop("display")
         return talks_search(query, projection=projection)
