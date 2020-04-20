@@ -100,11 +100,9 @@ class WebInstitution(object):
             db.institutions.upsert({"shortname": self.shortname}, data)
 
     def admin_link(self):
-        userdata = db.users.lookup(self.admin)
-        return '<a href="mailto:%s">%s</a>' % (
-            self.admin,
-            userdata["name"] if userdata["name"] else self.admin,
-        )
+        rec = db.users.lookup(self.admin)
+        link = (rec["homepage"] if rec["homepage"] else ("mailto:%s" % (rec["email"]) if rec["email"] else ""))
+        return '<a href="%s">%s</a>' % (link, rec["name"] if rec["name"] else self.admin)
 
 ### FIXME ###
 # Should always return a WebInstitution object but currently may returna dictionary or WebObject

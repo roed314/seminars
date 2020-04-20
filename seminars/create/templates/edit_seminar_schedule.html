@@ -35,13 +35,13 @@
   <table id="edit-schedule-table">
     <thead>
       <tr>
-        <th>Date</th>
-        <th>Time</th>
-        <th>Speaker</th>
-        <th>Email</th>
-        <th>Affiliation</th>
-        <th>Title</th>
-        <th></th>
+        <td align="center">{{ KNOWL("talk_date") }}</td>
+        <td align="center">{{ KNOWL("talk_time_range") }}</td>
+        <td align="center">{{ KNOWL("speaker") }}</td>
+        <td align="center">{{ KNOWL("speaker_email") }}</td>
+        <td align="center">{{ KNOWL("speaker_affiliation") }}</td>
+        <td align="center">{{ KNOWL("title") }}</td>
+        <td></td>
       </tr>
     </thead>
     {% set vars = {'i': 0} %}
