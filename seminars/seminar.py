@@ -557,7 +557,7 @@ def next_talk_sorted(results):
         R.next_talk_time = ntdict[R.shortname]
     results.sort(key=lambda R: (R.next_talk_time, R.name))
     for R in results:
-        if R.next_talk_time.replace(tzinfo=None) == datetime.datetime.max:
+        if R.next_talk_time.replace(tzinfo=None) == datetime.max:
             R.next_talk_time = None
     return results
 
