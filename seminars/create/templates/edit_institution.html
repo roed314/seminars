@@ -6,19 +6,15 @@
   <input type="hidden" name="new" value="{{ 'yes' if institution.new else 'no' }}"/>
   <table>
     <tr>
-      <td>
-        Identifier
-      </td>
-      <td>
-        {{ institution.shortname }}
-      </td>
+      <td>{{ KNOWL('institution_shortname') }}</td>
+      <td>{{ institution.shortname }}</td>
     </tr>
     <tr>
-      <td>Full name</td>
+      <td>{{ ASTKNOWL('institution_name') }}</td>
       <td><input name="name" id="sname" value="{{ institution.name | blanknone }}" style="width:500px;" /></td>
     </tr>
     <tr>
-      <td>Type</td>
+      <td>{{ ASTKNOWL('institution_type') }}</td>
       <td>
         <select name="type" style="width:510px;">
           {% for itype, disp in institution_types %}
@@ -28,15 +24,15 @@
       </td>
     </tr>
     <tr>
-      <td>Homepage</td>
+      <td>{{ ASTKNOWL('institution_homepage') }}</td>
       <td><input style="width:500px;" name="homepage" value="{{ institution.homepage | blanknone }}" placeholder="https://math.mit.edu/"/></td>
     </tr>
     <tr>
-      <td>City</td>
+      <td>{{ KNOWL('institution_city') }}</td>
       <td><input name="city" value="{{ institution.city | blanknone }}" style="width:500px;" placeholder="Cambridge, MA, USA"/></td>
     </tr>
     <tr>
-      <td>Time zone</td>
+      <td>{{ ASTKNOWL('institution_timezone') }}</td>
       <td>
         <select name="timezone" style="width:510px;">
           {% for tz, disp in timezones %}
@@ -46,7 +42,7 @@
       </td>
     </tr>
     <tr>
-      <td>Maintainer</td>
+      <td>{{ ASTKNOWL('institution_admin') }}</td>
       <td><input name="admin" value="{{ institution.admin }}" style="width:500px;" /></td>
     </tr>
   </table>

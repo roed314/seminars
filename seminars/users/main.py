@@ -158,7 +158,7 @@ def info():
         title = section = "Login"
     return render_template(
         "user-info.html",
-        next=request.args.get("next"),
+        next=request.args.get("next", ''),
         title=title,
         section=section,
         timezones=timezones,
@@ -596,8 +596,14 @@ def ics_file(token):
     cal.add("X-WR-CALNAME", "mathseminars.org")
 
     for talk in user.talks:
+        # Organizers may have hidden talk
+        if talk.hidden or talk.seminar.visibility == 0:
+            continue
         cal.add_component(talk.event(user))
     for seminar in user.seminars:
+        # Organizers may have hidden seminar
+        if seminar.visibility == 0:
+            continue
         for talk in seminar.talks():
             cal.add_component(talk.event(user))
     bIO = BytesIO()
