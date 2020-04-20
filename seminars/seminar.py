@@ -605,16 +605,11 @@ def can_edit_seminar(shortname, new):
         return redirect(url_for("show_seminar", shortname=shortname), 302), None
     # Make sure user has permission to edit
     if not new and not seminar.user_can_edit():
-        owner = seminar.owner
-        owner_name = db.users.lucky({"email": owner}, "name")
-        if owner_name:
-            owner = "%s (%s)" % (owner_name, owner)
-
         flash_error(
-            "You do not have permission to edit seminar %s.  Contact the seminar owner, %s, and ask them to grant you permission."
-            % (shortname, owner)
+            "You do not have permission to edit seminar %s.  Please contact the seminar organizers."
+            % shortname
         )
-        return redirect(url_for(".index"), 302), None
+        return redirect(url_for("show_seminar", shortname=shortname), 302), Non
     if seminar is None:
         seminar = WebSeminar(shortname, data=None, editing=True)
     return None, seminar

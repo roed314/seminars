@@ -30,7 +30,7 @@ from seminars.institution import (
     clean_institutions,
 )
 from seminars.lock import get_lock
-from seminars.users.pwdmanager import ilike_query, ilike_escape
+from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import IdentifierWrapper
 from psycopg2.sql import SQL
@@ -503,8 +503,8 @@ def save_institution():
             val = raw_data.get(col, "")
             data[col] = None # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
-            if col == "admin":                
-                userdata = db.users.lookup(data[col])
+            if col == "admin":
+                userdata = userdb.lookup(data[col])
                 if userdata is None:
                     if not data[col]:
                         errmsgs.append("You must specify the email address of the maintainer.")
