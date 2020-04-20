@@ -6,7 +6,7 @@ import bcrypt
 import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
-from seminars.seminar import WebSeminar, seminars_search
+from seminars.seminar import WebSeminar, seminars_search, next_talk_sorted
 from seminars.talk import WebTalk
 from seminars.utils import pretty_timezone
 from lmfdb.backend.searchtable import PostgresSearchTable
@@ -366,6 +366,7 @@ class SeminarsUser(UserMixin):
             except ValueError:
                 self._data["seminar_subscriptions"].remove(elt)
                 self._dirty = True
+        ans = next_talk_sorted(ans)
         if self._dirty:
             self.save()
         return ans

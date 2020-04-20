@@ -545,6 +545,22 @@ SELECT DISTINCT ON (seminar_id) {0} FROM
         ans[rec["seminar_id"]] = rec["start_time"]
     return ans
 
+def next_talk_sorted(results):
+    """
+    Sort a list of WebSeminars by when their next talk is (and add the next_talk_time attribute to each seminar).
+
+    Returns the sorted list.
+    """
+    results = list(results)
+    ntdict = next_talks()
+    for R in results:
+        R.next_talk_time = ntdict[R.shortname]
+    results.sort(key=lambda R: (R.next_talk_time, R.name))
+    for R in results:
+        if R.next_talk_time.replace(tzinfo=None) == datetime.datetime.max:
+            R.next_talk_time = None
+    return results
+
 def next_talk(shortname):
     """
     Gets the next talk time in a single seminar.  Note that if you need this information for many seminars, the `next_talks` function will be faster.
