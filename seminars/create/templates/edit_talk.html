@@ -36,6 +36,12 @@
     {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
     <tr>
+      <td>{{ KNOWL("hidden") }}</td>
+      <td>
+        <input name="hidden" type="checkbox"{% if talk.hidden %} checked{% endif %} />
+      </td>
+    </tr>
+    <tr>
       <td>{{ ASTKNOWL("timezone") }}</td>
       <td>
         <select name="timezone" style="width:610px;">
