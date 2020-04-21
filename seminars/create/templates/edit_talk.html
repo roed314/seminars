@@ -89,7 +89,16 @@
     </tr>
     {% else %}
     <tr>
-      <td colspan="2">{{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezon %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}</td>
+      <td colspan="2">
+        {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezon %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}
+        <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
+        <input type="hidden" name="timezone" value="{{ talk.timezone }}" />
+        <input type="hidden" name="start_time" value="{{ talk.editable_start_time() }}" />
+        <input type="hidden" name="end_time" value="{{ talk.editable_end_time() }}" />
+        <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
+        <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
+        <input type="hidden" name="access" value="{{ talk.access }}" />
+      </td>
     </tr>
     {% if (not talk.online or talk.room) and talk.timezone != current_user.timezone %}
     <tr>
