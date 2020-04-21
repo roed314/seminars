@@ -3,27 +3,13 @@
 {% block body %}
 <div id="header">
 </div>
-<h2>Upcoming talks</h2>
   <table class="ntdata">
     <thead>
       <tr>
         {{ talks_header(include_seminar=False, include_subscribe=False,  datetime_header="Time") | safe }}
       </tr>
     </thead>
-    {% for talk in future %}
-    <tr>
-      {{ talk.oneline(include_seminar=False, include_subscribe=False, tz=seminar.tz) | safe }}
-    </tr>
-    {% endfor %}
-  </table>
-<h2>Past talks</h2>
-  <table class="ntdata">
-    <thead>
-      <tr>
-        {{ talks_header(include_seminar=False, include_subscribe=False, datetime_header="Time") | safe }}
-      </tr>
-    </thead>
-    {% for talk in past %}
+    {% for talk in talks %}
     <tr>
       {{ talk.oneline(include_seminar=False, include_subscribe=False, tz=seminar.tz) | safe }}
     </tr>
