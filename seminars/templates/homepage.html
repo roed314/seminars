@@ -53,12 +53,32 @@ console.log('Form is unchanged!');
       </div>
       {% endfor %}
     </div>
-    {% for ab, name in topics %}
-      <div class="topic_toggle" id="topiclink-{{ab}}">
-        {{name}}{% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+
+    <div id="subjects-tabs">
+      <ul class="tab-subject-nav">
+        {% for subject in subjects %}
+          <li><a href="#tab-{{subject}}-content" class="tab-subject-nav">{{subject}}</a></li>
+        {% endfor %}
+      </ul>
+
+     {% for subject in subjects %}
+       <div id="tab-{{subject}}-content" class="tab-subject-panel">
+         {% for ab, name, topic_subject in topics_and_subjects %}
+           {% if topic_subject == subject %}
+             <div class="topic_toggle" id="topiclink-{{ab}}">
+               {% if topic_subject == "physics" %}
+                {{name}}
+               {% else %}
+                {{name}}
+               {% endif %}
+               {% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+             </div>
+           {% endif %}
+         {% endfor %}
       </div>
     {% endfor %}
-    </div>
+  </div>
+
   </div>
   <div id="language-filter-menu">
     {% for ab, name in languages %}

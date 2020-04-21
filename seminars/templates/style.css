@@ -304,6 +304,34 @@ body.knowl #header {
     min-height: 20px;
 }
 
+.ui-tabs {
+    border: none !important;
+    background: #373737 !important;
+}
+
+.ui-widget-header {
+    border: none !important;
+    background: #373737 !important;
+}
+
+.ui-state-default {
+    border: none !important;
+    background: #373737 !important;
+}
+
+.ui-state-active {
+    border: none !important;
+    background: #000000 !important;
+}
+
+.ui-tabs-panel {
+    background: #000000 !important;
+}
+
+.ui-corner-top {
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+}
 div.topic_toggle, div.language_toggle {
     display: inline-block;
     min-width: 15%;

@@ -161,6 +161,18 @@ def topics():
         key=lambda x: x[1].lower(),
     )
 
+def topics_and_subjects():
+    return sorted(
+        ((rec["abbreviation"], rec["name"], rec["subject"]) for rec in db.topics.search({}, ["abbreviation", "name", "subject"])),
+        key=lambda x: (x[2].lower(), x[1].lower()),
+    )
+
+@lru_cache(maxsize=None)
+def subjects():
+    return sorted(
+        tuple(set(((rec["subject"]) for rec in db.topics.search({}, ["subject"])))),
+        key=lambda x: x[0].lower(),
+    )
 
 @lru_cache(maxsize=None)
 def topic_dict():
