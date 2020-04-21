@@ -481,7 +481,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def is_organizer(self):
-        return self.is_admin or self.is_creator or self._organizer
+        return self.id and (self.is_admin or self.is_creator or self._organizer)
 
     def check_password(self, pwd):
         """
