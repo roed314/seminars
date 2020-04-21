@@ -354,7 +354,8 @@ class WebTalk(object):
             or current_user.email_confirmed
             and (
                 current_user.email.lower() in self.seminar.editors()
-                or current_user.email.lower() == self.speaker_email.lower()
+                or (self.speaker_email and current_user.email and
+                    current_user.email.lower() == self.speaker_email.lower())
             )
         )
 
