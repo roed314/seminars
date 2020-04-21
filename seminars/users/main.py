@@ -284,11 +284,27 @@ def permanently_deleteme():
 
 
 @login_page.route("/admin")
-@login_required
 @admin_required
 def admin():
     return "success: only admins can read this!"
 
+
+@login_page.route("/loginas/<emailorid>")
+@admin_required
+def loginas(emailorid):
+    try:
+        uid = int(emailorid)
+        user = SeminarsUser(uid=uid)
+    except ValueError:
+        email = emailorid
+        user = SeminarsUser(email=email)
+    if user.id:
+        logout_user()
+        login_user(user)
+        flask.flash(Markup("Using your super powers, you are now logged in as %s" % (user.email)))
+        return redirect(url_for(".info"))
+    else:
+        return "No user matches the email/id provided."
 
 # confirm email
 
