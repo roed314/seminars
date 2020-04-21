@@ -206,7 +206,7 @@ speaker:
 speaker_email:
   title: Speaker email
   contents: |
-    The email address of the speaker.  This is only visible to organizers of the seminar or conference to which the talk belongs.
+    The email address of the speaker.  This is visible only to organizers of the seminar or conference to which the talk belongs.
 speaker_affiliation:
   title: Speaker affiliation
   contents: |
@@ -214,15 +214,15 @@ speaker_affiliation:
 speaker_homepage:
   title: Speaker homepage
   contents: |
-    The homepage of the speaker.
+    The URL of the speaker's homepage.
     The speaker name will be linked to the speaker homepage if specified, and this link will appear on our main page for browsing talks.
     This link is useful to visitors of mathseminars.org who may not know the speaker, and it improves the speaker's visibility within the mathematical community.
-    We encourage organizers to fill this in, or to ask the speaker do so when the enter their title or abstract using the edit link for this page.
+    We encourage organizers to enter this or to ask the speaker to do so when entering their title or abstract using the talk's edit link.
 title:
   title: Title
   contents: |
     The title of the talk.  As with seminar and conference names, this should be in <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>,
-    with only the first word and proper nouns captilaized.
+    with only the first word and proper nouns capitalized.
 paper_link:
   title: Paper link
   contents: |
@@ -238,14 +238,14 @@ video_link:
 talk_date:
   title: Date
   contents: |
-    The date the talk starts (talks cannot exceed 24 hours in length, but they may start and end on different dates).
+    The date on which the talk starts (talks cannot exceed 24 hours in length, but they may start and end on different dates).
 talk_time_range:
   title: Time
   contents: |
     The start and end times of the talk in 24 hour format, separated by a hyphen, for example 10:00-11:00.
     <br><br>
     Use 23:00-01:00 for a talk that starts at 11pm and ends at 1am the next day.
-    Note that 12:30-1:30 denotes a talk that is 13 hours long (you will be warned about talks that last longer than 8 hours); you probably want to use 12:30-13:30 instead.
+    Note that 12:30-1:30 denotes a talk that is 13 hours long; you probably meant 12:30-13:30.
 venue:
   title: Venue
   contents: |
@@ -261,4 +261,4 @@ visibility:
 hidden:
   title: Hide
   contents: |
-    Check this box if you want the talk to be invisible to non-organizers.
+    Check this box to make the talk invisible to all but the organizers.
