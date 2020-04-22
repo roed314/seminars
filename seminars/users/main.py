@@ -180,7 +180,7 @@ def info():
 @login_page.route("/set_info", methods=["POST"])
 @login_required
 def set_info():
-    homepage = request.form.get_item("homepage")
+    homepage = request.form.get("homepage")
     if homepage and not validate_url(homepage):
         return show_input_errors([format_errmsg("Homepage %s is not a valid URL, it should begin with http:// or https://", homepage)])
     for k, v in request.form.items():
