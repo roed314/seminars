@@ -5,7 +5,7 @@ from six import string_types
 from flask import url_for, flash, render_template
 from flask_login import current_user
 from seminars import db
-from sage.misc.cachefunc import cached_function
+from functools import lru_cache
 from lmfdb.backend.utils import IdentifierWrapper
 from lmfdb.utils.search_boxes import SearchBox
 from psycopg2.sql import SQL
@@ -92,7 +92,7 @@ def simplify_language_name(name):
     return name
 
 
-@cached_function
+@lru_cache(maxsize=None)
 def languages_dict():
     return {lang["iso639_1"]: simplify_language_name(lang["name"]) for lang in iso639.data if lang["iso639_1"]}
 
@@ -154,7 +154,7 @@ def allowed_shortname(shortname):
 
 
 # Note the caching: if you add a topic you have to restart the server
-@cached_function
+@lru_cache(maxsize=None)
 def topics():
     return sorted(
         ((rec["abbreviation"], rec["name"]) for rec in db.topics.search({}, ["abbreviation", "name"])),
@@ -162,7 +162,7 @@ def topics():
     )
 
 
-@cached_function
+@lru_cache(maxsize=None)
 def topic_dict():
     return dict(topics())
 
