@@ -151,7 +151,8 @@ class PostgresUserTable(PostgresSearchTable):
                 return False
         for key in list(data):
             if key not in self.search_cols:
-                critical("Need to update pwdmanager code to account for schema change key=%s" % key)
+                if key != "id":
+                    critical("Need to update pwdmanager code to account for schema change key=%s" % key)
                 data.pop(key)
         with DelayCommit(db):
             if "email" in data:
@@ -481,7 +482,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def is_organizer(self):
-        return self.is_admin or self.is_creator or self._organizer
+        return self.id and (self.is_admin or self.is_creator or self._organizer)
 
     def check_password(self, pwd):
         """
