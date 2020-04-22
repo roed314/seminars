@@ -338,7 +338,7 @@ div.topic_cmd {
 }
 
 #make_semconf td.forminfo, #make_inst td.forminfo {
-    text-align: center;
+    vertical-align: center;
 }
 #make_semconf th, #make_inst th {
     text-align: left;
