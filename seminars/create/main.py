@@ -426,7 +426,7 @@ def save_seminar():
                 r = db.users.lookup(D["email"])
                 if r and r["email_confirmed"]:
                     if D["full_name"] != r["name"]:
-                        errmsgs.append(format_errmsg("Organizer name %s does not match the name %s of the account with email address %s", D["tull_name"], r["name"], D["email"]))
+                        errmsgs.append(format_errmsg("Organizer name %s does not match the name %s of the account with email address %s", D["full_name"], r["name"], D["email"]))
                     else:
                         contact_count += 1
                         if D["homepage"] and D["homepage"] != r["homepage"]:
