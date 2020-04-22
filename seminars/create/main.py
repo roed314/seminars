@@ -428,7 +428,7 @@ def save_seminar():
                     else:
                         if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
                             format_warning("The hompage %s does not match the homepage %s of the account with email address %s", D["homepage"], r["homepage"], D["email"])
-                        if D["dsiplay"]:
+                        if D["display"]:
                             contact_count += 1
 
             organizer_data.append(D)
