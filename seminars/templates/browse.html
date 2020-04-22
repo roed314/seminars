@@ -4,20 +4,26 @@
 
 <table id="filter-table">
   <tr>
+    <td>
+      Filter by:
+    </td>
+    <td>
+      {{ toggle(tglid="enable_subject_filter", value="", onchange="toggleFilters(this.id);") | safe }}
+    </td>
     <td style="padding-right: 2em;">
-      Times in {{ user.show_timezone("browse") }}
+      <a id="subject-filter-btn" class="likeknowl" onclick="$('#subject-filter-menu').slideToggle(300); return false;">subject</a>
     </td>
     <td>
       {{ toggle(tglid="enable_topic_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
     <td style="padding-right: 2em;">
-      Filter by <a id="topic-filter-btn" class="likeknowl"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
+      <a id="topic-filter-btn" class="likeknowl"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
     </td>
     <td>
       {{ toggle(tglid="enable_language_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
     <td style="padding-right: 2em;">
-      Filter by <a id="language-filter-btn" class="likeknowl" onclick="$('#language-filter-menu').slideToggle(300); return false;">language</a>
+      <a id="language-filter-btn" class="likeknowl" onclick="$('#language-filter-menu').slideToggle(300); return false;">language</a>
     </td>
     {% if user.is_authenticated %}
     <td >
@@ -30,6 +36,13 @@
   </tr>
 </table>
 
+<table>
+   <tr>
+    <td style="padding-right: 2em;">
+      Times in {{ user.show_timezone("browse") }}
+    </td>
+   </tr>
+</table>
 
 <table id="browse-talks" class="talk-table ntdata">
   <thead>

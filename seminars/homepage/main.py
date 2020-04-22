@@ -12,16 +12,15 @@ import pytz
 from collections import Counter
 from dateutil.parser import parse
 
-from lmfdb.utils.search_boxes import (
+from lmfdb.utils import (
     BasicSpacer,
     SearchArray,
     TextBox,
     SelectBox,
-)
-from lmfdb.utils.utilities import (
     to_dict,
     flash_error,
 )
+
 from lmfdb.utils.search_parsing import collapse_ors
 
 
@@ -173,7 +172,7 @@ class TalkSearchArray(SearchArray):
 
     def __init__(self):
         ## topics
-        topic = SelectBox(name="talk_topic", label="Topics", options=[("", "")] + topics())
+        topic = SelectBox(name="talk_topic", label="Topics", options=[("", "")] + [topic[:-1] for topic in topics()])
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -284,7 +283,7 @@ class SemSearchArray(SearchArray):
 
     def __init__(self):
         ## topics
-        topic = SelectBox(name="seminar_topic", label="Topics", options=[("", "")] + topics())
+        topic = SelectBox(name="seminar_topic", label="Topics", options=[("", "")] + [topic[:-1] for topic in topics()])
 
         ## pick institution where it is held
         institution = SelectBox(

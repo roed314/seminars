@@ -45,15 +45,15 @@ console.log('Form is unchanged!');
 </div>
 
 {% if section == "Browse" %}
-  <div id="topic-filter-menu">
-    <div id="topic-filter-head">
-      {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics();"), ("CLR", "Clear all", "clearAllTopics();")] %}
-      <div class="topic_cmd" id="topiclink-{{ab}}" onclick="{{onclick}}">
-        {{name}}
+  <div id="subject-filter-menu">
+    {% for subject in subjects %}
+      <div class="subject_toggle" id="subjectlink-{{subject}}">
+        {{subject}}
       </div>
-      {% endfor %}
-    </div>
+    {% endfor %}
+  </div>
 
+  <div id="topic-filter-menu">
     <div id="subjects-tabs">
       <ul class="tab-subject-nav">
         {% for subject in subjects %}
@@ -63,9 +63,9 @@ console.log('Form is unchanged!');
 
      {% for subject in subjects %}
        <div id="tab-{{subject}}-content" class="tab-subject-panel">
-         {% for ab, name, topic_subject in topics_and_subjects %}
+         {% for ab, name, topic_subject in topics %}
            {% if topic_subject == subject %}
-             <div class="topic_toggle" id="topiclink-{{ab}}">
+             <div class="topic_toggle {{topic_subject}}" id="topiclink-{{ab}}">
                {% if topic_subject == "physics" %}
                 {{name}}
                {% else %}
@@ -75,11 +75,23 @@ console.log('Form is unchanged!');
              </div>
            {% endif %}
          {% endfor %}
+         <div id="topic-filter-head">
+          {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics();"), ("CLR", "Clear all", "clearAllTopics();")] %}
+            <div class="topic_cmd" id="topiclink-{{subject}}-{{ab}}" onclick="{{onclick}}">
+              {{name}}
+            </div>
+          {% endfor %}
+         </div>
       </div>
     {% endfor %}
-  </div>
+    </div>
+
+
+
+
 
   </div>
+
   <div id="language-filter-menu">
     {% for ab, name in languages %}
       <div class="language_toggle" id="langlink-{{ab}}">
