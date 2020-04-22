@@ -132,6 +132,12 @@ console.log('Form is unchanged!');
         <div class="submenu-nav{% if subsection == 'faq' %} submenu-active{% endif %}">
           <a href="{{ url_for('faq') }}">FAQ</a>
         </div>
+        <div class="submenu-nav{% if subsection == 'policies' %} submenu-active{% endif %}">
+          <a href="{{ url_for('policies') }}">Policies</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'privacy' %} submenu-active{% endif %}">
+          <a href="{{ url_for('privacy') }}">Privacy</a>
+        </div>
         <div class="submenu-nav{% if subsection == 'acknowledgments' %} submenu-active{% endif %}">
           <a href="{{ url_for('acknowledgment') }}">Acknowledgments</a>
         </div>
