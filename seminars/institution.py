@@ -121,12 +121,12 @@ def can_edit_institution(shortname, new):
     if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         if institution["admin"].lower() != current_user.email.lower():
-            rec = userdb.lookup(institution.admin, "full_name")
+            rec = userdb.lookup(institution["admin"], "full_name")
             link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
             owner = "%s (%s)" % (rec['name'], link)
             flash_error(
                 "You do not have permission to edit %s.  Contact the institution admin, %s, and ask them to fix any errors."
-                % (institution.name, owner)
+                % (institution["name"], owner)
             )
             return redirect(url_for(".index"), 302), None
     if institution is None:
