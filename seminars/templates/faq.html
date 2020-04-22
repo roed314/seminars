@@ -4,9 +4,9 @@
 
 
 <div class="text_content auto">
-<h3>
+<h2>
   Browsing
-  </h3>
+</h2>
   <ul>
     <li>
       <h4>
@@ -20,6 +20,7 @@
         You can also select more than one topic.
         To close the topics menu, click "topic" again.</p>
     </li>
+    
      <li>
       <h4>
         What time zone is used to display talk times?
@@ -33,6 +34,7 @@
          Exception (for organizers and speakers): When editing a seminar or talk, times are displayed in the time zone <i>of the seminar or talk</i>; this time zone can be set at the seminar's "Edit properties" page or the talk's "Edit talk" page, respectively.
       </p>
     </li>
+
     <li>
       <h4>
         What should I do if I cannot connect to an online talk?  What if I need a link or password that is not listed?
@@ -48,10 +50,12 @@
       </p>
     </li>
 </ul>
-    <h3>
-  Registering and saving favorites
-  </h3>
+
+    <h2>
+  Registering
+  </h2>
   <ul>
+    
 <li>
       <h4>
         What are the benefits of <a href="{{ url_for('user.register') }}">registering</a>?
@@ -72,22 +76,37 @@
         </ol>
       </p>
     </li>
+
   <li>
       <h4>
         Will my email address be displayed on the site if I register?
       </h4>
       <p>No.  The only situation in which we would display your email publicly is if you list yourself as an organizer of a seminar <i>and</i> indicate that your name should be displayed <i>and</i> do not provide a homepage URL (if your email address and homepage URL are both provided, we would display only the URL), or if similarly you list yourself as maintainer of an institution without providing your homepage URL as a way for people to contact you.  Another situation in which your email address might be shared in a very limited way: Independently of whether you register, if a seminar organizer enters your email address when scheduling a talk by you, then the email address would be visible also to other organizers of that seminar.</p>
     </li>
+  </ul>
+
+    <h2>
+  Exporting favorites to a calendar
+  </h2>
+  <ul>
     <li>
       <h4>
         If I export seminars to my Google calendar, do I have to export them again every week to see the latest talks?
       </h4>
       <p> No, once you export a seminar to your calendar, talks added to that seminar later will be pushed to your calendar automatically!</p>
     </li>
+    
+    <li>
+      <h4>
+        I exported my favorites to a calendar.  Why is it showing no events?
+      </h4>
+      <p>Some calendar services sync external calendars only every 24 hours.  Furthermore, some may take even longer for the initial sync.  A workaround is to go to the <a href="{{ url_for('user.info')}}">Account</a> tab, copy the URL of the "ICS file" link there, and add it manually to your calendar app.</p>
+    </li>
   </ul>
-    <h3>
-  Creating and organizing seminars
-  </h3>
+
+    <h2>
+  Endorsed users
+  </h2>
   <ul>
     <li>
       <h4>
@@ -100,29 +119,14 @@
     </ol>
   </p>
     </li>
+
    <li>
       <h4>
         How do I get endorsed?
       </h4>
      <p>After <a href="{{ url_for('user.register') }}">registering</a>, go to the <a href="{{ url_for('user.public_users') }}">list of public users</a> and follow the instructions there.</p>
     </li>
-   <li>
-      <h4>
-        How do I create a new seminar?
-      </h4>
-      <p><ol><li><a href="{{ url_for('user.register') }}">Register</a> for an account.</li>
-     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.  (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
-          <li>Click on the <a href="{{ url_for('create.index')}}">Create</a> tab and follow the instructions there.  (Note: After creating your first seminar, the "Create" tab will be renamed as "Manage".)</li>
-        </ol></p>
-    </li>
-    <li>
-      <h4>
-        How do I create a new conference?
-      </h4>
-      <p>
-        The procedure is the same as for creating a new seminar.
-      </p>
-    </li>
+
     <li>
       <h4>
         How can I endorse other users?
@@ -137,6 +141,32 @@
         someone who would be adding appropriate content (generally mathematicians or mathematics department staff).
       </p>
     </li>
+  </ul>
+
+    <h2>
+  Creating and organizing seminars
+  </h2>
+  <ul>
+    <li>
+      <h4>
+        How do I create a new seminar?
+      </h4>
+      <p><ol><li><a href="{{ url_for('user.register') }}">Register</a> for an account.</li>
+     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.  (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
+      <li>(Optional, but recommended) Go to the <a href="{{ url_for('create.index')}}">Institutions</a> page to make sure that the institutions associated with your seminar are there; if not, add them.  (Alternatively, add them after the seminar is created.)</li>
+          <li>Click on the <a href="{{ url_for('create.index')}}">Create</a> tab and follow the instructions there.  (Note: After creating your first seminar, the "Create" tab will be renamed as "Manage".)</li>
+        </ol></p>
+    </li>
+
+    <li>
+      <h4>
+        How do I create a new conference?
+      </h4>
+      <p>
+        The procedure is the same as for creating a new seminar.
+      </p>
+    </li>
+
     <li>
       <h4>
         Is it OK to add a seminar if I'm not one of the organizers?
@@ -149,6 +179,7 @@
         and the organizers (or others) will be able to contact you if there are any errors.
       </p>
     </li>
+
     <li>
       <h4>
         If someone else added my seminar to the site, how can I gain the ability to update it?
@@ -159,6 +190,7 @@
         If you don't want the seminar listed on this site, please ask <a href="mailto:edgarc@mit.edu">Edgar Costa</a> or <a href="mailto:roed@mit.edu">David Roe</a> to remove it.
       </p>
     </li>
+
     <li>
       <h4>
         What should I do if I'm organizing a seminar that doesn't meet once a week?
@@ -166,6 +198,7 @@
       <p> If it meets every other week on the same day, set the Frequency to 14 in the "Edit properties" page for the seminar.
         If it meets multiple times per week, we don't currently support this (though we plan to in the future).  For now, we suggest changing the "talks per day" field in the Edit Properties page of the seminar to the number of times it meets per week, then editing the date on the schedule page.</p>
     </li>
+
     <li>
       <h4>
         I added a topic to my seminar; why aren't the talks in my seminar listed when I filter by that topic?
@@ -175,6 +208,7 @@
       you need to add the topic manually to each such talk.  The same applies to other attributes, 
       such as language, room, livestream, and access.
     </li>
+
     <li>
       <h4>
         What if I have a question not addressed here?
