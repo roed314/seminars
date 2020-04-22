@@ -169,13 +169,13 @@ class WebTalk(object):
         if t0.date() == t.date():
             return t.strftime("%H:%M")
         else:
-            return t.strftime("%a %b %#d, %H:%M")
+            return t.strftime("%a %b %-d, %H:%M")
 
     def show_date(self, tz=None):
         if self.start_time is None:
             return ""
         else:
-            return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %#d")
+            return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %-d")
 
     def show_time_and_duration(self, adapt=True):
         start = self.start_time
@@ -192,7 +192,7 @@ class WebTalk(object):
 
         def ans(rmk):
             return "%s-%s (%s)" % (
-                adapt_datetime(start, newtz=newtz).strftime("%a %b %#d, %H:%M"),
+                adapt_datetime(start, newtz=newtz).strftime("%a %b %-d, %H:%M"),
                 adapt_datetime(end, newtz=newtz).strftime("%H:%M"),
                 rmk,
             )
