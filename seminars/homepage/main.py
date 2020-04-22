@@ -517,7 +517,7 @@ def show_seminar_json(shortname):
     if seminar is None or not seminar.visible():
         return render_template("404.html", title="Seminar not found")
     # FIXME
-    cols = ['start_time', 'end_time', 'speaker', 'title', 'abstract']
+    cols = ['start_time', 'end_time', 'speaker', 'title', 'abstract', 'speaker_affiliation', 'speaker_homepage']
     talks = [{c: getattr(elt, c) for c in cols}
              for elt in talks_search_api(shortname, projection=['seminar_id'] + cols)]
     import json
