@@ -429,7 +429,7 @@ def save_seminar():
                         errmsgs.append(format_errmsg("Organizer name %s does not match the name %s of the account with email address %s", D["full_name"], r["name"], D["email"]))
                     else:
                         contact_count += 1
-                        if D["homepage"] and D["homepage"] != r["homepage"]:
+                        if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
                             format_warning("The hompage %s does not match the homepage %s of the account with email address %s", D["homepage"], r["homepage"], D["email"])
             organizer_data.append(D)
     if display_count == 0:
