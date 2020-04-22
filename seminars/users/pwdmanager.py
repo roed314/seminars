@@ -337,6 +337,22 @@ class SeminarsUser(UserMixin):
         self._dirty = True
 
     @property
+    def subjects(self):
+        cookie = request.cookies.get("subjects", "")
+        subjects = self._data.get("subjects")
+        if subjects:
+            return subjects
+        elif cookie:
+            return [subj.strip() for subj in cookie.split(",")]
+        else:
+            return []
+
+    @subjects.setter
+    def subjects(self, subjects):
+        self._data["subjects"] = subjects
+        self._dirty = True
+
+    @property
     def ics(self):
         return generate_token(self.id, "ics")
 

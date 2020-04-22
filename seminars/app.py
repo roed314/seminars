@@ -122,6 +122,7 @@ def ctx_proc_userdata():
     data["DEBUG"] = is_debug_mode()
 
     data["topics"] = topics()
+    data["subjects"] = [("math", "Math"), ("physics", "Physics")] # hard code this for the moment
     data["top_menu"] = top_menu()
 
     data["talks_header"] = talks_header

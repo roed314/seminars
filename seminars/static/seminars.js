@@ -309,6 +309,21 @@ function makeLanguageSelector(langOptions, initialLanguage) {
         classNames: selectPureClassNames,
     });
 }
+function makeSubjectSelector(subjOptions, initialSubjects) {
+    function callback_subjects(value) {
+        $('input[name="subjects"]')[0].value = '[' + value + ']';
+    }
+    return new SelectPure("#subject_selector", {
+        onChange: callback_subjects,
+        options: subjOptions,
+        multiple: true,
+        autocomplete: true,
+        icon: "fa fa-times",
+        inlineIcon: false,
+        value: initialSubjects,
+        classNames: selectPureClassNames,
+    });
+}
 
 $(document).ready(function () {
   if (navigator.cookieEnabled) {
