@@ -388,7 +388,7 @@ def save_seminar():
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     organizer_data = []
-    display_count = contact_count = 0
+    contact_count = 0
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
@@ -410,8 +410,6 @@ def save_seminar():
             # but it sets the database column curator, so the
             # boolean needs to be inverted
             D["curator"] = not D["curator"]
-            if D["display"]:
-                display_count += 1
             if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
                 flash(
                     format_warning(
@@ -428,18 +426,18 @@ def save_seminar():
                     if D["full_name"] != r["name"]:
                         errmsgs.append(format_errmsg("Organizer name %s does not match the name %s of the account with email address %s", D["full_name"], r["name"], D["email"]))
                     else:
-                        contact_count += 1
                         if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
                             format_warning("The hompage %s does not match the homepage %s of the account with email address %s", D["homepage"], r["homepage"], D["email"])
+                        if D["dsiplay"]:
+                            contact_count += 1
+
             organizer_data.append(D)
-    if display_count == 0:
-        errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
     if contact_count == 0:
         errmsgs.append(
             format_errmsg(
-                "At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s",
-                "email",
-                "Note that the email will not be public if homepage is set or display is not checked, it is used only to identify the organizer.",
+                "At least one displayed organizer or curator needs a %s so that there is a contact for this listing.<br>%s",
+                "confirmed email",
+                "This email will not be visible if homepage is set or display is not checked, it is used only to identify the organizer's account.",
             )
         )
     # Don't try to create new_version using invalid input
