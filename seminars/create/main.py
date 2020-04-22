@@ -435,9 +435,10 @@ def save_seminar():
     if contact_count == 0:
         errmsgs.append(
             format_errmsg(
-                "At least one displayed organizer or curator needs a %s so that there is a contact for this listing.<br>%s",
+                "There must be at least one displayed organizer or curator with a %s so that there is a contact for this listing.<br>%s<br>%s",
                 "confirmed email",
                 "This email will not be visible if homepage is set or display is not checked, it is used only to identify the organizer's account.",
+                "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked (this will make you a curator.",
             )
         )
     # Don't try to create new_version using invalid input
