@@ -1,6 +1,8 @@
 {% extends 'homepage.html' %}
 {% block content %}
 
+Before registering, you are encouraged to read our <a href="{{ url_for('policies') }}">policies</a> and in particular our <a href="{{ url_for('privacy') }}">privacy policy</a>.
+
 <h1>Register</h1>
 
 <form name="login" action="{{ url_for('.register') }}" method="POST">
