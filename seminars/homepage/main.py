@@ -585,6 +585,14 @@ def show_institution(shortname):
 def info():
     return render_template("info.html", title="Features", section="Info", subsection="features")
 
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html", title="Privacy policy", section="Info", subsection="privacy")
+
+@app.route("/policies")
+def policies():
+    return render_template("policies.html", title="Policies", section="Info", subsection="policies")
+
 
 @app.route("/faq")
 def faq():
