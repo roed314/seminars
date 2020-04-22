@@ -12,7 +12,7 @@
     <input type="hidden" name="next" value="{{ next }}" />
     <table>
       <tr><td>Email:</td>
-          <td><input name="email" /></td></tr>
+          <td><input name="email" placeholder="existing_user@email.com" /></td></tr>
       <tr><td>Password:</td>
           <td><input name="password" type="password" /></td>
           <td> (<a href="{{ url_for('.reset_password') }}">Forgot password?</a>) </td>
