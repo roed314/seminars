@@ -134,7 +134,8 @@
       </tr>
       <tr>
         <td>Homepage</td>
-        <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" /></td>{% if not user.homepage %} <td class=forminfo> Set this to ensure your email is hidden.</td> {% endif %}
+        <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" /></td>
+        {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never displayed.</td> {% endif %}
       </tr>
     <tr>
       <td>Timezone</td>
