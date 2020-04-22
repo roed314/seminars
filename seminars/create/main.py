@@ -388,7 +388,7 @@ def save_seminar():
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     organizer_data = []
-    display_count = email_count = 0
+    display_count = contact_count = 0
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
@@ -423,11 +423,18 @@ def save_seminar():
                     "error",
                 )
             if D["email"]:
-                email_count += 1
+                r = db.users.lookup(D["email"])
+                if r and r["email_confirmed"]:
+                    if D["name"] != r["name"]:
+                        errmsgs.append(format_errmsg("Organizer name %s does not match the name %s of the account with email address %s", D["name"], r["name"], D["email"]))
+                    else:
+                        contact_count += 1
+                        if D["homepage"] and D["homepage"] != r["homepage"]:
+                            format_warning("The hompage %s does not match the homepage %s of the account with email address %s", D["homepage"], r["homepage"], D["email"])
             organizer_data.append(D)
     if display_count == 0:
         errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
-    if email_count == 0:
+    if contact_count == 0:
         errmsgs.append(
             format_errmsg(
                 "At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s",
