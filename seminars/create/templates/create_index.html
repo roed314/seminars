@@ -128,7 +128,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
 const instOptions = [
   {% for iid, name in institutions %}
   {
-    label: "{{ name }}",
+    label: "{{ name | safe}}",
     value: "{{ iid }}",
   },
   {% endfor %}
