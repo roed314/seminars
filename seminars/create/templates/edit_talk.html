@@ -115,7 +115,11 @@
       <td colspan="2">{{ KNOWL("comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; seminar comments will appear immediately after talk comments.">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; seminar comments below will appear in additiona to talk specific comments.">{{ talk.comments | blanknone }}</textarea></td>
+    </tr>
+    <hr>
+    <tr>
+      {{ talk.seminar.show_comments() | safe }}
     </tr>
   </table>
   <hr style="width:800px;">
