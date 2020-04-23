@@ -335,12 +335,12 @@ body.knowl #header {
 
 div.topic_toggle, div.language_toggle, div.subject_toggle {
     display: inline-block;
-    min-width: 16%;
+    min-width: 15%;
     padding: 5px;
     color: #aaaaaa;
 }
 
-div.topic_toggle.physics {
+div.topic_toggle.subject-physics {
     min-width: 32%;
 }
 
@@ -348,6 +348,12 @@ div.subject_toggle, div.language_toggle  {
     text-align: center;
     background: #000000;
     min-width: 10%;
+}
+
+#welcome-popup {
+    margin: 0px auto;
+    max-width: 1000px;
+    display: none;
 }
 
 div.topic_toggle:hover, div.language_toggle:hover, div.subject_toggle:hover, div.topic_cmd {

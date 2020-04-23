@@ -75,7 +75,7 @@
     <tr>
       <td>{{ KNOWL("live_link") }}</td>
       <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
-          <td class="forminfo" />Enter "see comments" if the link is not fixed and explain in the seminar or talk comments how to get the link.</td>
+          <td class="forminfo" />If link varies, enter "See comments" and leave instructions below in Comments.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("access") }}</td>
@@ -115,8 +115,14 @@
       <td colspan="2">{{ KNOWL("comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; seminar comments will appear immediately after talk comments.">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; any seminar comments shown below will appear in additiona to the comments you put here.  TeX symbols are OK here.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
+    {% if talk.seminar.comments %}
+      <tr><td colspan="2" class="forminfo">Seminar comments appear below</td></tr>
+      <tr><td colspan="2" style="width:770px;">{{ talk.seminar.show_comments() | safe }}<td></tr>
+    {% else %}
+      <tr><td colspan="2" class="forminfo">No seminar comments set</td></tr
+    {% endif %}
   </table>
   <hr style="width:800px;">
   <table>
@@ -160,7 +166,7 @@
   <table>
     <tr>
       <td colspan="2">
-        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" placeholder="TeX symbols are OK here">{{talk.abstract | blanknone }}</textarea>
+        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" placeholder="TeX symbols are OK here.  This is joint work with Leonhard Euler.">{{talk.abstract | blanknone }}</textarea>
       </td>
     </tr>
   </table>
@@ -229,7 +235,7 @@ function() {
 
 /* topic and inst selector */
 const topicOptions = [
-  {% for ab, topic in topics %}
+  {% for ab, topic in user_topics %}
   {
     label: "{{ topic | safe}}",
     value: "{{ ab }}",

@@ -160,6 +160,16 @@ def topics():
         key=lambda x: (x[2].lower(), x[1].lower()),
     )
 
+def user_topics():
+    mysubjects = current_user.subjects
+    if len(mysubjects) == 1:
+        subject = mysubjects[0]
+        return [(subj + '_' + ab, name) for (ab, name, subj) in topics() if subj == subject]
+    if len(mysubjects) == 0:
+        # Show all subjects rather than none
+        mysubjects = [subj for (subj, name) in subjects()]
+    return [(subj + '_' + ab, subj.capitalize() + ': ' + name) for (ab, name, subj) in topics() if subj in mysubjects]
+
 @lru_cache(maxsize=None)
 def subjects():
     return sorted(
@@ -168,9 +178,11 @@ def subjects():
     )
 
 @lru_cache(maxsize=None)
-def topic_dict():
-    return dict(topics())
-
+def topic_dict(include_subj=True):
+    if include_subj:
+        return {subj + "_" + ab: subj.capitalize() + ": " + name for (ab, name, subj) in topics()}
+    else:
+        return {subj + "_" + ab: name for (ab, name, subj) in topics()}
 
 @lru_cache(maxsize=None)
 def subject_dict():
@@ -181,16 +193,30 @@ def clean_topics(inp):
         return []
     if isinstance(inp, str):
         inp = inp.strip()
-        if inp[0] == "[" and inp[-1] == "]":
+        if inp and inp[0] == "[" and inp[-1] == "]":
             inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
             if inp == [""]:  # was an empty array
                 return []
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in dict(topics())]
+        inp = [elt for elt in inp if elt in topic_dict()]
     return inp
 
+def clean_subjects(inp):
+    if inp is None:
+        return []
+    if isinstance(inp, str):
+        inp = inp.strip()
+        if inp and inp[0] == "[" and inp[-1] == "]":
+            inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
+            if inp == [""]: # was an empty array
+                return []
+        else:
+            inp = [inp]
+    if isinstance(inp, Iterable):
+        inp = [elt for elt in inp if elt in subject_dict()]
+    return inp
 
 def count_distinct(table, counter, query={}, include_deleted=False):
     query = dict(query)

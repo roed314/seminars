@@ -1,7 +1,7 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import topics, toggle, Toggle, languages_dict
+from seminars.utils import user_topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import render_template, request, redirect, url_for
@@ -172,7 +172,7 @@ class TalkSearchArray(SearchArray):
 
     def __init__(self):
         ## topics
-        topic = SelectBox(name="talk_topic", label="Topics", options=[("", "")] + [topic[:-1] for topic in topics()])
+        topic = SelectBox(name="talk_topic", label="Topics", options=[("", "")] + user_topics())
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -283,7 +283,7 @@ class SemSearchArray(SearchArray):
 
     def __init__(self):
         ## topics
-        topic = SelectBox(name="seminar_topic", label="Topics", options=[("", "")] + [topic[:-1] for topic in topics()])
+        topic = SelectBox(name="seminar_topic", label="Topics", options=[("", "")] + user_topics())
 
         ## pick institution where it is held
         institution = SelectBox(

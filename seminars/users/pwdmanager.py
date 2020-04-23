@@ -338,14 +338,15 @@ class SeminarsUser(UserMixin):
 
     @property
     def subjects(self):
-        cookie = request.cookies.get("subjects", "")
         subjects = self._data.get("subjects")
         if subjects:
             return subjects
-        elif cookie:
-            return [subj.strip() for subj in cookie.split(",")]
         else:
-            return []
+            cookie = request.cookies.get("subjects", "")
+            if cookie:
+                return [subj.strip() for subj in cookie.split(",")]
+            else:
+                return []
 
     @subjects.setter
     def subjects(self, subjects):
@@ -582,6 +583,14 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
             return timezone(self.timezone)
         except UnknownTimeZoneError:
             return timezone("UTC")
+
+    @property
+    def subjects(self):
+        cookie = request.cookies.get("subjects", "")
+        if cookie:
+            return [subj.strip() for subj in cookie.split(",")]
+        else:
+            return []
 
     @property
     def email_confirmed(self):

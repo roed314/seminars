@@ -1,4 +1,4 @@
-\*TODO: DECIDE IF TALKS HAVE SINGLE SUBJECT OR SEVERAL AND IF FILTERING WILL WORK ON THESE OR PULL FROM TOPICS*\
+/*TODO: DECIDE IF TALKS HAVE SINGLE SUBJECT OR SEVERAL AND IF FILTERING WILL WORK ON THESE OR PULL FROM TOPICS*/
 function toggle_time(id) {
     var future = $('#future_talks');
     var past = $('#past_talks');
@@ -90,10 +90,14 @@ function setLanguageLinks() {
 function setSubjectLinks() {
     var cur_subjects = getCookie("subjects");
     if (cur_subjects == null) {
+        console.log("No subjects!");
         setCookie("subjects", "");
         setCookie("filter_subject", "0");
+        $("#welcome-popup").show();
+        $("#subject-filter-menu").show();
+        cur_subjects = "";
     } else {
-        $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subjects"))));
+        $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
     }
     cur_subjects = cur_subjects.split(",");
     for (var i=0; i<cur_subjects.length; i++) {
@@ -101,10 +105,7 @@ function setSubjectLinks() {
         $(".subject-" + cur_subjects[i]).removeClass("subject-filtered");
     }
 }
-
-function setLinks() {
-    setSubjectLinks();
-    setLanguageLinks();
+function setTopicLinks() {
     var cur_topics = getCookie("topics");
     $(".talk").addClass("topic-filtered");
     if (cur_topics == null) {
@@ -126,6 +127,22 @@ function setLinks() {
             $(".topic-" + cur_topics[i]).removeClass("topic-filtered");
         }
         toggleFilters(null);
+    }
+}
+function welcomeDone() {
+    setCookie("filter_subject", "1");
+    $("#welcome-popup").hide();
+    $("#subject-filter-menu").hide();
+    if (!$('#enable_subject_filter').is(":checked")) {
+        $("#enable_subject_filter").prop("checked", true);
+    }
+}
+
+function setLinks() {
+    if (navigator.cookieEnabled) {
+        setSubjectLinks();
+        setLanguageLinks();
+        setTopicLinks();
     }
 }
 

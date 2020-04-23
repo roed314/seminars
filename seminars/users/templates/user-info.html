@@ -108,6 +108,7 @@
   {% endif %}
   <h2>Edit my details</h2>
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
+    <input type="hidden" name="subjects" value="{{ user.subjects }}" />
     <table>
       <tr>
         <td>Created</td>
@@ -134,8 +135,8 @@
       </tr>
       <tr>
         <td>Homepage</td>
-        <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" /></td>
-        <td id="urltest" /></td>
+        <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" placeholder="https://upan.edu/~someone"/></td>
+        {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
       <tr>
         <td>Timezone</td>
@@ -154,8 +155,9 @@
         </td>
       </tr>
       <tr>
+        <td>Subjects</td>
         <td>
-          <span id="subject_selector"></span>
+          <span id="subject_selector" style="width:356px;"></span>
         </td>
       </tr>
 
@@ -225,7 +227,7 @@ const subjOptions = [
 ];
 
 $(document).ready(function() {
-  var subjSelector = makeSubjectSelector(subjOptions, []);
+  var subjSelector = makeSubjectSelector(subjOptions, {{ user.subjects | safe }});
 });
 
 /* this tells the user if the passwords match */
