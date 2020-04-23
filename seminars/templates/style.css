@@ -296,7 +296,7 @@ body.knowl #header {
     font-size: 18px;
 }
 
-#top-menu a, #topic-filter-menu a, #language-filter-menu a, #top-menu span {
+#top-menu a, #topic-filter-menu a, #language-filter-menu a, #subject-filter-menu a, #top-menu span {
     text-decoration: none;
     color: #aaaaaa;
     font-family: sans-serif;
@@ -304,13 +304,53 @@ body.knowl #header {
     min-height: 20px;
 }
 
-div.topic_toggle, div.language_toggle {
+.ui-tabs {
+    border: none !important;
+    background: #373737 !important;
+}
+
+.ui-widget-header {
+    border: none !important;
+    background: #373737 !important;
+}
+
+.ui-state-default {
+    border: none !important;
+    background: #373737 !important;
+}
+
+.ui-state-active {
+    border: none !important;
+    background: #000000 !important;
+}
+
+.ui-tabs-panel {
+    background: #000000 !important;
+}
+
+.ui-corner-top {
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+}
+
+div.topic_toggle, div.language_toggle, div.subject_toggle {
     display: inline-block;
-    min-width: 15%;
+    min-width: 16%;
     padding: 5px;
     color: #aaaaaa;
 }
-div.topic_toggle:hover, div.language_toggle:hover, div.topic_cmd {
+
+div.topic_toggle.physics {
+    min-width: 32%;
+}
+
+div.subject_toggle, div.language_toggle  {
+    text-align: center;
+    background: #000000;
+    min-width: 10%;
+}
+
+div.topic_toggle:hover, div.language_toggle:hover, div.subject_toggle:hover, div.topic_cmd {
     cursor: pointer;
 }
 div.topic_cmd {
@@ -327,7 +367,7 @@ div.topic_cmd {
   padding-right: 0px;
 }
 
-#topic-filter-menu, #language-filter-menu {
+#topic-filter-menu, #language-filter-menu, #subject-filter-menu {
     display: none;
     background: {{color.header_background}};
 }
@@ -362,7 +402,7 @@ div.topic_cmd {
     color: {{color.header_background}};
 }
 
-div.topicselected, div.languageselected {
+div.topicselected, div.languageselected, div.subjectselected {
     color: {{color.header_background}};
     background: #aaaaaa;
 }

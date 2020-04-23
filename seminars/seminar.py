@@ -282,7 +282,7 @@ class WebSeminar(object):
                 cols.append(('class="date"', ""))
                 cols.append(('class="time"', ""))
             else:
-                cols.append(('class="date"', t.strftime("%a %b %-d")))
+                cols.append(('class="date"', t.strftime("%a %b %#d")))
                 cols.append(('class="time"', t.strftime("%H:%M")))
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:

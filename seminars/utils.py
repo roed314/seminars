@@ -91,7 +91,6 @@ def simplify_language_name(name):
         name = name[: name.find("(") - 1]
     return name
 
-
 @lru_cache(maxsize=None)
 def languages_dict():
     return {lang["iso639_1"]: simplify_language_name(lang["name"]) for lang in iso639.data if lang["iso639_1"]}
@@ -157,15 +156,25 @@ def allowed_shortname(shortname):
 @lru_cache(maxsize=None)
 def topics():
     return sorted(
-        ((rec["abbreviation"], rec["name"]) for rec in db.topics.search({}, ["abbreviation", "name"])),
-        key=lambda x: x[1].lower(),
+        ((rec["abbreviation"], rec["name"], rec["subject"]) for rec in db.topics.search({}, ["abbreviation", "name", "subject"])),
+        key=lambda x: (x[2].lower(), x[1].lower()),
     )
 
+@lru_cache(maxsize=None)
+def subjects():
+    return sorted(
+        tuple(set(((rec["subject"], rec["subject"].capitalize()) for rec in db.topics.search({}, ["subject"])))),
+        key=lambda x: x[1].lower(),
+    )
 
 @lru_cache(maxsize=None)
 def topic_dict():
     return dict(topics())
 
+
+@lru_cache(maxsize=None)
+def subject_dict():
+    return dict(subjects())
 
 def clean_topics(inp):
     if inp is None:
