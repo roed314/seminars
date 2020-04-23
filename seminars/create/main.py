@@ -366,9 +366,9 @@ def save_seminar():
             typ = "time"
         try:
             val = raw_data.get(col, "")
-            data[col] = None # make sure col is present even if process_user_input fails
+            data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
-        except Exception as err: # should only be ValueError's but let's be cautious
+        except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Seminar name cannot be blank")
@@ -388,7 +388,7 @@ def save_seminar():
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     organizer_data = []
-    display_count = email_count = 0
+    contact_count = 0
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
@@ -398,9 +398,9 @@ def save_seminar():
             typ = db.seminar_organizers.col_type[col]
             try:
                 val = raw_data.get(name, "")
-                D[col] = None # make sure col is present even if process_user_input fails
+                D[col] = None  # make sure col is present even if process_user_input fails
                 D[col] = process_user_input(val, col, typ, tz)
-            except Exception as err: # should only be ValueError's but let's be cautious
+            except Exception as err:  # should only be ValueError's but let's be cautious
                 errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
         if D["homepage"] or D["email"] or D["full_name"]:
             if not D["full_name"]:
@@ -410,8 +410,6 @@ def save_seminar():
             # but it sets the database column curator, so the
             # boolean needs to be inverted
             D["curator"] = not D["curator"]
-            if D["display"]:
-                display_count += 1
             if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
                 flash(
                     format_warning(
@@ -423,16 +421,38 @@ def save_seminar():
                     "error",
                 )
             if D["email"]:
-                email_count += 1
+                r = db.users.lookup(D["email"])
+                if r and r["email_confirmed"]:
+                    if D["full_name"] != r["name"]:
+                        errmsgs.append(
+                            format_errmsg(
+                                "Organizer name %s does not match the name %s of the account with email address %s",
+                                D["full_name"],
+                                r["name"],
+                                D["email"],
+                            )
+                        )
+                    else:
+                        if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
+                            flash(
+                                format_warning(
+                                    "The hompage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
+                                    D["homepage"],
+                                    r["homepage"],
+                                    D["email"],
+                                )
+                            )
+                        if D["display"]:
+                            contact_count += 1
+
             organizer_data.append(D)
-    if display_count == 0:
-        errmsgs.append(format_errmsg("At least one organizer or curator must be displayed."))
-    if email_count == 0:
+    if contact_count == 0:
         errmsgs.append(
             format_errmsg(
-                "At least one organizer or curator needs %s set to ensure that someone can maintain this listing.<br>%s",
-                "email",
-                "Note that the email will not be public if homepage is set or display is not checked, it is used only to identify the organizer.",
+                "There must be at least one displayed organizer or curator with a %s so that there is a contact for this listing.<br>%s<br>%s",
+                "confirmed email",
+                "This email will not be visible if homepage is set or display is not checked, it is used only to identify the organizer's account.",
+                "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
             )
         )
     # Don't try to create new_version using invalid input
@@ -501,7 +521,7 @@ def save_institution():
         typ = db.institutions.col_type[col]
         try:
             val = raw_data.get(col, "")
-            data[col] = None # make sure col is present even if process_user_input fails
+            data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
             if col == "admin":
                 userdata = userdb.lookup(data[col])
@@ -512,7 +532,7 @@ def save_institution():
                         errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
                 elif not userdata["creator"]:
                     errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
-        except Exception as err: # should only be ValueError's but let's be cautious
+        except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Institution name cannot be blank.")
@@ -621,11 +641,11 @@ def save_talk():
         typ = db.talks.col_type[col]
         try:
             val = raw_data.get(col, "")
-            data[col] = None # make sure col is present even if process_user_input fails
+            data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
-        except Exception as err: # should only be ValueError's but let's be cautious
+        except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
     if not data["speaker"]:
         errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
@@ -832,7 +852,11 @@ def save_seminar_schedule():
             if not warned and any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
                 warned = True
                 flash_warning("Talks are only saved if you specify a speaker")
-            elif not warned and seminar_ctr and not any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
+            elif (
+                not warned
+                and seminar_ctr
+                and not any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols)
+            ):
                 warned = True
                 flash_warning("To delete an existing talk, click Details and then click delete on the Edit talk page")
             continue
@@ -840,7 +864,7 @@ def save_seminar_schedule():
         if date:
             try:
                 date = process_user_input(date, "date", "date", tz)
-            except Exception as err: # should only be ValueError's but let's be cautious
+            except Exception as err:  # should only be ValueError's but let's be cautious
                 errmsgs.append(format_errmsg("Unable to process input %s for date: {0}".format(err), date))
         else:
             errmsgs.append(format_errmsg("You must specify a date for the talk by %s", speaker))
@@ -897,7 +921,7 @@ def save_seminar_schedule():
             typ = db.talks.col_type[col]
             try:
                 val = raw_data.get("%s%s" % (col, i), "")
-                data[col] = None # make sure col is present even if process_user_input fails
+                data[col] = None  # make sure col is present even if process_user_input fails
                 data[col] = process_user_input(val, col, typ, tz)
             except Exception as err:
                 errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))

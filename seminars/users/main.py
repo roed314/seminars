@@ -30,7 +30,14 @@ from io import BytesIO
 
 from seminars import db
 
-from seminars.utils import timezones, timestamp
+from seminars.utils import (
+    timezones,
+    timestamp,
+    validate_url,
+    format_errmsg,
+    show_input_errors,
+)
+
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 import datetime
 
@@ -174,6 +181,9 @@ def info():
 @login_page.route("/set_info", methods=["POST"])
 @login_required
 def set_info():
+    homepage = request.form.get("homepage")
+    if homepage and not validate_url(homepage):
+        return show_input_errors([format_errmsg("Homepage %s is not a valid URL, it should begin with http:// or https://", homepage)])
     for k, v in request.form.items():
         setattr(current_user, k, v)
     previous_email = current_user.email
