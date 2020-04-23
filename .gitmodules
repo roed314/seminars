@@ -1,3 +1,6 @@
 [submodule "lmfdb"]
 	path = lmfdb
 	url = https://github.com/lmfdb/lmfdb
+[submodule "seminars/static/select-pure"]
+	path = seminars/static/select-pure
+	url = https://github.com/dudyn5ky1/select-pure.git
