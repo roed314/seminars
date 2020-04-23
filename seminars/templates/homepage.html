@@ -45,6 +45,10 @@ console.log('Form is unchanged!');
 </div>
 
 {% if section == "Browse" %}
+  <div id="welcome-popup">
+    <h1> Welcome to Math Seminars! </h1>
+    <p> Please select your subjects of interest. <button onclick="welcomeDone();">Done</button></p>
+  </div>
   <div id="subject-filter-menu">
     {% for ab, name in subjects %}
       <div class="subject_toggle" id="subjectlink-{{ab}}">
@@ -78,13 +82,9 @@ console.log('Form is unchanged!');
             </div>
           {% endfor %}
          </div>
-
       </div>
     {% endfor %}
     </div>
-
-
-
   </div>
 
   <div id="language-filter-menu">

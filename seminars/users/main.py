@@ -152,6 +152,7 @@ def email_confirmed_required(fn):
 
 @login_page.route("/info")
 def info():
+    print(current_user.subjects)
     if current_user.is_authenticated:
         title = section = "Account"
     else:

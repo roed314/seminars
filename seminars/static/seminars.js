@@ -1,4 +1,4 @@
-\*TODO: DECIDE IF TALKS HAVE SINGLE SUBJECT OR SEVERAL AND IF FILTERING WILL WORK ON THESE OR PULL FROM TOPICS*\
+/*TODO: DECIDE IF TALKS HAVE SINGLE SUBJECT OR SEVERAL AND IF FILTERING WILL WORK ON THESE OR PULL FROM TOPICS*/
 function toggle_time(id) {
     var future = $('#future_talks');
     var past = $('#past_talks');
@@ -90,10 +90,14 @@ function setLanguageLinks() {
 function setSubjectLinks() {
     var cur_subjects = getCookie("subjects");
     if (cur_subjects == null) {
+        console.log("No subjects!");
         setCookie("subjects", "");
         setCookie("filter_subject", "0");
+        $("#welcome-popup").show();
+        $("#subject-filter-menu").show();
+        cur_subjects = "";
     } else {
-        $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subjects"))));
+        $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
     }
     cur_subjects = cur_subjects.split(",");
     for (var i=0; i<cur_subjects.length; i++) {
@@ -101,31 +105,41 @@ function setSubjectLinks() {
         $(".subject-" + cur_subjects[i]).removeClass("subject-filtered");
     }
 }
+function welcomeDone() {
+    setCookie("filter_subject", "1");
+    $("#welcome-popup").hide();
+    $("#subject-filter-menu").hide();
+    if (!$('#enable_subject_filter').is(":checked")) {
+        $("#enable_subject_filter").prop("checked", true);
+    }
+}
 
 function setLinks() {
-    setSubjectLinks();
-    setLanguageLinks();
-    var cur_topics = getCookie("topics");
-    $(".talk").addClass("topic-filtered");
-    if (cur_topics == null) {
-        setCookie("topics", "");
-        setCookie("filter_topic", "0");
-        // filter_language set in setLanguageLinks(), since we added it after launch
-        setCookie("filter_calendar", "0");
-        // Set the following in preparation so we don't need to worry about them not existing.
-        setCookie("filter_location", "0");
-        setCookie("filter_time", "0");
-    } else {
-        $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
-        $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
-        $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
-        $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
-        cur_topics = cur_topics.split(",");
-        for (var i=0; i<cur_topics.length; i++) {
-            $("#topiclink-" + cur_topics[i]).addClass("topicselected");
-            $(".topic-" + cur_topics[i]).removeClass("topic-filtered");
+    if (navigator.cookieEnabled) {
+        setSubjectLinks();
+        setLanguageLinks();
+        var cur_topics = getCookie("topics");
+        $(".talk").addClass("topic-filtered");
+        if (cur_topics == null) {
+            setCookie("topics", "");
+            setCookie("filter_topic", "0");
+            // filter_language set in setLanguageLinks(), since we added it after launch
+            setCookie("filter_calendar", "0");
+            // Set the following in preparation so we don't need to worry about them not existing.
+            setCookie("filter_location", "0");
+            setCookie("filter_time", "0");
+        } else {
+            $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
+            $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
+            $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
+            $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
+            cur_topics = cur_topics.split(",");
+            for (var i=0; i<cur_topics.length; i++) {
+                $("#topiclink-" + cur_topics[i]).addClass("topicselected");
+                $(".topic-" + cur_topics[i]).removeClass("topic-filtered");
+            }
+            toggleFilters(null);
         }
-        toggleFilters(null);
     }
 }
 

@@ -7,24 +7,14 @@
     <td>
       Filter by:
     </td>
+    {% for ftype in ["subject", "topic", "language"] %}
     <td>
-      {{ toggle(tglid="enable_subject_filter", value="", onchange="toggleFilters(this.id);") | safe }}
+      {{ toggle(tglid="enable_"+ftype+"_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
     <td style="padding-right: 2em;">
-      <a id="subject-filter-btn" class="likeknowl" onclick="$('#subject-filter-menu').slideToggle(300); return false;">subject</a>
+      <a id="{{ftype}}-filter-btn" class="likeknowl" onclick="$('#{{ftype}}-filter-menu').slideToggle(300); return false;">{{ftype}}</a>
     </td>
-    <td>
-      {{ toggle(tglid="enable_topic_filter", value="", onchange="toggleFilters(this.id);") | safe }}
-    </td>
-    <td style="padding-right: 2em;">
-      <a id="topic-filter-btn" class="likeknowl"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
-    </td>
-    <td>
-      {{ toggle(tglid="enable_language_filter", value="", onchange="toggleFilters(this.id);") | safe }}
-    </td>
-    <td style="padding-right: 2em;">
-      <a id="language-filter-btn" class="likeknowl" onclick="$('#language-filter-menu').slideToggle(300); return false;">language</a>
-    </td>
+    {% endfor %}
     {% if user.is_authenticated %}
     <td >
       {{ toggle(tglid="enable_calendar_filter", value="", onchange="toggleFilters(this.id);") | safe }}
@@ -49,8 +39,8 @@
   <tr> {{ talks_header()  | safe }} </tr>
   </thead>
   <tbody>
-    {% for talk in talks %} \*TODO: FIX SUBJECT CLASSES HERE BASED ON WHETHER WE WANT TO BE LIST*\
-    <tr class="talk {%for topic in talk.topics %} topic-{{topic}} {% endfor %} {%for subject in talk.subject %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
+    {% for talk in talks %} {# TODO: FIX SUBJECT CLASSES HERE BASED ON WHETHER WE WANT TO BE LIST #}
+    <tr class="talk {% for topic in talk.topics %} topic-{{topic}} {% endfor %} {% for subject in talk.subjects %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
       {{ talk.oneline() | safe }}
     </tr>
     {% endfor %}

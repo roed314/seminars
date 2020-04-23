@@ -108,6 +108,7 @@
   {% endif %}
   <h2>Edit my details</h2>
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
+    <input type="hidden" name="subjects" value="{{ user.subjects }}" />
     <table>
       <tr>
         <td>Created</td>
@@ -154,8 +155,9 @@
         </td>
       </tr>
       <tr>
+        <td>Subjects</td>
         <td>
-          <span id="subject_selector"></span>
+          <span id="subject_selector" style="width:356px;"></span>
         </td>
       </tr>
 
@@ -220,6 +222,14 @@ const subjOptions = [
   {
     label: "{{ name }}",
     value: "{{ sid }}",
+  },
+  {% endfor %}
+];
+const initialSubjects = [
+  {% for subj in user.subjects %}
+  {
+    label: "{{ subj | capitalize }}",
+    value: "{{ subj }}",
   },
   {% endfor %}
 ];
