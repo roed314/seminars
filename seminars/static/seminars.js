@@ -1,4 +1,3 @@
-/*TODO: DECIDE IF TALKS HAVE SINGLE SUBJECT OR SEVERAL AND IF FILTERING WILL WORK ON THESE OR PULL FROM TOPICS*/
 function toggle_time(id) {
     var future = $('#future_talks');
     var past = $('#past_talks');
@@ -150,7 +149,7 @@ function toggleSubject(id) {
     var toggler = $("#" + id);
     console.log(id);
     var subject = id.substring(12); // subjectlink-*
-    var talks = $(".subject-" + subject);
+    var talks = $("tr.talk.subject-" + subject);
     if (toggler.hasClass("subjectselected")) {
         toggler.removeClass("subjectselected");
         cur_subjects = removeFromCookie(subject, "subjects").split(",");
@@ -179,7 +178,7 @@ function toggleLanguage(id) {
     var toggler = $("#" + id);
     console.log(id);
     var lang = id.substring(9); // langlink-*
-    var talks = $(".lang-" + lang);
+    var talks = $(".talk.lang-" + lang);
     if (toggler.hasClass("languageselected")) {
         toggler.removeClass("languageselected");
         cur_langs = removeFromCookie(lang, "languages").split(",");
@@ -208,7 +207,7 @@ function toggleTopic(id) {
     var toggler = $("#" + id);
     console.log(id);
     var topic = id.substring(10); // topiclink-*
-    var talks = $(".topic-" + topic);
+    var talks = $(".talk.topic-" + topic);
     if (toggler.hasClass("topicselected")) {
         toggler.removeClass("topicselected");
         cur_topics = removeFromCookie(topic, "topics").split(",");
@@ -234,35 +233,30 @@ function toggleTopic(id) {
 }
 function getAllTopics(subject) {
     var toggles = []
-    $(".topic_toggle."+subject).each(function() {
-        toggles.push(this.id.substring(10));
+    $(".topic_toggle.subject-"+subject).each(function() {
+        toggles.push(this.id);
     })
     return toggles;
 }
 
 function selectAllTopics(subject) {
     var toggles = getAllTopics(subject);
-    setCookie("topics", toggles.join(",")); /*TODO: FIX THIS TO ADD ALL IN SUBJECT*/
-    $(".topic_toggle.subject-"+subject).addClass("topicselected"); /*TODO: STILL NOT RESTRICTING TO ONE SUBJECT???*/
-    var talks = $(".talk.subject-"+subject); /*TODO: ADD CLASS TO TALKS */
-    talks.removeClass("topic-filtered");
-    if (topicFiltering()) {
-        talks = talksToShow(talks);
-        talks.show();
-        apply_striping();
-    }
+    toggles.forEach(function(id,index){
+        var toggler = $("#" + id);
+        if (! toggler.hasClass("topicselected")) {
+            toggleTopic(id);
+        }
+    })
 }
+
 function clearAllTopics(subject) {
-    setCookie("topics", ""); /*TODO: FIX THIS TO ONLY REMOVE ALL IN SUBJECT*/
     var toggles = getAllTopics(subject);
-    $(".topic_toggle.subject-"+subject).removeClass("topicselected"); /*TODO: STILL NOT RESTRICTING TO ONE SUBJECT???*/
-    var talks = $(".talk.subject-"+subject); /*TODO: ADD CLASS TO TALKS */
-    talks.addClass("topic-filtered");
-    if (topicFiltering()) {
-        talks = talksToShow(talks);
-        talks.show();
-        apply_striping();
-    }
+    toggles.forEach(function(id,index){
+        var toggler = $("#" + id);
+        if (toggler.hasClass("topicselected")) {
+            toggleTopic(id);
+        }
+    })
 }
 
 var filter_classes = [['.topic-filtered', topicFiltering], ['.subject-filtered', subjectFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering]]
