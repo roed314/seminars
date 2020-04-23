@@ -149,7 +149,7 @@ function toggleSubject(id) {
     var toggler = $("#" + id);
     console.log(id);
     var subject = id.substring(12); // subjectlink-*
-    var talks = $("tr.talk.subject-" + subject);
+    var talks = $(".talk.subject-" + subject);
     if (toggler.hasClass("subjectselected")) {
         toggler.removeClass("subjectselected");
         cur_subjects = removeFromCookie(subject, "subjects").split(",");
