@@ -436,7 +436,7 @@ def save_seminar():
                         if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
                             flash(
                                 format_warning(
-                                    "The hompage %s does not match the homepage %s of the account with email address %s",
+                                    "The hompage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
                                     D["homepage"],
                                     r["homepage"],
                                     D["email"],
