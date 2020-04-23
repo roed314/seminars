@@ -231,7 +231,7 @@ function() {
 const topicOptions = [
   {% for ab, topic in topics %}
   {
-    label: "{{ topic }}",
+    label: "{{ topic | safe}}",
     value: "{{ ab }}",
   },
   {% endfor %}
@@ -240,7 +240,7 @@ const topicOptions = [
 const langOptions = [
   {% for code, name in languages_dict.items() %}
   {
-    label: "{{ name }}",
+    label: "{{ name | safe}}",
     value: "{{ code }}",
   },
   {% endfor %}

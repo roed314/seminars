@@ -484,25 +484,44 @@ def show_seminar(shortname):
     )
 
 
-@app.route("/seminar_raw/<shortname>")
+def talks_search_api(shortname, projection=1):
+    query = {"seminar_id": shortname, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
+    reverse_sort = False
+    if 'daterange' in request.args:
+        parse_date(request.args, query)
+    elif 'past' in request.args and 'future' in request.args:
+        # no restriction on date
+        pass
+    elif 'past' in request.args:
+        query["start_time"] = {'$lte': get_now()}
+        reverse_sort = True
+    elif 'future' in request.args:
+        query["start_time"] = {'$gte': get_now()}
+    talks = list(talks_search(query, projection=3))
+    talks.sort(key=lambda talk: talk.start_time, reverse=reverse_sort)
+    return talks
+
+@app.route("/seminar/<shortname>/raw")
 def show_seminar_raw(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         return render_template("404.html", title="Seminar not found")
-    talks = seminar.talks(projection=3)
-    now = get_now()
-    future = []
-    past = []
-    for talk in talks:
-        if talk.end_time >= now:
-            future.append(talk)
-        else:
-            past.append(talk)
-    future.sort(key=lambda talk: talk.start_time)
-    past.sort(key=lambda talk: talk.start_time, reverse=True)
+    talks = talks_search_api(shortname)
     return render_template(
-        "seminar_raw.html", title=seminar.name, future=future, past=past, seminar=seminar
+        "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
     )
+
+@app.route("/seminar/<shortname>/json")
+def show_seminar_json(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        return render_template("404.html", title="Seminar not found")
+    # FIXME
+    cols = ['start_time', 'end_time', 'speaker', 'title', 'abstract', 'speaker_affiliation', 'speaker_homepage']
+    talks = [{c: getattr(elt, c) for c in cols}
+             for elt in talks_search_api(shortname, projection=['seminar_id'] + cols)]
+    import json
+    return json.dumps(talks, default=str)
 
 
 @app.route("/talk/<semid>/<int:talkid>/")
@@ -565,6 +584,14 @@ def show_institution(shortname):
 @app.route("/info")
 def info():
     return render_template("info.html", title="Features", section="Info", subsection="features")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html", title="Privacy policy", section="Info", subsection="privacy")
+
+@app.route("/policies")
+def policies():
+    return render_template("policies.html", title="Policies", section="Info", subsection="policies")
 
 
 @app.route("/faq")

@@ -45,7 +45,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
       <td><span id="institution_selector"></span></td>
       <td class="forminfo">You can also add these later.</td>
     <tr>
-      <td><button type="submit">Create</button></td>
+      <td><button type="submit">Create</button></td><td class="forminfo">Before clicking this button please be sure you have read our <a href="{{ url_for('policies') }}">policies</a> for posting content.</td>
     </tr>
   </table>
 </form>
@@ -128,7 +128,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
 const instOptions = [
   {% for iid, name in institutions %}
   {
-    label: "{{ name }}",
+    label: "{{ name | safe}}",
     value: "{{ iid }}",
   },
   {% endfor %}
