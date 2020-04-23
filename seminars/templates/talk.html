@@ -55,11 +55,14 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 </div>
 <div>
 <p class="forminfo">If you have any concerns or questions about this listing please get in touch with one of the contacts listed below.</p>
+<small>
 <table>
+  {{ seminar.show_name(homepage_link=True) | safe }}
   {{ seminar.show_organizers() | safe }}
   {{ seminar.show_curators() | safe }}
   <td></td><td class="forminfo">*indicates a contact for this listing</td>
 </table>
+</small>
 </div>
 
 
