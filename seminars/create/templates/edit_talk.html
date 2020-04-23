@@ -117,13 +117,12 @@
     <tr>
       <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; any seminar comments shown below will appear in additiona to the comments you put here.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
-  </table>
     {% if talk.seminar.comments %}
-    <hr style="width:800px;">
-    <p>
-      {{ seminar.show_comments() | safe }}
-    </p>
+    <tr>
+      <td colspan="2">{{ talk.seminar.show_comments() | safe }}<td>
+    </tr>
     {% endif %}
+  </table>
   <hr style="width:800px;">
   <table>
     <tr>
