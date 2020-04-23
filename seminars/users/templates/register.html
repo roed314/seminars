@@ -1,7 +1,12 @@
 {% extends 'homepage.html' %}
 {% block content %}
 
-Before registering, you are encouraged to read the site's <a href="{{ url_for('policies') }}" target="_blank">policies</a> and in particular the <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
+Each registered user should be an <i>individual</i>, not an organization or a group of people, 
+so the email address below should be associated to an individual.
+(Seminar email addresses or aliases may be associated with a seminar later.)
+<br><br>
+Before registering, you are encouraged to read the site's <a href="{{ url_for('policies') }}" target="_blank">policies</a> 
+and in particular the <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
 
 <h1>Register</h1>
 
@@ -9,9 +14,8 @@ Before registering, you are encouraged to read the site's <a href="{{ url_for('p
   <table>
     <tr>
       <td>Email:</td>
-      <td><input name="email" size="30" value="{{ email }}" /></td></tr>
-    <tr>
-      <td colspan="2" class="forminfo">by default, not visible to others</td></tr>
+      <td><input name="email" size="30" value="{{ email }}" /></td>
+      <td colspan="2" class="forminfo">By default, not visible to others.</td></tr>
     <tr>
       <td colspan="2" class="spacing" /></tr>
     <tr><td colspan="2" class="forminfo" />Don't use a password that you use elsewhere!</tr>

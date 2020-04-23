@@ -322,15 +322,13 @@ class WebSeminar(object):
         for rec in self.organizer_data:
             show = rec["curator"] if curators else not rec["curator"]
             if show and rec["display"]:
-                link = (
-                    rec["homepage"]
-                    if rec["homepage"]
-                    else ("mailto:%s" % (rec["email"]) if rec["email"] else "")
-                )
+                link = (rec["homepage"] if rec["homepage"] else ("mailto:%s" % (rec["email"]) if rec["email"] else ""))
                 name = rec["full_name"] if rec["full_name"] else link
                 if name:
-                    editors.append('<a href="%s">%s</a>' % (link, name) if link else name)
-
+                    namelink = '<a href="%s">%s</a>' % (link, name) if link else name
+                    if link and db.users.count({"email":rec["email"], "email_confirmed":True}):
+                        namelink += "*"
+                    editors.append(namelink)
         if editors:
             return "<tr><td>%s:</td><td>%s</td></tr>" % (label, ", ".join(editors))
         else:
