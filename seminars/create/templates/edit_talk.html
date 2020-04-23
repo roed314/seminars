@@ -115,7 +115,7 @@
       <td colspan="2">{{ KNOWL("comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; seminar comments will appear immediately after talk comments.">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk-specific comments here, such as livestream access instructions specific to this talk, or notes about the speaker.  Seminar comments will be displayed below talk comments.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
   </table>
   <hr style="width:800px;">
@@ -160,7 +160,7 @@
   <table>
     <tr>
       <td colspan="2">
-        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" placeholder="TeX symbols are OK here">{{talk.abstract | blanknone }}</textarea>
+        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" placeholder="TeX symbols are OK here.  This is joint work with Leonhard Euler.">{{talk.abstract | blanknone }}</textarea>
       </td>
     </tr>
   </table>
