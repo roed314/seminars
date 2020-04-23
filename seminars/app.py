@@ -17,7 +17,7 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
-from seminars.utils import topics, subjects, top_menu, languages_dict
+from seminars.utils import topics, user_topics, subjects, top_menu, languages_dict
 from seminars.knowls import static_knowl
 from .seminar import seminars_header
 from .talk import talks_header
@@ -122,6 +122,7 @@ def ctx_proc_userdata():
     data["DEBUG"] = is_debug_mode()
 
     data["topics"] = topics()
+    data["user_topics"] = user_topics()
     data["subjects"] = subjects()
     data["top_menu"] = top_menu()
 

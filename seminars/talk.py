@@ -478,6 +478,10 @@ Email link to speaker
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 
+    @property
+    def subjects(self):
+        # derived from topics
+        return sorted(set(topic.split("_", 1)[0] for topic in self.topics))
 
 def talks_header(include_seminar=True, include_subscribe=True, datetime_header="Your time"):
     cols = []

@@ -39,7 +39,7 @@
   <tr> {{ talks_header()  | safe }} </tr>
   </thead>
   <tbody>
-    {% for talk in talks %} {# TODO: FIX SUBJECT CLASSES HERE BASED ON WHETHER WE WANT TO BE LIST #}
+    {% for talk in talks %}
     <tr class="talk {% for topic in talk.topics %} topic-{{topic}} {% endfor %} {% for subject in talk.subjects %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
       {{ talk.oneline() | safe }}
     </tr>

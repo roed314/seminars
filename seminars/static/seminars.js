@@ -105,6 +105,30 @@ function setSubjectLinks() {
         $(".subject-" + cur_subjects[i]).removeClass("subject-filtered");
     }
 }
+function setTopicLinks() {
+    var cur_topics = getCookie("topics");
+    $(".talk").addClass("topic-filtered");
+    if (cur_topics == null) {
+        setCookie("topics", "");
+        setCookie("filter_topic", "0");
+        // filter_language set in setLanguageLinks(), since we added it after launch
+        setCookie("filter_calendar", "0");
+        // Set the following in preparation so we don't need to worry about them not existing.
+        setCookie("filter_location", "0");
+        setCookie("filter_time", "0");
+    } else {
+        $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
+        $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
+        $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
+        $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
+        cur_topics = cur_topics.split(",");
+        for (var i=0; i<cur_topics.length; i++) {
+            $("#topiclink-" + cur_topics[i]).addClass("topicselected");
+            $(".topic-" + cur_topics[i]).removeClass("topic-filtered");
+        }
+        toggleFilters(null);
+    }
+}
 function welcomeDone() {
     setCookie("filter_subject", "1");
     $("#welcome-popup").hide();
@@ -118,28 +142,7 @@ function setLinks() {
     if (navigator.cookieEnabled) {
         setSubjectLinks();
         setLanguageLinks();
-        var cur_topics = getCookie("topics");
-        $(".talk").addClass("topic-filtered");
-        if (cur_topics == null) {
-            setCookie("topics", "");
-            setCookie("filter_topic", "0");
-            // filter_language set in setLanguageLinks(), since we added it after launch
-            setCookie("filter_calendar", "0");
-            // Set the following in preparation so we don't need to worry about them not existing.
-            setCookie("filter_location", "0");
-            setCookie("filter_time", "0");
-        } else {
-            $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
-            $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
-            $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
-            $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
-            cur_topics = cur_topics.split(",");
-            for (var i=0; i<cur_topics.length; i++) {
-                $("#topiclink-" + cur_topics[i]).addClass("topicselected");
-                $(".topic-" + cur_topics[i]).removeClass("topic-filtered");
-            }
-            toggleFilters(null);
-        }
+        setTopicLinks();
     }
 }
 

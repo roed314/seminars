@@ -225,17 +225,9 @@ const subjOptions = [
   },
   {% endfor %}
 ];
-const initialSubjects = [
-  {% for subj in user.subjects %}
-  {
-    label: "{{ subj | capitalize }}",
-    value: "{{ subj }}",
-  },
-  {% endfor %}
-];
 
 $(document).ready(function() {
-  var subjSelector = makeSubjectSelector(subjOptions, []);
+  var subjSelector = makeSubjectSelector(subjOptions, {{ user.subjects | safe }});
 });
 
 /* this tells the user if the passwords match */

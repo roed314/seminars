@@ -69,15 +69,15 @@ console.log('Form is unchanged!');
        <div id="tab-{{subject_ab}}-content" class="tab-subject-panel">
          {% for ab, name, topic_subject in topics %}
            {% if topic_subject == subject_ab %}
-             <div class="topic_toggle subject-{{topic_subject}}" id="topiclink-{{ab}}">
-                {{name}}
+             <div class="topic_toggle subject-{{topic_subject}}" id="topiclink-{{subject_ab}}_{{ab}}">
+               {{name}}
                {% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
              </div>
            {% endif %}
          {% endfor %}
          <div id="topic-filter-head">
-          {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics(\'"+subject_ab+"\');"), ("CLR", "Clear all", "clearAllTopics(\'"+subject_ab+"\');")] %}
-            <div class="topic_cmd" id="topiclink-{{subject_ab}}-{{ab}}" onclick="{{onclick}}">
+          {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics('"+subject_ab+"');"), ("CLR", "Clear all", "clearAllTopics('"+subject_ab+"');")] %}
+            <div class="topic_cmd" id="topiclink-{{subject_ab}}_{{ab}}" onclick="{{onclick}}">
               {{name}}
             </div>
           {% endfor %}

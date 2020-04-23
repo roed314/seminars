@@ -36,6 +36,7 @@ from seminars.utils import (
     validate_url,
     format_errmsg,
     show_input_errors,
+    clean_subjects,
 )
 
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
@@ -186,6 +187,7 @@ def set_info():
         return show_input_errors([format_errmsg("Homepage %s is not a valid URL, it should begin with http:// or https://", homepage)])
     for k, v in request.form.items():
         setattr(current_user, k, v)
+    current_user.subjects = clean_subjects(current_user.subjects)
     previous_email = current_user.email
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))

@@ -184,7 +184,9 @@ class WebSeminar(object):
 
     def show_topics(self):
         if self.topics:
-            return " (" + ", ".join(topic_dict()[topic] for topic in self.topics) + ")"
+            subjects = set(topic.split("_", 1)[0] for topic in self.topics)
+            tdict = topic_dict(include_subj=(len(subjects) > 1))
+            return " (" + ", ".join(tdict[topic] for topic in self.topics) + ")"
         else:
             return ""
 
@@ -282,7 +284,7 @@ class WebSeminar(object):
                 cols.append(('class="date"', ""))
                 cols.append(('class="time"', ""))
             else:
-                cols.append(('class="date"', t.strftime("%a %b %#d")))
+                cols.append(('class="date"', t.strftime("%a %b %-d")))
                 cols.append(('class="time"', t.strftime("%H:%M")))
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
