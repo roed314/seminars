@@ -344,7 +344,9 @@ div.topic_toggle.physics {
     min-width: 32%;
 }
 
-div.subject_toggle {
+div.subject_toggle, div.language_toggle  {
+    text-align: center;
+    background: #000000;
     min-width: 10%;
 }
 

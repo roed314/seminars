@@ -36,7 +36,7 @@
   </tr>
 </table>
 
-<table>
+<table id="timezone-table">
    <tr>
     <td style="padding-right: 2em;">
       Times in {{ user.show_timezone("browse") }}
@@ -49,12 +49,19 @@
   <tr> {{ talks_header()  | safe }} </tr>
   </thead>
   <tbody>
-    {% for talk in talks %}
-    <tr class="talk {%for topic in talk.topics %} topic-{{topic}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
+    {% for talk in talks %} \*TODO: FIX SUBJECT CLASSES HERE BASED ON WHETHER WE WANT TO BE LIST*\
+    <tr class="talk {%for topic in talk.topics %} topic-{{topic}} {% endfor %} {%for subject in talk.subject %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
       {{ talk.oneline() | safe }}
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
+    <!-- topic tabs -->
+      <script>
+        $( function() {
+          $( "#subjects-tabs" ).tabs();
+        } );
+      </script>
 
 {% endblock %}

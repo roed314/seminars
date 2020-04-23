@@ -1,4 +1,4 @@
-
+\*TODO: DECIDE IF TALKS HAVE SINGLE SUBJECT OR SEVERAL AND IF FILTERING WILL WORK ON THESE OR PULL FROM TOPICS*\
 function toggle_time(id) {
     var future = $('#future_talks');
     var past = $('#past_talks');
@@ -132,7 +132,7 @@ function setLinks() {
 function toggleSubject(id) {
     var toggler = $("#" + id);
     console.log(id);
-    var subject = id.substring(8); // subjectlink-*
+    var subject = id.substring(12); // subjectlink-*
     var talks = $(".subject-" + subject);
     if (toggler.hasClass("subjectselected")) {
         toggler.removeClass("subjectselected");
@@ -217,16 +217,17 @@ function toggleTopic(id) {
 }
 function getAllTopics(subject) {
     var toggles = []
-    $(".topic_toggle").each(function() {
+    $(".topic_toggle."+subject).each(function() {
         toggles.push(this.id.substring(10));
     })
     return toggles;
 }
-function selectAllTopics() {
-    var toggles = getAllTopics();
-    setCookie("topics", toggles.join(","));
-    $(".topic_toggle").addClass("topicselected");
-    var talks = $(".talk");
+
+function selectAllTopics(subject) {
+    var toggles = getAllTopics(subject);
+    setCookie("topics", toggles.join(",")); /*TODO: FIX THIS TO ADD ALL IN SUBJECT*/
+    $(".topic_toggle.subject-"+subject).addClass("topicselected"); /*TODO: STILL NOT RESTRICTING TO ONE SUBJECT???*/
+    var talks = $(".talk.subject-"+subject); /*TODO: ADD CLASS TO TALKS */
     talks.removeClass("topic-filtered");
     if (topicFiltering()) {
         talks = talksToShow(talks);
@@ -234,15 +235,16 @@ function selectAllTopics() {
         apply_striping();
     }
 }
-function clearAllTopics() {
-    setCookie("topics", "");
-    var toggles = getAllTopics();
-    $(".topic_toggle").removeClass("topicselected");
-    var talks = $(".talk");
+function clearAllTopics(subject) {
+    setCookie("topics", ""); /*TODO: FIX THIS TO ONLY REMOVE ALL IN SUBJECT*/
+    var toggles = getAllTopics(subject);
+    $(".topic_toggle.subject-"+subject).removeClass("topicselected"); /*TODO: STILL NOT RESTRICTING TO ONE SUBJECT???*/
+    var talks = $(".talk.subject-"+subject); /*TODO: ADD CLASS TO TALKS */
     talks.addClass("topic-filtered");
     if (topicFiltering()) {
-        talks.hide();
-        // no need to apply striping since no visible talks
+        talks = talksToShow(talks);
+        talks.show();
+        apply_striping();
     }
 }
 

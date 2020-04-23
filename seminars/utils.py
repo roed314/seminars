@@ -163,8 +163,8 @@ def topics():
 @lru_cache(maxsize=None)
 def subjects():
     return sorted(
-        tuple(set(((rec["subject"]) for rec in db.topics.search({}, ["subject"])))),
-        key=lambda x: x[0].lower(),
+        tuple(set(((rec["subject"], rec["subject"].capitalize()) for rec in db.topics.search({}, ["subject"])))),
+        key=lambda x: x[1].lower(),
     )
 
 @lru_cache(maxsize=None)
