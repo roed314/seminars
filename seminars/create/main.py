@@ -421,8 +421,7 @@ def save_seminar():
                     "error",
                 )
             if D["email"]:
-                r = db.users.lookup(D["email"])
-                if r and r["email_confirmed"]:
+                if db.users.count({'email':D["email"], 'email_confirmed':True}):
                     if D["full_name"] != r["name"]:
                         errmsgs.append(format_errmsg("Organizer name %s does not match the name %s of the account with email address %s", D["full_name"], r["name"], D["email"]))
                     else:
@@ -438,7 +437,7 @@ def save_seminar():
                 "There must be at least one displayed organizer or curator with a %s so that there is a contact for this listing.<br>%s<br>%s",
                 "confirmed email",
                 "This email will not be visible if homepage is set or display is not checked, it is used only to identify the organizer's account.",
-                "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked (this will make you a curator.",
+                "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
             )
         )
     # Don't try to create new_version using invalid input
