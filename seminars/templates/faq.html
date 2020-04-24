@@ -12,7 +12,7 @@
       <h4>
         How do I browse only combinatorics talks?
       </h4>
-      <p> At the <a href="{{ url_for("index") }}">Browse</a> tab,
+      <p> On the <a href="{{ url_for("index") }}">Browse</a> page,
         in the text "Filter by topic", click "topic" to open the topics menu,
         press "Clear all" (if necessary) to deselect all topics,
         click on "combinatorics",
@@ -64,11 +64,13 @@
         <ol>
           <li>
             Registered users can save seminars and talks to their favorites.
-            Then on the <a href="{{ url_for("index") }}">Browse</a> tab they can click "Show only saved events" to display only those.
+            Then on the <a href="{{ url_for("index") }}">Browse</a> page 
+            they can click "Show only saved events" to display only those.
             Moreover, on the Account page, they can export these to their own calendars.
           </li>
           <li>
-            Registered users can view all livestream links for connecting online to a talk.  (Many livestream links are viewable to all, but some seminar organizers may restrict access to registered users.)
+            Registered users can view all livestream links for connecting online to a talk.  
+            (Many livestream links are viewable to all, but some seminar organizers may restrict access to registered users.)
           </li>
           <li>
             Registered users, once endorsed, can create their own seminars and conferences for others to see.
@@ -86,11 +88,11 @@
 
   <li>
       <h4>
-        Can I register an alias email address for a group of organizers, like <span style="font-family:'Lucida Console' ,monospace">analysis_seminar@mit.edu</span>?
+        Can I register an alias email address for a group of organizers, like <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span>?
       </h4>
     <p>No.  Our policy is that each registered user is a <i>person</i>.  
       What you should do is register as yourself, 
-      and then list analysis_seminar@mit.edu as an organizer when you create your seminar.</p>
+      and then list <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> as an organizer when you create your seminar.</p>
     </li>
 </ul>
 
@@ -109,7 +111,7 @@
       <h4>
         I exported my favorites to a calendar.  Why is it showing no events?
       </h4>
-      <p>Some calendar services sync external calendars only every 24 hours.  Furthermore, some may take even longer for the initial sync.  A workaround is to go to the <a href="{{ url_for('user.info')}}">Account</a> tab, copy the URL of the "ICS file" link there, and add it manually to your calendar app.</p>
+      <p>Some calendar services sync external calendars only every 24 hours.  Furthermore, some may take even longer for the initial sync.  A workaround is to go to the <a href="{{ url_for('user.info')}}">Account</a> page, copy the URL of the "ICS file" link there, and add it manually to your calendar app.</p>
     </li>
   </ul>
 
@@ -178,11 +180,11 @@
 
     <li>
       <h4>
-        My seminar uses analysis_seminar@mit.edu as an alias email address for reaching all the organizers.  How do I make this appear as a contact email for my seminar?
+        My seminar uses <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> as an alias email address for reaching all the organizers.  How do I make this appear as a contact email for my seminar?
       </h4>
       <p>
-        First, do <i>not</i> register a user account with email address analysis_seminar@mit.edu; our policy is that each registered user must be a <i>person</i>.
-        Instead, when editing the seminar properties, in the list of organizers at the bottom, fill in a new row with email address analysis_seminar@mit.edu and uncheck "Organizer" and check "Display".  You must also add yourself or some other (human) registered user as an organizer, along with name and email address, and check "Display" (if you also provide a homepage URL, this person's email address will not be displayed).
+        First, do <i>not</i> register a user account with email address <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span>; our policy is that each registered user must be a <i>person</i>.
+        Instead, when editing the seminar properties, in the list of organizers at the bottom, fill in a new row with email address <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> and uncheck "Organizer" and check "Display".  You must also add yourself or some other (human) registered user as an organizer, along with name and email address, and check "Display" (if you also provide a homepage URL, this person's email address will not be displayed).
       </p>
     </li>
 
