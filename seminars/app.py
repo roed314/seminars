@@ -122,7 +122,7 @@ def ctx_proc_userdata():
     data["DEBUG"] = is_debug_mode()
 
     data["topics"] = topics()
-    data["usertopics"] = user_topics()
+    data["user_topics"] = user_topics()
     data["top_menu"] = top_menu()
 
     data["talks_header"] = talks_header
