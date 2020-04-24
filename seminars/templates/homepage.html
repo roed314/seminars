@@ -53,7 +53,7 @@ console.log('Form is unchanged!');
       </div>
       {% endfor %}
     </div>
-    {% for ab, name in topics %}
+    {% for ab, name in user_topics %}
       <div class="topic_toggle" id="topiclink-{{ab}}">
         {{name}}{% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
       </div>
