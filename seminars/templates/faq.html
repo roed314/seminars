@@ -164,8 +164,11 @@
         How do I create a new seminar?
       </h4>
       <p><ol><li><a href="{{ url_for('user.register') }}">Register</a> for an account.</li>
-     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.  (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
-      <li>(Optional, but recommended) Go to the <a href="{{ url_for('create.index')}}">Institutions</a> page to make sure that the institutions associated with your seminar are there; if not, add them.  (Alternatively, add them after the seminar is created.)</li>
+     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.  
+       (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
+      <li>(Optional, but recommended) Go to the <a href="{{ url_for('list_institutions')}}">Institutions</a> page 
+        to make sure that the institutions associated with your seminar are there; if not, add them.  
+        (Alternatively, add them after the seminar is created.)</li>
           <li>Click on the <a href="{{ url_for('create.index')}}">Create</a> tab and follow the instructions there.  (Note: After creating your first seminar, the "Create" tab will be renamed as "Manage".)</li>
         </ol></p>
     </li>
