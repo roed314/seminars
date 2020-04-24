@@ -1,7 +1,7 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import user_topics, toggle, Toggle, languages_dict
+from seminars.utils import user_topics, toggle, Toggle, languages_dict, subject_dict, topic_dict, subjects, topics
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import render_template, request, redirect, url_for
@@ -359,24 +359,55 @@ class SemSearchArray(SearchArray):
 
 @app.route("/")
 def index():
+    return _index({})
+
+def by_subject(subject):
+    subject = subject.lower()
+    if subject not in subject_dict():
+        return render_template("404.html", title="Subject %s not found" % subject)
+    return lambda: _index({"subjects": {"$contains": subject}})
+
+def by_topic(subject, topic):
+    full_topic = subject + "_" + topic
+    return lambda: _index({"topics": {"$contains": full_topic}})
+
+# We don't want to intercept other routes by doing @app.route("/<subject>") etc.
+for subject in subject_dict():
+    app.add_url_rule("/%s/" % subject, "by_subject_%s" % subject, by_subject(subject))
+for ab, name, subject in topics():
+    app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
+
+def _index(query):
     # Eventually want some kind of cutoff on which talks are included.
-    talks = list(
-        talks_search(
-            {"display": True,
-             "hidden": {"$or": [False, {"$exists": False}]},
-             "end_time": {"$gte": datetime.datetime.now()}},
-            sort=["start_time"],
-            seminar_dict=all_seminars(),
-        )
-    )
+    query = dict(query)
+    subs = subjects()
+    if "subjects" in query:
+        subject = query["subjects"]["$contains"]
+        hide_filters = ["subject"]
+        title = subject_dict()[subject] + " talks (beta)"
+        subs = ((subject, subject.capitalize()),)
+    elif "topics" in query:
+        hide_filters = ["subject", "topic"]
+        title = topic_dict(include_subj=False)[query["topics"]["$contains"]] + " talks (beta)"
+    else:
+        hide_filters = []
+        title = "Worldwide seminars (beta)"
+    query["display"] = True
+    query["hidden"] = {"$or": [False, {"$exists": False}]}
+    query["end_time"] = {"$gte": datetime.datetime.now()}
+    talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
     topic_counts = Counter()
     language_counts = Counter()
+    subject_counts = Counter()
     for talk in talks:
         if talk.topics:
             for topic in talk.topics:
                 topic_counts[topic] += 1
+        if talk.subjects:
+            for subject in talk.subjects:
+                subject_counts[subject] += 1
         language_counts[talk.language] += 1
     lang_dict = languages_dict()
     languages = [(code, lang_dict[code]) for code in language_counts]
@@ -384,15 +415,17 @@ def index():
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
-        title="Math Seminars (beta)",
+        title=title,
+        hide_filters=hide_filters,
         topic_counts=topic_counts,
+        subject_counts=subject_counts,
         languages=languages,
         language_counts=language_counts,
         talks=talks,
+        subjects=subs,
         section="Browse",
         toggle=toggle,
     )
-
 
 @app.route("/search")
 def search():
