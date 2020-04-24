@@ -556,7 +556,7 @@ def save_institution():
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Institution name cannot be blank.")
-    if not data["homepage"]:
+    if not errmsgs and not data["homepage"]:
         errmsgs.append("Institution homepage cannot be blank.")
     # Don't try to create new_version using invalid input
     if errmsgs:
