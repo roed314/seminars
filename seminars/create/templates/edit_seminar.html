@@ -252,9 +252,9 @@ $(document).ready(function() {
         console.log(a);
         console.log(b);
         var x = $('input[name="'+a+'"]')[0].value;
-        $('input[name="'+b+'"]')[0].value = $('input[name="'+a+'"]')[0].value;
-        $('input[name="'+a+'"]')[0].value = x;
-        colsole.log("swapped");
+        $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
+        $('input[name="'+b+'"]')[0].value = x;
+        console.log("swapped");
       }
   {% for i in range(10) %}
     $("a.swap{{i}}").click(function(){
