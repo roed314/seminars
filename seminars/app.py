@@ -29,6 +29,8 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 ############################
 
 app = Flask(__name__, static_url_path="", static_folder="static",)
+# disable cache temporarily
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 mail_settings = {
     "MAIL_SERVER": "heaviside.mit.edu",
