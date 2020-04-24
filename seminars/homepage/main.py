@@ -362,7 +362,7 @@ def index():
     talks = list(
         talks_search(
             {"display": True,
-             "subject": ["math"],
+             "subjects": ["math"],
              "hidden": {"$or": [False, {"$exists": False}]},
              "end_time": {"$gte": datetime.datetime.now()}},
             sort=["start_time"],
