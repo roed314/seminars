@@ -32,7 +32,10 @@ def parse_topic(info, query, prefix):
     # of the talk
     topic = info.get(prefix + "_topic")
     if topic:
-        query["topics"] = {"$contains": topic}
+        # FIXME: temporary bridge during addition of physics
+        if "_" not in topic:
+            topic = "math_" + topic
+        query["topics"] = {"$or": [{"$contains": topic}, {"$contains": topic[5:]}]}
 
 
 def parse_institution_sem(info, query, prefix="seminar"):
