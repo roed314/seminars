@@ -481,6 +481,10 @@ class SeminarsUser(UserMixin):
         return self._data.get("admin", False)
 
     @property
+    def subject_admin(self):
+        return self._data.get("subject_admin")
+
+    @property
     def is_creator(self):
         return self._data.get("creator", False)
 
