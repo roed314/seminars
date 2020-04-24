@@ -304,6 +304,20 @@ body.knowl #header {
     min-height: 20px;
 }
 
+i.fa.close {
+    color: white;
+    background: #373737;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+i.fa.close:hover {
+    cursor: pointer;
+}
+
+#topic-filter-menu #subjects-tabs i {
+    margin: 12px 8px 0px 2px;
+}
+
 .ui-tabs {
     border: none !important;
     background: #373737 !important;

@@ -50,6 +50,7 @@ console.log('Form is unchanged!');
     <p> Please select your subjects of interest. <button onclick="welcomeDone();">Done</button></p>
   </div>
   <div id="subject-filter-menu">
+    <span id="close-subject-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
     {% for ab, name in subjects %}
       <div class="subject_toggle" id="subjectlink-{{ab}}">
         {{name}}
@@ -60,6 +61,7 @@ console.log('Form is unchanged!');
   <div id="topic-filter-menu">
     <div id="subjects-tabs">
       <ul class="tab-subject-nav">
+        <li><span id="close-topic-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span></li>
         {% for ab, name in subjects %}
           <li><a href="#tab-{{ab}}-content" class="tab-subject-nav">{{name}}</a></li>
         {% endfor %}
@@ -88,6 +90,7 @@ console.log('Form is unchanged!');
   </div>
 
   <div id="language-filter-menu">
+    <span id="close-language-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
     {% for ab, name in languages %}
       <div class="language_toggle" id="langlink-{{ab}}">
         {{name}} ({{language_counts[ab]}})

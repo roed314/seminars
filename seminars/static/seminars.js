@@ -101,7 +101,7 @@ function setSubjectLinks() {
     cur_subjects = cur_subjects.split(",");
     for (var i=0; i<cur_subjects.length; i++) {
         $("#subjectlink-" + cur_subjects[i]).addClass("subjectselected");
-        $(".subject-" + cur_subjects[i]).removeClass("subject-filtered");
+        $(".talk.subject-" + cur_subjects[i]).removeClass("subject-filtered");
     }
 }
 function setTopicLinks() {
@@ -116,6 +116,11 @@ function setTopicLinks() {
         setCookie("filter_location", "0");
         setCookie("filter_time", "0");
     } else {
+        // Backward compatibility with cookies from mathseminars.org
+        if (cur_topics.length > 0 && !cur_topics.includes("_")) {
+            cur_topics = "math_" + cur_topics.replace(/,/g, ",math_");
+            setCookie("topics", cur_topics);
+        }
         $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
         $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
         $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
@@ -259,7 +264,8 @@ function clearAllTopics(subject) {
     })
 }
 
-var filter_classes = [['.topic-filtered', topicFiltering], ['.subject-filtered', subjectFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering]]
+var filter_menus = ['topic', 'subject', 'language'];
+var filter_classes = [['.topic-filtered', topicFiltering], ['.subject-filtered', subjectFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering]];
 function talksToShow(talks) {
     for (i=0; i<filter_classes.length; i++) {
         if (filter_classes[i][1]()) {
@@ -281,6 +287,17 @@ function toggleFilters(id) {
     talks = talksToShow(talks);
     talks.show();
     apply_striping();
+}
+function toggleFilterView(id) {
+    var ftype = id.split("-")[0];
+    for (i=0; i<filter_menus.length; i++) {
+        var elt = $("#"+filter_menus[i]+"-filter-menu");
+        if (ftype == filter_menus[i]) {
+            elt.slideToggle(300);
+        } else {
+            elt.slideUp(300);
+        }
+    }
 }
 
 function apply_striping() {
