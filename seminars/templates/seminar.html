@@ -8,6 +8,12 @@
 </h1>
 {{seminar.show_subscribe() | safe }}
 </span>
+{% if seminar.homepage %}
+<p>
+{{ seminar.show_homepage() | safe }}
+</p>
+{% endif %}
+
 
 {% if not seminar.display %}
 <p>
@@ -35,12 +41,6 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
   {% endif %}
 {% endif %}
 
-
-{% if seminar.homepage %}
-<p>
-{{ seminar.show_homepage() | safe }}
-</p>
-{% endif %}
 
 <table>
   {{ seminar.show_organizers() | safe }}
