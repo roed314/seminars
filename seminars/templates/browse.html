@@ -12,7 +12,7 @@
       {{ toggle(tglid="enable_"+ftype+"_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
     <td style="padding-right: 2em;">
-      <a id="{{ftype}}-filter-btn" class="likeknowl" onclick="$('#{{ftype}}-filter-menu').slideToggle(300); return false;">{{ftype}}</a>
+      <a id="{{ftype}}-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">{{ftype}}</a>
     </td>
     {% endfor %}
     {% if user.is_authenticated %}
