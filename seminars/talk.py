@@ -76,6 +76,9 @@ class WebTalk(object):
                     data["start_time"] = adapt_datetime(data["start_time"], tz)
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
+            # transition to topics including the subject
+            if data.get("topics"):
+                data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
 
     def __repr__(self):
@@ -117,6 +120,8 @@ class WebTalk(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
+        topics = self.topics if self.topics else []
+        data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):
