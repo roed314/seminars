@@ -539,7 +539,7 @@ def save_institution():
                     if current_user.email == userdata["email"]:
                         flash(
                             format_warning(
-                                "Your email address is now public; set the homepage in your user profile to prevent this."
+                                "Your email address will become public if you do not set your homepage in your user profile."
                             )
                         )
                     else:
