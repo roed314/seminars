@@ -159,10 +159,11 @@
       </table>
       <h3>Organizers</h3>
       <p class="forminfo">
-        Normally, leave "Organizer" checked.  Uncheck for a staff/student/postdoc assistant with permission to edit the seminar despite not being responsible for the scientific organization.
+        Normally, leave "Organizer" checked.  Uncheck for an assistant with permission to edit the seminar despite not being responsible for the scientific organization, or for a seminar email address not associated to a single person.  At least one <i>person</i> displayed must be a registered user.
       </p>
       <table>
         <thead>
+          <td></td>
           <td align="center">{{ KNOWL("organizer_name") }}</td>
           <td align="center">{{ KNOWL("homepage") }}</td>
           <td align="center">{{ KNOWL("email") }}</td>
@@ -171,6 +172,11 @@
         </thead>
         {% for i in range(10) %}
         <tr>
+          {% if i > 0 and i < (seminar.organizer_data | length) %}
+            <td style="padding-right:0px;"><a class="swap{{i}}" href="#">&#11014;</a></td>
+          {% else %}
+            <td></td>
+          {% endif %}
           {% if i < (seminar.organizer_data | length) %}
             <td>
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
@@ -220,7 +226,7 @@
 
 /* topic and inst selector */
 const topicOptions = [
-  {% for ab, topic in topics %}
+  {% for ab, topic in user_topics %}
   {
     label: "{{ topic }}",
     value: "{{ ab }}",
@@ -247,6 +253,18 @@ const langOptions = [
 ];
 
 $(document).ready(function() {
+      function swap(a,b) {
+        var x = $('input[name="'+a+'"]')[0].value;
+        $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
+        $('input[name="'+b+'"]')[0].value = x;
+      }
+  {% for i in range(1,(seminar.organizer_data | length)) %}
+    $("a.swap{{i}}").click(function(){
+      swap("org_full_name{{i-1}}","org_full_name{{i}}");
+      swap("org_homepage{{i-1}}","org_homepage{{i}}");
+      swap("org_email{{i-1}}","org_email{{i}}");
+    });
+  {% endfor %}
   var topicSelector = makeTopicSelector(
     topicOptions,
     {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},

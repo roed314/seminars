@@ -20,6 +20,10 @@ body {
 td.title {
     color: {{color.box_tab_text}};
 }
+h1 {
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+}
 h2.link > a {
     color: {{color.box_tab_text}};
 }

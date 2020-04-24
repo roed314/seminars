@@ -104,18 +104,18 @@ console.log('Form is unchanged!');
           </div>
         {% endif %} {# institution/seminar #}
         {% if talk %}
-          <div class="submenu-nav{% if subsection == 'viewtalk' %} submenu-active{% endif %}">
-            {% if talk.seminar.user_can_edit() %}
-              <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr) }}">View talk</a>
-            {% else %}
-              <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr, token=token) }}">View talk</a>
-            {% endif %}
-          </div>
           <div class="submenu-nav{% if subsection == 'edittalk' %} submenu-active{% endif %}">
             {% if talk.seminar.user_can_edit() %}
             <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr) }}">Edit talk</a>
             {% else %}
             <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr, token=token) }}">Edit talk</a>
+            {% endif %}
+          </div>
+          <div class="submenu-nav{% if subsection == 'viewtalk' %} submenu-active{% endif %}">
+            {% if talk.seminar.user_can_edit() %}
+              <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr) }}">View talk</a>
+            {% else %}
+              <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr, token=token) }}">View talk</a>
             {% endif %}
           </div>
         {% endif %} {# talk #}
