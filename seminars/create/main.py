@@ -562,9 +562,6 @@ def save_institution():
     if errmsgs:
         return show_input_errors(errmsgs)
     new_version = WebInstitution(shortname, data=data)
-    ### FIXME ###
-    # The comparison below always fails because can_edit_institution returns a dictionary
-    # see FIXME at line 110 of institution.py
     if new_version == institution:
         flash("No changes made to institution.")
     else:

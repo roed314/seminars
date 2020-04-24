@@ -105,8 +105,6 @@ class WebInstitution(object):
         link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
         return '<a href="%s"><i>%s</i></a>' % (link, "Contact this page's maintainer.")
 
-### FIXME ###
-# Should always return a WebInstitution object but currently may returna dictionary or WebObject
 def can_edit_institution(shortname, new):
     if not allowed_shortname(shortname) or len(shortname) < 2 or len(shortname) > 32:
         flash_error(
@@ -129,6 +127,5 @@ def can_edit_institution(shortname, new):
                 % (institution["name"], owner)
             )
             return redirect(url_for(".index"), 302), None
-    if institution is None:
-        institution = WebInstitution(shortname, data=None, editing=True)
+    institution = WebInstitution(shortname, data=None, editing=new)
     return None, institution
