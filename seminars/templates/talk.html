@@ -55,7 +55,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 </div>
 <p class="forminfo">If you have any concerns or questions about this listing please get in touch with one of the contacts listed below.</p>
 <div style="font-size: 90%;">
-{{ seminar.show_name(homepage_link=True) | safe }}
+{{ seminar.show_name() | safe }}
 <table>
   {{ seminar.show_organizers() | safe }}
   {{ seminar.show_curators() | safe }}
