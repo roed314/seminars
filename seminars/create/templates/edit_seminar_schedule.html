@@ -5,7 +5,7 @@
 <h1>{{ seminar.show_name() | safe }}</h1>
 {% if seminar.homepage %}
 <p>
-{{ seminar.show_homepage() | safe }}
+{{ seminar.show_homepage(newtab=True) | safe }}
 </p>
 {% endif %}
 <p> To add talks, enter Speaker (and optionally edit the other fields) in one or more rows of the table; and then click any button or "Details" link.</p>
