@@ -163,6 +163,7 @@
       </p>
       <table>
         <thead>
+          <td></td>
           <td align="center">{{ KNOWL("organizer_name") }}</td>
           <td align="center">{{ KNOWL("homepage") }}</td>
           <td align="center">{{ KNOWL("email") }}</td>
@@ -171,6 +172,11 @@
         </thead>
         {% for i in range(10) %}
         <tr>
+          {% if i > 0 and i < (seminar.organizer_data | length) %}
+            <td><a class="swap{{i}}">&#11014;</a></td>
+          {% else %}
+            <td></td>
+          {% endif %}
           {% if i < (seminar.organizer_data | length) %}
             <td>
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
@@ -247,6 +253,18 @@ const langOptions = [
 ];
 
 $(document).ready(function() {
+      function swap(a,b) {
+        var x = $('input[name="'+a+'"]')[0].value;
+        $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
+        $('input[name="'+b+'"]')[0].value = x;
+      }
+  {% for i in range(1,(seminar.organizer_data | length)) %}
+    $("a.swap{{i}}").click(function(){
+      swap("org_full_name{{i-1}}","org_full_name{{i}}");
+      swap("org_homepage{{i-1}}","org_homepage{{i}}");
+      swap("org_email{{i-1}}","org_email{{i}}");
+    });
+  {% endfor %}
   var topicSelector = makeTopicSelector(
     topicOptions,
     {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
