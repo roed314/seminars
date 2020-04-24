@@ -166,7 +166,7 @@ def user_topics():
 
 @lru_cache(maxsize=None)
 def topic_dict():
-    return dict(topics())
+    return dict(user_topics())
 
 
 def clean_topics(inp):
