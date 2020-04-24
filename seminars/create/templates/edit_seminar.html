@@ -172,6 +172,7 @@
         {% for i in range(10) %}
         <tr>
           {% if i < (seminar.organizer_data | length) %}
+            <td><a class="swap{{i}}">swap</a></td>
             <td>
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
             </td>
@@ -247,6 +248,19 @@ const langOptions = [
 ];
 
 $(document).ready(function() {
+      function swap(a,b) {
+        console.log(a);
+        console.log(b);
+        var x = $('input[name="'+a+'"]')[0].value;
+        $('input[name="'+b+'"]')[0].value = $('input[name="'+a+'"]')[0].value;
+        $('input[name="'+a+'"]')[0].value = x;
+        colsole.log("swapped");
+      }
+  {% for i in range(10) %}
+    $("a.swap{{i}}").click(function(){
+      swap("org_full_name{{i}}","org_full_name{{i+1}}");
+    });
+  {% endfor %}
   var topicSelector = makeTopicSelector(
     topicOptions,
     {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
