@@ -139,6 +139,8 @@ def talks_parser(info, query):
     # These are necessary but not succificient conditions to display the talk
     # Also need that the seminar has visibility 2.
 
+    # FIXME: temporary measure during addition of physics
+    query["subjects"] = ["math"]
 
 def seminars_parser(info, query):
     parse_topic(info, query, prefix="seminar")
@@ -152,6 +154,8 @@ def seminars_parser(info, query):
     query["display"] = True
     query["visibility"] = 2
 
+    # FIXME: temporary measure during addition of physics
+    query["subjects"] = ["math"]
 
 # Common boxes
 
