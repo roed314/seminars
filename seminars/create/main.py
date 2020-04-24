@@ -547,7 +547,7 @@ def save_institution():
                             format_warning(
                                 "The email address %s of maintainer %s will be publicily visible.<br>%s",
                                 userdata["email"],
-                                userdata["full_name"],
+                                userdata["name"],
                                 "The homepage on the maintainer's user account should be set prevent this.",
                             ),
                             "error",
