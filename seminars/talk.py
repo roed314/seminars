@@ -420,11 +420,11 @@ class WebTalk(object):
             return "<p>TBA</p>"
 
     def speaker_link(self):
-        return "https://mathseminars.org/edit/talk/%s/%s/%s" % (
-            self.seminar_id,
-            self.seminar_ctr,
-            self.token,
-        )
+        return url_for("create.edit_talk_with_token",
+                       seminar_id=self.seminar_id,
+                       seminar_ctr=self.seminar_ctr,
+                       token=self.token,
+                       _external=True, _scheme='https')
 
     def send_speaker_link(self):
         """
