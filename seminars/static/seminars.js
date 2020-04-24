@@ -166,7 +166,7 @@ function setLinks() {
     }
 }
 
-function toggleSubject(id) {
+function toggleSubject(id, welcome=false) {
     var toggler = $("#" + id);
     console.log(id);
     var subject = id.substring(12); // subjectlink-* or subjectwelc-*
@@ -185,7 +185,7 @@ function toggleSubject(id) {
     } else {
         toggler.addClass("subjectselected");
         cur_subjects = addToCookie(subject, "subjects").split(",");
-        if (cur_subjects.length == 1) {
+        if (!welcome && cur_subjects.length == 1) {
             enableSubjectFiltering();
         }
         talks.removeClass("subject-filtered");
@@ -476,7 +476,7 @@ $(document).ready(function () {
     $('.welcome_toggle').click(
         function (evt) {
             evt.preventDefault();
-            toggleSubject(this.id);
+            toggleSubject(this.id, true);
         });
     $('.topic_toggle').click(
         function (evt) {
