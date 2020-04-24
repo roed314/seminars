@@ -532,6 +532,23 @@ def save_institution():
                         errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
                 elif not userdata["creator"]:
                     errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
+                if not userdata["homepage"]:
+                    if current_user.email == userdata["email"]:
+                        flash(
+                            format_warning(
+                                "Your email address is now public; set the homepage in your user profile to prevent this."
+                            )
+                        )
+                    else:
+                        flash(
+                            format_warning(
+                                "The email address %s of maintainer %s will be publicily visible.<br>%s",
+                                userdata["email"],
+                                userdata["full_name"],
+                                "The homepage on the maintainer's user account should be set prevent this.",
+                            ),
+                            "error",
+                        )
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
