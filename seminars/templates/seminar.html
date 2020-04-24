@@ -4,7 +4,7 @@
 
 <span style="display: inline-flex">
   <h1 style="padding-right: 0.5em;">
-    {{ seminar.show_name(homepage_link=True, show_attributes=True) | safe }}
+    {{ seminar.show_name(show_attributes=True) | safe }}
 </h1>
 {{seminar.show_subscribe() | safe }}
 </span>
