@@ -461,9 +461,6 @@ def save_seminar():
 
     new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
     sanity_check_times(new_version.start_time, new_version.end_time)
-    print(seminar)
-    print(new_version)
-    print(seminar==new_version)
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"

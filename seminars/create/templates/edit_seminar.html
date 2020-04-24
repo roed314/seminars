@@ -254,12 +254,9 @@ const langOptions = [
 
 $(document).ready(function() {
       function swap(a,b) {
-        console.log(a);
-        console.log(b);
         var x = $('input[name="'+a+'"]')[0].value;
         $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
         $('input[name="'+b+'"]')[0].value = x;
-        console.log("swapped");
       }
   {% for i in range(1,(seminar.organizer_data | length)) %}
     $("a.swap{{i}}").click(function(){
