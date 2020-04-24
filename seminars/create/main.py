@@ -528,10 +528,13 @@ def save_institution():
                 if userdata is None:
                     if not data[col]:
                         errmsgs.append("You must specify the email address of the maintainer.")
+                        continue
                     else:
                         errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
+                        continue
                 elif not userdata["creator"]:
                     errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
+                    continue
                 if not userdata["homepage"]:
                     if current_user.email == userdata["email"]:
                         flash(
