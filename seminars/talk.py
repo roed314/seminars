@@ -107,7 +107,7 @@ class WebTalk(object):
         but it can also be hidden even if the seminar is public.
         """
         return (self.seminar.owner == current_user.email or
-                current_user.is_admin or
+                current_user.is_subject_admin(self) or
                 self.display and ((self.seminar.visibility is None or self.seminar.visibility > 0) and not self.hidden or
                                   current_user.email in self.seminar.editors()))
 
@@ -355,7 +355,7 @@ class WebTalk(object):
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
         return (
-            current_user.is_admin
+            current_user.is_subject_admin(self)
             or current_user.email_confirmed
             and (
                 current_user.email.lower() in self.seminar.editors()

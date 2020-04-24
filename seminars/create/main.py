@@ -205,15 +205,15 @@ def deleted_seminar(shortname):
 @create.route("revive/seminar/<shortname>")
 @email_confirmed_required
 def revive_seminar(shortname):
-    data = seminars_lookup(shortname, include_deleted=True)
+    seminar = seminars_lookup(shortname, include_deleted=True)
 
-    if data is None:
+    if seminar is None:
         flash_error("Seminar %s was deleted permanently", shortname)
         return redirect(url_for(".index"), 302)
-    if not current_user.is_admin and data.owner != current_user:
+    if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
         flash_error("You do not have permission to revive seminar %s", shortname)
         return redirect(url_for(".index"), 302)
-    if not data.deleted:
+    if not seminar.deleted:
         flash_error("Seminar %s was not deleted, so cannot be revived", shortname)
     else:
         db.seminars.update({"shortname": shortname}, {"deleted": False})
@@ -228,15 +228,15 @@ def revive_seminar(shortname):
 @create.route("permdelete/seminar/<shortname>")
 @email_confirmed_required
 def permdelete_seminar(shortname):
-    data = seminars_lookup(shortname, include_deleted=True)
+    seminar = seminars_lookup(shortname, include_deleted=True)
 
-    if data is None:
+    if seminar is None:
         flash_error("Seminar %s already deleted permanently", shortname)
         return redirect(url_for(".index"), 302)
-    if not current_user.is_admin and data.owner != current_user:
+    if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
         flash_error("You do not have permission to delete seminar %s", shortname)
         return redirect(url_for(".index"), 302)
-    if not data.deleted:
+    if not seminar.deleted:
         flash_error("You must delete seminar %s first", shortname)
         return redirect(url_for(".edit_seminar", shortname=shortname), 302)
     else:
@@ -298,7 +298,7 @@ def revive_talk(semid, semctr):
     if talk is None:
         flash_error("Talk %s/%s was deleted permanently", semid, semctr)
         return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    if not current_user.is_admin and talk.seminar.owner != current_user:
+    if not current_user.is_subject_admin(talk) and talk.seminar.owner != current_user:
         flash_error("You do not have permission to revive this talk")
         return redirect(url_for(".index"), 302)
     if not talk.deleted:
@@ -318,7 +318,7 @@ def permdelete_talk(semid, semctr):
     if talk is None:
         flash_error("Talk %s/%s already deleted permanently", semid, semctr)
         return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    if not current_user.is_admin and talk.seminar.owner != current_user:
+    if not current_user.is_subject_admin(talk) and talk.seminar.owner != current_user:
         flash_error("You do not have permission to delete this seminar")
         return redirect(url_for(".index"), 302)
     if not talk.deleted:
@@ -528,23 +528,40 @@ def save_institution():
                 if userdata is None:
                     if not data[col]:
                         errmsgs.append("You must specify the email address of the maintainer.")
+                        continue
                     else:
                         errmsgs.append(format_errmsg("user %s does not have an account on this site", data[col]))
+                        continue
                 elif not userdata["creator"]:
                     errmsgs.append(format_errmsg("user %s has not been endorsed", data[col]))
+                    continue
+                if not userdata["homepage"]:
+                    if current_user.email == userdata["email"]:
+                        flash(
+                            format_warning(
+                                "Your email address will become public if you do not set your homepage in your user profile."
+                            )
+                        )
+                    else:
+                        flash(
+                            format_warning(
+                                "The email address %s of maintainer %s will be publicily visible.<br>%s",
+                                userdata["email"],
+                                userdata["name"],
+                                "The homepage on the maintainer's user account should be set prevent this.",
+                            ),
+                            "error",
+                        )
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
     if not data["name"]:
         errmsgs.append("Institution name cannot be blank.")
-    if not data["homepage"]:
+    if not errmsgs and not data["homepage"]:
         errmsgs.append("Institution homepage cannot be blank.")
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
     new_version = WebInstitution(shortname, data=data)
-    ### FIXME ###
-    # The comparison below always fails because can_edit_institution returns a dictionary
-    # see FIXME at line 110 of institution.py
     if new_version == institution:
         flash("No changes made to institution.")
     else:

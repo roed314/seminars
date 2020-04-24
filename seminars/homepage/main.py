@@ -502,7 +502,7 @@ def show_seminar(shortname):
             past.append(talk)
     future.sort(key=lambda talk: talk.start_time)
     past.sort(key=lambda talk: talk.start_time, reverse=True)
-    if current_user.email in seminar.editors() or current_user.is_admin:
+    if current_user.email in seminar.editors() or current_user.is_subject_admin(seminar):
         section = "Manage"
     else:
         section = None
@@ -576,7 +576,7 @@ def show_talk(semid, talkid):
         menu[2] = (url_for("create.index"), "", "Manage")
         kwds["top_menu"] = menu
     elif (
-        current_user.is_admin
+        current_user.is_subject_admin(talk)
         or current_user.email_confirmed
         and (
             current_user.email in talk.seminar.editors() or current_user.email == talk.speaker_email

@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% if user.is_admin or seminar.owner == user.email %}
+{% if user.is_subject_admin(seminar) or seminar.owner == user.email %}
 
 <p>Your seminar, {{seminar.name}}, has been deleted with all of its talks.  They will no longer show up in search results or on the browse page.</p>
 
