@@ -220,7 +220,7 @@
 
 /* topic and inst selector */
 const topicOptions = [
-  {% for ab, topic in topics %}
+  {% for ab, topic in user_topics %}
   {
     label: "{{ topic }}",
     value: "{{ ab }}",

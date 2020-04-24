@@ -157,10 +157,12 @@ def allowed_shortname(shortname):
 @lru_cache(maxsize=None)
 def topics():
     return sorted(
-        ((rec["abbreviation"], rec["name"]) for rec in db.topics.search({}, ["abbreviation", "name"])),
+        ((rec["abbreviation"], rec["name"]) for rec in db.topics.search({"subject":"math"}, ["abbreviation", "name"])),
         key=lambda x: x[1].lower(),
     )
 
+def user_topics():
+    return [('math_' + ab, name) for (ab, name) in topics()]
 
 @lru_cache(maxsize=None)
 def topic_dict():
