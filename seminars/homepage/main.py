@@ -1,7 +1,7 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import topics, toggle, Toggle, languages_dict
+from seminars.utils import topics, user_topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import render_template, request, redirect, url_for
@@ -32,7 +32,10 @@ def parse_topic(info, query, prefix):
     # of the talk
     topic = info.get(prefix + "_topic")
     if topic:
-        query["topics"] = {"$contains": topic}
+        # FIXME: temporary bridge during addition of physics
+        if "_" not in topic:
+            topic = "math_" + topic
+        query["topics"] = {"$or": [{"$contains": topic}, {"$contains": topic[5:]}]}
 
 
 def parse_institution_sem(info, query, prefix="seminar"):
@@ -139,6 +142,8 @@ def talks_parser(info, query):
     # These are necessary but not succificient conditions to display the talk
     # Also need that the seminar has visibility 2.
 
+    # FIXME: temporary measure during addition of physics
+    query["subjects"] = ["math"]
 
 def seminars_parser(info, query):
     parse_topic(info, query, prefix="seminar")
@@ -152,6 +157,8 @@ def seminars_parser(info, query):
     query["display"] = True
     query["visibility"] = 2
 
+    # FIXME: temporary measure during addition of physics
+    query["subjects"] = ["math"]
 
 # Common boxes
 
@@ -171,7 +178,7 @@ class TalkSearchArray(SearchArray):
 
     def __init__(self):
         ## topics
-        topic = SelectBox(name="talk_topic", label="Topics", options=[("", "")] + topics())
+        topic = SelectBox(name="talk_topic", label="Topics", options=[("", "")] + user_topics())
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -282,7 +289,7 @@ class SemSearchArray(SearchArray):
 
     def __init__(self):
         ## topics
-        topic = SelectBox(name="seminar_topic", label="Topics", options=[("", "")] + topics())
+        topic = SelectBox(name="seminar_topic", label="Topics", options=[("", "")] + user_topics())
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -362,6 +369,7 @@ def index():
     talks = list(
         talks_search(
             {"display": True,
+             "subjects": ["math"],
              "hidden": {"$or": [False, {"$exists": False}]},
              "end_time": {"$gte": datetime.datetime.now()}},
             sort=["start_time"],
