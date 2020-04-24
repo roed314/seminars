@@ -106,7 +106,7 @@ def ctx_proc_userdata():
     # For example, [ ('Bread', '.'), ('Crumb', '.'), ('Hierarchy', '.')]
     data["bread"] = None
 
-    # default title - Math seminars already included in base.html
+    # default title - Research seminars already included in base.html
     data["title"] = r""
 
     # meta_description appears in the meta tag "description"

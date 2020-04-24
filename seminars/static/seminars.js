@@ -60,11 +60,23 @@ function removeFromCookie(item, cookie) {
 function subjectFiltering() {
     return $('#enable_subject_filter').is(":checked");
 }
+function enableSubjectFiltering() {
+    setCookie("filter_subject", "1");
+    $('#enable_subject_filter').prop("checked", true);
+}
 function topicFiltering() {
     return $('#enable_topic_filter').is(":checked");
 }
+function enableTopicFiltering() {
+    setCookie("filter_topic", "1");
+    $('#enable_topic_filter').prop("checked", true);
+}
 function languageFiltering() {
     return $('#enable_language_filter').is(":checked");
+}
+function enableLanguageFiltering() {
+    setCookie("filter_language", "1");
+    $('#enable_language_filter').prop("checked", true);
 }
 function calFiltering() {
     return $('#enable_calendar_filter').is(":checked");
@@ -169,7 +181,10 @@ function toggleSubject(id) {
         }
     } else {
         toggler.addClass("subjectselected");
-        addToCookie(subject, "subjects");
+        cur_subjects = addToCookie(subject, "subjects").split(",");
+        if (cur_subjects.length == 1) {
+            enableSubjectFiltering();
+        }
         talks.removeClass("subject-filtered");
         if (subjectFiltering()) {
             // elements may be filtered by other criteria
@@ -198,7 +213,10 @@ function toggleLanguage(id) {
         }
     } else {
         toggler.addClass("languageselected");
-        addToCookie(lang, "languages");
+        cur_langs = addToCookie(lang, "languages").split(",");
+        if (cur_langs.length == 1) {
+            enableLanguageFiltering();
+        }
         talks.removeClass("language-filtered");
         if (languageFiltering()) {
             // elements may be filtered by other criteria
@@ -227,7 +245,10 @@ function toggleTopic(id) {
         }
     } else {
         toggler.addClass("topicselected");
-        addToCookie(topic, "topics");
+        cur_topics = addToCookie(topic, "topics").split(",");
+        if (cur_topics.length == 1) {
+            enableTopicFiltering();
+        }
         talks.removeClass("topic-filtered");
         if (topicFiltering()) {
             // elements may be filtered by other criteria
