@@ -5,3 +5,7 @@ Flask-Mail
 itsdangerous
 icalendar
 iso639
+PyYAML
+flask-login
+bcrypt
+psycopg2-binary
