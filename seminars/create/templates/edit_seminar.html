@@ -173,12 +173,12 @@
         {% for i in range(10) %}
         <tr>
           {% if i > 0 and i < (seminar.organizer_data | length) %}
-            <td padding-right="0px;"><a class="swap{{i}}" href="#">&#11014;</a></td>
+            <td style="padding-right:0px;"><a class="swap{{i}}" href="#">&#11014;</a></td>
           {% else %}
             <td></td>
           {% endif %}
           {% if i < (seminar.organizer_data | length) %}
-            <td padding-left="0px;">
+            <td style="padding-left:0px;">
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
             </td>
             <td>
