@@ -63,6 +63,7 @@ function subjectFiltering() {
 function enableSubjectFiltering() {
     setCookie("filter_subject", "1");
     $('#enable_subject_filter').prop("checked", true);
+    toggleFilters(null);
 }
 function topicFiltering() {
     return $('#enable_topic_filter').is(":checked");
@@ -70,6 +71,7 @@ function topicFiltering() {
 function enableTopicFiltering() {
     setCookie("filter_topic", "1");
     $('#enable_topic_filter').prop("checked", true);
+    toggleFilters(null);
 }
 function languageFiltering() {
     return $('#enable_language_filter').is(":checked");
@@ -77,6 +79,7 @@ function languageFiltering() {
 function enableLanguageFiltering() {
     setCookie("filter_language", "1");
     $('#enable_language_filter').prop("checked", true);
+    toggleFilters(null);
 }
 function calFiltering() {
     return $('#enable_calendar_filter').is(":checked");
