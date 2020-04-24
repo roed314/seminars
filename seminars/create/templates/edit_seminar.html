@@ -173,7 +173,7 @@
         {% for i in range(10) %}
         <tr>
           {% if i > 0 and i < (seminar.organizer_data | length) %}
-            <td><a class="swap{{i}}">up</a></td>
+            <td><a class="swap{{i}}"><i class="fa"> &#f0aa;</i></a></td>
           {% else %}
             <td></td>
           {% endif %}
