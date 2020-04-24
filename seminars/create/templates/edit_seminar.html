@@ -178,7 +178,7 @@
             <td></td>
           {% endif %}
           {% if i < (seminar.organizer_data | length) %}
-            <td style="padding-left:0px;">
+            <td>
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
             </td>
             <td>
