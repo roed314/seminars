@@ -205,15 +205,15 @@ def deleted_seminar(shortname):
 @create.route("revive/seminar/<shortname>")
 @email_confirmed_required
 def revive_seminar(shortname):
-    data = seminars_lookup(shortname, include_deleted=True)
+    seminar = seminars_lookup(shortname, include_deleted=True)
 
-    if data is None:
+    if seminar is None:
         flash_error("Seminar %s was deleted permanently", shortname)
         return redirect(url_for(".index"), 302)
-    if not current_user.is_admin and data.owner != current_user:
+    if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
         flash_error("You do not have permission to revive seminar %s", shortname)
         return redirect(url_for(".index"), 302)
-    if not data.deleted:
+    if not seminar.deleted:
         flash_error("Seminar %s was not deleted, so cannot be revived", shortname)
     else:
         db.seminars.update({"shortname": shortname}, {"deleted": False})
@@ -228,15 +228,15 @@ def revive_seminar(shortname):
 @create.route("permdelete/seminar/<shortname>")
 @email_confirmed_required
 def permdelete_seminar(shortname):
-    data = seminars_lookup(shortname, include_deleted=True)
+    seminar = seminars_lookup(shortname, include_deleted=True)
 
-    if data is None:
+    if seminar is None:
         flash_error("Seminar %s already deleted permanently", shortname)
         return redirect(url_for(".index"), 302)
-    if not current_user.is_admin and data.owner != current_user:
+    if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
         flash_error("You do not have permission to delete seminar %s", shortname)
         return redirect(url_for(".index"), 302)
-    if not data.deleted:
+    if not seminar.deleted:
         flash_error("You must delete seminar %s first", shortname)
         return redirect(url_for(".edit_seminar", shortname=shortname), 302)
     else:
@@ -298,7 +298,7 @@ def revive_talk(semid, semctr):
     if talk is None:
         flash_error("Talk %s/%s was deleted permanently", semid, semctr)
         return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    if not current_user.is_admin and talk.seminar.owner != current_user:
+    if not current_user.is_subject_admin(talk) and talk.seminar.owner != current_user:
         flash_error("You do not have permission to revive this talk")
         return redirect(url_for(".index"), 302)
     if not talk.deleted:
@@ -318,7 +318,7 @@ def permdelete_talk(semid, semctr):
     if talk is None:
         flash_error("Talk %s/%s already deleted permanently", semid, semctr)
         return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    if not current_user.is_admin and talk.seminar.owner != current_user:
+    if not current_user.is_subject_admin(talk) and talk.seminar.owner != current_user:
         flash_error("You do not have permission to delete this seminar")
         return redirect(url_for(".index"), 302)
     if not talk.deleted:

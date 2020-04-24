@@ -480,9 +480,11 @@ class SeminarsUser(UserMixin):
     def is_admin(self):
         return self._data.get("admin", False)
 
-    @property
-    def subject_admin(self):
-        return self._data.get("subject_admin")
+    def is_subject_admin(self, talk_or_seminar):
+        if self.is_admin:
+            return True
+        sa = self._data.get("subject_admin")
+        return sa and sa in talk_or_seminar.subjects
 
     @property
     def is_creator(self):
@@ -560,6 +562,9 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
 
     @property
     def is_admin(self):
+        return False
+
+    def is_subject_admin(self, talk_or_seminar):
         return False
 
     def get_id(self):

@@ -117,7 +117,7 @@ class WebSeminar(object):
         Whether this seminar should be shown to the current user
         """
         return (self.owner == current_user.email or
-                current_user.is_admin or
+                current_user.is_subject_admin(self) or
                 # TODO: remove temporary measure of allowing visibility None
                 self.display and (self.visibility is None or self.visibility > 0 or current_user.email in self.editors()))
 
@@ -312,7 +312,7 @@ class WebSeminar(object):
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_admin or (
+        return current_user.is_subject_admin(self) or (
             current_user.email_confirmed and current_user.email.lower() == self.owner.lower()
         )
 
@@ -321,7 +321,7 @@ class WebSeminar(object):
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_admin or (
+        return current_user.is_subject_admin(self) or (
             current_user.email_confirmed and current_user.email.lower() in self.editors()
         )
 

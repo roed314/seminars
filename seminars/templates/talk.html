@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% if user.email in talk.seminar.editors() or user.is_admin %}
+{% if user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
 <p>{{ talk.send_speaker_link() | safe }}</p>
 {% endif %}
 
