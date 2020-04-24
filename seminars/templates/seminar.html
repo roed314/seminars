@@ -5,14 +5,12 @@
 <span style="display: inline-flex">
   <h1 style="padding-right: 0.5em;">
     {{ seminar.show_name(show_attributes=True,plain=True) | safe }}
-</h1>
-{{seminar.show_subscribe() | safe }}
+  </h1>
+  {{seminar.show_subscribe() | safe }}
 </span>
-{% if seminar.homepage %}
-<p>
-{{ seminar.show_homepage() | safe }}
+<p style="padding: 0x; margin: 0px 0px 25px 0px;">
+  {% if seminar.homepage %} {{ seminar.show_homepage() | safe }} {% endif %}
 </p>
-{% endif %}
 
 
 {% if not seminar.display %}
