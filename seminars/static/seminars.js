@@ -96,6 +96,11 @@ function setLinks() {
         setCookie("filter_location", "0");
         setCookie("filter_time", "0");
     } else {
+        // Backward compatibility with cookies from mathseminars.org
+        if (cur_topics.length > 0 && !cur_topics.includes("_")) {
+            cur_topics = "math_" + cur_topics.replace(/,/g, ",math_");
+            setCookie("topics", cur_topics);
+        }
         $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
         $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
         $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
