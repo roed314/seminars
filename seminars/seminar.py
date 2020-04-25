@@ -132,7 +132,8 @@ class WebSeminar(object):
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
         assert data.get("shortname")
         topics = self.topics if self.topics else []
-        data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
+        data["subjects"] = ["math"]
+        #data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
         data["edited_by"] = int(current_user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
