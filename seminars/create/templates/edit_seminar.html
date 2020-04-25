@@ -260,7 +260,7 @@ $(document).ready(function() {
       }
   {% for i in range(1,(seminar.organizer_data | length)) %}
     $("a.swap{{i}}").click(function(e){
-      e.prevent_default();
+      e.preventDefault();
       swap("org_full_name{{i-1}}","org_full_name{{i}}");
       swap("org_homepage{{i-1}}","org_homepage{{i}}");
       swap("org_email{{i-1}}","org_email{{i}}");
