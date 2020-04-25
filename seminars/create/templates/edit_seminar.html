@@ -257,6 +257,7 @@ $(document).ready(function() {
         var x = $('input[name="'+a+'"]')[0].value;
         $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
         $('input[name="'+b+'"]')[0].value = x;
+        console.log("swapped " + a " and " +b);
       }
   {% for i in range(1,(seminar.organizer_data | length)) %}
     $("a.swap{{i}}").click(function(e){
