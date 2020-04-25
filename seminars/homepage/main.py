@@ -391,7 +391,7 @@ def _index(query):
         title = topic_dict(include_subj=False)[query["topics"]["$contains"]] + " talks (beta)"
     else:
         hide_filters = []
-        title = "Worldwide seminars (beta)"
+        title = "Research seminars (beta)"
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     query["end_time"] = {"$gte": datetime.datetime.now()}
