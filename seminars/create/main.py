@@ -780,10 +780,12 @@ def make_date_data(seminar, data):
         # Only possible by user input
         frequency = -frequency
         query = {"$gte": midnight_end, "$lt": midnight_begin + day}
+        sort = [("start_time", -1)]
     else:
         query = {"$gte": midnight_begin, "$lt": midnight_end + day}
+        sort = ["start_time"]
     schedule_days = [begin + i * frequency * day for i in range(schedule_len)]
-    scheduled_talks = list(talks_search({"seminar_id": shortname, "start_time": query}))
+    scheduled_talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=sort))
     by_date = defaultdict(list)
     for T in scheduled_talks:
         by_date[adapt_datetime(T.start_time, tz).date()].append(T)
