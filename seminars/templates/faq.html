@@ -12,7 +12,7 @@
       <h4>
         How do I browse only combinatorics talks?
       </h4>
-      <p> At the <a href="{{ url_for("index") }}">front page</a>,
+      <p> On the <a href="{{ url_for("index") }}">Browse</a> page,
         in the text "Filter by topic", click "topic" to open the topics menu,
         press "Clear all" (if necessary) to deselect all topics,
         click on "combinatorics",
@@ -41,7 +41,7 @@
       </h4>
       <p>
         Check the seminar's external webpage, usually reachable by clicking
-        on the seminar name at the seminar's page at mathseminars.org.  Many seminars post
+        "External homepage" at the seminar's page on this site.  Many seminars post
         passwords just before each talk starts or email them to users subscribed to their
         mailing list.
       </p>
@@ -64,11 +64,13 @@
         <ol>
           <li>
             Registered users can save seminars and talks to their favorites.
-            Then on the <a href="{{ url_for("index") }}">front page</a> they can click "Show only saved events" to display only those.
+            Then on the <a href="{{ url_for("index") }}">Browse</a> page 
+            they can click "Show only saved events" to display only those.
             Moreover, on the Account page, they can export these to their own calendars.
           </li>
           <li>
-            Registered users can view all livestream links for connecting online to a talk.  (Many livestream links are viewable to all, but some seminar organizers may restrict access to registered users.)
+            Registered users can view all livestream links for connecting online to a talk.  
+            (Many livestream links are viewable to all, but some seminar organizers may restrict access to registered users.)
           </li>
           <li>
             Registered users, once endorsed, can create their own seminars and conferences for others to see.
@@ -83,7 +85,17 @@
       </h4>
       <p>No.  The only situation in which we would display your email publicly is if you list yourself as an organizer of a seminar <i>and</i> indicate that your name should be displayed <i>and</i> do not provide a homepage URL (if your email address and homepage URL are both provided, we would display only the URL), or if similarly you list yourself as maintainer of an institution without providing your homepage URL as a way for people to contact you.  Another situation in which your email address might be shared in a very limited way: Independently of whether you register, if a seminar organizer enters your email address when scheduling a talk by you, then the email address would be visible also to other organizers of that seminar.</p>
     </li>
-  </ul>
+
+  <li>
+      <h4>
+        Can I register an alias email address for a group of organizers, like <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span>?
+      </h4>
+    <p>No.  Our policy is that each registered user must be a <i>person</i>.  
+      What you should do is register as yourself, 
+      and then list <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> 
+      as an organizer when you create your seminar.</p>
+    </li>
+</ul>
 
     <h2>
   Exporting favorites to a calendar
@@ -100,7 +112,7 @@
       <h4>
         I exported my favorites to a calendar.  Why is it showing no events?
       </h4>
-      <p>Some calendar services sync external calendars only every 24 hours.  Furthermore, some may take even longer for the initial sync.  A workaround is to go to the <a href="{{ url_for('user.info')}}">Account</a> tab, copy the URL of the "ICS file" link there, and add it manually to your calendar app.</p>
+      <p>Some calendar services sync external calendars only every 24 hours.  Furthermore, some may take even longer for the initial sync.  A workaround is to go to the <a href="{{ url_for('user.info')}}">Account</a> page, copy the URL of the "ICS file" link there, and add it manually to your calendar app.</p>
     </li>
   </ul>
 
@@ -152,8 +164,11 @@
         How do I create a new seminar?
       </h4>
       <p><ol><li><a href="{{ url_for('user.register') }}">Register</a> for an account.</li>
-     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.  (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
-      <li>(Optional, but recommended) Go to the <a href="{{ url_for('create.index')}}">Institutions</a> page to make sure that the institutions associated with your seminar are there; if not, add them.  (Alternatively, add them after the seminar is created.)</li>
+     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.  
+       (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
+      <li>(Optional, but recommended) Go to the <a href="{{ url_for('list_institutions')}}">Institutions</a> page 
+        to make sure that the institutions associated with your seminar are there; if not, add them.  
+        (Alternatively, add them after the seminar is created.)</li>
           <li>Click on the <a href="{{ url_for('create.index')}}">Create</a> tab and follow the instructions there.  (Note: After creating your first seminar, the "Create" tab will be renamed as "Manage".)</li>
         </ol></p>
     </li>
@@ -164,6 +179,21 @@
       </h4>
       <p>
         The procedure is the same as for creating a new seminar.
+      </p>
+    </li>
+
+    <li>
+      <h4>
+        My seminar uses <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> as an alias email address for reaching all the organizers.  How do I make this appear as a contact email for my seminar?
+      </h4>
+      <p>
+        First, do <i>not</i> register a user account with email address <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span>; 
+        our policy is that each registered user must be a <i>person</i>.
+        Instead, when editing the seminar properties, in the list of organizers at the bottom, 
+        fill in a new row with email address <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> 
+        and uncheck "Organizer" and check "Display".  
+        You must also add yourself or some other (human) registered user as an organizer, along with name and email address, 
+        and check "Display"; if you also provide a homepage URL, this person's email address will not be displayed.
       </p>
     </li>
 

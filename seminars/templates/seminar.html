@@ -4,10 +4,14 @@
 
 <span style="display: inline-flex">
   <h1 style="padding-right: 0.5em;">
-    {{ seminar.show_name(homepage_link=True, show_attributes=True) | safe }}
-</h1>
-{{seminar.show_subscribe() | safe }}
+    {{ seminar.show_name(show_attributes=True,plain=True) | safe }}
+  </h1>
+  {{seminar.show_subscribe() | safe }}
 </span>
+{% if seminar.homepage %}
+  <p style="padding: 0x; margin: 0px 0px 25px 0px;"> {{ seminar.show_homepage() | safe }} </p>
+{% endif %}
+
 
 {% if not seminar.display %}
 <p>
@@ -36,16 +40,10 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% endif %}
 
 
-{% if seminar.homepage %}
-<p>
-{{ seminar.show_homepage() | safe }}
-</p>
-{% endif %}
-
 <table>
   {{ seminar.show_organizers() | safe }}
   {{ seminar.show_curators() | safe }}
-  <td></td><td class="forminfo">*indicates a contact for this listing</td>
+  <td></td><td class="forminfo">*contact</td>
 </table>
 
 

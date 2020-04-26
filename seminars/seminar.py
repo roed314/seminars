@@ -194,7 +194,9 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_name(self, homepage_link=False, external=False, show_attributes=False):
+    def show_name(self, homepage_link=False, external=False, show_attributes=False, plain=False):
+        if plain:
+            return self.name + (self.show_attributes() if show_attributes else "")
         # Link to seminar
         if homepage_link:
             if self.homepage:
@@ -245,11 +247,11 @@ class WebSeminar(object):
             classes="subscribe",
         )
 
-    def show_homepage(self):
+    def show_homepage(self,newtab=False):
         if not self.homepage:
             return ""
         else:
-            return "<a href='%s'>External homepage</a>" % (self.homepage)
+            return "<a href='%s'%s>External homepage</a>" % (self.homepage,' target="_blank"' if newtab else '')
 
     def show_institutions(self):
         if self.institutions:

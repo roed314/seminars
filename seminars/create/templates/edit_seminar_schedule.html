@@ -2,7 +2,11 @@
 {% block content %}
 
 <div class="text_content">
-<h1>{% if seminar.homepage %}<a href="{{seminar.homepage}}">{{seminar.name}}</a>{% else %}{{seminar.name}}{% endif %}</h1>
+<h1>{{ seminar.show_name() | safe }}</h1>
+{% if seminar.homepage %}
+  <p style="padding: 0x; margin: 0px 0px 25px 0px;"> {{ seminar.show_homepage(newtab=True) | safe }} </p>
+{% endif %}
+
 <p> To add talks, enter Speaker (and optionally edit the other fields) in one or more rows of the table; and then click any button or "Details" link.</p>
 
 <p>All times are shown in the seminar's time zone, {{ seminar.timezone }}.</p>

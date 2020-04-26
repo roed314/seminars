@@ -159,10 +159,11 @@
       </table>
       <h3>Organizers</h3>
       <p class="forminfo">
-        Normally, leave "Organizer" checked.  Uncheck for a staff/student/postdoc assistant with permission to edit the seminar despite not being responsible for the scientific organization.
+        Normally, leave "Organizer" checked.  Uncheck for an assistant with permission to edit the seminar despite not being responsible for the scientific organization, or for a seminar email address not associated to a single person.  At least one <i>person</i> displayed must be a registered user.
       </p>
       <table>
         <thead>
+          <td></td>
           <td align="center">{{ KNOWL("organizer_name") }}</td>
           <td align="center">{{ KNOWL("homepage") }}</td>
           <td align="center">{{ KNOWL("email") }}</td>
@@ -171,6 +172,11 @@
         </thead>
         {% for i in range(10) %}
         <tr>
+          {% if i > 0 and i < (seminar.organizer_data | length) %}
+            <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
+          {% else %}
+            <td></td>
+          {% endif %}
           {% if i < (seminar.organizer_data | length) %}
             <td>
               <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
@@ -247,6 +253,28 @@ const langOptions = [
 ];
 
 $(document).ready(function() {
+      function swapv(a,b) {
+        var x = $('input[name="'+a+'"]')[0].value;
+        $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
+        $('input[name="'+b+'"]')[0].value = x;
+        x = $('input[name="'+a+'"]')[0].value;
+      }
+      function swapc(a,b) {
+        var x = $('input[name="'+a+'"]')[0].checked;
+        $('input[name="'+a+'"]')[0].checked = $('input[name="'+b+'"]')[0].checked;
+        $('input[name="'+b+'"]')[0].checked = x;
+        x = $('input[name="'+a+'"]')[0].checked;
+      }
+  {% for i in range(1,(seminar.organizer_data | length)) %}
+    $("a.swap{{i}}").click(function(e){
+      e.preventDefault();
+      swapv("org_full_name{{i-1}}","org_full_name{{i}}");
+      swapv("org_homepage{{i-1}}","org_homepage{{i}}");
+      swapv("org_email{{i-1}}","org_email{{i}}");
+      swapc("org_curator{{i-1}}","org_curator{{i}}");
+      swapc("org_display{{i-1}}","org_display{{i}}");
+    });
+  {% endfor %}
   var topicSelector = makeTopicSelector(
     topicOptions,
     {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
