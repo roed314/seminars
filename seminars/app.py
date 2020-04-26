@@ -131,6 +131,7 @@ def ctx_proc_userdata():
     data["seminars_header"] = seminars_header
     data["languages_dict"] = languages_dict()
     data["static_knowl"] = static_knowl
+    data["topdomain"] = '.'.join(urlparse(request.url).netloc.split('.')[-2:])
 
     return data
 
