@@ -17,7 +17,7 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
-from seminars.utils import topics, user_topics, top_menu, languages_dict
+from seminars.utils import topics, user_topics, top_menu, languages_dict, topdomain
 from seminars.knowls import static_knowl
 from .seminar import seminars_header
 from .talk import talks_header
@@ -131,9 +131,10 @@ def ctx_proc_userdata():
     data["seminars_header"] = seminars_header
     data["languages_dict"] = languages_dict()
     data["static_knowl"] = static_knowl
-    data["topdomain"] = '.'.join(urlparse(request.url).netloc.split('.')[-2:])
+    data["topdomain"] = topdomain()
 
     return data
+
 
 
 ##############################
