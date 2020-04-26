@@ -410,6 +410,8 @@ def process_user_input(inp, col, typ, tz):
 def format_errmsg(errmsg, *args):
     return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
+def format_input_errmsg(err, inp, col):
+    return format_errmsg('Unable to process input %s for property %s: {0}'.format(err), '"' + inp + '"', col)
 
 def format_warning(errmsg, *args):
     return Markup("Warning: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
