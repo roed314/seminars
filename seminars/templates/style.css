@@ -2730,7 +2730,7 @@ li.ical-detail {
   display: inline-flex;
   background: {{color.header_background}};
   color: #ccc;
-  box-shadow: 0px 5px 5px {{color.header_shadow}};
+  box-shadow: 1px 1px 3px #aaa;
 }
 
 .notifyjs-banner-base .message {
