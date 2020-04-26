@@ -97,16 +97,16 @@ def parse_date(info, query):
         if start.strip():
             try:
                 start = tz.localize(parse(start))
+                sub_query["$gte"] = start
             except Exception:
-                flash_error("Could not parse date: %s", start)
-            sub_query["$gte"] = start
+                flash_error("Could not parse date: '%s'", start)
         if end.strip():
             try:
                 end = tz.localize(parse(end))
+                end = end + datetime.timedelta(hours=23, minutes=59, seconds=59)
+                sub_query["$lte"] = end
             except Exception:
-                flash_error("Could not parse date: %s", end)
-            end = end + datetime.timedelta(hours=23, minutes=59, seconds=59)
-            sub_query["$lte"] = end
+                flash_error("Could not parse date: '%s'", end)
         if sub_query:
             query["start_time"] = sub_query
 
