@@ -369,7 +369,7 @@ def save_seminar():
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+            errmsgs.append(format_errmsg('Unable to process input "%s" for property %s: {0}'.format(err), val, col))
     if not data["name"]:
         errmsgs.append("Seminar name cannot be blank")
     if seminar.is_conference and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
@@ -378,7 +378,7 @@ def save_seminar():
         if data[col] is not None and data[col] < 1:
             errmsgs.append(
                 format_errmsg(
-                    "Unable to process input %s for %s: a positive integer is required", raw_data.get(col, ""), col,
+                    'Unable to process input "%s" for property %s: a positive integer is required', raw_data.get(col, ""), col,
                 )
             )
     data["institutions"] = clean_institutions(data.get("institutions"))
@@ -401,7 +401,7 @@ def save_seminar():
                 D[col] = None  # make sure col is present even if process_user_input fails
                 D[col] = process_user_input(val, col, typ, tz)
             except Exception as err:  # should only be ValueError's but let's be cautious
-                errmsgs.append(format_errmsg('unable to process input "%s" for property %s: {0}'.format(err), val, col))
+                errmsgs.append(format_errmsg('Unable to process input "%s" for property %s: {0}'.format(err), val, col))
         if D["homepage"] or D["email"] or D["full_name"]:
             if not D["full_name"]:
                 errmsgs.append(format_errmsg("organizer %s cannot be blank", "name"))
@@ -553,7 +553,7 @@ def save_institution():
                             "error",
                         )
         except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_errmsg('unable to process input "%s" for property %s: {0}'.format(err), val, col))
+            errmsgs.append(format_errmsg('Unable to process input "%s" for property %s: {0}'.format(err), val, col))
     if not data["name"]:
         errmsgs.append("Institution name cannot be blank.")
     if not errmsgs and not data["homepage"]:
@@ -663,7 +663,7 @@ def save_talk():
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
         except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_errmsg('unable to process input "%s" for property %s: {0}'.format(err), val, col))
+            errmsgs.append(format_errmsg('Unable to process input "%s" for property %s: {0}'.format(err), val, col))
     if not data["speaker"]:
         errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
     if data["start_time"] is None or data["end_time"] is None:
@@ -941,7 +941,7 @@ def save_seminar_schedule():
                 data[col] = None  # make sure col is present even if process_user_input fails
                 data[col] = process_user_input(val, col, typ, tz)
             except Exception as err:
-                errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+                errmsgs.append(format_errmsg('Unable to process input "%s" for property %s: {0}'.format(err), val, col))
 
         # Don't try to create new_version using invalid input
         if errmsgs:
