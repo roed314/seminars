@@ -377,7 +377,7 @@ def save_seminar():
         errmsgs.append("End date cannot precede start date")
     for col in ["frequency", "per_day"]:
         if data[col] is not None and data[col] < 1:
-            errmsgs.append(errmsgs.append(format_input_errmsg("integer must be positive", val, col)))
+            errmsgs.append(format_input_errmsg("integer must be positive", data[col], col))
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
