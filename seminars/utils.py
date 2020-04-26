@@ -370,7 +370,7 @@ def process_user_input(inp, col, typ, tz):
         t = t.replace(year=2020, month=1, day=1)
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
-        if not validate_url(inp) and not (col == "live_link" and inp == "see comments"):
+        if not validate_url(inp) and not (col == "live_link" and (inp == "see comments" or inp == "See comments")):
             raise ValueError("Invalid URL")
         return inp
     elif col.endswith("email") and typ == "text":
@@ -410,6 +410,8 @@ def process_user_input(inp, col, typ, tz):
 def format_errmsg(errmsg, *args):
     return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
+def format_input_errmsg(err, inp, col):
+    return format_errmsg('Unable to process input %s for property %s: {0}'.format(err), '"' + str(inp) + '"', col)
 
 def format_warning(errmsg, *args):
     return Markup("Warning: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))

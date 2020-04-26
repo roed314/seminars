@@ -1,7 +1,7 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import topics, user_topics, toggle, Toggle, languages_dict
+from seminars.utils import user_topics, toggle, Toggle, languages_dict
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import render_template, request, redirect, url_for, Response, make_response
