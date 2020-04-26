@@ -384,14 +384,14 @@ def _index(query):
     if "subjects" in query:
         subject = query["subjects"]["$contains"]
         hide_filters = ["subject"]
-        title = subject_dict()[subject] + " talks (beta)"
+        title = subject_dict()[subject] + " talks (test)"
         subs = ((subject, subject.capitalize()),)
     elif "topics" in query:
         hide_filters = ["subject", "topic"]
-        title = topic_dict(include_subj=False)[query["topics"]["$contains"]] + " talks (beta)"
+        title = topic_dict(include_subj=False)[query["topics"]["$contains"]] + " talks (test)"
     else:
         hide_filters = []
-        title = "Research seminars (beta)"
+        title = "Research seminars (test)"
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     query["end_time"] = {"$gte": datetime.datetime.now()}
