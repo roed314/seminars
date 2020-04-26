@@ -401,7 +401,7 @@ def save_seminar():
                 D[col] = None  # make sure col is present even if process_user_input fails
                 D[col] = process_user_input(val, col, typ, tz)
             except Exception as err:  # should only be ValueError's but let's be cautious
-                errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
+                errmsgs.append(format_errmsg('unable to process input "%s" for property %s: {0}'.format(err), val, col))
         if D["homepage"] or D["email"] or D["full_name"]:
             if not D["full_name"]:
                 errmsgs.append(format_errmsg("organizer %s cannot be blank", "name"))
@@ -553,7 +553,7 @@ def save_institution():
                             "error",
                         )
         except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_errmsg("unable to process input %s for %s: {0}".format(err), val, col))
+            errmsgs.append(format_errmsg('unable to process input "%s" for property %s: {0}'.format(err), val, col))
     if not data["name"]:
         errmsgs.append("Institution name cannot be blank.")
     if not errmsgs and not data["homepage"]:
@@ -663,7 +663,7 @@ def save_talk():
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
                 errmsgs.append(format_errmsg("access type %s invalid", data[col]))
         except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_errmsg("Unable to process input %s for %s: {0}".format(err), val, col))
+            errmsgs.append(format_errmsg('unable to process input "%s" for property %s: {0}'.format(err), val, col))
     if not data["speaker"]:
         errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
     if data["start_time"] is None or data["end_time"] is None:
@@ -882,7 +882,7 @@ def save_seminar_schedule():
             try:
                 date = process_user_input(date, "date", "date", tz)
             except Exception as err:  # should only be ValueError's but let's be cautious
-                errmsgs.append(format_errmsg("Unable to process input %s for date: {0}".format(err), date))
+                errmsgs.append(format_errmsg('Unable to process date input "%s": {0}'.format(err), date))
         else:
             errmsgs.append(format_errmsg("You must specify a date for the talk by %s", speaker))
         time_input = raw_data.get("time%s" % i, "").strip()
@@ -900,7 +900,7 @@ def save_seminar_schedule():
                 start_time = process_user_input(time_split[0], "start_time", "time", tz)
                 end_time = process_user_input(time_split[1], "end_time", "time", tz)
             except Exception as err:
-                errmsgs.append(format_errmsg("Unable to process input %s for time: {0}".format(err), time_input,))
+                errmsgs.append(format_errmsg('Unable to process time input "%s": {0}'.format(err), time_input,))
         if any(X is None for X in [start_time, end_time]):
             errmsgs.append(format_errmsg("You must specify a start and end time for the talk by speaker %s", speaker))
         else:
