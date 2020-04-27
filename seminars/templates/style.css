@@ -345,7 +345,6 @@ i.fa.close:hover {
     background: linear-gradient(to bottom, white 80%, #373737 100%) !important;
     border-top-left-radius: 5px !important;
     border-top-right-radius: 5px !important;
-    box-shadow: 5px 0px 5px white;
 }
 
 .ui-state-default a:hover {
