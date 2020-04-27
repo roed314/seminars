@@ -303,6 +303,7 @@ body.knowl #header {
     font-family: sans-serif;
     padding: 10px 25px 10px 25px;
     min-height: 20px;
+    border-radius: 5px 5px 0 0;
 }
 
 div.topic_toggle, div.language_toggle {
