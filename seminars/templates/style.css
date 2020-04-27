@@ -341,7 +341,7 @@ i.fa.close:hover {
 
 .ui-state-active {
     border: none !important;
-    background: white !important;
+    background: linear-gradient(to bottom, white 80%, #373737 100%) !important;
 }
 
 
