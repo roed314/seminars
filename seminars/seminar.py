@@ -7,7 +7,7 @@ from seminars.utils import (
     count_distinct,
     max_distinct,
     allowed_shortname,
-    topic_dict,
+    physics_topic_dict as topic_dict,
     weekdays,
     adapt_weektime,
     adapt_datetime,
