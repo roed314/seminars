@@ -285,7 +285,7 @@ slide_link:
     A URL link to a slide presentation used in the talk.  
     This may be set either before or after the talk.
 video_link:
-  title: Video link
+  title: Recorded video link
   contents: |
     A URL link to a video recording of the talk.
 talk_date:
