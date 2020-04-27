@@ -17,7 +17,6 @@ from email_validator import validate_email
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-@lru_cache(maxsize=None)
 def topdomain():
     # return 'mathseminars.org'
     # return 'researchseminars.org'
