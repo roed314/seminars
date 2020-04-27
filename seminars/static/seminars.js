@@ -107,8 +107,8 @@ function setSubjectLinks() {
         console.log("No subjects!");
         setCookie("subjects", "");
         setCookie("filter_subject", "0");
-        $("#filter-table").hide();
-        $("#welcome-popup").show();
+        //$("#filter-table").hide();
+        //$("#welcome-popup").show();
         cur_subjects = "";
     } else {
         $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
@@ -145,7 +145,6 @@ function setTopicLinks() {
             $("#topiclink-" + cur_topics[i]).addClass("topicselected");
             $(".topic-" + cur_topics[i]).removeClass("topic-filtered");
         }
-        toggleFilters(null);
     }
 }
 function welcomeDone() {
@@ -163,6 +162,7 @@ function setLinks() {
         setSubjectLinks();
         setLanguageLinks();
         setTopicLinks();
+        toggleFilters(null);
     }
 }
 
@@ -300,11 +300,19 @@ function talksToShow(talks) {
     }
     return talks;
 }
-function toggleFilters(id) {
-    console.log(id);
+function filterMenuVisible(ftype) {
+    return $("#"+ftype+"-filter-menu").is(":visible");
+}
+function toggleFilters(id, on_menu_open=false) {
+    console.log("filters", id);
     if (id !== null) {
         console.log($('#'+id).is(":checked"));
-        setCookie("filter_" + id.split("_")[1], $('#'+id).is(":checked") ? "1" : "0");
+        var is_enabled = $('#'+id).is(":checked")
+        var ftype = id.split("_")[1]
+        setCookie("filter_" + ftype, is_enabled ? "1" : "0");
+        if (!on_menu_open && is_enabled && !filterMenuVisible(ftype) && !getCookie(ftype+"s")) {
+            toggleFilterView(ftype+"-filter-btn");
+        }
     }
     var talks = $('.talk');
     console.log(talks.length);
@@ -314,7 +322,16 @@ function toggleFilters(id) {
     apply_striping();
 }
 function toggleFilterView(id) {
+    // If this filter is not enabled, we enable it
+    console.log("filterview", id);
     var ftype = id.split("-")[0];
+    var is_enabled = Boolean(parseInt(getCookie("filter_"+ftype)));
+    var visible = filterMenuVisible(ftype)
+    if (!is_enabled && !visible) {
+        var filtid = 'enable_'+ftype+'_filter';
+        $('#'+filtid).prop("checked", true);
+        toggleFilters(filtid, true);
+    }
     for (i=0; i<filter_menus.length; i++) {
         var elt = $("#"+filter_menus[i]+"-filter-menu");
         if (ftype == filter_menus[i]) {
@@ -456,7 +473,7 @@ function displayCookieBanner() {
 }
 
 $(document).ready(function () {
-    if (navigator.cookieEnabled && document.cookie.includes("subjects") && ! document.cookie.includes('cookie_banner')) {
+    if (navigator.cookieEnabled && !document.cookie.includes('cookie_banner')) {
         displayCookieBanner();
     }
 
@@ -473,11 +490,11 @@ $(document).ready(function () {
             evt.preventDefault();
             toggleSubject(this.id);
         });
-    $('.welcome_toggle').click(
+    /*$('.welcome_toggle').click(
         function (evt) {
             evt.preventDefault();
             toggleSubject(this.id, true);
-        });
+        });*/
     $('.topic_toggle').click(
         function (evt) {
             evt.preventDefault();
