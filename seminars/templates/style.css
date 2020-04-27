@@ -356,11 +356,13 @@ div.topic_cmd {
 #top-menu div.menu-active a {
     background: white;
     color: {{color.header_background}};
+    border-radius: 5px 5px 0 0;
 }
 
 #top-menu a:hover {
     background: #aaaaaa;
     color: {{color.header_background}};
+    border-radius: 5px 5px 0 0;
 }
 
 div.topicselected, div.languageselected {
