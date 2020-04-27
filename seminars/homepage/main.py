@@ -392,7 +392,7 @@ def index():
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
-        title="Math Seminars (beta)",
+        title="Browse",
         topic_counts=topic_counts,
         languages=languages,
         language_counts=language_counts,
