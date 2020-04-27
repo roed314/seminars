@@ -169,7 +169,7 @@ def topics():
 # A temporary measure in case talks/seminars with physics topics are visible (they might be crosslisted with math)
 @lru_cache(maxsize=None)
 def physics_topic_dict():
-    return dict([(rec["subject"] + "_" + rec["abbreviation"], rec["name"]) for rec in db.topics.search()))
+    return dict([(rec["subject"] + "_" + rec["abbreviation"], rec["name"]) for rec in db.topics.search()])
 
 def user_topics():
     return [('math_' + ab, name) for (ab, name) in topics()]
