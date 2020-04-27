@@ -114,7 +114,7 @@ def ctx_proc_userdata():
     # meta_description appears in the meta tag "description"
     data[
         "meta_description"
-    ] = r"Welcome to {topdomain}, a listing of research seminars, talks and conferences!".format(topdomain = topdomain())
+    ] = r"Welcome to {topdomain}, a listing of research seminars and conferences!".format(topdomain = topdomain())
     data[
         "feedbackpage"
     ] = r"https://docs.google.com/forms/d/e/1FAIpQLSdJNJ0MwBXzqZleN5ibAI9u1gPPu9Aokzsy08ot802UitiDRw/viewform"
