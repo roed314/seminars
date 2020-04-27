@@ -108,6 +108,7 @@
   {% endif %}
   <h2>Edit my details</h2>
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
+    <input type="hidden" name="subjects" value="{{ user.subjects }}" />
     <table>
       <tr>
         <td>Created</td>
@@ -137,22 +138,28 @@
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
-    <tr>
-      <td>Timezone</td>
-      <td>
-        <select name="timezone" style="width:356px;">
-        {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
+      <tr>
+        <td>Timezone</td>
+        <td>
+          <select name="timezone" style="width:356px;">
+            {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
                     selected=true
                     {%endif%}
                     >
-                    {{pretty_tz}}
+              {{pretty_tz}}
             </option>
-        {% endfor %}
-        </select>
-      </td>
-    </tr>
+            {% endfor %}
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Subjects</td>
+        <td>
+          <span id="subject_selector" style="width:356px;"></span>
+        </td>
+      </tr>
 
       <tr><td colspan="3" class="spacing" /></tr>
       <tr>
@@ -207,7 +214,21 @@ function makelink() {
 $(function() {
    $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
 });
+
 makelink();
+
+const subjOptions = [
+  {% for sid, name in subjects %}
+  {
+    label: "{{ name }}",
+    value: "{{ sid }}",
+  },
+  {% endfor %}
+];
+
+$(document).ready(function() {
+  var subjSelector = makeSubjectSelector(subjOptions, {{ user.subjects | safe }});
+});
 
 /* this tells the user if the passwords match */
 

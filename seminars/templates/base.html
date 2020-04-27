@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="description" content="{{meta_description|striptags}}"/>
     {% if titletag %}
-      <title>Math seminars - {{ titletag|striptags }}</title>
+      <title>Research seminars - {{ titletag|striptags }}</title>
     {% else %}
-      <title>Math seminars{% if title %} - {{ title|striptags }}{% endif %}  </title>
+      <title>Research seminars{% if title %} - {{ title|striptags }}{% endif %}  </title>
     {% endif %}
   <script>
   if (navigator.cookieEnabled) {
@@ -80,7 +80,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.watermark.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.markitup.markdown.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='lmfdb.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='seminars2.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='seminars.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='showdown.min.js') }}"></script>
 
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.dataTables.js') }}"></script>
@@ -163,6 +163,10 @@ ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www')
 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 })();
     </script>
+
+
+
+
   </head>
 
   <body class="{{ body_class }}">

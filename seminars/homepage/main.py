@@ -1,7 +1,17 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import user_topics, toggle, Toggle, languages_dict
+from seminars.utils import (
+    restricted_topics as user_topics,
+    toggle,
+    Toggle,
+    languages_dict,
+    subject_dict,
+    topic_dict,
+    subjects,
+    topics,
+    topdomain,
+)
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import render_template, request, redirect, url_for, Response, make_response
@@ -21,6 +31,7 @@ from lmfdb.utils import (
     to_dict,
     flash_error,
 )
+
 from lmfdb.utils.search_parsing import collapse_ors
 
 
@@ -144,7 +155,8 @@ def talks_parser(info, query):
     # Also need that the seminar has visibility 2.
 
     # FIXME: temporary measure during addition of physics
-    query["subjects"] = ["math"]
+    if topdomain() == "mathseminars.org":
+        query["subjects"] = ["math"]
 
 def seminars_parser(info, query):
     parse_topic(info, query, prefix="seminar")
@@ -159,7 +171,8 @@ def seminars_parser(info, query):
     query["visibility"] = 2
 
     # FIXME: temporary measure during addition of physics
-    query["subjects"] = ["math"]
+    if topdomain() == "mathseminars.org":
+        query["subjects"] = ["math"]
 
 # Common boxes
 
@@ -366,25 +379,57 @@ class SemSearchArray(SearchArray):
 
 @app.route("/")
 def index():
+    return _index({})
+
+def by_subject(subject):
+    subject = subject.lower()
+    if subject not in subject_dict():
+        return render_template("404.html", title="Subject %s not found" % subject)
+    return lambda: _index({"subjects": {"$contains": subject}})
+
+def by_topic(subject, topic):
+    full_topic = subject + "_" + topic
+    return lambda: _index({"topics": {"$contains": full_topic}})
+
+# We don't want to intercept other routes by doing @app.route("/<subject>") etc.
+for subject in subject_dict():
+    app.add_url_rule("/%s/" % subject, "by_subject_%s" % subject, by_subject(subject))
+for ab, name, subject in topics():
+    app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
+
+def _index(query):
     # Eventually want some kind of cutoff on which talks are included.
-    talks = list(
-        talks_search(
-            {"display": True,
-             "subjects": ["math"],
-             "hidden": {"$or": [False, {"$exists": False}]},
-             "end_time": {"$gte": datetime.datetime.now()}},
-            sort=["start_time"],
-            seminar_dict=all_seminars(),
-        )
-    )
+    query = dict(query)
+    subs = subjects()
+    if "subjects" in query:
+        subject = query["subjects"]["$contains"]
+        hide_filters = ["subject"]
+        title = subject_dict()[subject] + " talks (test)"
+        subs = ((subject, subject.capitalize()),)
+    elif "topics" in query:
+        hide_filters = ["subject", "topic"]
+        title = topic_dict(include_subj=False)[query["topics"]["$contains"]] + " talks (test)"
+    else:
+        hide_filters = []
+        title = "Research seminars (test)"
+    query["display"] = True
+    if topdomain() == "mathseminars.org":
+        query["subjects"] = ["math"]
+    query["hidden"] = {"$or": [False, {"$exists": False}]}
+    query["end_time"] = {"$gte": datetime.datetime.now()}
+    talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
     topic_counts = Counter()
     language_counts = Counter()
+    subject_counts = Counter()
     for talk in talks:
         if talk.topics:
             for topic in talk.topics:
                 topic_counts[topic] += 1
+        if talk.subjects:
+            for subject in talk.subjects:
+                subject_counts[subject] += 1
         language_counts[talk.language] += 1
     lang_dict = languages_dict()
     languages = [(code, lang_dict[code]) for code in language_counts]
@@ -392,15 +437,17 @@ def index():
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
-        title="Browse",
+        title=title,
+        hide_filters=hide_filters,
         topic_counts=topic_counts,
+        subject_counts=subject_counts,
         languages=languages,
         language_counts=language_counts,
         talks=talks,
+        subjects=subs,
         section="Browse",
         toggle=toggle,
     )
-
 
 @app.route("/search")
 def search():
@@ -477,7 +524,7 @@ def show_seminar(shortname):
             past.append(talk)
     future.sort(key=lambda talk: talk.start_time)
     past.sort(key=lambda talk: talk.start_time, reverse=True)
-    if current_user.email in seminar.editors() or current_user.is_admin:
+    if current_user.email in seminar.editors() or current_user.is_subject_admin(seminar):
         section = "Manage"
     else:
         section = None
@@ -585,7 +632,7 @@ def show_talk(semid, talkid):
         menu[2] = (url_for("create.index"), "", "Manage")
         kwds["top_menu"] = menu
     elif (
-        current_user.is_admin
+        current_user.is_subject_admin(talk)
         or current_user.email_confirmed
         and (
             current_user.email in talk.seminar.editors() or current_user.email == talk.speaker_email

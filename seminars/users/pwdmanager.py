@@ -337,6 +337,23 @@ class SeminarsUser(UserMixin):
         self._dirty = True
 
     @property
+    def subjects(self):
+        subjects = self._data.get("subjects")
+        if subjects:
+            return subjects
+        else:
+            cookie = request.cookies.get("subjects", "")
+            if cookie:
+                return [subj.strip() for subj in cookie.split(",")]
+            else:
+                return []
+
+    @subjects.setter
+    def subjects(self, subjects):
+        self._data["subjects"] = subjects
+        self._dirty = True
+
+    @property
     def ics(self):
         return generate_token(self.id, "ics")
 
@@ -463,6 +480,12 @@ class SeminarsUser(UserMixin):
     def is_admin(self):
         return self._data.get("admin", False)
 
+    def is_subject_admin(self, talk_or_seminar):
+        if self.is_admin:
+            return True
+        sa = self._data.get("subject_admin")
+        return sa and sa in talk_or_seminar.subjects
+
     @property
     def is_creator(self):
         return self._data.get("creator", False)
@@ -541,6 +564,9 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     def is_admin(self):
         return False
 
+    def is_subject_admin(self, talk_or_seminar):
+        return False
+
     def get_id(self):
         return
 
@@ -566,6 +592,14 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
             return timezone(self.timezone)
         except UnknownTimeZoneError:
             return timezone("UTC")
+
+    @property
+    def subjects(self):
+        cookie = request.cookies.get("subjects", "")
+        if cookie:
+            return [subj.strip() for subj in cookie.split(",")]
+        else:
+            return []
 
     @property
     def email_confirmed(self):

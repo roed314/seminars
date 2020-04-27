@@ -17,7 +17,7 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
-from seminars.utils import topics, user_topics, top_menu, languages_dict, topdomain
+from seminars.utils import topics, restricted_topics, subjects, top_menu, languages_dict, topdomain
 from seminars.knowls import static_knowl
 from .seminar import seminars_header
 from .talk import talks_header
@@ -108,7 +108,7 @@ def ctx_proc_userdata():
     # For example, [ ('Bread', '.'), ('Crumb', '.'), ('Hierarchy', '.')]
     data["bread"] = None
 
-    # default title - Math seminars already included in base.html
+    # default title - Research seminars already included in base.html
     data["title"] = r""
 
     # meta_description appears in the meta tag "description"
@@ -124,7 +124,8 @@ def ctx_proc_userdata():
     data["DEBUG"] = is_debug_mode()
 
     data["topics"] = topics()
-    data["user_topics"] = user_topics()
+    data["user_topics"] = restricted_topics()
+    data["subjects"] = subjects()
     data["top_menu"] = top_menu()
 
     data["talks_header"] = talks_header

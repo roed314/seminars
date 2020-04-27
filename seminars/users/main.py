@@ -36,6 +36,7 @@ from seminars.utils import (
     validate_url,
     format_errmsg,
     show_input_errors,
+    clean_subjects,
     topdomain,
 )
 
@@ -160,6 +161,7 @@ def email_confirmed_required(fn):
 
 @login_page.route("/info")
 def info():
+    print(current_user.subjects)
     if current_user.is_authenticated:
         title = section = "Account"
     else:
@@ -185,7 +187,8 @@ def set_info():
     if homepage and not validate_url(homepage):
         return show_input_errors([format_errmsg("Homepage %s is not a valid URL, it should begin with http:// or https://", homepage)])
     for k, v in request.form.items():
-        setattr(current_user, k, v.strip())
+        setattr(current_user, k, v)
+    current_user.subjects = clean_subjects(current_user.subjects)
     previous_email = current_user.email
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))

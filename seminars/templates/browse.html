@@ -4,21 +4,19 @@
 
 <table id="filter-table">
   <tr>
-    <td style="padding-right: 2em;">
-      Times in {{ user.show_timezone("browse") }}
-    </td>
     <td>
-      {{ toggle(tglid="enable_topic_filter", value="", onchange="toggleFilters(this.id);") | safe }}
+      Filter by:
     </td>
-    <td style="padding-right: 2em;">
-      Filter by <a id="topic-filter-btn" class="likeknowl"  onclick="$('#topic-filter-menu').slideToggle(300); return false;">topic</a>
-    </td>
+    {% for ftype in ["subject", "topic", "language"] %}
+    {% if ftype not in hide_filters %}
     <td>
-      {{ toggle(tglid="enable_language_filter", value="", onchange="toggleFilters(this.id);") | safe }}
+      {{ toggle(tglid="enable_"+ftype+"_filter", value="", onchange="toggleFilters(this.id);") | safe }}
     </td>
     <td style="padding-right: 2em;">
-      Filter by <a id="language-filter-btn" class="likeknowl" onclick="$('#language-filter-menu').slideToggle(300); return false;">language</a>
+      <a id="{{ftype}}-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">{{ftype}}</a>
     </td>
+    {% endif %}
+    {% endfor %}
     {% if user.is_authenticated %}
     <td >
       {{ toggle(tglid="enable_calendar_filter", value="", onchange="toggleFilters(this.id);") | safe }}
@@ -30,6 +28,14 @@
   </tr>
 </table>
 
+<br>
+<table id="timezone-table">
+   <tr>
+    <td style="padding-right: 2em;">
+      Times in {{ user.show_timezone("browse") }}
+    </td>
+   </tr>
+</table>
 
 <table id="browse-talks" class="talk-table ntdata">
   <thead>
@@ -37,11 +43,18 @@
   </thead>
   <tbody>
     {% for talk in talks %}
-    <tr class="talk {%for topic in talk.topics %} topic-{{topic}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
+    <tr class="talk {% for topic in talk.topics %} topic-{{topic}} {% endfor %} subject-filtered {% for subject in talk.subjects %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
       {{ talk.oneline() | safe }}
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
+    <!-- topic tabs -->
+      <script>
+        $( function() {
+          $( "#subjects-tabs" ).tabs();
+        } );
+      </script>
 
 {% endblock %}
