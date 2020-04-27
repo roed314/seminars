@@ -226,24 +226,21 @@ body.knowl #header {
     /* display: inline-block; */
     color: {{color.header_text_title}};
     min-height: 32px;
+    float: left;
+    min-width: 500px;
 }
 
 #header #title .katex{
     font-weight: bold !important;
 }
 
-#header .bread {
-    font-family: sans-serif;
-    font-size: 90%;
-    display: inline-block;
-}
-
-#header .bread a:first-child {
-    font-size: 150%;
-}
-
-#header .bread a {
-    color: {{color.bread_links}};
+#header #domain {
+  float: right;
+  text-align: right;
+  font-family: sans-serif;
+  float: right;
+  color: {{color.header_text_topright}};
+  padding: 10px;
 }
 
 #header .topright {

@@ -19,6 +19,8 @@ short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 @lru_cache(maxsize=None)
 def topdomain():
+    # return 'mathseminars.org'
+    # return 'researchseminars.org'
     return '.'.join(urlparse(request.url).netloc.split('.')[-2:])
 
 def validate_url(x):
