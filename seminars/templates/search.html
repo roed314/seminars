@@ -5,14 +5,14 @@
   <div class="container">
     <form class="toggle">
       <input type="radio" id="choice1" name="choice" value="seminars">
-      <label id="labelchoice1" for="choice1">Seminars</label>
+      <label id="labelchoice1" for="choice1">Series</label>
 
       <input type="radio" id="choice2" name="choice" value="talks">
       <label id="labelchoice2" for="choice2">Talks</label>
       {% if info.get('search_type') == 'talks' %}
       <div id="flap"><span class="content" id="rotatedcontent" style="transform: rotateY(180deg)">Talks</span></div>
       {% else %}
-      <div id="flap"><span class="content">Seminars</span></div>
+      <div id="flap"><span class="content">Series</span></div>
       {% endif %}
 
     </form>
@@ -126,7 +126,7 @@ st.clickHandler = (e) => {
             st.flap.children[0].textContent = e.target.textContent;
         }, 250);
     }
-    if (e.target.textContent == 'Seminars') {
+    if (e.target.textContent == 'Series') {
       $('#searchseminars').show();
       $('#searchtalks').hide();
     } else if (e.target.textContent == 'Talks') {

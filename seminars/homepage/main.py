@@ -1,7 +1,17 @@
 from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
-from seminars.utils import user_topics, toggle, Toggle, languages_dict, subject_dict, topic_dict, subjects, topics
+from seminars.utils import (
+    restricted_topics as user_topics,
+    toggle,
+    Toggle,
+    languages_dict,
+    subject_dict,
+    topic_dict,
+    subjects,
+    topics,
+    topdomain,
+)
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import render_template, request, redirect, url_for, Response, make_response
@@ -145,7 +155,8 @@ def talks_parser(info, query):
     # Also need that the seminar has visibility 2.
 
     # FIXME: temporary measure during addition of physics
-    query["subjects"] = ["math"]
+    if topdomain() == "mathseminars.org":
+        query["subjects"] = ["math"]
 
 def seminars_parser(info, query):
     parse_topic(info, query, prefix="seminar")
@@ -160,7 +171,8 @@ def seminars_parser(info, query):
     query["visibility"] = 2
 
     # FIXME: temporary measure during addition of physics
-    query["subjects"] = ["math"]
+    if topdomain() == "mathseminars.org":
+        query["subjects"] = ["math"]
 
 # Common boxes
 
@@ -286,8 +298,8 @@ class TalkSearchArray(SearchArray):
 
 
 class SemSearchArray(SearchArray):
-    noun = "seminar"
-    plural_noun = "seminars"
+    noun = "series"
+    plural_noun = "series"
 
     def __init__(self):
         ## topics
@@ -357,7 +369,7 @@ class SemSearchArray(SearchArray):
 
     def search_types(self, info):
         return [
-            ("seminars", "Search for seminars"),
+            ("seminars", "Search for series"),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -401,6 +413,8 @@ def _index(query):
         hide_filters = []
         title = "Research seminars (test)"
     query["display"] = True
+    if topdomain() == "mathseminars.org":
+        query["subjects"] = ["math"]
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     query["end_time"] = {"$gte": datetime.datetime.now()}
     talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
@@ -475,7 +489,7 @@ def search():
     talks = [talk for talk in talks if talk.searchable()]
     info["talk_results"] = talks
     return render_template(
-        "search.html", title="Search seminars", info=info, section="Search", bread=None,
+        "search.html", title="Search series", info=info, section="Search", bread=None,
     )
 
 

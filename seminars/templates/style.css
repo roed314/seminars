@@ -226,24 +226,21 @@ body.knowl #header {
     /* display: inline-block; */
     color: {{color.header_text_title}};
     min-height: 32px;
+    float: left;
+    min-width: 300px;
 }
 
 #header #title .katex{
     font-weight: bold !important;
 }
 
-#header .bread {
-    font-family: sans-serif;
-    font-size: 90%;
-    display: inline-block;
-}
-
-#header .bread a:first-child {
-    font-size: 150%;
-}
-
-#header .bread a {
-    color: {{color.bread_links}};
+#header #domain {
+  float: right;
+  text-align: right;
+  font-family: sans-serif;
+  float: right;
+  color: {{color.header_text_topright}};
+  padding: 10px;
 }
 
 #header .topright {
@@ -424,11 +421,13 @@ div.topic_cmd {
 #top-menu div.menu-active a {
     background: white;
     color: {{color.header_background}};
+    border-radius: 5px 5px 0 0;
 }
 
 #top-menu a:hover {
     background: #aaaaaa;
     color: {{color.header_background}};
+    border-radius: 5px 5px 0 0;
 }
 
 div.topicselected, div.languageselected, div.subjectselected {
@@ -1534,38 +1533,6 @@ div.limit-height {
 }
 
 /* end knowl */
-
-/*** Dirichlet series, displayed in HTML ***/
-
-.dirichletseries {
-  font-family:"Times New Roman", Times, serif;
-}
-
-.dirichletseries em {
-  font-style: italic;
-}
-
-.dirichletseries td {
-  padding-left:0;
-  padding-right:0;
-}
-
-/*
-.dirichletseries td:first-child {
-  padding-top:3px;
-}
-*/
-
-.dirichletseries span.term {
-  white-space: nowrap;
-}
-
-.dirichletseries sup {
-/*  font-size: 75%;
-*/
-  font-style: italic;
-  font-family: KaTeX_Math;
-}
 
 /*** Tables for the Siegel corner ***/
 
@@ -2795,7 +2762,7 @@ li.ical-detail {
   display: inline-flex;
   background: {{color.header_background}};
   color: #ccc;
-  box-shadow: 0px 5px 5px {{color.header_shadow}};
+  box-shadow: 1px 1px 3px #aaa;
 }
 
 .notifyjs-banner-base .message {

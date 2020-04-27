@@ -75,7 +75,6 @@
     <tr>
       <td>{{ KNOWL("live_link") }}</td>
       <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
-          <td class="forminfo" />If link varies, enter "See comments" and leave instructions below in Comments.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("access") }}</td>
@@ -86,6 +85,7 @@
           <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
         </select>
       </td>
+      <td class="forminfo">This controls who can see the livestream link.</td>
     </tr>
     {% else %}
     <tr>

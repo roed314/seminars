@@ -668,6 +668,8 @@ def save_talk():
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
+    if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
+        flash_warning("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.\n")
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
     new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
