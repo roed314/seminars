@@ -1467,38 +1467,6 @@ div.limit-height {
 
 /* end knowl */
 
-/*** Dirichlet series, displayed in HTML ***/
-
-.dirichletseries {
-  font-family:"Times New Roman", Times, serif;
-}
-
-.dirichletseries em {
-  font-style: italic;
-}
-
-.dirichletseries td {
-  padding-left:0;
-  padding-right:0;
-}
-
-/*
-.dirichletseries td:first-child {
-  padding-top:3px;
-}
-*/
-
-.dirichletseries span.term {
-  white-space: nowrap;
-}
-
-.dirichletseries sup {
-/*  font-size: 75%;
-*/
-  font-style: italic;
-  font-family: KaTeX_Math;
-}
-
 /*** Tables for the Siegel corner ***/
 
 /** TODO these definitions are too broad. please make siegel a

@@ -488,7 +488,7 @@ def talks_header(include_seminar=True, include_subscribe=True, datetime_header="
     cols = []
     cols.append((' colspan="2" class="yourtime"', datetime_header))
     if include_seminar:
-        cols.append((' class="seminar"', "Seminar"))
+        cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
     cols.append((' class="title"', "Title"))
     if include_subscribe:

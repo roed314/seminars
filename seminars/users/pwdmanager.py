@@ -478,7 +478,7 @@ class SeminarsUser(UserMixin):
         if creator:
             assert self.endorser is not None
             userdb.make_creator(self.email, int(self.endorser))  # it already saves
-            flash("Someone endorsed you! You can now create seminars.", "success")
+            flash("Someone endorsed you! You can now create series.", "success")
 
     @property
     def is_organizer(self):
