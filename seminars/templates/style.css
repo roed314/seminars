@@ -339,15 +339,24 @@ i.fa.close:hover {
     background: #373737 !important;
 }
 
-.ui-state-active {
-    border: none !important;
-    background: linear-gradient(to bottom, white 80%, #373737 100%) !important;
-}
-
-
 .ui-state-active a {
     color: black !important;
+    border: none !important;
+    background: linear-gradient(to bottom, white 80%, #373737 100%) !important;
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
+    box-shadow: 5px 0px 5px white;
 }
+
+.ui-state-default a:hover {
+    color: black !important;
+    background: linear-gradient(to bottom, #aaa 80%, #373737 100%);
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
+}
+
+
+
 
 .ui-tabs-panel {
     background: #373737 !important;
