@@ -344,16 +344,21 @@ i.fa.close:hover {
 
 .ui-state-active {
     border: none !important;
-    background: #000000 !important;
+    background: white !important;
+}
+
+
+.ui-state-active a {
+    color: black !important;
 }
 
 .ui-tabs-panel {
-    background: #000000 !important;
+    background: #373737 !important;
 }
 
 .ui-corner-top {
-    border-top-left-radius: 0px !important;
-    border-top-right-radius: 0px !important;
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
 }
 
 div.topic_toggle, div.language_toggle, div.subject_toggle, div.welcome_toggle {
@@ -369,7 +374,7 @@ div.topic_toggle.subject-physics {
 
 div.subject_toggle, div.welcome_toggle, div.language_toggle  {
     text-align: center;
-    background: #000000;
+    background: #373737;
     min-width: 10%;
 }
 
@@ -1426,46 +1431,6 @@ table .knowl a {
    color: {{color.knowl_error}};
 }
 
-/*
-knowl-qm does not seem to be currently used.
-
-.knowl-qm {
-  font-family: sans-serif;
-  font-weight: bold;
-  border: 1px solid {{ color.knowl_thin_border }};
-  background: transparent;
-  color: {{ color.knowl_hover_text }};
-  cursor: pointer;
-  padding: 0 0.4em;
-  border-radius: 0.8em;
-  font-size: 0.9em;
-  top: -0.4em;
-  left: -0.1em;
-}
-.knowl-qm:hover,
-.knowl-qm.active {
-    background: {{color.knowl_db}};
-  color: {{color.white}};
-}
-.knowl-qm.active:hover {
-  background: transparent;
-  color: {{ color.knowl_hover_text }};
-}
-h1 > .knowl-qm {
-  font-size: 0.6em;
-  border-radius: 0.6em;
-  position: relative;
-  top: -0.8em;
-  left: -0.3em;
-}
-h2 > .knowl-qm {
-  font-size: 0.7em;
-  border-radius: 0.7em;
-  position: relative;
-  top: -0.6em;
-  left: -0.4em;
-}
-*/
 .knowl-output {
   background: {{ color.knowl_background }};
   border: 10px solid {{ color.knowl_border }};
