@@ -25,7 +25,7 @@
     </thead>
     {% for seminar in seminars %}
     <tr>
-      {{ seminar.oneline(include_institutions=False, show_attributes=user.is_admin) | safe }}
+      {{ seminar.oneline(include_institutions=False, show_attributes=user.is_subject_admin(seminar)) | safe }}
     </tr>
     {% endfor %}
   </table>
@@ -42,7 +42,7 @@
     </thead>
     {% for conference in conferences %}
     <tr>
-      {{ conference.oneline(include_institutions=False, show_attributes=user.is_admin) | safe }}
+      {{ conference.oneline(include_institutions=False, show_attributes=user.is_subject_admin(conference)) | safe }}
     </tr>
     {% endfor %}
   </table>

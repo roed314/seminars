@@ -107,7 +107,7 @@ class WebTalk(object):
         but it can also be hidden even if the seminar is public.
         """
         return (self.seminar.owner == current_user.email or
-                current_user.is_admin or
+                current_user.is_subject_admin(self) or
                 self.display and ((self.seminar.visibility is None or self.seminar.visibility > 0) and not self.hidden or
                                   current_user.email in self.seminar.editors()))
 
@@ -356,7 +356,7 @@ class WebTalk(object):
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
         return (
-            current_user.is_admin
+            current_user.is_subject_admin(self)
             or current_user.email_confirmed
             and (
                 current_user.email.lower() in self.seminar.editors()
@@ -421,11 +421,11 @@ class WebTalk(object):
             return "<p>TBA</p>"
 
     def speaker_link(self):
-        return "https://mathseminars.org/edit/talk/%s/%s/%s" % (
-            self.seminar_id,
-            self.seminar_ctr,
-            self.token,
-        )
+        return url_for("create.edit_talk_with_token",
+                       seminar_id=self.seminar_id,
+                       seminar_ctr=self.seminar_ctr,
+                       token=self.token,
+                       _external=True, _scheme='https')
 
     def send_speaker_link(self):
         """
@@ -484,12 +484,16 @@ Email link to speaker
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 
+    @property
+    def subjects(self):
+        # derived from topics
+        return sorted(set(topic.split("_", 1)[0] for topic in self.topics))
 
 def talks_header(include_seminar=True, include_subscribe=True, datetime_header="Your time"):
     cols = []
     cols.append((' colspan="2" class="yourtime"', datetime_header))
     if include_seminar:
-        cols.append((' class="seminar"', "Seminar"))
+        cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
     cols.append((' class="title"', "Title"))
     if include_subscribe:

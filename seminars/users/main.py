@@ -36,6 +36,8 @@ from seminars.utils import (
     validate_url,
     format_errmsg,
     show_input_errors,
+    clean_subjects,
+    topdomain,
 )
 
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
@@ -159,6 +161,7 @@ def email_confirmed_required(fn):
 
 @login_page.route("/info")
 def info():
+    print(current_user.subjects)
     if current_user.is_authenticated:
         title = section = "Account"
     else:
@@ -184,7 +187,8 @@ def set_info():
     if homepage and not validate_url(homepage):
         return show_input_errors([format_errmsg("Homepage %s is not a valid URL, it should begin with http:// or https://", homepage)])
     for k, v in request.form.items():
-        setattr(current_user, k, v.strip())
+        setattr(current_user, k, v)
+    current_user.subjects = clean_subjects(current_user.subjects)
     previous_email = current_user.email
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))
@@ -341,50 +345,6 @@ def send_confirmation_email(email):
         return False
 
 
-import os
-
-
-@login_page.route("/sendlostemails")
-@housekeeping
-def send_lost_emails():
-    def send_confirmation_email_fix(email):
-        token = generate_confirmation_token(email)
-        confirm_url = "https://mathseminars.org/" + url_for(".confirm_email", token=token)
-        html = render_template("confirm_email.html", confirm_url=confirm_url)
-        subject = "Please confirm your email"
-        send_email(email, subject, html)
-
-    def send_reset_password_fix(email):
-        token = generate_password_token(email)
-        reset_url = "https://mathseminars.org/" + url_for(".reset_password_wtoken", token=token)
-        html = render_template("reset_password_email.html", reset_url=reset_url)
-        subject = "Resetting password"
-        send_email(email, subject, html)
-
-    root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-    out = ""
-    if os.path.exists(os.path.join(root_path, "confirmation_emails.txt")):
-        with open(os.path.join(root_path, "confirmation_emails.txt")) as F:
-            out += "confirmation_emails.txt\n"
-            for email in F.readlines():
-                email = email.rstrip("\n")
-                try:
-                    send_confirmation_email_fix(email)
-                    out += email + ", success\n"
-                except Exception:
-                    out += email + ", fail\n"
-    if os.path.exists(os.path.join(root_path, "reset_emails.txt")):
-        with open(os.path.join(root_path, "reset_emails.txt")) as F:
-            out += "reset_emails.txt\n"
-            for email in F.readlines():
-                email = email.rstrip("\n")
-                try:
-                    send_reset_password_fix(email)
-                    out += email + ", success\n"
-                except Exception:
-                    out += email + ", fail\n"
-
-    return out.replace("\n", "<br>")
 
 
 @login_page.route("/confirm/<token>")
@@ -485,11 +445,11 @@ def get_endorsing_link():
             to_send = """Hello,
 
     I am offering you permission to add content (e.g., create a seminar)
-    on the mathseminars.org website.
+    on the {topdomain} website.
 
     To accept this invitation:
 
-    1. Register at https://mathseminars.org/user/register/ using this email address.
+    1. Register at {register} using this email address.
 
     2. Click on the link the system emails you, to confirm your email address.
 
@@ -499,11 +459,13 @@ def get_endorsing_link():
     Best,
     {name}
     """.format(
-                name=current_user.name
+                name = current_user.name,
+                topdomain = topdomain(),
+                register = url_for('.register', _external=True, _scheme='https'),
             )
             data = {
                 "body": to_send,
-                "subject": "An invitation to collaborate on mathseminars.org",
+                "subject": "An invitation to collaborate on " + topdomain(),
             }
             endorsing_link = """
     <p>
@@ -523,17 +485,18 @@ def get_endorsing_link():
             welcome = "Hello" if not target_name else ("Dear " + target_name)
             to_send = """{welcome},<br>
 <p>
-You have been endorsed you on mathseminars.org and any content you create will
+You have been endorsed you on {topdomain} and any content you create will
 be publicly viewable.
 </p>
 <p>
-Thanks for using mathseminars.org!
+Thanks for using {topdomain}!
 </p>
 
 """.format(
-                welcome=welcome
+                welcome = welcome,
+                topdomain = topdomain()
             )
-            subject = "Endorsement to create content on mathseminars.org"
+            subject = "Endorsement to create content on " + topdomain()
             send_email(email, subject, to_send)
             userdb.make_creator(email, int(current_user.id))
             endorsing_link = "<p>{target_name} is now able to create content.</p> ".format(
@@ -617,9 +580,9 @@ def ics_file(token):
 
     cal = Calendar()
     cal.add("VERSION", "2.0")
-    cal.add("PRODID", "mathseminars.org")
+    cal.add("PRODID", topdomain())
     cal.add("CALSCALE", "GREGORIAN")
-    cal.add("X-WR-CALNAME", "mathseminars.org")
+    cal.add("X-WR-CALNAME", topdomain())
 
     for talk in user.talks:
         # Organizers may have hidden talk
@@ -635,7 +598,7 @@ def ics_file(token):
     bIO = BytesIO()
     bIO.write(cal.to_ical())
     bIO.seek(0)
-    return send_file(bIO, attachment_filename="mathseminars.ics", as_attachment=True, add_etags=False)
+    return send_file(bIO, attachment_filename="seminars.ics", as_attachment=True, add_etags=False)
 
 
 @login_page.route("/public/")

@@ -4,33 +4,33 @@
 
 <div class="text_content auto">
 <p>
-{{meta_description}}  On this site, <i>seminar</i> means a talk series (which might be a conference), and a <i>talk</i> is a one-time event that occurs as part of a seminar.
+   {{meta_description}}  On this site, each <i>talk</i> belongs to a <i>series</i>.
 </p>
 
 <h3>Browse</h3>
 
-<p>The <a href="{{ url_for("index") }}">front page</a> lists upcoming talks.  You can filter them by topic to tailor them to your interests.</p>
+<p>The <a href="{{ url_for("index") }}">front page</a> lists upcoming talks.  You can filter them by subject, topic, or language to tailor them to your interests.</p>
 
 <h3>Search</h3>
 
-<p>You can <a href="{{ url_for("search") }}">search</a> for seminars and talks satisfying various criteria, including specifying keywords within talk abstracts.</p>
+<p>You can <a href="{{ url_for("search") }}">search</a> for series and talks satisfying various criteria, including specifying keywords within talk abstracts.  Each series is either a <i>conference</i> (event typically lasting a few days, with several talks per day) or a <i>seminar series</i> (a recurring series of talks spread out over weeks).</p>
 
 <h3>Subscribe</h3>
 
-<p>After <a href="{{ url_for('user.register') }}">registering</a>, you can <a href="{{ url_for('user.info') }}">export</a> selected seminars and talks to your own calendar (e.g., Google calendar, Outlook or iCal).  When you subscribe to a seminar, new talks will be pushed to your calendar automatically.</p>
+<p>After <a href="{{ url_for('user.register') }}">registering</a>, you can <a href="{{ url_for('user.info') }}">export</a> selected series and talks to your own calendar (e.g., Google calendar, Outlook or iCal).  When you subscribe to a series, new talks will be pushed to your calendar automatically.</p>
 
 <h3>Attend</h3>
 
-<p>Many seminars include livestreaming links for direct access.  Some organizers make these links visible only to users logged in to a <a href="mathseminars.org">mathseminars.org</a> account.</p>
+<p>Many seminars include livestreaming links for direct access.  Some organizers make these links visible only to users logged in to a <a href="https://{{topdomain}}">{{topdomain}}</a> account.</p>
 
 <h3>Create</h3>
 
-<p>If you are organizing a seminar, we aim to make it easy to add your seminar to the site.  Once you <a href="{{ url_for('create.index') }}">create</a> a new seminar, you can add upcoming or historical talks.
-   Seminars and talks you create will not be visible to others until your account has been endorsed.</p>
+<p>You can easily add your own series to the site.  Once you <a href="{{ url_for('create.index') }}">create</a> a new series, you can add upcoming or historical talks to it.
+   Series and talks you create will be visible to others once your account has been endorsed.</p>
 
 <h3>Organize</h3>
 
-<p>Seminar organizers can add upcoming talks easily: defaults are filled in from the seminar but are editable on a per-talk basis.  Sharing a talk's edit link with speakers allows them to update their own title and abstract.  Seminar information can be <a href="{{ url_for('user.info') }}">exported</a> to formats suitable for your own website or department calendar.</p>
+<p>Organizers can add upcoming talks easily: defaults are filled in from the series but are editable on a per-talk basis.  Sharing a talk's edit link with speakers allows them to update their own title and abstract.  Talk information can be <a href="{{ url_for('user.info') }}">exported</a> to formats suitable for your own website or department calendar.</p>
 
 <h3>Questions?  Error reports?  Suggestions?</h3>
 

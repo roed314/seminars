@@ -23,7 +23,7 @@
   </form>
 {% else %}
 <h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">Logout</a>)</h1>
-  <h3> Favorite seminars </h3>
+  <h3> Favorite series </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
     <thead>
@@ -38,7 +38,7 @@
     {% endfor %}
   </table>
   </div>
-  <h3> Favorite talks (outside favorite seminars) </h3>
+  <h3> Favorite talks (outside favorite series) </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
     <thead>
@@ -85,7 +85,7 @@
   {% if user.is_creator %}
   <h2>Adding content</h2>
   <p>
-    To add content or manage the seminars that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
+    To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
   </p>
   <h2>Endorse someone to add content</h2>
 
@@ -108,6 +108,7 @@
   {% endif %}
   <h2>Edit my details</h2>
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
+    <input type="hidden" name="subjects" value="{{ user.subjects }}" />
     <table>
       <tr>
         <td>Created</td>
@@ -137,22 +138,28 @@
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
-    <tr>
-      <td>Timezone</td>
-      <td>
-        <select name="timezone" style="width:356px;">
-        {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
+      <tr>
+        <td>Timezone</td>
+        <td>
+          <select name="timezone" style="width:356px;">
+            {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
                     selected=true
                     {%endif%}
                     >
-                    {{pretty_tz}}
+              {{pretty_tz}}
             </option>
-        {% endfor %}
-        </select>
-      </td>
-    </tr>
+            {% endfor %}
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Subjects</td>
+        <td>
+          <span id="subject_selector" style="width:356px;"></span>
+        </td>
+      </tr>
 
       <tr><td colspan="3" class="spacing" /></tr>
       <tr>
@@ -189,7 +196,7 @@
 
   <h2>Delete account</h2>
 
-<p> Deleting your account will remove all personal information about you from our database (your favorites, the "details" above, etc.), though talks and seminars you've created will remain.</p>
+<p> Deleting your account will remove all personal information about you from our database (your favorites, the "details" above, etc.), though talks and series you've created will remain.</p>
 
 <p><a href="{{ url_for('user.permanently_deleteme') }}" onclick="return confirm('Are you sure you want to PERMANENTLY delete your account?');">Permanently delete account</a></p>
 
@@ -207,7 +214,21 @@ function makelink() {
 $(function() {
    $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
 });
+
 makelink();
+
+const subjOptions = [
+  {% for sid, name in subjects %}
+  {
+    label: "{{ name }}",
+    value: "{{ sid }}",
+  },
+  {% endfor %}
+];
+
+$(document).ready(function() {
+  var subjSelector = makeSubjectSelector(subjOptions, {{ user.subjects | safe }});
+});
 
 /* this tells the user if the passwords match */
 

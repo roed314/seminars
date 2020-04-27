@@ -28,6 +28,7 @@ console.log('Form is unchanged!');
     <div class="right">
       <div class="upper">
         <div id="title">{{ title|safe }}</div>
+        <div id="domain"> {{ topdomain }} {% if 'mathseminars' in topdomain  %}(beta){% else %}(test){%endif%}</div>
         <div id="top-menu">
         {% for url, onclick, label in top_menu -%}
           <div {% if section == label %} class="menu-active"{% endif %}><a href="{{url}}"{% if onclick %} onclick="{{onclick}}"{% endif %}>{{label}}</a></div>
@@ -45,22 +46,64 @@ console.log('Form is unchanged!');
 </div>
 
 {% if section == "Browse" %}
-  <div id="topic-filter-menu">
-    <div id="topic-filter-head">
-      {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics();"), ("CLR", "Clear all", "clearAllTopics();")] %}
-      <div class="topic_cmd" id="topiclink-{{ab}}" onclick="{{onclick}}">
+{#
+  <div id="welcome-popup">
+    <h1> Welcome to researchseminars.org </h1>
+    <p> Please select your subjects of interest.</p>
+    <div id="welcome-subjects">
+      {% for ab, name in subjects %}
+      <div class="welcome_toggle" id="subjectwelc-{{ab}}">
         {{name}}
       </div>
       {% endfor %}
     </div>
-    {% for ab, name in user_topics %}
-      <div class="topic_toggle" id="topiclink-{{ab}}">
-        {{name}}{% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+    <p>You will be able to update these later, and add additional filters.</p>
+    <p>Also note that we use cookies in accordance with our <a href="{{ url_for('privacy') }}">privacy policy</a>.</p>
+    <p><button onclick="welcomeDone();">Done</button></p>
+  </div>
+#}
+  <div id="subject-filter-menu">
+    <span id="close-subject-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
+    {% for ab, name in subjects %}
+      <div class="subject_toggle" id="subjectlink-{{ab}}">
+        {{name}}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div id="topic-filter-menu">
+    <div id="subjects-tabs">
+      <ul class="tab-subject-nav">
+        <li><span id="close-topic-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span></li>
+        {% for ab, name in subjects %}
+          <li><a href="#tab-{{ab}}-content" class="tab-subject-nav">{{name}}</a></li>
+        {% endfor %}
+      </ul>
+
+     {% for subject_ab, subject_name in subjects %}
+       <div id="tab-{{subject_ab}}-content" class="tab-subject-panel">
+         {% for ab, name, topic_subject in topics %}
+           {% if topic_subject == subject_ab %}
+             <div class="topic_toggle subject-{{topic_subject}}" id="topiclink-{{subject_ab}}_{{ab}}">
+               {{name}}
+               {% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+             </div>
+           {% endif %}
+         {% endfor %}
+         <div id="topic-filter-head">
+          {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics('"+subject_ab+"');"), ("CLR", "Clear all", "clearAllTopics('"+subject_ab+"');")] %}
+            <div class="topic_cmd" id="topiclink-{{subject_ab}}_{{ab}}" onclick="{{onclick}}">
+              {{name}}
+            </div>
+          {% endfor %}
+         </div>
       </div>
     {% endfor %}
     </div>
   </div>
+
   <div id="language-filter-menu">
+    <span id="close-language-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
     {% for ab, name in languages %}
       <div class="language_toggle" id="langlink-{{ab}}">
         {{name}} ({{language_counts[ab]}})

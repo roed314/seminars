@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from dateutil.parser import parse as parse_time
 import pytz, re, iso639
 from six import string_types
-from flask import url_for, flash, render_template
+from flask import url_for, flash, render_template, request
 from flask_login import current_user
 from seminars import db
 from functools import lru_cache
@@ -17,6 +17,10 @@ from email_validator import validate_email
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
+def topdomain():
+    # return 'mathseminars.org'
+    # return 'researchseminars.org'
+    return '.'.join(urlparse(request.url).netloc.split('.')[-2:])
 
 def validate_url(x):
     if not (x.startswith("http://") or x.startswith("https://")):
@@ -91,7 +95,6 @@ def simplify_language_name(name):
         name = name[: name.find("(") - 1]
     return name
 
-
 @lru_cache(maxsize=None)
 def languages_dict():
     return {lang["iso639_1"]: simplify_language_name(lang["name"]) for lang in iso639.data if lang["iso639_1"]}
@@ -157,33 +160,80 @@ def allowed_shortname(shortname):
 @lru_cache(maxsize=None)
 def topics():
     return sorted(
-        ((rec["abbreviation"], rec["name"]) for rec in db.topics.search({"subject":"math"}, ["abbreviation", "name"])),
+        ((rec["abbreviation"], rec["name"], rec["subject"]) for rec in db.topics.search({}, ["abbreviation", "name", "subject"])),
+        key=lambda x: (x[2].lower(), x[1].lower()),
+    )
+
+# A temporary measure in case talks/seminars with physics topics are visible (they might be crosslisted with math)
+@lru_cache(maxsize=None)
+def physics_topic_dict():
+    return dict([(rec["subject"] + "_" + rec["abbreviation"], rec["name"]) for rec in db.topics.search()])
+
+@lru_cache(maxsize=None)
+def restricted_topics():
+    if topdomain() == 'mathseminars.org':
+        return [('math_' + ab, name) for (ab, name, subj) in topics() if subj == "math"]
+    else:
+        return user_topics()
+
+def user_topics():
+    mysubjects = current_user.subjects
+    if len(mysubjects) == 1:
+        subject = mysubjects[0]
+        return [(subj + '_' + ab, name) for (ab, name, subj) in topics() if subj == subject]
+    if len(mysubjects) == 0:
+        # Show all subjects rather than none
+        mysubjects = [subj for (subj, name) in subjects()]
+    return [(subj + '_' + ab, subj.capitalize() + ': ' + name) for (ab, name, subj) in topics() if subj in mysubjects]
+
+@lru_cache(maxsize=None)
+def subjects():
+    return sorted(
+        tuple(set(((rec["subject"], rec["subject"].capitalize()) for rec in db.topics.search({}, ["subject"])))),
         key=lambda x: x[1].lower(),
     )
 
-def user_topics():
-    return [('math_' + ab, name) for (ab, name) in topics()]
+@lru_cache(maxsize=None)
+def topic_dict(include_subj=True):
+    if include_subj:
+        return {subj + "_" + ab: subj.capitalize() + ": " + name for (ab, name, subj) in topics()}
+    else:
+        return {subj + "_" + ab: name for (ab, name, subj) in topics()}
+
 
 @lru_cache(maxsize=None)
-def topic_dict():
-    return dict(user_topics())
-
+def subject_dict():
+    return dict(subjects())
 
 def clean_topics(inp):
     if inp is None:
         return []
     if isinstance(inp, str):
         inp = inp.strip()
-        if inp[0] == "[" and inp[-1] == "]":
+        if inp and inp[0] == "[" and inp[-1] == "]":
             inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
             if inp == [""]:  # was an empty array
                 return []
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in dict(user_topics())]
+        inp = [elt for elt in inp if elt in topic_dict()]
     return inp
 
+def clean_subjects(inp):
+    if inp is None:
+        return []
+    if isinstance(inp, str):
+        inp = inp.strip()
+        if inp and inp[0] == "[" and inp[-1] == "]":
+            inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
+            if inp == [""]: # was an empty array
+                return []
+        else:
+            inp = [inp]
+    if isinstance(inp, Iterable):
+        inp = [elt for elt in inp if elt in subject_dict()]
+    return inp
 
 def count_distinct(table, counter, query={}, include_deleted=False):
     query = dict(query)
