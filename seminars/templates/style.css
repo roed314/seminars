@@ -227,7 +227,7 @@ body.knowl #header {
     color: {{color.header_text_title}};
     min-height: 32px;
     float: left;
-    min-width: 500px;
+    min-width: 300px;
 }
 
 #header #title .katex{
