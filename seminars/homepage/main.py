@@ -285,8 +285,8 @@ class TalkSearchArray(SearchArray):
 
 
 class SemSearchArray(SearchArray):
-    noun = "seminar"
-    plural_noun = "seminars"
+    noun = "series"
+    plural_noun = "series"
 
     def __init__(self):
         ## topics
@@ -356,7 +356,7 @@ class SemSearchArray(SearchArray):
 
     def search_types(self, info):
         return [
-            ("seminars", "Search for seminars"),
+            ("seminars", "Search for series"),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -442,7 +442,7 @@ def search():
     talks = [talk for talk in talks if talk.searchable()]
     info["talk_results"] = talks
     return render_template(
-        "search.html", title="Search seminars", info=info, section="Search", bread=None,
+        "search.html", title="Search series", info=info, section="Search", bread=None,
     )
 
 
