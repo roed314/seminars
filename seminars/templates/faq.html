@@ -10,18 +10,40 @@
   <ul>
     <li>
       <h4>
-        How do I browse only combinatorics talks?
+        How do I browse only <i>physics</i> talks?
       </h4>
       <p> On the <a href="{{ url_for("index") }}">Browse</a> page,
-        in the text "Filter by topic", click "topic" to open the topics menu,
-        press "Clear all" (if necessary) to deselect all topics,
-        click on "combinatorics",
-        and adjust the "Filter by topic" slider to the right.
+        click "subject" to open the subject menu.
+        This also applies the subject filter, so no talks will be displayed until you start adding subjects.
+        Now add "Physics".
+        To close the subject menu, click "subject" again.
+        The subject toggle will now switch between displaying all talks and displaying only physics talks.
+      </p>
+    </li>
+    <li>
+      <h4>
+        How do I browse only talks on a specific topic within physics, like <i>optics</i>?
+      </h4>
+      <p> On the <a href="{{ url_for("index") }}">Browse</a> page,
+        first make sure that physics talks are being displayed 
+        (if the subject filter is on, make sure that physics is a selected subject).
+        Then click "topic" to open the topic menu.
+        This also applies the topic filter, so no talks will be displayed until you start adding topics.
+        Now click on "optics".
         You can also select more than one topic.
         To close the topics menu, click "topic" again.</p>
     </li>
     
-     <li>
+  <li>
+      <h4>
+        If several filters are set on the <a href="{{ url_for("index") }}">Browse</a> page, what will be displayed?
+      </h4>
+       <p>
+         Each activated filter defines a subset of all the talks, and the talks in the <i>intersection</i> of these subsets are displayed.
+      </p>
+    </li>
+
+    <li>
       <h4>
         What time zone is used to display talk times?
       </h4>
@@ -31,7 +53,7 @@
            <li>If you're logged in, this is the time zone associated with your account, which you can set on the Account page.</li>
            <li>If you're not logged in, this is the time zone provided by your browser.</li>
          </ul><br>
-         Exception (for organizers and speakers): When editing a seminar or talk, times are displayed in the time zone <i>of the seminar or talk</i>; this time zone can be set at the seminar's "Edit properties" page or the talk's "Edit talk" page, respectively.
+         Exception (for organizers and speakers): When editing a series or talk, times are displayed in the time zone <i>of the series or talk</i>; this time zone can be set at the series' "Edit properties" page or the talk's "Edit talk" page, respectively.
       </p>
     </li>
 
@@ -40,13 +62,13 @@
         What should I do if I cannot connect to an online talk?  What if I need a link or password that is not listed?
       </h4>
       <p>
-        Check the seminar's external webpage, usually reachable by clicking
-        "External homepage" at the seminar's page on this site.  Many seminars post
+        Check the external webpage, usually reachable by clicking
+        "External homepage" at the series' page on this site.  Many organizers post
         passwords just before each talk starts or email them to users subscribed to their
         mailing list.
       </p>
       <p>
-        If you are still having trouble, contact one of the seminar's scientific organizers; you may need to go to the external webpage to find their contact details.
+        If you are still having trouble, contact one of the series' scientific organizers; you may need to go to the external webpage to find their contact details.
       </p>
     </li>
 </ul>
@@ -63,17 +85,17 @@
       <p>
         <ol>
           <li>
-            Registered users can save seminars and talks to their favorites.
+            Registered users can save series and talks to their favorites.
             Then on the <a href="{{ url_for("index") }}">Browse</a> page 
             they can click "Show only saved events" to display only those.
             Moreover, on the Account page, they can export these to their own calendars.
           </li>
           <li>
             Registered users can view all livestream links for connecting online to a talk.  
-            (Many livestream links are viewable to all, but some seminar organizers may restrict access to registered users.)
+            (Many livestream links are viewable to all, but some organizers may restrict access to registered users.)
           </li>
           <li>
-            Registered users, once endorsed, can create their own seminars and conferences for others to see.
+            Registered users, once endorsed, can create their own seminar series and conferences for others to see.
           </li>
         </ol>
       </p>
@@ -83,7 +105,7 @@
       <h4>
         Will my email address be displayed on the site if I register?
       </h4>
-      <p>No.  The only situation in which we would display your email publicly is if you list yourself as an organizer of a seminar <i>and</i> indicate that your name should be displayed <i>and</i> do not provide a homepage URL (if your email address and homepage URL are both provided, we would display only the URL), or if similarly you list yourself as maintainer of an institution without providing your homepage URL as a way for people to contact you.  Another situation in which your email address might be shared in a very limited way: Independently of whether you register, if a seminar organizer enters your email address when scheduling a talk by you, then the email address would be visible also to other organizers of that seminar.</p>
+      <p>No.  The only situation in which we would display your email publicly is if you list yourself as an organizer of a series <i>and</i> indicate that your name should be displayed <i>and</i> do not provide a homepage URL (if your email address and homepage URL are both provided, we would display only the URL), or if similarly you list yourself as maintainer of an institution without providing your homepage URL as a way for people to contact you.  Another situation in which your email address might be shared in a very limited way: Independently of whether you register, if a series organizer enters your email address when scheduling a talk by you, then the email address would be visible also to other organizers of that series.</p>
     </li>
 
   <li>
@@ -93,7 +115,7 @@
     <p>No.  Our policy is that each registered user must be a <i>person</i>.  
       What you should do is register as yourself, 
       and then list <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> 
-      as an organizer when you create your seminar.</p>
+      as an organizer when you create your series.</p>
     </li>
 </ul>
 
@@ -103,9 +125,9 @@
   <ul>
     <li>
       <h4>
-        If I export seminars to my Google calendar, do I have to export them again every week to see the latest talks?
+        If I export some series to my Google calendar, do I have to export them again every week to see the latest talks?
       </h4>
-      <p> No, once you export a seminar to your calendar, talks added to that seminar later will be pushed to your calendar automatically!</p>
+      <p> No, once you export a series to your calendar, talks added to that series later will be pushed to your calendar automatically!</p>
     </li>
     
     <li>
@@ -125,10 +147,11 @@
         What is the difference between a registered user and an endorsed user?
       </h4>
       <p>Endorsed users have additional privileges:
-        <ol><li>They can make their newly created seminars visible to others.</li>
-          <li>They can add institutions to the site, so that seminars can be later associated with them.</li>
+        <ol><li>They can make their newly created series visible to others.</li>
+          <li>They can add institutions to the site, so that series can be later associated with them.</li>
           <li>They can endorse other users.</li>
     </ol>
+      For these we require endorsement, to prevent spammers from ruining our site.
   </p>
     </li>
 
@@ -136,7 +159,7 @@
       <h4>
         How do I get endorsed?
       </h4>
-     <p>After <a href="{{ url_for('user.register') }}">registering</a>, go to the <a href="{{ url_for('user.public_users') }}">list of public users</a> and follow the instructions there.</p>
+     <p>After <a href="{{ url_for('user.register') }}">registering</a>, just ask someone in the <a href="{{ url_for('user.public_users') }}">list of public users</a>.</p>
     </li>
 
     <li>
@@ -150,26 +173,25 @@
         enter the email address of the person you would like to endorse, 
         and click "Endorse".
         Make an effort to verify beforehand that the email address is associated with 
-        someone who would be adding appropriate content (generally mathematicians or mathematics department staff).
+        someone who would be adding appropriate content (generally a member of a research institution).
       </p>
     </li>
   </ul>
 
     <h2>
-  Creating and organizing seminars
+  Creating and organizing seminar series and conferences
   </h2>
   <ul>
     <li>
       <h4>
-        How do I create a new seminar?
+        How do I create a new seminar series?
       </h4>
       <p><ol><li><a href="{{ url_for('user.register') }}">Register</a> for an account.</li>
-     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.  
-       (We require this for your seminars to be visible to others, as a security measure, to prevent spam on our site.)</li>
+     <li>Get your account <a href="{{ url_for('user.public_users') }}">endorsed</a>.</li>
       <li>(Optional, but recommended) Go to the <a href="{{ url_for('list_institutions')}}">Institutions</a> page 
-        to make sure that the institutions associated with your seminar are there; if not, add them.  
-        (Alternatively, add them after the seminar is created.)</li>
-          <li>Click on the <a href="{{ url_for('create.index')}}">Create</a> tab and follow the instructions there.  (Note: After creating your first seminar, the "Create" tab will be renamed as "Manage".)</li>
+        to make sure that the institutions associated with your seminar series are there; if not, add them.  
+        (Alternatively, add them after the seminar series is created.)</li>
+          <li>Click on the <a href="{{ url_for('create.index')}}">Create</a> tab.  (Note: After creating your first series, the "Create" tab will be renamed as "Manage".)</li>
         </ol></p>
     </li>
 
@@ -178,18 +200,28 @@
         How do I create a new conference?
       </h4>
       <p>
-        The procedure is the same as for creating a new seminar.
+        The procedure is the same as for creating a new seminar series.
       </p>
     </li>
 
     <li>
       <h4>
-        My seminar uses <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> as an alias email address for reaching all the organizers.  How do I make this appear as a contact email for my seminar?
+        How do I create a talk that is not part of any series?
+      </h4>
+      <p>
+        Create a series, say with the same title as the talk, and add the talk to that series.
+        It is OK to have a series with just one talk, even if most series have many talks.
+      </p>
+    </li>
+
+    <li>
+      <h4>
+        My seminar series uses <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> as an alias email address for reaching all the organizers.  How do I make this appear as a contact email for my seminar?
       </h4>
       <p>
         First, do <i>not</i> register a user account with email address <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span>; 
         our policy is that each registered user must be a <i>person</i>.
-        Instead, when editing the seminar properties, in the list of organizers at the bottom, 
+        Instead, when editing the series properties, in the list of organizers at the bottom, 
         fill in a new row with email address <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span> 
         and uncheck "Organizer" and check "Display".  
         You must also add yourself or some other (human) registered user as an organizer, along with name and email address, 
@@ -199,25 +231,25 @@
 
     <li>
       <h4>
-        Is it OK to add a seminar if I'm not one of the organizers?
+        Is it OK to add a series if I'm not one of the organizers?
       </h4>
       <p>
-        The seminar organizers will likely be grateful for the assistance in spreading the word about their seminar.
-        We suggest notifying them that you plan to add their seminar to this site.
-        When entering the seminar details, uncheck the "Organizer" checkbox to the right of your name;
-        if you then check "Display", the seminar page will list you as a curator instead of an organizer,
+        The series organizers will likely be grateful for the assistance in spreading the word about their series.
+        We suggest notifying them that you plan to add their series to this site.
+        When entering the series' properties, uncheck the "Organizer" checkbox to the right of your name;
+        if you then check "Display", the series' page will list you as a curator instead of an organizer,
         and the organizers (or others) will be able to contact you if there are any errors.
       </p>
     </li>
 
     <li>
       <h4>
-        If someone else added my seminar to the site, how can I gain the ability to update it?
+        If someone else added my series to the site, how can I gain the ability to update it?
       </h4>
       <p>
-        Hopefully that person contacted you or left contact information on the seminar page.
-        If so, ask that person to endorse you and to add you to the list of organizers of the seminar; then you can edit it.
-        If you don't want the seminar listed on this site, please ask <a href="mailto:edgarc@mit.edu">Edgar Costa</a> or <a href="mailto:roed@mit.edu">David Roe</a> to remove it.
+        Hopefully that person contacted you or left contact information on the series' page.
+        If so, ask that person to endorse you and to add you to the list of organizers of the series; then you can edit it.
+        If you don't want the series listed on this site, please ask <a href="mailto:edgarc@mit.edu">Edgar Costa</a> or <a href="mailto:roed@mit.edu">David Roe</a> to remove it.
       </p>
     </li>
 
@@ -226,24 +258,24 @@
         Is it possible to create a draft of a schedule that is only visible to organizers?
       </h4>
       <p>
-        Yes.  When you create or edit a seminar, you can set its visibility to one of three options: <i>public</i> (it will appear on the front page and in search results), <i>unlisted</i> (it will not be listed but will be accessible with a direct link) and <i>private</i> (it will only be visible to organizers).  Similarly, when you create a talk within a seminar, you can mark it as <i>hidden</i> so that it only appears to organizers.  The visibility of a talk will also be affected by its seminar: unhidden talks in a private seminar will only be visible to organizers.  Finally, note that neither seminars nor talks will appear until you're endorsed.
+        Yes.  When you create or edit a series, you choose to make it <i>public</i> (it will appear on the front page and in search results), <i>unlisted</i> (it will not be listed but anyone with the link can access it), or <i>private</i> (visible only to the series' organizers).  Also, when you create a talk within a series, you can temporarily mark it as <i>hidden</i> so that it is visible only to organizers.  Visibility of a talk is also affected by its series' settings: for example, an unhidden talk in a private series is visible only to organizers.  Finally, neither series nor talks will appear until you have been endorsed.
       </p>
     </li>
 
     <li>
       <h4>
-        What should I do if I'm organizing a seminar that doesn't meet once a week?
+        What should I do if I'm organizing a seminar series that doesn't meet once a week?
       </h4>
-      <p> If it meets every other week on the same day, set the Frequency to 14 in the "Edit properties" page for the seminar.
-        If it meets multiple times per week, we don't currently support this (though we plan to in the future).  For now, we suggest changing the "talks per day" field in the Edit Properties page of the seminar to the number of times it meets per week, then editing the date on the schedule page.</p>
+      <p> If it meets every other week on the same day, set the Frequency to 14 in the "Edit properties" page for the series.
+        We don't currently support series meeting multiple times per week (though we plan to in the future); for now, we suggest changing the "Talks per day" field in the "Edit properties" page of the series to the number of times it meets per week, then editing the date on the schedule page.</p>
     </li>
 
     <li>
       <h4>
-        I added a topic to my seminar; why aren't the talks in my seminar listed when I filter by that topic?
+        I added a topic to my series; why aren't the talks in my series listed when I filter by that topic?
       </h4>
-      Talks inherit the seminar's attributes <i>at the time the talks are created</i> but are not affected by subsequent
-      edits to the seminar.  If you want your seminar's new topic to apply to talks previously added to the seminar, 
+      Talks inherit the series' attributes <i>at the time the talks are created</i> but are not affected by subsequent
+      edits to the series.  If you want your series' new topic to apply to talks previously added to the series, 
       you need to add the topic manually to each such talk.  The same applies to other attributes, 
       such as language, room, livestream, and access.
     </li>

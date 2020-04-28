@@ -14,83 +14,6 @@
   <input type="hidden" name="token" value="{{ talk.token }}"/>
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
-  <table>
-    <tr>
-      <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
-      <td>
-        <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
-      </td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("topics") }}</td>
-      <td>
-        <span id="topic_selector" style="width:610px;"></span>
-      </td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("language") }}</td>
-      <td>
-        <span id="language_selector" style="width:600px;"></span>
-      </td>
-    </tr>
-    {# only seminar organizers can edit the following attributes #}
-    {% if talk.seminar.user_can_edit() %}
-    <tr>
-      <td>{{ KNOWL("hidden") }}</td>
-      <td>
-        <input name="hidden" value="yes" type="checkbox"{% if talk.hidden %} checked{% endif %} />
-      </td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("timezone") }}</td>
-      <td>
-        <select name="timezone" style="width:610px;">
-          {% for tz, disp in timezones %}
-          <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
-          {% endfor %}
-        </select>
-      </td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("talk_start_time") }}</td>
-      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" /></td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("talk_end_time") }}</td>
-      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("room") }}</td>
-      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building" /></td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("online") }}</td>
-      <td>
-        <select name="online" style="width:610px;">
-          <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
-          <option value="no"{% if not talk.online %} selected{% endif %}>no</option>
-        </select>
-      </td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("access") }}</td>
-      <td>
-        <select name="access" style="width:610px;">
-          <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view link</option>
-          <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
-          <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
-        </select>
-      </td>
-      <td class="forminfo">This controls who can see the livestream link.</td>
-    </tr>
-    {% else %}
-    <tr>
-      <td colspan="2">
-        {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezon %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}
         <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
         <input type="hidden" name="timezone" value="{{ talk.timezone }}" />
         <input type="hidden" name="start_time" value="{{ talk.editable_start_time() }}" />
@@ -98,34 +21,11 @@
         <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
         <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
         <input type="hidden" name="access" value="{{ talk.access }}" />
-      </td>
-    </tr>
-    {% if (not talk.online or talk.room) and talk.timezone != current_user.timezone %}
-    <tr>
-      <td colspan="2">{{ talk.show_time_and_duration(adapt=False) | safe }} in talk time zone, {{ talk.timezone.replace("_", " ") }}.</td>
-    </tr>
-    {% endif %}
-    {% if talk.live_link %}
-    <tr>
-      <td colspan="2">Livestream access: {{ talk.live_link }}</td>
-    </tr>
-    {% endif %}
-    {% endif %} {# attributes only organizers can edit #}
-    <tr>
-      <td colspan="2">{{ KNOWL("comments") }}</td>
-    </tr>
-    <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; any seminar comments shown below will appear in additiona to the comments you put here.  TeX symbols are OK here.">{{ talk.comments | blanknone }}</textarea></td>
-    </tr>
-    {% if talk.seminar.comments %}
-      <tr><td colspan="2" class="forminfo">Seminar comments appear below</td></tr>
-      <tr><td colspan="2" style="width:770px;">{{ talk.seminar.show_comments() | safe }}<td></tr>
-    {% else %}
-      <tr><td colspan="2" class="forminfo">No seminar comments set</td></tr
-    {% endif %}
-  </table>
-  <hr style="width:800px;">
-  <table>
+  This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
+  
+  <h3>Speaker info and talk content</h3>
+  
+    <table>
     <tr>
       <td style="width:150px">{{ KNOWL("speaker") }}</td>
       <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" placeholder="Firstname Lastname"/></td>
@@ -150,6 +50,18 @@
       <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
     </tr>
     <tr>
+      <td>{{ KNOWL("topics") }}</td>
+      <td>
+        <span id="topic_selector" style="width:610px;"></span>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("language") }}</td>
+      <td>
+        <span id="language_selector" style="width:600px;"></span>
+      </td>
+    </tr>
+    <tr>
       <td>{{ KNOWL("paper_link") }}</td>
       <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" placeholder="https://arxiv.org/abs/9999.99999"/></td>
     </tr>
@@ -157,12 +69,10 @@
       <td>{{ KNOWL("slide_link") }}</td>
       <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
     </tr>
-    <tr>
-      <td>{{ KNOWL("video_link") }}</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
-    </tr>
+  <tr>
+    <td>Abstract</td>
+  </tr>
   </table>
-  <h3>Abstract</h3>
   <table>
     <tr>
       <td colspan="2">
@@ -170,6 +80,139 @@
       </td>
     </tr>
   </table>
+
+<hr style="width:800px;">
+
+<div id="view-wrapper" class="knowl" style="width:670px;">
+  <div id="view-preview">
+    <h2 id="view-title"></h2>
+    <div id="view-abstract"></div>
+  </div>
+</div>
+
+  <hr style="width:800px;">
+
+<h3>Time</h3>
+
+  <table>
+{#
+    <tr>
+      <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
+      <td>
+        <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
+      </td>
+    </tr>
+ #}
+
+    {# only seminar organizers can edit the following attributes #}
+    {% if talk.seminar.user_can_edit() %}
+    <tr>
+      <td>{{ ASTKNOWL("timezone") }}</td>
+      <td>
+        <select name="timezone" style="width:610px;">
+          {% for tz, disp in timezones %}
+          <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("talk_start_time") }}</td>
+      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" /></td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("talk_end_time") }}</td>
+      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
+    </tr>
+    
+ {% else %}  {# non-organizers can edit the following attributes #}
+    <tr>
+      <td colspan="2">
+        {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}
+      </td>
+    </tr>
+    {% if (not talk.online or talk.room) and talk.timezone != current_user.timezone %}
+    <tr>
+      <td colspan="2">{{ talk.show_time_and_duration(adapt=False) | safe }} in talk time zone, {{ talk.timezone.replace("_", " ") }}.</td>
+    </tr>
+    {% endif %}
+    {% endif %} {# attributes non-organizers can edit #}
+</table>
+
+<h3>Venue and access links</h3>
+
+<table>
+      {# only seminar organizers can edit the following attributes #}
+    {% if talk.seminar.user_can_edit() %}
+    <tr>
+      <td>{{ KNOWL("hidden") }}</td>
+      <td>
+        <input name="hidden" value="yes" type="checkbox"{% if talk.hidden %} checked{% endif %} />
+      </td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("online") }}</td>
+      <td>
+        <select name="online" style="width:610px;">
+          <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
+          <option value="no"{% if not talk.online %} selected{% endif %}>no</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("room") }}</td>
+      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building" /></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("live_link") }}</td>
+      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("access") }}</td>
+      <td>
+        <select name="access" style="width:610px;">
+          <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view livestream link</option>
+          <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Only logged-in users can view livestream link</option>
+          <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view livestream link</option>
+        </select>
+      </td>
+    </tr>
+     <tr>
+      <td>{{ KNOWL("video_link") }}</td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
+    </tr>
+    {% else %} {# attributes non-organizers can edit #}
+    {% if talk.live_link %}
+    <tr>
+      <td colspan="2">Livestream access: {{ talk.live_link }}</td>
+    </tr>
+    {% endif %}
+    {% endif %} {# attributes non-organizers can edit #}
+  </table>
+        
+<h3>Comments</h3>
+
+<table>
+    <tr>
+      <td colspan="2">{{ KNOWL("talk_comments") }}</td>
+    </tr>
+    <tr>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Talk-specific livestream access instructions?  Notes about the speaker?  HTML and $\TeX$ are OK here.  Both the talk comments and the series comments below will appear on the talk's page.">{{ talk.comments | blanknone }}</textarea></td>
+    </tr>
+</table>
+<br>
+<table>
+      <tr>
+        <td colspan="2">{{ KNOWL("series_comments") }}</td>
+      </tr>
+  {% if talk.seminar.comments %}
+      <tr><td colspan="2" style="width:770px;">{{ talk.seminar.show_comments() | safe }}<td></tr>
+    {% else %}
+      <tr><td colspan="2" class="forminfo">No series comments set</td></tr
+    {% endif %}
+</table>
+        
+        
   <table>
     <tr>
       <td>
@@ -193,13 +236,6 @@
     </tr>
   </table>
 </form>
-
-<div id="view-wrapper" class="knowl" style="width:670px;">
-  <div id="view-preview">
-    <h2 id="view-title"></h2>
-    <div id="view-abstract"></div>
-  </div>
-</div>
 
 <script type="text/javascript"
         src="https://cdn.jsdelivr.net/gh/markitup/1.x@1.1.15/markitup/jquery.markitup.js"

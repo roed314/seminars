@@ -7,7 +7,12 @@
     <td>
       Filter by:
     </td>
-    {% for ftype in ["subject", "topic", "language"] %}
+    {% if topdomain == "mathseminars.org" %}
+    {% set ftypes = ["topic", "language"] %}
+    {% else %}
+    {% set ftypes = ["subject", "topic", "language"] %}
+    {% endif %}
+    {% for ftype in ftypes %}
     {% if ftype not in hide_filters %}
     <td>
       {{ toggle(tglid="enable_"+ftype+"_filter", value="", onchange="toggleFilters(this.id);") | safe }}

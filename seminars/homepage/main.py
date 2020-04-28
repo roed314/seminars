@@ -401,20 +401,16 @@ def _index(query):
     # Eventually want some kind of cutoff on which talks are included.
     query = dict(query)
     subs = subjects()
+    hide_filters = []
     if "subjects" in query:
         subject = query["subjects"]["$contains"]
         hide_filters = ["subject"]
-        title = subject_dict()[subject] + " talks (test)"
         subs = ((subject, subject.capitalize()),)
     elif "topics" in query:
         hide_filters = ["subject", "topic"]
-        title = topic_dict(include_subj=False)[query["topics"]["$contains"]] + " talks (test)"
-    else:
-        hide_filters = []
-        title = "Research seminars (test)"
-    query["display"] = True
-    if topdomain() == "mathseminars.org":
+    elif topdomain() == "mathseminars.org":
         query["subjects"] = ["math"]
+    query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     query["end_time"] = {"$gte": datetime.datetime.now()}
     talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
@@ -437,7 +433,7 @@ def _index(query):
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
         "browse.html",
-        title=title,
+        title="Browse",
         hide_filters=hide_filters,
         topic_counts=topic_counts,
         subject_counts=subject_counts,
