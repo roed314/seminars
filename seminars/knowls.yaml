@@ -188,7 +188,7 @@ access:
     only to users logged in, 
     or only to endorsed users.
     If the livestream link is not specified, this setting is ignored.
-series_comments:
+comments:
   title: Comments
   contents: |
     Use the comments field to display additional information on the series page, 
