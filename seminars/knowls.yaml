@@ -294,7 +294,7 @@ paper_link:
   contents: |
     A URL link to a paper related to the talk.
 slide_link:
-  title: Slide link
+  title: Slides link
   contents: |
     A URL link to a slide presentation used in the talk.  
     This may be set either before or after the talk.
