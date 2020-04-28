@@ -190,15 +190,20 @@ def user_topics(talk_or_seminar=None):
         return [(subj + '_' + ab, name) for (ab, name, subj) in topics() if subj == subject]
     if len(subjects) == 0:
         # Show all subjects rather than none
-        subjects = [subj for (subj, name) in subjects()]
+        subjects = [subj for (subj, name) in subject_pairs()]
     return [(subj + '_' + ab, subj.capitalize() + ': ' + name) for (ab, name, subj) in topics() if subj in subjects]
 
 @lru_cache(maxsize=None)
-def subjects():
+def subject_pairs():
     return sorted(
         tuple(set(((rec["subject"], rec["subject"].capitalize()) for rec in db.topics.search({}, ["subject"])))),
         key=lambda x: x[1].lower(),
     )
+
+
+@lru_cache(maxsize=None)
+def subject_dict():
+    return dict(subject_pairs())
 
 @lru_cache(maxsize=None)
 def topic_dict(include_subj=True):
@@ -208,9 +213,6 @@ def topic_dict(include_subj=True):
         return {subj + "_" + ab: name for (ab, name, subj) in topics()}
 
 
-@lru_cache(maxsize=None)
-def subject_dict():
-    return dict(subjects())
 
 def clean_topics(inp):
     if inp is None:
