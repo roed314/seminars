@@ -248,7 +248,7 @@ def acknowledgment():
 
 @app.route("/contact")
 def contact():
-    t = "Contact and Feedback"
+    t = "Contact and feedback"
     return render_template("contact.html", title=t, section="Info", subsection="contact")
 
 
