@@ -123,8 +123,7 @@ class WebTalk(object):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
         topics = self.topics if self.topics else []
-        data["subjects"] = ["math"]
-        #data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
+        data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):
