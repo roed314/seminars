@@ -169,7 +169,6 @@ def topics():
 def physics_topic_dict():
     return dict([(rec["subject"] + "_" + rec["abbreviation"], rec["name"]) for rec in db.topics.search()])
 
-@lru_cache(maxsize=None)
 def restricted_topics():
     if topdomain() == 'mathseminars.org':
         return [('math_' + ab, name) for (ab, name, subj) in topics() if subj == "math"]
