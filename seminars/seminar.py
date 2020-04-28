@@ -191,7 +191,7 @@ class WebSeminar(object):
         if self.topics:
             subjects = set(topic.split("_", 1)[0] for topic in self.topics)
             tdict = topic_dict(include_subj=(len(subjects) > 1))
-            return " (" + ", ".join(tdict[topic] for topic in self.topics) + ")"
+            return " ".join('<span class="topic_label">%s</span>' % tdict[topic] for topic in self.topics)
         else:
             return ""
 

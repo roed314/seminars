@@ -88,16 +88,18 @@ function calFiltering() {
 function setLanguageLinks() {
     var cur_languages = getCookie("languages");
     if (cur_languages == null) {
-        setCookie("languages", "en");
-        cur_languages = "en";
+        setCookie("languages", "");
+        cur_languages = "";
         setCookie("filter_language", "0");
     } else {
         $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_languages"))));
     }
-    cur_languages = cur_languages.split(",");
-    for (var i=0; i<cur_languages.length; i++) {
-        $("#langlink-" + cur_languages[i]).addClass("languageselected");
-        $(".lang-" + cur_languages[i]).removeClass("language-filtered");
+    if (cur_languages.length > 0) {
+        cur_languages = cur_languages.split(",");
+        for (var i=0; i<cur_languages.length; i++) {
+            $("#langlink-" + cur_languages[i]).addClass("languageselected");
+            $(".lang-" + cur_languages[i]).removeClass("language-filtered");
+        }
     }
 }
 

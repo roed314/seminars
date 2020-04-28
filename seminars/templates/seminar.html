@@ -9,7 +9,7 @@
   {{seminar.show_subscribe() | safe }}
 </span>
 {% if seminar.homepage %}
-  <p style="padding: 0x; margin: 0px 0px 25px 0px;"> {{ seminar.show_homepage() | safe }} </p>
+  <p style="padding: 0x; margin: 0px;"> {{ seminar.show_homepage() | safe }} </p>
 {% endif %}
 
 
@@ -21,6 +21,11 @@ creator will be able to endorse others.
 If you are seeking an endorsement, see if you know anyone on this <a href="{{ url_for('user.public_users') }}">list</a> of all seminar organizers and curators.
 </p>
 {% endif %}
+{% if seminar.topics %}
+<p>
+  {{seminar.show_topics() | safe}}
+</p>
+{% endif %}
 {% if seminar.institutions %}
   <p>
     {{seminar.show_institutions() | safe}}
@@ -28,7 +33,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% endif %}
 {% if seminar.description %}
   <p>
-    Description: {{(seminar.description | blanknone) + seminar.show_topics() | safe }}
+    Description: {{(seminar.description | blanknone) | safe }}
   </p>
 {% endif %}
 
