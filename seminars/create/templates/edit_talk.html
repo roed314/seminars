@@ -50,6 +50,18 @@
       <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
     </tr>
     <tr>
+      <td>{{ KNOWL("topics") }}</td>
+      <td>
+        <span id="topic_selector" style="width:610px;"></span>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("language") }}</td>
+      <td>
+        <span id="language_selector" style="width:600px;"></span>
+      </td>
+    </tr>
+    <tr>
       <td>{{ KNOWL("paper_link") }}</td>
       <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" placeholder="https://arxiv.org/abs/9999.99999"/></td>
     </tr>
@@ -72,24 +84,15 @@
 <h3>Time and venue</h3>
 
   <table>
+{#
     <tr>
       <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
     </tr>
-    <tr>
-      <td>{{ KNOWL("topics") }}</td>
-      <td>
-        <span id="topic_selector" style="width:610px;"></span>
-      </td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("language") }}</td>
-      <td>
-        <span id="language_selector" style="width:600px;"></span>
-      </td>
-    </tr>
+ #}
+
     {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
     <tr>
