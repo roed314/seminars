@@ -7,9 +7,10 @@
   <p style="padding: 0x; margin: 0px 0px 25px 0px;"> {{ seminar.show_homepage(newtab=True) | safe }} </p>
 {% endif %}
 
-<p> To add talks, enter Speaker (and optionally edit the other fields) in one or more rows of the table; and then click any button or "Details" link.</p>
+<p> To add talks, enter Speaker (and optionally edit the other fields) in one or more rows of the table; 
+  then click any button or "Details" link.</p>
 
-<p>All times are shown in the seminar's time zone, {{ seminar.timezone }}.</p>
+<p>All times are shown in the series' time zone, {{ seminar.timezone }}.</p>
 </div>
 
 <form action="{{ url_for('.save_seminar_schedule') }}" method="POST">
