@@ -72,6 +72,23 @@ console.log('Form is unchanged!');
   </div>
 
   <div id="topic-filter-menu">
+    {% if topdomain == "mathseminars.org" %}
+    {% for ab, name, topic_subject in topics %}
+    {% if topic_subject == "math" %}
+    <div class="topic_toggle subject-math" id="topiclink-math_{{ab}}">
+      {{name}}
+      {% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    <div id="topic-filter-head">
+      {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics('math');"), ("CLR", "Clear all", "clearAllTopics('math');")] %}
+      <div class="topic_cmd" id="topiclink-math_{{ab}}" onclick="{{onclick}}">
+        {{name}}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
     <div id="subjects-tabs">
       <ul class="tab-subject-nav">
         <li><span id="close-topic-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span></li>
@@ -100,6 +117,7 @@ console.log('Form is unchanged!');
       </div>
     {% endfor %}
     </div>
+    {% endif %}
   </div>
 
   <div id="language-filter-menu">
