@@ -139,7 +139,15 @@ def talks_parser(info, query):
     parse_topic(info, query, prefix="talk")
     parse_institution_talk(info, query)
     #parse_venue(info, query, prefix="talk")
-    parse_substring(info, query, "talk_keywords", ["title", "abstract"])
+    parse_substring(info, query, "talk_keywords",
+                    ["title",
+                     "abstract",
+                     "speaker",
+                     "speaker_affiliation",
+                     "seminar_id",
+                     "comments",
+                     "speaker_homepage",
+                     "paper_link"])
     parse_access(info, query, prefix="talk")
 
     parse_substring(info, query, "speaker", ["speaker"])
@@ -162,7 +170,12 @@ def seminars_parser(info, query):
     parse_topic(info, query, prefix="seminar")
     parse_institution_sem(info, query)
     #parse_venue(info, query, prefix="seminar")
-    parse_substring(info, query, "seminar_keywords", ["description", "comments", "name"])
+    parse_substring(info, query, "seminar_keywords",
+                    ["name",
+                     "description",
+                     "homepage",
+                     "shortname",
+                     "comments"])
     parse_access(info, query, prefix="seminar")
     parse_language(info, query, prefix="seminar")
 
@@ -215,7 +228,7 @@ class TalkSearchArray(SearchArray):
         ## keywords for seminar or talk
         keywords = TextBox(
             name="talk_keywords",
-            label="Keywords",
+            label="Anywhere",
             colspan=(1, 2, 1),
             width=textwidth,
         )
@@ -324,7 +337,7 @@ class SemSearchArray(SearchArray):
         assert venue
 
         ## keywords for seminar or talk
-        keywords = TextBox(name="seminar_keywords", label="Keywords", width=textwidth,)
+        keywords = TextBox(name="seminar_keywords", label="Anywhere", width=textwidth,)
         ## type of access
         access = SelectBox(
             name="seminar_access",
