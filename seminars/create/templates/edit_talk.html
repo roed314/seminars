@@ -14,6 +14,13 @@
   <input type="hidden" name="token" value="{{ talk.token }}"/>
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
+        <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
+        <input type="hidden" name="timezone" value="{{ talk.timezone }}" />
+        <input type="hidden" name="start_time" value="{{ talk.editable_start_time() }}" />
+        <input type="hidden" name="end_time" value="{{ talk.editable_end_time() }}" />
+        <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
+        <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
+        <input type="hidden" name="access" value="{{ talk.access }}" />
   <table>
     <tr>
       <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
@@ -91,13 +98,6 @@
     <tr>
       <td colspan="2">
         {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezon %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}
-        <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
-        <input type="hidden" name="timezone" value="{{ talk.timezone }}" />
-        <input type="hidden" name="start_time" value="{{ talk.editable_start_time() }}" />
-        <input type="hidden" name="end_time" value="{{ talk.editable_end_time() }}" />
-        <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
-        <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
-        <input type="hidden" name="access" value="{{ talk.access }}" />
       </td>
     </tr>
     {% if (not talk.online or talk.room) and talk.timezone != current_user.timezone %}
@@ -115,7 +115,7 @@
       <td colspan="2">{{ KNOWL("comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; any seminar comments shown below will appear in additiona to the comments you put here.  TeX symbols are OK here.">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; any seminar comments shown below will appear in addition to the comments you put here.  TeX symbols are OK here.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
     {% if talk.seminar.comments %}
       <tr><td colspan="2" class="forminfo">Seminar comments appear below</td></tr>
