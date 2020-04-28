@@ -70,6 +70,7 @@ console.log('Form is unchanged!');
       {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics('math');"), ("CLR", "Clear all", "clearAllTopics('math');")] %}
       <div class="topic_cmd" id="topiclink-math_{{ab}}" onclick="{{onclick}}">
         {{name}}
+        {% if topic_counts["math_"+ab] %} ({{topic_counts["math_"+ab]}}){% endif %}
       </div>
       {% endfor %}
     </div>
