@@ -694,7 +694,7 @@ def policies():
 
 @app.route("/faq")
 def faq():
-    return render_template("faq.html", title="FAQ", section="Info", subsection="faq")
+    return render_template("faq.html", title="Frequently asked questions", section="Info", subsection="faq")
 
 
 # @app.route("/<topic>")
