@@ -191,15 +191,23 @@ access:
 comments:
   title: Comments
   contents: |
-    Use the comments field to add additional information about yout talk or series, 
+    Use the comments field to add additional information about your series, 
     especially details on how to find the room or access the livestreaming link.  
-    You may use include links to external pages here.  
     Any token beginning with "http://" or "https://" will automatically appear as a link.
-    You may also use HTML hyperlinks.
+    You may also use HTML hyperlinks and TeX symbols.
     <br><br>
     On a talk page, the comments for both the talk and the series are displayed.
-    Therefore use the series Comments box for information applicable to every talk, 
-    and use the talk Comments box for information specific to that talk;
+talk_comments:
+  title: Talk comments
+  contents: |
+    Use the comments field to add additional information about your talk, 
+    especially details on how to find the room or access the livestreaming link.  
+    Any token beginning with "http://" or "https://" will automatically appear as a link.
+    You may also use HTML hyperlinks and TeX symbols.
+    <br><br>
+    On a talk page, the comments for both the talk and the series are displayed.
+    Therefore use the series "Comments" box for information applicable to every talk, 
+    and use the "Talk comments" box for information specific to that talk;
     there is no need to repeat information.
 organizer_name:
   title: Name
@@ -318,6 +326,6 @@ visibility:
     You must be endorsed in order for your series to be visible to anyone else;
     your setting here will become active once you get endorsed.
 hidden:
-  title: Hide
+  title: Hide talk
   contents: |
     Check this box to make the talk invisible to all but the organizers.
