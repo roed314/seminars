@@ -171,9 +171,10 @@ def physics_topic_dict():
 
 def restricted_topics(talk_or_seminar=None):
     if topdomain() == 'mathseminars.org':
-        subjects = talk_or_seminar.subjects
-        if subjects is None:
+        if talk_or_seminar is None or talk_or_seminar.subjects is None:
             subjects = []
+        else:
+            subjects = talk_or_seminar.subjects
         return [('math_' + ab, name) for (ab, name, subj) in topics() if subj == "math" or subj in subjects]
     else:
         return user_topics(talk_or_seminar)
