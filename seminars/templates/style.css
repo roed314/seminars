@@ -226,24 +226,21 @@ body.knowl #header {
     /* display: inline-block; */
     color: {{color.header_text_title}};
     min-height: 32px;
+    float: left;
+    min-width: 300px;
 }
 
 #header #title .katex{
     font-weight: bold !important;
 }
 
-#header .bread {
-    font-family: sans-serif;
-    font-size: 90%;
-    display: inline-block;
-}
-
-#header .bread a:first-child {
-    font-size: 150%;
-}
-
-#header .bread a {
-    color: {{color.bread_links}};
+#header #domain {
+  float: right;
+  text-align: right;
+  font-family: sans-serif;
+  float: right;
+  color: {{color.header_text_topright}};
+  padding: 10px;
 }
 
 #header .topright {
@@ -344,16 +341,21 @@ i.fa.close:hover {
 
 .ui-state-active {
     border: none !important;
-    background: #000000 !important;
+    background: linear-gradient(to bottom, white 80%, #373737 100%) !important;
+}
+
+
+.ui-state-active a {
+    color: black !important;
 }
 
 .ui-tabs-panel {
-    background: #000000 !important;
+    background: #373737 !important;
 }
 
 .ui-corner-top {
-    border-top-left-radius: 0px !important;
-    border-top-right-radius: 0px !important;
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
 }
 
 div.topic_toggle, div.language_toggle, div.subject_toggle, div.welcome_toggle {
@@ -369,7 +371,7 @@ div.topic_toggle.subject-physics {
 
 div.subject_toggle, div.welcome_toggle, div.language_toggle  {
     text-align: center;
-    background: #000000;
+    background: #373737;
     min-width: 10%;
 }
 
@@ -424,11 +426,13 @@ div.topic_cmd {
 #top-menu div.menu-active a {
     background: white;
     color: {{color.header_background}};
+    border-radius: 5px 5px 0 0;
 }
 
 #top-menu a:hover {
     background: #aaaaaa;
     color: {{color.header_background}};
+    border-radius: 5px 5px 0 0;
 }
 
 div.topicselected, div.languageselected, div.subjectselected {
@@ -1426,46 +1430,6 @@ table .knowl a {
    color: {{color.knowl_error}};
 }
 
-/*
-knowl-qm does not seem to be currently used.
-
-.knowl-qm {
-  font-family: sans-serif;
-  font-weight: bold;
-  border: 1px solid {{ color.knowl_thin_border }};
-  background: transparent;
-  color: {{ color.knowl_hover_text }};
-  cursor: pointer;
-  padding: 0 0.4em;
-  border-radius: 0.8em;
-  font-size: 0.9em;
-  top: -0.4em;
-  left: -0.1em;
-}
-.knowl-qm:hover,
-.knowl-qm.active {
-    background: {{color.knowl_db}};
-  color: {{color.white}};
-}
-.knowl-qm.active:hover {
-  background: transparent;
-  color: {{ color.knowl_hover_text }};
-}
-h1 > .knowl-qm {
-  font-size: 0.6em;
-  border-radius: 0.6em;
-  position: relative;
-  top: -0.8em;
-  left: -0.3em;
-}
-h2 > .knowl-qm {
-  font-size: 0.7em;
-  border-radius: 0.7em;
-  position: relative;
-  top: -0.6em;
-  left: -0.4em;
-}
-*/
 .knowl-output {
   background: {{ color.knowl_background }};
   border: 10px solid {{ color.knowl_border }};
@@ -1534,38 +1498,6 @@ div.limit-height {
 }
 
 /* end knowl */
-
-/*** Dirichlet series, displayed in HTML ***/
-
-.dirichletseries {
-  font-family:"Times New Roman", Times, serif;
-}
-
-.dirichletseries em {
-  font-style: italic;
-}
-
-.dirichletseries td {
-  padding-left:0;
-  padding-right:0;
-}
-
-/*
-.dirichletseries td:first-child {
-  padding-top:3px;
-}
-*/
-
-.dirichletseries span.term {
-  white-space: nowrap;
-}
-
-.dirichletseries sup {
-/*  font-size: 75%;
-*/
-  font-style: italic;
-  font-family: KaTeX_Math;
-}
 
 /*** Tables for the Siegel corner ***/
 
@@ -2795,7 +2727,7 @@ li.ical-detail {
   display: inline-flex;
   background: {{color.header_background}};
   color: #ccc;
-  box-shadow: 0px 5px 5px {{color.header_shadow}};
+  box-shadow: 1px 1px 3px #aaa;
 }
 
 .notifyjs-banner-base .message {

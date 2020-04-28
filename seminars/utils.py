@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from dateutil.parser import parse as parse_time
 import pytz, re, iso639
 from six import string_types
-from flask import url_for, flash, render_template
+from flask import url_for, flash, render_template, request
 from flask_login import current_user
 from seminars import db
 from functools import lru_cache
@@ -17,6 +17,11 @@ from email_validator import validate_email
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
+@lru_cache(maxsize=None)
+def topdomain():
+    # return 'mathseminars.org'
+    # return 'researchseminars.org'
+    return '.'.join(urlparse(request.url).netloc.split('.')[-2:])
 
 def validate_url(x):
     if not (x.startswith("http://") or x.startswith("https://")):
@@ -159,6 +164,18 @@ def topics():
         ((rec["abbreviation"], rec["name"], rec["subject"]) for rec in db.topics.search({}, ["abbreviation", "name", "subject"])),
         key=lambda x: (x[2].lower(), x[1].lower()),
     )
+
+# A temporary measure in case talks/seminars with physics topics are visible (they might be crosslisted with math)
+@lru_cache(maxsize=None)
+def physics_topic_dict():
+    return dict([(rec["subject"] + "_" + rec["abbreviation"], rec["name"]) for rec in db.topics.search()])
+
+@lru_cache(maxsize=None)
+def restricted_topics():
+    if topdomain() == 'mathseminars.org':
+        return [('math_' + ab, name) for (ab, name, subj) in topics() if subj == "math"]
+    else:
+        return user_topics()
 
 def user_topics():
     mysubjects = current_user.subjects

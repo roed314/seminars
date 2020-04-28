@@ -17,7 +17,7 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
-from seminars.utils import topics, user_topics, subjects, top_menu, languages_dict
+from seminars.utils import topics, restricted_topics, subjects, top_menu, languages_dict, topdomain
 from seminars.knowls import static_knowl
 from .seminar import seminars_header
 from .talk import talks_header
@@ -114,7 +114,7 @@ def ctx_proc_userdata():
     # meta_description appears in the meta tag "description"
     data[
         "meta_description"
-    ] = r"Welcome to Math Seminars, a listing of mathematical research seminars, talks and conferences!"
+    ] = r"Welcome to {topdomain}, a listing of research seminars and conferences!".format(topdomain = topdomain())
     data[
         "feedbackpage"
     ] = r"https://docs.google.com/forms/d/e/1FAIpQLSdJNJ0MwBXzqZleN5ibAI9u1gPPu9Aokzsy08ot802UitiDRw/viewform"
@@ -124,7 +124,7 @@ def ctx_proc_userdata():
     data["DEBUG"] = is_debug_mode()
 
     data["topics"] = topics()
-    data["user_topics"] = user_topics()
+    data["user_topics"] = restricted_topics()
     data["subjects"] = subjects()
     data["top_menu"] = top_menu()
 
@@ -132,8 +132,10 @@ def ctx_proc_userdata():
     data["seminars_header"] = seminars_header
     data["languages_dict"] = languages_dict()
     data["static_knowl"] = static_knowl
+    data["topdomain"] = topdomain()
 
     return data
+
 
 
 ##############################
