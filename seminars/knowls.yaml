@@ -189,7 +189,7 @@ access:
     or only to endorsed users.
     If the livestream link is not specified, this setting is ignored.
 series_comments:
-  title: Series comments
+  title: Comments
   contents: |
     Use the comments field to display additional information on the series page, 
     especially details on how to find the room or access the livestreaming link.
@@ -197,8 +197,12 @@ series_comments:
     so talk-specific comments should not be entered here.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
     You may also use HTML hyperlinks and TeX symbols.    
-    <br><br>
-
+series_comments:
+  title: Series comments
+  contents: |
+    These comments are inherited from the series.  
+    They are displayed on the series' page and on the page of each of its talks.  
+    Organizers can edit them at the "Edit seminar" page.
 talk_comments:
   title: Talk comments
   contents: |
