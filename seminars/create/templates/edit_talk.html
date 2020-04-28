@@ -197,12 +197,10 @@
       <td colspan="2">{{ KNOWL("talk_comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk specific comments here such as livestream access instructions specific to this talk or notes about the speaker; any seminar comments shown below will appear in addition to the comments you put here.  TeX symbols are OK here.">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Put talk-specific comments here such as livestream access instructions specific to this talk or notes about the speaker; any series comments shown below will appear in addition to the comments you put here.  TeX symbols are OK here.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
-  <tr>
-  </tr>
       <tr>
-        <td colspan="2">{{ KNOWL("series_comments") }} {% if talk.seminar.user_can_edit() %} (editable on the "Edit seminar" page) {% endif %}</td>
+        <td colspan="2">{{ KNOWL("series_comments") }}</td>
       </tr>
   {% if talk.seminar.comments %}
       <tr><td colspan="2" style="width:770px;">{{ talk.seminar.show_comments() | safe }}<td></tr>
