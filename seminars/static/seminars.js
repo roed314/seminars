@@ -320,7 +320,7 @@ function toggleFilters(id, on_menu_open=false) {
 }
 function toggleFilterView(id) {
     // If this filter is not enabled, we enable it
-    console.log("filterview", id);
+    //console.log("filterview", id);
     var ftype = id.split("-")[0];
     var is_enabled = Boolean(parseInt(getCookie("filter_"+ftype)));
     var visible = filterMenuVisible(ftype)
@@ -328,6 +328,24 @@ function toggleFilterView(id) {
         var filtid = 'enable_'+ftype+'_filter';
         $('#'+filtid).prop("checked", true);
         toggleFilters(filtid, true);
+    }
+    if (ftype == "topic" && !visible) {
+        // Count the number of active topics in each tab
+        var max_tab_count = 0;
+        var max_tab = "math";
+        let tabs = $("#subjects-tabs").children("div.tab-subject-panel");
+        tabs.each(function (i, elt) {
+            let tab_count = $("#"+elt.id).children("div.topicselected").length;
+            //console.log(elt.id, tab_count, max_tab_count);
+            if (tab_count > max_tab_count) {
+                max_tab_count = tab_count;
+                max_tab = elt.id.split("-")[1];
+            }
+        });
+        //console.log(max_tab, );
+        // subject_list defined at the bottom of browse.html because I can't figure out how to get
+        // a list of subjects out of jquery.
+        $('#subjects-tabs').tabs({ active: subject_list.indexOf(max_tab)});
     }
     for (i=0; i<filter_menus.length; i++) {
         var elt = $("#"+filter_menus[i]+"-filter-menu");
