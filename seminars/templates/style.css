@@ -324,6 +324,25 @@ i.fa.close:hover {
     margin: 12px 8px 0px 2px;
 }
 
+.topic_label, .language_label {
+    border-radius: 4px;
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+}
+
+.topic_label {
+    background: #373737;
+    color: #fff;
+    padding: 3px 7px;
+}
+
+.language_label {
+    background: #E3F2FD;
+    color: #000;
+    border: 2px solid #0033bb;
+    padding: 1px 5px;
+}
+
 .ui-tabs {
     border: none !important;
     background: #373737 !important;

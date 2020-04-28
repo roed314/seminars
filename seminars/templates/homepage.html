@@ -46,22 +46,6 @@ console.log('Form is unchanged!');
 </div>
 
 {% if section == "Browse" %}
-{#
-  <div id="welcome-popup">
-    <h1> Welcome to researchseminars.org </h1>
-    <p> Please select your subjects of interest.</p>
-    <div id="welcome-subjects">
-      {% for ab, name in subjects %}
-      <div class="welcome_toggle" id="subjectwelc-{{ab}}">
-        {{name}}
-      </div>
-      {% endfor %}
-    </div>
-    <p>You will be able to update these later, and add additional filters.</p>
-    <p>Also note that we use cookies in accordance with our <a href="{{ url_for('privacy') }}">privacy policy</a>.</p>
-    <p><button onclick="welcomeDone();">Done</button></p>
-  </div>
-#}
   <div id="subject-filter-menu">
     <span id="close-subject-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
     {% for ab, name in subjects %}
@@ -72,6 +56,23 @@ console.log('Form is unchanged!');
   </div>
 
   <div id="topic-filter-menu">
+    {% if topdomain == "mathseminars.org" %}
+    {% for ab, name, topic_subject in topics %}
+    {% if topic_subject == "math" %}
+    <div class="topic_toggle subject-math" id="topiclink-math_{{ab}}">
+      {{name}}
+      {% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    <div id="topic-filter-head">
+      {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics('math');"), ("CLR", "Clear all", "clearAllTopics('math');")] %}
+      <div class="topic_cmd" id="topiclink-math_{{ab}}" onclick="{{onclick}}">
+        {{name}}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
     <div id="subjects-tabs">
       <ul class="tab-subject-nav">
         <li><span id="close-topic-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span></li>
@@ -86,7 +87,7 @@ console.log('Form is unchanged!');
            {% if topic_subject == subject_ab %}
              <div class="topic_toggle subject-{{topic_subject}}" id="topiclink-{{subject_ab}}_{{ab}}">
                {{name}}
-               {% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+               {% if topic_counts[subject_ab+"_"+ab] %} ({{topic_counts[subject_ab+"_"+ab]}}){% endif %}
              </div>
            {% endif %}
          {% endfor %}
@@ -100,6 +101,7 @@ console.log('Form is unchanged!');
       </div>
     {% endfor %}
     </div>
+    {% endif %}
   </div>
 
   <div id="language-filter-menu">

@@ -12,6 +12,8 @@ from seminars.utils import (
     adapt_datetime,
     toggle,
     make_links,
+    topic_dict,
+    languages_dict,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -264,6 +266,19 @@ class WebTalk(object):
             title=self.show_title(),
             content=Markup.escape(render_template("talk-knowl.html", talk=self)),
         )
+
+    def show_lang_topics(self):
+        if self.language and self.language != "en":
+            ldict = languages_dict()
+            language = '<span class="language_label">%s</span>' % ldict.get(self.language, "Unknown language")
+        else:
+            language = ""
+        if self.topics:
+            subjects = set(topic.split("_", 1)[0] for topic in self.topics)
+            tdict = topic_dict(include_subj=(len(subjects) > 1))
+            return language + "".join('<span class="topic_label">%s</span>' % tdict[topic] for topic in self.topics)
+        else:
+            return language
 
     def show_seminar(self, external=False):
         return self.seminar.show_name(external=external)
