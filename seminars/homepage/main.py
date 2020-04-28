@@ -497,7 +497,7 @@ def search():
     talks = [talk for talk in talks if talk.searchable()]
     info["talk_results"] = talks
     return render_template(
-        "search.html", title="Search series", info=info, section="Search", bread=None,
+        "search.html", title="Search", info=info, section="Search", bread=None,
     )
 
 
