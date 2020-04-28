@@ -103,7 +103,7 @@ console.log('Form is unchanged!');
            {% if topic_subject == subject_ab %}
              <div class="topic_toggle subject-{{topic_subject}}" id="topiclink-{{subject_ab}}_{{ab}}">
                {{name}}
-               {% if topic_counts[ab] %} ({{topic_counts[ab]}}){% endif %}
+               {% if topic_counts[subject_ab+"_"+ab] %} ({{topic_counts[subject_ab+"_"+ab]}}){% endif %}
              </div>
            {% endif %}
          {% endfor %}
