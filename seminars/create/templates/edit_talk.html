@@ -200,6 +200,19 @@
       <tr><td colspan="2" class="forminfo">No seminar comments set</td></tr
     {% endif %}
   </table>
+        
+
+{# only seminar organizers can edit the following attributes #}
+{% if talk.seminar.user_can_edit() %}
+  <table>   
+     <tr>
+        <td>{{ KNOWL("hidden") }}</td>
+       <td>
+        <input name="hidden" value="yes" type="checkbox"{% if talk.hidden %} checked{% endif %} />
+      </td>
+    </tr>
+  </table>
+{% endif %} {# attributes organizers can edit #}
 
   <table>
     <tr>
