@@ -119,7 +119,7 @@ console.log('Form is unchanged!');
       <div class="submenu-inner">
         {% if user.is_creator %}
           <div class="submenu-nav{% if subsection == 'home' %} submenu-active{% endif %}">
-            <a href="{{ url_for('create.index') }}">Seminars</a>
+            <a href="{{ url_for('create.index') }}">Series</a>
           </div>
           {% if not subsection in ['view', 'editsem', 'schedule', 'viewtalk', 'edittalk'] %}
             <div class="submenu-nav{% if subsection == 'institutions' %} submenu-active{% endif %}">
