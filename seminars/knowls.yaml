@@ -212,8 +212,6 @@ talk_comments:
     these instructions change from talk to talk.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
     You may also use HTML hyperlinks and TeX symbols.
-    <br><br>
-
 organizer_name:
   title: Name
   contents: |
