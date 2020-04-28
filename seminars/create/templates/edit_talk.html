@@ -105,12 +105,6 @@
     {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
     <tr>
-      <td>{{ KNOWL("hidden") }}</td>
-      <td>
-        <input name="hidden" value="yes" type="checkbox"{% if talk.hidden %} checked{% endif %} />
-      </td>
-    </tr>
-    <tr>
       <td>{{ ASTKNOWL("timezone") }}</td>
       <td>
         <select name="timezone" style="width:610px;">
@@ -148,6 +142,12 @@
 <table>
       {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
+    <tr>
+      <td>{{ KNOWL("hidden") }}</td>
+      <td>
+        <input name="hidden" value="yes" type="checkbox"{% if talk.hidden %} checked{% endif %} />
+      </td>
+    </tr>
     <tr>
       <td>{{ ASTKNOWL("online") }}</td>
       <td>
@@ -201,19 +201,6 @@
     {% endif %}
   </table>
         
-
-{# only seminar organizers can edit the following attributes #}
-{% if talk.seminar.user_can_edit() %}
-  <table>   
-     <tr>
-        <td>{{ KNOWL("hidden") }}</td>
-       <td>
-        <input name="hidden" value="yes" type="checkbox"{% if talk.hidden %} checked{% endif %} />
-      </td>
-    </tr>
-  </table>
-{% endif %} {# attributes organizers can edit #}
-
   <table>
     <tr>
       <td>
