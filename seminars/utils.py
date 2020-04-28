@@ -169,21 +169,28 @@ def topics():
 def physics_topic_dict():
     return dict([(rec["subject"] + "_" + rec["abbreviation"], rec["name"]) for rec in db.topics.search()])
 
-def restricted_topics():
+def restricted_topics(talk_or_seminar=None):
     if topdomain() == 'mathseminars.org':
-        return [('math_' + ab, name) for (ab, name, subj) in topics() if subj == "math"]
+        subjects = talk_or_seminar.subjects
+        if subjects is None:
+            subjects = []
+        return [('math_' + ab, name) for (ab, name, subj) in topics() if subj == "math" or subj in subjects]
     else:
-        return user_topics()
+        return user_topics(talk_or_seminar)
 
-def user_topics():
-    mysubjects = current_user.subjects
-    if len(mysubjects) == 1:
-        subject = mysubjects[0]
+def user_topics(talk_or_seminar=None):
+    subjects = current_user.subjects
+    if subjects is None:
+        subjects = []
+    if talk_or_seminar is not None:
+        subjects = sorted(set(subjects + talk_or_seminar.subjects))
+    if len(subjects) == 1:
+        subject = subjects[0]
         return [(subj + '_' + ab, name) for (ab, name, subj) in topics() if subj == subject]
-    if len(mysubjects) == 0:
+    if len(subjects) == 0:
         # Show all subjects rather than none
-        mysubjects = [subj for (subj, name) in subjects()]
-    return [(subj + '_' + ab, subj.capitalize() + ': ' + name) for (ab, name, subj) in topics() if subj in mysubjects]
+        subjects = [subj for (subj, name) in subjects()]
+    return [(subj + '_' + ab, subj.capitalize() + ': ' + name) for (ab, name, subj) in topics() if subj in subjects]
 
 @lru_cache(maxsize=None)
 def subjects():
