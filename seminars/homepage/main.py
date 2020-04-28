@@ -7,8 +7,7 @@ from seminars.utils import (
     Toggle,
     languages_dict,
     subject_dict,
-    topic_dict,
-    subjects,
+    subject_pairs,
     topics,
     topdomain,
 )
@@ -413,7 +412,7 @@ for ab, name, subject in topics():
 def _index(query):
     # Eventually want some kind of cutoff on which talks are included.
     query = dict(query)
-    subs = subjects()
+    subs = subject_pairs()
     hide_filters = []
     if "subjects" in query:
         subject = query["subjects"]["$contains"]

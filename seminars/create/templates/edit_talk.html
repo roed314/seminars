@@ -14,17 +14,10 @@
   <input type="hidden" name="token" value="{{ talk.token }}"/>
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
-        <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
-        <input type="hidden" name="timezone" value="{{ talk.timezone }}" />
-        <input type="hidden" name="start_time" value="{{ talk.editable_start_time() }}" />
-        <input type="hidden" name="end_time" value="{{ talk.editable_end_time() }}" />
-        <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
-        <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
-        <input type="hidden" name="access" value="{{ talk.access }}" />
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
-  
+
   <h3>Speaker info and talk content</h3>
-  
+
     <table>
     <tr>
       <td style="width:150px">{{ KNOWL("speaker") }}</td>
@@ -124,8 +117,13 @@
       <td>{{ ASTKNOWL("talk_end_time") }}</td>
       <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
     </tr>
-    
- {% else %}  {# non-organizers can edit the following attributes #}
+
+ {% else %}
+    {# non-organizers cannot edit the following attributes #}
+    <input type="hidden" name="timezone" value="{{ talk.timezone }}" />
+    <input type="hidden" name="start_time" value="{{ talk.editable_start_time() }}" />
+    <input type="hidden" name="end_time" value="{{ talk.editable_end_time() }}" />
+    {# non-organizers can edit the following attributes #}
     <tr>
       <td colspan="2">
         {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}
@@ -142,7 +140,7 @@
 <h3>Venue and access links</h3>
 
 <table>
-      {# only seminar organizers can edit the following attributes #}
+    {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
     <tr>
       <td>{{ KNOWL("hidden") }}</td>
@@ -181,7 +179,18 @@
       <td>{{ KNOWL("video_link") }}</td>
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
     </tr>
-    {% else %} {# attributes non-organizers can edit #}
+    {% else %}
+    {# attributes non-organizers cannot edit #}
+    <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
+    <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
+    <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
+    <input type="hidden" name="access" value="{{ talk.access }}" />
+    {# attributes non-organizers can edit #}
+    {% if talk.room %}
+    <tr>
+      <td colspan="2">Room: {{ talk.room }}</td>
+    </tr>
+    {% endif %}
     {% if talk.live_link %}
     <tr>
       <td colspan="2">Livestream access: {{ talk.live_link }}</td>
@@ -189,7 +198,7 @@
     {% endif %}
     {% endif %} {# attributes non-organizers can edit #}
   </table>
-        
+
 <h3>Comments</h3>
 
 <table>
@@ -211,8 +220,8 @@
       <tr><td colspan="2" class="forminfo">No series comments set</td></tr
     {% endif %}
 </table>
-        
-        
+
+
   <table>
     <tr>
       <td>

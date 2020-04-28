@@ -51,6 +51,7 @@ console.log('Form is unchanged!');
     {% for ab, name in subjects %}
       <div class="subject_toggle" id="subjectlink-{{ab}}">
         {{name}}
+        {% if subject_counts[ab] %} ({{subject_counts[ab]}}) {% endif %}
       </div>
     {% endfor %}
   </div>
