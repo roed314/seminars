@@ -5,12 +5,12 @@
 <div class="text_content">
 {% if not user.is_creator %}
 <p>
-  Welcome!  Please feel free to start creating seminars.  For the moment any content you create will be visible only to you, but once your account has been endorsed, all the seminars and talks you added will instantly appear on the public browse and search pages.  To get endorsed, visit the <a href="{{ url_for('user.public_users') }}">list of public users</a> and follow the instructions there.
+  Welcome!  Please feel free to start creating series.  For the moment any content you create will be visible only to you, but once your account has been endorsed, all the series and talks you added will instantly appear on the public browse and search pages.  To get endorsed, visit the <a href="{{ url_for('user.public_users') }}">list of public users</a> and follow the instructions there.
 </p>
 {% else %}
 {% if user.affiliation and not institution_known(user.affiliation) %}
 <p> Your affiliation does not appear to be on our list of institutions.
-You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a seminar or conference.  Alternatively, you can create a seminar now and add an institution to it later.
+You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a series.  Alternatively, you can create a series now and add an institution to it later.
 {% endif %}
 {% endif %}
 
@@ -25,7 +25,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
       <td>
         <select name="is_conference" style="width:100px;">
           <option value="yes">conference</option>
-          <option value="no" selected>seminar</option>
+          <option value="no" selected>seminar series</option>
         </select>
       </td>
       <td class="forminfo"><p style="width:230px;">Click blue captions for more details. Asterisks denote required items.</p></td>
@@ -52,7 +52,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
 </form>
 
 
-{% set pair = [('Seminars you organize', seminars), ('Conferences you organize', conferences)] %}
+{% set pair = [('Seminar series you organize', seminars), ('Conferences you organize', conferences)] %}
 {% for title, list in pair %}
   {% if list %}
     <h2>{{ title }}</h2>
@@ -79,13 +79,13 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   {% endif %}
 {% endfor %}
 {% if not seminars and not conferences %}
-<p>To add a talk, create a seminar first.</p>
+<p>To add a talk, create a series first.</p>
 {% endif %}
 {% if deleted_seminars or deleted_talks %}
 <p><a href="#" onclick="$('#deleted_stuff').show(); return false;">Show deleted items</a></p>
 <div id="deleted_stuff" style="display:none;">
   {% if deleted_seminars %}
-  <h2>Deleted seminars/conferences</h2>
+  <h2>Deleted series</h2>
   <table class="ntdata">
     <thead>
       <th>Name</th>
@@ -103,7 +103,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   <h2>Deleted talks</h2>
   <table class="ntdata">
     <thead>
-      <th>Seminar</th>
+      <th>Series</th>
       <th>Time</th>
       <th>Speaker</th>
       <th>Title</th>
