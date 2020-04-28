@@ -88,6 +88,8 @@
   </div>
 </div>
 
+  <hr style="width:800px;">
+
 <h3>Time and venue</h3>
 
   <table>
@@ -126,6 +128,14 @@
       <td>{{ ASTKNOWL("talk_end_time") }}</td>
       <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
     </tr>
+        {% endif %} {# attributes only organizers can edit #}
+</table>
+
+<h3>Venue and access links</h3>
+
+<table>
+      {# only seminar organizers can edit the following attributes #}
+    {% if talk.seminar.user_can_edit() %}
     <tr>
       <td>{{ KNOWL("room") }}</td>
       <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building" /></td>
@@ -188,7 +198,6 @@
       <tr><td colspan="2" class="forminfo">No seminar comments set</td></tr
     {% endif %}
   </table>
-  <hr style="width:800px;">
 
   <table>
     <tr>
