@@ -140,7 +140,7 @@ def edit_seminar():
         if seminar.institutions:
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
     lock = get_lock(shortname, data.get("lock"))
-    title = "conference" if seminar.is_conference else "seminar"
+    title = "conference" if seminar.is_conference else "seminar series"
     title = "Create " + title if new else "Edit " + title + " properties"
     manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
