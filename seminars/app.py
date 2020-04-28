@@ -124,7 +124,7 @@ def ctx_proc_userdata():
     data["DEBUG"] = is_debug_mode()
 
     data["topics"] = topics()
-    data["user_topics"] = restricted_topics()
+    data["user_topics"] = restricted_topics
     data["subjects"] = subjects()
     data["top_menu"] = top_menu()
 
