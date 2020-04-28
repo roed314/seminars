@@ -1,16 +1,14 @@
 <div class="talk-body">
-  <h2>{{ talk.show_title() | safe }}</h2>
+  <h3>{{ talk.show_title() | safe }}</h3>
   <p>
     {{ talk.show_speaker_and_seminar() | safe }}
   </p>
 
-  <h3>Time: </h3>
   <p>
-    {{ talk.show_time_and_duration() | safe }}
+    <b>{{ talk.show_time_and_duration() | safe }}</b>
   </p>
 
   {% if not talk.is_past() %}
-    <h3>Join live:</h3>
     <p>
       <b> {{ talk.show_live_link() | safe }} </b>
       {% if talk.room %} </p><p>Lecture held in {{ talk.room }}. {% endif %}
@@ -18,7 +16,7 @@
   {% endif %}
 
   {% if talk.abstract %}
-    <h3> Abstract </h3>
+    <b> Abstract </b>
     {{ talk.show_abstract() | safe }}
   {% endif %}
 
