@@ -144,9 +144,9 @@
           <td>{{ KNOWL("access") }}</td>
           <td>
             <select name="access" style="width:610px;">
-              <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view link</option>
-              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Only logged-in users can view link</option>
-              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view link</option>
+              <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view livestream link</option>
+              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Only logged-in users can view livestream link</option>
+              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view livestream link</option>
             </select>
           </td>
         </tr>
@@ -154,7 +154,7 @@
           <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>
         </tr>
         <tr>
-          <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" placeholder="TeX symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
+          <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" placeholder="Instructions for obtaining the livestream link?  Directions to the room?  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
         </tr>
       </table>
       <h3>Organizers</h3>
@@ -226,7 +226,7 @@
 
 /* topic and inst selector */
 const topicOptions = [
-  {% for ab, topic in user_topics %}
+  {% for ab, topic in user_topics(seminar) %}
   {
     label: "{{ topic }}",
     value: "{{ ab }}",
