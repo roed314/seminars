@@ -202,7 +202,7 @@ series_comments:
   contents: |
     These comments are inherited from the series.  
     They are displayed on the series' page and on the page of each of its talks.  
-    Organizers can edit them at the "Edit seminar" page.
+    Organizers can edit them at the "Edit series" page.
 talk_comments:
   title: Talk comments
   contents: |
