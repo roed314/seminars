@@ -191,24 +191,25 @@ access:
 comments:
   title: Comments
   contents: |
-    Use the comments field to add additional information about your series, 
-    especially details on how to find the room or access the livestreaming link.  
+    Use the comments field to display additional information on the series page, 
+    especially details on how to find the room or access the livestreaming link.
+    On a talk page, both the talk comments and the series comments are displayed,
+    so talk-specific comments should not be entered here.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
-    You may also use HTML hyperlinks and TeX symbols.
+    You may also use HTML hyperlinks and TeX symbols.    
     <br><br>
-    On a talk page, the comments for both the talk and the series are displayed.
+
 talk_comments:
   title: Talk comments
   contents: |
-    Use the comments field to add additional information about your talk, 
-    especially details on how to find the room or access the livestreaming link.  
+    The talk page will display both the talk comments and the series comments,
+    so here enter only additional information specific to this talk,
+    such as how to find the room or access the livestreaming link if
+    these instructions change from talk to talk.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
     You may also use HTML hyperlinks and TeX symbols.
     <br><br>
-    On a talk page, the comments for both the talk and the series are displayed.
-    Therefore use the series "Comments" box for information applicable to every talk, 
-    and use the "Talk comments" box for information specific to that talk;
-    there is no need to repeat information.
+
 organizer_name:
   title: Name
   contents: |
