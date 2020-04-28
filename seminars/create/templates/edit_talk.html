@@ -160,11 +160,11 @@
       <td colspan="2">Livestream access: {{ talk.live_link }}</td>
     </tr>
     {% endif %}
-        <tr>
+    {% endif %} {# attributes only organizers can edit #}
+    <tr>
       <td>{{ KNOWL("video_link") }}</td>
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
     </tr>
-    {% endif %} {# attributes only organizers can edit #}
     <tr>
       <td colspan="2">{{ KNOWL("comments") }}</td>
     </tr>
