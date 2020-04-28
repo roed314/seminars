@@ -25,6 +25,46 @@
   
   <h3>Speaker info and talk content</h3>
   
+    <table>
+    <tr>
+      <td style="width:150px">{{ KNOWL("speaker") }}</td>
+      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" placeholder="Firstname Lastname"/></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("speaker_email") }}</td>
+      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" placeholder="someone@upan.edu"/></td>
+      <td class="forminfo" />Visible only to organizers.</td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("speaker_affiliation") }}</td>
+      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" placeholder="University of Pangaea" /></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("speaker_homepage") }}</td>
+      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone"/></td>
+      <td class="forminfo" />Please set if available.</td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("title") }}</td>
+      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" placeholder="TeX symbols are OK here" /></td>
+      <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("paper_link") }}</td>
+      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" placeholder="https://arxiv.org/abs/9999.99999"/></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("slide_link") }}</td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("video_link") }}</td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
+    </tr>
+  </table>
+
+<h3>Time and venue</h3>
+
   <table>
     <tr>
       <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
@@ -129,43 +169,7 @@
     {% endif %}
   </table>
   <hr style="width:800px;">
-  <table>
-    <tr>
-      <td style="width:150px">{{ KNOWL("speaker") }}</td>
-      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" placeholder="Firstname Lastname"/></td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("speaker_email") }}</td>
-      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" placeholder="someone@upan.edu"/></td>
-      <td class="forminfo" />Visible only to organizers.</td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("speaker_affiliation") }}</td>
-      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" placeholder="University of Pangaea" /></td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("speaker_homepage") }}</td>
-      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone"/></td>
-      <td class="forminfo" />Please set if available.</td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("title") }}</td>
-      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" placeholder="TeX symbols are OK here" /></td>
-      <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("paper_link") }}</td>
-      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" placeholder="https://arxiv.org/abs/9999.99999"/></td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("slide_link") }}</td>
-      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("video_link") }}</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
-    </tr>
-  </table>
+
   <h3>Abstract</h3>
   <table>
     <tr>
