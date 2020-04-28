@@ -188,8 +188,8 @@ access:
     only to users logged in, 
     or only to endorsed users.
     If the livestream link is not specified, this setting is ignored.
-comments:
-  title: Comments
+series_comments:
+  title: Series comments
   contents: |
     Use the comments field to display additional information on the series page, 
     especially details on how to find the room or access the livestreaming link.
