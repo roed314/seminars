@@ -22,6 +22,9 @@
         <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
         <input type="hidden" name="access" value="{{ talk.access }}" />
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
+  
+  <h3>Speaker info and talk content</h3>
+  
   <table>
     <tr>
       <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
