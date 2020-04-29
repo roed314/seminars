@@ -296,7 +296,7 @@ $(document).ready(function() {
   $("a.addslot").click(function(e){
     e.preventDefault();
     var x = document.getElementById('slots').value;
-    x = '' + parseInt(x)+1;
+    x = '' + (parseInt(x)+1);
     document.getElementById('slots').value = x;
     console.log("slots =" + x);
     $('input[name=weekday"'+x+'"]')[0].show();
@@ -317,8 +317,8 @@ $(document).ready(function() {
   var x = parseInt(document.getElementById('slots').value);
   if ( x == 0 ) x = 1;
   for (i = 0 ; i < x ; i++ ) {
-    $('input[name=weekday"'+x+'"]')[0].show();
-    $('input[name=times"'+x+'"]')[0].show();
+    $('input[name="weekday'+x+'"]')[0].show();
+    $('input[name="times'+x+'"]')[0].show();
   }
 });
 
