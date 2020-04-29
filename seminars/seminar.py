@@ -46,10 +46,6 @@ class WebSeminar(object):
         self.new = data is None
         self.deleted = False
         if self.new:
-            ### FIXME ###
-            # Temporary fix to ensure seminars created on mathseminars.org are visible on mathseminars.org
-            if topdomain() == "mathseminars.org":
-                self.subjects = ["math"]
             self.shortname = shortname
             self.display = current_user.is_creator
             self.online = True  # default
@@ -138,6 +134,9 @@ class WebSeminar(object):
         assert data.get("shortname")
         topics = self.topics if self.topics else []
         data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
+        ### if we are saving a seminar on mathseminars.org with no subjects set, set the subject to math so that the sminar will be visible
+        if not data["subjects"] and topdomain() == "mathseminars.org":
+            data["subjects"] = ["math"]
         data["edited_by"] = int(current_user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
