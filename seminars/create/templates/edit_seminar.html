@@ -109,7 +109,7 @@
         <tr></tr>
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
-          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes()" />
+          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" ondisplay="showtimes()" onchange="showtimes()" />
               <option value="0">no fixed schedule</option>
               <option value="7">weekly</option>
               <option value="14">every other week</option>
