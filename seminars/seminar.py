@@ -24,7 +24,6 @@ from lmfdb.logger import critical
 
 combine = datetime.combine
 
-
 class WebSeminar(object):
     def __init__(
         self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False, deleted=False
@@ -98,6 +97,7 @@ class WebSeminar(object):
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
         self.organizer_data = organizer_data
+        self.convert_time_to_times()
 
     def __repr__(self):
         return self.name
@@ -111,6 +111,16 @@ class WebSeminar(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def convert_time_to_times(self):
+        if self.frequency > 1 and self.frequency <= 7:
+            self.frequency = 7
+        elif self.frequncy > 7 and self.frequency <= 14:
+            self.frequency = 14
+        elif self.frequence > 14 and self.frequence <= 21:
+            self.frequency = 21
+        else:
+            self.frequency = None
 
     def visible(self):
         """
