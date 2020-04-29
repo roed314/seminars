@@ -143,10 +143,12 @@ seminar_end_time:
 seminar_times:
   title: Talk times
   contents: |
-    The days and times of the regularly scheduled talks in your series.  Each talk show be assigned a day of the week and a time range specified in 24 hour format.
-    For example 11:30-13:00 indicates a talk that runs from 11:30 A.M. to 1 P.M.
-    Note that you can still create talks in your series at irregular times;
-    this information is used only to configure the initial layout of the scheduling grid.
+    The days and times of the regularly scheduled talks in your series.
+    You can create up to six time slots for talks in your regular schedule; each must include a day of the week and a time range in 24 hour format.
+    For example, enter 11:30-13:00 for a talk that runs from 11:30 A.M. to 1 P.M.
+    <br><br>
+    Note that you can create talks in your series at irregular times whenever you wish.
+    The information entered here is used only to configure the initial layout of the scheduling grid and can be changed as needed.
 timezone:
   title: Timezone
   contents: |
