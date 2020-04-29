@@ -1,4 +1,4 @@
-from flask import redirect, url_for
+from flask import redirect, url_for, render_template
 from flask_login import current_user
 from seminars import db
 from seminars.utils import (
@@ -17,6 +17,7 @@ from seminars.utils import (
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
+from markupsafe import Markup
 from psycopg2.sql import SQL
 import pytz
 from collections import defaultdict
@@ -279,6 +280,11 @@ class WebSeminar(object):
             return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
         else:
             return ""
+
+    def show_knowl_embed(self, daterange):
+        return r'<a knowl="dynamic_show" kwargs="{content}">Embed this schedule</a>'.format(
+            content=Markup.escape(render_template("seminar-embed-code-knowl.html", seminar=self, daterange=daterange)),
+        )
 
     def oneline(
         self,

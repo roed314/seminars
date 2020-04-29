@@ -464,6 +464,14 @@ function makeSubjectSelector(subjOptions, initialSubjects) {
     });
 }
 
+function copySourceOfId(id) {
+  var copyText = document.getElementById(id);
+  copyText.select();
+  document.execCommand("copy");
+  // TODO, report that we copied?
+  console.log("copied!");
+}
+
 function displayCookieBanner() {
     console.log("showing banner");
     $.notify.addStyle('banner', {
