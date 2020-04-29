@@ -115,9 +115,9 @@ class WebSeminar(object):
     def convert_time_to_times(self):
         if self.frequency > 1 and self.frequency <= 7:
             self.frequency = 7
-        elif self.frequncy > 7 and self.frequency <= 14:
+        elif self.frequency > 7 and self.frequency <= 14:
             self.frequency = 14
-        elif self.frequence > 14 and self.frequence <= 21:
+        elif self.frequency > 14 and self.frequenye <= 21:
             self.frequency = 21
         else:
             self.frequency = None
