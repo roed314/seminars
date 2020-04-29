@@ -49,7 +49,7 @@
     var xhr = new XMLHttpRequest();
     xhr.responseType = "document";
 
-    self = this;
+    var self = this;
     xhr.addEventListener("load", function(event) { response = this.responseXML; self.finishEmbed(target, event, response); });
     xhr.addEventListener("error", function(event) { self.transferFailed(target, event); });
     xhr.addEventListener("abort", function(event) { self.transferCanceled(target, event); });
@@ -68,8 +68,14 @@
 
   SeminarEmbedder.prototype.finishEmbed = function(target, event, response) {
 
+    // Success!! Process the response, attach anything we need
+    var embed_el = response.getElementById('embed_content');
+
+    // Works if katex has been loaded. Anything to test?
+    renderMathInElement(embed_el, katexOpts);
+
     target.innerText = "";
-    target.appendChild(response.getElementById('embed_content'));
+    target.appendChild(embed_el);
 
     // Mark it as processed by changing the class
     target.classList.remove("embedding_in_prog_schedule");
@@ -143,25 +149,47 @@
       return;
     };
 
+    var self = this;
 
-    this.addJS("{{ url_for('static', filename='katex-custom.js', _external=True, _scheme=scheme) }}");
-
-    this.addCSS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css",
+    self.addCSS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css",
                 {"integrity": "sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j",
                  "crossOrigin": "anonymous"});
-    this.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js",
+    self.addCSS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.css");
+
+
+    self.addJS("{{ url_for('static', filename='katex-custom.js', _external=True, _scheme=scheme) }}",
+               {"onload":
+                function() {
+                  // After loading our customizations --
+
+    self.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js",
                {"defer": true,
                 "integrity": "sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ",
-                "crossOrigin": "anonymous"});
-    this.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js",
+                "crossOrigin": "anonymous",
+                "onload": function() {
+                  // After loading katex --
+
+    self.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js",
                {"defer": true,
                 "integrity": "sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI",
-                "crossOrigin": "anonymous"});
-    this.addCSS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.css");
-    this.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.min.js",
+                "crossOrigin": "anonymous",
+                // Don't need this.
+                // Must call renderMathInElement each time we add an element
+                // "onload": function() {
+                //   console.log(katexOpts);
+                //   renderMathInElement(document.body, katexOpts);
+                // }
+               });
+    self.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.min.js",
                {"defer": true,
                 "integrity": "sha384-XhWAe6BtVcvEdS3FFKT7Mcft4HJjPqMQvi5V4YhzH9Qxw497jC13TupOEvjoIPy7",
                 "crossOrigin": "anonymous"});
+
+                  // End of onload for loading katex
+                }});
+
+                  // End of onload for our katex customizations
+                }});
 
   }
 
