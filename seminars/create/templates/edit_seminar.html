@@ -103,11 +103,14 @@
           <td><input name="end_time" value="{{ seminar.show_input_time(seminar.end_time) }}" style="width:600px;" placeholder="16:00"/></td>
         </tr>
         {% else %}
+        <script>
+        function showtimes() { if ( doecument.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
+        </script>
         <tr></tr>
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
-          <td><select name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" />
-              <option value="1">irregular -- schedule has no fixed pattern</option>
+          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes()" />
+              <option value="0">no fixed schedule</option>
               <option value="7">weekly</option>
               <option value="14">every other week</option>
               <option value="21">every third week</option>
@@ -118,7 +121,7 @@
             </select></td>
         </tr>
       </table>
-      <table>
+      <table class='times'>
         {% for i in range(2) %}
           <tr>
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} {% endif %}</td>
