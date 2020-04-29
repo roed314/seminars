@@ -336,3 +336,7 @@ hide_talk:
   title: Hide talk
   contents: |
     Check this box to make the talk invisible to all but the organizers.
+filter:
+  title: Filter
+  contents: |
+    
