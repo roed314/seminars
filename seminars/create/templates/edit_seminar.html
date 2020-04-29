@@ -90,29 +90,10 @@
             <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
           </td>
         </tr>
-        {% else %}
-        <tr>
-          <td style="padding-top: 20px">{{ KNOWL("weekday") }}</td>
-          <td style="padding-top: 20px">
-            <select name="weekday" style="width:610px;">
-              <option value=""></option>
-              {% for wkday in weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
-              {% endfor %}
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>{{ KNOWL("frequency", "Frequency (in days)") }}</td>
-          <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:600px;" placeholder="7"/></td>
-        </tr>
-        {% endif %}
-
         <tr>
           <td>{{ KNOWL("per_day") }}</td>
           <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
         </tr>
-        {% if not seminar.is_conference %}
         <tr>
           <td>{{ KNOWL("seminar_start_time") }}</td>
           <td><input name="start_time" value="{{ seminar.show_input_time(seminar.start_time) }}" style="width:600px;" placeholder="15:00"/></td>
@@ -121,7 +102,79 @@
           <td>{{ KNOWL("seminar_end_time") }}</td>
           <td><input name="end_time" value="{{ seminar.show_input_time(seminar.end_time) }}" style="width:600px;" placeholder="16:00"/></td>
         </tr>
+        {% else %}
+        <tr>
+          <td>{{ KNOWL("frequency", "Periodicity") }}</td>
+          <td><select name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" /></td>
+              <option value="0">none</option>
+              <option value="7">weekly</option>
+              <option value="14">biweekly</option>
+              <option value="21">triweekly</option>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <td>
+            <select name="weekday0" style="width:610px;">
+              <option value=""></option>
+              {% for wkday in shortweekdays %}
+                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input name="times0" value="{{ seminar.show_input_time(seminar.times[0]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td>
+            <select name="weekday1" style="width:610px;">
+              <option value=""></option>
+              {% for wkday in shortweekdays %}
+                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input name="times1" value="{{ seminar.show_input_time(seminar.times[1]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td>
+            <select name="weekday2" style="width:610px;">
+              <option value=""></option>
+              {% for wkday in shortweekdays %}
+                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input name="times2" value="{{ seminar.show_input_time(seminar.times[2]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+        </tr>
+        <tr>
+          <td>
+            <select name="weekday3" style="width:610px;">
+              <option value=""></option>
+              {% for wkday in shortweekdays %}
+                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input name="times3" value="{{ seminar.show_input_time(seminar.times[0]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td>
+            <select name="weekday4" style="width:610px;">
+              <option value=""></option>
+              {% for wkday in shortweekdays %}
+                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input name="times4" value="{{ seminar.show_input_time(seminar.times[1]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td>
+            <select name="weekday5" style="width:610px;">
+              <option value=""></option>
+              {% for wkday in shortweekdays %}
+                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input name="times5" value="{{ seminar.show_input_time(seminar.times[2]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+        </tr>
+      </table>
+      <table>
         {% endif %}
+
         <tr>
           <td style="padding-top: 20px">{{ KNOWL("room") }}</td>
           <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building"/></td>
