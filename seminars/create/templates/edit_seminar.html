@@ -295,7 +295,7 @@ $(document).ready(function() {
   {% endfor %}
   $("a.addslot").click(function(e){
     e.preventDefault();
-    x = $('input[name="slots"]')[0].value++;
+    x = document.getElementById('slots').value++;
     console.log("slots =" + x+1);
     $('input[name="'+x+'"]')[0].show();
   });
