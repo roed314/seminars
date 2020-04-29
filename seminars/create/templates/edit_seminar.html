@@ -118,7 +118,7 @@
           <td style="width:150px;"></td>
           <td style="padding-right:0px;">
             <select name="weekday0" style="width:60px;">
-              <option value="">{% if not seminar.weedays[0] %} selseced{% endif %}</option>
+              <option value="">{% if not seminar.weekdays[0] %} selseced{% endif %}</option>
               {% for wkday in short_weekdays %}
                 <option value="{{loop.index0}}"{% if seminar.weekdays[0] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
