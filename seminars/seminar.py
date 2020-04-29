@@ -48,7 +48,7 @@ class WebSeminar(object):
         if self.new:
             ### FIXME ###
             # Temporary fix to ensure seminars created on mathseminars.org are visible on mathseminars.org
-            if topdomain() == "mathseminars.org":
+            if topdomain() != "researchseminars.org":
                 self.subjects = ["math"]
             self.shortname = shortname
             self.display = current_user.is_creator
