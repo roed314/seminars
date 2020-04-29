@@ -143,10 +143,10 @@ console.log('Form is unchanged!');
             </div>
           {% endif %} {# seminar.new #}
           <div class="submenu-nav{% if subsection == 'editsem' %} submenu-active{% endif %}">
-            <a href="{{ url_for('create.edit_seminar', shortname=seminar.shortname) }}">{% if seminar.new %}Create{% else %}Edit{% endif %} {% if subsection in ['edittalk', 'viewtalk'] %}seminar{% else %}properties{% endif %}</a>
+            <a href="{{ url_for('create.edit_seminar', shortname=seminar.shortname) }}">{% if seminar.new %}Create{% else %}Edit{% endif %} {% if subsection in ['edittalk', 'viewtalk'] %}series{% else %}properties{% endif %}</a>
           </div>
           <div class="submenu-nav{% if subsection == 'view' %} submenu-active{% endif %}">
-            <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View seminar</a>
+            <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View series</a>
           </div>
         {% endif %} {# institution/seminar #}
         {% if talk %}

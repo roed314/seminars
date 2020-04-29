@@ -350,9 +350,9 @@ function toggleFilterView(id) {
     for (i=0; i<filter_menus.length; i++) {
         var elt = $("#"+filter_menus[i]+"-filter-menu");
         if (ftype == filter_menus[i]) {
-            elt.slideToggle(300);
+            elt.slideToggle(150);
         } else {
-            elt.slideUp(300);
+            elt.slideUp(150);
         }
     }
 }

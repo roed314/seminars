@@ -13,6 +13,7 @@ from seminars.utils import (
     adapt_datetime,
     toggle,
     make_links,
+    topdomain,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -133,6 +134,9 @@ class WebSeminar(object):
         assert data.get("shortname")
         topics = self.topics if self.topics else []
         data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
+        ### if we are saving a seminar on mathseminars.org with no subjects set, set the subject to math so that the sminar will be visible
+        if not data["subjects"] and topdomain() == "mathseminars.org":
+            data["subjects"] = ["math"]
         data["edited_by"] = int(current_user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
