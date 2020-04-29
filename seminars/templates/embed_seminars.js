@@ -143,6 +143,9 @@
       return;
     };
 
+
+    this.addJS("{{ url_for('static', filename='katex-custom.js', _external=True, _scheme=scheme) }}");
+
     this.addCSS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css",
                 {"integrity": "sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j",
                  "crossOrigin": "anonymous"});
