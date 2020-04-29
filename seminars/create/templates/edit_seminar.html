@@ -110,14 +110,10 @@
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
           <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false" />
-              <option value="0">no fixed schedule</option>
-              <option value="7">weekly</option>
-              <option value="14">every other week</option>
-              <option value="21">every third week</option>
-              <option value="-1">first week of each month</option>
-              <option value="-2">second week of each month</option>
-              <option value="-3">third week of each month</option>
-              <option value="-4">fourth week of each month</option>
+              <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
+              <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
+              <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
+              <option value="21" {% if seminar.frequency == 21 %}selected{% endif %}>every third week</option>
             </select></td>
         </tr>
       </table>
