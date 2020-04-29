@@ -118,9 +118,9 @@
           <td style="width:150px;"></td>
           <td style="padding-right:0px;">
             <select name="weekday0" style="width:60px;">
-              <option value=""></option>
+              <option value="">{% if not seminar.weedays[0] %} selseced{% endif %}</option>
               {% for wkday in short_weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+                <option value="{{loop.index0}}"{% if seminar.weekdays[0] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
@@ -129,7 +129,7 @@
             <select name="weekday1" style="width:60px;">
               <option value=""></option>
               {% for wkday in short_weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+                <option value="{{loop.index0}}"{% if seminar.weekdays[1] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
@@ -138,7 +138,7 @@
             <select name="weekday2" style="width:60px;">
               <option value=""></option>
               {% for wkday in short_weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+                <option value="{{loop.index0}}"{% if seminar.weekdays[2] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
@@ -150,7 +150,7 @@
             <select name="weekday3" style="width:60px;">
               <option value=""></option>
               {% for wkday in short_weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+                <option value="{{loop.index0}}"{% if seminar.weekdays[3] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
@@ -159,7 +159,7 @@
             <select name="weekday4" style="width:60px;">
               <option value=""></option>
               {% for wkday in short_weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+                <option value="{{loop.index0}}"{% if seminar.weekdays[4] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
@@ -168,7 +168,7 @@
             <select name="weekday5" style="width:60px;">
               <option value=""></option>
               {% for wkday in short_weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+                <option value="{{loop.index0}}"{% if seminar.weekdays[5] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
@@ -179,7 +179,7 @@
         {% endif %}
 
         <tr>
-          <td style="padding-top: 20px">{{ KNOWL("room") }}</td>
+          <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
           <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building"/></td>
         </tr>
         <tr>
