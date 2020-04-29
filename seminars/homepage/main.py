@@ -640,7 +640,7 @@ def embed_seminar_js():
     <div class="embeddable_schedule" shortname="LATeN" daterange="April 23, 2020 - April 29, 2020"></div>
     <div class="embeddable_schedule" shortname="LATeN" daterange="past"></div>
     <div class="embeddable_schedule" shortname="LATeN" daterange="future"></div>
-    <script src="http://localhost:37778/embed_seminars.js"></script>
+    <script src="http://localhost:37778/embed_seminars.js" onload="seminarEmbedder.initialize({'addCSS': true});"></script>
     """
     resp = make_response(render_template('embed_seminars.js', scheme=request.scheme))
     resp.headers['Content-type'] = 'text/javascript'

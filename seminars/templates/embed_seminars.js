@@ -10,6 +10,7 @@
   SeminarEmbedder.prototype = {
     initialized: false,
 
+    katexAdded: false,
   };
 
   //////////////////////////////
@@ -97,13 +98,90 @@
 
   //////////////////////////////
 
+  SeminarEmbedder.prototype.addCSS = function(href, opts) {
+
+    var head = document.head;
+    var link = document.createElement("link");
+
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = href;
+
+    if (opts) {
+      for (var prop in opts) {
+        link[prop] = opts[prop];
+      };
+    };
+
+    head.appendChild(link);
+  }
+
+  SeminarEmbedder.prototype.addJS = function(src, opts) {
+
+    var head = document.head;
+    var script = document.createElement("script");
+
+    script.type = "text/javascript";
+    script.src = src;
+
+    if (opts) {
+      for (var prop in opts) {
+        script[prop] = opts[prop];
+      };
+    };
+
+    head.appendChild(script);
+  }
+
+  SeminarEmbedder.prototype.addKatex = function() {
+    if (this.katexAdded)
+      return;
+
+    if ( window.hasOwnProperty('katex') ) {
+      // Assume whoever wrote the embedding page knows what they're doing
+      this.katexAdded = true;
+      return;
+    };
+
+    this.addCSS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css",
+                {"integrity": "sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j",
+                 "crossOrigin": "anonymous"});
+    this.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js",
+               {"defer": true,
+                "integrity": "sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ",
+                "crossOrigin": "anonymous"});
+    this.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js",
+               {"defer": true,
+                "integrity": "sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI",
+                "crossOrigin": "anonymous"});
+    this.addCSS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.css");
+    this.addJS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.min.js",
+               {"defer": true,
+                "integrity": "sha384-XhWAe6BtVcvEdS3FFKT7Mcft4HJjPqMQvi5V4YhzH9Qxw497jC13TupOEvjoIPy7",
+                "crossOrigin": "anonymous"});
+
+  }
+
+  SeminarEmbedder.prototype.initialize = function(opts) {
+    if (this.initialized)
+      return;
+
+    if (opts && opts.hasOwnProperty('addCSS') && opts['addCSS']) {
+      this.addCSS("{{ url_for('css', _external=True, _scheme=scheme) }}");
+    };
+
+    // addKatex is idempotent
+    this.addKatex();
+
+    this.initialized = true;
+
+    this.processEmbeds();
+  }
+
+  //////////////////////////////
+
   var seminarEmbedder = new SeminarEmbedder();
 
   root['seminarEmbedder'] = seminarEmbedder;
-
-  document.addEventListener('DOMContentLoaded', (event) => {
-    seminarEmbedder.initialized = true;
-    seminarEmbedder.processEmbeds();
-  });
 
 })(this);
