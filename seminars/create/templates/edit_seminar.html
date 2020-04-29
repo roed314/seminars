@@ -119,7 +119,7 @@
           <tr>
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} {% endif %}</td>
           {% for j in range(3) %}
-          <td style="margin-right:0px;">
+          <td style="padding-right:0px; margin-right:0px;">
             <select name="weekday0" style="width:40px;">
               <option value="" {% if not seminar.weekdays[0] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
@@ -127,7 +127,9 @@
               {% endfor %}
             </select>
           </td>
-          <td><input name="times0" value="{{ seminar.show_input_time(seminar.start_times[0]) }}" style="width:90px; margin-left:0px; margin-right:20px;" placeholder="15:00-16:00"/></td>
+          <td style="padding-left:0px; margin-left:0px; margin-right:20px;">
+            <input name="times0" value="{{ seminar.show_input_time(seminar.start_times[0]) }}" style="width:90px;" placeholder="15:00-16:00"/>
+          </td>
           {% endfor %}
         {% endfor %}
       </table>
