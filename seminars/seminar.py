@@ -119,7 +119,7 @@ class WebSeminar(object):
             self.frequency = 7
         elif self.frequency > 7 and self.frequency <= 14:
             self.frequency = 14
-        elif self.frequency > 14 and self.frequenye <= 21:
+        elif self.frequency > 14 and self.frequency <= 21:
             self.frequency = 21
         else:
             self.frequency = None
