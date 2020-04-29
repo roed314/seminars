@@ -14,6 +14,7 @@ from seminars.utils import (
     make_links,
     topic_dict,
     languages_dict,
+    topdomain,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
