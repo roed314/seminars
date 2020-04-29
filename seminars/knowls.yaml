@@ -141,10 +141,9 @@ seminar_end_time:
   contents: |
     The time of day your series usually ends, specified in 24 hour format (so 4 or 4:00 is 4 A.M.; use 16:00 for 4 P.M.)
 seminar_times:
-  title: Talk times
+  title: Time slots
   contents: |
-    The days and times of the regularly scheduled talks in your series.
-    You can create up to six time slots for talks in your regular schedule; each must include a day of the week and a time range in 24 hour format.
+    The days and times of the regularly scheduled times for talks in your series; each must time slot must include a day of the week and a time range in 24 hour format.
     For example, enter 11:30-13:00 for a talk that runs from 11:30 A.M. to 1 P.M.
     <br><br>
     Note that you can create talks in your series at irregular times whenever you wish.
