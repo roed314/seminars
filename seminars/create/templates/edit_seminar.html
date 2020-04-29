@@ -103,6 +103,7 @@
           <td><input name="end_time" value="{{ seminar.show_input_time(seminar.end_time) }}" style="width:600px;" placeholder="16:00"/></td>
         </tr>
         {% else %}
+        <tr></tr>
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
           <td><select name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" />
@@ -194,7 +195,7 @@
         <tr>
           <td>{{ KNOWL("live_link") }}</td>
           <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
-          <td class="forminfo" />If link varies, enter "See comments" and leave instructions below in Comments.</td>
+          <td class="forminfo" />If link varies, enter "See comments" and put instructions in Comments.</td>
         </tr>
         <tr>
           <td>{{ KNOWL("access") }}</td>
