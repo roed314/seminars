@@ -123,8 +123,8 @@
           <tr>
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <a class="addslot" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a>{% endif %}</td>
           {% for j in range(3) %}
-          <td style="padding-right:1px; margin-right:0px;" style="display:none;">
-            <select name="weekday{{3*i+j}}"">
+          <td style="padding-right:1px; margin-right:0px;">
+            <select name="weekday{{3*i+j}}" style="display:none;">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
                 <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
@@ -132,7 +132,7 @@
             </select>
           </td>
           <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-            <input name="times{{3*i+j}}" value="{{ seminar.show_input_time(seminar.start_times[3*i+j]) }}" style="width:90px;" placeholder="15:00-16:00"/>
+            <input name="times{{3*i+j}}" value="{{ seminar.show_input_time(seminar.start_times[3*i+j]) }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
           </td>
           {% endfor %}
         {% endfor %}
@@ -296,7 +296,7 @@ $(document).ready(function() {
   $("a.addslot").click(function(e){
     e.preventDefault();
     var x = document.getElementById('slots').value;
-    x = '' + (x.parseint()+1)
+    x = '' + parseint(x)+1;
     console.log("slots =" + x);
     $('input[name="'+x+'"]')[0].show();
   });
