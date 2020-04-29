@@ -123,7 +123,7 @@ class WebSeminar(object):
             self.frequency = 21
         else:
             self.frequency = None
-        if self.time_slots is None
+        if self.time_slots is None:
             self.time_slots = []
 
 
