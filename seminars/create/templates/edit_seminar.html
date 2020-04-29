@@ -305,11 +305,11 @@ $(document).ready(function() {
   );
   var instSelector = makeInstitutionSelector(
     instOptions,
-    {{ seminar.institutions | safe }}
+    {{ seminar.institutions | safe }},
   );
   var langSelector = makeLanguageSelector(
     langOptions,
-    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %}),
+    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
   );
 });
 
