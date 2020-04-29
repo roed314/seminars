@@ -120,7 +120,7 @@
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
         {% for i in range(1) %}
           <tr>
-          <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <a class="addslot" href="#"><i style="color:green;" class="fas fa-plus"></i></a>{% endif %}</td>
+          <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <a class="addslot" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a>{% endif %}</td>
           {% for j in range(1) %}
           <td style="padding-right:1px; margin-right:0px;">
             <select name="weekday{{3*i+j}}"">
@@ -292,6 +292,10 @@ $(document).ready(function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
+  $("a.addslot").click(function(e){
+    e.preventDefault();
+    var
+  });
   var topicSelector = makeTopicSelector(
     topicOptions,
     {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
