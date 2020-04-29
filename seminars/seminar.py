@@ -124,8 +124,10 @@ class WebSeminar(object):
         else:
             self.frequency = None
         if self.time_slots is None:
-            self.time_slots = []
-
+            if self.start_time and self.end_time:
+                self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.edn_time.strftime("%H-%M")]
+            else:
+                self.time_slots = []
 
     def visible(self):
         """
