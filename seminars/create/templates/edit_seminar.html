@@ -296,9 +296,11 @@ $(document).ready(function() {
   $("a.addslot").click(function(e){
     e.preventDefault();
     var x = document.getElementById('slots').value;
-    x = '' + parseint(x)+1;
+    x = '' + parseInt(x)+1;
+    document.getElementById('slots').value = x;
     console.log("slots =" + x);
-    $('input[name="'+x+'"]')[0].show();
+    $('input[name=weekday"'+x+'"]')[0].show();
+    $('input[name=times"'+x+'"]')[0].show();
   });
   var topicSelector = makeTopicSelector(
     topicOptions,
@@ -312,6 +314,12 @@ $(document).ready(function() {
     langOptions,
     {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
   );
+  var x = parseInt(document.getElementById('slots').value);
+  if ( x == 0 ) x = 1;
+  for (i = 0 ; i < x ; i++ ) {
+    $('input[name=weekday"'+x+'"]')[0].show();
+    $('input[name=times"'+x+'"]')[0].show();
+  }
 });
 
 
