@@ -106,7 +106,7 @@
         <script>
         function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
         </script>
-        <input id="slots" style="display:none;" value="{{ len(seminar.time_slots) }}">
+        <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
         <tr></tr>
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
