@@ -46,7 +46,7 @@
         <td align="center">{{ KNOWL("speaker_email") }}</td>
         <td align="center">{{ KNOWL("speaker_affiliation") }}</td>
         <td align="center">{{ KNOWL("title") }}</td>
-        <th align="center">{{ KNOWL("hidden") }}</td>
+        <th align="center" style="padding-left:0px;">{{ KNOWL("hidden") }}</td>
         <td></td>
       </tr>
     </thead>
@@ -108,7 +108,7 @@
       <td class="titleinp">
         <input name="title{{vars.i}}" value="{{ talk.title | blanknone }}" />
       </td>
-      <td>
+      <td align="center" style="padding-right:0px;">
         <input type="checkbox" name="hidden{{vars.i}}" value="yes"{% if talk.hidden %} checked {% endif %} />
       </td>
       <td>
