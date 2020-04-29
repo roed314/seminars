@@ -106,7 +106,7 @@
         <script>
         function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
         </script>
-        <input id="slots" style="display:none;" value="{{ seminar.per_day }}">
+        <input id="slots" style="display:none;" value="{{ len(seminar.time_slots) }}">
         <tr></tr>
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
@@ -123,7 +123,7 @@
           <tr>
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <a class="addslot" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a>{% endif %}</td>
           {% for j in range(3) %}
-          <td style="padding-right:1px; margin-right:0px;" {% if 3*i+j >= seminar.per_day %}style="display:none;"{% endif %}>
+          <td style="padding-right:1px; margin-right:0px;" {% if 3*i+j > 0 and 3*i+j >= len(seminar.time_slots) %}style="display:none;"{% endif %}>
             <select name="weekday{{3*i+j}}"">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
@@ -305,11 +305,12 @@ $(document).ready(function() {
   );
   var instSelector = makeInstitutionSelector(
     instOptions,
-    {{ seminar.institutions | safe }},
+    {{ seminar.institutions | safe }}
   );
   var langSelector = makeLanguageSelector(
     langOptions,
-    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %});
+    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %}),
+  );
 });
 
 

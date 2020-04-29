@@ -123,8 +123,8 @@ class WebSeminar(object):
             self.frequency = 21
         else:
             self.frequency = None
-        if self.per_day is None:
-            self.per_day = 0
+        if self.time_slots is None
+            self.time_slots = []
 
 
     def visible(self):
