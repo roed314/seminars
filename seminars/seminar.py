@@ -13,6 +13,7 @@ from seminars.utils import (
     adapt_datetime,
     toggle,
     make_links,
+    topdomain,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -133,6 +134,9 @@ class WebSeminar(object):
         assert data.get("shortname")
         topics = self.topics if self.topics else []
         data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
+        ### if we are saving a seminar on mathseminars.org with no subjects set, set the subject to math so that the sminar will be visible
+        if not data["subjects"] and topdomain() == "mathseminars.org":
+            data["subjects"] = ["math"]
         data["edited_by"] = int(current_user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
@@ -534,7 +538,7 @@ def next_talks(query=None):
     A dictionary with keys the seminar_ids and values datetimes (either the next talk in that seminar, or datetime.max if no talk scheduled so that they sort at the end.
     """
     if query is None:
-        query = {"start_time": {"$gte": datetime.now(pytz.UTC)}}
+        query = {"end_time": {"$gte": datetime.now(pytz.UTC)}}
     ans = defaultdict(lambda: pytz.UTC.localize(datetime.max))
     from seminars.talk import _counter as talks_counter
     _selecter = SQL("""

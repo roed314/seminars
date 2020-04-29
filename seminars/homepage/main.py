@@ -497,7 +497,7 @@ def search():
     talks = [talk for talk in talks if talk.searchable()]
     info["talk_results"] = talks
     return render_template(
-        "search.html", title="Search series", info=info, section="Search", bread=None,
+        "search.html", title="Search", info=info, section="Search", bread=None,
     )
 
 
@@ -538,7 +538,7 @@ def show_seminar(shortname):
         section = None
     return render_template(
         "seminar.html",
-        title="View seminar",
+        title="View series",
         future=future,
         past=past,
         seminar=seminar,
@@ -694,7 +694,7 @@ def policies():
 
 @app.route("/faq")
 def faq():
-    return render_template("faq.html", title="FAQ", section="Info", subsection="faq")
+    return render_template("faq.html", title="Frequently asked questions", section="Info", subsection="faq")
 
 
 # @app.route("/<topic>")

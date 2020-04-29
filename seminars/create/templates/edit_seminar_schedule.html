@@ -7,9 +7,10 @@
   <p style="padding: 0x; margin: 0px 0px 25px 0px;"> {{ seminar.show_homepage(newtab=True) | safe }} </p>
 {% endif %}
 
-<p> To add talks, enter Speaker (and optionally edit the other fields) in one or more rows of the table; and then click any button or "Details" link.</p>
+<p> To add talks, enter Speaker (and optionally edit the other fields) in one or more rows of the table; 
+  then click any button or "Details" link.</p>
 
-<p>All times are shown in the seminar's time zone, {{ seminar.timezone }}.</p>
+<p>All times are shown in the series' time zone, {{ seminar.timezone }}.</p>
 </div>
 
 <form action="{{ url_for('.save_seminar_schedule') }}" method="POST">
@@ -45,7 +46,7 @@
         <td align="center">{{ KNOWL("speaker_email") }}</td>
         <td align="center">{{ KNOWL("speaker_affiliation") }}</td>
         <td align="center">{{ KNOWL("title") }}</td>
-        <th align="center">{{ KNOWL("hidden") }}</td>
+        <td align="left" style="padding-left:0px;">{{ KNOWL("hidden") }}</td>
         <td></td>
       </tr>
     </thead>
@@ -54,7 +55,7 @@
     {% for talk in by_date[date] %}
     <tr>
       <td class="date">
-        <input name="date{{vars.i}}" value="{% if raw_data['date%s'%vars['i']] %}{{ raw_data['date%s'%vars['i']] }}{% else %}{{ date.strftime('%a %b %-d') }}{% endif %}" />
+        <input style="width: 96px;" name="date{{vars.i}}" value="{% if raw_data['date%s'%vars['i']] %}{{ raw_data['date%s'%vars['i']] }}{% else %}{{ date.strftime('%a %b %-d') }}{% endif %}" />
       </td>
       {% if talk is none %}
       <td class="timerange">
@@ -107,10 +108,10 @@
       <td class="titleinp">
         <input name="title{{vars.i}}" value="{{ talk.title | blanknone }}" />
       </td>
-      <td>
+      <td align="left" style="padding-right:0px;">
         <input type="checkbox" name="hidden{{vars.i}}" value="yes"{% if talk.hidden %} checked {% endif %} />
       </td>
-      <td>
+      <td align="left">
         {{ talk.details_link() | safe }}
       </td>
       <input type="hidden" name="seminar_ctr{{vars.i}}" value="{{ talk.seminar_ctr }}" />

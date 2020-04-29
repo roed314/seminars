@@ -14,6 +14,7 @@ from seminars.utils import (
     make_links,
     topic_dict,
     languages_dict,
+    topdomain,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -124,6 +125,8 @@ class WebTalk(object):
         assert data.get("seminar_id") and data.get("seminar_ctr")
         topics = self.topics if self.topics else []
         data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
+        if not data["subjects"] and topdomain() == "mathseminars.org":
+            data["subjects"] = ["math"]
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):
@@ -452,12 +455,14 @@ class WebTalk(object):
         }
         email_to = self.speaker_email if self.speaker_email else ""
         return """
-<p>
+<p style="margin-bottom: 0px;">
  To let someone edit this page, send them this link:
-<span class="noclick">{link}</span></br>
-<button onClick="window.open('mailto:{email_to}?{msg}')">
+</p>
+<p style="margin-left: 20px; margin-top: 0px;">
+<span class="noclick">{link}</span>
+<button onClick="window.open('mailto:{email_to}?{msg}')" style="margin-left:20px;">
 Email link to speaker
-</button>""".format(
+</button></p>""".format(
             link=self.speaker_link(), email_to=email_to, msg=urlencode(data, quote_via=quote),
         )
 
