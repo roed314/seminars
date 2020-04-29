@@ -56,6 +56,17 @@
           <td><span id="language_selector" style="width:600px;"></span></td>
         </tr>
         <tr>
+          <td>{{ ASTKNOWL("timezone") }}</td>
+          <td>
+            <select name="timezone" style="width:610px;">
+              {% for tz, disp in timezones %}
+                <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td class="forminfo" />Be sure to set this correctly.</td>
+        </tr>
+        <tr>
           <td>{{KNOWL("visibility")}}</td>
           <td>
             <select name="visibility" style="width:610px;">
@@ -100,17 +111,6 @@
         <tr>
           <td>{{ KNOWL("per_day") }}</td>
           <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
-        </tr>
-        <tr>
-          <td>{{ ASTKNOWL("timezone") }}</td>
-          <td>
-            <select name="timezone" style="width:610px;">
-              {% for tz, disp in timezones %}
-                <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
-              {% endfor %}
-            </select>
-          </td>
-          <td class="forminfo" />Be sure to set this correctly.</td>
         </tr>
         {% if not seminar.is_conference %}
         <tr>
