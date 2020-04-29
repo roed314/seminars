@@ -580,6 +580,18 @@ def show_seminar_raw(shortname):
         "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
     )
 
+@app.route("/seminar/<shortname>/bare")
+def show_seminar_bare(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        return render_template("404.html", title="Seminar not found")
+    talks = talks_search_api(shortname)
+    resp = make_response(render_template("seminar_bare.html",
+                                         title=seminar.name, talks=talks,
+                                         seminar=seminar))
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
 @app.route("/seminar/<shortname>/json")
 def show_seminar_json(shortname):
     seminar = seminars_lucky({"shortname": shortname})
@@ -621,6 +633,19 @@ def show_seminar_js():
     resp.headers['Content-type'] = 'text/javascript'
     return resp
 
+@app.route("/embed_seminars.js")
+def embed_seminar_js():
+    """
+    Usage example:
+    <div class="embeddable_schedule" shortname="LATeN" daterange="April 23, 2020 - April 29, 2020"></div>
+    <div class="embeddable_schedule" shortname="LATeN" daterange="past"></div>
+    <div class="embeddable_schedule" shortname="LATeN" daterange="future"></div>
+    <script src="http://localhost:37778/embed_seminars.js"></script>
+    """
+    resp = make_response(render_template('embed_seminars.js', scheme=request.scheme))
+    resp.headers['Content-type'] = 'text/javascript'
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 @app.route("/talk/<semid>/<int:talkid>/")
 def show_talk(semid, talkid):
