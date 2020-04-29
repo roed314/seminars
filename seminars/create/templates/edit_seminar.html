@@ -107,10 +107,14 @@
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
           <td><select name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" />
-              <option value="0">none</option>
+              <option value="1">irregular -- schedule has no fixed pattern</option>
               <option value="7">weekly</option>
-              <option value="14">biweekly</option>
-              <option value="21">triweekly</option>
+              <option value="14">every other week</option>
+              <option value="21">every third week</option>
+              <option value="-1">first week of each month</option>
+              <option value="-2">second week of each month</option>
+              <option value="-3">third week of each month</option>
+              <option value="-4">fourth week of each month</option>
             </select></td>
         </tr>
       </table>
@@ -120,15 +124,15 @@
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} {% endif %}</td>
           {% for j in range(3) %}
           <td style="padding-right:1px; margin-right:0px;">
-            <select name="weekday0"">
-              <option value="" {% if not seminar.weekdays[0] %} selected{% endif %}></option>
+            <select name="weekday{{3*i+j}}"">
+              <option value="" {% if seminar.weekdays[3*i+j] is None %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekdays[0] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+                <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
           <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-            <input name="times0" value="{{ seminar.show_input_time(seminar.start_times[0]) }}" style="width:90px;" placeholder="15:00-16:00"/>
+            <input name="times{{3*i+j}}" value="{{ seminar.show_input_time(seminar.start_times[3*i+j]) }}" style="width:90px;" placeholder="15:00-16:00"/>
           </td>
           {% endfor %}
         {% endfor %}
