@@ -123,7 +123,7 @@
           <tr>
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <a class="addslot" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a>{% endif %}</td>
           {% for j in range(3) %}
-          <td style="padding-right:1px; margin-right:0px;" {% if 3*i+j > 0 %}style="display:none;"{% endif %}>
+          <td style="padding-right:1px; margin-right:0px;" style="display:none;">
             <select name="weekday{{3*i+j}}"">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
@@ -296,7 +296,7 @@ $(document).ready(function() {
   $("a.addslot").click(function(e){
     e.preventDefault();
     var x = document.getElementById('slots').value;
-    x = '' + (x.parsint()+1)
+    x = '' + (x.parseint()+1)
     console.log("slots =" + x);
     $('input[name="'+x+'"]')[0].show();
   });
