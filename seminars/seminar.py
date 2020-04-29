@@ -43,6 +43,8 @@ class WebSeminar(object):
                 data["timesone"] = str(current_user.tz)
         self.new = data is None
         self.deleted = False
+        if self.per_day is None:
+            self.per_day = 0
         if self.new:
             self.shortname = shortname
             self.display = current_user.is_creator
