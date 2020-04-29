@@ -55,7 +55,7 @@
     {% for talk in by_date[date] %}
     <tr>
       <td class="date">
-        <input style="width: 90px;" name="date{{vars.i}}" value="{% if raw_data['date%s'%vars['i']] %}{{ raw_data['date%s'%vars['i']] }}{% else %}{{ date.strftime('%a %b %-d') }}{% endif %}" />
+        <input style="width: 96px;" name="date{{vars.i}}" value="{% if raw_data['date%s'%vars['i']] %}{{ raw_data['date%s'%vars['i']] }}{% else %}{{ date.strftime('%a %b %-d') }}{% endif %}" />
       </td>
       {% if talk is none %}
       <td class="timerange">
