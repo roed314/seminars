@@ -118,10 +118,10 @@
         </tr>
       </table>
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
-        {% for i in range(2) %}
+        {% for i in range(1) %}
           <tr>
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <i style="color:green;" class="fas fa-plus"></i>{% endif %}</td>
-          {% for j in range(3) %}
+          {% for j in range(1) %}
           <td style="padding-right:1px; margin-right:0px;">
             <select name="weekday{{3*i+j}}"">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
