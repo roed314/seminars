@@ -88,7 +88,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
     {% endfor %}
   </table>
   <div>
-    {{ seminar.show_knowl_embed(daterange="future")| safe }}
+    {{ seminar.show_knowl_embed(daterange="future", uniqstr="1")| safe }}
   </div>
   {% endif %}
 </div>
@@ -107,7 +107,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
     {% endfor %}
   </table>
   <div>
-    {{ seminar.show_knowl_embed(daterange="past")| safe }}
+    {{ seminar.show_knowl_embed(daterange="past", uniqstr="2")| safe }}
   </div>
 </div>
 {% endif %}

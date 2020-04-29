@@ -4,10 +4,10 @@ the &lt;script&gt; tag only needs to be included once.
 Use <code>'addCSS': true</code> for our styling, or
 <code>'addCSS': false</code> to apply your own.
 </div>
-<textarea cols="69" rows="5" readonly id="embed-{{ seminar.shortname | safe }}">
+<textarea cols="69" rows="5" readonly id="embed-{{ seminar.shortname | safe }}-{{ uniqstr  | safe }}">
 <script src="{{ url_for('embed_seminar_js', _external=True) | safe }}" onload="seminarEmbedder.initialize({'addCSS': true});"></script>
 <div class="embeddable_schedule" shortname="{{ seminar.shortname | safe }}" daterange="{{ daterange | safe }}"></div>
 </textarea>
 <div>
-<a onclick="copySourceOfId('embed-{{ seminar.shortname | safe }}')">Click to copy code to clipboard</a>
+<a onclick="copySourceOfId('embed-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}')">Click to copy code to clipboard</a>
 </div>

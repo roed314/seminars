@@ -281,9 +281,9 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_knowl_embed(self, daterange):
+    def show_knowl_embed(self, daterange, uniqstr='0'):
         return r'<a knowl="dynamic_show" kwargs="{content}">Embed this schedule</a>'.format(
-            content=Markup.escape(render_template("seminar-embed-code-knowl.html", seminar=self, daterange=daterange)),
+            content=Markup.escape(render_template("seminar-embed-code-knowl.html", seminar=self, daterange=daterange, uniqstr=uniqstr)),
         )
 
     def oneline(
