@@ -14,7 +14,12 @@ function refresh_preview() {
   var $content = $("#view-abstract");
   var $refresh = $("#refresh-view");
   $title.html("Processing ...");
-  $content.html($kcontent.val());
+  var pkcontent = '';
+  var pkcontent = "";
+  $kcontent.val().split('\n\n').forEach(
+    paragraph => pkcontent += "<p>" + paragraph + "</p>"
+  );
+  $content.html(pkcontent);
   renderMathInElement($content.get(0), katexOpts);
   refresh_id = null;
   // once rendering is done.

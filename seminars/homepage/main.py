@@ -538,7 +538,7 @@ def show_seminar(shortname):
         section = None
     return render_template(
         "seminar.html",
-        title="View seminar",
+        title="View series",
         future=future,
         past=past,
         seminar=seminar,

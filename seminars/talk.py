@@ -14,6 +14,7 @@ from seminars.utils import (
     make_links,
     topic_dict,
     languages_dict,
+    topdomain,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -124,6 +125,8 @@ class WebTalk(object):
         assert data.get("seminar_id") and data.get("seminar_ctr")
         topics = self.topics if self.topics else []
         data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
+        if not data["subjects"] and topdomain() == "mathseminars.org":
+            data["subjects"] = ["math"]
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):
@@ -311,7 +314,7 @@ class WebTalk(object):
             success = self.live_link
         else:
             if self.live_link.startswith("http"):
-                success = 'Access <a href="%s">online</a>.' % self.live_link
+                success = 'Livestream access: <a href="%s">online</a>.' % self.live_link
             else:
                 success = "Livestream access: %s" % self.live_link
         if self.access == "open":
