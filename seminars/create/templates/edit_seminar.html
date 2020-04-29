@@ -106,7 +106,7 @@
         <script>
         function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
         </script>
-        <input id="slots" style="display:none;" value="{{ seminar.slots }}">
+        <input id="slots" style="display:none;" value="{{ seminar.per_day }}">
         <tr></tr>
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
@@ -119,11 +119,11 @@
         </tr>
       </table>
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
-        {% for i in range(seminar.slots // 3) %}
+        {% for i in range(2) %}
           <tr>
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <a class="addslot" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a>{% endif %}</td>
           {% for j in range(3) %}
-          <td style="padding-right:1px; margin-right:0px;" {% if 3*i+j >= seminar.slots %}style="display:none;"{% endif %}>
+          <td style="padding-right:1px; margin-right:0px;" {% if 3*i+j >= seminar.per_day %}style="display:none;"{% endif %}>
             <select name="weekday{{3*i+j}}"">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
@@ -271,7 +271,7 @@ const langOptions = [
 ];
 
 $(document).ready(function() {
-  var slots = {{ seminar.slots }};
+  var slots = {{ seminar.per_day }};
       function swapv(a,b) {
         var x = $('input[name="'+a+'"]')[0].value;
         $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
