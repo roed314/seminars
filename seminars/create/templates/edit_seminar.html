@@ -127,7 +127,9 @@
                 {% endfor %}
               </select>
             </td>
-            <td><input name="times{{3*i+j}}" value="{{ seminar.show_input_time(seminar.start_times[{{3*i+j}}]) }}" style="width:90px; padding-left:0px;{% if j < 2 %} padding-right:14px;{% endif %}" placeholder="15:00-16:00"/></td>
+            <td></td>
+<!--            <td><input name="times{{3*i+j}}" value="{{ seminar.show_input_time(seminar.start_times[{{3*i+j}}]) }}" style="width:90px; padding-left:0px;{% if j < 2 %} padding-right:14px;{% endif %}" placeholder="15:00-16:00"/></td>
+-->
           {% endfor %}
           </tr>
         {% endfor %}
