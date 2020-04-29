@@ -342,7 +342,7 @@ filter:
     Each filter restricts the talk list, 
     and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.
     <br><br>
-    Start by clicking the word <u>subject</u>, which sets the subject filter and opens the subject menu.  
+    Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.  
     Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed, 
     but each time you click on a subject to add it, talks in that subject will appear.  
     Click <u>subject</u> again to close the subject menu.  
