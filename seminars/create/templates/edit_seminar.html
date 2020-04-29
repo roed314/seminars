@@ -271,7 +271,6 @@ const langOptions = [
 ];
 
 $(document).ready(function() {
-  var slots = {{ seminar.per_day }};
       function swapv(a,b) {
         var x = $('input[name="'+a+'"]')[0].value;
         $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
@@ -297,8 +296,8 @@ $(document).ready(function() {
   $("a.addslot").click(function(e){
     e.preventDefault();
     x = $('input[name="slots"]')[0].value++;
-    $('input[name="+x+'"]'.show()
-    console.log("slots =" + x)
+    $('input[name="+x+'"]'.show();
+    console.log("slots =" + x);
   });
   var topicSelector = makeTopicSelector(
     topicOptions,
