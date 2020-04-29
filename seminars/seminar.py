@@ -113,6 +113,8 @@ class WebSeminar(object):
         return not (self == other)
 
     def convert_time_to_times(self):
+        if self.frequency is None:
+            return
         if self.frequency > 1 and self.frequency <= 7:
             self.frequency = 7
         elif self.frequency > 7 and self.frequency <= 14:
