@@ -342,18 +342,18 @@ filter:
     Each filter restricts the talk list, 
     and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.
     <br><br>
-    Start by clicking the word "subject", which sets the subject filter and opens the subject menu.  
+    Start by clicking the word <u>subject</u>, which sets the subject filter and opens the subject menu.  
     Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed, 
     but each time you click on a subject to add it, talks in that subject will appear.  
-    Click the word "subject" again to close the subject menu.  
+    Click <u>subject</u> again to close the subject menu.  
     Toggling the subject filter on and off now switches between displaying your selected subjects' talks and all talks.
     <br><br>
-    Next click "topic" to restrict to selected topics within each subject, 
-    and click "language" to restrict the list to the languages you understand.  
+    Next click <u>topic</u> to restrict to selected topics within each subject, 
+    and click <u>language</u> to restrict to talks in the languages you understand.  
     If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.
     <br><br>
     <i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
       If you open the topics menu and select optics (a topic within physics), then no optics talks will appear, 
       because the subject filter is hiding <i>all</i> physics talks.
     <br><br>
-    To close this box, click the word "Filter" again.
+    To close this box, click the word <u>Filter</u> again.
