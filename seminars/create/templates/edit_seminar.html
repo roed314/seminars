@@ -105,15 +105,17 @@
         {% else %}
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
-          <td><select name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" /></td>
+          <td><select name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" />
               <option value="0">none</option>
               <option value="7">weekly</option>
               <option value="14">biweekly</option>
               <option value="21">triweekly</option>
+            </select></td>
         </tr>
       </table>
       <table>
         <tr>
+          <td
           <td>
             <select name="weekday0" style="width:60px;">
               <option value=""></option>
@@ -122,7 +124,7 @@
               {% endfor %}
             </select>
           </td>
-          <td><input name="times0" value="{{ seminar.show_input_time(seminar.start_times[0]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td><input name="times0" value="{{ seminar.show_input_time(seminar.start_times[0]) }}" style="width:100px;" placeholder="15:00-16:00"/></td>
           <td>
             <select name="weekday1" style="width:60px;">
               <option value=""></option>
@@ -131,7 +133,7 @@
               {% endfor %}
             </select>
           </td>
-          <td><input name="times1" value="{{ seminar.show_input_time(seminar.start_times[1]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td><input name="times1" value="{{ seminar.show_input_time(seminar.start_times[1]) }}" style="width:100px;" placeholder="15:00-16:00"/></td>
           <td>
             <select name="weekday2" style="width:60px;">
               <option value=""></option>
@@ -140,7 +142,7 @@
               {% endfor %}
             </select>
           </td>
-          <td><input name="times2" value="{{ seminar.show_input_time(seminar.start_times[2]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td><input name="times2" value="{{ seminar.show_input_time(seminar.start_times[2]) }}" style="width:100px;" placeholder="15:00-16:00"/></td>
         </tr>
         <tr>
           <td>
@@ -151,7 +153,7 @@
               {% endfor %}
             </select>
           </td>
-          <td><input name="times3" value="{{ seminar.show_input_time(seminar.start_times[0]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td><input name="times3" value="{{ seminar.show_input_time(seminar.start_times[0]) }}" style="width:100px;" placeholder="15:00-16:00"/></td>
           <td>
             <select name="weekday4" style="width:60px;">
               <option value=""></option>
@@ -160,7 +162,7 @@
               {% endfor %}
             </select>
           </td>
-          <td><input name="times4" value="{{ seminar.show_input_time(seminar.start_times[1]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td><input name="times4" value="{{ seminar.show_input_time(seminar.start_times[1]) }}" style="width:100px;" placeholder="15:00-16:00"/></td>
           <td>
             <select name="weekday5" style="width:60px;">
               <option value=""></option>
@@ -169,7 +171,7 @@
               {% endfor %}
             </select>
           </td>
-          <td><input name="times5" value="{{ seminar.show_input_time(seminar.start_times[2]) }}" style="width:600px;" placeholder="15:00-16:00"/></td>
+          <td><input name="times5" value="{{ seminar.show_input_time(seminar.start_times[2]) }}" style="width:100px;" placeholder="15:00-16:00"/></td>
         </tr>
       </table>
       <table>
