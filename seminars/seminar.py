@@ -13,6 +13,7 @@ from seminars.utils import (
     adapt_datetime,
     toggle,
     make_links,
+    topdomain,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -45,6 +46,10 @@ class WebSeminar(object):
         self.new = data is None
         self.deleted = False
         if self.new:
+            ### FIXME ###
+            # Temporary fix to ensure seminars created on mathseminars.org are visible on mathseminars.org
+            if topdomain() == "mathseminars.org":
+                self.subjects = ["math"]
             self.shortname = shortname
             self.display = current_user.is_creator
             self.online = True  # default
