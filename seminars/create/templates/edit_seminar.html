@@ -124,7 +124,7 @@
           <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <a class="addslot" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a>{% endif %}</td>
           {% for j in range(3) %}
           <td style="padding-right:1px; margin-right:0px;">
-            <select name="weekday{{3*i+j}}" style="display:none;">
+            <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="display:none;">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
                 <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
@@ -132,7 +132,7 @@
             </select>
           </td>
           <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-            <input name="times{{3*i+j}}" value="{{ seminar.show_input_time(seminar.start_times[3*i+j]) }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
+            <input id="times{{3*i+j}}" name="times{{3*i+j}}" value="{{ seminar.show_input_time(seminar.start_times[3*i+j]) }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
           </td>
           {% endfor %}
         {% endfor %}
@@ -316,8 +316,9 @@ $(document).ready(function() {
   );
   var x = parseInt(document.getElementById('slots').value);
   if ( x == 0 ) x = 1;
-  $('.weekday0').show()
-  $('.times0').show()
+  consol.log("initial slots = "+x)
+  document.getElementById('weekday0').show()
+  document.getElementById('times0').show()
 });
 
 
