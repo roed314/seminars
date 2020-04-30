@@ -139,7 +139,7 @@ class WebSeminar(object):
         else:
             n = min(len(self.weekdays),len(self.time_slots))
             self.weekdays = self.weekdays[0:n]
-            self.time_slots = self.sime_slots[0:n]
+            self.time_slots = self.time_slots[0:n]
         print("frequency: "+str(self.frequency))
         print("weekdays: "+str(self.weekdays))
         print("time_slots: "+str(self.time_slots))
