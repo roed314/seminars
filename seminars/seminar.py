@@ -137,9 +137,9 @@ class WebSeminar(object):
             n = min(len(self.weekdays),len(self.time_slots))
             self.weekdays = self.weekdays[0:n]
             self.time_slots = self.sime_slots[0:n]
-        print("frequency: "+self.frequency)
-        print("weekdays: "+self.weekdays)
-        print("time_slots: "+self.time_slots)
+        print("frequency: "+str(self.frequency))
+        print("weekdays: "+str(self.weekdays))
+        print("time_slots: "+str(self.time_slots))
 
     def visible(self):
         """
