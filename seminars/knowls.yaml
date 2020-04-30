@@ -7,8 +7,8 @@ institution_shortname:
 institution_name:
   title: Name
   contents: |
-    Enter the full name of the institution.  
-    If the institution is associated to a series, this name will be displayed on that series' page.  
+    Enter the full name of the institution.
+    If the institution is associated to a series, this name will be displayed on that series' page.
     The name can be changed.
 institution_type:
   title: Type
@@ -17,7 +17,7 @@ institution_type:
 institution_homepage:
   title: Homepage
   contents: |
-    Enter the homepage of your institution.  
+    Enter the homepage of your institution.
     This should be a URL beginning with "http://" or "https://" (the latter is preferred).
 institution_city:
   title: City
@@ -27,28 +27,28 @@ institution_timezone:
   title: Timezone
   contents: |
     From the drop-down list, select the time zone in which your institution resides.
-    <i>Warning:</i> Different time zones with 
-    the same current <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a> offset 
-    may switch to daylight saving time on different dates, so choose the precise time zone, 
+    <i>Warning:</i> Different time zones with
+    the same current <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a> offset
+    may switch to daylight saving time on different dates, so choose the precise time zone,
     not just one with the correct UTC offset.
 institution_admin:
   title: Maintainer
   contents: |
-    Enter the email address of the account on this site responsible 
+    Enter the email address of the account on this site responsible
     for creating or maintaining this institution's listing.
-    This is set to the email address of the user who created the institution by default, 
+    This is set to the email address of the user who created the institution by default,
     but can be set to the email address of any endorsed user.
 is_conference:
   title: Type
   contents: |
     Choose <i>seminar series</i> for a recurring series of talks spread out over weeks.
     Choose <i>conference</i> for an event lasting a few days with talks each day.
-    Our site treats seminar series and conferences identically for the most part; 
+    Our site treats seminar series and conferences identically for the most part;
     the main difference is the layout when editing the talk schedule.
 seminar_shortname:
   title: Identifier
   contents: |
-    Each series has a unique identifier consisting of 
+    Each series has a unique identifier consisting of
     3 to 32 letters, numbers, hyphens, and underscores (no spaces).
     It will be included in all URL links for the series and its associated talks.
     When you press create, you will be told if the identifier you entered is already in use.
@@ -62,42 +62,47 @@ seminar_id:
 seminar_name:
   title: Name
   contents: |
-    This is the full name of the series, to appear on the browse and search pages. 
+    This is the full name of the series, to appear on the browse and search pages.
     It can be changed at any time.
-    Like Wikipedia, our site uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a> 
-    for titles: 
+    Like Wikipedia, our site uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>
+    for titles:
     only the first word and proper nouns should be capitalized.
 seminar_description:
   title: Short description
   contents: |
-    A short desciption of your series that will be displayed in our search pages 
+    A short desciption of your series that will be displayed in our search pages
     along with the name and institutions.
-    Here you might indicate, for example, whether the series is a research seminar series or a learning seminar series.  
+    Here you might indicate, for example, whether the series is a research seminar series or a learning seminar series.
     The short desription can be at most 50 characters long.
 seminar_homepage:
   title: Homepage
   contents: |
-    The external homepage of your series, if one exists.  
+    The external homepage of your series, if one exists.
     This should be a URL beginning with "http".
+subjects:
+  title: Subjects
+  contents: |
+    You need to associate one or more subjects to a series.
+    The list of subjects can be changed at any time.
 institutions:
   title: Institutions
   contents: |
-    You may associate zero or more institutions to a series.   
+    You may associate zero or more institutions to a series.
     The list of institutions can be changed at any time.
 topics:
   title: Topics
   contents: |
-    You may associate zero or more topics to a series or talk.  
-    Each topic corresponds to an arXiv subject class; 
+    You may associate zero or more topics to a series or talk.
+    Each topic corresponds to an arXiv subject class;
     for example, <i>number theory</i> corresponds to <a href="https://arxiv.org/list/math.NT/recent">math.NT</a>.
-    New talks inherit the topics of the series to which they belong; 
+    New talks inherit the topics of the series to which they belong;
     these can then be modified for a particular talk if desired.
     Changing the topics of a series has no impact on existing talks.
 language:
   title: Language
   contents: |
     Each series and talk has an associated language.
-    New talks inherit the language of the series to which they belong; 
+    New talks inherit the language of the series to which they belong;
     this can then be modified for a particular talk if desired.
     Changing the language of a series has no impact on existing talks.
 weekday:
@@ -106,23 +111,23 @@ weekday:
     Set this if your series meets on a particular day of the week, even if your series does not meet every week.
     If set, this value will be used to lay out the grid used when editing your series' talk schedule.
     <br><br>
-    For series that meet more than one day per week, 
-    we suggest either setting the meeting day to the first day of the week your series meets 
+    For series that meet more than one day per week,
+    we suggest either setting the meeting day to the first day of the week your series meets
     and then editing the dates on the scheduling grid,
-    or not setting the meeting day and setting the frequency to 1, 
+    or not setting the meeting day and setting the frequency to 1,
     which will give you a scheduling grid with slots for each day.
     We are currently working to better support series that meet on multiple days.
 frequency:
   title: Frequency
   contents: |
     Specify the frequency of your series if it meets at regular intervals, every 7 or 14 days, for example.
-    If your series does not meet on a particular day of the week, set the frequency to 1; 
+    If your series does not meet on a particular day of the week, set the frequency to 1;
     this will yield a scheduling grid with slots for each day.
 per_day:
   title: Talks per day
   contents: |
     The number of talks you expect to take place each day your series meets.
-    This is used only to determine the number of slots to create in your scheduling grid; 
+    This is used only to determine the number of slots to create in your scheduling grid;
     you can still add more talks on any particular day.
 start_date:
   title: Start date
@@ -143,24 +148,24 @@ seminar_end_time:
 timezone:
   title: Timezone
   contents: |
-    Each talk and series has a time zone 
+    Each talk and series has a time zone
     that determines how dates and times associated to the event are interpreted.
     Even if your event has no particular physical location, you must set the time zone.
-    <i>Warning:</i> Different time zones with 
-    the same current <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a> offset 
-    may switch to daylight saving time on different dates, so choose the precise time zone, 
+    <i>Warning:</i> Different time zones with
+    the same current <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a> offset
+    may switch to daylight saving time on different dates, so choose the precise time zone,
     not just one with the correct UTC offset.
     You may choose UTC as your time zone if you wish.
     <br><br>
-    Dates and times are displayed to site visitors in their local time zone, 
+    Dates and times are displayed to site visitors in their local time zone,
     as specified in their user account or by their computer.
-    Exception for organizers: When editing a series or talk, 
+    Exception for organizers: When editing a series or talk,
     times are displayed in <i>the time zone of the series or talk</i>.
 room:
   title: Room
   contents: |
     The physical location of a talk or series; leave this blank for events that take place solely online.
-    New talks inherit the room of the series to which they belong; 
+    New talks inherit the room of the series to which they belong;
     this can then be modified for a particular talk if desired.
     Changing the room of a series has no impact on previously created talks.
     <br><br>
@@ -168,40 +173,40 @@ room:
 online:
   title: Online
   contents: |
-    If your event can be attended online, indicate that here.  
-    Events that have a physical presence <i>and</i> are livestreamed 
+    If your event can be attended online, indicate that here.
+    Events that have a physical presence <i>and</i> are livestreamed
     should enter the location in Room and set the Online option to yes.
 live_link:
   title: Livestream link
   contents: |
     Events taking place online should list the URL of the livestream here.
-    For series, if the livestream link varies from talk to talk, 
+    For series, if the livestream link varies from talk to talk,
     enter "See comments" here and leave instructions below in the Comments box below.
-    New talks inherit the livestream link of the seminar or conference to which they belong; 
+    New talks inherit the livestream link of the seminar or conference to which they belong;
     this can then be modified for a particular talk if desired.
     <br><br>
     If your livestream requires a password, please indicate in the Comments box how participants should obtain the password.
 access:
   title: Access
   contents: |
-    For talks and series with a livestream link, this determines whether the link will be shown to everyone, 
-    only to users logged in, 
+    For talks and series with a livestream link, this determines whether the link will be shown to everyone,
+    only to users logged in,
     or only to endorsed users.
     If the livestream link is not specified, this setting is ignored.
 comments:
   title: Comments
   contents: |
-    Use the comments field to display additional information on the series page, 
+    Use the comments field to display additional information on the series page,
     especially details on how to find the room or access the livestreaming link.
     On a talk page, both the talk comments and the series comments are displayed,
     so talk-specific comments should not be entered here.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
-    You may also use HTML hyperlinks and TeX symbols.    
+    You may also use HTML hyperlinks and TeX symbols.
 series_comments:
   title: Series comments
   contents: |
-    These comments are inherited from the series.  
-    They are displayed on the series' page and on the page of each of its talks.  
+    These comments are inherited from the series.
+    They are displayed on the series' page and on the page of each of its talks.
     Organizers can edit them at the "Edit series" page.
 talk_comments:
   title: Talk comments
@@ -215,32 +220,32 @@ talk_comments:
 organizer_name:
   title: Name
   contents: |
-    Enter the full name of the organizer.  
-    This must be nonempty for each organizer.  
+    Enter the full name of the organizer.
+    This must be nonempty for each organizer.
     Names for which the Display box is checked will appear on the series' page, in the order given here.
 homepage:
   title: Homepage
   contents: |
-    Enter the URL of the organizer's homepage.  
+    Enter the URL of the organizer's homepage.
     Each organizer name displayed on the series' page will be a link to this URL.
-    Specifying the homepage ensures that the organizer's email address remains hidden.  
+    Specifying the homepage ensures that the organizer's email address remains hidden.
     (Many organizers obfuscate their email addresses on their homepages, and we want to preserve this obfuscation.)
 email:
   title: Email
   contents: |
-    Enter the organizer's email address, 
-    which will be displayed only if the Display box is checked and the homepage is not specified.  
+    Enter the organizer's email address,
+    which will be displayed only if the Display box is checked and the homepage is not specified.
     A user who logs in to the site using this email address will be able to edit the series.
 organizer:
   title: Organizer
   contents: |
     Check this box for organizers of the series responsible for its scientific content, inviting speakers, etc.
-    Uncheck this box for anyone else who should be able to edit the series (perhaps a staff/student/postdoc assistant); 
+    Uncheck this box for anyone else who should be able to edit the series (perhaps a staff/student/postdoc assistant);
     these people will be listed as "Curators" on the series' page, if the Display box is checked.
 display:
   title: Display
   contents: |
-    Check this box for an organizer or curator whose name should appear on the series' home page.  
+    Check this box for an organizer or curator whose name should appear on the series' home page.
     This box must be checked for at least one organizer/curator whose name and email match that of a registered user.
 seminar:
   title: Series
@@ -265,28 +270,28 @@ speaker:
 speaker_email:
   title: Speaker email
   contents: |
-    The email address of the speaker.  
+    The email address of the speaker.
     This is visible only to organizers of the series to which the talk belongs.
 speaker_affiliation:
   title: Speaker affiliation
   contents: |
-    The affiliation of the speaker.  
+    The affiliation of the speaker.
     This need not be an institution listed on the site.
 speaker_homepage:
   title: Speaker homepage
   contents: |
     The URL of the speaker's homepage.
-    The speaker name will be linked to the speaker homepage if specified, 
+    The speaker name will be linked to the speaker homepage if specified,
     and this link will appear on our main page for browsing talks.
-    This link is useful to site visitors who may not know the speaker, 
+    This link is useful to site visitors who may not know the speaker,
     and it improves the speaker's visibility within the mathematical community.
-    We encourage organizers to enter this or to ask the speaker to do so 
+    We encourage organizers to enter this or to ask the speaker to do so
     when entering their title or abstract using the talk's edit link.
 title:
   title: Title
   contents: |
-    The title of the talk.  
-    As with seminar and conference names, 
+    The title of the talk.
+    As with seminar and conference names,
     this should be in <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>,
     with only the first word and proper nouns capitalized.
 paper_link:
@@ -296,7 +301,7 @@ paper_link:
 slide_link:
   title: Slides link
   contents: |
-    A URL link to a slide presentation used in the talk.  
+    A URL link to a slide presentation used in the talk.
     This may be set either before or after the talk.
 video_link:
   title: Recorded video link
@@ -317,14 +322,14 @@ venue:
   title: Venue
   contents: |
     Selecting "online" limits search results to talks that are accessible online.
-    Selecting "in-person" limits search results to talks that exist as an in-person meeting; 
+    Selecting "in-person" limits search results to talks that exist as an in-person meeting;
     some of these may also be accessible online.
 visibility:
   title: Visibility
   contents: |
     <i>Public</i>: Any user can see the series and its talks.<br>
-    <i>Unlisted</i>: The series and its talks are not listed on the Browse or Search pages, 
-                      but you can share their links with anyone.<br> 
+    <i>Unlisted</i>: The series and its talks are not listed on the Browse or Search pages,
+                      but you can share their links with anyone.<br>
     <i>Private</i>: Only your co-organizers can see the series and its talks.<br><br>
     You must be endorsed in order for your series to be visible to anyone else;
     your setting here will become active once you get endorsed.
@@ -339,20 +344,20 @@ hide_talk:
 filter:
   title: Filter
   contents: |
-    Each filter restricts the talk list, 
+    Each filter restricts the talk list,
     and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.
     <br><br>
-    Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.  
-    Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed, 
-    but each time you click on a subject to add it, talks in that subject will appear.  
-    Click <u>subject</u> again to close the subject menu.  
+    Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.
+    Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed,
+    but each time you click on a subject to add it, talks in that subject will appear.
+    Click <u>subject</u> again to close the subject menu.
     Toggling the subject filter on and off now switches between displaying your selected subjects' talks and all talks.
     <br><br>
-    Next click <u>topic</u> to restrict to selected topics within each subject, 
-    and click <u>language</u> to restrict to talks in the languages you understand.  
+    Next click <u>topic</u> to restrict to selected topics within each subject,
+    and click <u>language</u> to restrict to talks in the languages you understand.
     If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.
     <br><br>
     <i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
-      If you open the topics menu and select optics (a topic within physics), then no optics talks will appear, 
+      If you open the topics menu and select optics (a topic within physics), then no optics talks will appear,
       because the subject filter is hiding <i>all</i> physics talks.
     <p style="text-align:right;">To close this box, click the word <u>Filter</u> above.</p>

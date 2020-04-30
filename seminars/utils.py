@@ -180,9 +180,7 @@ def restricted_topics(talk_or_seminar=None):
         return user_topics(talk_or_seminar)
 
 def user_topics(talk_or_seminar=None):
-    subjects = current_user.subjects
-    if subjects is None:
-        subjects = []
+    subjects = []
     if talk_or_seminar is not None:
         subjects = sorted(set(subjects + talk_or_seminar.subjects))
     if len(subjects) == 1:

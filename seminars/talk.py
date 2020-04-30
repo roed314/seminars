@@ -124,9 +124,6 @@ class WebTalk(object):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
         topics = self.topics if self.topics else []
-        data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
-        if not data["subjects"] and topdomain() == "mathseminars.org":
-            data["subjects"] = ["math"]
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):
@@ -502,11 +499,6 @@ Email link to speaker
         event.add("DTSTAMP", datetime.datetime.now(tz=pytz.UTC))
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
-
-    @property
-    def subjects(self):
-        # derived from topics
-        return sorted(set(topic.split("_", 1)[0] for topic in self.topics))
 
 def talks_header(include_seminar=True, include_subscribe=True, datetime_header="Your time"):
     cols = []
