@@ -336,6 +336,46 @@ i.fa.close:hover {
     padding: 3px 7px;
 }
 
+.access_button {
+    border-radius: 4px;
+    display: inline-block;
+    margin: 2px 4px 2px 4px;
+    padding: 3px 7px;
+    display: inline-block;
+}
+
+.access_button.is_link {
+    background: red;
+    color: #fff;
+}
+
+.access_button.is_link a:link, .access_button.is_link a:visited  {
+    color: white !important;
+}
+
+.access_button.no_link {
+    border: 2px solid red;
+    background: #fff;
+}
+
+.talk-header-container {
+    width 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.talk-title {
+    align: left;
+}
+
+.talk-view {
+    padding: 20px;
+    white-space: nowrap;
+    text-align: right;
+}
+
+
 .language_label {
     background: #E3F2FD;
     color: #000;
