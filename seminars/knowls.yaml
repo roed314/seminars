@@ -34,7 +34,7 @@ institution_timezone:
 institution_admin:
   title: Maintainer
   contents: |
-    Enter the email address of the mathseminars.org user account responsible 
+    Enter the email address of the account on this site responsible 
     for creating or maintaining this institution's listing.
     This is set to the email address of the user who created the institution by default, 
     but can be set to the email address of any endorsed user.
