@@ -138,7 +138,7 @@
             </select>
           </td>
           <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-            <input id="times{{3*i+j}}" name="times{{3*i+j}}" value="{{ seminar.show_input_time(seminar.start_times[3*i+j]) }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
+            <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.show_input_time(seminar.time_slots[3*i+j]) }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
           </td>
           {% endfor %}
         {% endfor %}
@@ -316,9 +316,9 @@ $(document).ready(function() {
     var n = parseInt(document.getElementById('slots').value)-1;
     document.getElementById('slots').value = '' + n;
     document.getElementById('weekday'+n).value = '';
-    document.getElementById('times'+n).value ='';
+    document.getElementById('time_slot'+n).value ='';
     document.getElementById('weekday'+n).style.display = 'none';
-    document.getElementById('times'+n).style.display = 'none';
+    document.getElementById('time_slot'+n).style.display = 'none';
     showplusminus(n);
   });
   var topicSelector = makeTopicSelector(
@@ -337,7 +337,7 @@ $(document).ready(function() {
   if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
   for ( var i = 0 ; i < n ; i++ ) {
     document.getElementById('weekday'+i).style.display = 'block';
-    document.getElementById('times'+i).style.display = 'block';
+    document.getElementById('time_slot'+i).style.display = 'block';
   }
   showplusminus(n);
 });
