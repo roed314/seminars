@@ -122,8 +122,8 @@
           <tr>
             {% if i == 0 %}
               <td>{{ KNOWL("seminar_times") }}</td>
-              <td style="vertical-align:middle; margin-left=0px; margin-right=0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a></td>
-              <td style="vertical-align:middle; margin-left=0px; margin-right=20px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#">&nbsp;<i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+              <td style="vertical-align:middle; margin-left=0px; margin-right=0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
+              <td style="vertical-align:middle; margin-left=0px; margin-right=28px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
             {% else %}
               <td></td><td></td><td></td>
             {% endif %}
@@ -299,17 +299,17 @@ $(document).ready(function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
-  function showplusmins() {
+  function showplusmins(n) {
     document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
     document.getElementById('slotplus').style.visibility = ( n < 24 ? 'visible' : 'hidden' );
   }
   $("a.slotplus").click(function(e){
     e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value);
-    document.getElementById('slots').value = ''+(n+1);
-    document.getElementById('weekday'+n).style.display='block';
-    document.getElementById('times'+n).style.display='block';
-    showplusminus();
+    var n = parseInt(document.getElementById('slots').value)+1;
+    document.getElementById('slots').value = ''+n;
+    document.getElementById('weekday'+(n-1)).style.display='block';
+    document.getElementById('times'+(n-1)).style.display='block';
+    showplusminus(n);
   });
   $("a.slotminus").click(function(e){
     e.preventDefault();
@@ -317,7 +317,7 @@ $(document).ready(function() {
     document.getElementById('slots').value = '' + n;
     document.getElementById('weekday'+n).style.display='none';
     document.getElementById('times'+n).style.display='none';
-    showplusminus();
+    showplusminus(n);
   });
   var topicSelector = makeTopicSelector(
     topicOptions,
@@ -337,7 +337,7 @@ $(document).ready(function() {
     document.getElementById('weekday'+i).style.display = 'block';
     document.getElementById('times'+i).style.display = 'block';
   }
-  showplusmins();
+  showplusmins(n);
 });
 
 
