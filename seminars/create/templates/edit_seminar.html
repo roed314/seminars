@@ -123,9 +123,7 @@
           <tr>
           <td style="width:150px;">
             {% if i == 0 %}
-            {{ KNOWL("seminar_times") }}
-            <a class="slotplus" id="slotplus" style="display:none;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a>
-            <a class="slotminus" id="slotminus" style="display:none;" href="#">&nbsp;<i style="color:red;" class="fas fa-minus-square"></i></a>
+            {{ KNOWL("seminar_times") }}<a class="slotplus" id="slotplus" style="display:none;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a><          <a class="slotminus" id="slotminus" style="display:none;" href="#">&nbsp;<i style="color:darkred;" class="fas fa-minus-square"></i></a>
             {% endif %}
           </td>
           {% for j in range(3) %}
@@ -312,8 +310,8 @@ $(document).ready(function() {
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value);
     document.getElementById('slots').value = (n-1);
-    document.getElementById('weekday'+n).style.display='block';
-    document.getElementById('times'+n).style.display='block';
+    document.getElementById('weekday'+n).style.display='none';
+    document.getElementById('times'+n).style.display='none';
     if ( n < 24 ) document.getElementById('slotplus').style.display='block';
     if ( n == 1 ) document.getElementById('slotminus').style.display='none';
   });
