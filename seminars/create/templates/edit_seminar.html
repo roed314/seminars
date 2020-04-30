@@ -123,7 +123,7 @@
           <tr>
           <td style="width:150px;">
             {% if i == 0 %}
-            {{ KNOWL("seminar_times") }}<a class="slotplus" id="slotplus" style="display:none;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a><          <a class="slotminus" id="slotminus" style="display:none;" href="#">&nbsp;<i style="color:darkred;" class="fas fa-minus-square"></i></a>
+            <div>{{ KNOWL("seminar_times") }}<a class="slotplus" id="slotplus" style="display:none;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a><a class="slotminus" id="slotminus" style="display:none;" href="#">&nbsp;<i style="color:darkred;" class="fas fa-minus-square"></i></a></div>
             {% endif %}
           </td>
           {% for j in range(3) %}
@@ -303,7 +303,7 @@ $(document).ready(function() {
     document.getElementById('slots').value = n;
     document.getElementById('weekday'+n).style.display='block';
     document.getElementById('times'+n).style.display='block';
-    if ( n > 1 ) document.getElementById('slotminus').style.display='block';
+    document.getElementById('slotminus').style.display='block';
     if ( n == 24 ) document.getElementById('slotplus').style.display='none';
   });
   $("a.slotminus").click(function(e){
@@ -312,7 +312,7 @@ $(document).ready(function() {
     document.getElementById('slots').value = (n-1);
     document.getElementById('weekday'+n).style.display='none';
     document.getElementById('times'+n).style.display='none';
-    if ( n < 24 ) document.getElementById('slotplus').style.display='block';
+    document.getElementById('slotplus').style.display='block';
     if ( n == 1 ) document.getElementById('slotminus').style.display='none';
   });
   var topicSelector = makeTopicSelector(
