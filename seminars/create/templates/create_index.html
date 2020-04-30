@@ -9,7 +9,7 @@
 </p>
 {% else %}
 {% if user.affiliation and not institution_known(user.affiliation) %}
-<p> Your affiliation does not appear to be on our list of institutions.
+<p> Your affiliation "<b>{{ user.affiliation }}</b>" does not appear to be on our list of institutions.
 You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a series.  Alternatively, you can create a series now and add an institution to it later.
 {% endif %}
 {% endif %}
