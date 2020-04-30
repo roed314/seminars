@@ -115,6 +115,10 @@ class WebSeminar(object):
     def convert_time_to_times(self):
         if self.is_conference:
             self.frequency = None
+        if self.frequency is None:
+            self.weekdays = []
+            self.time_slots = []
+            return
         if self.frequency > 1 and self.frequency <= 7:
             self.frequency = 7
         elif self.frequency > 7 and self.frequency <= 14:
@@ -123,7 +127,6 @@ class WebSeminar(object):
             self.frequency = 21
         else:
             self.frequency = None
-        if self.frequency is None:
             self.weekdays = []
             self.time_slots = []
             return
