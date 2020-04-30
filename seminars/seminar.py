@@ -101,6 +101,7 @@ class WebSeminar(object):
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
         self.organizer_data = organizer_data
+        self.convert_time_to_times()
 
     def __repr__(self):
         return self.name
@@ -114,6 +115,38 @@ class WebSeminar(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def convert_time_to_times(self):
+        if self.is_conference:
+            self.frequency = None
+        if self.frequency is None:
+            self.weekdays = []
+            self.time_slots = []
+            return
+        if self.frequency > 1 and self.frequency <= 7:
+            self.frequency = 7
+        elif self.frequency > 7 and self.frequency <= 14:
+            self.frequency = 14
+        elif self.frequency > 14 and self.frequency <= 21:
+            self.frequency = 21
+        else:
+            self.frequency = None
+            self.weekdays = []
+            self.time_slots = []
+            return
+        if self.weekdays is None or self.time_slots is None:
+            self.weekdays = []
+            self.time_slots = []
+            if self.weekday and self.start_time and self.end_time:
+                self.weekdays = [self.weekday]
+                self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H-%M")]
+        else:
+            n = min(len(self.weekdays),len(self.time_slots))
+            self.weekdays = self.weekdays[0:n]
+            self.time_slots = self.time_slots[0:n]
+        print("frequency: "+str(self.frequency))
+        print("weekdays: "+str(self.weekdays))
+        print("time_slots: "+str(self.time_slots))
 
     def visible(self):
         """

@@ -168,7 +168,7 @@ def edit_seminar():
         section=manage,
         subsection="editsem",
         institutions=institutions(),
-        weekdays=weekdays,
+        short_weekdays=short_weekdays,
         timezones=timezones,
         lock=lock,
     )
