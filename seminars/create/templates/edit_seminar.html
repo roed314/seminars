@@ -107,7 +107,6 @@
         function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
         </script>
         <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
-        <tr></tr>
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
           <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
@@ -121,9 +120,12 @@
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
         {% for i in range(8) %}
           <tr>
-          <td style="width:150px;">
             {% if i == 0 %}
-            {{ KNOWL("seminar_times") }}<a class="slotplus" id="slotplus" style="width:10px; display:none;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a><a class="slotminus" id="slotminus" style="width:10px; display:none;" href="#">&nbsp;<i style="color:darkred;" class="fas fa-minus-square"></i></a>
+              <td>{{ KNOWL("seminar_times") }}</td>
+              <td><a class="slotplus" id="slotplus" style="width:10px; display:none;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a></td>
+              <td><a class="slotminus" id="slotminus" style="width:10px; display:none;" href="#">&nbsp;<i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+            {% else %}
+              <td></td><td></td><td></td>
             {% endif %}
           </td>
           {% for j in range(3) %}
