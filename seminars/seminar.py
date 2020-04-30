@@ -2,18 +2,20 @@ from flask import redirect, url_for
 from flask_login import current_user
 from seminars import db
 from seminars.utils import (
-    search_distinct,
-    lucky_distinct,
-    count_distinct,
-    max_distinct,
+    adapt_datetime,
+    adapt_weektime,
     allowed_shortname,
+    count_distinct,
+    format_errmsg,
+    lucky_distinct,
+    make_links,
+    max_distinct,
+    search_distinct,
+    show_input_errors,
+    toggle,
+    topdomain,
     topic_dict,
     weekdays,
-    adapt_weektime,
-    adapt_datetime,
-    toggle,
-    make_links,
-    topdomain,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -133,10 +135,6 @@ class WebSeminar(object):
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
         assert data.get("shortname")
         topics = self.topics if self.topics else []
-        data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
-        ### if we are saving a seminar on mathseminars.org with no subjects set, set the subject to math so that the sminar will be visible
-        if not data["subjects"] and topdomain() == "mathseminars.org":
-            data["subjects"] = ["math"]
         data["edited_by"] = int(current_user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
@@ -592,33 +590,45 @@ def can_edit_seminar(shortname, new):
     - ``seminar`` -- a WebSeminar object, as returned by ``seminars_lookup(shortname)``,
                      or ``None`` (if error or seminar does not exist)
     """
+    errmsgs = []
     if not allowed_shortname(shortname) or len(shortname) < 3 or len(shortname) > 32:
-        flash_error(
-            "The identifier must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores."
+        errmsgs.append(
+            format_errmsg(
+                "The identifier '%s' must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores.", shortname
+            )
         )
-        return redirect(url_for(".index"), 302), None
+        return show_input_errors(errmsgs), None
     seminar = seminars_lookup(shortname, include_deleted=True)
     # Check if seminar exists
     if new != (seminar is None):
         if seminar is not None and seminar.deleted:
-            flash_error("Identifier %s is reserved by a seminar that has been deleted" % shortname)
+            errmsgs.append(
+                format_errmsg(
+                    "Identifier %s is reserved by a seminar that has been deleted",
+                    shortname)
+            )
         else:
-            flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
-        return redirect(url_for(".index"), 302), None
+            errmsgs.append(
+                format_errmsg(
+                    "Identifier %s " + ("already exists" if new else "does not exist"),
+                    shortname
+                )
+            )
+        return show_input_errors(errmsgs), None
     if seminar is not None and seminar.deleted:
         return redirect(url_for("create.deleted_seminar", shortname=shortname), 302)
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(
-            "You do not have permission to edit seminar %s.  Please create an account and contact the seminar organizers."
-            % shortname
+            "You do not have permission to edit seminar %s. Please create an account and contact the seminar organizers.",
+            shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 302), None
     # Make sure user has permission to edit
     if not new and not seminar.user_can_edit():
         flash_error(
-            "You do not have permission to edit seminar %s.  Please contact the seminar organizers."
-            % shortname
+            "You do not have permission to edit seminar %s. Please contact the seminar organizers.",
+            shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 302), None
     if seminar is None:

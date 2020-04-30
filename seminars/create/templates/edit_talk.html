@@ -7,6 +7,7 @@
   <input type="hidden" name="seminar_ctr" value="{{ talk.seminar_ctr | blanknone }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if talk.new else 'no' }}"/>
   <input type="hidden" name="token" value="{{ talk.token }}"/>
+  <input type="hidden" name="subjects" value="{{ talk.subjects  | safe }}" onchange=''/>
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
@@ -42,6 +43,13 @@
       <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" placeholder="TeX symbols are OK here" /></td>
       <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
     </tr>
+    {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
+    <tr>
+      <td>{{ ASTKNOWL("subjects") }}</td>
+      <td><span id="subject_selector" style="width:610px;"></span></td>
+      <td class="forminfo">Select at least one subject</td>
+    <tr>
+    {% endif %}
     <tr>
       <td>{{ KNOWL("topics") }}</td>
       <td>
@@ -295,15 +303,40 @@ const langOptions = [
   {% endfor %}
 ];
 
+const subjOptions = [
+  {% for sid, name in subjects %}
+  {
+    label: "{{ name }}",
+    value: "{{ sid }}",
+  },
+  {% endfor %}
+];
+
 $(document).ready(function() {
-  var topicSelector = makeTopicSelector(
+  makeTopicSelector(
     topicOptions,
     {% if talk.new or not talk.topics %}[]{% else %}{{ talk.topics | safe }}{% endif %},
   );
-  var langSelector = makeLanguageSelector(
+  makeLanguageSelector(
     langOptions,
     "{{ talk.language }}");
 });
+  makeSubjectSelector(
+    subjOptions,
+    {{ seminar.subjects | safe }});
+
+  $('input[name="subjects"]').change(
+    function (){
+      if( $(this).val() == '[]') {
+      $("#subject_selector").notify(
+      "Please select at least one subject",
+        {className: "error", position: "right"})
+      } else {
+      $("#topic_selector").notify(
+      "Save your changes to load new topics options",
+        {className: "info", position: "right"})
+      }
+    });
 </script>
 
 {% endblock %}

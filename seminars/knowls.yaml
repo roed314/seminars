@@ -79,6 +79,11 @@ seminar_homepage:
   contents: |
     The external homepage of your series, if one exists.
     This should be a URL beginning with "http".
+subjects:
+  title: Subjects
+  contents: |
+    You need to associate one or more subjects to a series.
+    The list of subjects can be changed at any time.
 institutions:
   title: Institutions
   contents: |

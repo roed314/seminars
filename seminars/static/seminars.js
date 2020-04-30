@@ -438,7 +438,7 @@ function makeInstitutionSelector(instOptions, initialInstitutions) {
 }
 function makeLanguageSelector(langOptions, initialLanguage) {
     function callback_language(value) {
-        $('input[name="language"]')[0].value = value;
+        $('input[name="language"]').value = value;
     }
     return new SelectPure("#language_selector", {
         onChange: callback_language,
@@ -450,7 +450,8 @@ function makeLanguageSelector(langOptions, initialLanguage) {
 }
 function makeSubjectSelector(subjOptions, initialSubjects) {
     function callback_subjects(value) {
-        $('input[name="subjects"]')[0].value = '[' + value + ']';
+      // hidden inputs by default don't trigger a change event
+        $('input[name="subjects"]').val('[' + value + ']').trigger('change');
     }
     return new SelectPure("#subject_selector", {
         onChange: callback_subjects,
