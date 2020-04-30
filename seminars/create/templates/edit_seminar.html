@@ -110,7 +110,7 @@
         <tr></tr>
         <tr>
           <td>{{ KNOWL("frequency", "Periodicity") }}</td>
-          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false" />
+          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
               <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
               <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
               <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
@@ -119,9 +119,12 @@
         </tr>
       </table>
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
-        {% for i in range(2) %}
+        {% for i in range(8) %}
           <tr>
-          <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }} <a class="addslot" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a>{% endif %}</td>
+          <td style="width:150px;">{% if i == 0 %} {{ KNOWL("seminar_times") }}
+            <a class="slotplus" id="slotplus" href="#">&nbsp;<i style="color:green; display:none;" class="fas fa-plus-square"></i></a>{% endif %}
+            <a class="slotminus" id="slotminus" href="#">&nbsp;<i style="color:red; display:none;" class="fas fa-minus-square"></i></a>{% endif %}
+          </td>
           {% for j in range(3) %}
           <td style="padding-right:1px; margin-right:0px;">
             <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="display:none;">
@@ -293,14 +296,23 @@ $(document).ready(function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
-  $("a.addslot").click(function(e){
+  $("a.slotplus").click(function(e){
     e.preventDefault();
-    var x = document.getElementById('slots').value;
-    x = '' + (parseInt(x)+1);
-    document.getElementById('slots').value = x;
-    console.log("updated slots = " + x);
-    document.getElementById('weekday'+x).style.display='block';
-    document.getElementById('times'+x).style.display='block';
+    var n = parseInt(document.getElementById('slots').value)+1;
+    document.getElementById('slots').value = n;
+    document.getElementById('weekday'+n).style.display='block';
+    document.getElementById('times'+n).style.display='block';
+    if ( n > 1 ) document.getElementById('slotminus').style.display='block';
+    if ( n == 24 ) document.getElementById('slotplus').style.display='none';
+  });
+  $("a.slotminus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value);
+    document.getElementById('slots').value = (n-1);
+    document.getElementById('weekday'+n).style.display='block';
+    document.getElementById('times'+n).style.display='block';
+    if ( n < 24 ) document.getElementById('slotplus').style.display='block';
+    if ( n == 1 ) document.getElementById('slotminus').style.display='none';
   });
   var topicSelector = makeTopicSelector(
     topicOptions,
@@ -314,11 +326,14 @@ $(document).ready(function() {
     langOptions,
     {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
   );
-  var x = parseInt(document.getElementById('slots').value);
-  if ( x == 0 ) x = 1;
-  for ( var i = 0 ; i < x ; i++ ) {
-    document.getElementById('weekday'+i).style.display='block';
-    document.getElementById('times'+i).style.display='block';
+  var n = parseInt(document.getElementById('slots').value);
+  if ( n <= 0 ) n = 1;
+  for ( var i = 0 ; i < n ; i++ ) {
+    document.getElementById('weekday'+i).style.display = 'block';
+    document.getElementById('times'+i).style.display = 'block';
+    document.getElementById('slotplus').style.display = 'block'
+    document.getElementById('slotminus').style.display = ( n > 1 'block' : 'none' );
+    document.getElementById('slotplus').style.display = ( n < 24 'block' : 'none' );
   }
 });
 
