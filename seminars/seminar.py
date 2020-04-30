@@ -130,7 +130,7 @@ class WebSeminar(object):
             self.weekdays = []
             self.time_slots = []
             return
-        if self.weekdays is None or self.timeslots is None:
+        if self.weekdays is None or self.time_slots is None:
             self.weekdays = []
             self.time_slots = []
             if self.weekday and self.start_time and self.end_time:
