@@ -316,10 +316,8 @@ $(document).ready(function() {
   );
   var x = parseInt(document.getElementById('slots').value);
   if ( x == 0 ) x = 1;
-  for (i = 0 ; i < x ; i++ ) {
-    $('input[name="weekday'+x+'"]')[0].show();
-    $('input[name="times'+x+'"]')[0].show();
-  }
+  $('.weekday0').show()
+  $('.times0').show()
 });
 
 
