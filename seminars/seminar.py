@@ -113,8 +113,8 @@ class WebSeminar(object):
         return not (self == other)
 
     def convert_time_to_times(self):
-        if self.frequency is None:
-            return
+        if self.is_conference:
+            self.frequency = None
         if self.frequency > 1 and self.frequency <= 7:
             self.frequency = 7
         elif self.frequency > 7 and self.frequency <= 14:
@@ -123,11 +123,23 @@ class WebSeminar(object):
             self.frequency = 21
         else:
             self.frequency = None
-        if self.time_slots is None:
-            if self.start_time and self.end_time:
+        if self.frequency is None:
+            self.weekdays = []
+            self.time_slots = []
+            return
+        if self.weekdays is None or self.timeslots is None:
+            self.weekdays = []
+            self.time_slots = []
+            if self.weekday and self.start_time and self.end_time:
+                self.weekdays = [self.weekday]
                 self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H-%M")]
-            else:
-                self.time_slots = []
+        else:
+            n = min(len(self.weekdays),len(self.time_slots))
+            self.weekdays = self.weekdays[0:n]
+            self.time_slots = self.sime_slots[0:n]
+        print("frequency: "+self.frequency)
+        print("weekdays: "+self.weekdays)
+        print("time_slots: "+self.time_slots)
 
     def visible(self):
         """
