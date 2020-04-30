@@ -123,7 +123,7 @@
           <tr>
           <td style="width:150px;">
             {% if i == 0 %}
-            <div>{{ KNOWL("seminar_times") }}<a class="slotplus" id="slotplus" style="display:none;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a><a class="slotminus" id="slotminus" style="display:none;" href="#">&nbsp;<i style="color:darkred;" class="fas fa-minus-square"></i></a></div>
+            {{ KNOWL("seminar_times") }}<a class="slotplus" id="slotplus" style="width:10px; display:none;" href="#">&nbsp;<i style="color:green;" class="fas fa-plus-square"></i></a><a class="slotminus" id="slotminus" style="width:10px; display:none;" href="#">&nbsp;<i style="color:darkred;" class="fas fa-minus-square"></i></a>
             {% endif %}
           </td>
           {% for j in range(3) %}
@@ -299,17 +299,17 @@ $(document).ready(function() {
   {% endfor %}
   $("a.slotplus").click(function(e){
     e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value)+1;
-    document.getElementById('slots').value = n;
+    var n = parseInt(document.getElementById('slots').value);
+    document.getElementById('slots').value = ''+(n+1);
     document.getElementById('weekday'+n).style.display='block';
     document.getElementById('times'+n).style.display='block';
     document.getElementById('slotminus').style.display='block';
-    if ( n == 24 ) document.getElementById('slotplus').style.display='none';
+    if ( n == 23 ) document.getElementById('slotplus').style.display='none';
   });
   $("a.slotminus").click(function(e){
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value);
-    document.getElementById('slots').value = (n-1);
+    document.getElementById('slots').value = '' + (n-1);
     document.getElementById('weekday'+n).style.display='none';
     document.getElementById('times'+n).style.display='none';
     document.getElementById('slotplus').style.display='block';
@@ -328,7 +328,7 @@ $(document).ready(function() {
     {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
   );
   var n = parseInt(document.getElementById('slots').value);
-  if ( n <= 0 ) n = 1;
+  if ( n <= 0 ) { n = 1; document.getElementById('slots').value = '' + n;
   for ( var i = 0 ; i < n ; i++ ) {
     document.getElementById('weekday'+i).style.display = 'block';
     document.getElementById('times'+i).style.display = 'block';
