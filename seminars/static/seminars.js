@@ -465,11 +465,12 @@ function makeSubjectSelector(subjOptions, initialSubjects) {
 }
 
 function copySourceOfId(id) {
-  var copyText = document.getElementById(id);
+  var copyText = $("#"+id);
   copyText.select();
   document.execCommand("copy");
   // TODO, report that we copied?
-  console.log("copied!");
+  console.log("Copied!");
+  copyText.notify("Copied!", {className: "success", position:"right" });
 }
 
 function displayCookieBanner() {
