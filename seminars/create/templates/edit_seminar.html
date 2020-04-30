@@ -299,8 +299,8 @@ $(document).ready(function() {
     x = '' + (parseInt(x)+1);
     document.getElementById('slots').value = x;
     console.log("updated slots = " + x);
-    document.getElementById('weekday'+x).show();
-    document.getElementById('times'+x).show();
+    document.getElementById('weekday'+x).style.display='block';
+    document.getElementById('times'+x).style.display='block';
   });
   var topicSelector = makeTopicSelector(
     topicOptions,
@@ -316,9 +316,10 @@ $(document).ready(function() {
   );
   var x = parseInt(document.getElementById('slots').value);
   if ( x == 0 ) x = 1;
-  console.log("initial slots = "+x);
-  document.getElementById('weekday0').style.display='block';
-  document.getElementById('times0').style.display='block';
+  for ( var i = 0 ; i < x ; i++ ) {
+    document.getElementById('weekday'+i).style.display='block';
+    document.getElementById('times'+i).style.display='block';
+  }
 });
 
 
