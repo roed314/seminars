@@ -337,25 +337,38 @@ i.fa.close:hover {
 }
 
 .access_button {
-    border-radius: 4px;
     display: inline-block;
     margin: 2px 4px 2px 4px;
     padding: 3px 7px;
     display: inline-block;
+    background: white;
+    border: 2px solid #373737;
 }
 
 .access_button.is_link {
-    background: red;
-    color: #fff;
+    background: white;
+    color: black;
 }
 
-.access_button.is_link a:link, .access_button.is_link a:visited  {
+.starting_soon a:link, .access_button.is_link a:visited, .access_button.is_link a:hover {
     color: white !important;
 }
 
+.starting_soon.access_button.is_link{
+    border: none;
+    border-radius: 4px;
+    background: red !important;
+    color: #fff !important;
+}
+
 .access_button.no_link {
-    border: 2px solid red;
+    border: 2px solid black;
     background: #fff;
+}
+
+.starting_soon.access_button.no_link {
+    border: 2px solid red !important;
+    background: #fff !important;
 }
 
 .talk-header-container {
@@ -487,7 +500,6 @@ div.topic_cmd {
 }
 
 .talk-body {
-    max-width: 700px;
 }
 
 #top-menu div.menu-active a {

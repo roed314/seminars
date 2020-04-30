@@ -314,9 +314,15 @@ class WebTalk(object):
             success = self.live_link
         else:
             if self.live_link.startswith("http"):
-                success = '<div class=\"access_button is_link\"><b> <a href="%s"> Livestream access >> </a></b></div>' % self.live_link
+                if self.is_starting_soon():
+                    success = '<div class=\"access_button is_link starting_soon \"><b> <a href="%s"> Livestream access &#x25ba;</a></b></div>' % self.live_link
+                else:
+                    success = '<div class=\"access_button is_link\"><b> Livestream access:<a href="%s"> available </a></b></div>' % self.live_link
             else:
-                success = "<div class=\"access_button no_link\"><b> Livestream access: %s </b></div>" % self.live_link
+                if self.is_starting_soon():
+                    success = "<div class=\"access_button no_link starting_soon\"><b> Livestream access: %s </b></div>" % self.live_link
+                else:
+                    success = "<div class=\"access_button no_link\"><b> Livestream access: %s </b></div>" % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
@@ -348,6 +354,12 @@ class WebTalk(object):
 
     def is_past(self):
         return self.end_time < datetime.datetime.now(pytz.utc)
+
+    def is_starting_soon(self):
+        if self.end_time > datetime.datetime.now(pytz.utc):
+            return self.start_time - datetime.datetime.now(pytz.utc) < datetime.timedelta(minutes=15)
+        else:
+            return False
 
     def is_subscribed(self):
         if current_user.is_anonymous:
