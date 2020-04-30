@@ -14,7 +14,6 @@ from seminars.utils import (
     make_links,
     topic_dict,
     languages_dict,
-    topdomain,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -123,7 +122,7 @@ class WebTalk(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
-        topics = self.topics if self.topics else []
+        data["topics"] = self.topics if self.topics else []
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):
