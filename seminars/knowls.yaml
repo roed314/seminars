@@ -34,7 +34,7 @@ institution_timezone:
 institution_admin:
   title: Maintainer
   contents: |
-    Enter the email address of the mathseminars.org user account responsible 
+    Enter the email address of the account on this site responsible 
     for creating or maintaining this institution's listing.
     This is set to the email address of the user who created the institution by default, 
     but can be set to the email address of any endorsed user.
@@ -322,10 +322,10 @@ venue:
 visibility:
   title: Visibility
   contents: |
-    Choose <i>public</i> if you want any user to be able to see the series and its talks.
-    Choose <i>unlisted</i> if you want to be able to share links to the series and its talks with others 
-    but have it not listed on the Browse or Search pages.
-    Choose <i>private</i> if you want only your co-organizers to be able to see the series and its talks.
+    <i>Public</i>: Any user can see the series and its talks.<br>
+    <i>Unlisted</i>: The series and its talks are not listed on the Browse or Search pages, 
+                      but you can share their links with anyone.<br> 
+    <i>Private</i>: Only your co-organizers can see the series and its talks.<br><br>
     You must be endorsed in order for your series to be visible to anyone else;
     your setting here will become active once you get endorsed.
 hidden:
@@ -355,5 +355,4 @@ filter:
     <i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
       If you open the topics menu and select optics (a topic within physics), then no optics talks will appear, 
       because the subject filter is hiding <i>all</i> physics talks.
-    <br><br>
-    To close this box, click the word <u>Filter</u> again.
+    <p style="text-align:right;">To close this box, click the word <u>Filter</u> above.</p>
