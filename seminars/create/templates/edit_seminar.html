@@ -21,7 +21,7 @@
       <form id="seminarform" action="{{ url_for('.save_seminar') }}" method="POST">
         <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
         <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
-        <input type="hidden" name="subjects" value="{{ seminar.subjects  | safe }}" onchange=''/>
+        <input type="hidden" name="subjects" value="{{ seminar.subjects  | safe }}" />
         <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
         <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
         <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>

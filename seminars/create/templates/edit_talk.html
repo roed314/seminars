@@ -7,7 +7,7 @@
   <input type="hidden" name="seminar_ctr" value="{{ talk.seminar_ctr | blanknone }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if talk.new else 'no' }}"/>
   <input type="hidden" name="token" value="{{ talk.token }}"/>
-  <input type="hidden" name="subjects" value="{{ talk.subjects  | safe }}" onchange=''/>
+  <input type="hidden" name="subjects" value="{{ talk.subjects  | safe }}" />
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
