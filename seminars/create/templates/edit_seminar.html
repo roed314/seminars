@@ -334,10 +334,9 @@ $(document).ready(function() {
   for ( var i = 0 ; i < n ; i++ ) {
     document.getElementById('weekday'+i).style.display = 'block';
     document.getElementById('times'+i).style.display = 'block';
-    document.getElementById('slotplus').style.display = 'block'
-    document.getElementById('slotminus').style.display = ( n > 1 ? 'block' : 'none' );
-    document.getElementById('slotplus').style.display = ( n < 24 ? 'block' : 'none' );
   }
+  document.getElementById('slotminus').style.display = ( n > 1 ? 'block' : 'none' );
+  document.getElementById('slotplus').style.display = ( n < 24 ? 'block' : 'none' );
 });
 
 
