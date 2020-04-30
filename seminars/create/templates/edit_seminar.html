@@ -277,18 +277,18 @@ const langOptions = [
 ];
 
 $(document).ready(function() {
-      function swapv(a,b) {
-        var x = $('input[name="'+a+'"]')[0].value;
-        $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
-        $('input[name="'+b+'"]')[0].value = x;
-        x = $('input[name="'+a+'"]')[0].value;
-      }
-      function swapc(a,b) {
-        var x = $('input[name="'+a+'"]')[0].checked;
-        $('input[name="'+a+'"]')[0].checked = $('input[name="'+b+'"]')[0].checked;
-        $('input[name="'+b+'"]')[0].checked = x;
-        x = $('input[name="'+a+'"]')[0].checked;
-      }
+  function swapv(a,b) {
+    var x = $('input[name="'+a+'"]')[0].value;
+    $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
+    $('input[name="'+b+'"]')[0].value = x;
+    x = $('input[name="'+a+'"]')[0].value;
+  }
+  function swapc(a,b) {
+    var x = $('input[name="'+a+'"]')[0].checked;
+    $('input[name="'+a+'"]')[0].checked = $('input[name="'+b+'"]')[0].checked;
+    $('input[name="'+b+'"]')[0].checked = x;
+    x = $('input[name="'+a+'"]')[0].checked;
+  }
   {% for i in range(1,(seminar.organizer_data | length)) %}
     $("a.swap{{i}}").click(function(e){
       e.preventDefault();
@@ -299,14 +299,17 @@ $(document).ready(function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
+  function showplusmins() {
+    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
+    document.getElementById('slotplus').style.visibility = ( n < 24 ? 'visible' : 'hidden' );
+  }
   $("a.slotplus").click(function(e){
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value);
     document.getElementById('slots').value = ''+(n+1);
     document.getElementById('weekday'+n).style.display='block';
     document.getElementById('times'+n).style.display='block';
-    document.getElementById('slotminus').style.display='block';
-    if ( n == 23 ) document.getElementById('slotplus').style.display='none';
+    showplusminus();
   });
   $("a.slotminus").click(function(e){
     e.preventDefault();
@@ -314,8 +317,7 @@ $(document).ready(function() {
     document.getElementById('slots').value = '' + n;
     document.getElementById('weekday'+n).style.display='none';
     document.getElementById('times'+n).style.display='none';
-    document.getElementById('slotplus').style.display='block';
-    if ( n == 1 ) document.getElementById('slotminus').style.display='none';
+    showplusminus();
   });
   var topicSelector = makeTopicSelector(
     topicOptions,
@@ -335,8 +337,7 @@ $(document).ready(function() {
     document.getElementById('weekday'+i).style.display = 'block';
     document.getElementById('times'+i).style.display = 'block';
   }
-  document.getElementById('slotminus').style.display = ( n > 1 ? 'block' : 'none' );
-  document.getElementById('slotplus').style.display = ( n < 24 ? 'block' : 'none' );
+  showplusmins();
 });
 
 
