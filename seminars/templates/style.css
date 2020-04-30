@@ -2781,3 +2781,8 @@ font-size: 1rem;
 border: 0px;
 max-width: 150px;
 }
+
+.clippy:after {
+    content: url("{{ url_for('static', filename='clippy.svg') }}");
+    vertical-align: -0.125em;
+}
