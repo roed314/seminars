@@ -123,7 +123,7 @@
             {% if i == 0 %}
               <td sytle="margin-right:0px;">{{ KNOWL("seminar_times") }}</td>
               <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
-              <td style="vertical-align:middle; padding-left:0px; padding-right:100px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+              <td style="vertical-align:middle; padding-left:0px; padding-right:40px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
             {% else %}
               <td></td><td></td><td></td>
             {% endif %}
@@ -306,17 +306,19 @@ $(document).ready(function() {
   $("a.slotplus").click(function(e){
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value)+1;
-    document.getElementById('slots').value = ''+n;
-    document.getElementById('weekday'+(n-1)).style.display='block';
-    document.getElementById('times'+(n-1)).style.display='block';
+    document.getElementById('slots').value = '' + n;
+    document.getElementById('weekday'+(n-1)).style.display = 'block';
+    document.getElementById('times'+(n-1)).style.display = 'block';
     showplusminus(n);
   });
   $("a.slotminus").click(function(e){
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value)-1;
     document.getElementById('slots').value = '' + n;
-    document.getElementById('weekday'+n).style.display='none';
-    document.getElementById('times'+n).style.display='none';
+    document.getElementById('weekday'+n).value = '';
+    document.getElementById('times'+n).value ='';
+    document.getElementById('weekday'+n).style.display = 'none';
+    document.getElementById('times'+n).style.display = 'none';
     showplusminus(n);
   });
   var topicSelector = makeTopicSelector(
