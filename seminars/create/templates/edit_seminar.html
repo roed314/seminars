@@ -308,7 +308,7 @@ $(document).ready(function() {
     var n = parseInt(document.getElementById('slots').value)+1;
     document.getElementById('slots').value = '' + n;
     document.getElementById('weekday'+(n-1)).style.display = 'block';
-    document.getElementById('times'+(n-1)).style.display = 'block';
+    document.getElementById('time_slot'+(n-1)).style.display = 'block';
     showplusminus(n);
   });
   $("a.slotminus").click(function(e){
