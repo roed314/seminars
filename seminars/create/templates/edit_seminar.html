@@ -308,8 +308,8 @@ $(document).ready(function() {
   });
   $("a.slotminus").click(function(e){
     e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value);
-    document.getElementById('slots').value = '' + (n-1);
+    var n = parseInt(document.getElementById('slots').value)-1;
+    document.getElementById('slots').value = '' + n;
     document.getElementById('weekday'+n).style.display='none';
     document.getElementById('times'+n).style.display='none';
     document.getElementById('slotplus').style.display='block';
@@ -328,7 +328,7 @@ $(document).ready(function() {
     {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
   );
   var n = parseInt(document.getElementById('slots').value);
-  if ( n <= 0 ) { n = 1; document.getElementById('slots').value = '' + n;
+  if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
   for ( var i = 0 ; i < n ; i++ ) {
     document.getElementById('weekday'+i).style.display = 'block';
     document.getElementById('times'+i).style.display = 'block';
