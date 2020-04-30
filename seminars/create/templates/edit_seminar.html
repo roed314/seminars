@@ -121,9 +121,9 @@
         {% for i in range(8) %}
           <tr>
             {% if i == 0 %}
-              <td>{{ KNOWL("seminar_times") }}</td>
-              <td style="vertical-align:middle; margin-left=0px; margin-right=0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
-              <td style="vertical-align:middle; margin-left=0px; margin-right=28px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+              <td sytle="padding-right:0px;">{{ KNOWL("seminar_times") }}</td>
+              <td style="vertical-align:middle; margin-left:0px; margin-right:0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
+              <td style="vertical-align:middle; margin-left:0px; margin-right:20px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
             {% else %}
               <td></td><td></td><td></td>
             {% endif %}
@@ -299,7 +299,7 @@ $(document).ready(function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
-  function showplusmins(n) {
+  function showplusminus(n) {
     document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
     document.getElementById('slotplus').style.visibility = ( n < 24 ? 'visible' : 'hidden' );
   }
