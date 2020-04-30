@@ -313,19 +313,27 @@ class WebTalk(object):
         if raw:
             success = self.live_link
         else:
+            now = datetime.datetime.now(pytz.UTC)
+            current = (self.start_time - datetime.timedelta(minutes=10) <= now <= self.end_time)
             if self.live_link.startswith("http"):
-                success = '<div class=\"access_button is_link\"><b> <a href="%s"> Livestream access >> </a></b></div>' % self.live_link
+                if current:
+                    success = '<div class="access_button is_link"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> </a></b></div>' % self.live_link
+                else:
+                    success = '<div>Livestream access <a href="%s">available</a>' % self.live_link
             else:
-                success = "<div class=\"access_button no_link\"><b> Livestream access: %s </b></div>" % self.live_link
+                if current:
+                    success = '<div class="access_button no_link"><b> Livestream access: %s </b></div>' % self.live_link
+                else:
+                    success = '<div>Livestream access: %s' % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
             if user.is_anonymous:
-                return '<div class=\"access_button no_link\"><b>To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % (
+                return '<div class="access_button no_link"><b>To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % (
                     url_for("user.info")
                 )
             elif not user.email_confirmed:
-                return "<div class=\"access_button no_link\"><b>To see access link, please confirm your email.</b></div>"
+                return '<div class="access_button no_link"><b>To see access link, please confirm your email.</b></div>'
             else:
                 return success
         elif self.access == "endorsed":
@@ -333,7 +341,7 @@ class WebTalk(object):
                 return success
             else:
                 # TODO: add link to an explanation of endorsement
-                return "<div class=\"access_button no_link\"><b>To see access link, you must be endorsed by another user.</b></div>"
+                return '<div class="access_button no_link"><b>To see access link, you must be endorsed by another user.</b></div>'
         else:  # should never happen
             return ""
 

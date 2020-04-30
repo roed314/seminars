@@ -320,6 +320,15 @@ i.fa.close:hover {
     cursor: pointer;
 }
 
+.play:after {
+    content: url("{{ url_for('static', filename='play.svg') }}");
+    vertical-align: -0.125em;
+}
+
+.filter-white:after {
+    filter: brightness(0) saturate(100%) invert(100%);
+}
+
 #topic-filter-menu #subjects-tabs i {
     margin: 12px 8px 0px 2px;
 }
