@@ -54,7 +54,7 @@ import pytz
 from collections import defaultdict
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
-
+MAX_SLOTS = 12     # Max time slots in a seminar series, must be a multiple of 3
 
 @create.route("manage/")
 @email_confirmed_required
@@ -170,6 +170,7 @@ def edit_seminar():
         institutions=institutions(),
         short_weekdays=short_weekdays,
         timezones=timezones,
+        max_slots=MAX_SLOTS,
         lock=lock,
     )
 
