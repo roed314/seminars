@@ -363,6 +363,9 @@ i.fa.close:hover {
     border: none;
     border-radius: 4px;
     background: red !important;
+}
+
+.starting_soon.access_button.is_link a {
     color: #fff !important;
 }
 
