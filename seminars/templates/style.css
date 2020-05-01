@@ -359,10 +359,6 @@ i.fa.close:hover {
     color: black;
 }
 
-.starting_soon a:link, .access_button.is_link a:visited, .access_button.is_link a:hover {
-    color: white !important;
-}
-
 .starting_soon.access_button.is_link{
     border: none;
     border-radius: 4px;
@@ -510,9 +506,6 @@ div.topic_cmd {
 
 #past_talks {
     display: none;
-}
-
-.talk-body {
 }
 
 #top-menu div.menu-active a {

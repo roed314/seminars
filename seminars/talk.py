@@ -317,7 +317,7 @@ class WebTalk(object):
                 if self.is_starting_soon():
                     success = '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> </a></b></div>' % self.live_link
                 else:
-                    success = '<div class="access_button is_link">Livestream access <a href="%s">available</a>' % self.live_link
+                    success = '<div class="access_button is_link">Livestream access <a href="%s">available</a></div>' % self.live_link
             else:
                 if self.is_starting_soon():
                     success = '<div class="access_button no_link starting_soon"><b>Livestream access: %s </b></div>' % self.live_link
@@ -443,9 +443,9 @@ class WebTalk(object):
 
     def show_abstract(self):
         if self.abstract:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
+            return "<p><b>Abstract</b></p>\n" + "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
         else:
-            return "<p>TBA</p>"
+            return "<p>Abstract TBA</p>"
 
     def speaker_link(self):
         return url_for("create.edit_talk_with_token",
