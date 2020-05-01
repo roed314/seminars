@@ -606,7 +606,7 @@ form button.aslink:hover {
   background: {{color.flashes_background}};
 }
 
-#flashes p.error {
+#flashes p.warning {
   margin: 15px 0;
   font-size: 90%;
   border: 0;
