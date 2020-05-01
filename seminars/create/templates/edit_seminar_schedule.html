@@ -13,6 +13,7 @@
 <p>All times are shown in the series' time zone, {{ seminar.timezone }}.</p>
 </div>
 
+
 <form action="{{ url_for('.save_seminar_schedule') }}" method="POST">
   <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
@@ -26,14 +27,41 @@
       <th style="padding-right:0px;">End date</th>
       <td><input name="end" value="{{ raw_data.end}}" style="width:120px;" /></td>
       {% if not seminar.is_conference %}
-      <th style="padding-right:0px;">New timeslots on</th>
-      <td><input name="weekday" value="{{ seminar.show_day(truncate=False) }}" style="width:80px;" /></td>
-      <th style="padding-right:0px;">every</th>
-      <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:60px;"/></td>
-      <th style="padding-left:0px;">day{% if seminar.frequency != 1 %}s{% endif %}</th>
-      {% endif %}
-      <td style="padding-left:20px;"><button type="submit" name="refresh" value="yes">Refresh</button></td>
+      <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
+      <th style="padding-right:0px;">Time slots</th>
+      <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
+            <option value="1" {% if seminar.frequency == 1 %}selected{% endif %}>daily</option>
+            <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
+            <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
+            <option value="21" {% if seminar.frequency == 21 %}selected{% endif %}>every third week</option>
+          </select></td>
+        <td style="padding-left:20px;"><button type="submit" name="refresh" value="yes">Refresh</button></td>
     </tr>
+    {% for i in range(max_slots//3) %}
+      <tr>
+        {% if i == 0 %}
+          <td sytle="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
+          <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
+          <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+        {% else %}
+          <td></td><td></td><td></td>
+        {% endif %}
+      </td>
+      {% for j in range(3) %}
+      <td style="padding-right:1px; margin-right:0px;">
+        <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="display:none;">
+          <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
+          {% for wkday in short_weekdays %}
+            <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
+        <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
+      </td>
+      {% endfor %}
+    {% endfor %}
+    {% endif %}
   </table>
   <br>
   <div><div class="inlineh2">Schedule</div> <button type="submit" class="textbottom">Save all changes</button> <a style="margin-left: 30px" href="{{ url_for('.edit_seminar_schedule', shortname=seminar.shortname) }}">Cancel all changes</a></div>
@@ -126,5 +154,37 @@
 <div name="add_new_talk">
 
 </div>
-
+<script>
+$(document).ready(function() {
+  function showplusminus(n) {
+    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
+    document.getElementById('slotplus').style.visibility = ( n < {{ max_slots }} ? 'visible' : 'hidden' );
+  }
+  $("a.slotplus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)+1;
+    document.getElementById('slots').value = '' + n;
+    document.getElementById('weekday'+(n-1)).style.display = 'block';
+    document.getElementById('time_slot'+(n-1)).style.display = 'block';
+    showplusminus(n);
+  });
+  $("a.slotminus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)-1;
+    document.getElementById('slots').value = '' + n;
+    document.getElementById('weekday'+n).value = '';
+    document.getElementById('time_slot'+n).value ='';
+    document.getElementById('weekday'+n).style.display = 'none';
+    document.getElementById('time_slot'+n).style.display = 'none';
+    showplusminus(n);
+  });
+  var n = parseInt(document.getElementById('slots').value);
+  if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+  for ( var i = 0 ; i < n ; i++ ) {
+    document.getElementById('weekday'+i).style.display = 'block';
+    document.getElementById('time_slot'+i).style.display = 'block';
+  }
+  showplusminus(n);
+});
+</script>
 {% endblock %}
