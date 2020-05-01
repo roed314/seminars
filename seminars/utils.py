@@ -16,7 +16,7 @@ from email_validator import validate_email
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-daytime_re_string = r'(\d{1,2}|\d{1,2}:\d\d'
+daytime_re_string = r'\d{1,2}|\d{1,2}:\d\d'
 daytime_re = re.compile(daytime_re_string)
 
 def topdomain():
