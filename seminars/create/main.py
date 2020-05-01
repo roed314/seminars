@@ -413,9 +413,11 @@ def save_seminar():
     for i in range(MAX_SLOTS):
         weekday = time_slot = None
         try:
-            val = raw_data.get(col="weekday"+str(i),"")
+            col="weekday"+str(i)
+            val = raw_data.get(col,"")
             weekday = process_user_input(val, col, "weekday_number", tz)
-            val = raw_data.get(col="time_slot"+str(i),"")
+            col="time_slot"+str(i)
+            val = raw_data.get(col,"")
             time_slot = process_user_input(val, col, "daytime_interval", tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
