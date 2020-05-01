@@ -173,10 +173,10 @@ function knowl_click_handler(evt) {
   // if we already have the content, toggle visibility
   if (output) {
     if (table_mode) {
-      output_id.parent().parent().slideToggle("fast")
+      output.parentNode.parentNode.style.display = 'none';
     }
-    output_id.slideToggle("fast")
-    knowl.classList.toggle("active")
+    output.style.display = 'none';
+    knowl.classList.add("active")
   } else {
     knowl.classList.add("active")
     // create the element for the content, insert it after the one where the
