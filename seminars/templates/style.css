@@ -601,10 +601,17 @@ form button.aslink:hover {
 
 #flashes p.error {
   margin: 15px 0;
-  font-size: 95%;
   border: 0;
   border-left: 15px solid {{color.flashes_border}};
   background: {{color.flashes_background}};
+}
+
+#flashes p.error {
+  margin: 15px 0;
+  font-size: 90%;
+  border: 0;
+  border-left: 15px solid {{color.flashes_border}};
+  background: {{color.knowl_background}};
 }
 
 #main {
@@ -860,12 +867,6 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
    font-style: italic;
    color: {{color.grey}};
    display: none;
-}
-
-.errmsg {
-   font-size: 80%;
-   font-style: bold;
-   color: {{color.red}};
 }
 
 .forminfo {
@@ -1530,22 +1531,6 @@ div.limit-height {
 
 .small{
     font-size: 12px;
-}
-
-.error {
-    margin: 20px 0 20px 0;
-    padding: 10px;
-    border: 1px solid {{color.red}};
-    color: {{color.red}};
-    font-size: 120%;
-}
-
-.warning {
-    margin: 20px 0 20px 0;
-    padding: 10px;
-    border: 1px solid {{color.yellow}};
-    color: {{color.yellow}};
-    font-size: 110%;
 }
 
 /* TODO: where?*/
