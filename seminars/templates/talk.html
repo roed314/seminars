@@ -2,11 +2,10 @@
 
 {% block content %}
 
-{% if user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
-<p>{{ talk.send_speaker_link() | safe }}</p>
-{% endif %}
-
 <h1>{{talk.show_title(visibility_info=True)}}</h1>
+<div class="talk-title">
+  <h3><i>{{ talk.show_speaker() | safe }}</i></h3>
+</div>
 
 {% if not talk.display %}
 <p>
@@ -17,52 +16,67 @@ Once the seminar's creator is endorsed, the seminar and its talks will be made p
 If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.public_users') }}">this list</a> of all seminar organizers and curators.
 </p>
 {% endif %}
+{% if user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
+<p>{{ talk.send_speaker_link() | safe }}</p>
+{% endif %}
 
 <div class="talk-body">
-  <p>{{ talk.show_speaker_and_seminar() | safe }}</p>
-
-  <p>{{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}</p>
-
   <p>
-    {% if not talk.is_past() %} {{ talk.show_live_link() | safe }} {% endif %}
-    {% if talk.room %} Lecture held in {{ talk.room }}. {% endif %}
+    <b>{{ talk.show_time_and_duration() | safe }}</b>
   </p>
 
-  {% if talk.topics %}
+  {% if not talk.is_past() %}
+  {% if talk.room %}
+  <p>Lecture held in {{ talk.room }}.</p>
+  {% endif %}
+  {{ talk.show_live_link() | safe }}
+  {% endif %}
+<div style="clear:both;"></div>
+
+  <div class="talk-details-container">
+  {% if talk.abstract %}
+  {{ talk.show_abstract() | safe }}
+  {% endif %}
+
+  {% if talk.language != "en" or talk.topics %}
   <p>
     {{talk.show_lang_topics() | safe}}
   </p>
   {% endif %}
 
   {% if talk.paper_link or talk.slides_link or talk.video_link %}
-  <p>({% if talk.paper_link %} {{ talk.show_paper_link() | safe }} {% endif %}
-      {% if talk.slides_link %} {{ talk.show_slides_link() | safe }} {% endif %}
-      {% if talk.video_link %} {{ talk.show_video_link() | safe }} {% endif %})
-  </p>
-  {% endif %}
-
-  {% if talk.abstract %}
-    <h3> Abstract </h3>
-    {{ talk.show_abstract() | safe }}
+  <p><b>Talk content</b></p>
+  <ul>{% if talk.paper_link %}<li>{{ talk.show_paper_link() | safe }}</li>{% endif %}
+      {% if talk.slides_link %}<li>{{ talk.show_slides_link() | safe }}</li>{% endif %}
+      {% if talk.video_link %}<li>{{ talk.show_video_link() | safe }}</li>{% endif %}
+  </ul>
   {% endif %}
 
   {% if talk.comments and talk.comments != talk.seminar.comments %}
-  <hr>
-  <p>{{talk.show_comments() | safe}}</p>
+  <p><b>Comments </b></p>
+  {{talk.show_comments() | safe}}
   {% endif %}
 
-  {% if talk.seminar.comments %}
   <hr>
-  <p>{{talk.seminar.show_comments() | safe}}</p>
+
+  <p>
+    <b>{{ talk.show_seminar() | safe }} </b>
+  </p>
+
+  {% if talk.seminar.comments %}
+
+  <p><b>Series comments</b></p>
+  {{talk.seminar.show_comments() | safe}}
   {% endif %}
+
+  <div style="font-size: 90%;">
+    <table>
+      {{ seminar.show_organizers() | safe }}
+      {{ seminar.show_curators() | safe }}
+      <tr><td></td><td class="forminfo">*contact for concerns or questions</td></tr>
+    </table>
+
 </div>
-<div style="font-size: 90%;">
-{{ seminar.show_name() | safe }}
-<table>
-  {{ seminar.show_organizers() | safe }}
-  {{ seminar.show_curators() | safe }}
-  <td></td><td class="forminfo">*contact for concerns or questions</td>
-</table>
 </div>
 
 
