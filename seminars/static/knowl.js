@@ -185,6 +185,7 @@ function knowl_click_handler(evt) {
     knowl_output.classList.add('knowl-output')
     knowl_output.setAttribute('id', output_id)
     knowl_output.innerHTML = '<div class="knowl"><div><div class="knowl-content">' + kwargs + '</div></div></div>'
+    knowl_output.style.display = 'block';
     // behave a bit differently, if the knowl is inside a td or th in a table.
     // otherwise assume its sitting inside a <div> or <p>
     if(table_mode) {
