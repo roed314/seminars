@@ -16,7 +16,7 @@ from email_validator import validate_email
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-daytime_re_string = r'(\d{1,2}|\d{1,2}:\d\d)'
+daytime_re_string = r'(\d{1,2}|\d{1,2}:\d\d'
 daytime_re = re.compile(daytime_re_string)
 
 def topdomain():
@@ -38,7 +38,7 @@ def validate_daytime(s):
     if not daytime_re.fullmatch(s):
         return None
     t = s.split(':')
-    h,m = int(t[0]),int(t[1])
+    h, m = int(t[0]), int(t[1]) if len(t) == 2 else int(t[0]), 0
     return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
 
 def validate_daytime_interval(s):
@@ -475,6 +475,7 @@ def process_user_input(inp, col, typ, tz):
         res = validate_daytime_interval(inp)
         if res is None:
             raise ValueError("Invalid time of day interval, expected format is hh:mm-hh:mm")
+        return res
     elif typ == "weekday_number":
         res = int(inp)
         if res < 0 or res >= 7:
