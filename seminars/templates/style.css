@@ -1528,7 +1528,7 @@ table .knowl a {
   margin-right: 10px;
   text-align: left;
   -webkit-transition: height 0.4s ease;
-  transition: height 0.4s ease;
+  transition: all 0.4s ease;
   overflow-y: hidden;
 }
 
