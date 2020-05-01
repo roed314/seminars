@@ -139,6 +139,8 @@
           <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
             <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
           </td>
+          {% if i == 0 %}
+          <td class ="forminfo">To delete an existing slot clear day or time.</td>
           {% endfor %}
         {% endfor %}
       </table>
