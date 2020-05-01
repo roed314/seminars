@@ -99,29 +99,32 @@ var siblings = function(node, tagName) {
     return siblingList;
 }
 
+//function toggle(element) {
+//  if (!element.classList.contains('open')) {
+//      element.classList.add('open');
+//      element.style.height = 'auto';
+//      var height = element.clientHeight + 'px';
+//    console.log("height = " + height);
+//
+//      element.style.height = '0px';
+//
+//      setTimeout(function () {
+//        element.style.height = height;
+//      }, 0);
+//    } else {
+//      element.style.height = '0px';
+//
+//      element.addEventListener('transitionend', function () {
+//        console.log('done');
+//        element.classList.remove('open');
+//      }, {
+//        once: true
+//      });
+//    }
+//}
+
 function toggle(element) {
-  foo = element;
-  if (!element.classList.contains('open')) {
-      element.classList.add('open');
-      element.style.height = 'auto';
-      var height = element.clientHeight + 'px';
-    console.log("height = " + height);
-
-      element.style.height = '0px';
-
-      setTimeout(function () {
-        element.style.height = height;
-      }, 0);
-    } else {
-      element.style.height = '0px';
-
-      element.addEventListener('transitionend', function () {
-        console.log('done');
-        element.classList.remove('open');
-      }, {
-        once: true
-      });
-    }
+  element.classList.toggle("open")
 }
 
 function knowl_click_handler(evt) {
