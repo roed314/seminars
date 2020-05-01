@@ -425,9 +425,9 @@ def save_seminar():
             data["weekdays"].append(weekday)
             data["time_slots"].append(time_slot)
             if daytime_interval_early(time_slot):
-                flash(format_warning("Time slot %s includes early AM hours, please verify that this is correct (use 24-hour time format).",val))
+                flash(format_warning("Time slot %s includes early AM hours, please verify that this is correct (use 24-hour time format).",val),"warning")
             elif daytime_interval_minutes(time_slot) > 8*60:
-                flash(format_warning("Time slot %s is longer than 8 hours, please verify that this is correct.",val))
+                flash(format_warning("Time slot %s is longer than 8 hours, please verify that this is correct.",val),"warning")
     organizer_data = []
     contact_count = 0
     for i in range(10):
