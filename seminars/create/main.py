@@ -20,6 +20,7 @@ from seminars.utils import (
     show_input_errors,
     timezones,
     weekdays,
+    daytime_minutes,
     daytime_interval_early,
     daytime_interval_minutes,
 )
@@ -425,9 +426,14 @@ def save_seminar():
             data["weekdays"].append(weekday)
             data["time_slots"].append(time_slot)
             if daytime_interval_early(time_slot):
-                flash(format_warning("Time slot %s includes early AM hours, please verify that this is correct (use 24-hour time format).",val),"warning")
+                flash(format_warning("Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",val),"warning")
             elif daytime_interval_minutes(time_slot) > 8*60:
-                flash(format_warning("Time slot %s is longer than 8 hours, please verify that this is correct.",val),"warning")
+                flash(format_warning("Time slot %s is longer than 8 hours, please correct if this is not intended.",val),"warning")
+    if data["frequency"] and not data["weekdays"]:
+        errmsgs.append('You must specify at least one time slot (or set periodicty to "no fixed schedule").')
+    if len(data["weekdays"]) > 1:
+        x = sorted(list(zip(data["weekdays"],data["time_slots"])),key=lambda t: t[0]*24*60 + daytime_minutes(t[1].split("-")[0]))
+        data["weekdays"], data["time_slots"] = [t[0] for t in x], [t[1] for t in x]
     organizer_data = []
     contact_count = 0
     for i in range(10):
