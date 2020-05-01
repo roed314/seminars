@@ -611,7 +611,8 @@ form button.aslink:hover {
   font-size: 90%;
   border: 0;
   border-left: 15px solid {{color.flashes_border}};
-  background: {{color.knowl_background}};
+  background: {{color.flashes_background}};
+  color: {{color.black}}
 }
 
 #main {
