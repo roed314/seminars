@@ -161,12 +161,12 @@ function debounce(func, wait, immediate){
 
 
 function knowl_click_handler(evt) {
-  knowl = evt.target || evt.srcElement
-  uid = knowl.getAttribute("knowl-uid")
-  output_id = 'knowl-output-' + uid
-  output = document.getElementById(output_id)
-  kwargs = knowl.getAttribute("kwargs")
-  tagname = knowl.parentNode.tagName.toLowerCase()
+  var knowl = evt.target || evt.srcElement
+  var uid = knowl.getAttribute("knowl-uid")
+  var output_id = 'knowl-output-' + uid
+  var output = document.getElementById(output_id)
+  var kwargs = knowl.getAttribute("kwargs")
+  var tagname = knowl.parentNode.tagName.toLowerCase()
 
   var table_mode = tagname == "td" || tagname == "th"
 
@@ -185,7 +185,6 @@ function knowl_click_handler(evt) {
     knowl_output.classList.add('knowl-output')
     knowl_output.setAttribute('id', output_id)
     knowl_output.innerHTML = '<div class="knowl"><div><div class="knowl-content">' + kwargs + '</div></div></div>'
-
     // behave a bit differently, if the knowl is inside a td or th in a table.
     // otherwise assume its sitting inside a <div> or <p>
     if(table_mode) {
@@ -193,6 +192,14 @@ function knowl_click_handler(evt) {
       var td_tag = knowl.parentNode
       var tr_tag = td_tag.parentNode
       // create two rows
+
+      // For alternating color tables
+      var hiddenrow = document.createElement('tr')
+      hiddenrow.className = tr_tag.className
+      hiddenrow.classList.add('hidden')
+      tr_tag.insertAdjacentElement('afterend', hiddenrow)
+
+      // the real row
       var newrow = document.createElement('tr')
       newrow.className = tr_tag.className
       var col = document.createElement('td')
@@ -200,11 +207,6 @@ function knowl_click_handler(evt) {
       col.appendChild(knowl_output)
       newrow.appendChild(col)
       tr_tag.insertAdjacentElement('afterend', newrow)
-      // For alternating color tables
-      var hiddenrow = document.createElement('tr')
-      hiddenrow.className = tr_tag.className
-      hiddenrow.classList.add('hidden')
-      tr_tag.insertAdjacentElement('afterend', hiddenrow)
     } else {
       knowl.parentNode.insertAdjacentElement('afterend', knowl_output)
     }
