@@ -38,13 +38,13 @@ def validate_daytime(s):
     if not daytime_re.fullmatch(s):
         return None
     t = s.split(':')
-    h, m = int(t[0]), int(t[1]) if len(t) == 2 else int(t[0]), 0
+    (h, m) = (int(t[0]), int(t[1])) if len(t) == 2 else (int(t[0]), 0)
     return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
 
 def validate_daytime_interval(s):
     t = s.strip().split('-')
     if len(t) != 2:
-        return 0;
+        return None;
     start, end = validate_daytime(t[0]), validate_daytime(t[1])
     if start is None or end is None:
         return None
