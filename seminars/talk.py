@@ -313,18 +313,16 @@ class WebTalk(object):
         if raw:
             success = self.live_link
         else:
-            now = datetime.datetime.now(pytz.UTC)
-            current = (self.start_time - datetime.timedelta(minutes=10) <= now <= self.end_time)
             if self.live_link.startswith("http"):
-                if current:
-                    success = '<div class="access_button is_link"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> </a></b></div>' % self.live_link
+                if self.is_starting_soon():
+                    success = '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> </a></b></div>' % self.live_link
                 else:
-                    success = '<div>Livestream access <a href="%s">available</a>' % self.live_link
+                    success = '<div class="access_button is_link">Livestream access <a href="%s">available</a>' % self.live_link
             else:
-                if current:
-                    success = '<div class="access_button no_link"><b> Livestream access: %s </b></div>' % self.live_link
+                if self.is_starting_soon():
+                    success = '<div class="access_button no_link starting_soon"><b> Livestream access: %s </b></div>' % self.live_link
                 else:
-                    success = '<div>Livestream access: %s' % self.live_link
+                    success = '<div class="access_button no_link">Livestream access: %s</div>' % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
@@ -356,6 +354,10 @@ class WebTalk(object):
 
     def is_past(self):
         return self.end_time < datetime.datetime.now(pytz.utc)
+
+    def is_starting_soon(self):
+        now = datetime.datetime.now(pytz.utc)
+        return (self.start_time - datetime.timedelta(minutes=15) <= now < self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:

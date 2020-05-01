@@ -55,8 +55,7 @@
     {% if talk.room %}
       <p>Lecture held in {{ talk.room }}.</p>
     {% endif %}
-    {{ talk.show_live_link() | safe }}
-    <p> </p>
+       {{ talk.show_live_link() | safe }}
   {% endif %}
   </div>
 
