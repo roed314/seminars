@@ -143,7 +143,7 @@ def clean_language(inp):
 def flash_warning(warnmsg, *args):
     flash(
         Markup("Warning: " + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))),
-        "error",
+        "warning",
     )
 
 
@@ -518,7 +518,7 @@ def format_input_errmsg(err, inp, col):
     return format_errmsg('Unable to process input %s for property %s: {0}'.format(err), '"' + str(inp) + '"', col)
 
 def format_warning(errmsg, *args):
-    return Markup("Warning: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
+    return Markup("Warning: " + (errmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)))
 
 
 def show_input_errors(errmsgs):
