@@ -419,7 +419,7 @@ def save_seminar():
             time_slot = process_user_input(val, "time_slot", "daytime_interval", tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
-        print("Weekday in slot %d is %d"%(i,weekday))
+        print("Weekday in slot %d is %s"%(i,weekday))
         print("Time interval in slot %d is %s"%(i,time_slot))
         if weekday is not None and time_slot is not None:
             data["weekdays"].append(weekday)
