@@ -1528,17 +1528,6 @@ div.limit-height {
 
 /*** Tables for the Siegel corner ***/
 
-/** TODO these definitions are too broad. please make siegel a
- * blueprint (name is e.g. "siegel") and prefix all siegel
- * related definitions with body.siegel
- */
-.box1 {
-    margin: 20px 5px 20px 5px;
-    padding: 1px;
-    max-width: 800px;
-    overflow: auto;
-}
-
 .small{
     font-size: 12px;
 }
@@ -1548,6 +1537,14 @@ div.limit-height {
     padding: 10px;
     border: 1px solid {{color.red}};
     color: {{color.red}};
+    font-size: 120%;
+}
+
+.warning {
+    margin: 20px 0 20px 0;
+    padding: 10px;
+    border: 1px solid {{color.red}};
+    color: {{color.grey}};
     font-size: 120%;
 }
 
