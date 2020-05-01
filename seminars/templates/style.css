@@ -320,6 +320,15 @@ i.fa.close:hover {
     cursor: pointer;
 }
 
+.play:after {
+    content: url("{{ url_for('static', filename='play.svg') }}");
+    vertical-align: -0.125em;
+}
+
+.filter-white:after {
+    filter: brightness(0) saturate(100%) invert(100%);
+}
+
 #topic-filter-menu #subjects-tabs i {
     margin: 12px 8px 0px 2px;
 }
@@ -335,6 +344,62 @@ i.fa.close:hover {
     color: #fff;
     padding: 3px 7px;
 }
+
+.access_button {
+    display: inline-block;
+    margin: 2px 4px 2px 4px;
+    padding: 3px 7px;
+    display: inline-block;
+    background: white;
+    border: 2px solid #373737;
+}
+
+.access_button.is_link {
+    background: white;
+    color: black;
+}
+
+.starting_soon.access_button.is_link{
+    border: none;
+    border-radius: 4px;
+    background: red !important;
+}
+
+.starting_soon.access_button.is_link a {
+    color: #fff !important;
+}
+
+.starting_soon a:hover {
+    background: inherit;
+}
+
+.access_button.no_link {
+    border: 2px solid black;
+    background: #fff;
+}
+
+.starting_soon.access_button.no_link {
+    border: 2px solid red !important;
+    background: #fff !important;
+}
+
+.talk-header-container {
+    width 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.talk-title {
+    align: left;
+}
+
+.talk-view {
+    padding: 20px;
+    white-space: nowrap;
+    text-align: right;
+}
+
 
 .language_label {
     background: #E3F2FD;
@@ -444,10 +509,6 @@ div.topic_cmd {
 
 #past_talks {
     display: none;
-}
-
-.talk-body {
-    max-width: 700px;
 }
 
 #top-menu div.menu-active a {

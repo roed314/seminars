@@ -124,9 +124,6 @@ class WebTalk(object):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
         topics = self.topics if self.topics else []
-        data["subjects"] = sorted(set(topic.split("_")[0] for topic in topics))
-        if not data["subjects"] and topdomain() == "mathseminars.org":
-            data["subjects"] = ["math"]
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):
@@ -314,18 +311,24 @@ class WebTalk(object):
             success = self.live_link
         else:
             if self.live_link.startswith("http"):
-                success = 'Livestream access: <a href="%s">online</a>.' % self.live_link
+                if self.is_starting_soon():
+                    success = '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> </a></b></div>' % self.live_link
+                else:
+                    success = '<div class="access_button is_link">Livestream access <a href="%s">available</a></div>' % self.live_link
             else:
-                success = "Livestream access: %s" % self.live_link
+                if self.is_starting_soon():
+                    success = '<div class="access_button no_link starting_soon"><b>Livestream access: %s </b></div>' % self.live_link
+                else:
+                    success = '<div class="access_button no_link">Livestream access: %s</div>' % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
             if user.is_anonymous:
-                return 'To see access link, please <a href="%s">log in</a> (anti-spam measure).' % (
+                return '<div class="access_button no_link">To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % (
                     url_for("user.info")
                 )
             elif not user.email_confirmed:
-                return "To see access link, please confirm your email."
+                return '<div class="access_button no_link">To see access link, please confirm your email.</div>'
             else:
                 return success
         elif self.access == "endorsed":
@@ -333,7 +336,7 @@ class WebTalk(object):
                 return success
             else:
                 # TODO: add link to an explanation of endorsement
-                return "To see access link, you must be endorsed by another user."
+                return '<div class="access_button no_link">To see access link, you must be endorsed by another user.</div>'
         else:  # should never happen
             return ""
 
@@ -348,6 +351,10 @@ class WebTalk(object):
 
     def is_past(self):
         return self.end_time < datetime.datetime.now(pytz.utc)
+
+    def is_starting_soon(self):
+        now = datetime.datetime.now(pytz.utc)
+        return (self.start_time - datetime.timedelta(minutes=15) <= now < self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:
@@ -433,9 +440,9 @@ class WebTalk(object):
 
     def show_abstract(self):
         if self.abstract:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
+            return "<p><b>Abstract</b></p>\n" + "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
         else:
-            return "<p>TBA</p>"
+            return "<p>Abstract TBA</p>"
 
     def speaker_link(self):
         return url_for("create.edit_talk_with_token",
@@ -502,11 +509,6 @@ Email link to speaker
         event.add("DTSTAMP", datetime.datetime.now(tz=pytz.UTC))
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
-
-    @property
-    def subjects(self):
-        # derived from topics
-        return sorted(set(topic.split("_", 1)[0] for topic in self.topics))
 
 def talks_header(include_seminar=True, include_subscribe=True, datetime_header="Your time"):
     cols = []
