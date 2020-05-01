@@ -1527,7 +1527,7 @@ table .knowl a {
   margin-bottom: 15px;
   margin-right: 10px;
   text-align: left;
-  transition: max-height 0.4s ease, border 0.4s ease-in;
+  transition: max-height 0.4s ease, border 0.4s ease-out, max-width 0.2s linear;
   overflow-y: hidden;
   max-height: 1000px;
 }
@@ -1536,6 +1536,7 @@ table .knowl a {
   max-height: 0px;
   border: 0px;
   margin: 0px;
+  max-width: 0px ! important;
 }
 
 

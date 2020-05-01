@@ -223,11 +223,9 @@ function knowl_click_handler(evt) {
  *  this is necessary when the same reference is used several times. */
 var knowl_id_counter = 0
 function knowl_handle(evt) {
-  console.log("knowl_handle")
   evt.preventDefault()
   var knowl = evt.target || evt.srcElement
   if(!knowl.getAttribute("knowl-uid") ) {
-    console.log("knowl-uid = " + knowl_id_counter)
     knowl.setAttribute("knowl-uid", knowl_id_counter)
     knowl_id_counter++
   }
@@ -239,7 +237,6 @@ function knowl_register_onclick(element) {
   console.log(element.querySelectorAll('*[knowl]'));
   element.querySelectorAll('a[knowl]').forEach(
    (knowl) => {
-     console.log(knowl)
      knowl.onclick = debounce(knowl_handle, 500, true)
    }
   )
@@ -255,5 +252,4 @@ if( document.readyState !== 'loading' ) {
     });
 }
 
-console.log("loaded");
 
