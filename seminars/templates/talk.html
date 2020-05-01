@@ -16,9 +16,6 @@ Once the seminar's creator is endorsed, the seminar and its talks will be made p
 If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.public_users') }}">this list</a> of all seminar organizers and curators.
 </p>
 {% endif %}
-{% if user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
-<p>{{ talk.send_speaker_link() | safe }}</p>
-{% endif %}
 
 <div class="talk-body">
   <p>
@@ -75,8 +72,10 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
       {{ seminar.show_curators() | safe }}
       <tr><td></td><td class="forminfo">*contact for concerns or questions</td></tr>
     </table>
-
-</div>
+  </div>
+  {% if user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
+  <p>{{ talk.send_speaker_link() | safe }}</p>
+  {% endif %}
 </div>
 
 

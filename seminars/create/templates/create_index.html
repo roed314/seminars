@@ -14,6 +14,32 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
 {% endif %}
 {% endif %}
 
+{% set pair = [('Seminar series you organize', seminars), ('Conferences you organize', conferences)] %}
+{% for title, list in pair %}
+  {% if list %}
+    <h2>{{ title }}</h2>
+    <table class="ntdata">
+    <thead>
+      <th>Name</th>
+      <th colspan="1" style="border-left: solid 1px;text-align: center;">Role</th>
+      <th colspan="2" style="border-left: solid 1px;text-align: center;">Edit</th>
+      <th colspan="1" style="border-left: solid 1px;text-align: center;">View</th>
+    </thead>
+    <tbody>
+      {% for row in list %}
+      {% set elt, role = row  %}
+      <tr>
+        <td> {{elt.name + elt.show_attributes()}} </td>
+        <td style="border-left: solid 1px;"> {{role}} </td>
+        <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>Schedule</a></td>
+        <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>Properties</a></td>
+        <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    </table>
+  {% endif %}
+{% endfor %}
 <h2>Create a series</h2>
 
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
@@ -62,37 +88,6 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     </tr>
   </table>
 </form>
-
-
-{% set pair = [('Seminar series you organize', seminars), ('Conferences you organize', conferences)] %}
-{% for title, list in pair %}
-  {% if list %}
-    <h2>{{ title }}</h2>
-    <table class="ntdata">
-    <thead>
-      <th>Name</th>
-      <th colspan="1" style="border-left: solid 1px;text-align: center;">Role</th>
-      <th colspan="2" style="border-left: solid 1px;text-align: center;">Edit</th>
-      <th colspan="1" style="border-left: solid 1px;text-align: center;">View</th>
-    </thead>
-    <tbody>
-      {% for row in list %}
-      {% set elt, role = row  %}
-      <tr>
-        <td> {{elt.name + elt.show_attributes()}} </td>
-        <td style="border-left: solid 1px;"> {{role}} </td>
-        <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>Schedule</a></td>
-        <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>Properties</a></td>
-        <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-    </table>
-  {% endif %}
-{% endfor %}
-{% if not seminars and not conferences %}
-<p>To add a talk, create a series first.</p>
-{% endif %}
 {% if deleted_seminars or deleted_talks %}
 <p><a href="#" onclick="$('#deleted_stuff').show(); return false;">Show deleted items</a></p>
 <div id="deleted_stuff" style="display:none;">
@@ -135,6 +130,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
 </div>
 {% endif %}
 </div>
+
 
 <script type="text/javascript">
 

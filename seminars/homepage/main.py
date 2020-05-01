@@ -39,6 +39,12 @@ def get_now():
     return datetime.datetime.now(pytz.UTC)
 
 
+def parse_subject(info, query, prefix):
+    subject = info.get(prefix + "_subject")
+    if subject:
+        query["subjects"] = {"$contains": subject}
+
+
 def parse_topic(info, query, prefix):
     # of the talk
     topic = info.get(prefix + "_topic")
@@ -135,6 +141,7 @@ def parse_language(info, query, prefix):
 
 
 def talks_parser(info, query):
+    parse_subject(info, query, prefix="talk")
     parse_topic(info, query, prefix="talk")
     parse_institution_talk(info, query)
     #parse_venue(info, query, prefix="talk")
@@ -166,6 +173,7 @@ def talks_parser(info, query):
         query["subjects"] = ["math"]
 
 def seminars_parser(info, query):
+    parse_subject(info, query, prefix="seminar")
     parse_topic(info, query, prefix="seminar")
     parse_institution_sem(info, query)
     #parse_venue(info, query, prefix="seminar")
@@ -203,8 +211,10 @@ class TalkSearchArray(SearchArray):
     plural_noun = "talks"
 
     def __init__(self):
+        ## subjects
+        subject = SelectBox(name="seminar_subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
-        topic = SelectBox(name="talk_topic", label="Topics", options=[("", "")] + user_topics())
+        topic = SelectBox(name="talk_topic", label="Topic", options=[("", "")] + user_topics())
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -256,7 +266,7 @@ class TalkSearchArray(SearchArray):
             label="Affiliation",
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
-            example="Monsters University",
+            example="University of Pangea",
         )
         title = TextBox(
             name="title",
@@ -287,11 +297,12 @@ class TalkSearchArray(SearchArray):
         )
         video = Toggle(name="video", label="Has video")
         self.array = [
-            [topic, keywords],
-            [institution, title],
-            [language, speaker],
-            [access, affiliation],
-            [video, date],
+            [subject, keywords],
+            [topic, title],
+            [institution, speaker],
+            [language, affiliation],
+            [access, date],
+            [video]
             # [venue],
             # [count],
         ]
@@ -314,8 +325,10 @@ class SemSearchArray(SearchArray):
     plural_noun = "series"
 
     def __init__(self):
+        ## subjects
+        subject = SelectBox(name="seminar_subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
-        topic = SelectBox(name="seminar_topic", label="Topics", options=[("", "")] + user_topics())
+        topic = SelectBox(name="seminar_topic", label="Topic", options=[("", "")] + user_topics())
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -365,13 +378,14 @@ class SemSearchArray(SearchArray):
             name="name",
             label="Name",
             width=textwidth,
-            example="What Do They Know? Do They Know Things?? Let's Find Out!",
+            example="Terra firma topology colloquium",
         )
 
         self.array = [
-            [topic, keywords],
-            [institution, name],
-            [language, access],
+            [subject, keywords],
+            [topic, name],
+            [institution, access],
+            [language],
             # [venue],
             # [count],
         ]
