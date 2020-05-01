@@ -131,11 +131,13 @@ class WebSeminar(object):
         # TODO: remove temporary measure of allowing visibility None
         return self.display and (self.visibility is None or self.visibility > 1)
 
-    def save(self):
+    def save(self, user=None):
+        if user is None:
+            user = current_user
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
         assert data.get("shortname")
         topics = self.topics if self.topics else []
-        data["edited_by"] = int(current_user.id)
+        data["edited_by"] = int(user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
 
@@ -309,22 +311,26 @@ class WebSeminar(object):
             self.owner.lower()
         ]
 
-    def user_can_delete(self):
+    def user_can_delete(self, user=None):
         # Check whether the current user can delete the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_subject_admin(self) or (
-            current_user.email_confirmed and current_user.email.lower() == self.owner.lower()
+        if user is None:
+            user = current_user
+        return user.is_subject_admin(self) or (
+            user.email_confirmed and user.email.lower() == self.owner.lower()
         )
 
-    def user_can_edit(self):
+    def user_can_edit(self, user=None):
         # Check whether the current user can edit the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_subject_admin(self) or (
-            current_user.email_confirmed and current_user.email.lower() in self.editors()
+        if user is None:
+            user = current_user
+        return user.is_subject_admin(self) or (
+            user.email_confirmed and user.email.lower() in self.editors()
         )
 
     def _show_editors(self, label, curators=False):

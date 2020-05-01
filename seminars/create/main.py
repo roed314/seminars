@@ -358,7 +358,29 @@ def save_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
+    data, organizer_data, errmsgs = process_save_seminar(seminar, raw_data)
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
+    else: # to make it obvious that these two statements should be together
+        new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
+
+    sanity_check_times(new_version.start_time, new_version.end_time)
+    if seminar.new or new_version != seminar:
+        new_version.save()
+        edittype = "created" if new else "edited"
+        flash("Series %s successfully!" % edittype)
+    elif seminar.organizer_data == new_version.organizer_data:
+        flash("No changes made to series.")
+    if seminar.new or seminar.organizer_data != new_version.organizer_data:
+        new_version.save_organizers()
+        if not seminar.new:
+            flash("Series organizers updated!")
+    return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+
+def process_save_seminar(seminar, raw_data, warn=flash_warning, format_error=format_errmsg, format_input_error=format_input_errmsg, update_organizers=True):
     errmsgs = []
+    shortname = raw_data["shortname"]
 
     if seminar.new:
         data = {
@@ -373,128 +395,110 @@ def save_seminar():
             "owner": seminar.owner,
         }
     # Have to get time zone first
-    data["timezone"] = tz = raw_data.get("timezone")
+    tz = raw_data.get("timezone", getattr(seminar, "timezone", "UTC"))
+    data["timezone"] = tz
     tz = pytz.timezone(tz)
 
     for col in db.seminars.search_cols:
         if col in data:
+            continue
+        # For the API, we want to carry over unspecified columns from the previous data
+        if col not in raw_data:
+            data[col] = getattr(seminar, col, None)
             continue
         typ = db.seminars.col_type[col]
         ### Hack to be removed ###
         if col.endswith("time") and typ == "timestamp with time zone":
             typ = "time"
         try:
-            val = raw_data.get(col, "")
+            val = raw_data[col]
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_input_errmsg(err, val, col))
+            errmsgs.append(format_input_error(err, val, col))
     if not data["name"]:
         errmsgs.append("The name cannot be blank")
     if seminar.is_conference and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date")
     for col in ["frequency", "per_day"]:
         if data[col] is not None and data[col] < 1:
-            errmsgs.append(format_input_errmsg("integer must be positive", data[col], col))
+            errmsgs.append(format_input_error("integer must be positive", data[col], col))
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
+    if not data["topics"]:
+        warn("This series has no topics selected; don't forget to set the topics for each new talk individually.")
     data["language"] = clean_language(data.get("language"))
     data["subjects"] = clean_subjects(data.get("subjects"))
     if not data["subjects"]:
-        errmsgs.append(format_errmsg("Please select at least one subject."))
+        errmsgs.append(format_error("Please select at least one subject."))
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     organizer_data = []
-    contact_count = 0
-    for i in range(10):
-        D = {"seminar_id": seminar.shortname}
-        for col in db.seminar_organizers.search_cols:
-            if col in D:
-                continue
-            name = "org_%s%s" % (col, i)
-            typ = db.seminar_organizers.col_type[col]
-            try:
-                val = raw_data.get(name, "")
-                D[col] = None  # make sure col is present even if process_user_input fails
-                D[col] = process_user_input(val, col, typ, tz)
-            except Exception as err:  # should only be ValueError's but let's be cautious
-                errmsgs.append(format_input_errmsg(err, val, col))
-        if D["homepage"] or D["email"] or D["full_name"]:
-            if not D["full_name"]:
-                errmsgs.append(format_errmsg("Organizer name cannot be left blank"))
-            D["order"] = len(organizer_data)
-            # WARNING the header on the template says organizer
-            # but it sets the database column curator, so the
-            # boolean needs to be inverted
-            D["curator"] = not D["curator"]
-            if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
-                flash(
-                    format_warning(
+    if update_organizers:
+        contact_count = 0
+        for i in range(10):
+            D = {"seminar_id": seminar.shortname}
+            for col in db.seminar_organizers.search_cols:
+                if col in D:
+                    continue
+                name = "org_%s%s" % (col, i)
+                typ = db.seminar_organizers.col_type[col]
+                try:
+                    val = raw_data.get(name, "")
+                    D[col] = None  # make sure col is present even if process_user_input fails
+                    D[col] = process_user_input(val, col, typ, tz)
+                except Exception as err:  # should only be ValueError's but let's be cautious
+                    errmsgs.append(format_input_error(err, val, col))
+            if D["homepage"] or D["email"] or D["full_name"]:
+                if not D["full_name"]:
+                    errmsgs.append(format_error("Organizer name cannot be left blank"))
+                D["order"] = len(organizer_data)
+                # WARNING the header on the template says organizer
+                # but it sets the database column curator, so the
+                # boolean needs to be inverted
+                D["curator"] = not D["curator"]
+                if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
+                    flash_warning(
                         "The email address %s of organizer %s will be publicily visible.<br>%s",
                         D["email"],
                         D["full_name"],
                         "Set homepage or disable display to prevent this.",
-                    ),
-                    "error",
-                )
-            if D["email"]:
-                r = db.users.lookup(D["email"])
-                if r and r["email_confirmed"]:
-                    if D["full_name"] != r["name"]:
-                        errmsgs.append(
-                            format_errmsg(
-                                "Organizer name %s does not match the name %s of the account with email address %s",
-                                D["full_name"],
-                                r["name"],
-                                D["email"],
+                    )
+                if D["email"]:
+                    r = db.users.lookup(D["email"])
+                    if r and r["email_confirmed"]:
+                        if D["full_name"] != r["name"]:
+                            errmsgs.append(
+                                format_error(
+                                    "Organizer name %s does not match the name %s of the account with email address %s",
+                                    D["full_name"],
+                                    r["name"],
+                                    D["email"],
+                                )
                             )
-                        )
-                    else:
-                        if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
-                            flash(
-                                format_warning(
+                        else:
+                            if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
+                                flash_warning(
                                     "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
                                     D["homepage"],
                                     r["homepage"],
                                     D["email"],
                                 )
-                            )
-                        if D["display"]:
-                            contact_count += 1
+                            if D["display"]:
+                                contact_count += 1
 
-            organizer_data.append(D)
-    if contact_count == 0:
-        errmsgs.append(
-            format_errmsg(
-                "There must be at least one displayed organizer or curator with a %s so that there is a contact for this listing.<br>%s<br>%s",
-                "confirmed email",
-                "This email will not be visible if homepage is set or display is not checked, it is used only to identify the organizer's account.",
-                "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
+                organizer_data.append(D)
+        if contact_count == 0:
+            errmsgs.append(
+                format_error(
+                    "There must be at least one displayed organizer or curator with a %s so that there is a contact for this listing.<br>%s<br>%s",
+                    "confirmed email",
+                    "This email will not be visible if homepage is set or display is not checked, it is used only to identify the organizer's account.",
+                    "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
+                )
             )
-        )
-    # Don't try to create new_version using invalid input
-    if errmsgs:
-        return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
-        new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
-
-    # Warnings
-    sanity_check_times(new_version.start_time, new_version.end_time)
-    if not data["topics"]:
-        flash_warning("This series has no topics selected; don't forget to set the topics for each new talk individually.")
-    if seminar.new or new_version != seminar:
-        new_version.save()
-        edittype = "created" if new else "edited"
-        flash("Series %s successfully!" % edittype)
-    elif seminar.organizer_data == new_version.organizer_data:
-        flash("No changes made to series.")
-    if seminar.new or seminar.organizer_data != new_version.organizer_data:
-        new_version.save_organizers()
-        if not seminar.new:
-            flash("Series organizers updated!")
-    return redirect(url_for(".edit_seminar", shortname=shortname), 302)
-
+    return data, organizer_data, errmsgs
 
 @create.route("edit/institution/", methods=["GET", "POST"])
 @email_confirmed_required

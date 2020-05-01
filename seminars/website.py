@@ -18,14 +18,16 @@ from .app import app, set_running  # So that we can set it running below
 
 
 from . import users
-
 assert users
+
 from . import homepage
-
 assert homepage
-from . import create
 
+from . import create
 assert create
+
+from . import api
+assert api
 
 
 from lmfdb.backend import db

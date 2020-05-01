@@ -338,6 +338,10 @@ class SeminarsUser(UserMixin):
 
 
     @property
+    def api_token(self):
+        return self._data.get("api_token")
+
+    @property
     def ics(self):
         return generate_token(self.id, "ics")
 
