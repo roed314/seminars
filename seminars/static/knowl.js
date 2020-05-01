@@ -216,8 +216,8 @@ function knowl_click_handler(evt) {
     // otherwise assume its sitting inside a <div> or <p>
     if(table_mode) {
       // assume we are in a td or th tag, go 2 levels up
-      td_tag = knowl.parentNode
-      tr_tag = td_tag.parentNode
+      var td_tag = knowl.parentNode
+      var tr_tag = td_tag.parentNode
 
 
       // figure out max_width
