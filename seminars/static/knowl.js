@@ -210,7 +210,9 @@ function knowl_click_handler(evt) {
         console.log("err:" + err)
       }
     }, 'renderMathInElement')
-    toggle(knowl_output);
+    setTimeout(function () {
+      toggle(knowl_output);
+    }, 10);
   }
 } //~~ end click handler for *[knowl] elements
 

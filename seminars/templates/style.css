@@ -1527,14 +1527,15 @@ table .knowl a {
   margin-bottom: 15px;
   margin-right: 10px;
   text-align: left;
-  -webkit-transition: all 0.4s ease;
-  transition: all 0.4s ease;
+  transition: max-height 0.4s ease, border 0.4s ease-out;
   overflow-y: hidden;
   max-height: 1000px;
 }
 
 .knowl-output:not(.open) {
   max-height: 0px;
+  border: 0px;
+  margin: 0px;
 }
 
 
