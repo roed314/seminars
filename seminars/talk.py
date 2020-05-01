@@ -320,18 +320,18 @@ class WebTalk(object):
                     success = '<div class="access_button is_link">Livestream access <a href="%s">available</a>' % self.live_link
             else:
                 if self.is_starting_soon():
-                    success = '<div class="access_button no_link starting_soon"><b> Livestream access: %s </b></div>' % self.live_link
+                    success = '<div class="access_button no_link starting_soon"><b>Livestream access: %s </b></div>' % self.live_link
                 else:
                     success = '<div class="access_button no_link">Livestream access: %s</div>' % self.live_link
         if self.access == "open":
             return success
         elif self.access == "users":
             if user.is_anonymous:
-                return '<div class="access_button no_link"><b>To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % (
+                return '<div class="access_button no_link">To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % (
                     url_for("user.info")
                 )
             elif not user.email_confirmed:
-                return '<div class="access_button no_link"><b>To see access link, please confirm your email.</b></div>'
+                return '<div class="access_button no_link">To see access link, please confirm your email.</div>'
             else:
                 return success
         elif self.access == "endorsed":
@@ -339,7 +339,7 @@ class WebTalk(object):
                 return success
             else:
                 # TODO: add link to an explanation of endorsement
-                return '<div class="access_button no_link"><b>To see access link, you must be endorsed by another user.</b></div>'
+                return '<div class="access_button no_link">To see access link, you must be endorsed by another user.</div>'
         else:  # should never happen
             return ""
 
