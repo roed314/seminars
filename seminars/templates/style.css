@@ -604,6 +604,7 @@ form button.aslink:hover {
   border: 0;
   border-left: 15px solid {{color.flashes_border}};
   background: {{color.flashes_background}};
+  color: {{color.red}}
 }
 
 #flashes p.warning {
@@ -612,7 +613,7 @@ form button.aslink:hover {
   border: 0;
   border-left: 15px solid {{color.flashes_border}};
   background: {{color.flashes_background}};
-  color: {{color.black}}
+  color: {{color.grey}}
 }
 
 #main {
