@@ -613,7 +613,7 @@ form button.aslink:hover {
   border: 0;
   border-left: 15px solid {{color.flashes_border}};
   background: {{color.flashes_background}};
-  color: {{color.grey}}
+  color: {{color.black}}
 }
 
 #main {
