@@ -429,7 +429,7 @@ class WebTalk(object):
         cols.append(('class="talktitle"', self.show_knowl_title()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
-        cols.append(('style="display: none;"', self.show_link_title()))
+        #cols.append(('style="display: none;"', self.show_link_title()))
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def show_comments(self):

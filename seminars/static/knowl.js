@@ -149,16 +149,46 @@ function debounce(func, wait, immediate){
 }
 
 
-  function defer(method, property) {
-    if (window.hasOwnProperty(property)) {
-      method();
-    } else {
-      console.log("waiting for " + property + "to be loaded")
-      setTimeout(function() { defer(method, property) }, 100)
-    }
+function defer(method, property) {
+  if (window.hasOwnProperty(property)) {
+    method();
+  } else {
+    console.log("waiting for " + property + "to be loaded")
+    setTimeout(function() { defer(method, property) }, 100)
   }
+}
 
+var siblings = function(node, tagName) {
+    siblingList = Array.from(node.parentNode.children).filter(function(val) {
+        return val.tagName.toLowerCase() == tagName.toLowerCase();
+    });
+    return siblingList;
+}
 
+function toggle(element) {
+  foo = element;
+  if (!element.classList.contains('open')) {
+      element.classList.add('open');
+      element.style.height = 'auto';
+      var height = element.clientHeight + 'px';
+    console.log("height = " + height);
+
+      element.style.height = '0px';
+
+      setTimeout(function () {
+        element.style.height = height;
+      }, 0);
+    } else {
+      element.style.height = '0px';
+
+      element.addEventListener('transitionend', function () {
+        console.log('done');
+        element.classList.remove('open');
+      }, {
+        once: true
+      });
+    }
+}
 
 function knowl_click_handler(evt) {
   var knowl = evt.target || evt.srcElement
@@ -172,11 +202,8 @@ function knowl_click_handler(evt) {
 
   // if we already have the content, toggle visibility
   if (output) {
-    if (table_mode) {
-      output.parentNode.parentNode.style.display = 'none';
-    }
-    output.style.display = 'none';
-    knowl.classList.add("active")
+    knowl.classList.toggle("active")
+    toggle(output);
   } else {
     knowl.classList.add("active")
     // create the element for the content, insert it after the one where the
@@ -185,22 +212,46 @@ function knowl_click_handler(evt) {
     knowl_output.classList.add('knowl-output')
     knowl_output.setAttribute('id', output_id)
     knowl_output.innerHTML = '<div class="knowl"><div><div class="knowl-content">' + kwargs + '</div></div></div>'
-    knowl_output.style.display = 'block';
     // behave a bit differently, if the knowl is inside a td or th in a table.
     // otherwise assume its sitting inside a <div> or <p>
     if(table_mode) {
       // assume we are in a td or th tag, go 2 levels up
-      var td_tag = knowl.parentNode
-      var tr_tag = td_tag.parentNode
+      td_tag = knowl.parentNode
+      tr_tag = td_tag.parentNode
+
+
+      // figure out max_width
+      var row_width = tr_tag.clientWidth;
+      console.log("row_width: " + row_width);
+      // no larger than the current row width (for normal tables)
+      // at least 700px (for small tables)
+      // and deduce margins and borders
+      var margins_and_borders = 2*20 + parseInt(window.getComputedStyle(td_tag, null).getPropertyValue('padding-left')) + parseInt(window.getComputedStyle(td_tag, null).getPropertyValue('padding-right'));
+      console.log("margins_and_borders: " + margins_and_borders);
+      var max_width = Math.max(700, row_width) - margins_and_borders;
+
+      console.log("max_width: " + max_width);
+      knowl_output.style.maxWidth = max_width + "px"
+
+      //max rowspan of this row
+      var max_rowspan = Array.from(tr_tag.children).reduce((acc, td) => Math.max(acc, td.rowSpan), 0)
+      console.log("max_rowspan: " + max_rowspan);
+
+      //compute max number of columns in the table
+      var cols = Array.from(tr_tag.children).reduce((acc, td) => acc + td.colSpan, 0)
+      cols = Array.from(siblings(tr_tag, 'tr')).reduce((ac, tr) => Math.max(ac, Array.from(tr.children).reduce((acc, td) => acc + td.colSpan, 0)), cols);
+      console.log("cols: " + cols);
+      for (var i = 0; i < max_rowspan-1; i++)
+        tr_tag = tr_tag.next();
+
+
+
       // create two rows
-
-
-
       // the real row
       var newrow = document.createElement('tr')
       newrow.className = tr_tag.className
       var col = document.createElement('td')
-      col.setAttribute('colspan', 0)
+      col.setAttribute('colspan', cols)
       col.appendChild(knowl_output)
       newrow.appendChild(col)
       tr_tag.insertAdjacentElement('afterend', newrow)
@@ -222,6 +273,7 @@ function knowl_click_handler(evt) {
         console.log("err:" + err)
       }
     }, 'renderMathInElement')
+    toggle(knowl_output);
   }
 } //~~ end click handler for *[knowl] elements
 

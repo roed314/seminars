@@ -1523,12 +1523,19 @@ table .knowl a {
   border: 10px solid {{ color.knowl_border }};
   {{ BORDER_RADIUS(10) }}
   padding: 0px;
-  display: none;
   margin-top: 10px;
   margin-bottom: 15px;
   margin-right: 10px;
   text-align: left;
+  -webkit-transition: height 0.4s ease;
+  transition: height 0.4s ease;
+  overflow-y: hidden;
 }
+
+.knowl-output:not(.open) {
+  display: none;
+}
+
 
 .knowl-output .knowl-output,
 .knowl-output .knowl-output.loading {
