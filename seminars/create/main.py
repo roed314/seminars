@@ -659,6 +659,30 @@ def save_talk():
     resp, talk = can_edit_talk(raw_data.get("seminar_id", ""), raw_data.get("seminar_ctr", ""), token)
     if resp is not None:
         return resp
+
+    data, errmsgs = process_save_talk(talk, raw_data)
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
+    else: # to make it obvious that these two statements should be together
+        new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
+
+    # Warnings
+    sanity_check_times(new_version.start_time, new_version.end_time)
+    if new_version == talk:
+        flash("No changes made to talk.")
+    else:
+        new_version.save()
+        edittype = "created" if talk.new else "edited"
+        flash("Talk successfully %s!" % edittype)
+    edit_kwds = dict(seminar_id=new_version.seminar_id, seminar_ctr=new_version.seminar_ctr)
+    if token:
+        edit_kwds["token"] = token
+    else:
+        edit_kwds.pop("token", None)
+    return redirect(url_for(".edit_talk", **edit_kwds), 302)
+
+def process_save_talk(talk, raw_data, warn=flash_warning, format_error=format_errmsg, format_input_error=format_input_errmsg):
     errmsgs = []
 
     data = {
@@ -676,14 +700,20 @@ def save_talk():
     default_tz = talk.seminar.timezone
     if not default_tz:
         default_tz = "UTC"
-    data["timezone"] = tz = raw_data.get("timezone", default_tz)
+    tz = raw_data.get("timezone", getattr(talk, "timezone", default_tz))
+    data["timezone"] = tz
     tz = pytz.timezone(tz)
+
     for col in db.talks.search_cols:
         if col in data:
             continue
+        # For the API, we want to carry over unspecified columns from the previous data
+        if col not in raw_data:
+            data[col] = getattr(seminar, col, None)
+            continue
         typ = db.talks.col_type[col]
         try:
-            val = raw_data.get(col, "")
+            val = raw_data[col]
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
             if col == "access" and data[col] not in ["open", "users", "endorsed"]:
@@ -699,31 +729,11 @@ def save_talk():
     data["subjects"] = clean_subjects(data.get("subjects"))
     if not data["subjects"]:
         errmsgs.append("Please select at least one subject")
-
-    # Don't try to create new_version using invalid input
-    if errmsgs:
-        return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
-        new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
-
-    # Warnings
-    sanity_check_times(new_version.start_time, new_version.end_time)
     if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
-        flash_warning("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
+        warn("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
     if not data["topics"]:
-        flash_warning("This talk has no topics, and thus will only be visible to users when they disable their topics filter.")
-    if new_version == talk:
-        flash("No changes made to talk.")
-    else:
-        new_version.save()
-        edittype = "created" if talk.new else "edited"
-        flash("Talk successfully %s!" % edittype)
-    edit_kwds = dict(seminar_id=new_version.seminar_id, seminar_ctr=new_version.seminar_ctr)
-    if token:
-        edit_kwds["token"] = token
-    else:
-        edit_kwds.pop("token", None)
-    return redirect(url_for(".edit_talk", **edit_kwds), 302)
+        warn("This talk has no topics, and thus will only be visible to users when they disable their topics filter.")
+    return data, errmsgs
 
 
 def make_date_data(seminar, data):

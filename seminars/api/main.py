@@ -113,4 +113,8 @@ def save_seminar(version, user):
 @api_page.route("/<int:version>/save/talk/", methods=["POST"])
 @api_auth_required
 def save_talk(version, user):
-    pass
+    if version != 1:
+        raise APIError({"code": "invalid_version",
+                        "description": "Unknown API version: %s" % version}, 400)
+    raw_data = request.get_json()
+    
