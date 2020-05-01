@@ -40,53 +40,6 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     </table>
   {% endif %}
 {% endfor %}
-{% if not seminars and not conferences %}
-<p>To add a talk, create a series first.</p>
-{% endif %}
-{% if deleted_seminars or deleted_talks %}
-<p><a href="#" onclick="$('#deleted_stuff').show(); return false;">Show deleted items</a></p>
-<div id="deleted_stuff" style="display:none;">
-  {% if deleted_seminars %}
-  <h2>Deleted series</h2>
-  <table class="ntdata">
-    <thead>
-      <th>Name</th>
-      <th>Revive/Permanently delete</th>
-    </thead>
-    {% for seminar in deleted_seminars %}
-    <tr>
-      <td> {{seminar.name}} (deleted) </td>
-      <td> <a href="{{ url_for('.deleted_seminar', shortname=seminar.shortname) }}">Edit</a> </td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
-  {% if deleted_talks %}
-  <h2>Deleted talks</h2>
-  <table class="ntdata">
-    <thead>
-      <th>Series</th>
-      <th>Time</th>
-      <th>Speaker</th>
-      <th>Title</th>
-      <th>Revive/Permanently delete</th>
-    </thead>
-    {% for talk in deleted_talks %}
-    <tr>
-      <td> {{talk.seminar.name}}</td>
-      <td> {{talk.show_start_time() | safe}}</td>
-      <td> {{talk.show_speaker(affiliation=False) | safe}}</td>
-      <td> {{talk.show_knowl_title() | safe}}</td>
-      <td> <a href="{{ url_for('.deleted_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Edit</a> </td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
-</div>
-{% endif %}
-</div>
-
-
 <h2>Create a series</h2>
 
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
@@ -135,6 +88,48 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     </tr>
   </table>
 </form>
+{% if deleted_seminars or deleted_talks %}
+<p><a href="#" onclick="$('#deleted_stuff').show(); return false;">Show deleted items</a></p>
+<div id="deleted_stuff" style="display:none;">
+  {% if deleted_seminars %}
+  <h2>Deleted series</h2>
+  <table class="ntdata">
+    <thead>
+      <th>Name</th>
+      <th>Revive/Permanently delete</th>
+    </thead>
+    {% for seminar in deleted_seminars %}
+    <tr>
+      <td> {{seminar.name}} (deleted) </td>
+      <td> <a href="{{ url_for('.deleted_seminar', shortname=seminar.shortname) }}">Edit</a> </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+  {% if deleted_talks %}
+  <h2>Deleted talks</h2>
+  <table class="ntdata">
+    <thead>
+      <th>Series</th>
+      <th>Time</th>
+      <th>Speaker</th>
+      <th>Title</th>
+      <th>Revive/Permanently delete</th>
+    </thead>
+    {% for talk in deleted_talks %}
+    <tr>
+      <td> {{talk.seminar.name}}</td>
+      <td> {{talk.show_start_time() | safe}}</td>
+      <td> {{talk.show_speaker(affiliation=False) | safe}}</td>
+      <td> {{talk.show_knowl_title() | safe}}</td>
+      <td> <a href="{{ url_for('.deleted_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Edit</a> </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+{% endif %}
+</div>
 
 
 <script type="text/javascript">
