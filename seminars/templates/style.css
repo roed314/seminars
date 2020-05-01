@@ -1543,9 +1543,9 @@ div.limit-height {
 .warning {
     margin: 20px 0 20px 0;
     padding: 10px;
-    border: 1px solid {{color.red}};
-    color: {{color.grey}};
-    font-size: 120%;
+    border: 1px solid {{color.yellow}};
+    color: {{color.yellow}};
+    font-size: 110%;
 }
 
 /* TODO: where?*/
