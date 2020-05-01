@@ -1,6 +1,17 @@
 // Keep public namespace clean
 (function(root) {
 
+  function defer(method, property) {
+    if (window.hasOwnProperty(property)) {
+      method();
+    } else {
+      console.log("waiting for " + property + " to be loaded")
+      setTimeout(function() { defer(method, property) }, 100)
+    }
+  }
+
+
+
   // constructor
   function SeminarEmbedder() {
     // anything to do?
@@ -71,11 +82,14 @@
     // Success!! Process the response, attach anything we need
     var embed_el = response.getElementById('embed_content');
 
-    // Works if katex has been loaded. Anything to test?
-    renderMathInElement(embed_el, katexOpts);
+    //render content
+    defer(function () {renderMathInElement(embed_el, katexOpts)}, 'renderMathInElement');
 
     target.innerText = "";
     target.appendChild(embed_el);
+
+    //register knowl handles
+    defer(function () {knowl_register_onclick(target)}, 'knowl_register_onclick');
 
     // Mark it as processed by changing the class
     target.classList.remove("embedding_in_prog_schedule");
@@ -191,6 +205,19 @@
                   // End of onload for our katex customizations
                 }});
 
+
+  }
+
+  SeminarEmbedder.prototype.addKnowl = function () {
+    if (this.knowlAdded)
+      return;
+
+    if ( window.hasOwnProperty('knowl_register_onclick') ) {
+      // Assume whoever wrote the embedding page knows what they're doing
+      this.knowlAdded = true;
+      return;
+    };
+    this.addJS("{{ url_for('static', filename='knowl.js', _external=True, _scheme=scheme) }}", {});
   }
 
   SeminarEmbedder.prototype.initialize = function(opts) {
@@ -203,10 +230,14 @@
 
     // addKatex is idempotent
     this.addKatex();
+    this.addKnowl();
 
     this.initialized = true;
 
     this.processEmbeds();
+
+
+
   }
 
   //////////////////////////////
