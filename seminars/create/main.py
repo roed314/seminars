@@ -5,30 +5,43 @@ from seminars.users.main import email_confirmed_required
 from seminars import db
 from seminars.create import create
 from seminars.utils import (
-    timezones,
-    process_user_input,
-    weekdays,
-    short_weekdays,
-    flash_warning,
-    localize_time,
-    clean_topics,
-    clean_language,
     adapt_datetime,
-    sanity_check_times,
+    clean_language,
+    clean_subjects,
+    clean_topics,
+    flash_warning,
     format_errmsg,
     format_input_errmsg,
     format_warning,
+    localize_time,
+    process_user_input,
+    sanity_check_times,
+    short_weekdays,
     show_input_errors,
+    timezones,
+    weekdays,
 )
-from seminars.seminar import WebSeminar, can_edit_seminar, seminars_search, seminars_lookup
-from seminars.talk import WebTalk, talks_max, talks_search, talks_lucky, talks_lookup, can_edit_talk
+from seminars.seminar import (
+    WebSeminar,
+    can_edit_seminar,
+    seminars_lookup,
+    seminars_search,
+)
+from seminars.talk import (
+    WebTalk,
+    can_edit_talk,
+    talks_lookup,
+    talks_lucky,
+    talks_max,
+    talks_search,
+)
 from seminars.institution import (
     WebInstitution,
     can_edit_institution,
-    institutions,
-    institution_types,
-    institution_known,
     clean_institutions,
+    institution_known,
+    institution_types,
+    institutions,
 )
 from seminars.lock import get_lock
 from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
@@ -131,6 +144,12 @@ def edit_seminar():
     if resp is not None:
         return resp
     if new:
+        subjects = clean_subjects(data.get("subjects"))
+        if not subjects:
+            return show_input_errors([format_errmsg("Please select at least one subject.")])
+        else:
+            seminar.subjects = subjects
+
         seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", None)
         if seminar.is_conference:
             seminar.frequency = 1
@@ -184,7 +203,7 @@ def delete_seminar(shortname):
         return failure()
     else:
         if seminar.delete():
-            flash("Seminar deleted")
+            flash("Series deleted")
             return redirect(url_for(".deleted_seminar", shortname=shortname), 302)
         else:
             flash_error("Only the owner of the seminar can delete it")
@@ -208,18 +227,18 @@ def revive_seminar(shortname):
     seminar = seminars_lookup(shortname, include_deleted=True)
 
     if seminar is None:
-        flash_error("Seminar %s was deleted permanently", shortname)
+        flash_error("Series %s was deleted permanently", shortname)
         return redirect(url_for(".index"), 302)
     if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
         flash_error("You do not have permission to revive seminar %s", shortname)
         return redirect(url_for(".index"), 302)
     if not seminar.deleted:
-        flash_error("Seminar %s was not deleted, so cannot be revived", shortname)
+        flash_error("Series %s was not deleted, so cannot be revived", shortname)
     else:
         db.seminars.update({"shortname": shortname}, {"deleted": False})
         db.talks.update({"seminar_id": shortname}, {"deleted": False})
         flash(
-            "Seminar %s revived.  You should reset the organizers, and note that any users that were subscribed no longer are."
+            "Series %s revived.  You should reset the organizers, and note that any users that were subscribed no longer are."
             % shortname
         )
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
@@ -231,7 +250,7 @@ def permdelete_seminar(shortname):
     seminar = seminars_lookup(shortname, include_deleted=True)
 
     if seminar is None:
-        flash_error("Seminar %s already deleted permanently", shortname)
+        flash_error("Series %s already deleted permanently", shortname)
         return redirect(url_for(".index"), 302)
     if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
         flash_error("You do not have permission to delete seminar %s", shortname)
@@ -242,7 +261,7 @@ def permdelete_seminar(shortname):
     else:
         db.seminars.delete({"shortname": shortname})
         db.talks.delete({"seminar_id": shortname})
-        flash("Seminar %s permanently deleted" % shortname)
+        flash("Series %s permanently deleted" % shortname)
         return redirect(url_for(".index"), 302)
 
 
@@ -371,7 +390,7 @@ def save_seminar():
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["name"]:
-        errmsgs.append("Seminar name cannot be blank")
+        errmsgs.append("The name cannot be blank")
     if seminar.is_conference and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date")
     for col in ["frequency", "per_day"]:
@@ -380,6 +399,9 @@ def save_seminar():
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
+    data["subjects"] = clean_subjects(data.get("subjects"))
+    if not data["subjects"]:
+        errmsgs.append(format_errmsg("Please select at least one subject."))
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
@@ -454,19 +476,23 @@ def save_seminar():
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
+    else: # to make it obvious that these two statements should be together
+        new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
 
-    new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
+    # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
+    if not data["topics"]:
+        flash_warning("This series has no topics selected; don't forget to set the topics for each new talk individually.")
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
-        flash("Seminar %s successfully!" % edittype)
+        flash("Series %s successfully!" % edittype)
     elif seminar.organizer_data == new_version.organizer_data:
-        flash("No changes made to seminar.")
+        flash("No changes made to series.")
     if seminar.new or seminar.organizer_data != new_version.organizer_data:
         new_version.save_organizers()
         if not seminar.new:
-            flash("Seminar organizers updated!")
+            flash("Series organizers updated!")
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
 
@@ -664,15 +690,24 @@ def save_talk():
         errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
     if data["start_time"] is None or data["end_time"] is None:
         errmsgs.append("Talks must have both a start and end time.")
+    data["topics"] = clean_topics(data.get("topics"))
+    data["language"] = clean_language(data.get("language"))
+    data["subjects"] = clean_subjects(data.get("subjects"))
+    if not data["subjects"]:
+        errmsgs.append("Please select at least one subject")
+
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
-    if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
-        flash_warning("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.\n")
-    data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
-    new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
+    else: # to make it obvious that these two statements should be together
+        new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
+
+    # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
+    if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
+        flash_warning("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
+    if not data["topics"]:
+        flash_warning("This talk has no topics, and thus will only be visible to users when they disable their topics filter.")
     if new_version == talk:
         flash("No changes made to talk.")
     else:
@@ -820,6 +855,8 @@ def edit_seminar_schedule():
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
+    if not seminar.topics:
+        flash_warning("This series has no topics selected; don't forget to set the topics for each new talk individually.")
     seminar, all_dates, by_date, slots = make_date_data(seminar, data)
     title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(

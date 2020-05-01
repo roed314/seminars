@@ -21,6 +21,7 @@
       <form id="seminarform" action="{{ url_for('.save_seminar') }}" method="POST">
         <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
         <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
+        <input type="hidden" name="subjects" value="{{ seminar.subjects  | safe }}" />
         <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
         <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
         <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
@@ -47,6 +48,13 @@
           <td>{{ KNOWL("institutions") }}</td>
           <td><span id="institution_selector" style="width:610px;"></span></td>
         </tr>
+        {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
+        <tr>
+          <td>{{ ASTKNOWL("subjects") }}</td>
+          <td><span id="subject_selector" style="width:610px;"></span></td>
+          <td class="forminfo">Select at least one subject</td>
+        <tr>
+        {% endif %}
         <tr>
           <td>{{ KNOWL("topics") }}</td>
           <td><span id="topic_selector" style="width:610px;"></span></td>
@@ -252,19 +260,28 @@ const langOptions = [
   {% endfor %}
 ];
 
+const subjOptions = [
+  {% for sid, name in subjects %}
+  {
+    label: "{{ name }}",
+    value: "{{ sid }}",
+  },
+  {% endfor %}
+];
+
 $(document).ready(function() {
-      function swapv(a,b) {
-        var x = $('input[name="'+a+'"]')[0].value;
-        $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
-        $('input[name="'+b+'"]')[0].value = x;
-        x = $('input[name="'+a+'"]')[0].value;
-      }
-      function swapc(a,b) {
-        var x = $('input[name="'+a+'"]')[0].checked;
-        $('input[name="'+a+'"]')[0].checked = $('input[name="'+b+'"]')[0].checked;
-        $('input[name="'+b+'"]')[0].checked = x;
-        x = $('input[name="'+a+'"]')[0].checked;
-      }
+  function swapv(a,b) {
+    var x = $('input[name="'+a+'"]')[0].value;
+    $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
+    $('input[name="'+b+'"]')[0].value = x;
+    x = $('input[name="'+a+'"]')[0].value;
+  }
+  function swapc(a,b) {
+    var x = $('input[name="'+a+'"]')[0].checked;
+    $('input[name="'+a+'"]')[0].checked = $('input[name="'+b+'"]')[0].checked;
+    $('input[name="'+b+'"]')[0].checked = x;
+    x = $('input[name="'+a+'"]')[0].checked;
+  }
   {% for i in range(1,(seminar.organizer_data | length)) %}
     $("a.swap{{i}}").click(function(e){
       e.preventDefault();
@@ -275,17 +292,33 @@ $(document).ready(function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
-  var topicSelector = makeTopicSelector(
+  makeTopicSelector(
     topicOptions,
     {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
   );
-  var instSelector = makeInstitutionSelector(
+    makeInstitutionSelector(
     instOptions,
     {{ seminar.institutions | safe }},
   );
-  var langSelector = makeLanguageSelector(
+    makeLanguageSelector(
     langOptions,
     {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %});
+    makeSubjectSelector(
+      subjOptions,
+      {{ seminar.subjects | safe }});
+
+  $('input[name="subjects"]').change(
+    function (){
+      if( $(this).val() == '[]') {
+      $("#subject_selector").notify(
+      "Please select at least one subject",
+        {className: "error", position: "right"})
+      } else {
+      $("#topic_selector").notify(
+      "Save your changes to load new topics options",
+        {className: "info", position: "right"})
+      }
+    });
 });
 
 
