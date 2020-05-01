@@ -1,11 +1,13 @@
-$(function() {
- /* properties box collapsable click handlers */
- $(".properties-header,#properties-collapser").click(function(evt) { properties_collapser(evt); });
- /* providing watermark examples in those forms, that have an 'example=...' attribute */
- /* Add extra spaces so that if you type in exactly the example it does not disappear */
- $('input[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   '  ) } )
- $('textarea[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   ', {useNative:false}  ) } )
-});
+// This is from lmfdb.js, we will need this once we stop importing that file
+// $(function() {
+//  /* properties box collapsable click handlers */
+//  $(".properties-header,#properties-collapser").click(function(evt) { properties_collapser(evt); });
+//  /* providing watermark examples in those forms, that have an 'example=...' attribute */
+//  /* Add extra spaces so that if you type in exactly the example it does not disappear */
+//  $('input[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   '  ) } )
+//  $('textarea[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   ', {useNative:false}  ) } )
+// });
+
 
 
 function toggle_time(id) {
