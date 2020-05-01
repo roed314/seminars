@@ -19,50 +19,16 @@
   <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
   <input type="hidden" name="slots" value="{{ slots }}" />
   <input type="hidden" name="referrer" value="schedule" />
-  <h2>Show</h2>
+ {% if not seminar.is_conference %}
   <table id="edit-schedule-refresh">
     <tr>
-      <th style="padding-left:0px;padding-right:0px;">Start date</th>
-      <td><input name="begin" value="{{ raw_data.begin }}" style="width:120px;" /></td>
-      <th style="padding-right:0px;">End date</th>
-      <td><input name="end" value="{{ raw_data.end}}" style="width:120px;" /></td>
-      {% if not seminar.is_conference %}
-      <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
-      <th style="padding-right:0px;">Time slots</th>
-      <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
-            <option value="1" {% if seminar.frequency == 1 %}selected{% endif %}>daily</option>
-            <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
-            <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
-            <option value="21" {% if seminar.frequency == 21 %}selected{% endif %}>every third week</option>
-          </select></td>
-        <td style="padding-left:20px;"><button type="submit" name="refresh" value="yes">Refresh</button></td>
+      <th style="padding-left:0px;padding-right:0px; font-size=110%">Show from</th>
+      <td><input name="begin" value="{{ raw_data.begin }}" style="width:110px;" /></td>
+      <th style="padding-right:0px;">to</th>
+      <td><input name="end" value="{{ raw_data.end}}" style="width:110px;" /></td>
     </tr>
-    {% for i in range(max_slots//3) %}
-      <tr>
-        {% if i == 0 %}
-          <td sytle="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
-          <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
-          <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
-        {% else %}
-          <td></td><td></td><td></td>
-        {% endif %}
-      </td>
-      {% for j in range(3) %}
-      <td style="padding-right:1px; margin-right:0px;">
-        <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="display:none;">
-          <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
-          {% for wkday in short_weekdays %}
-            <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
-          {% endfor %}
-        </select>
-      </td>
-      <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-        <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
-      </td>
-      {% endfor %}
-    {% endfor %}
-    {% endif %}
   </table>
+ {% endif %}
   <br>
   <div><div class="inlineh2">Schedule</div> <button type="submit" class="textbottom">Save all changes</button> <a style="margin-left: 30px" href="{{ url_for('.edit_seminar_schedule', shortname=seminar.shortname) }}">Cancel all changes</a></div>
   <table id="edit-schedule-table">
