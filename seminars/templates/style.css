@@ -1535,7 +1535,6 @@ table .knowl a {
 
 .knowl-output:not(.open) {
   max-height: 0px;
-  display: none;
 }
 
 
