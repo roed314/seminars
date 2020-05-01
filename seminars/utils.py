@@ -16,6 +16,8 @@ from email_validator import validate_email
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+daytime_re_string = r'(\d{1,2}|\d{1,2}:\d\d)'
+daytime_re = re.compile(daytime_re_string)
 
 def topdomain():
     # return 'mathseminars.org'
@@ -30,6 +32,37 @@ def validate_url(x):
         return all([result.scheme, result.netloc])
     except:
         return False
+
+def validate_daytime(s):
+    s = s.strip()
+    if not daytime_re.fullmatch(s):
+        return None
+    t = s.split(':')
+    h,m = int(t[0]),int(t[1])
+    return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
+
+def validate_daytime_interval(s):
+    t = s.strip().split('-')
+    if len(t) != 2:
+        return 0;
+    start, end = validate_daytime(t[0]), validate_daytime(t[1])
+    if start is None or end is None:
+        return None
+    return start + '-' + end
+
+def daytime_minutes(s):
+    t = s.split(':')
+    return 60*int(t[0])+int(t[1])
+
+def daytime_interval_minutes(s):
+    t = s.split('-')
+    start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
+    return end - start if end > start else 24*60-start + end
+
+def daytime_interval_early(s):
+    t = s.split('-')
+    start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
+    return start > end or start < 6*60
 
 def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
@@ -434,6 +467,19 @@ def process_user_input(inp, col, typ, tz):
         return validate_email(inp.strip())["email"]
     elif typ == "timestamp with time zone":
         return localize_time(parse_time(inp), tz)
+    elif typ == "daytime":
+        res = validate_daytime(inp)
+        if res is None:
+            raise ValueError("Invalid time of day, expected format is hh:mm")
+    elif typ == "daytime_interval":
+        res = validate_daytime_interval(inp)
+        if res is None:
+            raise ValueError("Invalid time of day interval, expected format is hh:mm-hh:mm")
+    elif typ == "weekday_number":
+        res = int(inp)
+        if res < 0 or res >= 7:
+            raise ValueError("Invalid day of week, must be an integer in [0,6]")
+        return res
     elif typ == "date":
         return parse_time(inp).date()
     elif typ == "boolean":

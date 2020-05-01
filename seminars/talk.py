@@ -122,7 +122,6 @@ class WebTalk(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
-        data["topics"] = self.topics if self.topics else []
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):

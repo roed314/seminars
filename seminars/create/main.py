@@ -20,6 +20,8 @@ from seminars.utils import (
     show_input_errors,
     timezones,
     weekdays,
+    daytime_interval_early,
+    daytime_interval_minutes,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -406,6 +408,24 @@ def save_seminar():
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
+    data["weekdays"] = []
+    data["time_slots"] = []
+    for i in range(MAX_SLOTS):
+        weekday = time_slot = None
+        try:
+            val = raw_data.get("weekday"+str(i),"")
+            weekday = process_user_input(val, "weekday", "weekday_number", tz)
+            val = raw_data.get("time_slot"+str(i),"")
+            time_slot = process_user_input(val, "time_slot", "daytime_interval", tz)
+        except Exception as err:  # should only be ValueError's but let's be cautious
+            errmsgs.append(format_input_errmsg(err, val, col))
+        if weekday is not None and time_slot is not None:
+            data["weekdays"].append(weekday)
+            data["time_slots"].append(time_slot)
+            if daytime_interval_early(time_slot):
+                flash(format_warning("Time slot %s includes early AM hours, please verify that this is correct (use 24-hour time format).",val))
+            elif daytime_interval_minutes(time_slot) > 8*60:
+                flash(format_warning("Time slot %s is longer than 8 hours, please verify that this is correct.",val))
     organizer_data = []
     contact_count = 0
     for i in range(10):

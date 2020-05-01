@@ -163,7 +163,6 @@ class WebSeminar(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
         assert data.get("shortname")
-        data["topics"] = self.topics if self.topics else []
         data["edited_by"] = int(current_user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
