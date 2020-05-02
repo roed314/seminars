@@ -866,6 +866,7 @@ def layout_schedule(seminar, data):
             if (t[0], t[1], None) in newslots:
                 newslots.remove((t[0], t[1], None))
         print([t[1] for t in slots])
+        print([slot_start_time(t) for t in slots])
         slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
     return slots
 
