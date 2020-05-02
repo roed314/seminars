@@ -4,10 +4,17 @@ from seminars import db
 from seminars.app import app
 from seminars.api import api_page
 from seminars.seminar import WebSeminar, seminars_lookup
+from seminars.talk import WebTalk, talks_lookup
 from seminars.users.pwdmanager import SeminarsUser
 from seminars.utils import allowed_shortname, sanity_check_times
-from seminars.create.main import process_save_seminar
+from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
+
+def format_error(msg, *args):
+    return msg % args
+
+def format_input_error(err, inp, col):
+    return 'Unable to process input "%s" for property %s: %s' % (inp, col, err)
 
 class APIError(Exception):
     def __init__(self, error, status):
@@ -51,63 +58,63 @@ def test_api(user):
     response = jsonify({"code": "success"})
     return response
 
-@api_page.route("/<int:version>/save/seminar/", methods=["POST"])
+@api_page.route("/<int:version>/save/series/", methods=["POST"])
 @api_auth_required
-def save_seminar(version, user):
+def save_series(version, user):
     if version != 1:
         raise APIError({"code": "invalid_version",
                         "description": "Unknown API version: %s" % version}, 400)
     raw_data = request.get_json()
-    shortname = raw_data.get("shortname")
-    if shortname is None:
-        raise APIError({"code": "unspecified_shortname",
-                        "description": "You must specify shortname when saving a series"}, 400)
-    seminar = seminars_lookup(shortname, include_deleted=True)
-    if seminar is None:
-        # Creating new seminar
-        if not allowed_shortname(shortname) or len(shortname) < 3 or len(shortname) > 32:
-            raise APIError({"code": "invalid_shortname",
+    # Temporary measure while we rename shortname
+    series_id = raw_data.pop("series_id", None)
+    raw_data["shortname"] = series_id
+    if series_id is None:
+        raise APIError({"code": "unspecified_series_id",
+                        "description": "You must specify series_id when saving a series"}, 400)
+    series = seminars_lookup(series_id, include_deleted=True)
+    if series is None:
+        # Creating new series
+        if not allowed_shortname(series_id) or len(series_id) < 3 or len(series_id) > 32:
+            raise APIError({"code": "invalid_series_id",
                            "description": "The identifier must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores."}, 400)
         update_organizers = True
-        seminar = WebSeminar(shortname, data=None, editing=True)
+        series = WebSeminar(series_id, data=None, editing=True, user=user)
     else:
         # Make sure user has permission to edit
-        if not seminar.user_can_edit(user):
+        if not series.user_can_edit(user):
             raise APIError({"code":"unauthorized_user",
-                            "description": "You do not have permission to edit %s." % shortname}, 401)
-        if seminar.deleted:
+                            "description": "You do not have permission to edit %s." % series_id}, 401)
+        if series.deleted:
             raise APIError({"code": "norevive",
-                            "description": "You cannot revive a seminar through the API"})
+                            "description": "You cannot revive a series through the API"})
         update_organizers = False
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    def format_error(msg, *args):
-        return msg % args
-    def format_input_error(err, inp, col):
-        return 'Unable to process input "%s" for property %s: %s' % (inp, col, err)
-    data, organizer_data, errmsgs = process_save_seminar(seminar, raw_data, warn, format_error, format_input_error, update_organizers)
+    data, organizer_data, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers)
     if errmsgs:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
                         "errors": errmsgs}, 400)
-    new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
+    new_version = WebSeminar(series_id, data=data, organizer_data=organizer_data)
     sanity_check_times(new_version.start_time, new_version.end_time, warn)
-    if seminar.new or new_version != seminar:
+    if series.new or new_version != series:
+        # Series saved by the API are not displayed until user approves
+        new_version.display = False
         new_version.save(user)
     else:
         raise APIError({"code": "no_changes",
                         "description": "No changes detected"}, 400)
-    if seminar.new:
+    if series.new:
         new_version.save_organizers()
-    edittype = "created" if seminar.new else "edited"
+    edittype = "created" if series.new else "edited"
     if warnings:
         response = jsonify({"code": "warning",
-                            "description": "seminar successfully %s, but..." % edittype,
+                            "description": "series successfully %s, but..." % edittype,
                             "warnings": warnings})
     else:
         response = jsonify({"code": "success",
-                            "description": "seminar successfully %s" % edittype})
+                            "description": "series successfully %s" % edittype})
     return response
 
 @api_page.route("/<int:version>/save/talk/", methods=["POST"])
@@ -117,4 +124,33 @@ def save_talk(version, user):
         raise APIError({"code": "invalid_version",
                         "description": "Unknown API version: %s" % version}, 400)
     raw_data = request.get_json()
-    
+    # Temporary measure while we rename seminar_id
+    series_id = raw_data.pop("series_id", None)
+    raw_data["seminar_id"] = series_id
+    if series_id is None:
+        raise APIError({"code": "unspecified_series_id",
+                        "description": "You must specify series_id when saving a talk"}, 400)
+    series = seminars_lookup(series_id)
+    if series is None:
+        raise APIError({"code": "no_series",
+                        "description": "The series %s does not exist (or is deleted)" % series_id}, 400)
+    else:
+        # Make sure user has permission to edit
+        if not series.user_can_edit(user):
+            raise APIError({"code": "unauthorized_user",
+                            "description": "You do not have permission to edit %s." % series_id}, 401)
+    # Temporary measure while we rename seminar_ctr
+    series_ctr = raw_data.pop("series_ctr", None)
+    raw_data["seminar_ctr"] = series_ctr
+    if series_ctr is None:
+        # Creating new talk
+        talk = WebTalk(series_id, seminar=series, editing=True)
+    else:
+        talk = talks_lookup(series_id, series_ctr)
+        if talk is None:
+            raise APIError({"code": "no_talk",
+                            "description": "The talk %s/%s does not exist (or is deleted)" % (series_id, series_ctr)}, 400)
+    warnings = []
+    def warn(msg, *args):
+        warnings.append(msg % args)
+    data, errmsgs = process_save_talk()

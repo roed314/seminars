@@ -30,8 +30,10 @@ combine = datetime.combine
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False, deleted=False
+        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False, deleted=False, user=None,
     ):
+        if user is None:
+            user = current_user
         if data is None and not editing:
             data = seminars_lookup(shortname, include_deleted=deleted)
             if data is None:
@@ -44,12 +46,12 @@ class WebSeminar(object):
             if data.get("institutions") is None:
                 data["institutions"] = []
             if data.get("timezone") is None:
-                data["timesone"] = str(current_user.tz)
+                data["timesone"] = str(user.tz)
         self.new = data is None
         self.deleted = False
         if self.new:
             self.shortname = shortname
-            self.display = current_user.is_creator
+            self.display = user.is_creator
             self.online = True  # default
             self.access = "open"  # default
             self.visibility = 2 # public by default, once display is set to True
@@ -57,7 +59,7 @@ class WebSeminar(object):
             self.frequency = 7
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
-            self.timezone = str(current_user.tz)
+            self.timezone = str(user.tz)
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -74,9 +76,9 @@ class WebSeminar(object):
                 organizer_data = [
                     {
                         "seminar_id": self.shortname,
-                        "email": current_user.email,
-                        "homepage": current_user.homepage,
-                        "full_name": current_user.name,
+                        "email": user.email,
+                        "homepage": user.homepage,
+                        "full_name": user.name,
                         "order": 0,
                         "curator": False,
                         "display": True,
@@ -115,14 +117,16 @@ class WebSeminar(object):
     def __ne__(self, other):
         return not (self == other)
 
-    def visible(self):
+    def visible(self, user=None):
         """
         Whether this seminar should be shown to the current user
         """
-        return (self.owner == current_user.email or
-                current_user.is_subject_admin(self) or
+        if user is None:
+            user = current_user
+        return (self.owner == user.email or
+                user.is_subject_admin(self) or
                 # TODO: remove temporary measure of allowing visibility None
-                self.display and (self.visibility is None or self.visibility > 0 or current_user.email in self.editors()))
+                self.display and (self.visibility is None or self.visibility > 0 or user.email in self.editors()))
 
     def searchable(self):
         """
