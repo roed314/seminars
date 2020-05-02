@@ -183,7 +183,8 @@ class WebTalk(object):
         if self.start_time is None:
             return ""
         else:
-            return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %-d")
+            format = "%a %b %-d" if self.start_time.year = datetime.now().year else "%d-%b-%Y"
+            return adapt_datetime(self.start_time, newtz=tz).strftime(format)
 
     def show_time_and_duration(self, adapt=True):
         start = self.start_time

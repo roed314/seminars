@@ -44,7 +44,7 @@
     </thead>
     {% for i in range(schedule|length) %}
     <tr>
-      <td class="date"><input style="width: 96px;" name="date{{i}}" value="{{ schedule[i][0] }}" /></td>
+      <td class="date"><input style="width: 96px;" name="date{{i}}" value="{{ schedule[i][0] }}" placeholder="Jun 1, 2020" /></td>
       <td class="timerange"><input style="width: 96px;" name="time{{i}}" value="{{ schedule[i][1] }}" placeholder="15:00-16:00" /></td>
       {% if schedule[i][2] %}
         {% set talk = schedule[i][2] %}

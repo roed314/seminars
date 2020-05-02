@@ -401,7 +401,8 @@ class WebSeminar(object):
     def show_schedule_date(self, date):
         if not date:
             return ""
-        return adapt_datetime(date, self.tz).strftime("%a %b %-d")
+        format = "%a %b %-d" if self.start_time.year = datetime.now().year else "%d-%b-%Y"
+        return adapt_datetime(date, self.tz).strftime(format)
 
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
