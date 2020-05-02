@@ -615,7 +615,7 @@ def save_institution():
                     else:
                         flash(
                             format_warning(
-                                "The email address %s of maintainer %s will be publicily visible.<br>%s",
+                                "The email address %s of maintainer %s will be publicly visible.<br>%s",
                                 userdata["email"],
                                 userdata["name"],
                                 "The homepage on the maintainer's user account should be set prevent this.",
@@ -881,7 +881,8 @@ def edit_seminar_schedule():
             "This series has no topics selected; don't forget to set the topics for each new talk individually."
         )
     schedule = layout_schedule(seminar, data)
-    print(schedule)
+    for s in schedule:
+        print ((s[0],s[1]),s[2] is not None)
     title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(
         "edit_seminar_schedule.html",
