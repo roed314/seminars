@@ -138,7 +138,7 @@ class WebSeminar(object):
             self.time_slots = []
             if self.weekday and self.start_time and self.end_time:
                 self.weekdays = [self.weekday]
-                self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H-%M")]
+                self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H:%M")]
         else:
             n = min(len(self.weekdays),len(self.time_slots))
             self.weekdays = self.weekdays[0:n]
