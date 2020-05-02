@@ -192,7 +192,10 @@ class SeminarsUser(UserMixin):
                 raise Exception("Email is not a string, %s" % email)
             query = {"email": ilike_query(email)}
         else:
-            query = {"id": int(uid)}
+            try:
+                query = {"id": int(uid)}
+            except ValueError:
+                query = {"id": None}
 
         self._authenticated = False
         self._uid = None

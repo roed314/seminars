@@ -37,7 +37,7 @@ mail_settings = {
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": "mathseminarsnoreply",
+    "MAIL_USERNAME": "researchseminarsnoreply",
     "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD_MIT", ""),
 }
 
@@ -335,7 +335,7 @@ def css():
 def send_email(to, subject, message):
     from html2text import html2text
 
-    sender = "mathseminarsnoreply@math.mit.edu"
+    sender = "researchseminarsnoreply@math.mit.edu"
     app.logger.info("%s sending email from %s to %s..." % (timestamp(), sender, to))
     mail.send(
         Message(
