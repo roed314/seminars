@@ -65,7 +65,7 @@ def date_and_daytimes_to_times(date, s, tz):
     d = localize_time(datetime.combine(date, maketime()), tz)
     m = timedelta(minutes=1)
     t = s.split('-')
-    print t
+    print(t)
     start = d + m*daytime_minutes(t[0])
     end = d + m*daytime_minutes(t[1])
     if end < start:
