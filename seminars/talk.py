@@ -462,14 +462,14 @@ class WebTalk(object):
         }
         email_to = self.speaker_email if self.speaker_email else ""
         return """
-<p style="margin-bottom: 0px;">
+<p>
  To let someone edit this page, send them this link:
-</p>
-<p style="margin-left: 20px; margin-top: 0px;">
-<span class="noclick">{link}</span>
+<input type="text" id="speaker-link" value="{link}" class="noclick" readonly onclick="this.focus();this.select()"></input>
+<a><i class="clippy" onclick="copySourceOfId('speaker-link')"></i></a>
 <button onClick="window.open('mailto:{email_to}?{msg}')" style="margin-left:20px;">
 Email link to speaker
-</button></p>""".format(
+</button>
+</p>""".format(
             link=self.speaker_link(), email_to=email_to, msg=urlencode(data, quote_via=quote),
         )
 

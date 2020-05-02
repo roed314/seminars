@@ -516,9 +516,8 @@ function copySourceOfId(id) {
   var copyText = $("#"+id);
   copyText.select();
   document.execCommand("copy");
-  // TODO, report that we copied?
   console.log("Copied!");
-  copyText.notify("Copied!", {className: "success", position:"right" });
+  copyText.notify("Copied!", {className: "success", position:"bottom right" });
 }
 
 function displayCookieBanner() {

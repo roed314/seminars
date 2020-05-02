@@ -2397,6 +2397,9 @@ li.ical-detail {
 
 .noclick {
   color: #933e20;
+  font-size: 90%;
+  font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+  border: 2px solid #d1d5da;
 }
 
 .notifyjs-banner-base {
