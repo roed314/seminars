@@ -831,7 +831,7 @@ def layout_schedule(seminar, data):
             for i in range(len(seminar.weekdays)):
                 d = w + day*seminar.weekdays[i]
                 if d >= midnight_begin and d < midnight_end+day:
-                    newslots.append((seminar.show_input_date(d), seminar.time_slots[i]), None)
+                    newslots.append((seminar.show_input_date(d), seminar.time_slots[i], None))
             w = w + day*seminar.frequency
         # remove slots that are (exactly) matched by an existing talk
         # this should handle slots that occur with multiplicity
