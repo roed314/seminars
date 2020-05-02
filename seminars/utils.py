@@ -41,7 +41,7 @@ def validate_daytime(s):
     (h, m) = (int(t[0]), int(t[1])) if len(t) == 2 else (int(t[0]), 0)
     return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
 
-def validate_daytime_interval(s):
+def validate_daytimes(s):
     t = s.strip().split('-')
     if len(t) != 2:
         return None;
@@ -54,15 +54,29 @@ def daytime_minutes(s):
     t = s.split(':')
     return 60*int(t[0])+int(t[1])
 
-def daytime_interval_minutes(s):
-    t = s.split('-')
-    start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
-    return end - start if end > start else 24*60-start + end
+def daytimes_start_minutes(s):
+    return daytime_minutes(s.split(':')[0])
 
-def daytime_interval_early(s):
+def date_and_daytimes_to_times(date, s, tz):
+    d = localize_time(datetime.datetime.combine(date, datetime.time()), tz)
+    m = datetime.timedelta(minutes=1)
+    t = s.split('-')
+    start = d + m*daytime_minutes(t[0])
+    end = d + m*daytime_minutes(t[1])
+    if end < start:
+        end += datetime.timedelta(days=1)
+    return start, end
+
+def daytimes_early(s):
     t = s.split('-')
     start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
     return start > end or start < 6*60
+
+def daytimes_long(s):
+    t = s.split('-')
+    start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
+    len = end - start if end > start else 24*60-start + end
+    return len > 8*60
 
 def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
@@ -471,10 +485,10 @@ def process_user_input(inp, col, typ, tz):
         res = validate_daytime(inp)
         if res is None:
             raise ValueError("Invalid time of day, expected format is hh:mm")
-    elif typ == "daytime_interval":
-        res = validate_daytime_interval(inp)
+    elif typ == "daytimes":
+        res = validate_daytimes(inp)
         if res is None:
-            raise ValueError("Invalid time of day interval, expected format is hh:mm-hh:mm")
+            raise ValueError("Invalid times of day, expected format is hh:mm-hh:mm")
         return res
     elif typ == "weekday_number":
         res = int(inp)

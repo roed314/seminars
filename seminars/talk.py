@@ -176,6 +176,9 @@ class WebTalk(object):
         else:
             return t.strftime("%a %b %-d, %H:%M")
 
+    def show_daytimes(self, tz=None):
+        return adapt_datetime(self.start_time, tz).strftime("%H:%M") + "-" + adapt_datetime(self.end_time, tz).strftime("%H:%M")
+
     def show_date(self, tz=None):
         if self.start_time is None:
             return ""
