@@ -1,1 +1,0 @@
-../../lmfdb/lmfdb/static/lmfdb.js

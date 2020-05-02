@@ -1,7 +1,5 @@
-// This is from lmfdb.js, we will need this once we stop importing that file
+// from lmfdb.js,
 $(function() {
- /* properties box collapsable click handlers */
- $(".properties-header,#properties-collapser").click(function(evt) { properties_collapser(evt); });
  /* providing watermark examples in those forms, that have an 'example=...' attribute */
  /* Add extra spaces so that if you type in exactly the example it does not disappear */
  $('input[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   '  ) } )
@@ -10,13 +8,8 @@ $(function() {
 
 
 
-function resetStart()
-{
-  // resets start if not changing search_type
-  $('input[name=start]').val('')
-  // this will be cleaned by the cleanSubmit
-}
 
+// from lmfdb.js,
 function cleanSubmit(id)
 {
   var myForm = document.getElementById(id);
@@ -50,6 +43,7 @@ function cleanSubmit(id)
     myForm.appendChild(all);
   }
 }
+
 
 function toggle_time(id) {
     var future = $('#future_talks');
