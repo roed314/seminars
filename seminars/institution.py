@@ -6,7 +6,8 @@ from seminars.users.pwdmanager import userdb
 from lmfdb.utils import flash_error
 from collections.abc import Iterable
 from lmfdb.logger import critical
-import datetime, pytz
+import pytz
+from datetime import datetime
 
 institution_types = [
     ("university", "University"),
@@ -93,7 +94,7 @@ class WebInstitution(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.institutions.search_cols}
         data["edited_by"] = int(current_user.id)
-        data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
+        data["edited_at"] = datetime.now(tz=pytz.UTC)
         if self.new:
             db.institutions.insert_many([data])
         else:

@@ -97,7 +97,6 @@ class WebSeminar(object):
             if data.get("topics"):
                 data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
-            # start_time and end_time are datetime.datetimes's (offset from 1/1/2020)
         if organizer_data is None:
             organizer_data = list(
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])

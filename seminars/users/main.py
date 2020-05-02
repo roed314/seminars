@@ -38,7 +38,7 @@ from seminars.utils import (
 )
 
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
-import datetime
+from datetime import datetime
 
 
 login_page = Blueprint("user", __name__, template_folder="templates")
@@ -70,7 +70,7 @@ def get_username(uid):
 def ctx_proc_userdata():
     userdata = {
         "user": current_user,
-        "usertime": datetime.datetime.now(tz=current_user.tz),
+        "usertime": datetime.now(tz=current_user.tz),
     }
     # used to display name of locks
     userdata["get_username"] = get_username  # this is a function

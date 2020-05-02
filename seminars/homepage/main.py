@@ -18,7 +18,7 @@ from flask import render_template, request, redirect, url_for, Response, make_re
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
-import datetime
+from datetime import datetime
 import pytz
 from collections import Counter
 from dateutil.parser import parse
@@ -37,7 +37,7 @@ from lmfdb.utils.search_parsing import collapse_ors
 
 def get_now():
     # Returns now in UTC, comparable to time-zone aware datetimes from the database
-    return datetime.datetime.now(pytz.UTC)
+    return datetime.now(pytz.UTC)
 
 
 def parse_subject(info, query, prefix):
@@ -280,7 +280,7 @@ class TalkSearchArray(SearchArray):
             name="daterange",
             id="daterange",
             label="Date",
-            example=datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -"),
+            example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
@@ -439,7 +439,7 @@ def _index(query):
         query["subjects"] = ["math"]
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
-    query["end_time"] = {"$gte": datetime.datetime.now()}
+    query["end_time"] = {"$gte": datetime.now()}
     talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
@@ -480,7 +480,7 @@ def search():
     if "search_type" not in info:
         info["talk_online"] = info["seminar_online"] = True
         info["daterange"] = info.get(
-            "daterange", datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -")
+            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
         )
     try:
         seminar_count = int(info["seminar_count"])
