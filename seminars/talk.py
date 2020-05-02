@@ -1,4 +1,4 @@
-import pytz, datetime, random
+import pytz, random
 from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
@@ -22,7 +22,7 @@ from psycopg2.sql import SQL
 import urllib.parse
 from icalendar import Event
 from lmfdb.logger import critical
-
+from datetime import datetime, timedelta
 
 class WebTalk(object):
     def __init__(
@@ -128,7 +128,7 @@ class WebTalk(object):
         except (ValueError, AttributeError):
             # Talks can be edited by anonymous users with a token, with no id
             data["edited_by"] = -1
-        data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
+        data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
     @classmethod
@@ -177,17 +177,21 @@ class WebTalk(object):
         else:
             return t.strftime("%a %b %-d, %H:%M")
 
+    def show_daytimes(self, tz=None):
+        return adapt_datetime(self.start_time, tz).strftime("%H:%M") + "-" + adapt_datetime(self.end_time, tz).strftime("%H:%M")
+
     def show_date(self, tz=None):
         if self.start_time is None:
             return ""
         else:
-            return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %-d")
+            format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
+            return adapt_datetime(self.start_time, newtz=tz).strftime(format)
 
     def show_time_and_duration(self, adapt=True):
         start = self.start_time
         end = self.end_time
-        now = datetime.datetime.now(pytz.utc)
-        delta = datetime.timedelta
+        now = datetime.now(pytz.utc)
+        delta = timedelta
         minute = delta(minutes=1)
         hour = delta(hours=1)
         day = delta(days=1)
@@ -366,7 +370,7 @@ class WebTalk(object):
                        _external=True, _scheme="webcal")
 
     def is_past(self):
-        return self.end_time < datetime.datetime.now(pytz.utc)
+        return self.end_time < datetime.now(pytz.utc)
 
     def is_starting_soon(self):
         now = datetime.datetime.now(pytz.utc)
@@ -522,7 +526,7 @@ Email link to speaker
         event.add("description", desc)
         if self.room:
             event.add("location", "Lecture held in {}".format(self.room))
-        event.add("DTSTAMP", datetime.datetime.now(tz=pytz.UTC))
+        event.add("DTSTAMP", datetime.now(tz=pytz.UTC))
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 

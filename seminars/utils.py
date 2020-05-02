@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from datetime import datetime, timedelta
+from datetime import time as maketime
 from dateutil.parser import parse as parse_time
 from email_validator import validate_email
 from flask import url_for, flash, render_template, request, send_file
@@ -20,6 +21,8 @@ import re
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+daytime_re_string = r'\d{1,2}|\d{1,2}:\d\d'
+daytime_re = re.compile(daytime_re_string)
 
 def topdomain():
     # return 'mathseminars.org'
@@ -34,6 +37,54 @@ def validate_url(x):
         return all([result.scheme, result.netloc])
     except:
         return False
+
+def validate_daytime(s):
+    s = s.strip()
+    if not daytime_re.fullmatch(s):
+        return None
+    t = s.split(':')
+    (h, m) = (int(t[0]), int(t[1])) if len(t) == 2 else (int(t[0]), 0)
+    return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
+
+def validate_daytimes(s):
+    t = s.strip().split('-')
+    if len(t) != 2:
+        return None;
+    start, end = validate_daytime(t[0]), validate_daytime(t[1])
+    if start is None or end is None:
+        return None
+    return start + '-' + end
+
+def daytime_minutes(s):
+    t = s.split(':')
+    return 60*int(t[0])+int(t[1])
+
+def daytimes_start_minutes(s):
+    return daytime_minutes(s.split(':')[0])
+
+def midnight(date, tz):
+    return localize_time(datetime.combine(date, maketime()), tz)
+
+def date_and_daytimes_to_times(date, s, tz):
+    d = localize_time(datetime.combine(date, maketime()), tz)
+    m = timedelta(minutes=1)
+    t = s.split('-')
+    start = d + m*daytime_minutes(t[0])
+    end = d + m*daytime_minutes(t[1])
+    if end < start:
+        end += timedelta(days=1)
+    return start, end
+
+def daytimes_early(s):
+    t = s.split('-')
+    start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
+    return start > end or start < 6*60
+
+def daytimes_long(s):
+    t = s.split('-')
+    start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
+    len = end - start if end > start else 24*60-start + end
+    return len > 8*60
 
 def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
@@ -113,8 +164,8 @@ def clean_language(inp):
 
 def flash_warning(warnmsg, *args):
     flash(
-        Markup("Warning: " + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))),
-        "error",
+        Markup("Warning: " + (warnmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args))),
+        "warning",
     )
 
 
@@ -438,6 +489,20 @@ def process_user_input(inp, col, typ, tz):
         return validate_email(inp.strip())["email"]
     elif typ == "timestamp with time zone":
         return localize_time(parse_time(inp), tz)
+    elif typ == "daytime":
+        res = validate_daytime(inp)
+        if res is None:
+            raise ValueError("Invalid time of day, expected format is hh:mm")
+    elif typ == "daytimes":
+        res = validate_daytimes(inp)
+        if res is None:
+            raise ValueError("Invalid times of day, expected format is hh:mm-hh:mm")
+        return res
+    elif typ == "weekday_number":
+        res = int(inp)
+        if res < 0 or res >= 7:
+            raise ValueError("Invalid day of week, must be an integer in [0,6]")
+        return res
     elif typ == "date":
         return parse_time(inp).date()
     elif typ == "boolean":
@@ -475,7 +540,7 @@ def format_input_errmsg(err, inp, col):
     return format_errmsg('Unable to process input %s for property %s: {0}'.format(err), '"' + str(inp) + '"', col)
 
 def format_warning(errmsg, *args):
-    return Markup("Warning: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
+    return Markup("Warning: " + (errmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)))
 
 
 def show_input_errors(errmsgs):

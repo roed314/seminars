@@ -103,6 +103,7 @@ class WebSeminar(object):
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
         self.organizer_data = organizer_data
+        self.convert_time_to_times()
 
     def __repr__(self):
         return self.name
@@ -116,6 +117,35 @@ class WebSeminar(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def convert_time_to_times(self):
+        if self.is_conference:
+            self.frequency = None
+        if self.frequency is None:
+            self.weekdays = []
+            self.time_slots = []
+            return
+        if self.frequency > 1 and self.frequency <= 7:
+            self.frequency = 7
+        elif self.frequency > 7 and self.frequency <= 14:
+            self.frequency = 14
+        elif self.frequency > 14 and self.frequency <= 21:
+            self.frequency = 21
+        else:
+            self.frequency = None
+            self.weekdays = []
+            self.time_slots = []
+            return
+        if self.weekdays is None or self.time_slots is None:
+            self.weekdays = []
+            self.time_slots = []
+            if self.weekday is not None and self.start_time is not None and self.end_time is not None:
+                self.weekdays = [self.weekday]
+                self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H:%M")]
+        else:
+            n = min(len(self.weekdays),len(self.time_slots))
+            self.weekdays = self.weekdays[0:n]
+            self.time_slots = self.time_slots[0:n]
 
     def visible(self):
         """
@@ -375,6 +405,12 @@ class WebSeminar(object):
         if not date:
             return ""
         return date.strftime("%b %d, %Y")
+
+    def show_schedule_date(self, date):
+        if not date:
+            return ""
+        format = "%a %b %-d" if adapt_datetime(date,self.tz).year == datetime.now(self.tz).year else "%d-%b-%Y"
+        return adapt_datetime(date, self.tz).strftime(format)
 
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop

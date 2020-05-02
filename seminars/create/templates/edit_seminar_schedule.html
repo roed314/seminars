@@ -13,27 +13,19 @@
 <p>All times are shown in the series' time zone, {{ seminar.timezone }}.</p>
 </div>
 
+
 <form action="{{ url_for('.save_seminar_schedule') }}" method="POST">
   <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
-  <input type="hidden" name="slots" value="{{ slots }}" />
+  <input type="hidden" name="slots" value="{{ schedule|length }}" />
   <input type="hidden" name="referrer" value="schedule" />
-  <h2>Show</h2>
   <table id="edit-schedule-refresh">
     <tr>
-      <th style="padding-left:0px;padding-right:0px;">Start date</th>
-      <td><input name="begin" value="{{ raw_data.begin }}" style="width:120px;" /></td>
-      <th style="padding-right:0px;">End date</th>
-      <td><input name="end" value="{{ raw_data.end}}" style="width:120px;" /></td>
-      {% if not seminar.is_conference %}
-      <th style="padding-right:0px;">New timeslots on</th>
-      <td><input name="weekday" value="{{ seminar.show_day(truncate=False) }}" style="width:80px;" /></td>
-      <th style="padding-right:0px;">every</th>
-      <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:60px;"/></td>
-      <th style="padding-left:0px;">day{% if seminar.frequency != 1 %}s{% endif %}</th>
-      {% endif %}
-      <td style="padding-left:20px;"><button type="submit" name="refresh" value="yes">Refresh</button></td>
-    </tr>
+      <th style="padding-left:0px; padding-right:0px; font-size:147%;">Show from</th>
+      <td><input name="begin" value="{{ raw_data.begin }}" style="width:113px;" /></td>
+      <th style="padding-left:0px; padding-right:0px; font-size:147%;">to</th>
+      <td><input name="end" value="{{ raw_data.end}}" style="width:113px;" /></td>
+      <td style="padding-left:20px;"><button type="submit" name="refresh" value="yes">Refresh</button></td>    </tr>
   </table>
   <br>
   <div><div class="inlineh2">Schedule</div> <button type="submit" class="textbottom">Save all changes</button> <a style="margin-left: 30px" href="{{ url_for('.edit_seminar_schedule', shortname=seminar.shortname) }}">Cancel all changes</a></div>
@@ -50,81 +42,29 @@
         <td></td>
       </tr>
     </thead>
-    {% set vars = {'i': 0} %}
-    {% for date in all_dates %}
-    {% for talk in by_date[date] %}
+    {% for i in range(schedule|length) %}
     <tr>
-      <td class="date">
-        <input style="width: 96px;" name="date{{vars.i}}" value="{% if raw_data['date%s'%vars['i']] %}{{ raw_data['date%s'%vars['i']] }}{% else %}{{ date.strftime('%a %b %-d') }}{% endif %}" />
-      </td>
-      {% if talk is none %}
-      <td class="timerange">
-{% if raw_data['time%s'%vars['i']] %}
-  {% set talk_time = raw_data['time%s'%vars['i']] %}
-{% else %}
-  {% set talk_time = '' %}
-  {% if seminar.start_time %}
-    {% set talk_time = talk_time + seminar.start_time.strftime('%H:%M') %}
-  {% endif %}
-  {% if seminar.start_time or seminar.end_time %}
-    {% set talk_time = talk_time + '-' %}
-  {% endif %}
-  {% if seminar.end_time %}
-    {% set talk_time = talk_time + seminar.end_time.strftime('%H:%M') %}
-  {% endif %}
-{% endif %}
-<input name="time{{vars.i}}" value="{{ talk_time }}" placeholder="15:00-16:00" />
-      </td>
-      <td class="speakerinp">
-        <input name="speaker{{vars.i}}" value="{{ raw_data['speaker%s'%vars['i']] }}" />
-      </td>
-      <td class="emailinp">
-        <input name="speaker_email{{vars.i}}" value="{{ raw_data['speaker_email%s'%vars['i']] }}" />
-      </td>
-      <td class="affiliationinp">
-        <input name="speaker_affiliation{{vars.i}}" value="{{ raw_data['speaker_affiliation%s'%vars['i']] | blanknone }}" />
-      </td>
-      <td class="titleinp">
-        <input name="title{{vars.i}}" value="{{ raw_data['title%s'%vars['i']] }}" />
-      </td>
-      <td>
-        <input type="checkbox" name="hidden{{vars.i}}" value="yes" {% if raw_data['hidden%s'%vars['i']] == "yes" %} checked {% endif %} />
-      </td>
-      <td></td>
-      <input type="hidden" name="seminar_ctr{{vars.i}}" value="" />
-    {% else %}
-      <td class="timerange">
-        <input name="time{{vars.i}}" value="{% if talk.start_time and talk.end_time %}{{ talk.show_start_time(seminar.tz) }}-{{ talk.show_end_time(seminar.tz) }}{% else %}{{ raw_data['time%s'%vars['i']] }}{% endif %}" placeholder="15:00-16:00" />
-      </td>
-      <td class="speakerinp">
-        <input name="speaker{{vars.i}}" value="{{ talk.speaker | blanknone }}" />
-      </td>
-      <td class="emailinp">
-        <input name="speaker_email{{vars.i}}" value="{{ talk.speaker_email | blanknone }}" />
-      </td>
-      <td class="affiliationinp">
-        <input name="speaker_affiliation{{vars.i}}" value="{{ talk.speaker_affiliation | blanknone }}" />
-      </td>
-      <td class="titleinp">
-        <input name="title{{vars.i}}" value="{{ talk.title | blanknone }}" />
-      </td>
-      <td align="left" style="padding-right:0px;">
-        <input type="checkbox" name="hidden{{vars.i}}" value="yes"{% if talk.hidden %} checked {% endif %} />
-      </td>
-      <td align="left">
-        {{ talk.details_link() | safe }}
-      </td>
-      <input type="hidden" name="seminar_ctr{{vars.i}}" value="{{ talk.seminar_ctr }}" />
-    {% endif %}
+      <td class="date"><input style="width: 96px;" name="date{{i}}" value="{{ schedule[i][0] }}" placeholder="Jun 1, 2020" /></td>
+      <td class="timerange"><input style="width: 96px;" name="time{{i}}" value="{{ schedule[i][1] }}" placeholder="15:00-16:00" /></td>
+      {% if schedule[i][2] %}
+        {% set talk = schedule[i][2] %}
+        <td class="speakerinp"><input name="speaker{{i}}" value="{{ talk.speaker | blanknone }}" /></td>
+        <td class="emailinp"><input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" /></td>
+        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" /></td>
+        <td class="titleinp"><input name="title{{i}}" value="{{ talk.title | blanknone }}" /></td>
+        <td align="left" style="padding-right:0px;"><input type="checkbox" name="hidden{{i}}" value="yes"{% if talk.hidden %} checked {% endif %} /></td>
+        <td align="left">{{ talk.details_link() | safe }}</td>
+        <input type="hidden" name="seminar_ctr{{i}}" value="{{ talk.seminar_ctr }}" />
+      {% else %}
+        <td class="speakerinp"><input name="speaker{{i}}" value="" /></td>
+        <td class="emailinp"><input name="speaker_email{{i}}" value="" /></td>
+        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="" /></td>
+        <td class="titleinp"><input name="title{{i}}" value="" /></td>
+        <td><input type="checkbox" name="hidden{{i}}" value="yes"/></td>
+        <input type="hidden" name="seminar_ctr{{i}}" value="" />
+      {% endif %}
     </tr>
-    {% if vars.update({'i': vars.i+1}) %}{% endif %} {# hack to get around stupid Jinja forgetting variables outside loop #}
-    {% endfor %}
     {% endfor %}
   </table>
 </form>
-
-<div name="add_new_talk">
-
-</div>
-
 {% endblock %}

@@ -662,10 +662,19 @@ form button.aslink:hover {
 
 #flashes p.error {
   margin: 15px 0;
-  font-size: 95%;
   border: 0;
   border-left: 15px solid {{color.flashes_border}};
   background: {{color.flashes_background}};
+  color: {{color.red}}
+}
+
+#flashes p.warning {
+  margin: 15px 0;
+  font-size: 90%;
+  border: 0;
+  border-left: 15px solid {{color.flashes_border}};
+  background: {{color.flashes_background}};
+  color: {{color.black}}
 }
 
 #main {
@@ -922,12 +931,6 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
    font-style: italic;
    color: {{color.grey}};
    display: none;
-}
-
-.errmsg {
-   font-size: 80%;
-   font-style: bold;
-   color: {{color.red}};
 }
 
 .forminfo {
