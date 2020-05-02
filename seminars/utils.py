@@ -1,18 +1,22 @@
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 from dateutil.parser import parse as parse_time
-import pytz, re, iso639
-from six import string_types
-from flask import url_for, flash, render_template, request
+from email_validator import validate_email
+from flask import url_for, flash, render_template, request, send_file
 from flask_login import current_user
-from seminars import db
 from functools import lru_cache
+from icalendar import Calendar
+from io import BytesIO
 from lmfdb.backend.utils import IdentifierWrapper
 from lmfdb.utils.search_boxes import SearchBox
-from psycopg2.sql import SQL
 from markupsafe import Markup, escape
-from collections.abc import Iterable
+from psycopg2.sql import SQL
+from seminars import db
+from six import string_types
 from urllib.parse import urlparse
-from email_validator import validate_email
+import iso639
+import pytz
+import re
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -502,3 +506,20 @@ class Toggle(SearchBox):
             checked=info is not None and info.get(self.name, False),
         )
         return '<span style="display: inline-block">%s</span>' % (main,)
+
+
+def ics_file(talks, filename, user=current_user):
+    cal = Calendar()
+    cal.add("VERSION", "2.0")
+    cal.add("PRODID", topdomain())
+    cal.add("CALSCALE", "GREGORIAN")
+    cal.add("X-WR-CALNAME", topdomain())
+
+    for talk in talks:
+        cal.add_component(talk.event(user=user))
+
+    bIO = BytesIO()
+    bIO.write(cal.to_ical())
+    bIO.seek(0)
+    return send_file(bIO, attachment_filename=filename, as_attachment=True, add_etags=False)
+

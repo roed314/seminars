@@ -2,18 +2,19 @@ from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
 from seminars.utils import (
-    restricted_topics as user_topics,
-    toggle,
     Toggle,
+    ics_file,
     languages_dict,
+    restricted_topics as user_topics,
     subject_dict,
     subject_pairs,
-    topics,
+    toggle,
     topdomain,
+    topics,
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
-from flask import render_template, request, redirect, url_for, Response, make_response, send_file
+from flask import render_template, request, redirect, url_for, Response, make_response
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
@@ -22,16 +23,13 @@ import pytz
 from collections import Counter
 from dateutil.parser import parse
 
-from icalendar import Calendar
-from io import BytesIO
-
 from lmfdb.utils import (
     BasicSpacer,
     SearchArray,
-    TextBox,
     SelectBox,
-    to_dict,
+    TextBox,
     flash_error,
+    to_dict,
 )
 
 from lmfdb.utils.search_parsing import collapse_ors
@@ -645,18 +643,10 @@ def ics_seminar_file(shortname):
     if seminar is None or not seminar.visible():
         return render_template("404.html", title="Seminar not found")
 
-    cal = Calendar()
-    cal.add("VERSION", "2.0")
-    cal.add("PRODID", topdomain())
-    cal.add("CALSCALE", "GREGORIAN")
-    cal.add("X-WR-CALNAME", topdomain())
-
-    for talk in seminar.talks():
-        cal.add_component(talk.event(user=current_user))
-    bIO = BytesIO()
-    bIO.write(cal.to_ical())
-    bIO.seek(0)
-    return send_file(bIO, attachment_filename="{}.ics".format(shortname), as_attachment=True, add_etags=False)
+    return ics_file(
+        seminar.talks(),
+        filename="{}.ics".format(shortname),
+        user=current_user)
 
 
 @app.route("/talk/<semid>/<int:talkid>/ics")
@@ -664,18 +654,11 @@ def ics_talk_file(semid, talkid):
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
         return render_template("404.html", title="Talk not found")
+    return ics_file(
+        [talk],
+        filename="{}_{}.ics".format(semid, talkid),
+        user=current_user)
 
-    cal = Calendar()
-    cal.add("VERSION", "2.0")
-    cal.add("PRODID", topdomain())
-    cal.add("CALSCALE", "GREGORIAN")
-    cal.add("X-WR-CALNAME", topdomain())
-
-    cal.add_component(talk.event(user=current_user))
-    bIO = BytesIO()
-    bIO.write(cal.to_ical())
-    bIO.seek(0)
-    return send_file(bIO, attachment_filename="{}_{}.ics".format(semid, talkid), as_attachment=True, add_etags=False)
 
 @app.route("/talk/<semid>/<int:talkid>/")
 def show_talk(semid, talkid):
