@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import os
 import time
-import datetime
+from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 from flask import (
     Flask,
@@ -142,13 +142,13 @@ def ctx_proc_userdata():
 #      Jinja formatters      #
 ##############################
 
-# you can pass in a datetime.datetime python object and via
+# you can pass in a datetime python object and via
 # {{ <datetimeobject> | fmtdatetime }} you can format it inside a jinja template
 # if you want to do more than just the default, use it for example this way:
 # {{ <datetimeobject>|fmtdatetime('%H:%M:%S') }}
 @app.template_filter("fmtdatetime")
 def fmtdatetime(value, format="%Y-%m-%d %H:%M:%S"):
-    if isinstance(value, datetime.datetime):
+    if isinstance(value, datetime):
         return value.strftime(format)
     else:
         return "-"
