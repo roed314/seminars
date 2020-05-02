@@ -159,7 +159,7 @@ def clean_language(inp):
 
 def flash_warning(warnmsg, *args):
     flash(
-        Markup("Warning: " + (warnmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))),
+        Markup("Warning: " + (warnmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args))),
         "warning",
     )
 
