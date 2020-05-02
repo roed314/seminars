@@ -805,8 +805,6 @@ def layout_schedule(seminar, data):
     if end is None and seminar.is_conference:
         end = seminar.end_date
     if end is None:
-        end = begin + 14 * day
-    if end is None:
         if seminar.frequency:
             end = begin + day * ceil(SCHEDULE_LEN * seminar.frequecy / len(seminar.time_slots))
         else:
