@@ -798,17 +798,20 @@ def layout_schedule(seminar, data):
     now = datetime.now(tz=tz)
     today = now.date()
     day = timedelta(days=1)
-    if begin is None and seminar.is_conference:
-        begin = seminar.start_date
-    if begin is None:
-        begin = today
-    if end is None and seminar.is_conference:
-        end = seminar.end_date
+    begin = seminar.start_date if begin is None and seminar.is_conference else begin
+    begin = today if begin is None else begin
+    end = seminar.end_date if end is None and seminar_is_conference else end
     if end is None:
-        if seminar.frequency:
-            end = begin + day * ceil(SCHEDULE_LEN * seminar.frequency / len(seminar.time_slots))
+        if seminar.is_conference:
+            if seminar.per_day:
+                end = begin + day * ceil(SCHEDULE_LEN / seminar.per_day)
+            else
+                end = begin + 7 * day
         else:
-            end = begin + 14 * day
+            if seminar.frequency:
+                end = begin + day * ceil(SCHEDULE_LEN * seminar.frequency / len(seminar.time_slots))
+            else:
+                end = begin + 14 * day
     if end < begin:
         end = begin
     data["begin"] = seminar.show_input_date(begin)
@@ -823,6 +826,7 @@ def layout_schedule(seminar, data):
         d = midnight_begin
         while d < midnight_end + day:
             newslots += [(seminar.show_schedule_date(d), "", None) for i in range(seminar.per_day)]
+            d += day
         for t in slots:
             if (t[0], "", None) in newslots:
                 newslots.remove((t[0], "", None))
@@ -879,8 +883,6 @@ def edit_seminar_schedule():
             "This series has no topics selected; don't forget to set the topics for each new talk individually."
         )
     schedule = layout_schedule(seminar, data)
-    for s in schedule:
-        print ((s[0],s[1]),s[2] is not None)
     title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(
         "edit_seminar_schedule.html",
