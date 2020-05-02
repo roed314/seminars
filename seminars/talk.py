@@ -352,19 +352,19 @@ class WebTalk(object):
 
     @property
     def ics_link(self):
-        return url_for(".ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+        return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
                        _external=True, _scheme="https")
 
     @property
     def ics_gcal_link(self):
         return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
-            {"cid": url_for(".ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+            {"cid": url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
                             _external=True, _scheme="http")}
         )
 
     @property
     def ics_webcal_link(self):
-        return url_for(".ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+        return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
                        _external=True, _scheme="webcal")
 
     def is_past(self):
