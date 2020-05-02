@@ -413,7 +413,7 @@ def save_seminar():
     data["weekdays"] = []
     data["time_slots"] = []
     for i in range(MAX_SLOTS):
-        weekday = time_slot = None
+        weekday = daytimes = None
         try:
             col="weekday"+str(i)
             val = raw_data.get(col,"")
@@ -423,7 +423,7 @@ def save_seminar():
             daytimes = process_user_input(val, col, "daytimes", tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
-        if weekday is not None and time_slot is not None:
+        if weekday is not None and daytimes is not None:
             data["weekdays"].append(weekday)
             data["time_slots"].append(daytimes)
             if daytimes_early(daytimes):
