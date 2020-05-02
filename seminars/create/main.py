@@ -836,7 +836,7 @@ def layout_schedule(seminar, data):
         return slots
     if not seminar.frequency:
         for i in range(max(SCHEDULE_LEN - len(slots), 3)):
-            slots.append([("", "", None)])
+            slots.append(("", "", None))
     else:
         # get starting date of last seminar period whose start precedes begin
         # try to deduce this from the most recent talk, or if none, the next scheduled talk
