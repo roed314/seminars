@@ -13,7 +13,7 @@ from seminars.utils import (
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
-from flask import render_template, request, redirect, url_for, Response, make_response
+from flask import render_template, request, redirect, url_for, Response, make_response, send_file
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
@@ -21,6 +21,9 @@ import datetime
 import pytz
 from collections import Counter
 from dateutil.parser import parse
+
+from icalendar import Calendar
+from io import BytesIO
 
 from lmfdb.utils import (
     BasicSpacer,
@@ -634,6 +637,26 @@ def show_seminar_js():
     resp = make_response(render_template('seminar_raw.js', scheme=request.scheme))
     resp.headers['Content-type'] = 'text/javascript'
     return resp
+
+
+@app.route("/seminar/<shortname>/ics")
+def ics_seminar_file(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        return render_template("404.html", title="Seminar not found")
+
+    cal = Calendar()
+    cal.add("VERSION", "2.0")
+    cal.add("PRODID", topdomain())
+    cal.add("CALSCALE", "GREGORIAN")
+    cal.add("X-WR-CALNAME", topdomain())
+
+    for talk in seminar.talks():
+        cal.add_component(talk.event(user=current_user))
+    bIO = BytesIO()
+    bIO.write(cal.to_ical())
+    bIO.seek(0)
+    return send_file(bIO, attachment_filename="seminars.ics", as_attachment=True, add_etags=False)
 
 
 @app.route("/talk/<semid>/<int:talkid>/")
