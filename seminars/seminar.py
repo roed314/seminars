@@ -13,7 +13,6 @@ from seminars.utils import (
     search_distinct,
     show_input_errors,
     toggle,
-    topdomain,
     topic_dict,
     weekdays,
 )
@@ -25,6 +24,8 @@ import pytz
 from collections import defaultdict
 from datetime import datetime
 from lmfdb.logger import critical
+
+import urllib.parse
 
 combine = datetime.combine
 
@@ -135,7 +136,6 @@ class WebSeminar(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
         assert data.get("shortname")
-        topics = self.topics if self.topics else []
         data["edited_by"] = int(current_user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
@@ -383,6 +383,20 @@ class WebSeminar(object):
         if self.user_can_edit():
             query.pop("display")
         return talks_search(query, projection=projection)
+
+    @property
+    def ics_link(self):
+        return url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="https")
+
+    @property
+    def ics_gcal_link(self):
+        return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
+            {"cid": url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="http")}
+        )
+
+    @property
+    def ics_webcal_link(self):
+        return url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="webcal")
 
     @property
     def next_talk_time(self):

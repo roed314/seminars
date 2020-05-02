@@ -2,14 +2,15 @@ from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
 from seminars.utils import (
-    restricted_topics as user_topics,
-    toggle,
     Toggle,
+    ics_file,
     languages_dict,
+    restricted_topics as user_topics,
     subject_dict,
     subject_pairs,
-    topics,
+    toggle,
     topdomain,
+    topics,
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
@@ -25,10 +26,10 @@ from dateutil.parser import parse
 from lmfdb.utils import (
     BasicSpacer,
     SearchArray,
-    TextBox,
     SelectBox,
-    to_dict,
+    TextBox,
     flash_error,
+    to_dict,
 )
 
 from lmfdb.utils.search_parsing import collapse_ors
@@ -660,6 +661,29 @@ def embed_seminar_js():
     resp.headers['Content-type'] = 'text/javascript'
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
+
+@app.route("/seminar/<shortname>/ics")
+def ics_seminar_file(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        return render_template("404.html", title="Seminar not found")
+
+    return ics_file(
+        seminar.talks(),
+        filename="{}.ics".format(shortname),
+        user=current_user)
+
+
+@app.route("/talk/<semid>/<int:talkid>/ics")
+def ics_talk_file(semid, talkid):
+    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+    if talk is None:
+        return render_template("404.html", title="Talk not found")
+    return ics_file(
+        [talk],
+        filename="{}_{}.ics".format(semid, talkid),
+        user=current_user)
+
 
 @app.route("/talk/<semid>/<int:talkid>/")
 def show_talk(semid, talkid):

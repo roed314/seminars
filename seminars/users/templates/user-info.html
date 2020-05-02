@@ -58,28 +58,7 @@
     Please confirm your email to get access to your personalized calendar.
   </p>
   {% else %}
-  <div>
-      Export favorites to
-      <ul class="ical-detail">
-        <li class="ical-detail">
-          <a href="{{ user.ics_gcal_link }}" target="_blank">
-            <i class="fab fa-google"></i> Google Calendar
-          </a>
-        </li>
-        <li class="ical-detail">
-          <a href="{{ user.ics_webcal_link }}" target="_blank">
-            <i class="fas fa-calendar-alt"></i> iCal/Outlook
-          </a>
-        </li>
-        <li class="ical-detail">
-          <a href="{{ user.ics_link }}" target="_blank">
-            <i class="fas fa-file-download"></i> ICS file
-          </a>
-        </li>
-      </ul>
-      <br>
-    Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">~24 hours</a>.
-  </div>
+    {{ calendar_block('favorites', user) }}
   {% endif %}
 
   {% if user.is_creator %}
