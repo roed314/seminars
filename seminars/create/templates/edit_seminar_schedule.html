@@ -57,11 +57,11 @@
         <input type="hidden" name="seminar_ctr{{i}}" value="{{ talk.seminar_ctr }}" />
       {% else %}
         <td class="speakerinp"><input name="speaker{{i}}" value="" /></td>
-        <td class="emailinp"><input name="speaker_email{{vars.i}}" value="" /></td>
-        <td class="affiliationinp"><input name="speaker_affiliation{{vars.i}}" value="" /></td>
-        <td class="titleinp"><input name="title{{vars.i}}" value="" /></td>
-        <td><input type="checkbox" name="hidden{{vars.i}}" value="yes"/></td>
-        <input type="hidden" name="seminar_ctr{{vars.i}}" value="" />
+        <td class="emailinp"><input name="speaker_email{{i}}" value="" /></td>
+        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="" /></td>
+        <td class="titleinp"><input name="title{{i}}" value="" /></td>
+        <td><input type="checkbox" name="hidden{{i}}" value="yes"/></td>
+        <input type="hidden" name="seminar_ctr{{i}}" value="" />
       {% endif %}
     </tr>
     {% endfor %}
