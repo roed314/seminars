@@ -843,7 +843,7 @@ def layout_schedule(seminar, data):
         # otherwise just use the week containing begin
         t = talks_lucky({"seminar_id": shortname, "start_time": {"$gte": midnight_begin}}, sort=[("start_time", 1)])
         if not t:
-            t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=["start_time", -1])
+            t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=[("start_time", -1)])
         if t:
             t = adapt_datetime(t.start_time, newtz=tz)
             w = t - t.weekday() * day
