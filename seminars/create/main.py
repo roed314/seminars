@@ -59,7 +59,8 @@ from dateutil.parser import parse as parse_time
 import pytz
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
-MAX_SLOTS = 12     # Max time slots in a seminar series, must be a multiple of 3
+MAX_SLOTS = 12  # Max time slots in a seminar series, must be a multiple of 3
+
 
 @create.route("manage/")
 @email_confirmed_required
@@ -416,11 +417,11 @@ def save_seminar():
     for i in range(MAX_SLOTS):
         weekday = daytimes = None
         try:
-            col="weekday"+str(i)
-            val = raw_data.get(col,"")
+            col = "weekday" + str(i)
+            val = raw_data.get(col, "")
             weekday = process_user_input(val, col, "weekday_number", tz)
-            col="time_slot"+str(i)
-            val = raw_data.get(col,"")
+            col = "time_slot" + str(i)
+            val = raw_data.get(col, "")
             daytimes = process_user_input(val, col, "daytimes", tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
@@ -428,13 +429,27 @@ def save_seminar():
             data["weekdays"].append(weekday)
             data["time_slots"].append(daytimes)
             if daytimes_early(daytimes):
-                flash(format_warning("Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",daytimes),"warning")
+                flash(
+                    format_warning(
+                        "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                        daytimes,
+                    ),
+                    "warning",
+                )
             elif daytimes_long(daytimes):
-                flash(format_warning("Time slot %s is longer than 8 hours, please correct if this is not intended.",daytimes),"warning")
+                flash(
+                    format_warning(
+                        "Time slot %s is longer than 8 hours, please correct if this is not intended.", daytimes
+                    ),
+                    "warning",
+                )
     if data["frequency"] and not data["weekdays"]:
         errmsgs.append('You must specify at least one time slot (or set periodicty to "no fixed schedule").')
     if len(data["weekdays"]) > 1:
-        x = sorted(list(zip(data["weekdays"],data["time_slots"])),key=lambda t: t[0]*24*60 + daytime_minutes(t[1].split("-")[0]))
+        x = sorted(
+            list(zip(data["weekdays"], data["time_slots"])),
+            key=lambda t: t[0] * 24 * 60 + daytime_minutes(t[1].split("-")[0]),
+        )
         data["weekdays"], data["time_slots"] = [t[0] for t in x], [t[1] for t in x]
     organizer_data = []
     contact_count = 0
@@ -507,13 +522,15 @@ def save_seminar():
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
+    else:  # to make it obvious that these two statements should be together
         new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
 
     # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
     if not data["topics"]:
-        flash_warning("This series has no topics selected; don't forget to set the topics for each new talk individually.")
+        flash_warning(
+            "This series has no topics selected; don't forget to set the topics for each new talk individually."
+        )
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
@@ -730,15 +747,19 @@ def save_talk():
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
+    else:  # to make it obvious that these two statements should be together
         new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
 
     # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
     if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
-        flash_warning("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
+        flash_warning(
+            "Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links."
+        )
     if not data["topics"]:
-        flash_warning("This talk has no topics, and thus will only be visible to users when they disable their topics filter.")
+        flash_warning(
+            "This talk has no topics, and thus will only be visible to users when they disable their topics filter."
+        )
     if new_version == talk:
         flash("No changes made to talk.")
     else:
@@ -784,12 +805,12 @@ def layout_schedule(seminar, data):
     if end is None and seminar.is_conference:
         end = seminar.end_date
     if end is None:
-        end = begin + 14*day
+        end = begin + 14 * day
     if end is None:
         if seminar.frequency:
             end = begin + day * ceil(SCHEDULE_LEN * seminar.frequecy / len(seminar.time_slots))
         else:
-            end = begin + 14*day
+            end = begin + 14 * day
     if end < begin:
         end = begin
     data["begin"] = seminar.show_input_date(begin)
@@ -803,37 +824,37 @@ def layout_schedule(seminar, data):
         newslots = []
         d = begin
         while d <= end:
-            newslots += [(seminar.show_input_date(d),"",None) for i in range(seminar.per_day)]
+            newslots += [(seminar.show_input_date(d), "", None) for i in range(seminar.per_day)]
         for t in slots:
             if (t[0], "", None) in newslots:
                 newslots.remove((t[0], "", None))
         slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
     if not seminar.frequency:
-        for i in range(max(SCHEDULE_LEN-len(slots)),3):
-            slots.append([('','',None)])
+        for i in range(max(SCHEDULE_LEN - len(slots)), 3):
+            slots.append([("", "", None)])
     else:
         # get starting date of last seminar period whose start precedes begin
         # try to deduce this from the most recent talk, or if none, the next scheduled talk
-        t = talks_lucky({"seminar_id":shortname,"start_time":{"$lt":midnight_begin}}, sort=[("start_time",-1)])
+        t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=[("start_time", -1)])
         if not t:
-            t = talks_lucky({"seminar_id":shortname,"start_time":{"$lt":midnight_begin}}, sort=["start_time"])
+            t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=["start_time"])
         if t:
             t = adapt_datetime(t.start_time, newtz=tz)
-            w = t - t.weekday()*day
+            w = t - t.weekday() * day
             while w > midnight_begin:
-                w -= day*seminar.frequency
-            while w + day*seminar.frequency < midnight_begin:
-                w += day*seminar.frequency
+                w -= day * seminar.frequency
+            while w + day * seminar.frequency < midnight_begin:
+                w += day * seminar.frequency
         else:
-            w = midnight_begin - midnight_begin.weekday()*now
+            w = midnight_begin - midnight_begin.weekday() * now
         # make a list of all seminar time slots in [begin,end)
-        newslots =[]
+        newslots = []
         while w < midnight_end:
             for i in range(len(seminar.weekdays)):
-                d = w + day*seminar.weekdays[i]
-                if d >= midnight_begin and d < midnight_end+day:
+                d = w + day * seminar.weekdays[i]
+                if d >= midnight_begin and d < midnight_end + day:
                     newslots.append((seminar.show_input_date(d), seminar.time_slots[i], None))
-            w = w + day*seminar.frequency
+            w = w + day * seminar.frequency
         # remove slots that are (exactly) matched by an existing talk
         # this should handle slots that occur with multiplicity
         for t in slots:
@@ -841,6 +862,7 @@ def layout_schedule(seminar, data):
                 newslots.remove((t[0], t[1], None))
         slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
     return slots
+
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
 @email_confirmed_required
@@ -855,7 +877,9 @@ def edit_seminar_schedule():
     if resp is not None:
         return resp
     if not seminar.topics:
-        flash_warning("This series has no topics selected; don't forget to set the topics for each new talk individually.")
+        flash_warning(
+            "This series has no topics selected; don't forget to set the topics for each new talk individually."
+        )
     schedule = layout_schedule(seminar, data)
     print(schedule)
     title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
@@ -914,9 +938,9 @@ def save_seminar_schedule():
             continue
         try:
             date = start_time = end_time = None
-            date = process_user_input(raw_data.get("date%s"%i), "date", "date", tz)
-            interval = process_user_input(raw_data.get("time%s"%i), "time", "daytime_interval", tz)
-            start_time, end_time = date_and_daytimes_to_times (date, interval, tz)
+            date = process_user_input(raw_data.get("date%s" % i), "date", "date", tz)
+            interval = process_user_input(raw_data.get("time%s" % i), "time", "daytime_interval", tz)
+            start_time, end_time = date_and_daytimes_to_times(date, interval, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, date, "date"))
         if not date or not start_time or not end_time:
@@ -927,9 +951,18 @@ def save_seminar_schedule():
             return show_input_errors(errmsgs)
 
         if daytimes_early(interval):
-            flash(format_warning("Talk for speaker %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",speaker),"warning")
-        elif daytimes_long(interval) > 8*60:
-            flash(format_warning("Time s %s is longer than 8 hours, please correct if this is not intended.", speaker), "warning")
+            flash(
+                format_warning(
+                    "Talk for speaker %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                    speaker,
+                ),
+                "warning",
+            )
+        elif daytimes_long(interval) > 8 * 60:
+            flash(
+                format_warning("Time s %s is longer than 8 hours, please correct if this is not intended.", speaker),
+                "warning",
+            )
 
         if seminar_ctr:
             # existing talk
