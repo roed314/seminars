@@ -841,6 +841,7 @@ def layout_schedule(seminar, data):
         # get starting date of last seminar period whose start precedes begin
         # try to deduce this from the most recent talk, or if none, the next scheduled talk
         t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=[("start_time", -1)])
+        print(t is not None)
         if not t:
             t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=["start_time"])
         if t:
