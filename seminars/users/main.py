@@ -430,7 +430,6 @@ def get_endorsing_link():
     except EmailNotValidError as e:
         flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
         return redirect(url_for(".info"))
-    link = endorser_link(current_user, email)
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
         if db.preendorsed_users.count({'email':email}):
@@ -470,7 +469,7 @@ def get_endorsing_link():
     </button> to let them know.
     </p>
     """.format(
-                link=link, email=email, msg=urlencode(data, quote_via=quote)
+                email=email, msg=urlencode(data, quote_via=quote)
             )
     else:
         target_name = rec["name"]
