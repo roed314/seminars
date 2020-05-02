@@ -20,6 +20,7 @@ from seminars.utils import (
     show_input_errors,
     timezones,
     weekdays,
+    midnight,
     daytime_minutes,
     daytimes_early,
     daytimes_long,
@@ -52,7 +53,7 @@ from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import IdentifierWrapper
 from psycopg2.sql import SQL
-import datetime
+from datetime import datetime, timedelta
 from math import ceil
 from dateutil.parser import parse as parse_time
 import pytz
@@ -656,8 +657,8 @@ def edit_talk():
             # TODO: clean this up
             start_time = process_user_input(data.get("start_time"), "start_time", "time", tz)
             end_time = process_user_input(data.get("end_time"), "end_time", "time", tz)
-            start_time = localize_time(datetime.datetime.combine(date, start_time), tz)
-            end_time = localize_time(datetime.datetime.combine(date, end_time), tz)
+            start_time = localize_time(datetime.combine(date, start_time), tz)
+            end_time = localize_time(datetime.combine(date, end_time), tz)
         except ValueError:
             return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 302)
         talk.start_time = start_time
@@ -773,9 +774,9 @@ def layout_schedule(seminar, data):
     begin = parse_date("begin")
     end = parse_date("end")
     shortname = seminar.shortname
-    now = datetime.datetime.now(tz=tz)
+    now = datetime.now(tz=tz)
     today = now.date()
-    day = datetime.timedelta(days=1)
+    day = timedelta(days=1)
     if begin is None and seminar.is_conference:
         begin = seminar.start_date
     if begin is None:
@@ -793,8 +794,8 @@ def layout_schedule(seminar, data):
         end = begin
     data["begin"] = seminar.show_input_date(begin)
     data["end"] = seminar.show_input_date(end)
-    midnight_begin = localize_time(datetime.datetime.combine(begin, datetime.time()), tz)
-    midnight_end = localize_time(datetime.datetime.combine(end, datetime.time()), tz)
+    midnight_begin = midnight(begin, tz)
+    midnight_end = midnight(end, tz)
     query = {"$gte": midnight_begin, "$lt": midnight_end + day}
     talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]))
     slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]

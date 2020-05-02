@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time as maketime
 from dateutil.parser import parse as parse_time
 import pytz, re, iso639
 from six import string_types
@@ -57,14 +57,17 @@ def daytime_minutes(s):
 def daytimes_start_minutes(s):
     return daytime_minutes(s.split(':')[0])
 
+def midnight(date, tz):
+    localize_time(datetime.combine(date, maketime()), tz)
+
 def date_and_daytimes_to_times(date, s, tz):
-    d = localize_time(datetime.datetime.combine(date, datetime.time()), tz)
-    m = datetime.timedelta(minutes=1)
+    d = localize_time(datetime.combine(date, maketime()), tz)
+    m = timedelta(minutes=1)
     t = s.split('-')
     start = d + m*daytime_minutes(t[0])
     end = d + m*daytime_minutes(t[1])
     if end < start:
-        end += datetime.timedelta(days=1)
+        end += timedelta(days=1)
     return start, end
 
 def daytimes_early(s):
