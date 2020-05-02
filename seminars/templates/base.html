@@ -79,7 +79,7 @@
 
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.watermark.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.markitup.markdown.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='lmfdb.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='knowl.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='seminars.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='showdown.min.js') }}"></script>
 
@@ -102,50 +102,7 @@
           src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js"
           integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
           crossorigin="anonymous"></script>
-    <script>
-katexOpts = {
-  delimiters: [
-  {left: "$$", right: "$$", display: true},
-  {left: "\\[", right: "\\]", display: true},
-  {left: "$", right: "$", display: false},
-  {left: "\\(", right: "\\)", display: false}
-],
-  macros: {
-  "\\C": '{\\mathbb{C}}',
-  "\\R": '{\\mathbb{R}}',
-  "\\Q": '{\\mathbb{Q}}',
-  "\\Z": '{\\mathbb{Z}}',
-  "\\F": '{\\mathbb{F}}',
-  "\\H": '{\\mathbb{H}}',
-  "\\HH": '{\\mathcal{H}}',
-  "\\integers": '{\\mathcal{O}}',
-  "\\SL": '{\\textrm{SL}}',
-  "\\GL": '{\\textrm{GL}}',
-  "\\PSL": '{\\textrm{PSL}}',
-  "\\PGL": '{\\textrm{PGL}}',
-  "\\Sp": '{\\textrm{Sp}}',
-  "\\GSp": '{\\textrm{GSp}}',
-  "\\PSp": '{\\textrm{PSp}}',
-  "\\PSU": '{\\textrm{PSU}}',
-  "\\Gal": '{\\mathop{\\rm Gal}}',
-  "\\Aut": '{\\mathop{\\rm Aut}}',
-  "\\Sym": '{\\mathop{\\rm Sym}}',
-  "\\End": '{\\mathop{\\rm End}}',
-  "\\Reg": '{\\mathop{\\rm Reg}}',
-  "\\Ord": '{\\mathop{\\rm Ord}}',
-  "\\sgn": '{\\mathop{\\rm sgn}}',
-  "\\trace": '{\\mathop{\\rm trace}}',
-  "\\Res": '{\\mathop{\\rm Res}}',
-  "\\mathstrut": '\\vphantom(',
-  "\\ideal": '{\\mathfrak{ #1 }}',
-  "\\classgroup": '{Cl(#1)}',
-  "\\modstar": '{\\left( #1/#2 \\right)^\\times}',
-},
-};
-  document.addEventListener("DOMContentLoaded", function() {
-  renderMathInElement(document.body, katexOpts);
-});
-    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='katex-custom.js') }}"></script>
     <link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.css" rel="stylesheet" type="text/css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.min.js" integrity="sha384-XhWAe6BtVcvEdS3FFKT7Mcft4HJjPqMQvi5V4YhzH9Qxw497jC13TupOEvjoIPy7" crossorigin="anonymous"></script>
 
