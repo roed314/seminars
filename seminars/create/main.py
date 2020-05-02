@@ -833,8 +833,9 @@ def layout_schedule(seminar, data):
             if (t[0], "", None) in newslots:
                 newslots.remove((t[0], "", None))
         slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
+        return slots
     if not seminar.frequency:
-        for i in range(max(SCHEDULE_LEN - len(slots)), 3):
+        for i in range(max(SCHEDULE_LEN - len(slots), 3)):
             slots.append([("", "", None)])
     else:
         # get starting date of last seminar period whose start precedes begin
