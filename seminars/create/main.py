@@ -939,13 +939,18 @@ def save_seminar_schedule():
                 warned = True
                 flash_warning("To delete an existing talk, click Details and then click delete on the Edit talk page")
             continue
+        date = start_time = end_time = None
         try:
-            date = start_time = end_time = None
-            date = process_user_input(raw_data.get("date%s" % i), "date", "date", tz)
-            interval = process_user_input(raw_data.get("time%s" % i), "time", "daytimes", tz)
+            val = raw_data.get("date%s" % i)
+            date = process_user_input(val, "date", "date", tz)
+        except Exception as err:  # should only be ValueError's but let's be cautious
+            errmsgs.append(format_input_errmsg(err, val, "date"))
+        try:
+            val = raw_data.get("time%s" % i)
+            interval = process_user_input(val, "time", "daytimes", tz)
             start_time, end_time = date_and_daytimes_to_times(date, interval, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_input_errmsg(err, date, "date"))
+            errmsgs.append(format_input_errmsg(err, val, "time"))
         if not date or not start_time or not end_time:
             errmsgs.append(format_errmsg("You must specify a date and time for the talk by %s", speaker))
 
