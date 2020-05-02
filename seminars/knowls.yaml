@@ -294,6 +294,15 @@ title:
     As with seminar and conference names,
     this should be in <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>,
     with only the first word and proper nouns capitalized.
+    If you have co-authors, it is better to mention them not here, 
+    but in the abstract.
+abstract:
+  title: Abstract
+  contents: |
+    The abstract should briefly summarize what the talk will be about,
+    to help people figure out whether they want to attend the talk.
+    This is also a good place to mention your co-authors.
+    TeX symbols are OK here.
 paper_link:
   title: Paper link
   contents: |
