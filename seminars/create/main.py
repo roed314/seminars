@@ -890,7 +890,6 @@ def edit_seminar_schedule():
         raw_data=data,
         title=title,
         schedule=schedule,
-        slots=len(schedule),
         section="Manage",
         subsection="schedule",
     )
