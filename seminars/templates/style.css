@@ -904,6 +904,7 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
 .hidden {
     visibility: hidden;
     height: 0px;
+    display: none;
 }
 
 .code {
@@ -1527,16 +1528,16 @@ table .knowl a {
   margin-bottom: 15px;
   margin-right: 10px;
   text-align: left;
-  transition: max-height 0.4s ease, border 0.4s ease-out, max-width 0.2s linear;
   overflow-y: hidden;
   max-height: 1000px;
+  transition: max-height 0.4s ease, border-width 0.4s step-start;
 }
 
 .knowl-output:not(.open) {
+  transition: max-height 0.4s ease, border-width 0.4s step-end;
   max-height: 0px;
-  border: 0px;
+  border-width: 0px;
   margin: 0px;
-  max-width: 0px ! important;
 }
 
 

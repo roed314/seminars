@@ -139,6 +139,19 @@ function knowl_click_handler(evt) {
 
   // if we already have the content, toggle visibility
   if (output) {
+    if (table_mode) {
+      var row = output.parentNode.parentNode;
+      if(!output.classList.contains('open')) {
+        row.classList.remove("hidden")
+      } else {
+        output.addEventListener('transitionend', function () {
+        row.classList.add("hidden");
+
+      }, {
+        once: true
+      });
+      }
+    }
     knowl.classList.toggle("active")
     toggle(output);
   } else {
