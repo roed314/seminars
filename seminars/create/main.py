@@ -947,11 +947,12 @@ def save_seminar_schedule():
                 date = process_user_input(dateval, "date", "date", tz)
             except Exception as err:  # should only be ValueError's but let's be cautious
                 errmsgs.append(format_input_errmsg(err, dateval, "date"))
-            try:
-                interval = process_user_input(timeval, "time", "daytimes", tz)
-                start_time, end_time = date_and_daytimes_to_times(date, interval, tz)
-            except Exception as err:  # should only be ValueError's but let's be cautious
-                errmsgs.append(format_input_errmsg(err, timeval, "time"))
+            if date:
+                try:
+                    interval = process_user_input(timeval, "time", "daytimes", tz)
+                    start_time, end_time = date_and_daytimes_to_times(date, interval, tz)
+                except Exception as err:  # should only be ValueError's but let's be cautious
+                    errmsgs.append(format_input_errmsg(err, timeval, "time"))
         if not date or not start_time or not end_time:
             errmsgs.append(format_errmsg("You must specify a date and time for the talk by %s", speaker))
 
