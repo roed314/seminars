@@ -786,7 +786,7 @@ def layout_schedule(seminar, data):
             try:
                 return process_user_input(date, "date", "date", tz)
             except ValueError:
-                pass
+                flash_warning ("Invalid date %s ignored, please use a format like mmm dd, yyyy or dd-mmm-yyyy or mm/dd/yyyy", date)
 
     def slot_start_time(s):
         # put slots with no time specified at the end of the day
