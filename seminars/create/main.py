@@ -827,7 +827,7 @@ def layout_schedule(seminar, data):
             w = midnight_begin - midnight_begin.weekday()*now
         # make a list of all seminar time slots in [begin,end)
         newslots =[]
-        while w < end:
+        while w < midnight_end:
             for i in range(len(seminar.weekdays)):
                 d = w + day*seminar.weekdays[i]
                 if d >= midnight_begin and d < midnight_end+day:
