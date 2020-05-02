@@ -798,8 +798,8 @@ def layout_schedule(seminar, data):
     now = datetime.now(tz=tz)
     today = now.date()
     day = timedelta(days=1)
-    if begin is None or end is None:
-        flash_warning ("We recommend setting the start and end date properites of your conference before filling in the schedule.")
+    if seminar.is_conference and (begin is None or end is None):
+        flash_warning ("You have not specified the start and end dates of your conference (we chose a date range to layout your schedule).")
     begin = seminar.start_date if begin is None and seminar.is_conference else begin
     begin = today if begin is None else begin
     end = seminar.end_date if end is None and seminar_is_conference else end
