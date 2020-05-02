@@ -798,7 +798,7 @@ def layout_schedule(seminar, data):
     now = datetime.now(tz=tz)
     today = now.date()
     day = timedelta(days=1)
-    if seminar.is_conference and (begin is None or end is None):
+    if seminar.is_conference and (seminar.start_date is None or seminar.end_date is None):
         flash_warning ("You have not specified the start and end dates of your conference (we chose a date range to layout your schedule).")
     begin = seminar.start_date if begin is None and seminar.is_conference else begin
     begin = today if begin is None else begin
@@ -838,22 +838,19 @@ def layout_schedule(seminar, data):
         for i in range(max(SCHEDULE_LEN - len(slots), 3)):
             slots.append(("", "", None))
     else:
-        # get starting date of last seminar period whose start precedes begin
-        # try to deduce this from the most recent talk, or if none, the next scheduled talk
-        t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=[("start_time", -1)])
-        print(t is not None)
+        # figure out week to start in.
+        # use the week of the first seminar after begin if any, otherwise last seminar before begin, if any
+        # otherwise just use the week containing begin
+        t = talks_lucky({"seminar_id": shortname, "start_time": {"$gte": midnight_begin}}, sort=[("start_time", -1)])
         if not t:
             t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=["start_time"])
         if t:
             t = adapt_datetime(t.start_time, newtz=tz)
-            print(t)
             w = t - t.weekday() * day
-            print(w)
             while w > midnight_begin:
                 w -= day * seminar.frequency
             while w + day * seminar.frequency < midnight_begin:
                 w += day * seminar.frequency
-            print(w)
         else:
             w = midnight_begin - midnight_begin.weekday() * day
         # make a list of all seminar time slots in [begin,end)
