@@ -374,7 +374,7 @@ class WebTalk(object):
 
     def is_starting_soon(self):
         now = datetime.now(pytz.utc)
-        return (self.start_time - datetime.timedelta(minutes=15) <= now < self.end_time)
+        return (self.start_time - timedelta(minutes=15) <= now < self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:
