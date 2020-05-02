@@ -58,7 +58,7 @@ def daytimes_start_minutes(s):
     return daytime_minutes(s.split(':')[0])
 
 def midnight(date, tz):
-    localize_time(datetime.combine(date, maketime()), tz)
+    return localize_time(datetime.combine(date, maketime()), tz)
 
 def date_and_daytimes_to_times(date, s, tz):
     d = localize_time(datetime.combine(date, maketime()), tz)
