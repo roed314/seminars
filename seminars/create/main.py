@@ -790,7 +790,7 @@ def layout_schedule(seminar, data):
 
     def slot_start_time(s):
         # put slots with no time specified at the end of the day
-        print("slot_start_time: date=%s, interval=%s"(%s[0],s[1]))
+        print("slot_start_time: date=%s, interval=%s"(s[0],s[1]))
         return date_and_daytimes_to_times(parse_time(s[0]), s[1] if s[1] else "23:59-23:59", tz)[0]
 
     begin = parse_date("begin")
