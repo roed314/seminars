@@ -937,7 +937,7 @@ def save_seminar_schedule():
         try:
             date = start_time = end_time = None
             date = process_user_input(raw_data.get("date%s" % i), "date", "date", tz)
-            interval = process_user_input(raw_data.get("time%s" % i), "time", "daytime_interval", tz)
+            interval = process_user_input(raw_data.get("time%s" % i), "time", "daytimes", tz)
             start_time, end_time = date_and_daytimes_to_times(date, interval, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, date, "date"))
