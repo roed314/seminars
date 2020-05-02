@@ -398,6 +398,11 @@ class WebSeminar(object):
             return ""
         return date.strftime("%b %d, %Y")
 
+    def show_schedule_date(self, date):
+        if not date:
+            return ""
+        return adapt_datetime(date, self.tz).strftime("%a %b %-d")
+
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
 
