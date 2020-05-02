@@ -1541,20 +1541,11 @@ table .knowl a {
 }
 
 
-.knowl-output .knowl-output,
-.knowl-output .knowl-output.loading {
+.knowl-output .knowl-output {
  margin-left: 0;
  margin-right: 0;
 }
-.knowl-output.loading {
- color: {{color.grey}};
- font-style: italic;
- font-size: small;
-}
-div.limit-height {
-  max-height: 500px;
-  overflow-y: auto;
-}
+
 .knowl-output h1, .knowl-output h2 {
   margin: 5px 0;
 }
@@ -1597,31 +1588,6 @@ div.limit-height {
 }
 
 /* end knowl */
-
-/*** Tables for the Siegel corner ***/
-
-/** TODO these definitions are too broad. please make siegel a
- * blueprint (name is e.g. "siegel") and prefix all siegel
- * related definitions with body.siegel
- */
-.box1 {
-    margin: 20px 5px 20px 5px;
-    padding: 1px;
-    max-width: 800px;
-    overflow: auto;
-}
-
-.small{
-    font-size: 12px;
-}
-
-.error {
-    margin: 20px 0 20px 0;
-    padding: 10px;
-    border: 1px solid {{color.red}};
-    color: {{color.red}};
-    font-size: 120%;
-}
 
 /* TODO: where?*/
 .enternumber
