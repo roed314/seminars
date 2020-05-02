@@ -1,4 +1,4 @@
-import pytz, datetime, random
+import pytz, random
 from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
@@ -21,7 +21,7 @@ from markupsafe import Markup
 from psycopg2.sql import SQL
 from icalendar import Event
 from lmfdb.logger import critical
-
+from datetime import datetime
 
 class WebTalk(object):
     def __init__(
@@ -127,7 +127,7 @@ class WebTalk(object):
         except (ValueError, AttributeError):
             # Talks can be edited by anonymous users with a token, with no id
             data["edited_by"] = -1
-        data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
+        data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
     @classmethod
@@ -183,14 +183,14 @@ class WebTalk(object):
         if self.start_time is None:
             return ""
         else:
-            format = "%a %b %-d" if self.start_time.year == datetime.now().year else "%d-%b-%Y"
+            format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
             return adapt_datetime(self.start_time, newtz=tz).strftime(format)
 
     def show_time_and_duration(self, adapt=True):
         start = self.start_time
         end = self.end_time
-        now = datetime.datetime.now(pytz.utc)
-        delta = datetime.timedelta
+        now = datetime.now(pytz.utc)
+        delta = timedelta
         minute = delta(minutes=1)
         hour = delta(hours=1)
         day = delta(days=1)
@@ -346,7 +346,7 @@ class WebTalk(object):
         return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
 
     def is_past(self):
-        return self.end_time < datetime.datetime.now(pytz.utc)
+        return self.end_time < datetime.now(pytz.utc)
 
     def is_subscribed(self):
         if current_user.is_anonymous:
@@ -498,7 +498,7 @@ Email link to speaker
         event.add("description", desc)
         if self.room:
             event.add("location", "Lecture held in {}".format(self.room))
-        event.add("DTSTAMP", datetime.datetime.now(tz=pytz.UTC))
+        event.add("DTSTAMP", datetime.now(tz=pytz.UTC))
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 

@@ -401,7 +401,7 @@ class WebSeminar(object):
     def show_schedule_date(self, date):
         if not date:
             return ""
-        format = "%a %b %-d" if self.start_time.year == datetime.now().year else "%d-%b-%Y"
+        format = "%a %b %-d" if adapt_datetime(date,self.tz).year == datetime.now(self.tz).year else "%d-%b-%Y"
         return adapt_datetime(date, self.tz).strftime(format)
 
     def talks(self, projection=1):
