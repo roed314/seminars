@@ -845,11 +845,14 @@ def layout_schedule(seminar, data):
             t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=["start_time"])
         if t:
             t = adapt_datetime(t.start_time, newtz=tz)
+            print(t)
             w = t - t.weekday() * day
+            print(w)
             while w > midnight_begin:
                 w -= day * seminar.frequency
             while w + day * seminar.frequency < midnight_begin:
                 w += day * seminar.frequency
+            print(w)
         else:
             w = midnight_begin - midnight_begin.weekday() * day
         # make a list of all seminar time slots in [begin,end)
