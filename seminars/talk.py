@@ -21,7 +21,7 @@ from markupsafe import Markup
 from psycopg2.sql import SQL
 from icalendar import Event
 from lmfdb.logger import critical
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class WebTalk(object):
     def __init__(
