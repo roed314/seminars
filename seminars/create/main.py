@@ -802,7 +802,7 @@ def layout_schedule(seminar, data):
         flash_warning ("You have not specified the start and end dates of your conference (we chose a date range to layout your schedule).")
     begin = seminar.start_date if begin is None and seminar.is_conference else begin
     begin = today if begin is None else begin
-    end = seminar.end_date if end is None and seminar_is_conference else end
+    end = seminar.end_date if end is None and seminar.is_conference else end
     if end is None:
         if seminar.is_conference:
             if seminar.per_day:
