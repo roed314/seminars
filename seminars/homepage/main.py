@@ -656,8 +656,26 @@ def ics_seminar_file(shortname):
     bIO = BytesIO()
     bIO.write(cal.to_ical())
     bIO.seek(0)
-    return send_file(bIO, attachment_filename="seminars.ics", as_attachment=True, add_etags=False)
+    return send_file(bIO, attachment_filename="{}.ics".format(shortname), as_attachment=True, add_etags=False)
 
+
+@app.route("/talk/<semid>/<int:talkid>/ics")
+def ics_talk_file(semid, talkid):
+    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+    if talk is None:
+        return render_template("404.html", title="Talk not found")
+
+    cal = Calendar()
+    cal.add("VERSION", "2.0")
+    cal.add("PRODID", topdomain())
+    cal.add("CALSCALE", "GREGORIAN")
+    cal.add("X-WR-CALNAME", topdomain())
+
+    cal.add_component(talk.event(user=current_user))
+    bIO = BytesIO()
+    bIO.write(cal.to_ical())
+    bIO.seek(0)
+    return send_file(bIO, attachment_filename="{}_{}.ics".format(semid, talkid), as_attachment=True, add_etags=False)
 
 @app.route("/talk/<semid>/<int:talkid>/")
 def show_talk(semid, talkid):
