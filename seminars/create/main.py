@@ -819,9 +819,9 @@ def layout_schedule(seminar, data):
         if t:
             t = adapt_datetime(t.start_time, newtz=tz)
             w = t - t.weekday()*day
-            while w > begin:
+            while w > midnight_begin:
                 w -= day*seminar.frequency
-            while w + day*seminar.frequency < begin:
+            while w + day*seminar.frequency < midnight_begin:
                 w += day*seminar.frequency
         else:
             w = midnight_begin - midnight_begin.weekday()*now
