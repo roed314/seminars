@@ -6,7 +6,7 @@
     </thead>
     {% for talk in talks %}
     <tr>
-      {{ talk.oneline(include_seminar=False, include_subscribe=False, tz=seminar.tz) | safe }}
+      {{ talk.oneline(include_seminar=False, include_subscribe=False, tz=seminar.tz, _external=_external) | safe }}
     </tr>
     {% endfor %}
   </table>
