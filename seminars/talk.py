@@ -20,6 +20,7 @@ from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
+import urllib.parse
 from icalendar import Event
 from lmfdb.logger import critical
 
@@ -348,6 +349,23 @@ class WebTalk(object):
 
     def show_video_link(self):
         return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
+
+    @property
+    def ics_link(self):
+        return url_for(".ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+                       _external=True, _scheme="https")
+
+    @property
+    def ics_gcal_link(self):
+        return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
+            {"cid": url_for(".ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+                            _external=True, _scheme="http")}
+        )
+
+    @property
+    def ics_webcal_link(self):
+        return url_for(".ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+                       _external=True, _scheme="webcal")
 
     def is_past(self):
         return self.end_time < datetime.datetime.now(pytz.utc)
