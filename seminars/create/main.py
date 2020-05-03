@@ -734,7 +734,7 @@ def save_talk():
     if errmsgs:
         return show_input_errors(errmsgs)
     else:  # to make it obvious that these two statements should be together
-        new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
+        new_version = WebTalk(talk.seminar_id, data=data)
 
     # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
@@ -983,14 +983,14 @@ def save_seminar_schedule():
             return show_input_errors(errmsgs)
 
         if seminar_ctr:
-            new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
+            new_version = WebTalk(talk.seminar_id, data=data)
             if new_version != talk:
                 updated += 1
                 to_save.append(new_version) # defer save in case of errors on other talks
         else:
             data["seminar_ctr"] = ctr
             ctr += 1
-            new_version = WebTalk(talk.seminar_id, ctr, data=data)
+            new_version = WebTalk(talk.seminar_id, data=data)
             to_save.append(new_version) # defer save in case of errors on other talks
 
     for newver in to_save:
