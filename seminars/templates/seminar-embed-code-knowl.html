@@ -1,7 +1,8 @@
 <div>
 Including the HTML code below on your webpage will display the series schedule there.  The code consists of a &lt;div&gt; tag and a &lt;script&gt; tag.<br><br>
 To include the schedules of multiple series, you need the &lt;div&gt; tag for each but the &lt;script&gt; tag only once, so copy the code block for each series to your webpage and remove all but one copy of the &lt;script&gt; tag.<br><br>
-By default, the code uses <i>our</i> styling when displaying the schedule.  If instead you want your webpage's style settings to apply, then after copying the code, change <code>true</code> to <code>false</code> inside the &lt;script&gt; tag.
+By default, the code uses <i>our</i> styling when displaying the schedule.  If instead you want your webpage's style settings to apply, then after copying the code, change <code>'addCSS': true</code> to <code>'addCSS': false</code> inside the &lt;script&gt; tag.<br><br>
+If you want a footer advertising "Powered by {{topsite}}", include the <code>sitefooter</code> attibute in the &lt;div&gt; tag.<br><br>
 </div>
 <textarea cols="69" rows="5" readonly id="embed-{{ seminar.shortname | safe }}-{{ uniqstr  | safe }}" onclick="this.focus();this.select()">
 <div class="embeddable_schedule" shortname="{{ seminar.shortname | safe }}" daterange="{{ daterange | safe }}"></div>
