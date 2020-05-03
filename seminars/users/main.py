@@ -14,7 +14,6 @@ from flask import (
     redirect,
     make_response,
     session,
-    send_file,
 )
 from flask_login import (
     login_required,
@@ -25,22 +24,21 @@ from flask_login import (
 )
 from lmfdb.utils import flash_error
 from markupsafe import Markup
-from icalendar import Calendar
-from io import BytesIO
 
 from seminars import db
 
 from seminars.utils import (
-    timezones,
-    timestamp,
-    validate_url,
     format_errmsg,
+    ics_file,
     show_input_errors,
+    timestamp,
+    timezones,
     topdomain,
+    validate_url,
 )
 
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
-import datetime
+from datetime import datetime
 
 
 login_page = Blueprint("user", __name__, template_folder="templates")
@@ -72,7 +70,7 @@ def get_username(uid):
 def ctx_proc_userdata():
     userdata = {
         "user": current_user,
-        "usertime": datetime.datetime.now(tz=current_user.tz),
+        "usertime": datetime.now(tz=current_user.tz),
     }
     # used to display name of locks
     userdata["get_username"] = get_username  # this is a function
@@ -432,7 +430,6 @@ def get_endorsing_link():
     except EmailNotValidError as e:
         flash_error("""Oops, email '%s' is not allowed. %s""", email, str(e))
         return redirect(url_for(".info"))
-    link = endorser_link(current_user, email)
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
         if db.preendorsed_users.count({'email':email}):
@@ -472,7 +469,7 @@ def get_endorsing_link():
     </button> to let them know.
     </p>
     """.format(
-                link=link, email=email, msg=urlencode(data, quote_via=quote)
+                email=email, msg=urlencode(data, quote_via=quote)
             )
     else:
         target_name = rec["name"]
@@ -566,7 +563,7 @@ def talk_subscriptions_remove(shortname, ctr):
 
 
 @login_page.route("/ics/<token>")
-def ics_file(token):
+def user_ics_file(token):
     try:
         uid = read_token(token, "ics")
         user = SeminarsUser(uid=int(uid))
@@ -575,27 +572,18 @@ def ics_file(token):
     except Exception:
         return flask.abort(404, "Invalid link")
 
-    cal = Calendar()
-    cal.add("VERSION", "2.0")
-    cal.add("PRODID", topdomain())
-    cal.add("CALSCALE", "GREGORIAN")
-    cal.add("X-WR-CALNAME", topdomain())
-
-    for talk in user.talks:
-        # Organizers may have hidden talk
-        if talk.hidden or talk.seminar.visibility == 0:
-            continue
-        cal.add_component(talk.event(user))
+    talks = [t for t in user.talks if not (t.hidden or t.seminar.visibility == 0)]
     for seminar in user.seminars:
         # Organizers may have hidden seminar
         if seminar.visibility == 0:
             continue
         for talk in seminar.talks():
-            cal.add_component(talk.event(user))
-    bIO = BytesIO()
-    bIO.write(cal.to_ical())
-    bIO.seek(0)
-    return send_file(bIO, attachment_filename="seminars.ics", as_attachment=True, add_etags=False)
+            talks.append(talk)
+    return ics_file(
+        talks=talks,
+        filename="semianars.ics",
+        user=user)
+
 
 
 @login_page.route("/public/")

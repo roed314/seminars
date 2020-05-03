@@ -3,5 +3,5 @@
 	url = https://github.com/jamiesully/lmfdb.git
 [submodule "seminars/static/select-pure"]
 	path = seminars/static/select-pure
-	url = https://github.com/dudyn5ky1/select-pure.git
+	url = https://github.com/duetosymmetry/select-pure.git
 

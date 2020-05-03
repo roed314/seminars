@@ -662,10 +662,19 @@ form button.aslink:hover {
 
 #flashes p.error {
   margin: 15px 0;
-  font-size: 95%;
   border: 0;
   border-left: 15px solid {{color.flashes_border}};
   background: {{color.flashes_background}};
+  color: {{color.red}}
+}
+
+#flashes p.warning {
+  margin: 15px 0;
+  font-size: 90%;
+  border: 0;
+  border-left: 15px solid {{color.flashes_border}};
+  background: {{color.flashes_background}};
+  color: {{color.black}}
 }
 
 #main {
@@ -904,6 +913,7 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
 .hidden {
     visibility: hidden;
     height: 0px;
+    display: none;
 }
 
 .code {
@@ -921,12 +931,6 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
    font-style: italic;
    color: {{color.grey}};
    display: none;
-}
-
-.errmsg {
-   font-size: 80%;
-   font-style: bold;
-   color: {{color.red}};
 }
 
 .forminfo {
@@ -1112,6 +1116,12 @@ table.ntdata > tbody > tr:last-child {
     border-bottom:  2px solid {{ color.table_ntdata_border }};
 }
 */
+
+table.ntdata > caption {
+    caption-side: bottom;
+    padding-top: 10px;
+    text-align: right;
+}
 
 table.ntdata > tr.even,
 table.ntdata > tbody > tr.even,
@@ -1523,27 +1533,28 @@ table .knowl a {
   border: 10px solid {{ color.knowl_border }};
   {{ BORDER_RADIUS(10) }}
   padding: 0px;
-  display: none;
   margin-top: 10px;
   margin-bottom: 15px;
   margin-right: 10px;
   text-align: left;
+  overflow-y: hidden;
+  max-height: 1000px;
+  transition: max-height 0.4s ease, border-width 0.4s step-start;
 }
 
-.knowl-output .knowl-output,
-.knowl-output .knowl-output.loading {
+.knowl-output:not(.open) {
+  transition: max-height 0.4s ease, border-width 0.4s step-end;
+  max-height: 0px;
+  border-width: 0px;
+  margin: 0px;
+}
+
+
+.knowl-output .knowl-output {
  margin-left: 0;
  margin-right: 0;
 }
-.knowl-output.loading {
- color: {{color.grey}};
- font-style: italic;
- font-size: small;
-}
-div.limit-height {
-  max-height: 500px;
-  overflow-y: auto;
-}
+
 .knowl-output h1, .knowl-output h2 {
   margin: 5px 0;
 }
@@ -1586,31 +1597,6 @@ div.limit-height {
 }
 
 /* end knowl */
-
-/*** Tables for the Siegel corner ***/
-
-/** TODO these definitions are too broad. please make siegel a
- * blueprint (name is e.g. "siegel") and prefix all siegel
- * related definitions with body.siegel
- */
-.box1 {
-    margin: 20px 5px 20px 5px;
-    padding: 1px;
-    max-width: 800px;
-    overflow: auto;
-}
-
-.small{
-    font-size: 12px;
-}
-
-.error {
-    margin: 20px 0 20px 0;
-    padding: 10px;
-    border: 1px solid {{color.red}};
-    color: {{color.red}};
-    font-size: 120%;
-}
 
 /* TODO: where?*/
 .enternumber
@@ -1986,384 +1972,6 @@ tr.even td.sorting_3 {
     background-color: {{color.knowl_l_6}};
 }
 
-/*TODO: I think these are not used.*/
-/*
-tr.odd.gradeA td.sorting_1 {
-    background-color: {{color.col_main_ldl_1}};
-}
-
-tr.odd.gradeA td.sorting_2 {
-    background-color: {{color.col_main_ld_1}};
-}
-
-tr.odd.gradeA td.sorting_3 {
-    background-color: {{color.col_main_ld_1}};
-}
-
-tr.even.gradeA td.sorting_1 {
-    background-color: {{color.col_main_ld_2}};
-}
-
-tr.even.gradeA td.sorting_2 {
-    background-color: {{color.col_main_ll_1}};
-}
-
-tr.even.gradeA td.sorting_3 {
-    background-color: {{color.col_main_ll_1}};
-}
-
-tr.odd.gradeC td.sorting_1 {
-    background-color: {{color.knowl_ld_1}}
-}
-
-tr.odd.gradeC td.sorting_2 {
-    background-color: {{color.knowl_l_7}};
-}
-
-tr.odd.gradeC td.sorting_3 {
-    background-color: {{color.knowl_l_7}};
-}
-
-tr.even.gradeC td.sorting_1 {
-    background-color: {{color.knowl_l_8}};
-}
-
-tr.even.gradeC td.sorting_2 {
-    background-color: {{color.knowl_l_9}};
-}
-
-tr.even.gradeC td.sorting_3 {
-    background-color: {{color.knowl_l_9}};
-}
-
-tr.odd.gradeX td.sorting_1 {
-    background-color: {{color.light_red_4}};
-}
-
-tr.odd.gradeX td.sorting_2 {
-    background-color: {{color.light_red_5}};
-}
-
-tr.odd.gradeX td.sorting_3 {
-    background-color: {{color.light_red_5}};
-}
-
-tr.even.gradeX td.sorting_1 {
-    background-color: {{color.light_red_6}};
-}
-
-tr.even.gradeX td.sorting_2 {
-    background-color: {{color.light_red_7}};
-}
-
-tr.even.gradeX td.sorting_3 {
-    background-color: {{color.light_red_8}};
-}
-
-tr.odd.gradeU td.sorting_1 {
-    background-color: {{color.light_grey_5}};
-}
-
-tr.odd.gradeU td.sorting_2 {
-    background-color: {{color.light_grey_6}};
-}
-
-tr.odd.gradeU td.sorting_3 {
-    background-color: {{color.light_grey_6}};
-}
-
-tr.even.gradeU td.sorting_1 {
-    background-color: {{color.light_grey_7}};
-}
-
-tr.even.gradeU td.sorting_2 {
-    background-color: {{color.light_grey_8}};
-}
-
-tr.even.gradeU td.sorting_3 {
-    background-color: {{color.light_grey_8}};
-}
-
-.ex_highlight #example tbody tr.even:hover, #example tbody tr.even td.highlighted {
-    background-color: {{color.light_citron}};
-}
-
-.ex_highlight #example tbody tr.odd:hover, #example tbody tr.odd td.highlighted {
-    background-color: {{color.light_citron_1}};
-}
-
-.ex_highlight_row #example tr.even:hover {
-    background-color: {{color.light_citron}};
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_1 {
-    background-color: {{color.light_citron_2}};
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_2 {
-    background-color: {{color.light_citron_3}};
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_3 {
-    background-color: {{color.light_citron_4}};
-}
-
-.ex_highlight_row #example tr.odd:hover {
-    background-color: {{color.light_citron_1}};
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_1 {
-    background-color: {{color.light_citron_5}};
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_2 {
-    background-color: {{color.light_citron_6}};
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_3 {
-    background-color: {{color.light_citron_7}};
-}
-
-table.KeyTable td {
-    border: 3px solid transparent;
-}
-
-table.KeyTable td.focus {
-    border: 3px solid {{color.blue_1}};
-}
-
-table.display tr.gradeA {
-    background-color: {{color.col_main_ll}};
-}
-
-table.display tr.gradeC {
-    background-color: {{color.knowl_background}};
-}
-
-table.display tr.gradeX {
-    background-color: {{color.col_light_red_1}};
-}
-
-table.display tr.gradeU {
-    background-color: {{color.light_grey_3}};
-}
-*/
-
-/* TODO: div? */
-div.box {
-    height: 100px;
-    padding: 10px;
-    overflow: auto;
-    border: 1px solid {{color.knowl_thin_border}};
-    background-color: {{color.knowl_background}};
-}
-
-div.codebox {
-    padding: 5px;
-    text-padding: 10px;
-    border: 1px solid {{color.knowl_thin_border}};
-    border-radius: 5px;
-    background-color: {{color.knowl_background}};
-    box-shadow: 3px 3px 3px {{color.knowl_shadow}};
-    white-space: pre;
-}
-
-/* Styling of Maass form plot */
-
-div.maassformplot {
-    position: absolute;
-    width: 720px;
-    position: relative;
-    /*    height: 800px;
-        overflow: hidden;
-        position: relative; */
-}
-
-div.maassformplot img {
-    width:100%;
-    height:auto;
-/*    position: absolute;
-    top: -200px;
-    left: -870px;*/
-}
-
-/* End of styling of Maass form plot */
-
-
-
-/*Sidebar style*/
-
-#sidebar .L a {
-    display: inline;
-    padding: 2px;
-}
-
-#sidebar .L {
-    padding-right: 4px;
-}
-
-#sidebar .heading {
-    padding-right: 1px;
-    padding-left: 2px;
-    margin-bottom: 1px;
-}
-
-#sidebar div.L {
-    margin: 8px;
-}
-
-#sidebar table td a {
-    display: block;
-    padding: 2px;
-    border-radius: 0;
-}
-
-#sidebar table td .subtitle {
-    color: {{color.sidebar_text}};
-}
-
-#sidebar table td.borc .subtitle .future {
-    margin-left: 5px;
-    padding: 2px 5px
-}
-
-#sidebar table td.borc .subtitle a {
-    margin-left: 5px;
-}
-
-#sidebar table td p {
-    padding: 2px 0px;
-}
-
-#sidebar table td.full .future  {
-    padding: 2px 5px;
-}
-
-#sidebar .future {
-    color: {{color.sidebar_text_future}};
-    display: inherit;
-}
-
-
-#sidebar .beta {
-    color: {{color.sidebar_text_beta}};
-    display: inherit;
-}
-
-
-#sidebar .beta a {
-    color: {{color.sidebar_text_beta}};
-}
-
-
-#sidebar table td .parts {
-    padding-left: 15px;
-}
-
-#sidebar table td .subitem {
-    padding-right: 15px;
-}
-
-#sidebar table td.rotation { overflow: hidden; }
-
-#sidebar li a {
-    background: inherit;
-}
-
-#sidebar .list a {
-    display: block;
-    background: none;
-    padding: 0px;
-
-}
-#sidebar h2 {
-    margin: 5px 0px 0px;}
-
-p.rotation  {
-    transform: rotate(270deg);
-}
-
-/* temporary over-side for GL(2) on beta */
-body.beta #sidebar table.short:nth-of-type(3) .rotation p.rotation {
-    transform: rotate(0deg)
-}
-
-#sidebar table th, #sidebar table td {
-    text-align: left;
-    padding: 2px;
-}
-
-#sidebar table.short{
-    width: 100%;
-    table-layout: fixed;
-    border-width: 2px;
-    border-bottom: 0px;
-    border-style: solid;
-    padding: 2px;
-    border-spacing: 0px;
-    border-color: {{color.sidebar_background}};
-    border-collapse: separate;
-}
-
-#sidebar table.short td.bor{
-    text-align: left;
-}
-
-#sidebar table.short td.nbor{
-    padding: 0px; text-align: left;
-}
-
-#sidebar table.short td.borc{
-    text-align: center;
-}
-
-#sidebar table.short td.full{
-    text-align: left;
-}
-
-#sidebar table.short td.off {
-    text-align: center;
-    background: {{color.sidebar_background_off}};
-}
-
-
-
-#sidebar ul:first-child a:first-child,
-#sidebar h2:first-child a:first-child,
-#sidebar h2:first-child {
-  margin: 0;
-  padding-top: 3px;
-}
-
-#sidebar ul:last-child li:last-child,
-#sidebar ul:last-child li:last-child a {
-  border-bottom-right-radius: 0px;
-}
-
-#sidebar .list li {
-  padding: 2px 0px;
-}
-
-#sidebar .list a {
-  padding: 0px;
-}
-
-#sidebar table.short2{
-    width: 100%;
-    table-layout:fixed;
-    padding: 10px;
-    border-spacing: 0px;
-    border-color: {{color.sidebar_background}};
-    border-collapse: collapse;
-}
-
-#sidebar table.short2 td{
-    padding-left: 10px;
-}
-
-/*End of Sidebar style*/
-
-
 
 
 /*Table boxes front page*/
@@ -2596,15 +2204,6 @@ input::placeholder {
     color: #999;
 }
 
-.table_rotate {
-   /* see the word "Weight" on the left edge of the table in
-        /ModularForm/GL2/Q/holomorphic/?search_type=Dimensions&dim=1
-   */
-  transform: rotate(180deg);
-
-  writing-mode: vertical-lr;
-  white-space: nowrap;
-}
 
 /* an horizonal list with bullet points */
 ul.horizontal-list {
@@ -2807,6 +2406,9 @@ li.ical-detail {
 
 .noclick {
   color: #933e20;
+  font-size: 90%;
+  font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+  border: 2px solid #d1d5da;
 }
 
 .notifyjs-banner-base {
@@ -2841,4 +2443,9 @@ font-weight: 600;
 font-size: 1rem;
 border: 0px;
 max-width: 150px;
+}
+
+.clippy:after {
+    content: url("{{ url_for('static', filename='clippy.svg') }}");
+    vertical-align: -0.125em;
 }

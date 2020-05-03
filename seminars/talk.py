@@ -1,4 +1,4 @@
-import pytz, datetime, random
+import pytz, random
 from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
@@ -14,15 +14,15 @@ from seminars.utils import (
     make_links,
     topic_dict,
     languages_dict,
-    topdomain,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
+import urllib.parse
 from icalendar import Event
 from lmfdb.logger import critical
-
+from datetime import datetime, timedelta
 
 class WebTalk(object):
     def __init__(
@@ -123,13 +123,12 @@ class WebTalk(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
-        topics = self.topics if self.topics else []
         try:
             data["edited_by"] = int(current_user.id)
         except (ValueError, AttributeError):
             # Talks can be edited by anonymous users with a token, with no id
             data["edited_by"] = -1
-        data["edited_at"] = datetime.datetime.now(tz=pytz.UTC)
+        data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
     @classmethod
@@ -178,17 +177,21 @@ class WebTalk(object):
         else:
             return t.strftime("%a %b %-d, %H:%M")
 
+    def show_daytimes(self, tz=None):
+        return adapt_datetime(self.start_time, tz).strftime("%H:%M") + "-" + adapt_datetime(self.end_time, tz).strftime("%H:%M")
+
     def show_date(self, tz=None):
         if self.start_time is None:
             return ""
         else:
-            return adapt_datetime(self.start_time, newtz=tz).strftime("%a %b %-d")
+            format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
+            return adapt_datetime(self.start_time, newtz=tz).strftime(format)
 
     def show_time_and_duration(self, adapt=True):
         start = self.start_time
         end = self.end_time
-        now = datetime.datetime.now(pytz.utc)
-        delta = datetime.timedelta
+        now = datetime.now(pytz.utc)
+        delta = timedelta
         minute = delta(minutes=1)
         hour = delta(hours=1)
         day = delta(days=1)
@@ -261,10 +264,10 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self):
+    def show_knowl_title(self, _external=False):
         return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
             title=self.show_title(),
-            content=Markup.escape(render_template("talk-knowl.html", talk=self)),
+            content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
         )
 
     def show_lang_topics(self):
@@ -349,12 +352,29 @@ class WebTalk(object):
     def show_video_link(self):
         return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
 
+    @property
+    def ics_link(self):
+        return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+                       _external=True, _scheme="https")
+
+    @property
+    def ics_gcal_link(self):
+        return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
+            {"cid": url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+                            _external=True, _scheme="http")}
+        )
+
+    @property
+    def ics_webcal_link(self):
+        return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+                       _external=True, _scheme="webcal")
+
     def is_past(self):
-        return self.end_time < datetime.datetime.now(pytz.utc)
+        return self.end_time < datetime.now(pytz.utc)
 
     def is_starting_soon(self):
-        now = datetime.datetime.now(pytz.utc)
-        return (self.start_time - datetime.timedelta(minutes=15) <= now < self.end_time)
+        now = datetime.now(pytz.utc)
+        return (self.start_time - timedelta(minutes=15) <= now < self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:
@@ -419,17 +439,17 @@ class WebTalk(object):
             tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
         )
 
-    def oneline(self, include_seminar=True, include_subscribe=True, tz=None):
+    def oneline(self, include_seminar=True, include_subscribe=True, tz=None, _external=False):
         cols = []
         cols.append(('class="date"', self.show_date(tz=tz)))
         cols.append(('class="time"', self.show_start_time(tz=tz)))
         if include_seminar:
             cols.append(('class="seminar"', self.show_seminar()))
         cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
-        cols.append(('class="talktitle"', self.show_knowl_title()))
+        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external)))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
-        cols.append(('style="display: none;"', self.show_link_title()))
+        #cols.append(('style="display: none;"', self.show_link_title()))
         return "".join("<td %s>%s</td>" % c for c in cols)
 
     def show_comments(self):
@@ -462,14 +482,14 @@ class WebTalk(object):
         }
         email_to = self.speaker_email if self.speaker_email else ""
         return """
-<p style="margin-bottom: 0px;">
+<p>
  To let someone edit this page, send them this link:
-</p>
-<p style="margin-left: 20px; margin-top: 0px;">
-<span class="noclick">{link}</span>
+<input type="text" id="speaker-link" value="{link}" class="noclick" readonly onclick="this.focus();this.select()"></input>
+<a><i class="clippy" onclick="copySourceOfId('speaker-link')"></i></a>
 <button onClick="window.open('mailto:{email_to}?{msg}')" style="margin-left:20px;">
 Email link to speaker
-</button></p>""".format(
+</button>
+</p>""".format(
             link=self.speaker_link(), email_to=email_to, msg=urlencode(data, quote_via=quote),
         )
 
@@ -506,7 +526,7 @@ Email link to speaker
         event.add("description", desc)
         if self.room:
             event.add("location", "Lecture held in {}".format(self.room))
-        event.add("DTSTAMP", datetime.datetime.now(tz=pytz.UTC))
+        event.add("DTSTAMP", datetime.now(tz=pytz.UTC))
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 

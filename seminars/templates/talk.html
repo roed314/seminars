@@ -70,13 +70,15 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
     <table>
       {{ seminar.show_organizers() | safe }}
       {{ seminar.show_curators() | safe }}
-      <tr><td></td><td class="forminfo">*contact for concerns or questions</td></tr>
+      <tr><td></td><td class="forminfo">*contact</td></tr>
     </table>
   </div>
+  <hr>
   {% if user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
   <p>{{ talk.send_speaker_link() | safe }}</p>
   {% endif %}
 </div>
 
+{{ calendar_block('talk', talk) }}
 
 {% endblock %}

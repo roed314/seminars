@@ -5,7 +5,7 @@
         <h3> <i>{{ talk.show_speaker() | safe }}</i></h3>
       </div>
       <div class="talk-view">
-        ( <a href="{{url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr)}}">view</a> {% if talk.user_can_edit() %} | <a href="{{url_for('create.edit_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr)}}">edit</a> {% endif %} )
+        ( <a href="{{url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr, _external=_external)}}">view</a> {% if talk.user_can_edit() %} | <a href="{{url_for('create.edit_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr, _external=_external)}}">edit</a> {% endif %} )
       </div>
   </div>
   <div style="clear:both;"></div>
@@ -37,7 +37,7 @@
   <hr>
 
   <p>
-    <b>{{ talk.show_seminar() | safe }} </b>
+    <b>{{ talk.show_seminar(external=_external) | safe }} </b>
   </p>
 
   {% if talk.seminar.comments %}
@@ -45,6 +45,31 @@
   <p><b>Series comments </b></p>
   {{talk.seminar.show_comments() | safe}}
   {% endif %}
+
+  <hr>
+
+<div>
+  Export talk to
+  <ul class="ical-detail">
+    <li class="ical-detail">
+      <a href="{{ talk.ics_gcal_link }}" target="_blank">
+        <i class="fab fa-google"></i> Google Calendar
+      </a>
+    </li>
+    <li class="ical-detail">
+      <a href="{{ talk.ics_webcal_link }}" target="_blank">
+        <i class="fas fa-calendar-alt"></i> iCal/Outlook
+      </a>
+    </li>
+    <li class="ical-detail">
+      <a href="{{ talk.ics_link }}" target="_blank">
+        <i class="fas fa-file-download"></i> ICS file
+      </a>
+    </li>
+  </ul>
+  <br>
+  Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">~24 hours</a>.
+</div>
 
    <div align="right">
         <p>

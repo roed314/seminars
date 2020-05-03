@@ -1,0 +1,12 @@
+os: linux
+dist: trusty
+addons:
+    apt:
+        packages:
+            # needed for pyflakes
+            - python3-pip
+install:
+    # install the latest pyflakes
+    - pip3 install pyflakes --user
+script:
+  - pyflakes .

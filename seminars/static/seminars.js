@@ -1,3 +1,50 @@
+// from lmfdb.js,
+$(function() {
+ /* providing watermark examples in those forms, that have an 'example=...' attribute */
+ /* Add extra spaces so that if you type in exactly the example it does not disappear */
+ $('input[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   '  ) } )
+ $('textarea[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   ', {useNative:false}  ) } )
+});
+
+
+
+
+// from lmfdb.js,
+function cleanSubmit(id)
+{
+  var myForm = document.getElementById(id);
+  var allInputs = myForm.getElementsByTagName('input');
+  var allSelects = myForm.getElementsByTagName('select');
+  var item, i, n = 0;
+  for(i = 0; item = allInputs[i]; i++) {
+    if (item.getAttribute('name') ) {
+        // Special case count so that we strip the default value
+        if (!item.value || (item.getAttribute('name') == 'count' && item.value == 50)) {
+        item.setAttribute('name', '');
+      } else {
+        n++;
+      }
+    }
+  }
+  for(i = 0; item = allSelects[i]; i++) {
+    if (item.getAttribute('name') ) {
+      if (!item.value) {
+        item.setAttribute('name', '');
+      } else {
+        n++;
+      }
+    }
+  }
+  if (!n) {
+    var all = document.createElement('input');
+    all.type='hidden';
+    all.name='all';
+    all.value='1';
+    myForm.appendChild(all);
+  }
+}
+
+
 function toggle_time(id) {
     var future = $('#future_talks');
     var past = $('#past_talks');
@@ -463,6 +510,14 @@ function makeSubjectSelector(subjOptions, initialSubjects) {
         value: initialSubjects,
         classNames: selectPureClassNames,
     });
+}
+
+function copySourceOfId(id) {
+  var copyText = $("#"+id);
+  copyText.select();
+  document.execCommand("copy");
+  console.log("Copied!");
+  copyText.notify("Copied!", {className: "success", position:"bottom right" });
 }
 
 function displayCookieBanner() {

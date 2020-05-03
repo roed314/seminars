@@ -87,6 +87,9 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
     </tr>
     {% endfor %}
   </table>
+  <div>
+    {{ seminar.show_knowl_embed(daterange="future", uniqstr="1")| safe }}
+  </div>
   {% endif %}
 </div>
 {% if past %}
@@ -103,8 +106,14 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
     </tr>
     {% endfor %}
   </table>
+  <div>
+    {{ seminar.show_knowl_embed(daterange="past", uniqstr="2")| safe }}
+  </div>
 </div>
 {% endif %}
+
+{{ calendar_block('seminar', seminar) }}
+
 
 {% if past and not future %}
 <script>

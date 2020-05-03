@@ -1,0 +1,16 @@
+  <table class="ntdata" id="embed_content">
+    {% if site_footer %}
+    {# DOM standard says that caption should be the first child of table  #}
+    <caption>Powered by <a href="https://{{topdomain}}">{{topdomain}}</a></caption>
+    {% endif %}
+    <thead>
+      <tr>
+        {{ talks_header(include_seminar=False, include_subscribe=False,  datetime_header="Time") | safe }}
+      </tr>
+    </thead>
+    {% for talk in talks %}
+    <tr>
+      {{ talk.oneline(include_seminar=False, include_subscribe=False, tz=seminar.tz, _external=_external) | safe }}
+    </tr>
+    {% endfor %}
+  </table>

@@ -1,4 +1,4 @@
-from flask import redirect, url_for
+from flask import redirect, url_for, render_template
 from flask_login import current_user
 from seminars import db
 from seminars.utils import (
@@ -13,17 +13,19 @@ from seminars.utils import (
     search_distinct,
     show_input_errors,
     toggle,
-    topdomain,
     topic_dict,
     weekdays,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
+from markupsafe import Markup
 from psycopg2.sql import SQL
 import pytz
 from collections import defaultdict
 from datetime import datetime
 from lmfdb.logger import critical
+
+import urllib.parse
 
 combine = datetime.combine
 
@@ -95,12 +97,12 @@ class WebSeminar(object):
             if data.get("topics"):
                 data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
-            # start_time and end_time are datetime.datetimes's (offset from 1/1/2020)
         if organizer_data is None:
             organizer_data = list(
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
         self.organizer_data = organizer_data
+        self.convert_time_to_times()
 
     def __repr__(self):
         return self.name
@@ -114,6 +116,35 @@ class WebSeminar(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def convert_time_to_times(self):
+        if self.is_conference:
+            self.frequency = None
+        if self.frequency is None:
+            self.weekdays = []
+            self.time_slots = []
+            return
+        if self.frequency > 1 and self.frequency <= 7:
+            self.frequency = 7
+        elif self.frequency > 7 and self.frequency <= 14:
+            self.frequency = 14
+        elif self.frequency > 14 and self.frequency <= 21:
+            self.frequency = 21
+        else:
+            self.frequency = None
+            self.weekdays = []
+            self.time_slots = []
+            return
+        if self.weekdays is None or self.time_slots is None:
+            self.weekdays = []
+            self.time_slots = []
+            if self.weekday is not None and self.start_time is not None and self.end_time is not None:
+                self.weekdays = [self.weekday]
+                self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H:%M")]
+        else:
+            n = min(len(self.weekdays),len(self.time_slots))
+            self.weekdays = self.weekdays[0:n]
+            self.time_slots = self.time_slots[0:n]
 
     def visible(self):
         """
@@ -134,7 +165,6 @@ class WebSeminar(object):
     def save(self):
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
         assert data.get("shortname")
-        topics = self.topics if self.topics else []
         data["edited_by"] = int(current_user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
@@ -278,6 +308,11 @@ class WebSeminar(object):
         else:
             return ""
 
+    def show_knowl_embed(self, daterange, uniqstr='0'):
+        return r'<a knowl="dynamic_show" kwargs="{content}">Embed this schedule</a>'.format(
+            content=Markup.escape(render_template("seminar-embed-code-knowl.html", seminar=self, daterange=daterange, uniqstr=uniqstr)),
+        )
+
     def oneline(
         self,
         include_institutions=True,
@@ -370,6 +405,12 @@ class WebSeminar(object):
             return ""
         return date.strftime("%b %d, %Y")
 
+    def show_schedule_date(self, date):
+        if not date:
+            return ""
+        format = "%a %b %-d" if adapt_datetime(date,self.tz).year == datetime.now(self.tz).year else "%d-%b-%Y"
+        return adapt_datetime(date, self.tz).strftime(format)
+
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
 
@@ -377,6 +418,20 @@ class WebSeminar(object):
         if self.user_can_edit():
             query.pop("display")
         return talks_search(query, projection=projection)
+
+    @property
+    def ics_link(self):
+        return url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="https")
+
+    @property
+    def ics_gcal_link(self):
+        return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
+            {"cid": url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="http")}
+        )
+
+    @property
+    def ics_webcal_link(self):
+        return url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="webcal")
 
     @property
     def next_talk_time(self):

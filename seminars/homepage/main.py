@@ -2,14 +2,15 @@ from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky
 from seminars.utils import (
-    restricted_topics as user_topics,
-    toggle,
     Toggle,
+    ics_file,
     languages_dict,
+    restricted_topics as user_topics,
     subject_dict,
     subject_pairs,
-    topics,
+    toggle,
     topdomain,
+    topics,
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
@@ -17,7 +18,7 @@ from flask import render_template, request, redirect, url_for, Response, make_re
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
-import datetime
+from datetime import datetime
 import pytz
 from collections import Counter
 from dateutil.parser import parse
@@ -25,10 +26,10 @@ from dateutil.parser import parse
 from lmfdb.utils import (
     BasicSpacer,
     SearchArray,
-    TextBox,
     SelectBox,
-    to_dict,
+    TextBox,
     flash_error,
+    to_dict,
 )
 
 from lmfdb.utils.search_parsing import collapse_ors
@@ -36,7 +37,7 @@ from lmfdb.utils.search_parsing import collapse_ors
 
 def get_now():
     # Returns now in UTC, comparable to time-zone aware datetimes from the database
-    return datetime.datetime.now(pytz.UTC)
+    return datetime.now(pytz.UTC)
 
 
 def parse_subject(info, query, prefix):
@@ -259,27 +260,24 @@ class TalkSearchArray(SearchArray):
             label="Speaker",
             colspan=(1, 2, 1),
             width=textwidth,
-            example="Pythagoras o Samios",
         )
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
-            example="University of Pangea",
         )
         title = TextBox(
             name="title",
             label="Title",
             colspan=(1, 2, 1),
             width=textwidth,
-            example="A rigorous definition of rigorous",
         )
         date = TextBox(
             name="daterange",
             id="daterange",
             label="Date",
-            example=datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -"),
+            example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
@@ -378,7 +376,7 @@ class SemSearchArray(SearchArray):
             name="name",
             label="Name",
             width=textwidth,
-            example="Terra firma topology colloquium",
+            example="Thule topology colloquium series",
         )
 
         self.array = [
@@ -438,7 +436,7 @@ def _index(query):
         query["subjects"] = ["math"]
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
-    query["end_time"] = {"$gte": datetime.datetime.now()}
+    query["end_time"] = {"$gte": datetime.now()}
     talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
@@ -479,7 +477,7 @@ def search():
     if "search_type" not in info:
         info["talk_online"] = info["seminar_online"] = True
         info["daterange"] = info.get(
-            "daterange", datetime.datetime.now(current_user.tz).strftime("%B %d, %Y -")
+            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
         )
     try:
         seminar_count = int(info["seminar_count"])
@@ -594,6 +592,20 @@ def show_seminar_raw(shortname):
         "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
     )
 
+@app.route("/seminar/<shortname>/bare")
+def show_seminar_bare(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        return render_template("404.html", title="Seminar not found")
+    talks = talks_search_api(shortname)
+    resp = make_response(render_template("seminar_bare.html",
+                                         title=seminar.name, talks=talks,
+                                         seminar=seminar,
+                                         _external=( '_external' in request.args ),
+                                         site_footer=( 'site_footer' in request.args ),))
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
 @app.route("/seminar/<shortname>/json")
 def show_seminar_json(shortname):
     seminar = seminars_lucky({"shortname": shortname})
@@ -634,6 +646,42 @@ def show_seminar_js():
     resp = make_response(render_template('seminar_raw.js', scheme=request.scheme))
     resp.headers['Content-type'] = 'text/javascript'
     return resp
+
+@app.route("/embed_seminars.js")
+def embed_seminar_js():
+    """
+    Usage example:
+    <div class="embeddable_schedule" shortname="LATeN" daterange="April 23, 2020 - April 29, 2020"></div>
+    <div class="embeddable_schedule" shortname="LATeN" daterange="past"></div>
+    <div class="embeddable_schedule" shortname="LATeN" daterange="future"></div>
+    <script src="http://localhost:37778/embed_seminars.js" onload="seminarEmbedder.initialize({'addCSS': true});"></script>
+    """
+    resp = make_response(render_template('embed_seminars.js', scheme=request.scheme))
+    resp.headers['Content-type'] = 'text/javascript'
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
+@app.route("/seminar/<shortname>/ics")
+def ics_seminar_file(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        return render_template("404.html", title="Seminar not found")
+
+    return ics_file(
+        seminar.talks(),
+        filename="{}.ics".format(shortname),
+        user=current_user)
+
+
+@app.route("/talk/<semid>/<int:talkid>/ics")
+def ics_talk_file(semid, talkid):
+    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+    if talk is None:
+        return render_template("404.html", title="Talk not found")
+    return ics_file(
+        [talk],
+        filename="{}_{}.ics".format(semid, talkid),
+        user=current_user)
 
 
 @app.route("/talk/<semid>/<int:talkid>/")

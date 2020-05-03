@@ -12,7 +12,6 @@ from seminars.utils import (
     flash_warning,
     format_errmsg,
     format_input_errmsg,
-    format_warning,
     localize_time,
     process_user_input,
     sanity_check_times,
@@ -20,6 +19,11 @@ from seminars.utils import (
     show_input_errors,
     timezones,
     weekdays,
+    midnight,
+    daytime_minutes,
+    daytimes_early,
+    daytimes_long,
+    date_and_daytimes_to_times,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -48,12 +52,13 @@ from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import IdentifierWrapper
 from psycopg2.sql import SQL
-import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
+from math import ceil
+from dateutil.parser import parse as parse_time
 import pytz
-from collections import defaultdict
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
+MAX_SLOTS = 12  # Max time slots in a seminar series, must be a multiple of 3
 
 
 @create.route("manage/")
@@ -168,8 +173,9 @@ def edit_seminar():
         section=manage,
         subsection="editsem",
         institutions=institutions(),
-        weekdays=weekdays,
+        short_weekdays=short_weekdays,
         timezones=timezones,
+        max_slots=MAX_SLOTS,
         lock=lock,
     )
 
@@ -393,9 +399,13 @@ def save_seminar():
         errmsgs.append("The name cannot be blank")
     if seminar.is_conference and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date")
-    for col in ["frequency", "per_day"]:
-        if data[col] is not None and data[col] < 1:
-            errmsgs.append(format_input_errmsg("integer must be positive", data[col], col))
+    if data["per_day"] is not None and data["per_day"] < 1:
+        errmsgs.append(format_input_errmsg("integer must be positive", data["per_day"], "per_day"))
+    if seminar.is_conference and not (data["start_date"] and data["end_date"]):
+        flash_warning ("Please enter the start and end dates of your conference if available.")
+    if seminar.is_conference and not data["per_day"]:
+        flash_warning ("It will be easier to edit the conference schedule if you specify talks per day (an upper bound is fine).")
+
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -405,6 +415,40 @@ def save_seminar():
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
+    data["weekdays"] = []
+    data["time_slots"] = []
+    for i in range(MAX_SLOTS):
+        weekday = daytimes = None
+        try:
+            col = "weekday" + str(i)
+            val = raw_data.get(col, "")
+            weekday = process_user_input(val, col, "weekday_number", tz)
+            col = "time_slot" + str(i)
+            val = raw_data.get(col, "")
+            daytimes = process_user_input(val, col, "daytimes", tz)
+        except Exception as err:  # should only be ValueError's but let's be cautious
+            errmsgs.append(format_input_errmsg(err, val, col))
+        if weekday is not None and daytimes is not None:
+            data["weekdays"].append(weekday)
+            data["time_slots"].append(daytimes)
+            if daytimes_early(daytimes):
+                flash_warning(
+                    "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                    daytimes,
+                )
+            elif daytimes_long(daytimes):
+                flash_warning(
+                    "Time slot %s is longer than 8 hours, please correct if this is not intended.",
+                    daytimes,
+                )
+    if data["frequency"] and not data["weekdays"]:
+        errmsgs.append('You must specify at least one time slot (or set periodicty to "no fixed schedule").')
+    if len(data["weekdays"]) > 1:
+        x = sorted(
+            list(zip(data["weekdays"], data["time_slots"])),
+            key=lambda t: t[0] * 24 * 60 + daytime_minutes(t[1].split("-")[0]),
+        )
+        data["weekdays"], data["time_slots"] = [t[0] for t in x], [t[1] for t in x]
     organizer_data = []
     contact_count = 0
     for i in range(10):
@@ -429,15 +473,12 @@ def save_seminar():
             # boolean needs to be inverted
             D["curator"] = not D["curator"]
             if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
-                flash(
-                    format_warning(
-                        "The email address %s of organizer %s will be publicily visible.<br>%s",
-                        D["email"],
-                        D["full_name"],
-                        "Set homepage or disable display to prevent this.",
-                    ),
-                    "error",
-                )
+                flash_warning(
+                    "The email address %s of organizer %s will be publicly visible.<br>%s",
+                    D["email"],
+                    D["full_name"],
+                    "Set homepage or disable display to prevent this.",
+                ),
             if D["email"]:
                 r = db.users.lookup(D["email"])
                 if r and r["email_confirmed"]:
@@ -452,13 +493,11 @@ def save_seminar():
                         )
                     else:
                         if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
-                            flash(
-                                format_warning(
-                                    "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
-                                    D["homepage"],
-                                    r["homepage"],
-                                    D["email"],
-                                )
+                            flash_warning(
+                                "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
+                                D["homepage"],
+                                r["homepage"],
+                                D["email"],
                             )
                         if D["display"]:
                             contact_count += 1
@@ -476,13 +515,15 @@ def save_seminar():
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
+    else:  # to make it obvious that these two statements should be together
         new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
 
     # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
     if not data["topics"]:
-        flash_warning("This series has no topics selected; don't forget to set the topics for each new talk individually.")
+        flash_warning(
+            "This series has no topics selected; don't forget to set the topics for each new talk individually."
+        )
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
@@ -559,20 +600,13 @@ def save_institution():
                     continue
                 if not userdata["homepage"]:
                     if current_user.email == userdata["email"]:
-                        flash(
-                            format_warning(
-                                "Your email address will become public if you do not set your homepage in your user profile."
-                            )
-                        )
+                        flash_warning("Your email address will become public if you do not set your homepage in your user profile.")
                     else:
-                        flash(
-                            format_warning(
-                                "The email address %s of maintainer %s will be publicily visible.<br>%s",
-                                userdata["email"],
-                                userdata["name"],
-                                "The homepage on the maintainer's user account should be set prevent this.",
-                            ),
-                            "error",
+                        flash_warning(
+                            "The email address %s of maintainer %s will be publicly visible.<br>%s",
+                            userdata["email"],
+                            userdata["name"],
+                            "The homepage on the maintainer's user account should be set prevent this.",
                         )
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
@@ -626,8 +660,8 @@ def edit_talk():
             # TODO: clean this up
             start_time = process_user_input(data.get("start_time"), "start_time", "time", tz)
             end_time = process_user_input(data.get("end_time"), "end_time", "time", tz)
-            start_time = localize_time(datetime.datetime.combine(date, start_time), tz)
-            end_time = localize_time(datetime.datetime.combine(date, end_time), tz)
+            start_time = localize_time(datetime.combine(date, start_time), tz)
+            end_time = localize_time(datetime.combine(date, end_time), tz)
         except ValueError:
             return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 302)
         talk.start_time = start_time
@@ -699,15 +733,19 @@ def save_talk():
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
-        new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
+    else:  # to make it obvious that these two statements should be together
+        new_version = WebTalk(talk.seminar_id, data=data)
 
     # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
     if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
-        flash_warning("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
+        flash_warning(
+            "Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links."
+        )
     if not data["topics"]:
-        flash_warning("This talk has no topics, and thus will only be visible to users when they disable their topics filter.")
+        flash_warning(
+            "This talk has no topics, and thus will only be visible to users when they disable their topics filter."
+        )
     if new_version == talk:
         flash("No changes made to talk.")
     else:
@@ -722,7 +760,10 @@ def save_talk():
     return redirect(url_for(".edit_talk", **edit_kwds), 302)
 
 
-def make_date_data(seminar, data):
+def layout_schedule(seminar, data):
+    """ Returns a list of schedule slots in specified date range (date, daytime-interval, talk)
+        where talk is a WebTalk or none.  Picks default dates if none specified
+    """
     tz = seminar.tz
 
     def parse_date(key):
@@ -731,116 +772,88 @@ def make_date_data(seminar, data):
             try:
                 return process_user_input(date, "date", "date", tz)
             except ValueError:
-                pass
+                flash_warning ("Invalid date %s ignored, please use a format like mmm dd, yyyy or dd-mmm-yyyy or mm/dd/yyyy", date)
+
+    def slot_start_time(s):
+        # put slots with no time specified at the end of the day
+        return date_and_daytimes_to_times(parse_time(s[0]), s[1] if s[1] else "23:59-23:59", tz)[0]
 
     begin = parse_date("begin")
     end = parse_date("end")
-    frequency = data.get("frequency")
-    try:
-        frequency = int(frequency)
-    except Exception:
-        frequency = None
-    if not frequency or frequency < 0:
-        frequency = seminar.frequency
-        if not frequency or frequency < 0:
-            frequency = 1 if seminar.is_conference else 7
-    try:
-        weekday = short_weekdays.index(data.get("weekday", "")[:3])
-    except ValueError:
-        weekday = None
-    if weekday is None:
-        weekday = seminar.weekday
     shortname = seminar.shortname
-    day = datetime.timedelta(days=1)
-    now = datetime.datetime.now(tz=tz)
+    now = datetime.now(tz=tz)
     today = now.date()
-    midnight_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    if begin is None or seminar.start_time is None or seminar.end_time is None:
-        future_talk = talks_lucky(
-            {"seminar_id": shortname, "start_time": {"$exists": True, "$gte": midnight_today},}, sort=["start_time"],
-        )
-        last_talk = talks_lucky(
-            {"seminar_id": shortname, "start_time": {"$exists": True, "$lt": midnight_today},},
-            sort=[("start_time", -1)],
-        )
-
-    if begin is None:
-        if seminar.is_conference:
-            if seminar.start_date:
-                begin = seminar.start_date
-            else:
-                begin = today
-        else:
-            if weekday is not None and frequency == 7:
-                begin = today
-                # Will set to next weekday below
-            else:
-                # Try to figure out a plan from future and past talks
-                if future_talk is None:
-                    if last_talk is None:
-                        # Give up
-                        begin = today
-                    else:
-                        begin = last_talk.start_time.date()
-                        while begin < today:
-                            begin += frequency * day
-                else:
-                    begin = future_talk.start_time.date()
-                    while begin >= today:
-                        begin -= frequency * day
-                    begin += frequency * day
-    if not seminar.is_conference and seminar.weekday is not None:
-        # Weekly meetings: take the next one
-        while begin.weekday() != weekday:
-            begin += day
+    day = timedelta(days=1)
+    if seminar.is_conference and (seminar.start_date is None or seminar.end_date is None):
+        flash_warning ("You have not specified the start and end dates of your conference (we chose a date range to layout your schedule).")
+    begin = seminar.start_date if begin is None and seminar.is_conference else begin
+    begin = today if begin is None else begin
+    end = seminar.end_date if end is None and seminar.is_conference else end
     if end is None:
         if seminar.is_conference:
-            if seminar.end_date:
-                end = seminar.end_date
-                schedule_len = int((end - begin) / (frequency * day)) + 1
+            if seminar.per_day:
+                end = begin + day * ceil(SCHEDULE_LEN / seminar.per_day)
             else:
-                end = begin + 6 * day
-                schedule_len = 7
+                end = begin + 7 * day
         else:
-            end = begin + (SCHEDULE_LEN - 1) * frequency * day
-            schedule_len = SCHEDULE_LEN
-    else:
-        schedule_len = abs(int((end - begin) / (frequency * day))) + 1
-    seminar.frequency = frequency
+            if seminar.frequency:
+                end = begin + day * ceil(SCHEDULE_LEN * seminar.frequency / len(seminar.time_slots))
+            else:
+                end = begin + 14 * day
+    if end < begin:
+        end = begin
     data["begin"] = seminar.show_input_date(begin)
     data["end"] = seminar.show_input_date(end)
-    midnight_begin = localize_time(datetime.datetime.combine(begin, datetime.time()), tz)
-    midnight_end = localize_time(datetime.datetime.combine(end, datetime.time()), tz)
-    # add a day since we want to allow talks on the final day
-    if end < begin:
-        # Only possible by user input
-        frequency = -frequency
-        query = {"$gte": midnight_end, "$lt": midnight_begin + day}
-        sort = [("start_time", -1)]
+    midnight_begin = midnight(begin, tz)
+    midnight_end = midnight(end, tz)
+    query = {"$gte": midnight_begin, "$lt": midnight_end + day}
+    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]))
+    slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]
+    if seminar.is_conference:
+        newslots = []
+        d = midnight_begin
+        while d < midnight_end + day:
+            newslots += [(seminar.show_schedule_date(d), "", None) for i in range(seminar.per_day)]
+            d += day
+        for t in slots:
+            if (t[0], "", None) in newslots:
+                newslots.remove((t[0], "", None))
+        slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
+        return slots
+    if not seminar.frequency:
+        for i in range(max(SCHEDULE_LEN - len(slots), 3)):
+            slots.append(("", "", None))
     else:
-        query = {"$gte": midnight_begin, "$lt": midnight_end + day}
-        sort = ["start_time"]
-    schedule_days = [begin + i * frequency * day for i in range(schedule_len)]
-    scheduled_talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=sort))
-    by_date = defaultdict(list)
-    for T in scheduled_talks:
-        by_date[adapt_datetime(T.start_time, tz).date()].append(T)
-    all_dates = sorted(set(schedule_days + list(by_date)), reverse=(end < begin))
-    # Fill in by_date with Nones up to the per_day value
-    per_day = seminar.per_day if seminar.per_day else 1
-    for date in all_dates:
-        by_date[date].extend([None] * (per_day - len(by_date[date])))
-    if seminar.start_time is None:
-        if future_talk is not None and future_talk.start_time:
-            seminar.start_time = future_talk.start_time
-        elif last_talk is not None and last_talk.start_time:
-            seminar.start_time = last_talk.start_time
-    if seminar.end_time is None:
-        if future_talk is not None and future_talk.start_time:
-            seminar.end_time = future_talk.end_time
-        elif last_talk is not None and last_talk.start_time:
-            seminar.end_time = last_talk.end_time
-    return seminar, all_dates, by_date, len(all_dates) * per_day
+        # figure out week to start in.
+        # use the week of the first seminar after begin if any, otherwise last seminar before begin, if any
+        # otherwise just use the week containing begin
+        t = talks_lucky({"seminar_id": shortname, "start_time": {"$gte": midnight_begin}}, sort=[("start_time", 1)])
+        if not t:
+            t = talks_lucky({"seminar_id": shortname, "start_time": {"$lt": midnight_begin}}, sort=[("start_time", -1)])
+        if t:
+            t = adapt_datetime(t.start_time, newtz=tz)
+            w = t - t.weekday() * day
+            while w > midnight_begin:
+                w -= day * seminar.frequency
+            while w + day * seminar.frequency < midnight_begin:
+                w += day * seminar.frequency
+        else:
+            w = midnight_begin - midnight_begin.weekday() * day
+        # make a list of all seminar time slots in [begin,end)
+        newslots = []
+        while w < midnight_end:
+            for i in range(len(seminar.weekdays)):
+                d = w + day * seminar.weekdays[i]
+                if d >= midnight_begin and d < midnight_end + day:
+                    newslots.append((seminar.show_schedule_date(d), seminar.time_slots[i], None))
+            w = w + day * seminar.frequency
+        # remove slots that are (exactly) matched by an existing talk
+        # this should handle slots that occur with multiplicity
+        for t in slots:
+            if (t[0], t[1], None) in newslots:
+                newslots.remove((t[0], t[1], None))
+        slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
+    return slots
 
 
 @create.route("edit/schedule/", methods=["GET", "POST"])
@@ -856,18 +869,17 @@ def edit_seminar_schedule():
     if resp is not None:
         return resp
     if not seminar.topics:
-        flash_warning("This series has no topics selected; don't forget to set the topics for each new talk individually.")
-    seminar, all_dates, by_date, slots = make_date_data(seminar, data)
+        flash_warning(
+            "This series has no topics selected; don't forget to set the topics for each new talk individually."
+        )
+    schedule = layout_schedule(seminar, data)
     title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(
         "edit_seminar_schedule.html",
         seminar=seminar,
-        all_dates=all_dates,
-        by_date=by_date,
-        weekdays=weekdays,
-        slots=slots,
         raw_data=data,
         title=title,
+        schedule=schedule,
         section="Manage",
         subsection="schedule",
     )
@@ -899,6 +911,7 @@ def save_seminar_schedule():
     warned = False
     errmsgs = []
     tz = seminar.tz
+    to_save = []
     for i in list(range(slots)):
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
         speaker = process_user_input(raw_data.get("speaker%s" % i, ""), "speaker", "text", tz)
@@ -914,39 +927,34 @@ def save_seminar_schedule():
                 warned = True
                 flash_warning("To delete an existing talk, click Details and then click delete on the Edit talk page")
             continue
-        date = raw_data.get("date%s" % i).strip()
-        if date:
+        date = start_time = end_time = None
+        dateval = raw_data.get("date%s" % i).strip()
+        timeval = raw_data.get("time%s" % i).strip()
+        if dateval and timeval:
             try:
-                date = process_user_input(date, "date", "date", tz)
+                date = process_user_input(dateval, "date", "date", tz)
             except Exception as err:  # should only be ValueError's but let's be cautious
-                errmsgs.append(format_input_errmsg(err, date, "date"))
-        else:
-            errmsgs.append(format_errmsg("You must specify a date for the talk by %s", speaker))
-        time_input = raw_data.get("time%s" % i, "").strip()
-        start_time = end_time = None
-        if time_input:
-            try:
-                time_split = time_input.split("-")
-                if len(time_split) < 2:
-                    raise ValueError("Invalid time range.")
-                elif len(time_split) > 2:
-                    raise ValueError("Time range contains more than one hyphen, expected hh:mm-hh:mm.")
-                if not time_split[0].strip() or not time_split[1].strip():
-                    raise ValueError("Invalid time range.")
-                # TODO: clean this up
-                start_time = process_user_input(time_split[0], "start_time", "time", tz)
-                end_time = process_user_input(time_split[1], "end_time", "time", tz)
-            except Exception as err:
-                errmsgs.append(format_input_errmsg(err, time_input, "time"))
-        if any(X is None for X in [start_time, end_time]):
-            errmsgs.append(format_errmsg("You must specify a start and end time for the talk by speaker %s", speaker))
-        else:
-            start_time = start_time.time()
-            end_time = end_time.time()
+                errmsgs.append(format_input_errmsg(err, dateval, "date"))
+            if date:
+                try:
+                    interval = process_user_input(timeval, "time", "daytimes", tz)
+                    start_time, end_time = date_and_daytimes_to_times(date, interval, tz)
+                except Exception as err:  # should only be ValueError's but let's be cautious
+                    errmsgs.append(format_input_errmsg(err, timeval, "time"))
+        if not date or not start_time or not end_time:
+            errmsgs.append(format_errmsg("You must specify a date and time for the talk by %s", speaker))
 
         # we need to flag date and time errors before we go any further
         if errmsgs:
             return show_input_errors(errmsgs)
+
+        if daytimes_early(interval):
+            flash_warning(
+                "Talk for speaker %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                speaker,
+            )
+        elif daytimes_long(interval) > 8 * 60:
+            flash_warning("Time s %s is longer than 8 hours, please correct if this is not intended.", speaker),
 
         if seminar_ctr:
             # existing talk
@@ -955,21 +963,11 @@ def save_seminar_schedule():
         else:
             # new talk
             talk = WebTalk(shortname, seminar=seminar, editing=True)
+
         data = dict(talk.__dict__)
         data["speaker"] = speaker
-        data["start_time"] = localize_time(datetime.datetime.combine(date, start_time), seminar.tz)
-        data["end_time"] = localize_time(datetime.datetime.combine(date, end_time), seminar.tz)
-
-        # if end_time < start_time push it to the next day
-        if end_time < start_time:
-            data["end_time"] += timedelta(days=int(1))
-        assert data["end_time"] >= data["start_time"]
-
-        if data["start_time"] + timedelta(hours=int(8)) < data["end_time"]:
-            flash_warning(
-                "Talk for speaker %s is longer than 8 hours; if this was not intended, please check (24-hour) times.",
-                data["speaker"],
-            )
+        data["start_time"] = start_time
+        data["end_time"] = end_time
 
         for col in optional_cols:
             typ = db.talks.col_type[col]
@@ -983,16 +981,20 @@ def save_seminar_schedule():
         # Don't try to create new_version using invalid input
         if errmsgs:
             return show_input_errors(errmsgs)
+
         if seminar_ctr:
-            new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
+            new_version = WebTalk(talk.seminar_id, data=data)
             if new_version != talk:
                 updated += 1
-                new_version.save()
+                to_save.append(new_version) # defer save in case of errors on other talks
         else:
             data["seminar_ctr"] = ctr
             ctr += 1
-            new_version = WebTalk(talk.seminar_id, ctr, data=data)
-            new_version.save()
+            new_version = WebTalk(talk.seminar_id, data=data)
+            to_save.append(new_version) # defer save in case of errors on other talks
+
+    for newver in to_save:
+        newver.save()
 
     if raw_data.get("detailctr"):
         return redirect(url_for(".edit_talk", seminar_id=shortname, seminar_ctr=int(raw_data.get("detailctr")),), 302,)
