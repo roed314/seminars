@@ -163,7 +163,7 @@ def talks_parser(info, query):
 
     # FIXME: temporary measure during addition of physics
     if topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
+        query["subjects"] = {'$contains': "math"}
 
 def seminars_parser(info, query):
     parse_topic(info, query, prefix="seminar")
@@ -184,7 +184,7 @@ def seminars_parser(info, query):
 
     # FIXME: temporary measure during addition of physics
     if topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
+        query["subjects"] = {'$contains': "math"}
 
 # Common boxes
 
@@ -421,7 +421,7 @@ def _index(query):
     elif "topics" in query:
         hide_filters = ["subject", "topic"]
     elif topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
+        query["subjects"] = {'$contains': "math"}
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     query["end_time"] = {"$gte": datetime.datetime.now()}
