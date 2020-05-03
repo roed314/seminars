@@ -603,7 +603,8 @@ def show_seminar_bare(shortname):
     talks = talks_search_api(shortname)
     resp = make_response(render_template("seminar_bare.html",
                                          title=seminar.name, talks=talks,
-                                         seminar=seminar))
+                                         seminar=seminar,
+                                         _external=( '_external' in request.args )))
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 

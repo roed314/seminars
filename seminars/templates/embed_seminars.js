@@ -57,6 +57,8 @@
       }
     }
 
+    fetchURL += "&_external="
+
     var xhr = new XMLHttpRequest();
     xhr.responseType = "document";
 

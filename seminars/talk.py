@@ -264,10 +264,10 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self):
+    def show_knowl_title(self, _external=False):
         return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
             title=self.show_title(),
-            content=Markup.escape(render_template("talk-knowl.html", talk=self)),
+            content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
         )
 
     def show_lang_topics(self):
@@ -439,14 +439,14 @@ class WebTalk(object):
             tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
         )
 
-    def oneline(self, include_seminar=True, include_subscribe=True, tz=None):
+    def oneline(self, include_seminar=True, include_subscribe=True, tz=None, _external=False):
         cols = []
         cols.append(('class="date"', self.show_date(tz=tz)))
         cols.append(('class="time"', self.show_start_time(tz=tz)))
         if include_seminar:
             cols.append(('class="seminar"', self.show_seminar()))
         cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
-        cols.append(('class="talktitle"', self.show_knowl_title()))
+        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external)))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
         #cols.append(('style="display: none;"', self.show_link_title()))
