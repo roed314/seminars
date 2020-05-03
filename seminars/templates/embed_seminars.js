@@ -57,7 +57,11 @@
       }
     }
 
-    fetchURL += "&_external="
+    fetchURL += "&_external=";
+
+    if (target.hasAttribute('sitefooter')) {
+      fetchURL += "&site_footer=";
+    };
 
     var xhr = new XMLHttpRequest();
     xhr.responseType = "document";

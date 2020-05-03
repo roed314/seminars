@@ -604,7 +604,8 @@ def show_seminar_bare(shortname):
     resp = make_response(render_template("seminar_bare.html",
                                          title=seminar.name, talks=talks,
                                          seminar=seminar,
-                                         _external=( '_external' in request.args )))
+                                         _external=( '_external' in request.args ),
+                                         site_footer=( 'site_footer' in request.args ),))
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
