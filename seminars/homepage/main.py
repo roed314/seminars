@@ -260,21 +260,18 @@ class TalkSearchArray(SearchArray):
             label="Speaker",
             colspan=(1, 2, 1),
             width=textwidth,
-            example="Pythagoras o Samios",
         )
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
-            example="University of Pangea",
         )
         title = TextBox(
             name="title",
             label="Title",
             colspan=(1, 2, 1),
             width=textwidth,
-            example="A rigorous definition of rigorous",
         )
         date = TextBox(
             name="daterange",
@@ -379,7 +376,7 @@ class SemSearchArray(SearchArray):
             name="name",
             label="Name",
             width=textwidth,
-            example="Terra firma topology colloquium",
+            example="Thule topology colloquium series",
         )
 
         self.array = [
