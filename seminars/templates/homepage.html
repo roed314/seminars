@@ -20,7 +20,7 @@ console.log('Form is unchanged!');
 {%- endmacro %}
 {% macro calendar_block(name, obj) -%}
   <div>
-    Export {{name}} to
+    {{ KNOWL("export") }} {{name}} to
       <ul class="ical-detail">
         <li class="ical-detail">
           <a href="{{ obj.ics_gcal_link }}" target="_blank">
