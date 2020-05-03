@@ -12,7 +12,6 @@ from seminars.utils import (
     flash_warning,
     format_errmsg,
     format_input_errmsg,
-    format_warning,
     localize_time,
     process_user_input,
     sanity_check_times,
@@ -400,9 +399,13 @@ def save_seminar():
         errmsgs.append("The name cannot be blank")
     if seminar.is_conference and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date")
-    for col in ["per_day"]:
-        if data[col] is not None and data[col] < 1:
-            errmsgs.append(format_input_errmsg("integer must be positive", data[col], col))
+    if data["per_day"] is not None and data[col] < 1:
+        errmsgs.append(format_input_errmsg("integer must be positive", data["per_day"], "per_day"))
+    if seminar.is_conference and not (data["start_date"] and data["end_date"]):
+        flash_warning ("Please enter the start and end dates of your conference if available.")
+    if not data["per_day"]:
+        flash_warning ("It will be easier to edit the conference schedule if you specify talks per day (an upper bound is fine).")
+
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
@@ -429,19 +432,14 @@ def save_seminar():
             data["weekdays"].append(weekday)
             data["time_slots"].append(daytimes)
             if daytimes_early(daytimes):
-                flash(
-                    format_warning(
-                        "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
-                        daytimes,
-                    ),
-                    "warning",
+                flash_warning(
+                    "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                    daytimes,
                 )
             elif daytimes_long(daytimes):
-                flash(
-                    format_warning(
-                        "Time slot %s is longer than 8 hours, please correct if this is not intended.", daytimes
-                    ),
-                    "warning",
+                flash_warning(
+                    "Time slot %s is longer than 8 hours, please correct if this is not intended.",
+                    daytimes,
                 )
     if data["frequency"] and not data["weekdays"]:
         errmsgs.append('You must specify at least one time slot (or set periodicty to "no fixed schedule").')
@@ -475,15 +473,12 @@ def save_seminar():
             # boolean needs to be inverted
             D["curator"] = not D["curator"]
             if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
-                flash(
-                    format_warning(
-                        "The email address %s of organizer %s will be publicily visible.<br>%s",
-                        D["email"],
-                        D["full_name"],
-                        "Set homepage or disable display to prevent this.",
-                    ),
-                    "error",
-                )
+                flash_warning(
+                    "The email address %s of organizer %s will be publicly visible.<br>%s",
+                    D["email"],
+                    D["full_name"],
+                    "Set homepage or disable display to prevent this.",
+                ),
             if D["email"]:
                 r = db.users.lookup(D["email"])
                 if r and r["email_confirmed"]:
@@ -498,13 +493,11 @@ def save_seminar():
                         )
                     else:
                         if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
-                            flash(
-                                format_warning(
-                                    "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
-                                    D["homepage"],
-                                    r["homepage"],
-                                    D["email"],
-                                )
+                            flash_warning(
+                                "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
+                                D["homepage"],
+                                r["homepage"],
+                                D["email"],
                             )
                         if D["display"]:
                             contact_count += 1
@@ -607,20 +600,13 @@ def save_institution():
                     continue
                 if not userdata["homepage"]:
                     if current_user.email == userdata["email"]:
-                        flash(
-                            format_warning(
-                                "Your email address will become public if you do not set your homepage in your user profile."
-                            )
-                        )
+                        flash_warning("Your email address will become public if you do not set your homepage in your user profile.")
                     else:
-                        flash(
-                            format_warning(
-                                "The email address %s of maintainer %s will be publicly visible.<br>%s",
-                                userdata["email"],
-                                userdata["name"],
-                                "The homepage on the maintainer's user account should be set prevent this.",
-                            ),
-                            "error",
+                        flash_warning(
+                            "The email address %s of maintainer %s will be publicly visible.<br>%s",
+                            userdata["email"],
+                            userdata["name"],
+                            "The homepage on the maintainer's user account should be set prevent this.",
                         )
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
@@ -925,6 +911,7 @@ def save_seminar_schedule():
     warned = False
     errmsgs = []
     tz = seminar.tz
+    to_save = []
     for i in list(range(slots)):
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
         speaker = process_user_input(raw_data.get("speaker%s" % i, ""), "speaker", "text", tz)
@@ -962,18 +949,12 @@ def save_seminar_schedule():
             return show_input_errors(errmsgs)
 
         if daytimes_early(interval):
-            flash(
-                format_warning(
-                    "Talk for speaker %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
-                    speaker,
-                ),
-                "warning",
+            flash_warning(
+                "Talk for speaker %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                speaker,
             )
         elif daytimes_long(interval) > 8 * 60:
-            flash(
-                format_warning("Time s %s is longer than 8 hours, please correct if this is not intended.", speaker),
-                "warning",
-            )
+            flash_warning("Time s %s is longer than 8 hours, please correct if this is not intended.", speaker),
 
         if seminar_ctr:
             # existing talk
@@ -1000,16 +981,20 @@ def save_seminar_schedule():
         # Don't try to create new_version using invalid input
         if errmsgs:
             return show_input_errors(errmsgs)
+
         if seminar_ctr:
             new_version = WebTalk(talk.seminar_id, data["seminar_ctr"], data=data)
             if new_version != talk:
                 updated += 1
-                new_version.save()
+                to_save.append(new_version) # defer save in case of errors on other talks
         else:
             data["seminar_ctr"] = ctr
             ctr += 1
             new_version = WebTalk(talk.seminar_id, ctr, data=data)
-            new_version.save()
+            to_save.append(new_version) # defer save in case of errors on other talks
+
+    for newver in to_save:
+        newver.save()
 
     if raw_data.get("detailctr"):
         return redirect(url_for(".edit_talk", seminar_id=shortname, seminar_ctr=int(raw_data.get("detailctr")),), 302,)

@@ -21,7 +21,7 @@ import re
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-daytime_re_string = r'\d{1,2}|\d{1,2}:\d\d'
+daytime_re_string = r'\d{1,4}|\d{1,2}:\d\d|'
 daytime_re = re.compile(daytime_re_string)
 
 def topdomain():
@@ -42,8 +42,13 @@ def validate_daytime(s):
     s = s.strip()
     if not daytime_re.fullmatch(s):
         return None
-    t = s.split(':')
-    (h, m) = (int(t[0]), int(t[1])) if len(t) == 2 else (int(t[0]), 0)
+    if len(s) <= 2:
+        h, m = int(s), 0
+    elif not ':' in s:
+        h, m = int(s[:-2]), int(s[-2:])
+    else:
+        t = s.split(':')
+        h, m = int(t[0]), int(t[1])
     return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
 
 def validate_daytimes(s):
@@ -160,14 +165,6 @@ def clean_language(inp):
         return "en"
     else:
         return inp
-
-
-def flash_warning(warnmsg, *args):
-    flash(
-        Markup("Warning: " + (warnmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args))),
-        "warning",
-    )
-
 
 def sanity_check_times(start_time, end_time):
     """
@@ -536,11 +533,17 @@ def process_user_input(inp, col, typ, tz):
 def format_errmsg(errmsg, *args):
     return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
 
+
 def format_input_errmsg(err, inp, col):
     return format_errmsg('Unable to process input %s for property %s: {0}'.format(err), '"' + str(inp) + '"', col)
 
-def format_warning(errmsg, *args):
-    return Markup("Warning: " + (errmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)))
+
+def format_warning(warnmsg, *args):
+    return Markup("Warning: " + (warnmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)))
+
+
+def flash_warning(warnmsg, *args):
+    flash(format_warning(warnmsg, *args), "warning")
 
 
 def show_input_errors(errmsgs):
