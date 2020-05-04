@@ -362,6 +362,7 @@ $(document).ready(function() {
     document.getElementById('weekday'+i).style.display = 'block';
     document.getElementById('time_slot'+i).style.display = 'block';
   }
+  if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
   showplusminus(n);
 });
 
