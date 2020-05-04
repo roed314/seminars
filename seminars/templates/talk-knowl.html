@@ -68,7 +68,7 @@
     </div>
 
     <div align="right">
-        <b>{{ talk.show_time_and_duration() | safe }}</b>
+        <p><b>{{ talk.show_time_and_duration() | safe }}</b></p>
         {% if not talk.is_past() %}
           {% if talk.room %}
             Lecture held in {{ talk.room }}.
