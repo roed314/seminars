@@ -16,7 +16,7 @@ from seminars.utils import (
     topic_dict,
     weekdays,
 )
-from seminars.talks import talks_lucky
+from seminars.talk import talks_lucky
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from markupsafe import Markup
