@@ -365,9 +365,8 @@ export:
 filter:
   title: Filter
   contents: |
-    Each filter restricts the talk list,
-    and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.
-    <br><br>
+    <p>Each filter restricts the talk list,
+    and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.</p>
     Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.
     Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed,
     but each time you click on a subject to add it, talks in that subject will appear.
