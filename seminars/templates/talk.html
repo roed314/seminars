@@ -44,7 +44,6 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   {% endif %}
 
   {% if talk.comments and talk.comments != talk.seminar.comments %}
-  <p><b>Comments </b></p>
   {{talk.show_comments(prefix="<b>Comments: </b>") | safe}}
   {% endif %}
 
@@ -56,7 +55,6 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 
   {% if talk.seminar.comments %}
 
-  <p><b>Series comments</b></p>
   {{talk.seminar.show_comments(prefix="<b>Series comments: </b>") | safe}}
   {% endif %}
 
