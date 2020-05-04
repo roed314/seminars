@@ -395,9 +395,6 @@ i.fa.close:hover {
 .talk-details-container {
     padding: 0px;
     margin: 0px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
 }
 
 .talk-title {
