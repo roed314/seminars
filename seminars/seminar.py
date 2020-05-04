@@ -593,7 +593,7 @@ def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_di
         projection=projection,
         organizer_dict=organizer_dict,
         include_deleted=include_deleted,
-        object=objects,
+        objects=objects,
     )
 
 
