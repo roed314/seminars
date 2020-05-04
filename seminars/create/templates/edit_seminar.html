@@ -280,7 +280,7 @@ const subjOptions = [
   {% endfor %}
 ];
 
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
   {{ prevent_unsaved() }}
 
