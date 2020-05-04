@@ -146,7 +146,7 @@ class WebSeminar(object):
             self.weekdays = self.weekdays[0:n]
             self.time_slots = self.time_slots[0:n]
         if self.frequency and (not self.weekdays or not self.time_slots):
-            if self.weekdays is None:
+            if not self.weekdays:
                 self.weekdays = [0]
             if not self.time_slots:
                 self.time_slots = ["00:00-01:00"]
