@@ -1,3 +1,10 @@
+{% macro KNOWL(kid, title=none) -%}
+  {{ static_knowl(kid, title) | safe }}
+{%- endmacro %}
+{% macro ASTKNOWL(kid, title=none) -%}
+  {{ static_knowl(kid, title) | safe }}<span style="color:red; font-weight:normal">*</span>
+{%- endmacro %}
+
 {% macro calendar_block(name, obj, warning=False) -%}
   <div>
     {{ KNOWL("export") }} {{name}} to
@@ -23,4 +30,23 @@
       Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">~24 hours</a>
       {% endif %}
   </div>
+{%- endmacro %}
+
+{% macro prevent_unsaved(formid='') -%}
+  {% if formid %}
+    var $form = $('#{{formid}}');
+  {% else %}
+    var $form = $('form');
+  {% endif %}
+  var unsaved = true;
+  var initialState = $form.serialize();
+  window.onbeforeunload = function() {
+  if (unsaved && initialState !== $form.serialize())  {
+console.log('Form has changed!');
+      return "There are unsaved edits. Really close?";
+    }
+    else {
+console.log('Form is unchanged!');
+}
+  };
 {%- endmacro %}

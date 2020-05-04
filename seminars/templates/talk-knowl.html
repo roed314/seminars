@@ -1,4 +1,4 @@
-{% include 'calendar_block.html' %}
+{%- from "macros.html" import calendar_block with context -%}
 
 <div class="talk-body">
   <div class="talk-header-container">
@@ -46,7 +46,7 @@
 
     <hr>
 
-    {{ calendar_block("talk", talk) }}
+    {{ calendar_block("talk", talk, False) }}
 
     <div align="right">
         <b>{{ talk.show_time_and_duration() | safe }}</b><br>
