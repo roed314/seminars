@@ -50,7 +50,7 @@ def insert_many(self, data, resort=False, reindex=False, restat=False, commit=Tr
 
 for tname in db.tablenames:
     db[tname].log_db_change = nothing
-    db[tname].add_column = are_you_REALLY_sure(db[tname].add_column)
+    # db[tname].add_column = are_you_REALLY_sure(db[tname].add_column)
     db[tname].drop_column = are_you_REALLY_sure(db[tname].drop_column)
     db[tname].update = update
     db[tname].count = count
