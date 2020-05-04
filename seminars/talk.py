@@ -455,9 +455,9 @@ class WebTalk(object):
         #cols.append(('style="display: none;"', self.show_link_title()))
         return "".join("<td %s>%s</td>" % c for c in cols)
 
-    def show_comments(self):
+    def show_comments(self, prefix=""):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + self.comments).split("\n\n"))
         else:
             return ""
 
