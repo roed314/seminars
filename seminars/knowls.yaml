@@ -371,11 +371,11 @@ filter:
     Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed,
     but each time you click on a subject to add it, talks in that subject will appear.
     Click <u>subject</u> again to close the subject menu.
-    Toggling the subject filter on and off now switches between displaying your selected subjects' talks and all talks.</p>
+    Toggling the subject filter off and on now switches between displaying all talks vs. only talks in your selected subjects.</p>
     <p>Next click <u>topic</u> to restrict to selected topics within each subject,
     and click <u>language</u> to restrict to talks in the languages you understand.
     If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.</p>
-    <i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
+    <p><i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
       If you open the topics menu and select optics (a topic within physics), then no optics talks will appear,
-      because the subject filter is hiding <i>all</i> physics talks.
+      because the subject filter is hiding <i>all</i> physics talks.</p>
     <p style="text-align:right;">To close this box, click the word <u>Filter</u> above.</p>
