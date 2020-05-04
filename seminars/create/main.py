@@ -371,7 +371,6 @@ def save_seminar():
     else: # to make it obvious that these two statements should be together
         new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
 
-    sanity_check_times(new_version.start_time, new_version.end_time)
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
@@ -705,7 +704,6 @@ def save_talk():
     else: # to make it obvious that these two statements should be together
         new_version = WebTalk(talk.seminar_id, data=data)
 
-    # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
     if new_version == talk:
         flash("No changes made to talk.")
