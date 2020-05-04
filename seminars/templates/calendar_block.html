@@ -1,0 +1,26 @@
+{% macro calendar_block(name, obj, warning=False) -%}
+  <div>
+    {{ KNOWL("export") }} {{name}} to
+      <ul class="ical-detail">
+        <li class="ical-detail">
+          <a href="{{ obj.ics_gcal_link }}" target="_blank">
+            <i class="fab fa-google"></i> Google Calendar
+          </a>
+        </li>
+        <li class="ical-detail">
+          <a href="{{ obj.ics_webcal_link }}" target="_blank">
+            <i class="fas fa-calendar-alt"></i> iCal/Outlook
+          </a>
+        </li>
+        <li class="ical-detail">
+          <a href="{{ obj.ics_link }}" target="_blank">
+            <i class="fas fa-file-download"></i> ICS file
+          </a>
+        </li>
+      </ul>
+      {% if warning %}
+      <br>
+      Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">~24 hours</a>
+      {% endif %}
+  </div>
+{%- endmacro %}
