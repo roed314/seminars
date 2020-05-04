@@ -132,7 +132,6 @@ function knowl_click_handler(evt) {
   var uid = knowl.getAttribute("knowl-uid")
   var output_id = 'knowl-output-' + uid
   var output = document.getElementById(output_id)
-  var content = "loading..."
   var tagname = knowl.parentNode.tagName.toLowerCase()
   var kwargs = knowl.getAttribute("kwargs")
   var knowl_id = knowl.getAttribute("knowl")

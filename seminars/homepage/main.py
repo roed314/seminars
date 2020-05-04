@@ -403,7 +403,6 @@ class SemSearchArray(SearchArray):
 
 @app.route("/")
 def index():
-    print("secret_kye = ", app.config["SECRET_KEY"])
     return _index({})
 
 def by_subject(subject):
