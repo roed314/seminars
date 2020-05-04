@@ -16,7 +16,6 @@ from seminars.utils import (
     topic_dict,
     weekdays,
 )
-from seminars.talk import talks_lucky
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from markupsafe import Markup
@@ -119,6 +118,8 @@ class WebSeminar(object):
         return not (self == other)
 
     def convert_time_to_times(self):
+        from seminars.talk import talks_lucky
+
         if self.is_conference:
             self.frequency = None
         if self.frequency is None:
