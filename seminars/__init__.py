@@ -10,8 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../lmf
 # from .website import main
 # assert main
 from lmfdb.backend import db
-
-assert db
+from lmfdb.backend.searchtable import PostgresSearchTable
 
 # Have to make sure that changes aren't logged using the LMFDB's logging mechanism.
 def nothing(self, *args, **kwds):
