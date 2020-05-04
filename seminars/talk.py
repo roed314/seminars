@@ -622,7 +622,7 @@ def _construct(seminar_dict, projecting=False):
             seminar=seminar_dict.get(rec["seminar_id"]),
             data=rec,
         )
-    def pojection_contruct(rec):
+    def projection_contruct(rec):
         return rec
 
     return inner_construct if not projecting else projection_construct
