@@ -118,7 +118,7 @@ class WebSeminar(object):
         return not (self == other)
 
     def convert_time_to_times(self):
-        from seminars.talk import talks_lucky
+        from seminars.talk import talks_lucky_dicts
 
         if self.is_conference:
             self.frequency = None
