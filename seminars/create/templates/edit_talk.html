@@ -1,15 +1,6 @@
 {% extends "homepage.html" %}
 {% block content %}
 
-  <!-- date range picker https://github.com/dangrossman/daterangepicker jQuery plugins -->
-  <script defer
-          type="text/javascript"
-          src="{{ url_for('static', filename='daterangepicker/moment.min.js') }}"></script>
-  <script defer
-          type="text/javascript"
-          src="{{ url_for('static', filename='daterangepicker/daterangepicker.min.js') }}"></script>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='daterangepicker/daterangepicker.css') }}" />
-
 
 <form it="talkform" action="{{ url_for('.save_talk') }}" method="POST">
   <input type="hidden" name="seminar_id" value="{{ talk.seminar_id }}"/>
@@ -261,7 +252,7 @@
   </table>
 </form>
 
-<script type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
+<script defer type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
 <script type="text/javascript">
 /* prevent accidental closing of browser window */
 {{ prevent_unsaved() }}
