@@ -145,9 +145,9 @@ class WebSeminar(object):
                 self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H:%M")]
             else:
                 now = datetime.now(tz=self.tz)
-                t = talks_lucky({"seminar_id": self.shortname, "start_time": {"$gte": now}}, projection=['start_time','seminar_id', 'seminar_ctr'], sort=[("start_time", 1)])
+                t = talks_lucky({"seminar_id": self.shortname, "start_time": {"$gte": now}}, projection=['start_time'], sort=[("start_time", 1)])
                 if not t:
-                    t = talks_lucky({"seminar_id": self.shortname, "start_time": {"$lt": now}}, projection=['start_time','seminar_id', 'seminar_ctr'], sort=[("start_time", -1)])
+                    t = talks_lucky({"seminar_id": self.shortname, "start_time": {"$lt": now}}, projection=['start_time'], sort=[("start_time", -1)])
                 if t:
                     self.weekdays = [t.start_time.weekday()]
                     self.time_slots = [t.start_time.strftime("%H:%M") + "-" + t.end_time.strftime("%H:%M")]
