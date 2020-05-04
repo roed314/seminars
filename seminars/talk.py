@@ -660,7 +660,7 @@ def talks_search(*args, **kwds):
     return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict), *args, **kwds)
 
 
-def talks_lucky(*args, **kwds, objects=True):
+def talks_lucky(objects=True, *args, **kwds):
     """
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
