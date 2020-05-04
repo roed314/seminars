@@ -192,7 +192,10 @@ class SeminarsUser(UserMixin):
                 raise Exception("Email is not a string, %s" % email)
             query = {"email": ilike_query(email)}
         else:
-            query = {"id": int(uid)}
+            try:
+                query = {"id": int(uid)}
+            except ValueError:
+                query = {"id": None}
 
         self._authenticated = False
         self._uid = None
@@ -347,17 +350,17 @@ class SeminarsUser(UserMixin):
 
     @property
     def ics_link(self):
-        return url_for(".ics_file", token=self.ics, _external=True, _scheme="https")
+        return url_for(".user_ics_file", token=self.ics, _external=True, _scheme="https")
 
     @property
     def ics_gcal_link(self):
         return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
-            {"cid": url_for(".ics_file", token=self.ics, _external=True, _scheme="http")}
+            {"cid": url_for(".user_ics_file", token=self.ics, _external=True, _scheme="http")}
         )
 
     @property
     def ics_webcal_link(self):
-        return url_for(".ics_file", token=self.ics, _external=True, _scheme="webcal")
+        return url_for(".user_ics_file", token=self.ics, _external=True, _scheme="webcal")
 
     @property
     def seminar_subscriptions(self):

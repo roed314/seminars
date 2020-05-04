@@ -1,0 +1,14 @@
+<div>
+Include the HTML code below on your webpage to display the series schedule there.  The code consists of a &lt;div&gt; tag and a &lt;script&gt; tag.<br><br>
+To include the schedules of multiple series, you need the &lt;div&gt; tag for each but the &lt;script&gt; tag only once, so copy the code block for each series to your webpage and remove all but one copy of the &lt;script&gt; tag.<br><br>
+By default, the code uses <i>our</i> styling when displaying the schedule.  If instead you want your webpage's style settings to apply, then after copying the code, change <code>'addCSS': true</code> to <code>'addCSS': false</code> inside the &lt;script&gt; tag.<br><br>
+The bottom of each schedule will include a footer saying "Powered by {{topdomain}}".  To remove this, delete the word <code>sitefooter</code> inside the &lt;div&gt; tag.<br><br>
+</div>
+<textarea cols="69" rows="5" readonly id="embed-{{ seminar.shortname | safe }}-{{ uniqstr  | safe }}" onclick="this.focus();this.select()">
+<div class="embeddable_schedule" shortname="{{ seminar.shortname | safe }}" daterange="{{ daterange | safe }}" sitefooter></div>
+<script src="{{ url_for('embed_seminar_js', _external=True) | safe }}" onload="seminarEmbedder.initialize({'addCSS': true});"></script>
+</textarea>
+<div>
+<a onclick="copySourceOfId('embed-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}')"><i class="clippy"></i> Copy code to clipboard</a>
+</div>
+<script async>console.log('foo');add_autoselect_event();</script>

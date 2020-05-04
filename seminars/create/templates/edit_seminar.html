@@ -64,6 +64,17 @@
           <td><span id="language_selector" style="width:600px;"></span></td>
         </tr>
         <tr>
+          <td>{{ ASTKNOWL("timezone") }}</td>
+          <td>
+            <select name="timezone" style="width:610px;">
+              {% for tz, disp in timezones %}
+                <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td class="forminfo" />Be sure to set this correctly.</td>
+        </tr>
+        <tr>
           <td>{{KNOWL("visibility")}}</td>
           <td>
             <select name="visibility" style="width:610px;">
@@ -73,8 +84,7 @@
             </select>
           </td>
         </tr>
-
-        {% if seminar.is_conference %}
+      {% if seminar.is_conference %}
         <tr>
           <td style="padding-top: 20px">{{ KNOWL("start_date") }}</td>
           <td style="padding-top: 20px">
@@ -87,51 +97,55 @@
             <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
           </td>
         </tr>
-        {% else %}
-        <tr>
-          <td style="padding-top: 20px">{{ KNOWL("weekday") }}</td>
-          <td style="padding-top: 20px">
-            <select name="weekday" style="width:610px;">
-              <option value=""></option>
-              {% for wkday in weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekday == loop.index0 %} selected{% endif %}>{{wkday}}</option>
-              {% endfor %}
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>{{ KNOWL("frequency", "Frequency (in days)") }}</td>
-          <td><input name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:600px;" placeholder="7"/></td>
-        </tr>
-        {% endif %}
-
         <tr>
           <td>{{ KNOWL("per_day") }}</td>
           <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
         </tr>
+      {% else %}
+        <script>
+        function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
+        </script>
+        <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
         <tr>
-          <td>{{ ASTKNOWL("timezone") }}</td>
-          <td>
-            <select name="timezone" style="width:610px;">
-              {% for tz, disp in timezones %}
-                <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
+          <td>{{ KNOWL("frequency", "Periodicity") }}</td>
+          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
+              <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
+              <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
+              <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
+              <option value="21" {% if seminar.frequency == 21 %}selected{% endif %}>every third week</option>
+            </select></td>
+        </tr>
+      </table>
+      <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
+        {% for i in range(max_slots//3) %}
+          <tr>
+            {% if i == 0 %}
+              <td sytle="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
+              <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
+              <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+            {% else %}
+              <td></td><td></td><td></td>
+            {% endif %}
+          </td>
+          {% for j in range(3) %}
+          <td style="padding-right:1px; margin-right:0px;">
+            <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="display:none;">
+              <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
+              {% for wkday in short_weekdays %}
+                <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
-          <td class="forminfo" />Be sure to set this correctly.</td>
-        </tr>
-        {% if not seminar.is_conference %}
+          <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
+            <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
+          </td>
+          {% endfor %}
+        {% endfor %}
+      </table>
+      <table>
+    {% endif %}
         <tr>
-          <td>{{ KNOWL("seminar_start_time") }}</td>
-          <td><input name="start_time" value="{{ seminar.show_input_time(seminar.start_time) }}" style="width:600px;" placeholder="15:00"/></td>
-        </tr>
-        <tr>
-          <td>{{ KNOWL("seminar_end_time") }}</td>
-          <td><input name="end_time" value="{{ seminar.show_input_time(seminar.end_time) }}" style="width:600px;" placeholder="16:00"/></td>
-        </tr>
-        {% endif %}
-        <tr>
-          <td style="padding-top: 20px">{{ KNOWL("room") }}</td>
+          <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
           <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building"/></td>
         </tr>
         <tr>
@@ -146,7 +160,7 @@
         <tr>
           <td>{{ KNOWL("live_link") }}</td>
           <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
-          <td class="forminfo" />If link varies, enter "See comments" and leave instructions below in Comments.</td>
+          <td class="forminfo" />If link varies, enter "See comments" and put instructions in Comments.</td>
         </tr>
         <tr>
           <td>{{ KNOWL("access") }}</td>
@@ -222,7 +236,7 @@
         {% if seminar.user_can_delete() %}
         <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="unsaved = false;return confirm('Are you sure you want to delete this {% if seminar.is_conference %}conference{% else %}seminar{% endif %} and all of its talks?');">
           <button type="button">
-            Delete seminar
+            Delete series
           </button>
         </a>
         {% endif %}
@@ -292,21 +306,44 @@ $(document).ready(function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
+  function showplusminus(n) {
+    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
+    document.getElementById('slotplus').style.visibility = ( n < {{ max_slots }} ? 'visible' : 'hidden' );
+  }
+  $("a.slotplus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)+1;
+    document.getElementById('slots').value = '' + n;
+    document.getElementById('weekday'+(n-1)).style.display = 'block';
+    document.getElementById('time_slot'+(n-1)).style.display = 'block';
+    showplusminus(n);
+  });
+  $("a.slotminus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)-1;
+    document.getElementById('slots').value = '' + n;
+    document.getElementById('weekday'+n).value = '';
+    document.getElementById('time_slot'+n).value ='';
+    document.getElementById('weekday'+n).style.display = 'none';
+    document.getElementById('time_slot'+n).style.display = 'none';
+    showplusminus(n);
+  });
   makeTopicSelector(
     topicOptions,
     {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
   );
-    makeInstitutionSelector(
+  makeInstitutionSelector(
     instOptions,
     {{ seminar.institutions | safe }},
   );
-    makeLanguageSelector(
+  makeLanguageSelector(
     langOptions,
-    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %});
-    makeSubjectSelector(
+    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
+  );
+  makeSubjectSelector(
       subjOptions,
-      {{ seminar.subjects | safe }});
-
+      {{ seminar.subjects | safe }},
+  );
   $('input[name="subjects"]').change(
     function (){
       if( $(this).val() == '[]') {
@@ -319,8 +356,15 @@ $(document).ready(function() {
         {className: "info", position: "right"})
       }
     });
+  var n = parseInt(document.getElementById('slots').value);
+  if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+  for ( var i = 0 ; i < n ; i++ ) {
+    document.getElementById('weekday'+i).style.display = 'block';
+    document.getElementById('time_slot'+i).style.display = 'block';
+  }
+  if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
+  showplusminus(n);
 });
-
 
 </script>
 

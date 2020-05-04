@@ -151,7 +151,9 @@
           <li>They can add institutions to the site, so that series can be later associated with them.</li>
           <li>They can endorse other users.</li>
     </ol>
-      For these we require endorsement, to prevent spammers from ruining our site.
+        </p>
+      <p>
+      The endorsement system prevents spammers from ruining our site.
   </p>
     </li>
 
@@ -278,6 +280,13 @@
       edits to the series.  If you want your series' new topic to apply to talks previously added to the series, 
       you need to add the topic manually to each such talk.  The same applies to other attributes, 
       such as language, room, livestream, and access.
+    </li>
+
+    <li>
+      <h4>
+        How can I avoid having to edit my talk schedule in two places, on both {{topdomain}} and the external homepage of the series?
+      </h4>
+      On the <a href="{{ url_for('create.index') }}">Manage</a> page, click the short identifier of your series in the <b>View</b> column to go to the "View series" page.  Then click "Embed this schedule" and copy the HTML code to your external webpage to have it display the talk schedule.  From then on, any changes you make to the talk schedule on {{topdomain}} will automatically appear on your external webpage.
     </li>
 
     <li>

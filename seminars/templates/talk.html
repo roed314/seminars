@@ -16,22 +16,17 @@ Once the seminar's creator is endorsed, the seminar and its talks will be made p
 If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.public_users') }}">this list</a> of all seminar organizers and curators.
 </p>
 {% endif %}
-{% if user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
-<p>{{ talk.send_speaker_link() | safe }}</p>
-{% endif %}
 
 <div class="talk-body">
-  <p>
     <b>{{ talk.show_time_and_duration() | safe }}</b>
-  </p>
+    {% if not talk.is_past() %}
+      {% if talk.room %}
+        Lecture held in {{ talk.room }}.
+      {% endif %}
+      {{ talk.show_live_link() | safe }}
+    {% endif %}
 
-  {% if not talk.is_past() %}
-  {% if talk.room %}
-  <p>Lecture held in {{ talk.room }}.</p>
-  {% endif %}
-  {{ talk.show_live_link() | safe }}
-  {% endif %}
-<div style="clear:both;"></div>
+  <div style="clear:both;"></div>
 
   <div class="talk-details-container">
   {% if talk.abstract %}
@@ -45,11 +40,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   {% endif %}
 
   {% if talk.paper_link or talk.slides_link or talk.video_link %}
-  <p><b>Talk content</b></p>
-  <ul>{% if talk.paper_link %}<li>{{ talk.show_paper_link() | safe }}</li>{% endif %}
-      {% if talk.slides_link %}<li>{{ talk.show_slides_link() | safe }}</li>{% endif %}
-      {% if talk.video_link %}<li>{{ talk.show_video_link() | safe }}</li>{% endif %}
-  </ul>
+  <p>{{talk.show_content_links() | safe}}</p>
   {% endif %}
 
   {% if talk.comments and talk.comments != talk.seminar.comments %}
@@ -73,11 +64,15 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
     <table>
       {{ seminar.show_organizers() | safe }}
       {{ seminar.show_curators() | safe }}
-      <tr><td></td><td class="forminfo">*contact for concerns or questions</td></tr>
+      <tr><td></td><td class="forminfo">*contact</td></tr>
     </table>
-
+  </div>
+  <hr>
+  {% if user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
+  <p>{{ talk.send_speaker_link() | safe }}</p>
+  {% endif %}
 </div>
-</div>
 
+{{ calendar_block('talk', talk) }}
 
 {% endblock %}

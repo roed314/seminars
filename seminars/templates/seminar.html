@@ -40,7 +40,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% if seminar.weekday is not none or seminar.start_time %}
   <p>{{ seminar.show_weektime_and_duration() }}{% if seminar.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}. {% endif %}</p>
   {% if (not seminar.online or seminar.room) and seminar.timezone != current_user.timezone %}
-    <p>{{ seminar.show_weektime_and_duration(adapt=False) }} in seminar time zone, {{ seminar.timezone.replace("_", " ") }}.</p>
+    <p>{{ seminar.show_weektime_and_duration(adapt=False) }} in series time zone, {{ seminar.timezone.replace("_", " ") }}.</p>
   {% endif %}
 {% endif %}
 
@@ -87,6 +87,9 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
     </tr>
     {% endfor %}
   </table>
+  <div>
+    {{ seminar.show_knowl_embed(daterange="future", uniqstr="1")| safe }}
+  </div>
   {% endif %}
 </div>
 {% if past %}
@@ -103,8 +106,14 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
     </tr>
     {% endfor %}
   </table>
+  <div>
+    {{ seminar.show_knowl_embed(daterange="past", uniqstr="2")| safe }}
+  </div>
 </div>
 {% endif %}
+
+{{ calendar_block('series', seminar) }}
+
 
 {% if past and not future %}
 <script>

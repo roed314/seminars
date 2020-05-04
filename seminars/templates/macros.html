@@ -1,0 +1,48 @@
+{% macro KNOWL(kid, title=none) -%}
+  {{ static_knowl(kid, title) | safe }}
+{%- endmacro %}
+{% macro ASTKNOWL(kid, title=none) -%}
+  {{ static_knowl(kid, title) | safe }}<span style="color:red; font-weight:normal">*</span>
+{%- endmacro %}
+
+{% macro calendar_block(name, obj) -%}
+  <div>
+    {{ KNOWL("export") }} {{name}} to
+      <ul class="ical-detail">
+        <li class="ical-detail">
+          <a href="{{ obj.ics_gcal_link }}" target="_blank">
+            <i class="fab fa-google"></i> Google Calendar
+          </a>
+        </li>
+        <li class="ical-detail">
+          <a href="{{ obj.ics_webcal_link }}" target="_blank">
+            <i class="fas fa-calendar-alt"></i> iCal/Outlook
+          </a>
+        </li>
+        <li class="ical-detail">
+          <a href="{{ obj.ics_link }}" target="_blank">
+            <i class="fas fa-file-download"></i> ICS file
+          </a>
+        </li>
+      </ul>
+  </div>
+{%- endmacro %}
+
+{% macro prevent_unsaved(formid='') -%}
+  {% if formid %}
+    var $form = $('#{{formid}}');
+  {% else %}
+    var $form = $('form');
+  {% endif %}
+  var unsaved = true;
+  var initialState = $form.serialize();
+  window.onbeforeunload = function() {
+  if (unsaved && initialState !== $form.serialize())  {
+console.log('Form has changed!');
+      return "There are unsaved edits. Really close?";
+    }
+    else {
+console.log('Form is unchanged!');
+}
+  };
+{%- endmacro %}

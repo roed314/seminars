@@ -71,7 +71,7 @@
       <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
     </tr>
   <tr>
-    <td>Abstract</td>
+    <td>{{ KNOWL("abstract") }}</td>
   </tr>
   </table>
   <table>
@@ -323,7 +323,7 @@ $(document).ready(function() {
 });
   makeSubjectSelector(
     subjOptions,
-    {{ seminar.subjects | safe }});
+    {{ talk.subjects | safe }});
 
   $('input[name="subjects"]').change(
     function (){

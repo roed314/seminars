@@ -145,6 +145,14 @@ seminar_end_time:
   title: End time
   contents: |
     The time of day your series usually ends, specified in 24 hour format (so 4 or 4:00 is 4 A.M.; use 16:00 for 4 P.M.)
+seminar_time_slots:
+  title: Time slots
+  contents: |
+    The days and times of the regularly scheduled times for talks in your series; each must time slot must include a day of the week and a time range in 24 hour format.
+    For example, enter 11:30-13:00 for a talk that runs from 11:30 A.M. to 1 P.M.
+    <br><br>
+    Note that you can create talks in your series at irregular times whenever you wish.
+    The information entered here is used only to configure the initial layout of the scheduling grid and can be changed as needed.
 timezone:
   title: Timezone
   contents: |
@@ -294,6 +302,15 @@ title:
     As with seminar and conference names,
     this should be in <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>,
     with only the first word and proper nouns capitalized.
+    If you have co-authors, it is better to mention them not here, 
+    but in the abstract.
+abstract:
+  title: Abstract
+  contents: |
+    The abstract should briefly summarize what the talk will be about,
+    to help people figure out whether they want to attend the talk.
+    This is also a good place to mention your co-authors.
+    TeX symbols are OK here.
 paper_link:
   title: Paper link
   contents: |
@@ -341,23 +358,34 @@ hide_talk:
   title: Hide talk
   contents: |
     Check this box to make the talk invisible to all but the organizers.
+export:
+  title: Export
+  contents: |
+    The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> allow you to export your favorite series and talks to your chosen calendar app.  Later, if talks are added to those series, your calendar will automatically be updated.<br><br>  Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. Furthermore, some may take even longer for the initial sync. A workaround is to copy the URL of the <i>ICS file</i> link and add it manually to your calendar app.
 filter:
   title: Filter
   contents: |
-    Each filter restricts the talk list,
-    and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.
-    <br><br>
-    Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.
+    <p>Each filter restricts the talk list,
+    and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.</p>
+    <p>Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.
     Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed,
     but each time you click on a subject to add it, talks in that subject will appear.
     Click <u>subject</u> again to close the subject menu.
-    Toggling the subject filter on and off now switches between displaying your selected subjects' talks and all talks.
-    <br><br>
-    Next click <u>topic</u> to restrict to selected topics within each subject,
+    Toggling the subject filter off and on now switches between displaying all talks vs. only talks in your selected subjects.</p>
+    <p>Next click <u>topic</u> to restrict to selected topics within each subject,
     and click <u>language</u> to restrict to talks in the languages you understand.
-    If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.
-    <br><br>
-    <i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
+    If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.</p>
+    <p><i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
       If you open the topics menu and select optics (a topic within physics), then no optics talks will appear,
-      because the subject filter is hiding <i>all</i> physics talks.
-    <p style="text-align:right;">To close this box, click the word <u>Filter</u> above.</p>
+      because the subject filter is hiding <i>all</i> physics talks.</p>
+    <table>
+    <tr>
+      <td>
+        <a style="margin-left: 50px" href="info">Introduction to the site</a>
+      </td>
+      <td>
+        <a style="margin-left: 50px" href="faq">More help</a>
+      </td>
+    </tr>
+    </table>
+    <p style="text-align:right;">To close this box, click the blue word <u>Filter</u> above.</p>

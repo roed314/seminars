@@ -14,56 +14,6 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
 {% endif %}
 {% endif %}
 
-<h2>Create a series</h2>
-
-<form action="{{ url_for('.edit_seminar') }}" method="POST">
-  <input type="hidden" name="new" value="yes"/>
-  <input type="hidden" name="institutions" value=""/>
-  {% if topdomain == "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
-    <input type="hidden" name="subjects" value="['math']"/>
-  {% else %}
-    <input type="hidden" name="subjects" value=""/>
-  {% endif %}
-  <table id="make_semconf">
-    <tr>
-      <td>{{ ASTKNOWL("is_conference") }}</td>
-      <td>
-        <select name="is_conference" style="width:120px;">
-          <option value="yes">conference</option>
-          <option value="no" selected>seminar series</option>
-        </select>
-      </td>
-      <td class="forminfo"><p style="width:230px;">Click blue captions for more details. Asterisks denote required items.</p></td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("seminar_name") }}</td>
-      <td><input name="name" style="width:500px;" maxlength="100" placeholder="Terra firma topology colloquium"/></td>
-      <td class="forminfo">Capitalize first word and proper nouns.</td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("seminar_shortname") }}</td>
-      <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="32"/></td>
-      <td class="forminfo">Use 3-32 characters, no spaces.
-    </tr>
-    {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
-    <tr>
-      <td>{{ ASTKNOWL("subjects") }}</td>
-      <td><span id="subject_selector"></span></td>
-      <td class="forminfo">Select at least one subject</td>
-    <tr>
-    {% endif %}
-    <tr>
-      <td>{{ KNOWL("institutions") }}</td>
-      <td><span id="institution_selector"></span></td>
-      <td class="forminfo">You can also add these later.</td>
-    <tr>
-      <td><button type="submit">Create</button></td>
-      <td class="forminfo">Before clicking Create, please read our <a href="{{ url_for('policies') }}" target="_blank">policies</a>.</td>
-    </tr>
-  </table>
-</form>
-
-
 {% set pair = [('Seminar series you organize', seminars), ('Conferences you organize', conferences)] %}
 {% for title, list in pair %}
   {% if list %}
@@ -90,9 +40,54 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     </table>
   {% endif %}
 {% endfor %}
-{% if not seminars and not conferences %}
-<p>To add a talk, create a series first.</p>
-{% endif %}
+<h2>Create a series</h2>
+
+<form action="{{ url_for('.edit_seminar') }}" method="POST">
+  <input type="hidden" name="new" value="yes"/>
+  <input type="hidden" name="institutions" value=""/>
+  {% if topdomain == "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
+    <input type="hidden" name="subjects" value="['math']"/>
+  {% else %}
+    <input type="hidden" name="subjects" value=""/>
+  {% endif %}
+  <table id="make_semconf">
+    <tr>
+      <td>{{ ASTKNOWL("is_conference") }}</td>
+      <td>
+        <select name="is_conference" style="width:120px;">
+          <option value="yes">conference</option>
+          <option value="no" selected>seminar series</option>
+        </select>
+      </td>
+      <td class="forminfo"><p style="width:230px;">Click blue captions for more details. Asterisks denote required items.</p></td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("seminar_name") }}</td>
+      <td><input name="name" style="width:500px;" maxlength="100" placeholder="Thule topology colloquium series"/></td>
+      <td class="forminfo">Capitalize first word and proper nouns.</td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("seminar_shortname") }}</td>
+      <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="32"/></td>
+      <td class="forminfo">Use 3-32 characters, no spaces.
+    </tr>
+    {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
+    <tr>
+      <td>{{ ASTKNOWL("subjects") }}</td>
+      <td><span id="subject_selector"></span></td>
+      <td class="forminfo">Select at least one subject</td>
+    <tr>
+    {% endif %}
+    <tr>
+      <td>{{ KNOWL("institutions") }}</td>
+      <td><span id="institution_selector"></span></td>
+      <td class="forminfo">You can also add these later.</td>
+    <tr>
+      <td><button type="submit">Create</button></td>
+      <td class="forminfo">Before clicking Create, please read our <a href="{{ url_for('policies') }}" target="_blank">policies</a>.</td>
+    </tr>
+  </table>
+</form>
 {% if deleted_seminars or deleted_talks %}
 <p><a href="#" onclick="$('#deleted_stuff').show(); return false;">Show deleted items</a></p>
 <div id="deleted_stuff" style="display:none;">
@@ -135,6 +130,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
 </div>
 {% endif %}
 </div>
+
 
 <script type="text/javascript">
 

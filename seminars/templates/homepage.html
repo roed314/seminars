@@ -1,23 +1,8 @@
 {% extends "base.html" %}
 
-{% macro prevent_unsaved(formid='') -%}
-  {% if formid %}
-    var $form = $('#{{formid}}');
-  {% else %}
-    var $form = $('form');
-  {% endif %}
-  var unsaved = true;
-  var initialState = $form.serialize();
-  window.onbeforeunload = function() {
-  if (unsaved && initialState !== $form.serialize())  {
-console.log('Form has changed!');
-      return "There are unsaved edits. Really close?";
-    }
-    else {
-console.log('Form is unchanged!');
-}
-  };
-{%- endmacro %}
+
+
+{%- from "macros.html" import KNWOL, ASTKNOWL, calendar_block, prevent_unsaved with context -%}
 
 {% block body -%}
 <div id="header">
@@ -196,7 +181,7 @@ console.log('Form is unchanged!');
 {% endif %}
 <noscript>
   <div id="javascript-explanation">
-    We use javascript to filter seminar topics, adapt seminars to your local time zone, enter date ranges, and hide this annoying message.
+    We use javascript to filter series topics, adapt series to your local time zone, enter date ranges, and hide this annoying message.
     We use cookies to set your default timezone, keep track of your preferences, and to keep you logged in.
   </div>
 </noscript>

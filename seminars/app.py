@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import os
 import time
-import datetime
+from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 from flask import (
     Flask,
@@ -37,7 +37,7 @@ mail_settings = {
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": "mathseminarsnoreply",
+    "MAIL_USERNAME": "researchseminarsnoreply",
     "MAIL_PASSWORD": os.environ.get("EMAIL_PASSWORD_MIT", ""),
 }
 
@@ -142,13 +142,13 @@ def ctx_proc_userdata():
 #      Jinja formatters      #
 ##############################
 
-# you can pass in a datetime.datetime python object and via
+# you can pass in a datetime python object and via
 # {{ <datetimeobject> | fmtdatetime }} you can format it inside a jinja template
 # if you want to do more than just the default, use it for example this way:
 # {{ <datetimeobject>|fmtdatetime('%H:%M:%S') }}
 @app.template_filter("fmtdatetime")
 def fmtdatetime(value, format="%Y-%m-%d %H:%M:%S"):
-    if isinstance(value, datetime.datetime):
+    if isinstance(value, datetime):
         return value.strftime(format)
     else:
         return "-"
@@ -335,7 +335,7 @@ def css():
 def send_email(to, subject, message):
     from html2text import html2text
 
-    sender = "mathseminarsnoreply@math.mit.edu"
+    sender = "researchseminarsnoreply@math.mit.edu"
     app.logger.info("%s sending email from %s to %s..." % (timestamp(), sender, to))
     mail.send(
         Message(
