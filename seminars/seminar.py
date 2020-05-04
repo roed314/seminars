@@ -135,7 +135,7 @@ class WebSeminar(object):
             self.weekdays = []
             self.time_slots = []
             return
-        if self.weekdays is None or self.time_slots is None:
+        if not self.weekdays or not self.time_slots:
             self.weekdays = []
             self.time_slots = []
             if self.weekday is not None and self.start_time is not None and self.end_time is not None:
@@ -145,6 +145,11 @@ class WebSeminar(object):
             n = min(len(self.weekdays),len(self.time_slots))
             self.weekdays = self.weekdays[0:n]
             self.time_slots = self.time_slots[0:n]
+        if self.frequency and (not self.weekdays or not self.time_slots):
+            if not self.weekdays:
+                self.weekdays = [0]
+            if not self.time_slots:
+                self.time_slots = ["00:00-01:00"]
 
     def visible(self):
         """
