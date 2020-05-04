@@ -378,6 +378,15 @@ filter:
     <p><i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
       If you open the topics menu and select optics (a topic within physics), then no optics talks will appear,
       because the subject filter is hiding <i>all</i> physics talks.</p>
-    <p style="text-align:right;"><a href="info">Introduction to the site</a><br>
-                                 <a href="faq">More help</a></p>
+  <table>
+    <tr>
+      <td>
+        <a style="margin-left: 50px" href="info">Introduction to the site</a><b\
+r>
+      </td>
+      <td>
+        <a style="margin-left: 50px" href="faq">More help</a></p>
+      </td>
+    </tr>
+  </table>
     <p style="text-align:right;">To close this box, click the word <u>Filter</u> above.</p>
