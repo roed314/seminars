@@ -384,10 +384,17 @@ i.fa.close:hover {
 }
 
 .talk-header-container {
-    width 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+
+.talk-details-container {
+    padding: 0px;
+    margin: 0px;
 }
 
 .talk-title {
@@ -395,7 +402,7 @@ i.fa.close:hover {
 }
 
 .talk-view {
-    padding: 20px;
+    padding: 0px 20px;
     white-space: nowrap;
     text-align: right;
 }
@@ -437,9 +444,6 @@ i.fa.close:hover {
     border-top-left-radius: 5px !important;
     border-top-right-radius: 5px !important;
 }
-
-
-
 
 .ui-tabs-panel {
     background: #373737 !important;
