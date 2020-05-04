@@ -614,21 +614,18 @@ _maxer = SQL(
 )
 
 
-def _construct(seminar_dict):
+def _construct(seminar_dict, projecting=False):
     def inner_construct(rec):
-        # The following would break if we had jsonb columns holding dictionaries in the talks table,
-        # but that's not currently true.
-        if not isinstance(rec, dict):
-            return rec
-        else:
-            return WebTalk(
-                rec["seminar_id"],
-                rec["seminar_ctr"],
-                seminar=seminar_dict.get(rec["seminar_id"]),
-                data=rec,
-            )
+        return WebTalk(
+            rec["seminar_id"],
+            rec["seminar_ctr"],
+            seminar=seminar_dict.get(rec["seminar_id"]),
+            data=rec,
+        )
+    def pojection_contruct(rec):
+        return rec
 
-    return inner_construct
+    return inner_construct if not projecting else projection_construct
 
 
 def _iterator(seminar_dict):
@@ -667,8 +664,10 @@ def talks_lucky(*args, **kwds):
     """
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
+    projecting = len(args) >= 1 or "projection" in kwds
+    print(projecting)
     seminar_dict = kwds.pop("seminar_dict", {})
-    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict), *args, **kwds)
+    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, projecting=projecting), *args, **kwds)
 
 
 def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False):
