@@ -118,7 +118,7 @@ class WebSeminar(object):
         return not (self == other)
 
     def convert_time_to_times(self):
-        from seminars.talk import talks_lucky_dicts
+        from seminars.talk import talks_lucky
 
         if self.is_conference:
             self.frequency = None
@@ -145,16 +145,18 @@ class WebSeminar(object):
                 self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H:%M")]
             else:
                 now = datetime.now(tz=self.tz)
-                t = talks_lucky_dicts(
+                t = talks_lucky(
                     {"seminar_id": self.shortname, "start_time": {"$gte": now}},
                     projection=["start_time", "end_time"],
                     sort=[("start_time",1)],
+                    objects=False,
                 )
                 if not t:
-                    t = talks_lucky_dicts(
+                    t = talks_lucky(
                         {"seminar_id": self.shortname, "start_time": {"$lt": now}},
                         projection=["start_time", "end_time"],
                         sort=[("start_time", -1)],
+                        objects=False,
                     )
                 if t:
                     self.weekdays = [t["start_time"].weekday()]
@@ -323,9 +325,9 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_comments(self):
+    def show_comments(self, prefix=""):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + self.comments).split("\n\n"))
         else:
             return ""
 
@@ -530,24 +532,26 @@ _maxer = SQL(
 )
 
 
-def _construct(organizer_dict):
-    def inner_construct(rec):
+def _construct(organizer_dict, objects=True):
+    def object_construct(rec):
         if not isinstance(rec, dict):
             return rec
         else:
             return WebSeminar(
                 rec["shortname"], organizer_data=organizer_dict.get(rec["shortname"]), data=rec
             )
+    def default_construct(rec):
+        return rec
 
-    return inner_construct
+    return object_construct if objects else default_construct
 
 
-def _iterator(organizer_dict):
-    def inner_iterator(cur, search_cols, extra_cols, projection):
+def _iterator(organizer_dict, objects=True):
+    def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
             yield _construct(organizer_dict)(rec)
 
-    return inner_iterator
+    return object_iterator if objects else db.seminars._search_iterator
 
 
 def seminars_count(query={}, include_deleted=False):
@@ -568,8 +572,9 @@ def seminars_search(*args, **kwds):
     Doesn't support split_ors or raw.  Always computes count.
     """
     organizer_dict = kwds.pop("organizer_dict", {})
+    objects = kwds.pop("objects", True)
     return search_distinct(
-        db.seminars, _selecter, _counter, _iterator(organizer_dict), *args, **kwds
+        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects), *args, **kwds
     )
 
 
@@ -578,12 +583,17 @@ def seminars_lucky(*args, **kwds):
     Replacement for db.seminars.lucky to account for versioning, return a WebSeminar object or None.
     """
     organizer_dict = kwds.pop("organizer_dict", {})
-    return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict), *args, **kwds)
+    objects = kwds.pop("objects", True)
+    return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, objects=True):
     return seminars_lucky(
-        {label_col: shortname}, projection=projection, organizer_dict=organizer_dict, include_deleted=include_deleted
+        {label_col: shortname},
+        projection=projection,
+        organizer_dict=organizer_dict,
+        include_deleted=include_deleted,
+        objects=objects,
     )
 
 

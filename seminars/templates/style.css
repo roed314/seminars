@@ -1554,9 +1554,15 @@ table .knowl a {
 }
 
 
-.knowl-output .knowl-output {
+.knowl-output .knowl-output,
+.knowl-output .knowl-output.loading {
  margin-left: 0;
  margin-right: 0;
+}
+.knowl-output.loading {
+ color: {{color.grey}};
+ font-style: italic;
+ font-size: small;
 }
 
 .knowl-output h1, .knowl-output h2 {

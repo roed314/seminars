@@ -264,11 +264,19 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self, _external=False):
-        return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
-            title=self.show_title(),
-            content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
-        )
+    def show_knowl_title(self, _external=False, preload=False):
+        if _external or preload:
+            return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
+                title=self.show_title(),
+                content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
+            )
+        else:
+            return r'<a title="{title}" knowl="talk/{semid}/{talkid}">{title}</a>'.format(
+                title=self.show_title(),
+                semid=self.seminar_id,
+                talkid=self.seminar_ctr
+            )
+
 
     def show_lang_topics(self):
         if self.language and self.language != "en":
@@ -455,9 +463,9 @@ class WebTalk(object):
         #cols.append(('style="display: none;"', self.show_link_title()))
         return "".join("<td %s>%s</td>" % c for c in cols)
 
-    def show_comments(self):
+    def show_comments(self, prefix=""):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + self.comments).split("\n\n"))
         else:
             return ""
 
@@ -614,29 +622,29 @@ _maxer = SQL(
 )
 
 
-def _construct(seminar_dict):
-    def inner_construct(rec):
-        return WebTalk(
-            rec["seminar_id"],
-            rec["seminar_ctr"],
-            seminar=seminar_dict.get(rec["seminar_id"]),
-            data=rec,
-        )
-
-    return inner_construct
-
-def _construct_dicts(seminar_dict, objects=True):
-    def inner_construct(rec):
+def _construct(seminar_dict, objects=True):
+    def object_construct(rec):
+        if not isinstance(rec, dict):
+            return rec
+        else:
+            return WebTalk(
+                rec["seminar_id"],
+                rec["seminar_ctr"],
+                seminar=seminar_dict.get(rec["seminar_id"]),
+                data=rec,
+            )
+    def default_construct(rec):
         return rec
 
-    return inner_construct
+    return object_construct if objects else default_construct
 
-def _iterator(seminar_dict):
-    def inner_iterator(cur, search_cols, extra_cols, projection):
+
+def _iterator(seminar_dict, objects=True):
+    def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.talks._search_iterator(cur, search_cols, extra_cols, projection):
             yield _construct(seminar_dict)(rec)
 
-    return inner_iterator
+    return object_iterator if objects else db.talks._search_iterator
 
 
 def talks_count(query={}, include_deleted=False):
@@ -660,7 +668,8 @@ def talks_search(*args, **kwds):
     Doesn't support split_ors or raw.  Always computes count.
     """
     seminar_dict = kwds.pop("seminar_dict", {})
-    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict), *args, **kwds)
+    objects = kwds.pop("objects", True)
+    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects), *args, **kwds)
 
 
 def talks_lucky(*args, **kwds):
@@ -668,20 +677,15 @@ def talks_lucky(*args, **kwds):
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
     seminar_dict = kwds.pop("seminar_dict", {})
-    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict), *args, **kwds)
-
-def talks_lucky_dicts(*args, **kwds):
-    """
-    Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
-    """
-    seminar_dict = kwds.pop("seminar_dict", {})
-    return lucky_distinct(db.talks, _selecter, _construct_dicts(seminar_dict), *args, **kwds)
+    objects = kwds.pop("objects", True)
+    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, objects=True):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
         include_deleted=include_deleted,
+        objects=objects,
     )
