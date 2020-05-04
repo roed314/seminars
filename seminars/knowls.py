@@ -2,8 +2,7 @@
 
 import os, yaml
 from markupsafe import Markup
-from flask import render_template, request
-from seminars.talk import talks_lookup
+from flask import render_template
 
 
 def load_knowls():
