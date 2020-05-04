@@ -305,10 +305,11 @@ document.addEventListener("DOMContentLoaded", function() {
     topicOptions,
     {% if talk.new or not talk.topics %}[]{% else %}{{ talk.topics | safe }}{% endif %},
   );
+
   makeLanguageSelector(
     langOptions,
     "{{ talk.language }}");
-});
+
   makeSubjectSelector(
     subjOptions,
     {{ talk.subjects | safe }});
@@ -325,6 +326,8 @@ document.addEventListener("DOMContentLoaded", function() {
         {className: "info", position: "right"})
       }
     });
+
+});
 </script>
 
 {% endblock %}
