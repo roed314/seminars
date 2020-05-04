@@ -17,7 +17,14 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
-from seminars.utils import topics, restricted_topics, subject_pairs, top_menu, languages_dict, topdomain
+from seminars.utils import (
+    languages_dict,
+    restricted_topics,
+    subject_pairs,
+    top_menu,
+    topdomain,
+    topics,
+)
 from seminars.knowls import static_knowl
 from .seminar import seminars_header
 from .talk import talks_header
