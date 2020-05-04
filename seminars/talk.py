@@ -614,22 +614,19 @@ _maxer = SQL(
 )
 
 
-def _construct(seminar_dict):
-    def inner_construct(rec):
+def _construct(seminar_dict, objects=True):
+    def object_construct(rec):
         return WebTalk(
             rec["seminar_id"],
             rec["seminar_ctr"],
             seminar=seminar_dict.get(rec["seminar_id"]),
             data=rec,
         )
-
-    return inner_construct
-
-def _construct_dicts(seminar_dict, objects=True):
-    def inner_construct(rec):
+    def dict_construct(rec):
         return rec
 
-    return inner_construct
+    return object_construct if objects else dict_construct
+
 
 def _iterator(seminar_dict):
     def inner_iterator(cur, search_cols, extra_cols, projection):
@@ -663,19 +660,12 @@ def talks_search(*args, **kwds):
     return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict), *args, **kwds)
 
 
-def talks_lucky(*args, **kwds):
+def talks_lucky(objects=True, *args, **kwds):
     """
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
     seminar_dict = kwds.pop("seminar_dict", {})
-    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict), *args, **kwds)
-
-def talks_lucky_dicts(*args, **kwds):
-    """
-    Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
-    """
-    seminar_dict = kwds.pop("seminar_dict", {})
-    return lucky_distinct(db.talks, _selecter, _construct_dicts(seminar_dict), *args, **kwds)
+    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
 def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False):
