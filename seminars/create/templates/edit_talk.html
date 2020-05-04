@@ -254,20 +254,7 @@
 
 <script defer type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
 <script type="text/javascript">
-/* prevent accidental closing of browser window */
-{{ prevent_unsaved() }}
 
-/* register keyhandlers */
-$(function() {
-  $("#inp_title").keyup(delay_refresh);
-  $("#inp_abstract").keyup(delay_refresh);
-  refresh_preview();
-});
-
-// register any input change
-$("#talkform :input").change(function() {
-  unsaved = true;
-});
 
 
 /* topic and inst selector */
@@ -299,6 +286,21 @@ const subjOptions = [
 ];
 
 $(document).ready(function() {
+  /* prevent accidental closing of browser window */
+  {{ prevent_unsaved() }}
+
+  /* register keyhandlers */
+  $(function() {
+    $("#inp_title").keyup(delay_refresh);
+    $("#inp_abstract").keyup(delay_refresh);
+    refresh_preview();
+  });
+
+  // register any input change
+  $("#talkform :input").change(function() {
+    unsaved = true;
+  });
+
   makeTopicSelector(
     topicOptions,
     {% if talk.new or not talk.topics %}[]{% else %}{{ talk.topics | safe }}{% endif %},

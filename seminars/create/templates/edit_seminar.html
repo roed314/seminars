@@ -243,9 +243,6 @@
       {% endif %}
       </form>
 <script type="text/javascript">
-/* prevent accidental closing of browser window */
-{{ prevent_unsaved() }}
-
 /* topic and inst selector */
 const topicOptions = [
   {% for ab, topic in user_topics(seminar) %}
@@ -284,6 +281,9 @@ const subjOptions = [
 ];
 
 $(document).ready(function() {
+  /* prevent accidental closing of browser window */
+  {{ prevent_unsaved() }}
+
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
     $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;

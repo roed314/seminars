@@ -47,7 +47,7 @@
     <meta name="msapplication-square310x310logo" content="mstile-310x310.png" />
 
     <!-- jQuery -->
-    <script
+    <script defer
             type="text/javascript"
             src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"
             integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f"
@@ -76,10 +76,10 @@
     <script defer type="text/javascript" src="{{ url_for('static', filename='notify.min.js') }}"></script>
 
     <!-- depends on jquery and momment-->
-    <script type="text/javascript" src="{{ url_for('static', filename='seminars.js') }}"></script>
+    <script defer type="text/javascript" src="{{ url_for('static', filename='seminars.js') }}"></script>
 
     <!-- multi select https://github.com/dudyn5ky1/select-pure, vanilla JS-->
-    <script async
+    <script defer
             type="text/javascript"
             src="{{ url_for('static', filename='select-pure/dist/bundle.min.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='select_pure.css') }}" />
