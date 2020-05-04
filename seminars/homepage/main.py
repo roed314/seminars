@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky
+from seminars.talk import talks_search, talks_lucky, talks_lookup
 from seminars.utils import (
     Toggle,
     ics_file,
@@ -403,6 +403,7 @@ class SemSearchArray(SearchArray):
 
 @app.route("/")
 def index():
+    print("secret_kye = ", app.config["SECRET_KEY"])
     return _index({})
 
 def by_subject(subject):
@@ -711,6 +712,12 @@ def show_talk(semid, talkid):
         kwds["section"] = "Manage"
     return render_template("talk.html", **kwds)
 
+# We allow async queries for title knowls
+@app.route("/knowl/talk/<series_id>/<int:series_ctr>")
+def title_knowl(series_id, series_ctr, **kwds):
+    talk = talks_lookup(series_id, series_ctr)
+    return render_template("talk-knowl.html", talk=talk)
+
 
 @app.route("/institution/<shortname>/")
 def show_institution(shortname):
@@ -763,3 +770,5 @@ def faq():
 # def by_topic(topic):
 #    # raise error if not existing topic?
 #    return search({"seminars_topic": topic, "talks_topic": topic})
+
+

@@ -264,11 +264,19 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self, _external=False):
-        return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
-            title=self.show_title(),
-            content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
-        )
+    def show_knowl_title(self, _external=False, preload=False):
+        if _external or preload:
+            return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
+                title=self.show_title(),
+                content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
+            )
+        else:
+            return r'<a title="{title}" knowl="talk/{semid}/{talkid}">{title}</a>'.format(
+                title=self.show_title(),
+                semid=self.seminar_id,
+                talkid=self.seminar_ctr
+            )
+
 
     def show_lang_topics(self):
         if self.language and self.language != "en":
