@@ -5,7 +5,7 @@
   {{ static_knowl(kid, title) | safe }}<span style="color:red; font-weight:normal">*</span>
 {%- endmacro %}
 
-{% macro calendar_block(name, obj, warning=False) -%}
+{% macro calendar_block(name, obj) -%}
   <div>
     {{ KNOWL("export") }} {{name}} to
       <ul class="ical-detail">
@@ -25,10 +25,6 @@
           </a>
         </li>
       </ul>
-      {% if warning %}
-      <br>
-      Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">~24 hours</a>
-      {% endif %}
   </div>
 {%- endmacro %}
 

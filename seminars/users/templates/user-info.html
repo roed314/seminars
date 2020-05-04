@@ -58,7 +58,7 @@
     Please confirm your email to get access to your personalized calendar.
   </p>
   {% else %}
-    {{ calendar_block('favorites', user, True) }}
+    {{ calendar_block('favorites', user) }}
   {% endif %}
 
   {% if user.is_creator %}
