@@ -616,16 +616,19 @@ _maxer = SQL(
 
 def _construct(seminar_dict, objects=True):
     def object_construct(rec):
-        return WebTalk(
-            rec["seminar_id"],
-            rec["seminar_ctr"],
-            seminar=seminar_dict.get(rec["seminar_id"]),
-            data=rec,
-        )
-    def dict_construct(rec):
+        if not isinstance(rec, dict):
+            return rec
+        else:
+            return WebTalk(
+                rec["seminar_id"],
+                rec["seminar_ctr"],
+                seminar=seminar_dict.get(rec["seminar_id"]),
+                data=rec,
+            )
+    def default_construct(rec):
         return rec
 
-    return object_construct if objects else dict_construct
+    return object_construct if objects else default_construct
 
 
 def _iterator(seminar_dict, objects=True):
