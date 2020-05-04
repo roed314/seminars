@@ -381,7 +381,7 @@ def save_seminar():
     # Have to get time zone first
     data["timezone"] = tz = raw_data.get("timezone")
     tz = pytz.timezone(tz)
-    printf(raw_data.get("is_conference"))
+    print(raw_data.get("is_conference"))
     for col in db.seminars.search_cols:
         if col in data:
             continue
