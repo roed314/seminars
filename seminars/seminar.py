@@ -145,14 +145,14 @@ class WebSeminar(object):
                 self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H:%M")]
             else:
                 now = datetime.now(tz=self.tz)
-                t = talks_lucky(
+                t = talks_lucky_dicts(
                     {"seminar_id": self.shortname, "start_time": {"$gte": now}},
                     projection=["start_time", "end_time"],
                     sort=[("start_time",1)],
                     objects=False,
                 )
                 if not t:
-                    t = talks_lucky(
+                    t = talks_lucky_dicts(
                         {"seminar_id": self.shortname, "start_time": {"$lt": now}},
                         projection=["start_time", "end_time"],
                         sort=[("start_time", -1)],
