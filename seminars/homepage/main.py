@@ -759,7 +759,29 @@ def faq():
     return render_template("faq.html", title="Frequently asked questions", section="Info", subsection="faq")
 
 
+@app.route("/ams")
+def ams():
+    seminars = next_talk_sorted(
+        seminars_search(
+            query={"subjects": {'$contains': "math"}},
+            organizer_dict=all_organizers()
+        )
+    )
+    from collections import defaultdict
+    math_topics = {elt['subject'] + '_' + elt['abbreviation'] : elt['name'].capitalize() for elt in db.topics.search() if elt['subject'] == 'math'}
+    seminars_dict = defaultdict(list)
+    for sem in seminars:
+        for topic in sem.topics:
+            if topic in math_topics:
+                seminars_dict[topic].append(sem)
+    return render_template("ams.html",
+                           title="AMS example",
+                           math_topics=sorted(math_topics.items(), key=lambda x: x[1]),
+                           seminars_dict=seminars_dict)
+
+
+
 # @app.route("/<topic>")
 # def by_topic(topic):
 #    # raise error if not existing topic?
-#    return search({"seminars_topic": topic, "talks_topic": topic})
+    return search({"seminars_topic": topic, "talks_topic": topic})
