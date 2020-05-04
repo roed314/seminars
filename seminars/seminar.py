@@ -16,6 +16,7 @@ from seminars.utils import (
     topic_dict,
     weekdays,
 )
+from seminars.talks import talks_lucky
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from markupsafe import Markup
@@ -141,15 +142,21 @@ class WebSeminar(object):
             if self.weekday is not None and self.start_time is not None and self.end_time is not None:
                 self.weekdays = [self.weekday]
                 self.time_slots = [self.start_time.strftime("%H:%M") + "-" + self.end_time.strftime("%H:%M")]
-        else:
-            n = min(len(self.weekdays),len(self.time_slots))
-            self.weekdays = self.weekdays[0:n]
-            self.time_slots = self.time_slots[0:n]
-        if self.frequency and (not self.weekdays or not self.time_slots):
-            if not self.weekdays:
-                self.weekdays = [0]
-            if not self.time_slots:
-                self.time_slots = ["00:00-01:00"]
+            else:
+                now = datetime.now(tz=self.tz)
+                t = talks_lucky({"seminar_id": self.shortname, "start_time": {"$gte": now}}, sort=[("start_time", 1)])
+                if not t:
+                    t = talks_lucky({"seminar_id": self.shortname, "start_time": {"$lt": now}}, sort=[("start_time", -1)])
+                if t:
+                    self.weekdays = [t.start_time.weekday()]
+                    self.time_slots = [t.start_time.strftime("%H:%M") + "-" + t.end_time.strftime("%H:%M")]
+                else:
+                    # Create a slot with an obviously bogus time in the hope that the user will notice and set it
+                    self.weekdays = [0]
+                    self.time_slots = ["00:00-01:00"]
+        n = min(len(self.weekdays),len(self.time_slots))
+        self.weekdays = self.weekdays[0:n]
+        self.time_slots = self.time_slots[0:n]
 
     def visible(self):
         """
