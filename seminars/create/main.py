@@ -401,6 +401,7 @@ def save_seminar():
         errmsgs.append("End date cannot precede start date")
     if data["per_day"] is not None and data["per_day"] < 1:
         errmsgs.append(format_input_errmsg("integer must be positive", data["per_day"], "per_day"))
+    print(seminar.is_conference)
     if seminar.is_conference and (not data["start_date"] or not data["end_date"]):
         errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
     else:
