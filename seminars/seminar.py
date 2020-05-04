@@ -149,12 +149,14 @@ class WebSeminar(object):
                     {"seminar_id": self.shortname, "start_time": {"$gte": now}},
                     projection=["start_time", "end_time"],
                     sort=[("start_time",1)],
+                    objects=False,
                 )
                 if not t:
                     t = talks_lucky(
                         {"seminar_id": self.shortname, "start_time": {"$lt": now}},
                         projection=["start_time", "end_time"],
                         sort=[("start_time", -1)],
+                        objects=False,
                     )
                 if t:
                     self.weekdays = [t["start_time"].weekday()]
