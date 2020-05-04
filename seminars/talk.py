@@ -614,7 +614,7 @@ _maxer = SQL(
 )
 
 
-def _construct(seminar_dict, objects=True):
+def _construct(seminar_dict):
     def inner_construct(rec):
         return WebTalk(
             rec["seminar_id"],
@@ -622,11 +622,14 @@ def _construct(seminar_dict, objects=True):
             seminar=seminar_dict.get(rec["seminar_id"]),
             data=rec,
         )
-    def projection_construct(rec):
+
+    return inner_construct
+
+def _construct_dicts(seminar_dict, objects=True):
+    def inner_construct(rec):
         return rec
 
-    return inner_construct if objects else projection_construct
-
+    return inner_construct
 
 def _iterator(seminar_dict):
     def inner_iterator(cur, search_cols, extra_cols, projection):
@@ -674,7 +677,7 @@ def talks_lucky_dicts(*args, **kwds):
     """
     seminar_dict = kwds.pop("seminar_dict", {})
     objects = kwds.get("objects",True)
-    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, objects=False), *args, **kwds)
+    return lucky_distinct(db.talks, _selecter, _construct_dicts(seminar_dict), *args, **kwds)
 
 
 def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False):
