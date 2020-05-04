@@ -3,7 +3,8 @@ from __future__ import absolute_import
 
 __version__ = "0.1"
 
-import os, sys
+import os
+import sys
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../lmfdb"))
 
@@ -51,6 +52,6 @@ for tname in db.tablenames:
     db[tname].log_db_change = nothing
     # db[tname].add_column = are_you_REALLY_sure(db[tname].add_column)
     db[tname].drop_column = are_you_REALLY_sure(db[tname].drop_column)
-    db[tname].update = update
-    db[tname].count = count
-    db[tname].insert_many = insert_many
+    db[tname].update = update.__get__(db[tname])
+    db[tname].count = count.__get__(db[tname])
+    db[tname].insert_many = insert_many.__get__(db[tname])

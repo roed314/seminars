@@ -48,6 +48,7 @@
   </thead>
   <tbody>
     {% for talk in talks %}
+    {# filter_topic, filter_suject, filter_language #}
     <tr class="talk {% for topic in talk.topics %} topic-{{topic}} {% endfor %} subject-filtered {% for subject in talk.subjects %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
       {{ talk.oneline() | safe }}
     </tr>
