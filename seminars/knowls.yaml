@@ -381,11 +381,10 @@ filter:
   <table>
     <tr>
       <td>
-        <a style="margin-left: 50px" href="info">Introduction to the site</a><b\
-r>
+        <a style="margin-left: 50px" href="info">Introduction to the site</a>
       </td>
       <td>
-        <a style="margin-left: 50px" href="faq">More help</a></p>
+        <a style="margin-left: 50px" href="faq">More help</a>
       </td>
     </tr>
   </table>
