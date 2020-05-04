@@ -22,11 +22,7 @@
   {% endif %}
 
   {% if talk.paper_link or talk.slides_link or talk.video_link %}
-  <p><b>Talk content</b></p>
-  <ul>{% if talk.paper_link %}<li>{{ talk.show_paper_link() | safe }}</li>{% endif %}
-      {% if talk.slides_link %}<li>{{ talk.show_slides_link() | safe }}</li>{% endif %}
-      {% if talk.video_link %}<li>{{ talk.show_video_link() | safe }}</li>{% endif %}
-  </ul>
+  <p>{{talks.show_links() | safe}}></p>
   {% endif %}
 
   {% if talk.comments and talk.comments != talk.seminar.comments %}

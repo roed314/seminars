@@ -352,6 +352,9 @@ class WebTalk(object):
     def show_video_link(self):
         return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
 
+    def show_content_links(self):
+        return '( ' + ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link()])) + ' )'
+
     @property
     def ics_link(self):
         return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
