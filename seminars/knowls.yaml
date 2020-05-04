@@ -365,20 +365,27 @@ export:
 filter:
   title: Filter
   contents: |
-    Each filter restricts the talk list,
-    and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.
-    <br><br>
-    Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.
+    <p>Each filter restricts the talk list,
+    and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.</p>
+    <p>Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.
     Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed,
     but each time you click on a subject to add it, talks in that subject will appear.
     Click <u>subject</u> again to close the subject menu.
-    Toggling the subject filter on and off now switches between displaying your selected subjects' talks and all talks.
-    <br><br>
-    Next click <u>topic</u> to restrict to selected topics within each subject,
+    Toggling the subject filter off and on now switches between displaying all talks vs. only talks in your selected subjects.</p>
+    <p>Next click <u>topic</u> to restrict to selected topics within each subject,
     and click <u>language</u> to restrict to talks in the languages you understand.
-    If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.
-    <br><br>
-    <i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
+    If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.</p>
+    <p><i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
       If you open the topics menu and select optics (a topic within physics), then no optics talks will appear,
-      because the subject filter is hiding <i>all</i> physics talks.
-    <p style="text-align:right;">To close this box, click the word <u>Filter</u> above.</p>
+      because the subject filter is hiding <i>all</i> physics talks.</p>
+    <table>
+    <tr>
+      <td>
+        <a style="margin-left: 50px" href="info">Introduction to the site</a>
+      </td>
+      <td>
+        <a style="margin-left: 50px" href="faq">More help</a>
+      </td>
+    </tr>
+    </table>
+    <p style="text-align:right;">To close this box, click the blue word <u>Filter</u> above.</p>

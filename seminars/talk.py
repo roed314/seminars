@@ -352,6 +352,9 @@ class WebTalk(object):
     def show_video_link(self):
         return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
 
+    def show_content_links(self):
+        return '( ' + ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link()])) + ' )'
+
     @property
     def ics_link(self):
         return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
@@ -459,10 +462,7 @@ class WebTalk(object):
             return ""
 
     def show_abstract(self):
-        if self.abstract:
-            return "<p><b>Abstract</b></p>\n" + "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
-        else:
-            return "<p>Abstract TBA</p>"
+        return "\n".join("<p><b>Abstract: </b>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n")) if self.abstract else ""
 
     def speaker_link(self):
         return url_for("create.edit_talk_with_token",

@@ -226,6 +226,7 @@ function knowl_click_handler(evt) {
     setTimeout(function () {
       toggle(knowl_output);
     }, 10);
+    knowl_register_onclick(knowl_output);
   }
 } //~~ end click handler for *[knowl] elements
 

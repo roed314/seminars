@@ -18,17 +18,15 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 {% endif %}
 
 <div class="talk-body">
-  <p>
     <b>{{ talk.show_time_and_duration() | safe }}</b>
-  </p>
+    {% if not talk.is_past() %}
+      {% if talk.room %}
+        <br>Lecture held in {{ talk.room }}.
+      {% endif %}
+      {{ talk.show_live_link() | safe }}
+    {% endif %}
 
-  {% if not talk.is_past() %}
-  {% if talk.room %}
-  <p>Lecture held in {{ talk.room }}.</p>
-  {% endif %}
-  {{ talk.show_live_link() | safe }}
-  {% endif %}
-<div style="clear:both;"></div>
+  <div style="clear:both;"></div>
 
   <div class="talk-details-container">
   {% if talk.abstract %}
@@ -42,11 +40,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   {% endif %}
 
   {% if talk.paper_link or talk.slides_link or talk.video_link %}
-  <p><b>Talk content</b></p>
-  <ul>{% if talk.paper_link %}<li>{{ talk.show_paper_link() | safe }}</li>{% endif %}
-      {% if talk.slides_link %}<li>{{ talk.show_slides_link() | safe }}</li>{% endif %}
-      {% if talk.video_link %}<li>{{ talk.show_video_link() | safe }}</li>{% endif %}
-  </ul>
+  <p>{{talk.show_content_links() | safe}}</p>
   {% endif %}
 
   {% if talk.comments and talk.comments != talk.seminar.comments %}
