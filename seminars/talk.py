@@ -664,7 +664,7 @@ def talks_lucky(*args, **kwds):
     """
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
-    projecting = len(args) > 1 or "projection" in kwds
+    projecting = "projection" in kwds
     seminar_dict = kwds.pop("seminar_dict", {})
     return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, projecting=projecting), *args, **kwds)
 
