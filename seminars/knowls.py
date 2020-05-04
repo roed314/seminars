@@ -2,7 +2,9 @@
 
 import os, yaml
 from markupsafe import Markup
-from flask import render_template
+from flask import render_template, request
+from seminars.app import app
+from seminars.talk import talks_lookup
 
 
 def load_knowls():
@@ -28,3 +30,9 @@ def static_knowl(name, title=None):
     return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
         title=title, content=Markup.escape(render_template("static-knowl.html", knowl=knowl))
     )
+
+# We allow ajax queries for title knowls
+@app.route("/knowl/<series_id>/<series_ctr>")
+def title_knowl(series_id, series_ctr, **kwds):
+    talk = talks_lookup(series_id, series_ctr)
+    return render_template("talk-knowl.html", talk=talk)
