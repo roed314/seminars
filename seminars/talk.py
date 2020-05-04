@@ -628,12 +628,12 @@ def _construct(seminar_dict, objects=True):
     return object_construct if objects else dict_construct
 
 
-def _iterator(seminar_dict):
-    def inner_iterator(cur, search_cols, extra_cols, projection):
+def _iterator(seminar_dict, objects=True):
+    def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.talks._search_iterator(cur, search_cols, extra_cols, projection):
             yield _construct(seminar_dict)(rec)
 
-    return inner_iterator
+    return object_iterator if objects else db.talks._search_iterator
 
 
 def talks_count(query={}, include_deleted=False):
@@ -657,7 +657,8 @@ def talks_search(*args, **kwds):
     Doesn't support split_ors or raw.  Always computes count.
     """
     seminar_dict = kwds.pop("seminar_dict", {})
-    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict), *args, **kwds)
+    objects = kwds.pop("objects", True)
+    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects), *args, **kwds)
 
 
 def talks_lucky(*args, **kwds):
@@ -669,10 +670,11 @@ def talks_lucky(*args, **kwds):
     return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, objects=True):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
         include_deleted=include_deleted,
+        objects=objects,
     )
