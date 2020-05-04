@@ -456,8 +456,8 @@ def _index(query):
     languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
     # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
     return render_template(
-        "browse.html",
-        title="Browse",
+        "browse_talks.html",
+        title="Browse talks",
         hide_filters=hide_filters,
         topic_counts=topic_counts,
         subject_counts=subject_counts,
