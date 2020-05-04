@@ -88,7 +88,7 @@ class PostgresUserTable(PostgresSearchTable):
         assert tz == "" or tz in all_timezones
         kwargs["location"] = None
         kwargs["created"] = datetime.now(UTC)
-        self.insert_many([kwargs])
+        self.insert_many([kwargs], restat=False)
         newuser = SeminarsUser(email=email)
         return newuser
 
@@ -119,14 +119,14 @@ class PostgresUserTable(PostgresSearchTable):
 
     def make_creator(self, email, endorser):
         with DelayCommit(self):
-            db.users.update({"email": ilike_query(email)}, {"creator": True, "endorser": endorser})
+            db.users.update({"email": ilike_query(email)}, {"creator": True, "endorser": endorser}, restat=False)
             # Update all of this user's created seminars and talks
             db.seminars.update({"owner": ilike_query(email)}, {"display": True})
             # Could do this with a join...
             from seminars.seminar import seminars_search
 
             for sem in seminars_search({"owner": ilike_query(email)}, "shortname"):
-                db.talks.update({"seminar_id": sem}, {"display": True})
+                db.talks.update({"seminar_id": sem}, {"display": True}, restat=False)
 
     def save(self, data):
         data = dict(data)  # copy
@@ -161,7 +161,7 @@ class PostgresUserTable(PostgresSearchTable):
                 db.seminars.update({"owner": ilike_query(email)}, {"owner": newemail})
                 db.seminar_organizers.update({"email": ilike_query(email)}, {"email": newemail})
                 db.talks.update({"speaker_email": ilike_query(email)}, {"speaker_email": newemail})
-            self.update({"email": ilike_query(email)}, data)
+            self.update({"email": ilike_query(email)}, data, restat=False)
         return True
 
     def delete(self, data):
@@ -174,7 +174,7 @@ class PostgresUserTable(PostgresSearchTable):
             db.seminars.update({"owner": ilike_query(email)}, {"owner": "mathseminars-dev@googlegroups.com"})
             db.seminar_organizers.delete({"email": ilike_query(email)})
             db.talks.update({"speaker_email": ilike_query(email)}, {"speaker_email": ""})
-            self.update({"id": uid}, {key: None for key in self.search_cols})
+            self.update({"id": uid}, {key: None for key in self.search_cols}, restat=False)
 
 userdb = PostgresUserTable()
 
