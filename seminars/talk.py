@@ -462,10 +462,7 @@ class WebTalk(object):
             return ""
 
     def show_abstract(self):
-        if self.abstract:
-            return "<p><b>Abstract</b></p>\n" + "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
-        else:
-            return "<p>Abstract TBA</p>"
+        return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n")) if self.abstract else ""
 
     def speaker_link(self):
         return url_for("create.edit_talk_with_token",
