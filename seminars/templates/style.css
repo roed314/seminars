@@ -402,7 +402,7 @@ i.fa.close:hover {
 }
 
 .talk-view {
-    padding: 20px;
+    padding: 0px 20px;
     white-space: nowrap;
     text-align: right;
 }

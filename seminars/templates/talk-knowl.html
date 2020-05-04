@@ -8,7 +8,7 @@
         ( <a href="{{url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr, _external=_external)}}">view</a> {% if talk.user_can_edit() %} | <a href="{{url_for('create.edit_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr, _external=_external)}}">edit</a> {% endif %} )
       </div>
   </div>
-  <div style="clear:both; padding:0px; margin:0px;"></div>
+  <div style="clear:both;"></div>
 
   <div class="talk-details-container">
     {% if talk.abstract %}
