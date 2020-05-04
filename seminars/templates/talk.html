@@ -18,8 +18,6 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 {% endif %}
 
 <div class="talk-body">
-
-  <p>
     <b>{{ talk.show_time_and_duration() | safe }}</b>
     {% if not talk.is_past() %}
       {% if talk.room %}
@@ -27,7 +25,6 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
       {% endif %}
       {{ talk.show_live_link() | safe }}
     {% endif %}
-  </p>
 
   <div style="clear:both;"></div>
 

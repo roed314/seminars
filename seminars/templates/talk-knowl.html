@@ -68,7 +68,6 @@
     </div>
 
     <div align="right">
-      <p>
         <b>{{ talk.show_time_and_duration() | safe }}</b>
         {% if not talk.is_past() %}
           {% if talk.room %}
@@ -76,7 +75,6 @@
           {% endif %}
           {{ talk.show_live_link() | safe }}
         {% endif %}
-      </p>
     </div>
   </div>
 </div>
