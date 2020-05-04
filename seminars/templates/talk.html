@@ -42,7 +42,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   {% endif %}
 
   {% if talk.paper_link or talk.slides_link or talk.video_link %}
-  <p>{{talks.show_links() | safe}}></p>
+  <p>{{talk.show_links() | safe}}></p>
   {% endif %}
 
   {% if talk.comments and talk.comments != talk.seminar.comments %}
