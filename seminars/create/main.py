@@ -404,7 +404,7 @@ def save_seminar():
     print(data["start_date"])
     print(data["end_date"])
     if seminar.is_conference and not (data["start_date"] and data["end_date"]):
-        errmsgs.ap[pend("Please specify the start and end dates of your conference (you can change these later if needed).")
+        errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
     if seminar.is_conference and not data["per_day"]:
         flash_warning ("It will be easier to edit the conference schedule if you specify talks per day (an upper bound is fine).")
 
