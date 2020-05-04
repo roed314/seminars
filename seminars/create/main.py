@@ -403,6 +403,11 @@ def save_seminar():
         errmsgs.append(format_input_errmsg("integer must be positive", data["per_day"], "per_day"))
     if seminar.is_conference and (not data["start_date"] or not data["end_date"]):
         errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
+    else:
+        if seminar.is_conference:
+            print(data["start_date"])
+            print(not data["start_date"])
+
     if seminar.is_conference and not data["per_day"]:
         flash_warning ("It will be easier to edit the conference schedule if you specify talks per day (an upper bound is fine).")
 
