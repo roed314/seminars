@@ -668,7 +668,6 @@ def talks_lucky(*args, **kwds):
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
     seminar_dict = kwds.pop("seminar_dict", {})
-    objects = kwds.get("objects",True)
     return lucky_distinct(db.talks, _selecter, _construct(seminar_dict), *args, **kwds)
 
 def talks_lucky_dicts(*args, **kwds):
@@ -676,7 +675,6 @@ def talks_lucky_dicts(*args, **kwds):
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
     seminar_dict = kwds.pop("seminar_dict", {})
-    objects = kwds.get("objects",True)
     return lucky_distinct(db.talks, _selecter, _construct_dicts(seminar_dict), *args, **kwds)
 
 
