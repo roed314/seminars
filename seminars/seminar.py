@@ -149,7 +149,7 @@ class WebSeminar(object):
             if self.weekdays is None:
                 self.weekdays = 0
             if not self.time_slots:
-                self.time_slots = "00:00-01:00"
+                self.time_slots = ["00:00-01:00"]
 
     def visible(self):
         """
