@@ -590,7 +590,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         subsection=subsection,
         series_row_attributes=zip(series, row_attributes),
         is_conference=conference,
-        **counters,
+        **counters
     )
 
 @app.route("/search/seminars")
