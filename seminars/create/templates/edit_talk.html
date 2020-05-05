@@ -11,7 +11,7 @@
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
-  <button type="submit" onclick="return set_saved();" style="float: right;">Save all changes</button>
+  <button type="submit" onclick="unsaved = false; return true;" style="float: right;">Save all changes</button>
 
   <h3>Speaker info and talk content</h3>
 
@@ -233,7 +233,7 @@
   <table>
     <tr>
       <td>
-        <button type="submit" onclick="return set_saved();">Save all changes</button>
+        <button type="submit" onclick="unsaved = false; return true;">Save all changes</button>
       </td>
       <td>
         <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if talk.new %}{{ url_for('show_seminar', shortname=talk.seminar_id) }}{% else %}{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}{% endif %}">Cancel all changes</a>
@@ -252,10 +252,8 @@
   </table>
 </form>
 
-<script defer type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
 <script type="text/javascript">
-
-
 
 /* topic and inst selector */
 const topicOptions = [

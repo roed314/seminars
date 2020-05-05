@@ -46,17 +46,16 @@
       <td><input name="admin" value="{{ institution.admin }}" style="width:500px;" /></td>
     </tr>
   </table>
-  <button type="submit" onclick="return set_saved();">Save</button>
+  <button type="submit" onclick="unsaved = false; return true;">Save</button>
 
   <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if institution.new %}{{ url_for('list_institutions') }}{% else %}{{ url_for('show_institution', shortname=institution.shortname) }}{% endif %}">cancel</a>
 </form>
 <script type="text/javascript">
 /* prevent accidental closing of browser window */
-window.onbeforeunload = function() {
-  if(unsaved) {
-    return "There are unsaved edits. Really close?";
-  }
-}
+document.addEventListener("DOMContentLoaded", function() {
+  /* prevent accidental closing of browser window */
+  {{ prevent_unsaved() }}
+});
 </script>
 
 {% endblock %}
