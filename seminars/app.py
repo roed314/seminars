@@ -211,7 +211,7 @@ def not_found_404(error):
     messages = (
         error.description if isinstance(error.description, (list, tuple)) else (error.description,)
     )
-    return render_template("404.html", title="Page Not Found", messages=messages), 404
+    return render_template("404.html", title="Page not found", messages=messages), 404
 
 
 @app.errorhandler(500)
