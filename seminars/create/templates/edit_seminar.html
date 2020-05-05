@@ -86,13 +86,13 @@
         </tr>
       {% if seminar.is_conference %}
         <tr>
-          <td style="padding-top: 20px">{{ KNOWL("start_date") }}</td>
+          <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
           <td style="padding-top: 20px">
             <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
           </td>
         </tr>
         <tr>
-          <td> {{ KNOWL("end_date") }}</td>
+          <td> {{ ASTKNOWL("end_date") }}</td>
           <td>
             <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
           </td>

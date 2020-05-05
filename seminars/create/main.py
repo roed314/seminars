@@ -381,7 +381,6 @@ def save_seminar():
     # Have to get time zone first
     data["timezone"] = tz = raw_data.get("timezone")
     tz = pytz.timezone(tz)
-
     for col in db.seminars.search_cols:
         if col in data:
             continue
@@ -397,13 +396,14 @@ def save_seminar():
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["name"]:
         errmsgs.append("The name cannot be blank")
-    if seminar.is_conference and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
+    if data["is_conference"] and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date")
     if data["per_day"] is not None and data["per_day"] < 1:
         errmsgs.append(format_input_errmsg("integer must be positive", data["per_day"], "per_day"))
-    if seminar.is_conference and not (data["start_date"] and data["end_date"]):
-        flash_warning ("Please enter the start and end dates of your conference if available.")
-    if seminar.is_conference and not data["per_day"]:
+    if data["is_conference"] and (not data["start_date"] or not data["end_date"]):
+        errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
+
+    if data["is_conference"] and not data["per_day"]:
         flash_warning ("It will be easier to edit the conference schedule if you specify talks per day (an upper bound is fine).")
 
     data["institutions"] = clean_institutions(data.get("institutions"))

@@ -67,6 +67,16 @@ class WebSeminar(object):
                     setattr(self, key, "")
                 elif typ == "text[]":
                     setattr(self, key, [])
+                elif typ == "smallint[]":
+                    setattr(self, key, [])
+                elif typ == "timestamp with time zone":
+                    setattr(self, key, None)
+                elif typ == "timestamp with time zone[]":
+                    setattr(self, key, [])
+                elif typ == "date":
+                    setattr(self, key, None)
+                elif typ == "bigint":
+                    setattr(self, key, None)
                 else:
                     critical(
                         "Need to update seminar code to account for schema change key=%s" % key
