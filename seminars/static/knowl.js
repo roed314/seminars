@@ -167,9 +167,29 @@ function knowl_click_handler(evt) {
     knowl_div.classList.add("knowl")
     knowl_div.innerHTML = 'loading...'
     knowl_output.appendChild(knowl_div)
+    knowl_output.classList.add("loading");
 
     var knowl_content = document.createElement('div')
     knowl_content.classList.add("knowl-content")
+
+    function finish_knowl (content) {
+      knowl_content.innerHTML = content;
+      knowl_div.innerHTML = '';
+      knowl_output.classList.remove("loading");
+      knowl_div.appendChild(knowl_content);
+      // render latex
+      defer( function () {
+        try
+        {
+          renderMathInElement(document.getElementById(output_id), katexOpts)
+        }
+        catch(err) {
+          console.log("err:" + err)
+        }
+      }, 'renderMathInElement')
+      // enable knowls inside knowls
+      knowl_register_onclick(knowl_output);
+    }
     // behave a bit differently, if the knowl is inside a td or th in a table.
     // otherwise assume its sitting inside a <div> or <p>
     if(table_mode) {
@@ -224,18 +244,12 @@ function knowl_click_handler(evt) {
     }
 
     if(knowl_id == "dynamic_show") {
-      knowl_content.innerHTML = kwargs;
-      knowl_div.innerHTML = '';
-      knowl_div.appendChild(knowl_content);
+      finish_knowl(kwargs);
     } else {
-      knowl_output.classList.add("loading");
       var xhr = new XMLHttpRequest();
       xhr.responseType = "document";
       xhr.addEventListener("load", function(event) {
-        knowl_content.innerHTML = new XMLSerializer().serializeToString(this.responseXML);
-        knowl_div.innerHTML = '';
-        knowl_output.classList.remove("loading");
-        knowl_div.appendChild(knowl_content);
+        finish_knowl(new XMLSerializer().serializeToString(this.responseXML));
       });
       xhr.addEventListener("error", function(event) { knowl_content.innerHTML = "Failed loading knowl"; });
       xhr.addEventListener("abort", function(event) { knowl_content.innerHTML = "Canceled loading knowl"; });
@@ -245,20 +259,10 @@ function knowl_click_handler(evt) {
       xhr.open("GET", fetchURL, true);
       xhr.send();
     }
-
-    defer( function () {
-      try
-      {
-        renderMathInElement(document.getElementById(output_id), katexOpts)
-      }
-      catch(err) {
-        console.log("err:" + err)
-      }
-    }, 'renderMathInElement')
+    // even if the knowl is not loaded, this gives the user some feedback
     setTimeout(function () {
       toggle(knowl_output);
     }, 10);
-    knowl_register_onclick(knowl_output);
   }
 } //~~ end click handler for *[knowl] elements
 
