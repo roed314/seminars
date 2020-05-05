@@ -586,7 +586,7 @@ def user_ics_file(token):
             talks.append(talk)
     return ics_file(
         talks=talks,
-        filename="semianars.ics",
+        filename="seminars.ics",
         user=user)
 
 
