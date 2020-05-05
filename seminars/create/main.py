@@ -396,14 +396,14 @@ def save_seminar():
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["name"]:
         errmsgs.append("The name cannot be blank")
-    if seminar.is_conference and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
+    if data["is_conference"] and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date")
     if data["per_day"] is not None and data["per_day"] < 1:
         errmsgs.append(format_input_errmsg("integer must be positive", data["per_day"], "per_day"))
     if data["is_conference"] and (not data["start_date"] or not data["end_date"]):
         errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
     else:
-        if data["seminar.is_conference"]:
+        if data["is_conference"]:
             print(data["start_date"])
             print(not data["start_date"])
 
