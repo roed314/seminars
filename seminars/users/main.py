@@ -564,12 +564,17 @@ def talk_subscriptions_remove(shortname, ctr):
 
 @login_page.route("/ics/<token>")
 def user_ics_file(token):
+    from itsdangerous.exc import BadSignature
     try:
-        uid = read_token(token, "ics")
+        try:
+            uid = read_token(token, "ics")
+        except BadSignature:
+            # old key
+            uid = read_token(token, "ics", key="vVjYyCM99DtirZqMaGMrle")
         user = SeminarsUser(uid=int(uid))
         if not user.email_confirmed:
             return flask.abort(404, "The email has not yet been confirmed!")
-    except Exception:
+    except NotImplementedError:
         return flask.abort(404, "Invalid link")
 
     talks = [t for t in user.talks if not (t.hidden or t.seminar.visibility == 0)]
