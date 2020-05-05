@@ -505,9 +505,9 @@ def _get_row_attributes(objects):
         else:
             visible_counter += 1
             if visible_counter % 2: # odd
-                style = "background: #E3F2FD;"
-            else:
                 style = "background: none;"
+            else:
+                style = "background: #E3F2FD;"
         row_attributes = 'class="{classes}" style="{style}"'.format(
             classes=' '.join(classes),
             style=style)
