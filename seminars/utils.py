@@ -194,7 +194,7 @@ def top_menu():
         manage = "Create"
     return [
         (url_for("index"), "", "Browse"),
-        (url_for("search"), "", "Search"),
+        (url_for("search_seminars"), "", "Search"),
         (url_for("create.index"), "", manage),
         (url_for("info"), "", "Info"),
         (url_for("user.info"), "", account),

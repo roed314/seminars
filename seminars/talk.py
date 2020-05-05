@@ -450,7 +450,7 @@ class WebTalk(object):
             tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
         )
 
-    def oneline(self, include_seminar=True, include_subscribe=True, tz=None, _external=False):
+    def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
         cols = []
         cols.append(('class="date"', self.show_date(tz=tz)))
         cols.append(('class="time"', self.show_start_time(tz=tz)))
@@ -458,6 +458,10 @@ class WebTalk(object):
             cols.append(('class="seminar"', self.show_seminar()))
         cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
         cols.append(('class="talktitle"', self.show_knowl_title(_external=_external)))
+        if include_slides:
+            cols.append(('', self.show_slides_link()))
+        if include_video:
+            cols.append(('', self.show_video_link()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
         #cols.append(('style="display: none;"', self.show_link_title()))
@@ -538,13 +542,17 @@ Email link to speaker
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 
-def talks_header(include_seminar=True, include_subscribe=True, datetime_header="Your time"):
+def talks_header(include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, datetime_header="Your time"):
     cols = []
     cols.append((' colspan="2" class="yourtime"', datetime_header))
     if include_seminar:
         cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
     cols.append((' class="title"', "Title"))
+    if include_slides:
+        cols.append(("", ""))
+    if include_video:
+        cols.append(("", ""))
     if include_subscribe:
         if current_user.is_anonymous:
             cols.append(("", ""))

@@ -24,9 +24,10 @@ from seminars.utils import (
     top_menu,
     topdomain,
     topics,
+    toggle,
 )
 from seminars.knowls import static_knowl
-from .seminar import seminars_header
+from .seminar import series_header
 from .talk import talks_header
 
 SEMINARS_VERSION = "Seminars Release 0.1"
@@ -136,10 +137,11 @@ def ctx_proc_userdata():
     data["top_menu"] = top_menu()
 
     data["talks_header"] = talks_header
-    data["seminars_header"] = seminars_header
+    data["series_header"] = series_header
     data["languages_dict"] = languages_dict()
     data["static_knowl"] = static_knowl
     data["topdomain"] = topdomain()
+    data["toggle"] = toggle
 
     return data
 

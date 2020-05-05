@@ -31,6 +31,27 @@
 </div>
 
 {% if section == "Browse" %}
+  <div id="browse-submenu">
+    <header class="inner">
+      <div class="submenu-inner">
+        <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
+          <a href="{{ url_for('index') }}">Talks</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'conferences' %} submenu-active{% endif %}">
+          <a href="{{ url_for('conf_index') }}">Conferences</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'semseries' %} submenu-active{% endif %}">
+          <a href="{{ url_for('semseries_index') }}">Seminar series</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'past_talks' %} submenu-active{% endif %}">
+          <a href="{{ url_for('past_index') }}">Past talks</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'past_conferences' %} submenu-active{% endif %}">
+          <a href="{{ url_for('past_conf_index') }}">Past conferences</a>
+        </div>
+      </div>
+    </header>
+  </div>
   <div id="subject-filter-menu">
     <span id="close-subject-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
     {% for ab, name in subjects %}
@@ -97,6 +118,22 @@
         {{name}} ({{language_counts[ab]}})
       </div>
     {% endfor %}
+  </div>
+{% elif section == "Search" %}
+  <div id="search-submenu">
+    <header class="inner">
+      <div class="submenu-inner">
+        <div class="submenu-nav{% if subsection == 'seminars' %} submenu-active{% endif %}">
+          <a href="{{ url_for('search_seminars') }}">Seminar series</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'conferences' %} submenu-active{% endif %}">
+          <a href="{{ url_for('search_conferences') }}">Conferences</a>
+        </div>
+        <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
+          <a href="{{ url_for('search_talks') }}">Talks</a>
+        </div>
+      </div>
+    </header>
   </div>
 {% elif section in ["Manage", "Create"] %}
   <div id="manage-submenu">
