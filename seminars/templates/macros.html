@@ -34,15 +34,14 @@
   {% else %}
     var $form = $('form');
   {% endif %}
-  var unsaved = true;
+  unsaved = true;
   var initialState = $form.serialize();
   window.onbeforeunload = function() {
-  if (unsaved && initialState !== $form.serialize())  {
-console.log('Form has changed!');
+    if (unsaved && initialState !== $form.serialize())  {
+      console.log('Form has changed!');
       return "There are unsaved edits. Really close?";
+    } else {
+      console.log('Form is unchanged!');
     }
-    else {
-console.log('Form is unchanged!');
-}
   };
 {%- endmacro %}
