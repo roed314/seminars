@@ -252,7 +252,7 @@
   </table>
 </form>
 
-<script type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
+<script defer type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
 <script type="text/javascript">
 
 /* topic and inst selector */
@@ -292,11 +292,6 @@ document.addEventListener("DOMContentLoaded", function() {
     $("#inp_title").keyup(delay_refresh);
     $("#inp_abstract").keyup(delay_refresh);
     refresh_preview();
-  });
-
-  // register any input change
-  $("#talkform :input").change(function() {
-    unsaved = true;
   });
 
   makeTopicSelector(
