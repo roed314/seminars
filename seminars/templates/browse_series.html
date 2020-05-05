@@ -4,9 +4,22 @@
 
 <table id="browse-confs" class="conf-table ntdata">
   <thead>
-  <tr> {{ series_header(conference=True, include_description=False, include_topics=True)  | safe }} </tr>
+    {% if is_conference %}
+    <tr> {{ series_header(conference=True, include_description=False, include_topics=True)  | safe }} </tr>
+    {% else %}
+    <tr> {{ series_header() | safe }} </tr>
+    {% endif %}
   </thead>
   <tbody>
+    {% for series, row_attributes  in series_row_attributes %}
+    <tr {{ row_attributes | safe }} >
+      {% if is_conference %}
+      {{ series.oneline(conference=True, include_description=False, include_topics=True) | safe }}
+      {% else %}
+      {{ series.oneline() | safe }}
+      {% endif %}
+    </tr>
+    {% endfor %}
     {% for conf in conferences %}
     {# filter_topic, filter_suject, filter_language #}
     <tr class="talk {% for topic in talk.topics %} topic-{{topic}} {% endfor %} subject-filtered {% for subject in talk.subjects %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">

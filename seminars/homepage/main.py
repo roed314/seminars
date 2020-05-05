@@ -402,11 +402,23 @@ class SemSearchArray(SearchArray):
 
 @app.route("/")
 def index():
-    return _index({})
+    return _talks_index(subsection="talks")
 
 @app.route("/conferences")
 def conf_index():
-    return _series_index({"is_conference": True}, conference=True)
+    return _series_index({"is_conference": True}, subsection="conferences", conference=True)
+
+@app.route("/seminar_series")
+def semseries_index():
+    return _series_index({"is_conference": False}, subsection="semseries", conference=False)
+
+@app.route("/past")
+def past_index():
+    return _talks_index(subsection="past_talks", past=True)
+
+@app.route("/past_conferences")
+def past_conf_index():
+    return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
 def by_subject(subject):
     subject = subject.lower()
@@ -484,7 +496,7 @@ def _get_row_attributes(objects):
                 filtered = True
         return classes, filtered
 
-    row_attributes = []
+    attributes = []
     visible_counter = 0
     for obj in objects:
         classes, filtered = filter_classes(obj)
@@ -499,12 +511,12 @@ def _get_row_attributes(objects):
         row_attributes = 'class="{classes}" style="{style}"'.format(
             classes=' '.join(classes),
             style=style)
-        row_attributes.append(row_attributes)
+        attributes.append(row_attributes)
 
-    return row_attributes
+    return attributes
 
 
-def _talks_index(query={}, sort=["start_time", "series_id"]):
+def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
     query = dict(query)
     subs = subject_pairs()
@@ -519,7 +531,14 @@ def _talks_index(query={}, sort=["start_time", "series_id"]):
         query["subjects"] = ["math"]
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
-    query["end_time"] = {"$gte": datetime.now()}
+    if past:
+        query["end_time"] = {"$lt": datetime.now()}
+        if sort is None:
+            sort = [("start_time", -1), "seminar_id"]
+    else:
+        query["end_time"] = {"$gte": datetime.now()}
+        if sort is None:
+            sort = ["start_time", "seminar_id"]
     talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars()))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
@@ -531,25 +550,35 @@ def _talks_index(query={}, sort=["start_time", "series_id"]):
         hide_filters=hide_filters,
         subjects=subs,
         section="Browse",
+        subsection=subsection,
         talk_row_attributes=zip(talks, row_attributes),
+        past=past,
         **counters
     )
 
-def _series_index(query, sort=None, conference=True):
+def _series_index(query, sort=None, subsection=None, conference=True, past=False):
     query = dict(query)
     query["display"] = True
     query["visibility"] = 2
     if conference:
         # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.  Ignore the possibility that the user/conference is in Kiribati.
-        now = datetime.now().date()
-        query["end_date"] = {"$gte": now - timedelta(days=1)}
+        recent = datetime.now().date() - timedelta(days=1)
+        if past:
+            query["end_date"] = {"$lt": recent}
+        else:
+            query["end_date"] = {"$gte": recent}
     if conference and sort is None:
-        sort = ["start_date", "end_date", "name"]
+        if past:
+            sort = [("end_date", -1), ("start_date", -1), "name"]
+        else:
+            sort = ["start_date", "end_date", "name"]
     if sort is None: # not conferences
+        # We don't currently call this case in the past, but if we add it we probably
+        # need a last_talk_sorted that sorts by end time of last talk in reverse order
         series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers()))
     else:
         series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers()))
-    counters = _get_counters(talks)
+    counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
     title = "Browse conferences" if conference else "Browse seminar series"
     return render_template(
@@ -558,7 +587,9 @@ def _series_index(query, sort=None, conference=True):
         hide_filters=[],
         subjects=subject_pairs(),
         section="Browse",
-        series_row_attributes=zip(series, row_attributes,
+        subsection=subsection,
+        series_row_attributes=zip(series, row_attributes),
+        is_conference=conference,
         **counters,
     )
 

@@ -348,26 +348,40 @@ class WebSeminar(object):
 
     def oneline(
         self,
+        conference=False,
         include_institutions=True,
         include_datetime=True,
         include_description=True,
+        include_topics=False,
         include_subscribe=True,
         show_attributes=False,
     ):
         cols = []
         if include_datetime:
-            t = adapt_datetime(self.next_talk_time)
-            if t is None:
-                cols.append(('class="date"', ""))
-                cols.append(('class="time"', ""))
-            else:
-                cols.append(('class="date"', t.strftime("%a %b %-d")))
-                cols.append(('class="time"', t.strftime("%H:%M")))
+            if conference: # include start and end date instead
+                if self.start_date is None:
+                    cols.append(('class="date"', ""))
+                else:
+                    cols.append(('class="date"', self.start_date.strftime("%a %b %-d")))
+                if self.end_date is None:
+                    cols.append(('class="date"', ""))
+                else:
+                    cols.append(('class="date"', self.end_date.strftime("%a %b %-d")))
+            else: # could include both conferences and seminar series
+                t = adapt_datetime(self.next_talk_time)
+                if t is None:
+                    cols.append(('class="date"', ""))
+                    cols.append(('class="time"', ""))
+                else:
+                    cols.append(('class="date"', t.strftime("%a %b %-d")))
+                    cols.append(('class="time"', t.strftime("%H:%M")))
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
         if include_description:
             cols.append(('class="description"', self.show_description()))
+        if include_topics:
+            cols.append(('class="topics"', self.show_topics()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
         return "".join("<td %s>%s</td>" % c for c in cols)
