@@ -443,6 +443,58 @@ def _index(query):
     topic_counts = Counter()
     language_counts = Counter()
     subject_counts = Counter()
+    filtered_subjects = set(request.cookies.get('subjects', '').split(','))
+    filter_subject = request.cookies.get('filter_subject', '0') != '0'
+    filtered_topics = set(request.cookies.get('topics', '').split(','))
+    filter_topic = request.cookies.get('filter_topic', '0') != '0'
+    filtered_languages = set(request.cookies.get('languages', '').split(','))
+    filter_language = request.cookies.get('filter_language', '0') != '0'
+    filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
+
+
+    def talk_classes(talk):
+        filtered = False
+        classes = ['talk']
+
+        topic_filtered = True
+        for topic in talk.topics:
+            classes.append("topic-" + topic)
+            if topic in filtered_topics:
+                topic_filtered = False
+        if topic_filtered:
+            classes.append('topic-filtered')
+            if filter_topic:
+                filtered = True
+
+        subject_filtered = True
+        for subject in talk.subjects:
+            classes.append("subject-" + subject)
+            if subject in filtered_subjects:
+                subject_filtered = False
+        if subject_filtered:
+            classes.append('subject-filtered')
+            if filter_subject:
+                filtered = True
+
+        classes.append("lang-" + talk.language)
+        if talk.language not in filtered_languages:
+            classes.append("language-filtered")
+            if filter_language:
+                filtered = True
+        if not talk.is_subscribed():
+            classes.append("calendar-filtered")
+            if filter_calendar:
+                filtered = True
+        return classes, filtered
+
+
+
+
+
+
+
+    talk_row_attributes = []
+    visible_talks = 0
     for talk in talks:
         if talk.topics:
             for topic in talk.topics:
@@ -451,6 +503,20 @@ def _index(query):
             for subject in talk.subjects:
                 subject_counts[subject] += 1
         language_counts[talk.language] += 1
+        classes, filtered = talk_classes(talk)
+        if filtered:
+            style = "display: none;"
+        else:
+            visible_talks += 1
+            if visible_talks%2: # odd
+                style = "background: #E3F2FD;"
+            else:
+                style = "background: none;"
+        row_attributes = 'class="{classes}" style="{style}"'.format(
+            classes=' '.join(classes),
+            style=style)
+        talk_row_attributes.append((talk, row_attributes))
+
     lang_dict = languages_dict()
     languages = [(code, lang_dict[code]) for code in language_counts]
     languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
@@ -463,10 +529,10 @@ def _index(query):
         subject_counts=subject_counts,
         languages=languages,
         language_counts=language_counts,
-        talks=talks,
         subjects=subs,
         section="Browse",
         toggle=toggle,
+        talk_row_attributes=talk_row_attributes
     )
 
 @app.route("/search")
