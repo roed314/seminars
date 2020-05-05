@@ -9,7 +9,7 @@
   {{seminar.show_subscribe() | safe }}
 </span>
 {% if seminar.homepage %}
-  <p style="padding: 0x; margin: 0px;"> {{ seminar.show_homepage() | safe }} </p>
+  <p style="padding: 0x; margin: 0px;"> {{ seminar.show_homepage(newtab=True) | safe }} </p>
 {% endif %}
 
 
