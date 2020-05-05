@@ -151,7 +151,7 @@ const subjOptions = [
   {% endfor %}
 ];
 
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function() {
   makeInstitutionSelector(instOptions, []);
   makeSubjectSelector(subjOptions, []);
 });
