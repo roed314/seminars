@@ -531,7 +531,6 @@ def _talks_index(query={}, sort=["start_time", "series_id"]):
         hide_filters=hide_filters,
         subjects=subs,
         section="Browse",
-        toggle=toggle,
         talk_row_attributes=zip(talks, row_attributes),
         **counters
     )
@@ -551,13 +550,15 @@ def _series_index(query, sort=None, conference=True):
     else:
         series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers()))
     counters = _get_counters(talks)
+    row_attributes = _get_row_attributes(series)
+    title = "Browse conferences" if conference else "Browse seminar series"
     return render_template(
-        "browse_conferences.html",
-        title="Browse conferences",
+        "browse_series.html",
+        title=title,
         hide_filters=[],
-        series=series,
         subjects=subject_pairs(),
         section="Browse",
+        series_row_attributes=zip(series, row_attributes,
         **counters,
     )
 
