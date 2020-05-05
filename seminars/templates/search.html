@@ -68,6 +68,7 @@
 <script>
 
 
+document.addEventListener('DOMContentLoaded', () => {
 $('#talksform').submit(doubleSubmit)
 $('#seminarsform').submit(doubleSubmit)
 function doubleSubmit(evt) {
@@ -143,7 +144,6 @@ console.log(e);
   document.addEventListener('click', (e) => st.clickHandler(e));
 
 
-document.addEventListener('DOMContentLoaded', () => {
 {% if info.get('search_type') == 'talks' %}
   var oldtoggle = st.toggle.style.transition;
   var oldflap = st.flap.style.transition;
