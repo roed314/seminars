@@ -549,10 +549,10 @@ def talks_header(include_seminar=True, include_slides=False, include_video=False
         cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
     cols.append((' class="title"', "Title"))
-    if include_slides:
-        cols.append(("", ""))
-    if include_video:
-        cols.append(("", ""))
+    if include_slides and include_video:
+        cols.append((' colspan="2"', "Content"))
+    elif include_video or include_slides:
+        cols.append(("", "Content"))
     if include_subscribe:
         if current_user.is_anonymous:
             cols.append(("", ""))
