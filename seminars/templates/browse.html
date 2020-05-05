@@ -1,0 +1,46 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+
+<table id="filter-table">
+  <tr>
+    <td>
+      {{ KNOWL("filter") }} by:
+    </td>
+    {% if topdomain == "mathseminars.org" %}
+    {% set ftypes = ["topic", "language"] %}
+    {% else %}
+    {% set ftypes = ["subject", "topic", "language"] %}
+    {% endif %}
+    {% for ftype in ftypes %}
+    {% if ftype not in hide_filters %}
+    <td>
+      {{ toggle(tglid="enable_"+ftype+"_filter", value="", onchange="toggleFilters(this.id);") | safe }}
+    </td>
+    <td style="padding-right: 2em;">
+      <a id="{{ftype}}-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">{{ftype}}</a>
+    </td>
+    {% endif %}
+    {% endfor %}
+    {% if user.is_authenticated %}
+    <td >
+      {{ toggle(tglid="enable_calendar_filter", value="", onchange="toggleFilters(this.id);") | safe }}
+    </td>
+    <td style="padding-right: 2em;">
+      Show only saved events
+    </td>
+    {% endif %}
+  </tr>
+</table>
+
+{% block browsing %}{% endblock %}
+
+<!-- topic tabs -->
+<script>
+  $( function() {
+  $( "#subjects-tabs" ).tabs();
+  } );
+  var subject_list = [{% for ab, name in subjects %}"{{ab}}",{% endfor %}];
+</script>
+
+{% endblock %}

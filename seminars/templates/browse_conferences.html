@@ -1,0 +1,19 @@
+{% extends 'browse.html' %}
+
+{% block browsing %}
+
+<table id="browse-confs" class="conf-table ntdata">
+  <thead>
+  <tr> {{ series_header(conference=True, include_description=False, include_topics=True)  | safe }} </tr>
+  </thead>
+  <tbody>
+    {% for conf in conferences %}
+    {# filter_topic, filter_suject, filter_language #}
+    <tr class="talk {% for topic in talk.topics %} topic-{{topic}} {% endfor %} subject-filtered {% for subject in talk.subjects %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
+      {{ talk.oneline() | safe }}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
