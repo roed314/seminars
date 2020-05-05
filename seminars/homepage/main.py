@@ -450,7 +450,9 @@ def _index(query):
     filtered_languages = set(request.cookies.get('languages', '').split(','))
     filter_language = request.cookies.get('filter_language', '0') != '0'
     filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
-    def row_attributes(talk):
+
+
+    def talk_classes(talk):
         filtered = False
         classes = ['talk']
 
@@ -483,13 +485,16 @@ def _index(query):
             classes.append("calendar-filtered")
             if filter_calendar:
                 filtered = True
-
-        return 'class="{classes}" {extra}'.format(
-            classes=' '.join(classes),
-            extra='style="display: none;"' if filtered else '')
+        return classes, filtered
 
 
 
+
+
+
+
+    talk_row_attributes = []
+    visible_talks = 0
     for talk in talks:
         if talk.topics:
             for topic in talk.topics:
@@ -498,6 +503,20 @@ def _index(query):
             for subject in talk.subjects:
                 subject_counts[subject] += 1
         language_counts[talk.language] += 1
+        classes, filtered = talk_classes(talk)
+        if filtered:
+            style = "display: none;"
+        else:
+            visible_talks += 1
+            if visible_talks%2: # odd
+                style = "background: #E3F2FD;"
+            else:
+                style = "background: none;"
+        row_attributes = 'class="{classes}" style="{style}"'.format(
+            classes=' '.join(classes),
+            style=style)
+        talk_row_attributes.append((talk, row_attributes))
+
     lang_dict = languages_dict()
     languages = [(code, lang_dict[code]) for code in language_counts]
     languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
@@ -510,11 +529,10 @@ def _index(query):
         subject_counts=subject_counts,
         languages=languages,
         language_counts=language_counts,
-        talks=talks,
         subjects=subs,
         section="Browse",
         toggle=toggle,
-        row_attributes=row_attributes
+        talk_row_attributes=talk_row_attributes
     )
 
 @app.route("/search")
