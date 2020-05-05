@@ -33,27 +33,7 @@
   </tr>
 </table>
 
-<br>
-<table id="timezone-table">
-   <tr>
-    <td style="padding-right: 2em;">
-      Times in {{ user.show_timezone("browse") }}
-    </td>
-   </tr>
-</table>
-
-<table id="browse-talks" class="talk-table ntdata">
-  <thead>
-  <tr> {{ talks_header()  | safe }} </tr>
-  </thead>
-  <tbody>
-    {% for talk, row_attributes  in talk_row_attributes %}
-    <tr {{ row_attributes | safe }} >
-      {{ talk.oneline() | safe }}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% block browsing %}{% endblock %}
 
 <!-- topic tabs -->
 <script>

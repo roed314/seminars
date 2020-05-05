@@ -8,7 +8,6 @@ from seminars.utils import (
     restricted_topics as user_topics,
     subject_dict,
     subject_pairs,
-    toggle,
     topdomain,
     topics,
 )
@@ -18,7 +17,7 @@ from flask import render_template, request, redirect, url_for, Response, make_re
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 from collections import Counter
 from dateutil.parser import parse
@@ -403,17 +402,33 @@ class SemSearchArray(SearchArray):
 
 @app.route("/")
 def index():
-    return _index({})
+    return _talks_index(subsection="talks")
+
+@app.route("/conferences")
+def conf_index():
+    return _series_index({"is_conference": True}, subsection="conferences", conference=True)
+
+@app.route("/seminar_series")
+def semseries_index():
+    return _series_index({"is_conference": False}, subsection="semseries", conference=False)
+
+@app.route("/past")
+def past_index():
+    return _talks_index(subsection="past_talks", past=True)
+
+@app.route("/past_conferences")
+def past_conf_index():
+    return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
 def by_subject(subject):
     subject = subject.lower()
     if subject not in subject_dict():
         return not_found_404("Subject %s not found" % subject)
-    return lambda: _index({"subjects": {"$contains": subject}})
+    return lambda: _talks_index({"subjects": {"$contains": subject}})
 
 def by_topic(subject, topic):
     full_topic = subject + "_" + topic
-    return lambda: _index({"topics": {"$contains": full_topic}})
+    return lambda: _talks_index({"topics": {"$contains": full_topic}})
 
 # We don't want to intercept other routes by doing @app.route("/<subject>") etc.
 for subject in subject_dict():
@@ -421,7 +436,87 @@ for subject in subject_dict():
 for ab, name, subject in topics():
     app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
 
-def _index(query):
+def _get_counters(objects):
+    topic_counts = Counter()
+    language_counts = Counter()
+    subject_counts = Counter()
+    for object in objects:
+        if object.topics:
+            for topic in object.topics:
+                topic_counts[topic] += 1
+        if object.subjects:
+            for subject in object.subjects:
+                subject_counts[subject] += 1
+        language_counts[object.language] += 1
+    lang_dict = languages_dict()
+    languages = [(code, lang_dict[code]) for code in language_counts]
+    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
+    return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts, "languages": languages}
+
+def _get_row_attributes(objects):
+    filtered_subjects = set(request.cookies.get('subjects', '').split(','))
+    filter_subject = request.cookies.get('filter_subject', '0') != '0'
+    filtered_topics = set(request.cookies.get('topics', '').split(','))
+    filter_topic = request.cookies.get('filter_topic', '0') != '0'
+    filtered_languages = set(request.cookies.get('languages', '').split(','))
+    filter_language = request.cookies.get('filter_language', '0') != '0'
+    filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
+    def filter_classes(obj):
+        filtered = False
+        classes = ['talk']
+
+        topic_filtered = True
+        for topic in obj.topics:
+            classes.append("topic-" + topic)
+            if topic in filtered_topics:
+                topic_filtered = False
+        if topic_filtered:
+            classes.append('topic-filtered')
+            if filter_topic:
+                filtered = True
+
+        subject_filtered = True
+        for subject in obj.subjects:
+            classes.append("subject-" + subject)
+            if subject in filtered_subjects:
+                subject_filtered = False
+        if subject_filtered:
+            classes.append('subject-filtered')
+            if filter_subject:
+                filtered = True
+
+        classes.append("lang-" + obj.language)
+        if obj.language not in filtered_languages:
+            classes.append("language-filtered")
+            if filter_language:
+                filtered = True
+        if not obj.is_subscribed():
+            classes.append("calendar-filtered")
+            if filter_calendar:
+                filtered = True
+        return classes, filtered
+
+    attributes = []
+    visible_counter = 0
+    for obj in objects:
+        classes, filtered = filter_classes(obj)
+        if filtered:
+            style = "display: none;"
+        else:
+            visible_counter += 1
+            if visible_counter % 2: # odd
+                style = "background: #E3F2FD;"
+            else:
+                style = "background: none;"
+        row_attributes = 'class="{classes}" style="{style}"'.format(
+            classes=' '.join(classes),
+            style=style)
+        attributes.append(row_attributes)
+
+    return attributes
+
+
+def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
     query = dict(query)
     subs = subject_pairs()
@@ -436,136 +531,120 @@ def _index(query):
         query["subjects"] = ["math"]
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
-    query["end_time"] = {"$gte": datetime.now()}
-    talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
+    if past:
+        query["end_time"] = {"$lt": datetime.now()}
+        if sort is None:
+            sort = [("start_time", -1), "seminar_id"]
+    else:
+        query["end_time"] = {"$gte": datetime.now()}
+        if sort is None:
+            sort = ["start_time", "seminar_id"]
+    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars()))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
-    topic_counts = Counter()
-    language_counts = Counter()
-    subject_counts = Counter()
-    filtered_subjects = set(request.cookies.get('subjects', '').split(','))
-    filter_subject = request.cookies.get('filter_subject', '0') != '0'
-    filtered_topics = set(request.cookies.get('topics', '').split(','))
-    filter_topic = request.cookies.get('filter_topic', '0') != '0'
-    filtered_languages = set(request.cookies.get('languages', '').split(','))
-    filter_language = request.cookies.get('filter_language', '0') != '0'
-    filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
-
-
-    def talk_classes(talk):
-        filtered = False
-        classes = ['talk']
-
-        topic_filtered = True
-        for topic in talk.topics:
-            classes.append("topic-" + topic)
-            if topic in filtered_topics:
-                topic_filtered = False
-        if topic_filtered:
-            classes.append('topic-filtered')
-            if filter_topic:
-                filtered = True
-
-        subject_filtered = True
-        for subject in talk.subjects:
-            classes.append("subject-" + subject)
-            if subject in filtered_subjects:
-                subject_filtered = False
-        if subject_filtered:
-            classes.append('subject-filtered')
-            if filter_subject:
-                filtered = True
-
-        classes.append("lang-" + talk.language)
-        if talk.language not in filtered_languages:
-            classes.append("language-filtered")
-            if filter_language:
-                filtered = True
-        if not talk.is_subscribed():
-            classes.append("calendar-filtered")
-            if filter_calendar:
-                filtered = True
-        return classes, filtered
-
-
-
-
-
-
-
-    talk_row_attributes = []
-    visible_talks = 0
-    for talk in talks:
-        if talk.topics:
-            for topic in talk.topics:
-                topic_counts[topic] += 1
-        if talk.subjects:
-            for subject in talk.subjects:
-                subject_counts[subject] += 1
-        language_counts[talk.language] += 1
-        classes, filtered = talk_classes(talk)
-        if filtered:
-            style = "display: none;"
-        else:
-            visible_talks += 1
-            if visible_talks%2: # odd
-                style = "background: none;"
-            else:
-                style = "background: #E3F2FD;"
-        row_attributes = 'class="{classes}" style="{style}"'.format(
-            classes=' '.join(classes),
-            style=style)
-        talk_row_attributes.append((talk, row_attributes))
-
-    lang_dict = languages_dict()
-    languages = [(code, lang_dict[code]) for code in language_counts]
-    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
-    # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
+    counters = _get_counters(talks)
+    row_attributes = _get_row_attributes(talks)
     return render_template(
-        "browse.html",
-        title="Browse",
+        "browse_talks.html",
+        title="Browse talks",
         hide_filters=hide_filters,
-        topic_counts=topic_counts,
-        subject_counts=subject_counts,
-        languages=languages,
-        language_counts=language_counts,
         subjects=subs,
         section="Browse",
-        toggle=toggle,
-        talk_row_attributes=talk_row_attributes
+        subsection=subsection,
+        talk_row_attributes=zip(talks, row_attributes),
+        past=past,
+        **counters
     )
 
-@app.route("/search")
-def search():
-    info = to_dict(
-        request.args, seminar_search_array=SemSearchArray(), talks_search_array=TalkSearchArray()
+def _series_index(query, sort=None, subsection=None, conference=True, past=False):
+    query = dict(query)
+    query["display"] = True
+    query["visibility"] = 2
+    if conference:
+        # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.  Ignore the possibility that the user/conference is in Kiribati.
+        recent = datetime.now().date() - timedelta(days=1)
+        if past:
+            query["end_date"] = {"$lt": recent}
+        else:
+            query["end_date"] = {"$gte": recent}
+    if conference and sort is None:
+        if past:
+            sort = [("end_date", -1), ("start_date", -1), "name"]
+        else:
+            sort = ["start_date", "end_date", "name"]
+    if sort is None: # not conferences
+        # We don't currently call this case in the past, but if we add it we probably
+        # need a last_talk_sorted that sorts by end time of last talk in reverse order
+        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers()))
+    else:
+        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers()))
+    counters = _get_counters(series)
+    row_attributes = _get_row_attributes(series)
+    title = "Browse conferences" if conference else "Browse seminar series"
+    return render_template(
+        "browse_series.html",
+        title=title,
+        hide_filters=[],
+        subjects=subject_pairs(),
+        section="Browse",
+        subsection=subsection,
+        series_row_attributes=zip(series, row_attributes),
+        is_conference=conference,
+        **counters
     )
+
+@app.route("/search/seminars")
+def search_seminars():
+    return _search_series(conference=False)
+
+@app.route("/search/conferences")
+def search_conferences():
+    # For now this is basically the same as seminars_search, but they should diverge some (e.g. search on start date)
+    return _search_series(conference=True)
+
+def _search_series(conference):
+    info = to_dict(request.args, search_array=SemSearchArray())
     if "search_type" not in info:
-        info["talk_online"] = info["seminar_online"] = True
-        info["daterange"] = info.get(
-            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
-        )
+        info["seminar_online"] = True
     try:
         seminar_count = int(info["seminar_count"])
-        talk_count = int(info["talk_count"])
         seminar_start = int(info["seminar_start"])
         if seminar_start < 0:
             seminar_start += (1 - (seminar_start + 1) // seminar_count) * seminar_count
-        talk_start = int(info["talk_start"])
-        if talk_start < 0:
-            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
     except (KeyError, ValueError):
         seminar_count = info["seminar_count"] = 50
-        talk_count = info["talk_count"] = 50
         seminar_start = info["seminar_start"] = 0
-        talk_start = info["talk_start"] = 0
-    seminar_query = {}
+    seminar_query = {"is_conference": conference}
     seminars_parser(info, seminar_query)
     # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
-    info["seminar_results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    print(seminar_query)
+    info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    print(len(info["results"]))
+    return render_template(
+        "search_seminars.html", title="Search seminars", info=info, section="Search", subsection="seminars", bread=None, is_conference=conference
+    )
+
+@app.route("/search/talks")
+def search_talks():
+    info = to_dict(
+        request.args, search_array=TalkSearchArray()
+    )
+    if "search_type" not in info:
+        info["talk_online"] = True
+        info["daterange"] = info.get(
+            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
+        )
+    try:
+        talk_count = int(info["talk_count"])
+        talk_start = int(info["talk_start"])
+        if talk_start < 0:
+            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
+    except (KeyError, ValueError):
+        talk_count = info["talk_count"] = 50
+        talk_start = info["talk_start"] = 0
     talk_query = {}
     talks_parser(info, talk_query)
     talks = talks_search(
@@ -573,9 +652,9 @@ def search():
     )  # limit=talk_count, offset=talk_start
     # The talk query isn't sufficient since we don't do a join so don't have access to whether the seminar is private
     talks = [talk for talk in talks if talk.searchable()]
-    info["talk_results"] = talks
+    info["results"] = talks
     return render_template(
-        "search.html", title="Search", info=info, section="Search", bread=None,
+        "search_talks.html", title="Search talks", info=info, section="Search", subsection="talks", bread=None,
     )
 
 
@@ -598,7 +677,7 @@ def show_seminar(shortname):
         return not_found_404("Seminar not found")
     if not seminar.visible():
         flash_error("You do not have permission to view %s", seminar.name)
-        return redirect(url_for("search"), 302)
+        return redirect(url_for("search_seminars"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
     future = []

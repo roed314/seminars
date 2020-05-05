@@ -348,26 +348,40 @@ class WebSeminar(object):
 
     def oneline(
         self,
+        conference=False,
         include_institutions=True,
         include_datetime=True,
         include_description=True,
+        include_topics=False,
         include_subscribe=True,
         show_attributes=False,
     ):
         cols = []
         if include_datetime:
-            t = adapt_datetime(self.next_talk_time)
-            if t is None:
-                cols.append(('class="date"', ""))
-                cols.append(('class="time"', ""))
-            else:
-                cols.append(('class="date"', t.strftime("%a %b %-d")))
-                cols.append(('class="time"', t.strftime("%H:%M")))
+            if conference: # include start and end date instead
+                if self.start_date is None:
+                    cols.append(('class="date"', ""))
+                else:
+                    cols.append(('class="date"', self.start_date.strftime("%a %b %-d")))
+                if self.end_date is None:
+                    cols.append(('class="date"', ""))
+                else:
+                    cols.append(('class="date"', self.end_date.strftime("%a %b %-d")))
+            else: # could include both conferences and seminar series
+                t = adapt_datetime(self.next_talk_time)
+                if t is None:
+                    cols.append(('class="date"', ""))
+                    cols.append(('class="time"', ""))
+                else:
+                    cols.append(('class="date"', t.strftime("%a %b %-d")))
+                    cols.append(('class="time"', t.strftime("%H:%M")))
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
         if include_description:
             cols.append(('class="description"', self.show_description()))
+        if include_topics:
+            cols.append(('class="topics"', self.show_topics()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
         return "".join("<td %s>%s</td>" % c for c in cols)
@@ -512,24 +526,28 @@ class WebSeminar(object):
             return False
 
 
-def seminars_header(
-    include_time=True, include_institutions=True, include_description=True, include_subscribe=True
+def series_header(
+    conference=False, include_time=True, include_institutions=True, include_description=True, include_topics=False, include_subscribe=True
 ):
     cols = []
     if include_time:
-        cols.append(('colspan="2" class="yourtime"', "Next talk"))
+        if conference:
+            cols.append(('colspan="2" class="yourtime"', "Dates"))
+        else:
+            cols.append(('colspan="2" class="yourtime"', "Next talk"))
     cols.append(("", "Name"))
     if include_institutions:
         cols.append(("", "Institutions"))
     if include_description:
         cols.append(('style="min-width:280px;"', "Description"))
+    if include_topics:
+        cols.append(("", "Topics"))
     if include_subscribe:
         if current_user.is_anonymous:
             cols.append(("", ""))
         else:
             cols.append(("", "Saved"))
     return "".join("<th %s>%s</th>" % pair for pair in cols)
-
 
 _selecter = SQL(
     "SELECT {0} FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}"

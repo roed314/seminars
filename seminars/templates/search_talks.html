@@ -1,0 +1,28 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+<div class="search-container">
+  <div id='searchtalks'>
+    <form class='searchform' id='talksform' onsubmit="cleanSubmit(this.id)">
+      {{ info.search_array.html(info) | safe }}
+    </form>
+    <div class='searchresults'>
+      <table class='ntdata'>
+        <thead>
+          <tr>
+            {{  talks_header(include_seminar=False) | safe }}
+          </tr>
+        </thead>
+        {% for talk in info.results %}
+        <tr>
+          {{ talk.oneline(include_seminar=False) | safe }}
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+{% include 'debug_info.html' %}
+
+{% endblock %}
