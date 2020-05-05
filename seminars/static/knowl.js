@@ -3,8 +3,8 @@
  * Returns a function, that, as long as it continues to be invoked, will not
  * be triggered. The function will be called after it stops being called for
  * N milliseconds. If `immediate` is passed, trigger the function on the
- * leading edge, instead of the trailing. The function also has a property 'clear' 
- * that is a function which will clear the timer to prevent previously scheduled executions. 
+ * leading edge, instead of the trailing. The function also has a property 'clear'
+ * that is a function which will clear the timer to prevent previously scheduled executions.
  *
  * Copyright (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative
  * Reporters & Editors
@@ -132,8 +132,9 @@ function knowl_click_handler(evt) {
   var uid = knowl.getAttribute("knowl-uid")
   var output_id = 'knowl-output-' + uid
   var output = document.getElementById(output_id)
-  var kwargs = knowl.getAttribute("kwargs")
   var tagname = knowl.parentNode.tagName.toLowerCase()
+  var kwargs = knowl.getAttribute("kwargs")
+  var knowl_id = knowl.getAttribute("knowl")
 
   var table_mode = tagname == "td" || tagname == "th"
 
@@ -158,10 +159,17 @@ function knowl_click_handler(evt) {
     knowl.classList.add("active")
     // create the element for the content, insert it after the one where the
     // knowl element is included (e.g. inside a <h1> tag) (sibling in DOM)
-    knowl_output = document.createElement('div')
+    var knowl_output = document.createElement('div')
     knowl_output.classList.add('knowl-output')
     knowl_output.setAttribute('id', output_id)
-    knowl_output.innerHTML = '<div class="knowl"><div><div class="knowl-content">' + kwargs + '</div></div></div>'
+
+    var knowl_div = document.createElement('div')
+    knowl_div.classList.add("knowl")
+    knowl_div.innerHTML = 'loading...'
+    knowl_output.appendChild(knowl_div)
+
+    var knowl_content = document.createElement('div')
+    knowl_content.classList.add("knowl-content")
     // behave a bit differently, if the knowl is inside a td or th in a table.
     // otherwise assume its sitting inside a <div> or <p>
     if(table_mode) {
@@ -214,6 +222,30 @@ function knowl_click_handler(evt) {
     } else {
       knowl.parentNode.insertAdjacentElement('afterend', knowl_output)
     }
+
+    if(knowl_id == "dynamic_show") {
+      knowl_content.innerHTML = kwargs;
+      knowl_div.innerHTML = '';
+      knowl_div.appendChild(knowl_content);
+    } else {
+      knowl_output.classList.add("loading");
+      var xhr = new XMLHttpRequest();
+      xhr.responseType = "document";
+      xhr.addEventListener("load", function(event) {
+        knowl_content.innerHTML = new XMLSerializer().serializeToString(this.responseXML);
+        knowl_div.innerHTML = '';
+        knowl_output.classList.remove("loading");
+        knowl_div.appendChild(knowl_content);
+      });
+      xhr.addEventListener("error", function(event) { knowl_content.innerHTML = "Failed loading knowl"; });
+      xhr.addEventListener("abort", function(event) { knowl_content.innerHTML = "Canceled loading knowl"; });
+      xhr.addEventListener("progress", function(event) { knowl_content.innerHTML += "."; });
+      fetchURL = '/knowl/' + knowl_id + "?" + kwargs;
+      console.log("Initiating fetch from " + fetchURL);
+      xhr.open("GET", fetchURL, true);
+      xhr.send();
+    }
+
     defer( function () {
       try
       {
@@ -248,7 +280,6 @@ function knowl_handle(evt) {
 
 function knowl_register_onclick(element) {
   console.log("knowl_register_onclick");
-  console.log(element.querySelectorAll('*[knowl]'));
   element.querySelectorAll('a[knowl]').forEach(
    (knowl) => {
      knowl.onclick = debounce(knowl_handle, 500, true)

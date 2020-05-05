@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky
+from seminars.talk import talks_search, talks_lucky, talks_lookup
 from seminars.utils import (
     Toggle,
     ics_file,
@@ -441,6 +441,69 @@ def _get_counters(objects):
     languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
     return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts, "languages": languages}
 
+def _get_row_attributes(objects):
+    filtered_subjects = set(request.cookies.get('subjects', '').split(','))
+    filter_subject = request.cookies.get('filter_subject', '0') != '0'
+    filtered_topics = set(request.cookies.get('topics', '').split(','))
+    filter_topic = request.cookies.get('filter_topic', '0') != '0'
+    filtered_languages = set(request.cookies.get('languages', '').split(','))
+    filter_language = request.cookies.get('filter_language', '0') != '0'
+    filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
+    def filter_classes(obj):
+        filtered = False
+        classes = ['talk']
+
+        topic_filtered = True
+        for topic in obj.topics:
+            classes.append("topic-" + topic)
+            if topic in filtered_topics:
+                topic_filtered = False
+        if topic_filtered:
+            classes.append('topic-filtered')
+            if filter_topic:
+                filtered = True
+
+        subject_filtered = True
+        for subject in obj.subjects:
+            classes.append("subject-" + subject)
+            if subject in filtered_subjects:
+                subject_filtered = False
+        if subject_filtered:
+            classes.append('subject-filtered')
+            if filter_subject:
+                filtered = True
+
+        classes.append("lang-" + obj.language)
+        if obj.language not in filtered_languages:
+            classes.append("language-filtered")
+            if filter_language:
+                filtered = True
+        if not obj.is_subscribed():
+            classes.append("calendar-filtered")
+            if filter_calendar:
+                filtered = True
+        return classes, filtered
+
+    row_attributes = []
+    visible_counter = 0
+    for obj in objects:
+        classes, filtered = filter_classes(obj)
+        if filtered:
+            style = "display: none;"
+        else:
+            visible_counter += 1
+            if visible_counter % 2: # odd
+                style = "background: #E3F2FD;"
+            else:
+                style = "background: none;"
+        row_attributes = 'class="{classes}" style="{style}"'.format(
+            classes=' '.join(classes),
+            style=style)
+        row_attributes.append(row_attributes)
+
+    return row_attributes
+
+
 def _talks_index(query={}, sort=["start_time", "series_id"]):
     # Eventually want some kind of cutoff on which talks are included.
     query = dict(query)
@@ -461,13 +524,15 @@ def _talks_index(query={}, sort=["start_time", "series_id"]):
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
     counters = _get_counters(talks)
+    row_attributes = _get_row_attributes(talks)
     return render_template(
         "browse_talks.html",
         title="Browse talks",
         hide_filters=hide_filters,
-        talks=talks,
         subjects=subs,
         section="Browse",
+        toggle=toggle,
+        talk_row_attributes=zip(talks, row_attributes),
         **counters
     )
 
@@ -738,6 +803,12 @@ def show_talk(semid, talkid):
         kwds["section"] = "Manage"
     return render_template("talk.html", **kwds)
 
+# We allow async queries for title knowls
+@app.route("/knowl/talk/<series_id>/<int:series_ctr>")
+def title_knowl(series_id, series_ctr, **kwds):
+    talk = talks_lookup(series_id, series_ctr)
+    return render_template("talk-knowl.html", talk=talk)
+
 
 @app.route("/institution/<shortname>/")
 def show_institution(shortname):
@@ -807,8 +878,3 @@ def ams():
                            seminars_dict=seminars_dict)
 
 
-
-# @app.route("/<topic>")
-# def by_topic(topic):
-#    # raise error if not existing topic?
-    return search({"seminars_topic": topic, "talks_topic": topic})

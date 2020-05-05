@@ -28,8 +28,7 @@
     {% endif %}
 
     {% if talk.comments and talk.comments != talk.seminar.comments %}
-    <p><b>Comments</b></p>
-    {{talk.show_comments() | safe}}
+    {{talk.show_comments(prefix="<b>Comments: </b>") | safe}}
     {% endif %}
 
     <hr>
@@ -40,8 +39,7 @@
 
     {% if talk.seminar.comments %}
 
-    <p><b>Series comments </b></p>
-    {{talk.seminar.show_comments() | safe}}
+    {{talk.seminar.show_comments(prefix="<b>Series comments: </b>") | safe}}
     {% endif %}
 
     <hr>
