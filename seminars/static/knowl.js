@@ -284,7 +284,6 @@ function knowl_handle(evt) {
 
 function knowl_register_onclick(element) {
   console.log("knowl_register_onclick");
-  console.log(element.querySelectorAll('*[knowl]'));
   element.querySelectorAll('a[knowl]').forEach(
    (knowl) => {
      knowl.onclick = debounce(knowl_handle, 500, true)

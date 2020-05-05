@@ -424,7 +424,7 @@ def reset_password_wtoken(token):
 @login_page.route("/endorse", methods=["POST"])
 @creator_required
 def get_endorsing_link():
-    email = request.form["email"]
+    email = request.form["email"].strip()
     try:
         email = validate_email(email)["email"]
     except EmailNotValidError as e:

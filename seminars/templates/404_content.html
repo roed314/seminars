@@ -1,0 +1,30 @@
+<div class="announce red">
+<div>Unable to locate the page you requested.</div>
+{% if messages %}
+<ul>
+{% for msg in messages %}
+<li>{{msg}}</li>
+{% endfor %}
+</ul>
+{% elif message %}
+<br>
+{{ message }}
+{% elif request.referrer %}
+<br>
+<div>
+If you think accessing "{{ request.referrer }}" is an error, please help us improve and report that URL <a href="{{ feedbackpage }}" target=_blank>here</a>.
+</div>
+{% else %}
+<div>
+  If you believe this page should be here, please help us improve and report this problem here <a href="{{ feedbackpage }}" target=_blank>here</a>.
+</div>
+{% endif %}
+
+{% if request.referrer %}
+<div>
+<br>
+<a href="{{ request.referrer }}">Click here</a> to return to the referring URL.
+</div>
+{% endif %}
+
+</div>
