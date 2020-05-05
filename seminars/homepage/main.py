@@ -443,6 +443,53 @@ def _index(query):
     topic_counts = Counter()
     language_counts = Counter()
     subject_counts = Counter()
+    filtered_subjects = set(request.cookies.get('subjects', '').split(','))
+    filter_subject = request.cookies.get('filter_subject', '0') != '0'
+    filtered_topics = set(request.cookies.get('topics', '').split(','))
+    filter_topic = request.cookies.get('filter_topic', '0') != '0'
+    filtered_languages = set(request.cookies.get('languages', '').split(','))
+    filter_language = request.cookies.get('filter_language', '0') != '0'
+    filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
+    def row_attributes(talk):
+        filtered = False
+        classes = ['talk']
+
+        topic_filtered = True
+        for topic in talk.topics:
+            classes.append("topic-" + topic)
+            if topic in filtered_topics:
+                topic_filtered = False
+        if topic_filtered:
+            classes.append('topic-filtered')
+            if filter_topic:
+                filtered = True
+
+        subject_filtered = True
+        for subject in talk.subjects:
+            classes.append("subject-" + subject)
+            if subject in filtered_subjects:
+                subject_filtered = False
+        if subject_filtered:
+            classes.append('subject-filtered')
+            if filter_subject:
+                filtered = True
+
+        classes.append("lang-" + talk.language)
+        if talk.language not in filtered_languages:
+            classes.append("language-filtered")
+            if filter_language:
+                filtered = True
+        if not talk.is_subscribed():
+            classes.append("calendar-filtered")
+            if filter_calendar:
+                filtered = True
+
+        return 'class="{classes}" {extra}'.format(
+            classes=' '.join(classes),
+            extra='style="display: none;"' if filtered else '')
+
+
+
     for talk in talks:
         if talk.topics:
             for topic in talk.topics:
@@ -467,6 +514,7 @@ def _index(query):
         subjects=subs,
         section="Browse",
         toggle=toggle,
+        row_attributes=row_attributes
     )
 
 @app.route("/search")
