@@ -509,9 +509,9 @@ def _index(query):
         else:
             visible_talks += 1
             if visible_talks%2: # odd
-                style = "background: #E3F2FD;"
-            else:
                 style = "background: none;"
+            else:
+                style = "background: #E3F2FD;"
         row_attributes = 'class="{classes}" style="{style}"'.format(
             classes=' '.join(classes),
             style=style)
