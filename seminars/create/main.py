@@ -697,7 +697,7 @@ def save_talk():
         "display": talk.display,  # could be being edited by anonymous user
     }
     if talk.new:
-        curmax = talks_max("seminar_ctr", {"seminar_id": talk.seminar_id})
+        curmax = talks_max("seminar_ctr", {"seminar_id": talk.seminar_id}, include_deleted=True)
         if curmax is None:
             curmax = 0
         data["seminar_ctr"] = curmax + 1
