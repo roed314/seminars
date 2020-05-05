@@ -593,37 +593,58 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         **counters,
     )
 
-@app.route("/search")
-def search():
-    info = to_dict(
-        request.args, seminar_search_array=SemSearchArray(), talks_search_array=TalkSearchArray()
-    )
+@app.route("/search/seminars")
+def search_seminars():
+    return _search_series(conference=False)
+
+@app.route("/search/conferences")
+def search_conferences():
+    # For now this is basically the same as seminars_search, but they should diverge some (e.g. search on start date)
+    return _search_series(conference=True)
+
+def _search_series(conference):
+    info = to_dict(request.args, search_array=SemSearchArray())
     if "search_type" not in info:
-        info["talk_online"] = info["seminar_online"] = True
-        info["daterange"] = info.get(
-            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
-        )
+        info["seminar_online"] = True
     try:
         seminar_count = int(info["seminar_count"])
-        talk_count = int(info["talk_count"])
         seminar_start = int(info["seminar_start"])
         if seminar_start < 0:
             seminar_start += (1 - (seminar_start + 1) // seminar_count) * seminar_count
-        talk_start = int(info["talk_start"])
-        if talk_start < 0:
-            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
     except (KeyError, ValueError):
         seminar_count = info["seminar_count"] = 50
-        talk_count = info["talk_count"] = 50
         seminar_start = info["seminar_start"] = 0
-        talk_start = info["talk_start"] = 0
-    seminar_query = {}
+    seminar_query = {"is_conference": conference}
     seminars_parser(info, seminar_query)
     # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
-    info["seminar_results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    print(seminar_query)
+    info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    print(len(info["results"]))
+    return render_template(
+        "search_seminars.html", title="Search seminars", info=info, section="Search", subsection="seminars", bread=None, is_conference=conference
+    )
+
+@app.route("/search/talks")
+def search_talks():
+    info = to_dict(
+        request.args, search_array=TalkSearchArray()
+    )
+    if "search_type" not in info:
+        info["talk_online"] = True
+        info["daterange"] = info.get(
+            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
+        )
+    try:
+        talk_count = int(info["talk_count"])
+        talk_start = int(info["talk_start"])
+        if talk_start < 0:
+            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
+    except (KeyError, ValueError):
+        talk_count = info["talk_count"] = 50
+        talk_start = info["talk_start"] = 0
     talk_query = {}
     talks_parser(info, talk_query)
     talks = talks_search(
@@ -631,9 +652,9 @@ def search():
     )  # limit=talk_count, offset=talk_start
     # The talk query isn't sufficient since we don't do a join so don't have access to whether the seminar is private
     talks = [talk for talk in talks if talk.searchable()]
-    info["talk_results"] = talks
+    info["results"] = talks
     return render_template(
-        "search.html", title="Search", info=info, section="Search", bread=None,
+        "search_talks.html", title="Search talks", info=info, section="Search", subsection="talks", bread=None,
     )
 
 
@@ -656,7 +677,7 @@ def show_seminar(shortname):
         return render_template("404.html", title="Seminar not found")
     if not seminar.visible():
         flash_error("You do not have permission to view %s", seminar.name)
-        return redirect(url_for("search"), 302)
+        return redirect(url_for("search_seminars"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
     future = []
