@@ -500,24 +500,28 @@ class WebSeminar(object):
             return False
 
 
-def seminars_header(
-    include_time=True, include_institutions=True, include_description=True, include_subscribe=True
+def series_header(
+    conference=False, include_time=True, include_institutions=True, include_description=True, include_topics=True, include_subscribe=True
 ):
     cols = []
     if include_time:
-        cols.append(('colspan="2" class="yourtime"', "Next talk"))
+        if conference:
+            cols.append(('colspan="2" class="yourtime"', "Dates"))
+        else:
+            cols.append(('colspan="2" class="yourtime"', "Next talk"))
     cols.append(("", "Name"))
     if include_institutions:
         cols.append(("", "Institutions"))
     if include_description:
         cols.append(('style="min-width:280px;"', "Description"))
+    if include_topics:
+        cols.append(("", "Topics"))
     if include_subscribe:
         if current_user.is_anonymous:
             cols.append(("", ""))
         else:
             cols.append(("", "Saved"))
     return "".join("<th %s>%s</th>" % pair for pair in cols)
-
 
 _selecter = SQL(
     "SELECT {0} FROM (SELECT DISTINCT ON (shortname) {1} FROM {2} ORDER BY shortname, id DESC) tmp{3}"

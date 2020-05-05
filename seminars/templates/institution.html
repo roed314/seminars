@@ -20,7 +20,7 @@
   <table>
     <thead>
       <tr>
-        {{ seminars_header(include_institutions=False) | safe }}
+        {{ series_header(include_institutions=False) | safe }}
       </tr>
     </thead>
     {% for seminar in seminars %}
@@ -37,7 +37,7 @@
   <table>
     <thead>
       <tr>
-        {{ seminars_header(include_institutions=False) | safe }}
+        {{ series_header(include_institutions=False) | safe }}
       </tr>
     </thead>
     {% for conference in conferences %}

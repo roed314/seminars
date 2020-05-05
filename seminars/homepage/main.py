@@ -8,7 +8,6 @@ from seminars.utils import (
     restricted_topics as user_topics,
     subject_dict,
     subject_pairs,
-    toggle,
     topdomain,
     topics,
 )
@@ -18,7 +17,7 @@ from flask import render_template, request, redirect, url_for, Response, make_re
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 from collections import Counter
 from dateutil.parser import parse
@@ -405,15 +404,19 @@ class SemSearchArray(SearchArray):
 def index():
     return _index({})
 
+@app.route("/conferences")
+def conf_index():
+    return _series_index({"is_conference": True}, conference=True)
+
 def by_subject(subject):
     subject = subject.lower()
     if subject not in subject_dict():
         return render_template("404.html", title="Subject %s not found" % subject)
-    return lambda: _index({"subjects": {"$contains": subject}})
+    return lambda: _talks_index({"subjects": {"$contains": subject}})
 
 def by_topic(subject, topic):
     full_topic = subject + "_" + topic
-    return lambda: _index({"topics": {"$contains": full_topic}})
+    return lambda: _talks_index({"topics": {"$contains": full_topic}})
 
 # We don't want to intercept other routes by doing @app.route("/<subject>") etc.
 for subject in subject_dict():
@@ -421,7 +424,24 @@ for subject in subject_dict():
 for ab, name, subject in topics():
     app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
 
-def _index(query):
+def _get_counters(objects):
+    topic_counts = Counter()
+    language_counts = Counter()
+    subject_counts = Counter()
+    for object in objects:
+        if object.topics:
+            for topic in object.topics:
+                topic_counts[topic] += 1
+        if object.subjects:
+            for subject in object.subjects:
+                subject_counts[subject] += 1
+        language_counts[object.language] += 1
+    lang_dict = languages_dict()
+    languages = [(code, lang_dict[code]) for code in language_counts]
+    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
+    return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts, "languages": languages}
+
+def _talks_index(query={}, sort=["start_time", "series_id"]):
     # Eventually want some kind of cutoff on which talks are included.
     query = dict(query)
     subs = subject_pairs()
@@ -437,36 +457,43 @@ def _index(query):
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     query["end_time"] = {"$gte": datetime.now()}
-    talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
+    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars()))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
-    topic_counts = Counter()
-    language_counts = Counter()
-    subject_counts = Counter()
-    for talk in talks:
-        if talk.topics:
-            for topic in talk.topics:
-                topic_counts[topic] += 1
-        if talk.subjects:
-            for subject in talk.subjects:
-                subject_counts[subject] += 1
-        language_counts[talk.language] += 1
-    lang_dict = languages_dict()
-    languages = [(code, lang_dict[code]) for code in language_counts]
-    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
-    # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
+    counters = _get_counters(talks)
     return render_template(
         "browse_talks.html",
         title="Browse talks",
         hide_filters=hide_filters,
-        topic_counts=topic_counts,
-        subject_counts=subject_counts,
-        languages=languages,
-        language_counts=language_counts,
         talks=talks,
         subjects=subs,
         section="Browse",
-        toggle=toggle,
+        **counters
+    )
+
+def _series_index(query, sort=None, conference=True):
+    query = dict(query)
+    query["display"] = True
+    query["visibility"] = 2
+    if conference:
+        # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.  Ignore the possibility that the user/conference is in Kiribati.
+        now = datetime.now().date()
+        query["end_date"] = {"$gte": now - timedelta(days=1)}
+    if conference and sort is None:
+        sort = ["start_date", "end_date", "name"]
+    if sort is None: # not conferences
+        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers()))
+    else:
+        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers()))
+    counters = _get_counters(talks)
+    return render_template(
+        "browse_conferences.html",
+        title="Browse conferences",
+        hide_filters=[],
+        series=series,
+        subjects=subject_pairs(),
+        section="Browse",
+        **counters,
     )
 
 @app.route("/search")
