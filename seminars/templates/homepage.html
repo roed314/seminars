@@ -155,7 +155,7 @@
           </div>
           {% if user.is_admin or user.email == institution.admin %}
             <div class="submenu-nav{% if subsection == 'editinst' %} submenu-active{% endif %}">
-              <a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit properties</a>
+              <a href="{{ url_for('create.edit_institution', shortname=institution.shortname) }}">Edit series</a>
             </div>
           {% endif %} {# institution admin #}
         {% elif seminar and seminar.user_can_edit() %}

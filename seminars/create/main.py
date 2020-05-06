@@ -195,7 +195,7 @@ def delete_seminar(shortname):
         return render_template(
             "edit_seminar.html",
             seminar=seminar,
-            title="Edit properties",
+            title="Edit series",
             section=manage,
             subsection="editsem",
             institutions=institutions(),
@@ -873,12 +873,11 @@ def edit_seminar_schedule():
             "This series has no topics selected; don't forget to set the topics for each new talk individually."
         )
     schedule = layout_schedule(seminar, data)
-    title = "Edit %s schedule" % ("conference" if seminar.is_conference else "seminar")
     return render_template(
         "edit_seminar_schedule.html",
         seminar=seminar,
         raw_data=data,
-        title=title,
+        title="Edit schedule",
         schedule=schedule,
         section="Manage",
         subsection="schedule",
