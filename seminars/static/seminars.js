@@ -164,6 +164,7 @@ function setSubjectLinks() {
     }
     cur_subjects = cur_subjects.split(",");
     for (var i=0; i<cur_subjects.length; i++) {
+        $("#subjectlink-" + cur_subjects[i]).prop("checked", true);
         $("#subjectlink-" + cur_subjects[i]).addClass("subjectselected");
         $(".talk.subject-" + cur_subjects[i]).removeClass("subject-filtered");
     }
@@ -211,9 +212,10 @@ function setLinks() {
 }
 
 function toggleSubject(id, welcome=false) {
+    console.log("id", id);
     var toggler = $("#" + id);
     console.log(id);
-    var subject = id.substring(12); // subjectlink-* or subjectwelc-*
+    var subject = id.substring(12); // subjectlink-*
     var talks = $(".talk.subject-" + subject);
     if (toggler.hasClass("subjectselected")) {
         toggler.removeClass("subjectselected");
@@ -281,6 +283,7 @@ function toggleTopic(id) {
     var talks = $(".talk.topic-" + topic);
     if (toggler.hasClass("topicselected")) {
         toggler.removeClass("topicselected");
+        $("#topictoggle-"+topic).prop("checked", false);
         cur_topics = removeFromCookie(topic, "topics").split(",");
         for (i=0; i<cur_topics.length; i++) {
             talks = talks.not(".topic-" + cur_topics[i]);
@@ -292,6 +295,7 @@ function toggleTopic(id) {
         }
     } else {
         toggler.addClass("topicselected");
+        $("#topictoggle-"+topic).prop("checked", true);
         cur_topics = addToCookie(topic, "topics").split(",");
         if (cur_topics.length == 1) {
             enableTopicFiltering();
@@ -311,6 +315,18 @@ function getAllTopics(subject) {
         toggles.push(this.id);
     })
     return toggles;
+}
+
+function toggleTopicView(subject) {
+    var pane = $("#"+subject+"-pane");
+    var is_visible = pane.is(":visible");
+    $(".topic-pane").hide();
+    if (!is_visible) {
+        pane.show();
+        $("#tdsubj-"+subject).addClass("active");
+    } else {
+        $("#tdsubj-"+subject).removeClass("active");
+    }
 }
 
 function selectAllTopics(subject) {
