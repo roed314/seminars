@@ -107,7 +107,7 @@
         </script>
         <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
         <tr>
-          <td>{{ KNOWL("frequency", "Periodicity") }}</td>
+          <td>{{ KNOWL("Periodicity") }}</td>
           <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
               <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
               <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>

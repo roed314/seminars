@@ -117,8 +117,8 @@ weekday:
     or not setting the meeting day and setting the frequency to 1,
     which will give you a scheduling grid with slots for each day.
     We are currently working to better support series that meet on multiple days.
-frequency:
-  title: Frequency
+periodicity:
+  title: Periodicity
   contents: |
     Specify the frequency of your series if it meets at regular intervals, every 7 or 14 days, for example.
     If your series does not meet on a particular day of the week, set the frequency to 1;
