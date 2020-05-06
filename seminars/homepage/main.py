@@ -620,11 +620,10 @@ def _search_series(conference):
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
-    print(seminar_query)
     info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
-    print(len(info["results"]))
+    subsection = "conferences" if conference else "seminars"
     return render_template(
-        "search_seminars.html", title="Search seminars", info=info, section="Search", subsection="seminars", bread=None, is_conference=conference
+        "search_seminars.html", title="Search seminars", info=info, section="Search",subsection=subsection, bread=None, is_conference=conference
     )
 
 @app.route("/search/talks")
