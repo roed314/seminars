@@ -118,7 +118,7 @@
       </table>
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
         {% for i in range(max_slots//3) %}
-          <tr>
+          <tr style="width:750px;">
             {% if i == 0 %}
               <td sytle="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
               <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
