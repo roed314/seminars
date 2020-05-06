@@ -321,7 +321,7 @@ class SemSearchArray(SearchArray):
     noun = "series"
     plural_noun = "series"
 
-    def __init__(self):
+    def __init__(self, conference=False):
         ## subjects
         subject = SelectBox(name="seminar_subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
@@ -387,12 +387,15 @@ class SemSearchArray(SearchArray):
             # [count],
         ]
 
+        assert conference in [True, False]
+        self.conference = conference
+
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
         return [
-            ("seminars", "Search for series"),
+            ("seminars", "Search for " + "conferences" if self.conference else "seminar series"),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -603,7 +606,7 @@ def search_conferences():
     return _search_series(conference=True)
 
 def _search_series(conference):
-    info = to_dict(request.args, search_array=SemSearchArray())
+    info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
     try:
@@ -622,8 +625,9 @@ def _search_series(conference):
     # The second downside is that we need to do two queries.
     info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
     subsection = "conferences" if conference else "seminars"
+    title = "Search " + "conferences" if conference else "seminar series"
     return render_template(
-        "search_seminars.html", title="Search seminars", info=info, section="Search",subsection=subsection, bread=None, is_conference=conference
+        "search_seminars.html", title=title, info=info, section="Search",subsection=subsection, bread=None, is_conference=conference
     )
 
 @app.route("/search/talks")
