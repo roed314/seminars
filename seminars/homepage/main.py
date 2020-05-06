@@ -1,4 +1,4 @@
-from seminars.app import app, not_found_404
+from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky, talks_lookup
 from seminars.utils import (
@@ -14,7 +14,7 @@ from seminars.utils import (
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
-from flask import render_template, request, redirect, url_for, Response, make_response
+from flask import abort, render_template, request, redirect, url_for, Response, make_response
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
@@ -408,7 +408,7 @@ def index():
 def by_subject(subject):
     subject = subject.lower()
     if subject not in subject_dict():
-        return not_found_404("Subject %s not found" % subject)
+        return abort(404, "Subject %s not found" % subject)
     return lambda: _index({"subjects": {"$contains": subject}})
 
 def by_topic(subject, topic):
@@ -595,7 +595,7 @@ def list_institutions():
 def show_seminar(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
     if not seminar.visible():
         flash_error("You do not have permission to view %s", seminar.name)
         return redirect(url_for("search"), 302)
@@ -652,7 +652,7 @@ def talks_search_api(shortname, projection=1):
 def show_seminar_raw(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
     return render_template(
         "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
@@ -662,7 +662,7 @@ def show_seminar_raw(shortname):
 def show_seminar_bare(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
     resp = make_response(render_template("seminar_bare.html",
                                          title=seminar.name, talks=talks,
@@ -676,7 +676,7 @@ def show_seminar_bare(shortname):
 def show_seminar_json(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
     # FIXME
     cols = [
         "start_time",
@@ -731,7 +731,7 @@ def embed_seminar_js():
 def ics_seminar_file(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
 
     return ics_file(
         seminar.talks(),
@@ -743,7 +743,7 @@ def ics_seminar_file(shortname):
 def ics_talk_file(semid, talkid):
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
-        return not_found_404("Talk not found")
+        return abort(404, "Talk not found")
     return ics_file(
         [talk],
         filename="{}_{}.ics".format(semid, talkid),
@@ -755,7 +755,7 @@ def show_talk(semid, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
-        return not_found_404("Talk not found")
+        return abort(404, "Talk not found")
     kwds = dict(
         title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token
     )
@@ -791,7 +791,7 @@ def title_knowl(series_id, series_ctr, **kwds):
 def show_institution(shortname):
     institution = db.institutions.lookup(shortname)
     if institution is None:
-        return not_found_404("Institution not found")
+        return abort(404, "Institution not found")
     institution = WebInstitution(shortname, data=institution)
     section = "Manage" if current_user.is_creator else None
     query = {"institutions": {"$contains": shortname}}
