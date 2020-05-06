@@ -309,7 +309,7 @@ class TalkSearchArray(SearchArray):
 
     def search_types(self, info):
         return [
-            ("talks", "Search for talks"),
+            ("talks", "Search talks"),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -395,7 +395,7 @@ class SemSearchArray(SearchArray):
 
     def search_types(self, info):
         return [
-            ("seminars", "Search for " + ("conferences" if self.conference else "seminar series")),
+            ("seminars", "Search " + ("conferences" if self.conference else "seminar series")),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
