@@ -1,4 +1,4 @@
-from seminars.app import app, not_found_404
+from seminars.app import app
 from seminars import db
 from seminars.talk import talks_search, talks_lucky, talks_lookup
 from seminars.utils import (
@@ -13,7 +13,7 @@ from seminars.utils import (
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
-from flask import render_template, request, redirect, url_for, Response, make_response
+from flask import abort, render_template, request, redirect, url_for, Response, make_response
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
@@ -309,7 +309,7 @@ class TalkSearchArray(SearchArray):
 
     def search_types(self, info):
         return [
-            ("talks", "Search for talks"),
+            ("talks", "Search talks"),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -321,7 +321,7 @@ class SemSearchArray(SearchArray):
     noun = "series"
     plural_noun = "series"
 
-    def __init__(self):
+    def __init__(self, conference=False):
         ## subjects
         subject = SelectBox(name="seminar_subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
@@ -387,12 +387,15 @@ class SemSearchArray(SearchArray):
             # [count],
         ]
 
+        assert conference in [True, False]
+        self.conference = conference
+
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
         return [
-            ("seminars", "Search for series"),
+            ("seminars", "Search " + ("conferences" if self.conference else "seminar series")),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -423,7 +426,7 @@ def past_conf_index():
 def by_subject(subject):
     subject = subject.lower()
     if subject not in subject_dict():
-        return not_found_404("Subject %s not found" % subject)
+        return abort(404, "Subject %s not found" % subject)
     return lambda: _talks_index({"subjects": {"$contains": subject}})
 
 def by_topic(subject, topic):
@@ -505,9 +508,9 @@ def _get_row_attributes(objects):
         else:
             visible_counter += 1
             if visible_counter % 2: # odd
-                style = "background: #E3F2FD;"
-            else:
                 style = "background: none;"
+            else:
+                style = "background: #E3F2FD;"
         row_attributes = 'class="{classes}" style="{style}"'.format(
             classes=' '.join(classes),
             style=style)
@@ -603,7 +606,7 @@ def search_conferences():
     return _search_series(conference=True)
 
 def _search_series(conference):
-    info = to_dict(request.args, search_array=SemSearchArray())
+    info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
     try:
@@ -622,8 +625,9 @@ def _search_series(conference):
     # The second downside is that we need to do two queries.
     info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
     subsection = "conferences" if conference else "seminars"
+    title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(
-        "search_seminars.html", title="Search seminars", info=info, section="Search", subsection=subsection, bread=None, is_conference=conference
+        "search_seminars.html", title=title, info=info, section="Search",subsection=subsection, bread=None, is_conference=conference
     )
 
 @app.route("/search/talks")
@@ -673,7 +677,7 @@ def list_institutions():
 def show_seminar(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
     if not seminar.visible():
         flash_error("You do not have permission to view %s", seminar.name)
         return redirect(url_for("search_seminars"), 302)
@@ -730,7 +734,7 @@ def talks_search_api(shortname, projection=1):
 def show_seminar_raw(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
     return render_template(
         "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
@@ -740,7 +744,7 @@ def show_seminar_raw(shortname):
 def show_seminar_bare(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
     resp = make_response(render_template("seminar_bare.html",
                                          title=seminar.name, talks=talks,
@@ -754,7 +758,7 @@ def show_seminar_bare(shortname):
 def show_seminar_json(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
     # FIXME
     cols = [
         "start_time",
@@ -809,7 +813,7 @@ def embed_seminar_js():
 def ics_seminar_file(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return not_found_404("Seminar not found")
+        return abort(404, "Seminar not found")
 
     return ics_file(
         seminar.talks(),
@@ -821,7 +825,7 @@ def ics_seminar_file(shortname):
 def ics_talk_file(semid, talkid):
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
-        return not_found_404("Talk not found")
+        return abort(404, "Talk not found")
     return ics_file(
         [talk],
         filename="{}_{}.ics".format(semid, talkid),
@@ -833,7 +837,7 @@ def show_talk(semid, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
     talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
     if talk is None:
-        return not_found_404("Talk not found")
+        return abort(404, "Talk not found")
     kwds = dict(
         title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token
     )
@@ -869,7 +873,7 @@ def title_knowl(series_id, series_ctr, **kwds):
 def show_institution(shortname):
     institution = db.institutions.lookup(shortname)
     if institution is None:
-        return not_found_404("Institution not found")
+        return abort(404, "Institution not found")
     institution = WebInstitution(shortname, data=institution)
     section = "Manage" if current_user.is_creator else None
     query = {"institutions": {"$contains": shortname}}

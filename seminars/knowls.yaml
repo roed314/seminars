@@ -24,7 +24,7 @@ institution_city:
   contents: |
     Enter city in which your institution is located, followed by the state/province/region (if relevant), and the country.
 institution_timezone:
-  title: Timezone
+  title: Time zone
   contents: |
     From the drop-down list, select the time zone in which your institution resides.
     <i>Warning:</i> Different time zones with
@@ -108,8 +108,10 @@ language:
 weekday:
   title: Meeting day
   contents: |
-    Set this if your series meets on a particular day of the week, even if your series does not meet every week.
-    If set, this value will be used to lay out the grid used when editing your series' talk schedule.
+    Set this if your series meets on a particular day of the week, 
+    even if your series does not meet every week.
+    If set, this value will be used to lay out the grid used 
+    when editing your series' talk schedule.
     <br><br>
     For series that meet more than one day per week,
     we suggest either setting the meeting day to the first day of the week your series meets
@@ -117,18 +119,25 @@ weekday:
     or not setting the meeting day and setting the frequency to 1,
     which will give you a scheduling grid with slots for each day.
     We are currently working to better support series that meet on multiple days.
-frequency:
-  title: Frequency
+periodicity:
+  title: Periodicity
   contents: |
-    Specify the frequency of your series if it meets at regular intervals, every 7 or 14 days, for example.
-    If your series does not meet on a particular day of the week, set the frequency to 1;
-    this will yield a scheduling grid with slots for each day.
+    For a seminar series meeting at regular intervals, specify the period.
+    This, together with your time slot choices, 
+    determines the initial layout of time slots on the scheduling grid.
+    For example, if your series meets on Tuesday and Thursday this week, not at all next week,
+    Tuesday and Thursday in two weeks, not at all in three weeks, and so on,
+    choose "every other week" here and click + to the right of "Time slots"
+    so that you can enter both Tue and Thu there.
+    <br><br>
+    If your series does not have a regular schedule, select "no fixed schedule".
 per_day:
   title: Talks per day
   contents: |
-    The number of talks you expect to take place each day your series meets.
-    This is used only to determine the number of slots to create in your scheduling grid;
-    you can still add more talks on any particular day.
+    The number of talks on a typical day during your conference.
+    This is used only to determine the number of slots to create 
+    in the scheduling grid on the "Edit schedule" page.
+    Later you can adjust the number of talks on each day there.
 start_date:
   title: Start date
   contents: |
@@ -148,13 +157,18 @@ seminar_end_time:
 seminar_time_slots:
   title: Time slots
   contents: |
-    The days and times of the regularly scheduled times for talks in your series; each must time slot must include a day of the week and a time range in 24 hour format.
-    For example, enter 11:30-13:00 for a talk that runs from 11:30 A.M. to 1 P.M.
+    The days and times of the regularly scheduled times for talks in your series.
     <br><br>
-    Note that you can create talks in your series at irregular times whenever you wish.
-    The information entered here is used only to configure the initial layout of the scheduling grid and can be changed as needed.
+    Each time slot must include a day of the week and a time range in 24-hour format.
+    For example, enter 11:30-13:00 for a talk that runs from 11:30 A.M. to 1 P.M.
+    To enter more than one day-time pair, click + as many times as needed.
+    <br><br>
+    These entries, together with "Periodicity", 
+    determine the initial layout of the scheduling grid on the "Edit schedule" page.
+    At any later time you can adjust the schedule there, 
+    even to create talks at irregular times.
 timezone:
-  title: Timezone
+  title: Time zone
   contents: |
     Each talk and series has a time zone
     that determines how dates and times associated to the event are interpreted.
@@ -187,13 +201,17 @@ online:
 live_link:
   title: Livestream link
   contents: |
-    Events taking place online should list the URL of the livestream here.
-    For series, if the livestream link varies from talk to talk,
-    enter "See comments" here and leave instructions below in the Comments box below.
-    New talks inherit the livestream link of the seminar or conference to which they belong;
-    this can then be modified for a particular talk if desired.
-    <br><br>
-    If your livestream requires a password, please indicate in the Comments box how participants should obtain the password.
+    Events taking place online should list the livestream's URL,
+    either in the series properties 
+    (if the URL is the same for all talks in the series)
+    on in each talk's properties
+    (if each talk has a different livestream URL).
+    If further instructions are required 
+    (e.g., password, password hint, 
+    or additional procedure for obtaining the URL or password information),
+    then enter "See comments" here and leave the instructions 
+    in the Comments box below.
+    If the series' livestream link is set, new talks in the series inherit it.
 access:
   title: Access
   contents: |

@@ -48,7 +48,7 @@
   </table>
   <button type="submit" onclick="unsaved = false; return true;">Save</button>
 
-  <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if institution.new %}{{ url_for('list_institutions') }}{% else %}{{ url_for('show_institution', shortname=institution.shortname) }}{% endif %}">cancel</a>
+  <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if institution.new %}{{ url_for('list_institutions') }}{% else %}{{ url_for('show_institution', shortname=institution.shortname) }}{% endif %}">Cancel creation</a>
 </form>
 <script type="text/javascript">
 /* prevent accidental closing of browser window */

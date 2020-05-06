@@ -246,10 +246,9 @@ def user_topics(talk_or_seminar=None):
 @lru_cache(maxsize=None)
 def subject_pairs():
     return sorted(
-        tuple(set(((rec["subject"], rec["subject"].capitalize()) for rec in db.topics.search({}, ["subject"])))),
+        [(rec["subject_id"], rec["name"]) for rec in db.subjects.search({},["subject_id","name"])],
         key=lambda x: x[1].lower(),
     )
-
 
 @lru_cache(maxsize=None)
 def subject_dict():
@@ -261,7 +260,6 @@ def topic_dict(include_subj=True):
         return {subj + "_" + ab: subj.capitalize() + ": " + name for (ab, name, subj) in topics()}
     else:
         return {subj + "_" + ab: name for (ab, name, subj) in topics()}
-
 
 
 def clean_topics(inp):
