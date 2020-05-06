@@ -120,15 +120,21 @@ weekday:
 periodicity:
   title: Periodicity
   contents: |
-    Specify the frequency of your series if it meets at regular intervals, every 7 or 14 days, for example.
-    If your series does not meet on a particular day of the week, set the frequency to 1;
-    this will yield a scheduling grid with slots for each day.
+    For a seminar series meeting at regular intervals, specify the period in weeks (1, 2, or 3);
+    this, together with your time slot choices, 
+    determines the layout of time slots on the scheduling grid.
+    For example, if your series meets on Tuesday and Thursday this week, not at all next week,
+    Tuesday and Thursday in two weeks, not at all in three weeks, and so on,
+    choose "every other week" here and click + to the right of "Time slots"
+    so that you can enter both Tue and Thu there.<br><br>
+    If your series does not have a regular schedule, selected "no fixed schedule".
 per_day:
   title: Talks per day
   contents: |
-    The number of talks you expect to take place each day your series meets.
-    This is used only to determine the number of slots to create in your scheduling grid;
-    you can still add more talks on any particular day.
+    The number of talks on a typical day during your conference.
+    This is used only to determine the number of slots to create 
+    in the scheduling grid on the "Edit schedule" page.
+    Later you can adjust the number of talks on each day there.
 start_date:
   title: Start date
   contents: |
@@ -148,11 +154,15 @@ seminar_end_time:
 seminar_time_slots:
   title: Time slots
   contents: |
-    The days and times of the regularly scheduled times for talks in your series; each must time slot must include a day of the week and a time range in 24 hour format.
+    The days and times of the regularly scheduled times for talks in your series; 
+    each time slot must include a day of the week and a time range in 24-hour format.
     For example, enter 11:30-13:00 for a talk that runs from 11:30 A.M. to 1 P.M.
+    To enter more than one day-time pair, click + as many times as needed.
     <br><br>
-    Note that you can create talks in your series at irregular times whenever you wish.
-    The information entered here is used only to configure the initial layout of the scheduling grid and can be changed as needed.
+    These entries, together with "Periodicity", 
+    determine the initial layout of the scheduling grid on the "Edit schedule" page.
+    At any later time you can adjust the schedule there, 
+    even to create talks at irregular times.
 timezone:
   title: Timezone
   contents: |
