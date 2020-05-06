@@ -395,7 +395,7 @@ class SemSearchArray(SearchArray):
 
     def search_types(self, info):
         return [
-            ("seminars", "Search for " + "conferences" if self.conference else "seminar series"),
+            ("seminars", "Search for " + ("conferences" if self.conference else "seminar series")),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -625,7 +625,7 @@ def _search_series(conference):
     # The second downside is that we need to do two queries.
     info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
     subsection = "conferences" if conference else "seminars"
-    title = "Search " + "conferences" if conference else "seminar series"
+    title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(
         "search_seminars.html", title=title, info=info, section="Search",subsection=subsection, bread=None, is_conference=conference
     )
