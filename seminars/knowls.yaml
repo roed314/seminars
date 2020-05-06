@@ -24,7 +24,7 @@ institution_city:
   contents: |
     Enter city in which your institution is located, followed by the state/province/region (if relevant), and the country.
 institution_timezone:
-  title: Timezone
+  title: Time zone
   contents: |
     From the drop-down list, select the time zone in which your institution resides.
     <i>Warning:</i> Different time zones with
@@ -168,7 +168,7 @@ seminar_time_slots:
     At any later time you can adjust the schedule there, 
     even to create talks at irregular times.
 timezone:
-  title: Timezone
+  title: Time zone
   contents: |
     Each talk and series has a time zone
     that determines how dates and times associated to the event are interpreted.

@@ -117,7 +117,7 @@
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
       <tr>
-        <td>Timezone</td>
+        <td>Time zone</td>
         <td>
           <select name="timezone" style="width:356px;">
             {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
