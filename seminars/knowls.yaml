@@ -201,13 +201,17 @@ online:
 live_link:
   title: Livestream link
   contents: |
-    Events taking place online should list the URL of the livestream here.
-    For series, if the livestream link varies from talk to talk,
-    enter "See comments" here and leave instructions below in the Comments box below.
-    New talks inherit the livestream link of the seminar or conference to which they belong;
-    this can then be modified for a particular talk if desired.
-    <br><br>
-    If your livestream requires a password, please indicate in the Comments box how participants should obtain the password.
+    Events taking place online should list the livestream's URL,
+    either in the series properties 
+    (if the URL is the same for all talks in the series)
+    on in each talk's properties
+    (if each talk has a different livestream URL).
+    If further instructions are required 
+    (e.g., password, password hint, 
+    or additional procedure for obtaining the URL or password information),
+    then enter "See comments" here and leave the instructions 
+    in the Comments box below.
+    If the series' livestream link is set, new talks in the series inherit it.
 access:
   title: Access
   contents: |
