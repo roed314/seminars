@@ -125,7 +125,7 @@
               <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
               <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
             {% else %}
-              {% set hide="blank:none;" %}
+              {% set hide="display:none;" %}
               <td></td><td></td><td></td>
             {% endif %}
           </td>
@@ -316,8 +316,13 @@ document.addEventListener("DOMContentLoaded", function() {
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value)+1;
     document.getElementById('slots').value = '' + n;
-    document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
-    document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
+    if ( n < 3 ) {
+      document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
+      document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
+    } else {
+      document.getElementById('weekday'+(n-1)).style.display = 'block';
+      document.getElementById('time_slot'+(n-1)).style.display = 'block';
+    }
     showplusminus(n);
   });
   $("a.slotminus").click(function(e){
@@ -326,8 +331,13 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('slots').value = '' + n;
     document.getElementById('weekday'+n).value = '';
     document.getElementById('time_slot'+n).value ='';
-    document.getElementById('weekday'+n).style.visibility = 'hidden';
-    document.getElementById('time_slot'+n).style.visibility = 'hidden';
+    if ( n < 3 ) {
+      document.getElementById('weekday'+n).style.visibility = 'hidden';
+      document.getElementById('time_slot'+n).style.visibility = 'hidden';
+    } else {
+      document.getElementById('weekday'+n).style.display = 'none';
+      document.getElementById('time_slot'+n).style.display = 'none';
+    }
     showplusminus(n);
   });
   makeTopicSelector(
@@ -361,8 +371,13 @@ document.addEventListener("DOMContentLoaded", function() {
   var n = parseInt(document.getElementById('slots').value);
   if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
   for ( var i = 0 ; i < n ; i++ ) {
-    document.getElementById('weekday'+i).style.visibility = 'visible';
-    document.getElementById('time_slot'+i).style.visibility = 'visible';
+    if ( i < 3 ) {
+      document.getElementById('weekday'+i).style.visibility = 'visible';
+      document.getElementById('time_slot'+i).style.visibility = 'visible';
+    } else {
+      document.getElementById('weekday'+i).style.display = 'block';
+      document.getElementById('time_slot'+i).style.display = 'block';
+    }
   }
   if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
   showplusminus(n);
