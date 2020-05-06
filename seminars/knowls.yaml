@@ -108,8 +108,10 @@ language:
 weekday:
   title: Meeting day
   contents: |
-    Set this if your series meets on a particular day of the week, even if your series does not meet every week.
-    If set, this value will be used to lay out the grid used when editing your series' talk schedule.
+    Set this if your series meets on a particular day of the week, 
+    even if your series does not meet every week.
+    If set, this value will be used to lay out the grid used 
+    when editing your series' talk schedule.
     <br><br>
     For series that meet more than one day per week,
     we suggest either setting the meeting day to the first day of the week your series meets
@@ -120,14 +122,15 @@ weekday:
 periodicity:
   title: Periodicity
   contents: |
-    For a seminar series meeting at regular intervals, specify the period in weeks (1, 2, or 3);
-    this, together with your time slot choices, 
-    determines the layout of time slots on the scheduling grid.
+    For a seminar series meeting at regular intervals, specify the period.
+    This, together with your time slot choices, 
+    determines the initial layout of time slots on the scheduling grid.
     For example, if your series meets on Tuesday and Thursday this week, not at all next week,
     Tuesday and Thursday in two weeks, not at all in three weeks, and so on,
     choose "every other week" here and click + to the right of "Time slots"
-    so that you can enter both Tue and Thu there.<br><br>
-    If your series does not have a regular schedule, selected "no fixed schedule".
+    so that you can enter both Tue and Thu there.
+    <br><br>
+    If your series does not have a regular schedule, select "no fixed schedule".
 per_day:
   title: Talks per day
   contents: |
@@ -154,8 +157,9 @@ seminar_end_time:
 seminar_time_slots:
   title: Time slots
   contents: |
-    The days and times of the regularly scheduled times for talks in your series; 
-    each time slot must include a day of the week and a time range in 24-hour format.
+    The days and times of the regularly scheduled times for talks in your series.
+    <br><br>
+    Each time slot must include a day of the week and a time range in 24-hour format.
     For example, enter 11:30-13:00 for a talk that runs from 11:30 A.M. to 1 P.M.
     To enter more than one day-time pair, click + as many times as needed.
     <br><br>
