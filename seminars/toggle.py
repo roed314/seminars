@@ -16,7 +16,7 @@ def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
         tglid=tglid,
         value=value,
         checked="checked" if checked else "",
-        classes=" " + classes if classes else "",
+        classes=classes,
         onchange=onchange,
         name=name,
     )
@@ -25,6 +25,7 @@ def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
 def toggle3way(tglid, value, classes="", onchange="", name=""):
     if classes:
         classes += " "
+    assert value in [0, 1, 2]
     return """
 <input
     class="{classes}tgl tgl-light"
@@ -35,13 +36,13 @@ def toggle3way(tglid, value, classes="", onchange="", name=""):
 <label
     class="tgl-btn"
     for="{tglid}"
-    onclick="this.control.value = ((parseInt(this.control.value) + 2)%3) - 1;this.control.dataset.chosen=this.control.value;this.control.onchange();"
+    onclick="this.control.value = (parseInt(this.control.value) + 1)%3;this.control.dataset.chosen=this.control.value;this.control.onchange();"
     >
 </label>
 """.format(
         tglid=tglid,
         value=value,
-        classes=" " + classes if classes else "",
+        classes=classes,
         onchange=onchange,
         name=name,
     )
