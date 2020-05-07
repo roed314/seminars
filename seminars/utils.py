@@ -65,7 +65,7 @@ def daytime_minutes(s):
     return 60*int(t[0])+int(t[1])
 
 def daytimes_start_minutes(s):
-    return daytime_minutes(s.split(':')[0])
+    return daytime_minutes(s.split('-')[0])
 
 def midnight(date, tz):
     return localize_time(datetime.combine(date, maketime()), tz)
