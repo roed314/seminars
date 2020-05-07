@@ -233,7 +233,7 @@ class WebSeminar(object):
     def show_conference_dates (self, adapt=True):
         if self.is_conference:
             if self.start_date and self.end_date:
-                return self._show_date(self.start_date) + " to " + self.show_date(self.end_date)
+                return self._show_date(self.start_date) + " to " + self._show_date(self.end_date)
             else:
                 return "TBA"
         else:
