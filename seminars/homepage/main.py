@@ -761,13 +761,21 @@ def show_seminar_json(shortname):
         return abort(404, "Seminar not found")
     # FIXME
     cols = [
-        "start_time",
-        "end_time",
-        "speaker",
-        "title",
-        "abstract",
-        "speaker_affiliation",
-        "speaker_homepage",
+        'speaker',
+        'video_link',
+        'slides_link',
+        'title',
+        'room',
+        'comments',
+        'abstract',
+        'start_time',
+        'end_time',
+        'speaker_affiliation',
+        'speaker_homepage',
+        'language',
+        'deleted',
+        'paper_link',
+        'stream_link',
     ]
     talks = [
         {c: getattr(elt, c) for c in cols}
