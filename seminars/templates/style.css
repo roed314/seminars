@@ -2373,6 +2373,7 @@ max-width: 150px;
 }
 
 /* checkmark specific */
+/* see toggle in utils.py */
 .tgl:checked + .tgl-btn:after {
   left: 50%;
 }
@@ -2382,11 +2383,7 @@ max-width: 150px;
 
 
 /* 3 way toggle switch  styling */
-/* minimal example:
-<input id="id" class="tgl tgl-light tgl-1" value="0"></input>
-<label class="tgl-btn" for="id"
-       onclick="this.control.value = ((parseInt(this.control.value) + 2)%3) - 1;this.control.dataset.chosen=this.control.value;">
-</label>
+/* see toggle3way in utils.py */
 /* initial styling */
 input[value='-1'] + .tgl-btn:after{
   left: 0%;
