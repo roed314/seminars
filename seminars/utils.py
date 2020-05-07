@@ -678,7 +678,8 @@ def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
     id="{tglid}"
     onchange="{onchange}"
     name="{name}"
-    {checked}>
+    {checked}
+    ></input>
 <label class="tgl-btn" for="{tglid}"></label>
 """.format(
         tglid=tglid,
@@ -698,12 +699,14 @@ def toggle3way(tglid, value, classes="", onchange="", name=""):
     class="{classes} tgl tgl-light"
     value="{value}" id="{tglid}"
     onchange="{onchange}"
-    name="{name}">
+    name="{name}"
+    ></input>
 <label
     class="tgl-btn"
     for="{tglid}"
-    onclick="this.control.value = ((parseInt(this.control.value) + 2)%3) - 1;this.control.dataset.chosen=this.control.value;">
-></label>
+    onclick="this.control.value = ((parseInt(this.control.value) + 2)%3) - 1;this.control.dataset.chosen=this.control.value;this.control.onchange();"
+    >
+</label>
 """.format(
         tglid=tglid,
         value=value,
