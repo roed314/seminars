@@ -436,16 +436,19 @@ class WebSeminar(object):
                     if link and db.users.count({"email":rec["email"], "email_confirmed":True}):
                         namelink += "*"
                     editors.append(namelink)
-        if editors:
-            return "<tr><td>%s:</td><td>%s</td></tr>" % (label, ", ".join(editors))
-        else:
-            return ""
+        return ", ".join(editors)
 
     def show_organizers(self):
         return self._show_editors("Organizers")
 
     def show_curators(self):
         return self._show_editors("Curators", curators=True)
+
+    def num_visible_organizers(self):
+        return len([r for r in self.organizer_data if not r["curator"] and r["display"]])
+
+    def num_visible_curators(self):
+        return len([r for r in self.organizer_data if r["curator"] and r["display"]])
 
     def add_talk_link(self, ptag=True):
         if current_user.email in self.editors():
