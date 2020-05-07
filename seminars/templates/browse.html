@@ -33,6 +33,11 @@
   </tr>
 </table>
 
+<span>
+{{ toggle3way("foo", value="0", onchange="$(this).parent().notify('stop tickling me',  {className: 'info', position:'right'});") | safe }}
+</span>
+
+
 {% block browsing %}{% endblock %}
 
 <!-- topic tabs -->
