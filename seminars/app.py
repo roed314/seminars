@@ -25,7 +25,7 @@ from seminars.utils import (
     topdomain,
     topics,
 )
-from seminars.toggle import toggle
+from seminars.toggle import toggle, toggle3way
 from seminars.knowls import static_knowl
 from .seminar import series_header
 from .talk import talks_header
@@ -146,6 +146,7 @@ def ctx_proc_userdata():
     data["static_knowl"] = static_knowl
     data["topdomain"] = topdomain()
     data["toggle"] = toggle
+    data["toggle3way"] = toggle3way
 
     return data
 

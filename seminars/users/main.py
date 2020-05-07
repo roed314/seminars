@@ -574,7 +574,7 @@ def user_ics_file(token):
         user = SeminarsUser(uid=int(uid))
         if not user.email_confirmed:
             return flask.abort(404, "The email has not yet been confirmed!")
-    except NotImplementedError:
+    except Exception:
         return flask.abort(404, "Invalid link")
 
     talks = [t for t in user.talks if not (t.hidden or t.seminar.visibility == 0)]

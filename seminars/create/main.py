@@ -810,10 +810,11 @@ def layout_schedule(seminar, data):
     talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]))
     slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]
     if seminar.is_conference:
+        per_day = seminar.per_day if seminar.per_day else 4
         newslots = []
         d = midnight_begin
         while d < midnight_end + day:
-            newslots += [(seminar.show_schedule_date(d), "", None) for i in range(seminar.per_day)]
+            newslots += [(seminar.show_schedule_date(d), "", None) for i in range(per_day)]
             d += day
         for t in slots:
             if (t[0], "", None) in newslots:

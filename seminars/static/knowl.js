@@ -217,10 +217,15 @@ function knowl_click_handler(evt) {
 
       //compute max number of columns in the table
       var cols = Array.from(tr_tag.children).reduce((acc, td) => acc + td.colSpan, 0)
-      cols = Array.from(siblings(tr_tag, 'tr')).reduce((ac, tr) => Math.max(ac, Array.from(tr.children).reduce((acc, td) => acc + td.colSpan, 0)), cols);
+      var tr_siblings = siblings(tr_tag, 'tr');
+      cols = Array.from(tr_siblings).reduce((ac, tr) => Math.max(ac, Array.from(tr.children).reduce((acc, td) => acc + td.colSpan, 0)), cols);
       console.log("cols: " + cols);
-      for (var i = 0; i < max_rowspan-1; i++)
-        tr_tag = tr_tag.next();
+      for(var i = 0; i < tr_siblings.length; i++) {
+        if(tr_tag == tr_siblings[i]) {
+          tr_tag = tr_siblings[i + max_rowspan - 1];
+          break;
+        }
+      }
 
 
 
@@ -292,11 +297,11 @@ function knowl_register_onclick(element) {
 }
 
 if( document.readyState !== 'loading' ) {
-    console.log( 'document is already ready, just execute code here' );
+    console.log( 'document is already ready, registering knowls');
     knowl_register_onclick(document);
 } else {
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('document was not ready, place code here' );
+        console.log('document was not ready, wait until it is done to register knowls' );
         knowl_register_onclick(document);
     });
 }

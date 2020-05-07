@@ -118,18 +118,20 @@
       </table>
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
         {% for i in range(max_slots//3) %}
-          <tr>
+          <tr style="width:750px;">
             {% if i == 0 %}
-              <td sytle="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
-              <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
-              <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+              <td style="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
+              {% set hide="visibility:hidden;" %}
+              <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
+              <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
             {% else %}
+              {% set hide="display:none;" %}
               <td></td><td></td><td></td>
             {% endif %}
           </td>
           {% for j in range(3) %}
           <td style="padding-right:1px; margin-right:0px;">
-            <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="display:none;">
+            <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="{{hide}}">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
                 <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
@@ -137,7 +139,7 @@
             </select>
           </td>
           <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-            <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
+            <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; {{hide}}" placeholder="15:00-16:00"/>
           </td>
           {% endfor %}
         {% endfor %}
@@ -314,8 +316,13 @@ document.addEventListener("DOMContentLoaded", function() {
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value)+1;
     document.getElementById('slots').value = '' + n;
-    document.getElementById('weekday'+(n-1)).style.display = 'block';
-    document.getElementById('time_slot'+(n-1)).style.display = 'block';
+    if ( n <= 3 ) {
+      document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
+      document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
+    } else {
+      document.getElementById('weekday'+(n-1)).style.display = 'block';
+      document.getElementById('time_slot'+(n-1)).style.display = 'block';
+    }
     showplusminus(n);
   });
   $("a.slotminus").click(function(e){
@@ -324,8 +331,13 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('slots').value = '' + n;
     document.getElementById('weekday'+n).value = '';
     document.getElementById('time_slot'+n).value ='';
-    document.getElementById('weekday'+n).style.display = 'none';
-    document.getElementById('time_slot'+n).style.display = 'none';
+    if ( n < 3 ) {
+      document.getElementById('weekday'+n).style.visibility = 'hidden';
+      document.getElementById('time_slot'+n).style.visibility = 'hidden';
+    } else {
+      document.getElementById('weekday'+n).style.display = 'none';
+      document.getElementById('time_slot'+n).style.display = 'none';
+    }
     showplusminus(n);
   });
   makeTopicSelector(
@@ -359,8 +371,13 @@ document.addEventListener("DOMContentLoaded", function() {
   var n = parseInt(document.getElementById('slots').value);
   if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
   for ( var i = 0 ; i < n ; i++ ) {
-    document.getElementById('weekday'+i).style.display = 'block';
-    document.getElementById('time_slot'+i).style.display = 'block';
+    if ( i < 3 ) {
+      document.getElementById('weekday'+i).style.visibility = 'visible';
+      document.getElementById('time_slot'+i).style.visibility = 'visible';
+    } else {
+      document.getElementById('weekday'+i).style.display = 'block';
+      document.getElementById('time_slot'+i).style.display = 'block';
+    }
   }
   if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
   showplusminus(n);
