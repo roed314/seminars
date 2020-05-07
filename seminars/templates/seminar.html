@@ -31,7 +31,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
   <p>Description: {{(seminar.description | blanknone) | safe }}</p>
 {% endif %}
 {% if seminar.is_conference %}
-  <p>Conference dates: {{ seminar.show_dates() | safe }}</p>
+  <p>Conference dates: {{ seminar.show_conference_dates() | safe }}</p>
 {% else %}
   <p>Seminar time{% if (seminar.weekdays | length) > 1 %}s{% endif %}: {{seminar.show_seminar_times() | safe }}{% if seminar.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}{% endif %}.</p>
 {% endif %}
