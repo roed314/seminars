@@ -141,7 +141,7 @@ class WebSeminar(object):
         if self.frequency is None:
             self.weekdays = []
             self.time_slots = []
-        else
+        else:
             if self.frequency > 1 and self.frequency <= 7:
                 self.frequency = 7
             elif self.frequency > 7 and self.frequency <= 14:
