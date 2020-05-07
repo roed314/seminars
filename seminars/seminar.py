@@ -254,14 +254,12 @@ class WebSeminar(object):
             s = "Every third "
         prevd = -1
         for i in range(n):
+            s += ", " if i else ""
             d = self.weekdays[i]
             t = self.time_slots[i]
             if adapt:
                 d, t = adapt_weektimes (d, t, self.tz, current_user.tz)
-            if d == prevd:
-                s += (", " if len(s) else "") + t
-            else:
-                s += (", " if len(s) else "") + weekdays[d] + " " + t
+            s += t if d==prevd else (weekdays[d] + " " + t)
             prevd = d
         return s
 
