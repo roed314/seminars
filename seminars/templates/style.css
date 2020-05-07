@@ -515,9 +515,6 @@ div.col5 {
 div.col6 {
     min-width: 15%;
 }
-div.topic_toggle:hover {
-    cursor: pointer;
-}
 
 #filter-table {
     margin: 5px 0px 0px 0px;

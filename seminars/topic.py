@@ -27,7 +27,7 @@ class TopicDAG(object):
             topic.parents.sort(key=sort_key)
         self.subjects = sorted((topic for topic in self.by_id.values() if not topic.parents), key=sort_key)
 
-    def _link(self, parent_id="topic", topic_id=None, counts={}):
+    def _link(self, parent_id="root", topic_id=None, counts={}):
         if topic_id is None:
             tid = name = "topic"
             name = "topic"
@@ -55,15 +55,15 @@ class TopicDAG(object):
             onchange = "toggleTopic('%s');" % topic_id
         return tclass(tid, "", onchange=onchange)
 
-    def filter_link(self, parent_id="topic", topic_id=None, counts={}):
+    def filter_link(self, parent_id="root", topic_id=None, counts={}):
         return "<td>%s</td><td>%s</td>" % (self._toggle(topic_id), self._link(parent_id, topic_id, counts))
 
-    def link_pair(self, parent_id="topic", topic_id=None, counts={}, cols=1):
+    def link_pair(self, parent_id="root", topic_id=None, counts={}, cols=1):
         return """<div class="topic_toggle col{0}">
   <table><tr>{1}</tr></table>
 </div>""".format(cols, self.filter_link(parent_id, topic_id, counts))
 
-    def filter_pane(self, parent_id="topic", topic_id=None, counts={}):
+    def filter_pane(self, parent_id="root", topic_id=None, counts={}):
         if topic_id is None:
             tid = "topic"
             topics = self.subjects

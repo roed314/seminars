@@ -192,15 +192,6 @@ function setTopicLinks() {
         }
     }
 }
-function welcomeDone() {
-    setCookie("filter_subject", "1");
-    setCookie("cookie_banner", "nomore");
-    $("#welcome-popup").hide();
-    $("#subject-filter-menu").hide();
-    setSubjectLinks();
-    $("#filter-table").show();
-    toggleFilters(null);
-}
 
 function setLinks() {
     if (navigator.cookieEnabled) {
@@ -359,8 +350,15 @@ function talksToShow(talks) {
     }
     return talks;
 }
+function filterMenuId(ftype) {
+    if (ftype == "topic") {
+        return "#root-topic-pane";
+    } else {
+        return "#"+ftype+"-filter-menu";
+    }
+}
 function filterMenuVisible(ftype) {
-    return $("#"+ftype+"-filter-menu").is(":visible");
+    return $(filterMenuId(ftype)).is(":visible");
 }
 function toggleFilters(id, on_menu_open=false) {
     console.log("filters", id);
@@ -410,7 +408,7 @@ function toggleFilterView(id) {
         $('#subjects-tabs').tabs({ active: subject_list.indexOf(max_tab)});
     }
     for (i=0; i<filter_menus.length; i++) {
-        var elt = $("#"+filter_menus[i]+"-filter-menu");
+        var elt = $(filterMenuId(filter_menus[i]));
         if (ftype == filter_menus[i]) {
             elt.slideToggle(150);
         } else {
@@ -581,11 +579,11 @@ $(document).ready(function () {
             evt.preventDefault();
             toggleSubject(this.id, true);
         });*/
-    $('.topic_toggle').click(
+    /*$('.topic_toggle').click(
         function (evt) {
             evt.preventDefault();
             toggleTopic(this.id);
-        });
+        });*/
     $('.language_toggle').click(
         function (evt) {
             evt.preventDefault();
