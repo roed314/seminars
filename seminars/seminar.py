@@ -141,19 +141,18 @@ class WebSeminar(object):
         if self.frequency is None:
             self.weekdays = []
             self.time_slots = []
-            return
-        if self.frequency > 1 and self.frequency <= 7:
-            self.frequency = 7
-        elif self.frequency > 7 and self.frequency <= 14:
-            self.frequency = 14
-        elif self.frequency > 14 and self.frequency <= 21:
-            self.frequency = 21
-        else:
-            self.frequency = None
-            self.weekdays = []
-            self.time_slots = []
-            return
-        if not self.weekdays or not self.time_slots:
+        else
+            if self.frequency > 1 and self.frequency <= 7:
+                self.frequency = 7
+            elif self.frequency > 7 and self.frequency <= 14:
+                self.frequency = 14
+            elif self.frequency > 14 and self.frequency <= 21:
+                self.frequency = 21
+            else:
+                self.frequency = None
+                self.weekdays = []
+                self.time_slots = []
+        if self.frequency and (not self.weekdays or not self.time_slots):
             self.weekdays = []
             self.time_slots = []
             if self.weekday is not None and self.start_time is not None and self.end_time is not None:
