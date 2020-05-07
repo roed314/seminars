@@ -423,21 +423,21 @@ def past_index():
 def past_conf_index():
     return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
-def by_subject(subject):
-    subject = subject.lower()
-    if subject not in subject_dict():
-        return abort(404, "Subject %s not found" % subject)
-    return lambda: _talks_index({"subjects": {"$contains": subject}})
+#def by_subject(subject):
+#    subject = subject.lower()
+#    if subject not in subject_dict():
+#        return abort(404, "Subject %s not found" % subject)
+#    return lambda: _talks_index({"subjects": {"$contains": subject}})
 
-def by_topic(subject, topic):
-    full_topic = subject + "_" + topic
-    return lambda: _talks_index({"topics": {"$contains": full_topic}})
+#def by_topic(subject, topic):
+#    full_topic = subject + "_" + topic
+#    return lambda: _talks_index({"topics": {"$contains": full_topic}})
 
-# We don't want to intercept other routes by doing @app.route("/<subject>") etc.
-for subject in subject_dict():
-    app.add_url_rule("/%s/" % subject, "by_subject_%s" % subject, by_subject(subject))
-for ab, name, subject in topics():
-    app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
+## We don't want to intercept other routes by doing @app.route("/<subject>") etc.
+#for subject in subject_dict():
+#    app.add_url_rule("/%s/" % subject, "by_subject_%s" % subject, by_subject(subject))
+#for ab, name, subject in topics():
+#    app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
 
 def _get_counters(objects):
     topic_counts = Counter()

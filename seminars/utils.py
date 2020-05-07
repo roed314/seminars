@@ -9,7 +9,6 @@ from functools import lru_cache
 from icalendar import Calendar
 from io import BytesIO
 from lmfdb.backend.utils import IdentifierWrapper
-from lmfdb.utils.search_boxes import SearchBox
 from markupsafe import Markup, escape
 from psycopg2.sql import SQL
 from seminars import db
@@ -550,28 +549,6 @@ def show_input_errors(errmsgs):
     for msg in errmsgs:
         flash(msg, "error")
     return render_template("inputerror.html", messages=errmsgs)
-
-
-def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
-    if classes:
-        classes += " "
-    return """
-<input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" onchange="{onchange}" name="{name}" {checked}>
-<label class="tgl-btn" for="{tglid}"></label>
-""".format(
-        tglid=tglid, value=value, checked="checked" if checked else "", classes=classes, onchange=onchange, name=name,
-    )
-
-
-class Toggle(SearchBox):
-    def _input(self, info=None):
-        main = toggle(
-            tglid="toggle_%s" % self.name,
-            name=self.name,
-            value="yes",
-            checked=info is not None and info.get(self.name, False),
-        )
-        return '<span style="display: inline-block">%s</span>' % (main,)
 
 
 def ics_file(talks, filename, user=current_user):

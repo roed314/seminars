@@ -10,11 +10,11 @@ from seminars.utils import (
     count_distinct,
     max_distinct,
     adapt_datetime,
-    toggle,
     make_links,
     topic_dict,
     languages_dict,
 )
+from seminars.toggle import toggle
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
 from markupsafe import Markup

@@ -12,10 +12,10 @@ from seminars.utils import (
     max_distinct,
     search_distinct,
     show_input_errors,
-    toggle,
     topic_dict,
     weekdays,
 )
+from seminars.toggle import toggle
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from markupsafe import Markup

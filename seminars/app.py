@@ -24,8 +24,8 @@ from seminars.utils import (
     top_menu,
     topdomain,
     topics,
-    toggle,
 )
+from seminars.toggle import toggle
 from seminars.knowls import static_knowl
 from .seminar import series_header
 from .talk import talks_header
