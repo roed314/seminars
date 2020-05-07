@@ -251,7 +251,7 @@ class WebSeminar(object):
         elif self.frequency == 14:
             s = "Every other "
         elif self.frequency == 21:
-            s = "Everyt third "
+            s = "Every third "
         prevd = -1
         for i in range(n):
             d = self.weekdays[i]
@@ -259,9 +259,9 @@ class WebSeminar(object):
             if adapt:
                 d, t = adapt_weektimes (d, t, self.tz, current_user.tz)
             if d == prevd:
-                s += ", " + t
+                s += (", " if len(s) else "") + t
             else:
-                s += ", " + weekdays[d] + " " + t
+                s += (", " if len(s) else "") + weekdays[d] + " " + t
             prevd = d
         return s
 
