@@ -156,9 +156,6 @@ def edit_seminar():
             seminar.subjects = subjects
 
         seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", None)
-        if seminar.is_conference:
-            seminar.frequency = 1
-            seminar.per_day = 4
         seminar.name = data.get("name", "")
         seminar.institutions = clean_institutions(data.get("institutions"))
         if seminar.institutions:
@@ -404,7 +401,7 @@ def save_seminar():
         errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
 
     if data["is_conference"] and not data["per_day"]:
-        flash_warning ("It will be easier to edit the conference schedule if you specify talks per day (an upper bound is fine).")
+        errmsgs.append("Please specify the typical number of talks on each day of your conference (a rough guess is fine).")
 
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
@@ -519,7 +516,6 @@ def save_seminar():
         new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
 
     # Warnings
-    sanity_check_times(new_version.start_time, new_version.end_time)
     if not data["topics"]:
         flash_warning(
             "This series has no topics selected; don't forget to set the topics for each new talk individually."
@@ -786,15 +782,14 @@ def layout_schedule(seminar, data):
     day = timedelta(days=1)
     if seminar.is_conference and (seminar.start_date is None or seminar.end_date is None):
         flash_warning ("You have not specified the start and end dates of your conference (we chose a date range to layout your schedule).")
+    if seminar.is_conference and not seminar.per_day:
+        seminar.per_day = 4
     begin = seminar.start_date if begin is None and seminar.is_conference else begin
     begin = today if begin is None else begin
     end = seminar.end_date if end is None and seminar.is_conference else end
     if end is None:
         if seminar.is_conference:
-            if seminar.per_day:
-                end = begin + day * ceil(SCHEDULE_LEN / seminar.per_day)
-            else:
-                end = begin + 7 * day
+            end = begin + day * ceil(SCHEDULE_LEN / seminar.per_day)
         else:
             if seminar.frequency:
                 end = begin + day * ceil(SCHEDULE_LEN * seminar.frequency / len(seminar.time_slots))

@@ -22,28 +22,19 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 </p>
 {% endif %}
 {% if seminar.topics %}
-<p>
-  {{seminar.show_topics() | safe}}
-</p>
+  <p>{{seminar.show_topics() | safe}}</p>
 {% endif %}
 {% if seminar.institutions %}
-  <p>
-    {{seminar.show_institutions() | safe}}
-  </p>
+  <p>{{seminar.show_institutions() | safe}}</p>
 {% endif %}
 {% if seminar.description %}
-  <p>
-    Description: {{(seminar.description | blanknone) | safe }}
-  </p>
+  <p>Description: {{(seminar.description | blanknone) | safe }}</p>
 {% endif %}
-
-{% if seminar.weekday is not none or seminar.start_time %}
-  <p>{{ seminar.show_weektime_and_duration() }}{% if seminar.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}. {% endif %}</p>
-  {% if (not seminar.online or seminar.room) and seminar.timezone != current_user.timezone %}
-    <p>{{ seminar.show_weektime_and_duration(adapt=False) }} in series time zone, {{ seminar.timezone.replace("_", " ") }}.</p>
-  {% endif %}
+{% if seminar.is_conference %}
+  <p>Conference dates: {{ seminar.show_dates() | safe }}</p>
+{% else %}
+  <p>Seminar times: {{(seminar.show_times() | safe }}{% if seminar.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.</p>
 {% endif %}
-
 
 <table>
   {{ seminar.show_organizers() | safe }}

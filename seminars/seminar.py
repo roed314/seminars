@@ -3,7 +3,7 @@ from flask_login import current_user
 from seminars import db
 from seminars.utils import (
     adapt_datetime,
-    adapt_weektime,
+    adapt_weektimes,
     allowed_shortname,
     count_distinct,
     format_errmsg,
@@ -112,7 +112,7 @@ class WebSeminar(object):
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
         self.organizer_data = organizer_data
-        self.convert_time_to_times()
+        self.cleanse()
 
     def __repr__(self):
         return self.name
@@ -127,11 +127,17 @@ class WebSeminar(object):
     def __ne__(self, other):
         return not (self == other)
 
-    def convert_time_to_times(self):
+    def cleanse(self):
+        """
+        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This is the only place where columns we plan to drop should be referenced 
+        """
         from seminars.talk import talks_lucky
 
         if self.is_conference:
             self.frequency = None
+            if not self.per_day:
+                self.per_day = 4
         if self.frequency is None:
             self.weekdays = []
             self.time_slots = []
@@ -178,6 +184,10 @@ class WebSeminar(object):
         n = min(len(self.weekdays),len(self.time_slots))
         self.weekdays = self.weekdays[0:n]
         self.time_slots = self.time_slots[0:n]
+        # remove columns we plan to drop
+        for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
+            if hasattr(self,"attr"):
+                delattr(self,"attr")
 
     def visible(self):
         """
@@ -216,40 +226,43 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
-    def show_day(self, truncate=True, adapt=True):
-        if self.weekday is None:
-            return ""
-        elif self.start_time is None or not adapt:
-            d = weekdays[self.weekday]
-        else:
-            d = weekdays[adapt_weektime(self.start_time, self.tz, weekday=self.weekday)[0]]
-        if truncate:
-            return d[:3]
-        else:
-            return d
+    def _show_date(self, d):
+        format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
+        return d.strftime(format)
 
-    def _show_time(self, t, adapt):
-        """ t is a datetime, adapt is a boolean """
-        if t:
-            if adapt and self.weekday is not None:
-                t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
-            return t.strftime("%H:%M")
+    def show_conference_dates (self, adapt=True):
+        if self.is_conference:
+            if self.start_date and self.end_date:
+                return self._show_date(self.start_date) + " to " + self.show_date(self.end_date)
+            else:
+                return "TBA"
         else:
             return ""
 
-    def show_start_time(self, adapt=True):
-        return self._show_time(self.start_time, adapt)
-
-    def show_end_time(self, adapt=True):
-        return self._show_time(self.end_time, adapt)
-
-    def show_weektime_and_duration(self, adapt=True):
-        s = self.show_day(truncate=False,adapt=adapt)
-        if s:
-            s += ", "
-        s += self.show_start_time(adapt=adapt)
-        if self.start_time and self.end_time:
-            s += "-" + self.show_end_time(adapt=adapt)
+    def show_seminar_times(self, adapt=True):
+        """ weekday is an integer in [0,6], daytimes is a string "HH:MM-HH:MM" """
+        if self.is_conference or not self.frequency:
+            return ""
+        n = min(len(self.weekdays),len(self.time_slots))
+        if n == 0 or not self.frequency:
+            return "No regular schedule"
+        if self.frequency == 7:
+            s = ""
+        elif self.frequency == 14:
+            s = "Every other "
+        elif self.frequency == 21:
+            s = "Everyt third "
+        prevd = -1
+        for i in range(n):
+            d = self.weekdays[i]
+            t = self.time_slots[i]
+            if adapt:
+                d, t = adapt_weektimes (d, t, self.tz, current_user.tz)
+            if d == prevd:
+                s += ", " + t
+            else:
+                s += ", " + weekdays[d] + " " + t
+            prevd = d
         return s
 
     def show_topics(self):
