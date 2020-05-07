@@ -707,7 +707,6 @@ def toggle3way(tglid, value, classes="", onchange="", name=""):
 """.format(
         tglid=tglid,
         value=value,
-        checked="checked" if checked else "",
         classes=classes,
         onchange=onchange,
         name=name,
