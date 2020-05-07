@@ -730,7 +730,7 @@ def can_edit_seminar(shortname, new):
             )
         return show_input_errors(errmsgs), None
     if seminar is not None and seminar.deleted:
-        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302)
+        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302), None
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(
