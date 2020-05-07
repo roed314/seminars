@@ -184,7 +184,6 @@ class WebSeminar(object):
         self.weekdays = self.weekdays[0:n]
         self.time_slots = self.time_slots[0:n]
         self.description = self.description.capitalize() if self.description else ""
-        print(self.description)
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             if hasattr(self,"attr"):
