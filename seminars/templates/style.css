@@ -2266,153 +2266,9 @@ li.ical-detail {
   padding-right: 2em;
 }
 
-/* toggle copy pasta */
-
-:root {
-    --accent: {{color.button_background}};
-    --border-width: 5px;
-    --border-radius: 55px;
-    --font-size: 15px;
-    --perspective: 2000px;
-}
-
-.container {
-    perspective: var(--perspective);
-    display: inline-flex;
-    margin: 0;
-    font-family: sans-serif;
-    padding-bottom: 10px;
-}
-
-.toggle {
-    position: relative;
-    border: solid var(--border-width) var(--accent);
-    border-radius: var(--border-radius);
-    transition: transform cubic-bezier(0, 0, 0.30, 2) .4s;
-    transform-style: preserve-3d;
-    perspective: var(--perspective);
-}
-
-.toggle>input[type="radio"] {
-    display: none;
-}
-
-.toggle>#choice1:checked~#flap {
-    transform: rotateY(0deg);
-}
-.toggle>#choice1:checked~#flap>.content {
-    transform: rotateY(0deg);
-}
-
-.toggle>#choice2:checked~#flap {
-    transform: rotateY(180deg);
-}
-
-.toggle>#choice2:checked~#flap>.content {
-    transform: rotateY(180deg);
-}
 
 
 
-.toggle>label {
-    display: inline-block;
-    min-width: 150px;
-    padding: 10px;
-    font-size: var(--font-size);
-    text-align: center;
-    color: var(--accent);
-    cursor: pointer;
-}
-
-.toggle>label,
-.toggle>#flap {
-    font-weight: bold;
-    text-transform: capitalize;
-}
-
-.toggle>#flap {
-    position: absolute;
-    top: calc( 0px - var(--border-width));
-    right: 50%;
-    height: calc(100% + var(--border-width) * 2);
-    width: 51%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: var(--font-size);
-    background-color: var(--accent);
-    border-top-left-radius: var(--border-radius);
-    border-bottom-left-radius: var(--border-radius);
-    transform-style: preserve-3d;
-    transform-origin: right;
-    transition: transform cubic-bezier(0.4, 0, 0.2, 1) .5s;
-}
-
-.toggle>#flap>.content {
-    color: white;
-    transition: transform 0s linear .25s;
-    transform-style: preserve-3d;
-}
-
-/* fancy checkmarks */
-.tgl {
-  display: none;
-}
-.tgl, .tgl:after, .tgl:before, .tgl *, .tgl *:after, .tgl *:before, .tgl + .tgl-btn {
-  box-sizing: border-box;
-}
-.tgl::-moz-selection, .tgl:after::-moz-selection, .tgl:before::-moz-selection, .tgl *::-moz-selection, .tgl *:after::-moz-selection, .tgl *:before::-moz-selection, .tgl + .tgl-btn::-moz-selection {
-  background: none;
-}
-.tgl::selection, .tgl:after::selection, .tgl:before::selection, .tgl *::selection, .tgl *:after::selection, .tgl *:before::selection, .tgl + .tgl-btn::selection {
-  background: none;
-}
-.tgl + .tgl-btn {
-  outline: 0;
-  display: block;
-  width: 2.5em;
-  height: 1.25em;
-  position: relative;
-  cursor: pointer;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
-}
-.tgl + .tgl-btn:after, .tgl + .tgl-btn:before {
-  position: relative;
-  display: block;
-  content: "";
-  width: 50%;
-  height: 100%;
-}
-.tgl + .tgl-btn:after {
-  left: 0;
-}
-.tgl + .tgl-btn:before {
-  display: none;
-}
-.tgl:checked + .tgl-btn:after {
-  left: 50%;
-}
-
-.tgl-light + .tgl-btn {
-  background: #d8d8d8;
-  border-radius: 1.25em;
-  padding: 2px;
-  -webkit-transition: all .4s ease;
-  transition: all .4s ease;
-  margin: auto;
-}
-.tgl-light + .tgl-btn:after {
-  border-radius: 50%;
-  background: #fff;
-  -webkit-transition: all .2s ease;
-  transition: all .2s ease;
-}
-.tgl-light:checked + .tgl-btn {
-  background: {{ color.button_background }};
-}
 
 .noclick {
   color: #933e20;
@@ -2459,3 +2315,131 @@ max-width: 150px;
     content: url("{{ url_for('static', filename='clippy.svg') }}");
     vertical-align: -0.125em;
 }
+
+
+/* toggles and 3 way toggles */
+.tgl {
+  display: none;
+}
+.tgl, .tgl:after, .tgl:before, .tgl *, .tgl *:after, .tgl *:before, .tgl + .tgl-btn {
+  box-sizing: border-box;
+}
+.tgl::-moz-selection, .tgl:after::-moz-selection, .tgl:before::-moz-selection, .tgl *::-moz-selection, .tgl *:after::-moz-selection, .tgl *:before::-moz-selection, .tgl + .tgl-btn::-moz-selection {
+  background: none;
+}
+.tgl::selection, .tgl:after::selection, .tgl:before::selection, .tgl *::selection, .tgl *:after::selection, .tgl *:before::selection, .tgl + .tgl-btn::selection {
+  background: none;
+}
+.tgl + .tgl-btn {
+  outline: 0;
+  display: block;
+  width: 2.5em;
+  height: 1.25em;
+  position: relative;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+.tgl + .tgl-btn:after, .tgl + .tgl-btn:before {
+  position: relative;
+  display: block;
+  content: "";
+  width: 50%;
+  height: 100%;
+}
+.tgl + .tgl-btn:after {
+  left: 0;
+}
+.tgl + .tgl-btn:before {
+  display: none;
+}
+
+
+.tgl-light + .tgl-btn {
+  background: #d8d8d8;
+  border-radius: 1.25em;
+  padding: 2px;
+  -webkit-transition: all .4s ease;
+  transition: all .4s ease;
+  margin: auto;
+}
+.tgl-light + .tgl-btn:after {
+  border-radius: 50%;
+  background: #fff;
+  -webkit-transition: all .2s ease;
+  transition: all .2s ease;
+}
+
+/* checkmark specific */
+.tgl:checked + .tgl-btn:after {
+  left: 50%;
+}
+.tgl-light:checked + .tgl-btn {
+  background: {{ color.button_background }};
+}
+
+
+/* 3 way toggle switch  styling */
+/* minimal example:
+<input id="id" class="tgl tgl-light tgl-1" value="0"></input>
+<label class="tgl-btn" for="id"
+       onclick="this.control.value = ((parseInt(this.control.value) + 2)%3) - 1;this.control.dataset.chosen=this.control.value;">
+</label>
+/* initial styling */
+input[value='-1'] + .tgl-btn:after{
+  left: 0%;
+}
+input[value='0'] + .tgl-btn:after {
+  left: 25%;
+
+}
+input[value='1'] + .tgl-btn:after{
+  left: 50%;
+}
+
+input[value='-1'] + .tgl-btn{
+  background: #d8d8d8;
+}
+
+input[value='0'] + .tgl-btn{
+  background: #6fa0d9;
+}
+
+input[value='1'] + .tgl-btn {
+  background: #0066dd;
+}
+/* on change styling
+ * as the attribute selector targets the element's attribute,
+ * not the DOM node's value property (elem.value),
+ * it will not update while the form field is being updated.
+*/
+input[data-chosen='-1'] + .tgl-btn:after{
+  left: 0%;
+}
+
+input[data-chosen='0'] + .tgl-btn:after {
+  left: 25%;
+  
+}
+
+input[data-chosen='1'] + .tgl-btn:after{
+  left: 50%;
+}
+
+input[data-chosen='-1'] + .tgl-btn{
+  background: #d8d8d8;
+}
+
+input[data-chosen='0'] + .tgl-btn{
+  background: #6fa0d9;
+}
+
+
+input[data-chosen='1'] + .tgl-btn {
+  background: #0066dd;
+}
+
+/* end of 3 way toggle switch  styling */
+/* end of toggle styling */
