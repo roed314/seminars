@@ -9,7 +9,8 @@
         <td>
           {{ KNOWL("filter") }} by:
         </td>
-        {% for ftype in ["topic", "language"] %}
+        {{ topic_dag.filter_link() | safe }}
+        {% for ftype in ["language"] %}
         {% if ftype not in hide_filters %}
         <td>
           {{ toggle(tglid="enable_"+ftype+"_filter", value="", onchange="toggleFilters(this.id);") | safe }}
@@ -30,6 +31,8 @@
       </tr>
     </table>
   </div>
+  {{ topic_dag.filter_pane(counts=topic_counts) | safe }}
+  {#
   <div id="subject-filter-menu" class="filter-menu">
     {% for ab, name in subjects %}
     <div class="subject_toggle">
@@ -127,7 +130,7 @@
     </div>
     {% endif %}
   </div>
-
+#}
   <div id="language-filter-menu" class="filter-menu">
     <span id="close-language-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
     {% for ab, name in languages %}

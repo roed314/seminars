@@ -490,17 +490,30 @@ div.topic_cmd {
     color: {{color.header_background}};
 }*/
 
-div.topic_toggle.subject-physics {
-    min-width: 32%;
-}
-
 div.subject_toggle, div.topic_toggle, div.language_toggle {
     display: inline-block;
     color: black;
 }
 div.topic_toggle {
     padding: 3px;
+}
+div.col1 {
+    min-width: 90%;
+}
+div.col2 {
+    min-width: 48%;
+}
+div.col3 {
+    min-width: 32%;
+}
+div.col4 {
     min-width: 24%;
+}
+div.col5 {
+    min-width: 19%;
+}
+div.col6 {
+    min-width: 15%;
 }
 div.topic_toggle:hover {
     cursor: pointer;

@@ -317,15 +317,14 @@ function getAllTopics(subject) {
     return toggles;
 }
 
-function toggleTopicView(subject) {
-    var pane = $("#"+subject+"-pane");
+function toggleTopicView(pid, cid) {
+    var pane = $("#"+pid+"-"+cid+"-pane");
     var is_visible = pane.is(":visible");
-    $(".topic-pane").hide();
+    $("."+pid+"-subpane").hide();
+    $("."+pid+"-tlink").removeClass("active");
     if (!is_visible) {
         pane.show();
-        $("#tdsubj-"+subject).addClass("active");
-    } else {
-        $("#tdsubj-"+subject).removeClass("active");
+        $("#"+cid+"-filter-btn").addClass("active");
     }
 }
 
@@ -383,7 +382,7 @@ function toggleFilters(id, on_menu_open=false) {
 }
 function toggleFilterView(id) {
     // If this filter is not enabled, we enable it
-    //console.log("filterview", id);
+    console.log("filterview", id);
     var ftype = id.split("-")[0];
     var is_enabled = Boolean(parseInt(getCookie("filter_"+ftype)));
     var visible = filterMenuVisible(ftype)
