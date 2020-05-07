@@ -32,7 +32,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% if seminar.description %}
 <tr>
   <td style="padding:0px;">Description:</td>
-  <td>{{(seminar.description | blanknone) | safe }}</td>
+  <td>{{seminar.description.capitalize() | safe }}</td>
 </tr>
 {% endif %}
 {% if seminar.is_conference %}
@@ -49,17 +49,17 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% set n = seminar.num_visible_organizers() %}
 {% if n > 0 %}
 <tr>
-  <td style="padding:0px;">Organizer{%if n > 1 %}s{% endif %}</td>
+  <td style="padding:0px;">Organizer{%if n > 1 %}s{% endif %}:</td>
   <td>{{ seminar.show_organizers() | safe }}</td>
 </tr>
 {% endif %}
 {% set n = seminar.num_visible_curators() %}
 {% if n > 0 %}
 <tr>
-  <td style="padding:0px;">Curator{%if n > 1 %}s{% endif %}</td>
+  <td style="padding:0px;">Curator{%if n > 1 %}s{% endif %}:</td>
   <td>{{ seminar.show_curators() | safe }}</td>
 </tr>
-<tr><td style="padding:0px;"></td><td class="forminfo">*contact</td></tr>
+<tr><td style="padding:0px;"></td><td class="forminfo">*contact for this listing</td></tr>
 {% endif %}
 </table>
 
