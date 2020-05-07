@@ -137,7 +137,7 @@ per_day:
     The number of talks on a typical day during your conference.
     This is used only to determine the number of slots to create 
     in the scheduling grid on the "Edit schedule" page.
-    Later you can adjust the number of talks on each day there.
+    You can adjust the actual number of talks on each day there.
 start_date:
   title: Start date
   contents: |
@@ -146,14 +146,6 @@ end_date:
   title: End date
   contents: |
     The date on which your conference ends.
-seminar_start_time:
-  title: Start time
-  contents: |
-    The time of day your series usually meets, specified in 24 hour format (so 4 or 4:00 is 4 A.M.; use 16:00 for 4 P.M.)
-seminar_end_time:
-  title: End time
-  contents: |
-    The time of day your series usually ends, specified in 24 hour format (so 4 or 4:00 is 4 A.M.; use 16:00 for 4 P.M.)
 seminar_time_slots:
   title: Time slots
   contents: |
