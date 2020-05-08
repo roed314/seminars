@@ -2438,26 +2438,26 @@ max-width: 150px;
 /* 3 way toggle switch  styling */
 /* see toggle3way in utils.py */
 /* initial styling */
-input[value='-1'] + .tgl-btn:after{
+input[value='0'] + .tgl-btn:after{
   left: 0%;
 }
-input[value='0'] + .tgl-btn:after {
+input[value='1'] + .tgl-btn:after {
   left: 25%;
 
 }
-input[value='1'] + .tgl-btn:after{
+input[value='2'] + .tgl-btn:after{
   left: 50%;
 }
 
-input[value='-1'] + .tgl-btn{
+input[value='0'] + .tgl-btn{
   background: #d8d8d8;
 }
 
-input[value='0'] + .tgl-btn{
+input[value='1'] + .tgl-btn{
   background: #6fa0d9;
 }
 
-input[value='1'] + .tgl-btn {
+input[value='2'] + .tgl-btn {
   background: #0066dd;
 }
 /* on change styling
@@ -2465,29 +2465,28 @@ input[value='1'] + .tgl-btn {
  * not the DOM node's value property (elem.value),
  * it will not update while the form field is being updated.
 */
-input[data-chosen='-1'] + .tgl-btn:after{
+input[data-chosen='0'] + .tgl-btn:after{
   left: 0%;
 }
 
-input[data-chosen='0'] + .tgl-btn:after {
+input[data-chosen='1'] + .tgl-btn:after {
   left: 25%;
-  
 }
 
-input[data-chosen='1'] + .tgl-btn:after{
+input[data-chosen='2'] + .tgl-btn:after{
   left: 50%;
 }
 
-input[data-chosen='-1'] + .tgl-btn{
+input[data-chosen='0'] + .tgl-btn{
   background: #d8d8d8;
 }
 
-input[data-chosen='0'] + .tgl-btn{
+input[data-chosen='1'] + .tgl-btn{
   background: #6fa0d9;
 }
 
 
-input[data-chosen='1'] + .tgl-btn {
+input[data-chosen='2'] + .tgl-btn {
   background: #0066dd;
 }
 
