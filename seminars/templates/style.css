@@ -2433,14 +2433,14 @@ max-width: 150px;
 /* 3 way toggle switch  styling */
 /* see toggle3way in utils.py */
 /* initial styling */
-input[value='-1'] + .tgl-btn:after{
+input[value='0'] + .tgl-btn:after{
   left: 0%;
 }
-input[value='0'] + .tgl-btn:after {
+input[value='1'] + .tgl-btn:after {
   left: 25%;
 
 }
-input[value='1'] + .tgl-btn:after{
+input[value='2'] + .tgl-btn:after{
   left: 50%;
 }
 
