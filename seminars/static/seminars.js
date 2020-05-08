@@ -1,15 +1,4 @@
 // from lmfdb.js,
-$(function() {
- /* providing watermark examples in those forms, that have an 'example=...' attribute */
- /* Add extra spaces so that if you type in exactly the example it does not disappear */
- $('input[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   '  ) } )
- $('textarea[example]').each(function(a,b) { $(b).watermark($(b).attr('example')+'   ', {useNative:false}  ) } )
-});
-
-
-
-
-// from lmfdb.js,
 function cleanSubmit(id)
 {
   var myForm = document.getElementById(id);
