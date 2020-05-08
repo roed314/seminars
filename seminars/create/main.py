@@ -47,6 +47,7 @@ from seminars.institution import (
     institution_types,
     institutions,
 )
+from seminars.homepage.main import parse_substring
 from seminars.lock import get_lock
 from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from lmfdb.utils import flash_error
@@ -145,24 +146,45 @@ def edit_seminar():
         data = request.args
     shortname = data.get("shortname", "")
     new = data.get("new") == "yes"
+    notsimilar = data.get("similar") == "no"
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
+    title = "Create series" if new else "Edit series"
+    manage = "Manage" if current_user.is_organizer else "Create"
     if new:
+        errmsgs = []
         subjects = clean_subjects(data.get("subjects"))
         if not subjects:
-            return show_input_errors([format_errmsg("Please select at least one subject.")])
-        else:
-            seminar.subjects = subjects
-
-        seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", None)
+            errmsgs.append("Please select at least one subject")
         seminar.name = data.get("name", "")
+        if not seminar.name:
+            errmsgs.append("Seminar name is required.")
+        elif len(seminar.name) < 3:
+            errmsgs.append("Seminar name too short, at least three chracters are required.")
+        if errmsgs:
+            return show_input_errors(errmsgs)
+        seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", False)
+        seminar.subjects = subjects
         seminar.institutions = clean_institutions(data.get("institutions"))
         if seminar.institutions:
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
+        if not notsimilar:
+            query = {'is_conference': seminar.is_conference}
+            parse_substring(seminar.name, query, "name", ["name"])
+            similar = [s for s in seminars_search(query)]
+            if seminar.institutions:
+                similar = [s for s in similar if s["institutions"] and set(seminar.institutions) == set(s["institutions"])]
+            if similar:
+                return render_template(
+                    "show_similar.html",
+                    seminar=seminar,
+                    title=title,
+                    section=manage,
+                    similar=similar,
+                )
+
     lock = get_lock(shortname, data.get("lock"))
-    title = "Create series" if new else "Edit series"
-    manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "edit_seminar.html",
         seminar=seminar,
@@ -393,6 +415,8 @@ def save_seminar():
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["name"]:
         errmsgs.append("The name cannot be blank")
+    elif len(data["name"]) < 3:
+        errmsgs.append("Name too short, must be at least three characters.")
     if data["is_conference"] and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date")
     if data["per_day"] is not None and data["per_day"] < 1:
