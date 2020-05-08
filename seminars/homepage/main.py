@@ -10,6 +10,7 @@ from seminars.utils import (
     topdomain,
     topics,
 )
+from seminars.topic import topic_dag
 from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
@@ -535,7 +536,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     talks = [talk for talk in talks if talk.searchable()]
     counters = _get_counters(talks)
     row_attributes = _get_row_attributes(talks)
-    return render_template(
+    response = make_response(render_template(
         "browse_talks.html",
         title="Browse talks",
         hide_filters=hide_filters,
@@ -545,7 +546,13 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
         talk_row_attributes=zip(talks, row_attributes),
         past=past,
         **counters
-    )
+    ))
+    if request.cookies.get("topics", ""):
+        # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
+        # For now we set the max_age to 30 years
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
+        response.set_cookie("topics", "", max_age=0)
+    return response
 
 def _series_index(query, sort=None, subsection=None, conference=True, past=False):
     query = dict(query)
@@ -572,7 +579,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
     title = "Browse conferences" if conference else "Browse seminar series"
-    return render_template(
+    response = make_response(render_template(
         "browse_series.html",
         title=title,
         hide_filters=[],
@@ -582,7 +589,13 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         series_row_attributes=zip(series, row_attributes),
         is_conference=conference,
         **counters
-    )
+    ))
+    if request.cookies.get("topics", ""):
+        # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
+        # For now we set the max_age to 30 years
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
+        response.set_cookie("topics", "", max_age=0)
+    return response
 
 @app.route("/search/seminars")
 def search_seminars():

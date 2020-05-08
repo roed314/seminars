@@ -42,6 +42,18 @@ class TopicDAG(object):
             (topic for topic in self.by_id.values() if not topic.parents), key=sort_key
         )
 
+    def port_cookie(self):
+        cur_cookie = request.cookies.get("topics", "")
+        topics = []
+        for elt in cur_cookie.split(","):
+            if "_" in elt:
+                sub, top = elt.split("_", 1)
+                if sub in self.by_id:
+                    topics.append(sub)
+                if elt in self.by_id:
+                    topics.append(elt)
+        return ",".join("%s:1"%elt for elt in topics)
+
     def read_cookie(self, manage=None):
         if manage is not None:
             # manage is a talk or seminar
@@ -75,20 +87,24 @@ class TopicDAG(object):
             tid = name = "topic"
             onclick = "toggleFilterView(this.id)"
             count = ""
+            classes = "likeknowl root-tlink"
         else:
             tid = topic_id
             topic = self.by_id[tid]
             name = topic.name
             count = counts.get(topic_id, 0)
             count = (" (%s)" % count) if count else ""
+            ancestors = ["sub_" + elt for elt in topic.ancestors]
             if not topic.children:
-                return name + count
+                classes = " ".join(ancestors)
+                return '<span class="{0}">{1}</span>'.format(classes, name + count)
             if manage is None:
                 onclick = "toggleTopicView('%s', '%s')" % (parent_id, tid)
             else:
                 onclick = "manageTopicView('%s', '%s')" % (parent_id, tid)
-        return '<a id="{0}-filter-btn" class="likeknowl {1}-tlink" onclick="{2}; return false;">{3}</a>{4}'.format(
-            tid, parent_id, onclick, name, count
+            classes = " ".join(["likeknowl", parent_id+"-tlink"] + ancestors)
+        return '<a id="{0}-filter-btn" class="{1}" onclick="{2}; return false;">{3}</a>{4}'.format(
+            tid, classes, onclick, name, count
         )
 
     def _toggle(self, parent_id="root", topic_id=None, cookie=None, manage=None):

@@ -112,7 +112,7 @@ function setTopicCookie(topic, value) {
     }
     var new_item = topic + ":" + value.toString();
     var found = false;
-    for (var i=0;i<cur_items.length;i++) {
+    for (let i=0;i<cur_items.length;i++) {
         if (cur_items[i].startsWith(topic + ":")) {
             cur_items[i] = new_item
             found = true;
@@ -126,12 +126,23 @@ function setTopicCookie(topic, value) {
 }
 function getTopicCookie(topic) {
     var cur_items = getCookie("topics_dict").split(",");
-    for (var i=0;i<cur_items.length;i++) {
+    for (let i=0; i<cur_items.length; i++) {
         if (cur_items[i].startsWith(topic + ":")) {
-            return parseInt(topic.substring(topic.length+1));
+            return parseInt(cur_items[i].substring(topic.length+1));
         }
     }
     return 0;
+}
+function getTopicCookieWithValue(value) {
+    value = value.toString();
+    var cur_items = getCookie("topics_dict").split(",");
+    var with_value = [];
+    for (var i=0; i<cur_items.length; i++) {
+        if (cur_items[i].endsWith(":" + value)) {
+            with_value.push(cur_items[i].substring(0, value.length+1));
+        }
+    }
+    return with_value;
 }
 function subjectFiltering() {
     return $('#enable_subject_filter').is(":checked");
@@ -177,6 +188,10 @@ function setLanguageLinks() {
             $(".lang-" + cur_languages[i]).removeClass("language-filtered");
         }
     }
+}
+
+function topicFromPair(pairid) {
+    return pairid.split("--")[1];
 }
 
 function setSubjectLinks() {
@@ -330,26 +345,70 @@ function toggleTopic(id) {
     }
 }
 function manageTopicDAG(togid) {
-    var topic = togid.split("--")[1];
+    var topic = topicFromPair(togid);
     var toggleval = $("#" + togid).val();
     /* Need to add/subtract values from a hidden text input for saving
        and show/hide from a visible div to give current status */
 }
 
 function toggleTopicDAG(togid) {
+    var to_show = [];
+    var to_hide = [];
     console.log(togid);
-    var topic = togid.split("--")[1];
+    var topic = topicFromPair(togid);
     var toggleval = $("#" + togid).val();
     console.log(toggleval);
     setTopicCookie(topic, toggleval);
-    if (toggleval == 1) {
+    if (toggleval == 0) {
         $("label.sub_" + topic).css("visibility", "visible");
-        /* Need to show rows corresponding to sub-topics.
-           We can't just use $("tgl.sub_"+topic).each(),
-           since some 2s may be under 0s.
-        */
+        $("a.sub_"+topic+",span.sub_"+topic).removeClass("not_toggleable");
+        // Need to show rows corresponding to sub-topics.
+        // We can't just use $("tgl.sub_"+topic).each(),
+        // since some 1s may be under -1s.
+        var blocking_toggles = [];
+        $('input[value="-1"].tgl3way.sub_'+topic).each(function() {
+            blocking_toggles.push(topicFromPair(this.id));
+        });
+        var show_selector = $('input[value="1"].sub_'+topic);
+        for (let i=0; i<blocking_toggles.length; i++) {
+            show_selector = show_selector.not(".sub_"+blocking_toggles[i]);
+        }
+        show_selector.each(function() {
+            to_show.push(topicFromPair(this.id));
+        });
     } else {
         $("label.sub_" + topic).css("visibility", "hidden");
+        if (toggleval == 1) {
+            to_show.push(topic);
+        } else {
+            $("a.sub_"+topic+",span.sub_"+topic).addClass("not_toggleable");
+            to_hide.push(topic);
+        }
+    }
+    if (to_show.length > 0) {
+        var talks = $();
+        for (let i=0; i<to_show.length; i++) {
+            talks = talks.add(".talk.topic-filtered.topic-" + topic);
+        }
+        talks.removeClass("topic-filtered");
+        if (topicFiltering()) {
+            // elements may be filtered by other criteria
+            talks = talksToShow(talks);
+            talks.show();
+            apply_striping();
+        }
+    }
+    if (to_hide.length > 0) {
+        var talks = $(".talk.topic-" + topic);
+        var cur_topics = getTopicCookieWithValue(1);
+        for (let i=0; i<cur_topics.length; i++) {
+            talks = talks.not(".topic-" + cur_topics[i]);
+        }
+        talks.addClass("topic-filtered");
+        if (topicFiltering()) {
+            talks.hide();
+            apply_striping();
+        }
     }
 }
 
