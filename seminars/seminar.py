@@ -544,10 +544,10 @@ class WebSeminar(object):
 
 
 def series_header(
-    conference=False, include_time=True, include_institutions=True, include_description=True, include_topics=False, include_subscribe=True
+    conference=False, include_datetime=True, include_institutions=True, include_description=True, include_topics=False, include_subscribe=True
 ):
     cols = []
-    if include_time:
+    if include_datetime:
         if conference:
             cols.append(('colspan="2" class="yourtime"', "Dates"))
         else:
