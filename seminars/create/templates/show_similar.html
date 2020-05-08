@@ -1,0 +1,30 @@
+{% extends "homepage.html" %}
+{% block content %}
+  <form id="seminarform" action="{{ url_for('.edit_seminar') }}" method="POST">
+    <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
+    <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
+    <input type="hidden" name="subjects" value="{{ seminar.subjects  | safe }}" />
+    <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
+    <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
+    <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
+    <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
+    <input type="hidden" name="similar" value="no" />
+    <div class='searchresults'>
+      <table class='ntdata'>
+        <thead>
+          <tr>{{ series_header() }}</tr>
+        </thead>
+        {% for seminar in similar %}
+          <tr>{{ seminar.oneline() | safe }}</tr>
+        {% endfor %}
+      </table>
+    </div>
+    <table>
+    <tr>
+      <td><button type="submit">Continue</button></td>
+      <td><a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('create.index') }}">Cancel creation</a>
+    </tr>
+  </table>
+
+  </form>
+{% endblock %}
