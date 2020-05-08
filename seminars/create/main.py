@@ -847,7 +847,7 @@ def layout_schedule(seminar, data):
         # remove one slot for each talk in order, rather than trying to match times
         # this works better in situations where the times vary
         for t in slots:
-            sameday = [s for s in newslots if s[0] eq t[0]]
+            sameday = [s for s in newslots if s[0] == t[0]]
             if sameday:
                 newslots.remove(sameday[0])
         slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
