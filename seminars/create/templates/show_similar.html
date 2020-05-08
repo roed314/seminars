@@ -5,7 +5,7 @@
     <input type="hidden" name="new" value="{{ 'yes' if newseminar.new else 'no' }}"/>
     <input type="hidden" name="subjects" value="{{ newseminar.subjects  | safe }}" />
     <input type="hidden" name="topics" value="{{ newseminar.topics  | safe }}"/>
-    <input type="hidden" name="institutions" value="{{ nweseminar.institutions  | safe }}"/>
+    <input type="hidden" name="institutions" value="{{ newseminar.institutions  | safe }}"/>
     <input type="hidden" name="language" value="{{ newseminar.language  | safe }}"/>
     <input type="hidden" name="is_conference" value="{% if newseminar.is_conference %}yes{% else %}no{% endif %}"/>
     <input type="hidden" name="similar" value="no" />
