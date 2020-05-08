@@ -13,11 +13,12 @@ class WebTopic(object):
         self.children = []
         self.parents = []
 
-    def above(self):
+    @property
+    def ancestors(self):
         if not self.parents:
             return []
         else:
-            return [elt.id for elt in self.parents] + sum([elt.above() for elt in self.parents], [])
+            return sorted(set([elt.id for elt in self.parents] + sum([elt.ancestors for elt in self.parents], [])))
 
 
 class TopicDAG(object):
@@ -41,7 +42,10 @@ class TopicDAG(object):
             (topic for topic in self.by_id.values() if not topic.parents), key=sort_key
         )
 
-    def read_cookie(self):
+    def read_cookie(self, manage=None):
+        if manage is not None:
+            # manage is a talk or seminar
+            return {topic: 1 for topic in manage.topics}
         res = defaultdict(int)
         if request.cookies.get("topics", ""):
             # old key
@@ -53,6 +57,7 @@ class TopicDAG(object):
                     if elt in self.by_id:
                         res[elt] = 1  # full topic
             # FIXME we need to trigger deletion of the cookie  when building the response
+            # and setting the new topics_dict cookie
         for elt in request.cookies.get("topics_dict", "").split(","):
             if ':' in elt:
                 key, val = elt.split(":", 1)
@@ -65,7 +70,7 @@ class TopicDAG(object):
         res[None] = 1 if request.cookies.get('filter_topic', '0') != '0' else 0
         return res
 
-    def _link(self, parent_id="root", topic_id=None, counts={}):
+    def _link(self, parent_id="root", topic_id=None, counts={}, manage=None):
         if topic_id is None:
             tid = name = "topic"
             onclick = "toggleFilterView(this.id)"
@@ -78,52 +83,58 @@ class TopicDAG(object):
             count = (" (%s)" % count) if count else ""
             if not topic.children:
                 return name + count
-            onclick = "toggleTopicView('%s', '%s')" % (parent_id, tid)
+            if manage is None:
+                onclick = "toggleTopicView('%s', '%s')" % (parent_id, tid)
+            else:
+                onclick = "manageTopicView('%s', '%s')" % (parent_id, tid)
         return '<a id="{0}-filter-btn" class="likeknowl {1}-tlink" onclick="{2}; return false;">{3}</a>{4}'.format(
             tid, parent_id, onclick, name, count
         )
 
-    def _toggle(self, parent_id="root", topic_id=None, cookie=None):
+    def _toggle(self, parent_id="root", topic_id=None, cookie=None, manage=None):
         if cookie is None:
-            cookie = self.read_cookie()
+            cookie = self.read_cookie(manage=manage)
         kwds = {}
         if topic_id is None:
             tid = "topic"
             tclass = toggle
             onchange = "toggleFilters(this.id);"
         else:
-            tid = parent_id + ":" + topic_id
+            tid = parent_id + "--" + topic_id
             topic = self.by_id[topic_id]
-            if topic.children:
+            if topic.children and manage is None:
                 tclass = toggle3way
             else:
                 tclass = toggle
-            onchange = "toggleTopicDAG(thid.id);"
-            kwds["classes"] = " ".join([topic_id] + ["sub_" + elt for elt in topic.above()])
+            if manage is None:
+                onchange = "toggleTopicDAG(this.id);"
+            else:
+                onchange = "manageTopicDAG(this.id);"
+            kwds["classes"] = " ".join([topic_id] + ["sub_" + elt for elt in topic.ancestors])
 
         if tclass == toggle:
             kwds['checked'] = cookie[topic_id] > 0
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
-    def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None):
+    def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None, manage=None):
         padding = ' style="padding-right: 2em;"' if topic_id is None else ''
         return "<td>%s</td><td%s>%s</td>" % (
-            self._toggle(parent_id, topic_id, cookie),
+            self._toggle(parent_id, topic_id, cookie, manage),
             padding,
-            self._link(parent_id, topic_id, counts),
+            self._link(parent_id, topic_id, counts, manage),
         )
 
-    def link_pair(self, parent_id="root", topic_id=None, counts={}, cols=1, cookie=None):
+    def link_pair(self, parent_id="root", topic_id=None, counts={}, cols=1, cookie=None, manage=None):
         return """
-<div class="topic_toggle col{0}">
+<div class="toggle_pair col{0}">
   <table><tr>{1}</tr></table>
 </div>""".format(
-            cols, self.filter_link(parent_id, topic_id, counts, cookie=cookie)
+            cols, self.filter_link(parent_id, topic_id, counts, cookie=cookie, manage=manage)
         )
 
-    def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None):
+    def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None, manage=None):
         if cookie is None:
-            cookie = self.read_cookie()
+            cookie = self.read_cookie(manage=manage)
         if topic_id is None:
             tid = "topic"
             topics = self.subjects
@@ -152,8 +163,8 @@ class TopicDAG(object):
 </div>""".format(
             parent_id,
             tid,
-            "\n".join(self.link_pair(tid, topic.id, counts, cols, cookie) for topic in topics),
-            "\n".join(self.filter_pane(tid, child, counts, cookie) for child in childpanes),
+            "\n".join(self.link_pair(tid, topic.id, counts, cols, cookie, manage) for topic in topics),
+            "\n".join(self.filter_pane(tid, child, counts, cookie, manage) for child in childpanes),
         )
 
 

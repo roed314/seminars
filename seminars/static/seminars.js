@@ -103,7 +103,36 @@ function removeFromCookie(item, cookie) {
     setCookie(cookie, cur_items);
     return cur_items;
 }
-
+function setTopicCookie(topic, value) {
+    var cookie = getCookie("topics_dict");
+    if (cookie == null) {
+        var cur_items = [];
+    } else {
+        var cur_items = cookie.split(",");
+    }
+    var new_item = topic + ":" + value.toString();
+    var found = false;
+    for (var i=0;i<cur_items.length;i++) {
+        if (cur_items[i].startsWith(topic + ":")) {
+            cur_items[i] = new_item
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        cur_items.push(new_item);
+    }
+    setCookie(cur_items.join(","));
+}
+function getTopicCookie(topic) {
+    var cur_items = getCookie("topics_dict").split(",");
+    for (var i=0;i<cur_items.length;i++) {
+        if (cur_items[i].startsWith(topic + ":")) {
+            return parseInt(topic.substring(topic.length+1));
+        }
+    }
+    return 0;
+}
 function subjectFiltering() {
     return $('#enable_subject_filter').is(":checked");
 }
@@ -300,8 +329,31 @@ function toggleTopic(id) {
         }
     }
 }
+function manageTopicDAG(togid) {
+    var topic = togid.split("--")[1];
+    var toggleval = $("#" + togid).val();
+    /* Need to add/subtract values from a hidden text input for saving
+       and show/hide from a visible div to give current status */
+}
 
-function toggleTopicView(pid, cid) {
+function toggleTopicDAG(togid) {
+    console.log(togid);
+    var topic = togid.split("--")[1];
+    var toggleval = $("#" + togid).val();
+    console.log(toggleval);
+    setTopicCookie(topic, toggleval);
+    if (toggleval == 1) {
+        $("label.sub_" + topic).css("visibility", "visible");
+        /* Need to show rows corresponding to sub-topics.
+           We can't just use $("tgl.sub_"+topic).each(),
+           since some 2s may be under 0s.
+        */
+    } else {
+        $("label.sub_" + topic).css("visibility", "hidden");
+    }
+}
+
+function manageTopicView(pid, cid) {
     var pane = $("#"+pid+"-"+cid+"-pane");
     var is_visible = pane.is(":visible");
     $("."+pid+"-subpane").hide();
@@ -310,6 +362,18 @@ function toggleTopicView(pid, cid) {
         pane.show();
         $("#"+cid+"-filter-btn").addClass("active");
     }
+}
+function toggleTopicView(pid, cid) {
+    console.log(pid, cid);
+    var pane = $("#"+pid+"-"+cid+"-pane");
+    var is_visible = pane.is(":visible");
+    $("."+pid+"-subpane").hide();
+    $("."+pid+"-tlink").removeClass("active");
+    if (!is_visible) {
+        pane.show();
+        $("#"+cid+"-filter-btn").addClass("active");
+        $("#"+pid+"--"+cid).val(1).trigger('change');;
+    } // If we're closing the pane and we haven't selected anything, should we set the toggle to 0?
 }
 
 var filter_menus = ['topic', 'language'];

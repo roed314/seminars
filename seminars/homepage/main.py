@@ -437,7 +437,8 @@ def _get_counters(objects):
                 topic_counts[topic] += 1
         if object.subjects:
             for subject in object.subjects:
-                subject_counts[subject] += 1
+                topic_counts[subject] += 1
+                #subject_counts[subject] += 1
         language_counts[object.language] += 1
     langs = [(code, languages.show(code)) for code in language_counts]
     langs.sort(key=lambda x: (-language_counts[x[0]], x[1]))
