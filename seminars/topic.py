@@ -13,6 +13,12 @@ class WebTopic(object):
         self.children = []
         self.parents = []
 
+    def above(self):
+        if not self.parents:
+            return []
+        else:
+            return [elt.id for elt in self.parents] + sum([elt.above() for elt in self.parents], [])
+
 
 class TopicDAG(object):
     def __init__(self):
@@ -47,7 +53,7 @@ class TopicDAG(object):
                     if elt in self.by_id:
                         res[elt] = 1  # full topic
             # FIXME we need to trigger deletion of the cookie  when building the response
-        for elt in request.cookies.get("topics_dict", "").split("|"):
+        for elt in request.cookies.get("topics_dict", "").split(","):
             if ':' in elt:
                 key, val = elt.split(":", 1)
                 try:
@@ -77,30 +83,31 @@ class TopicDAG(object):
             tid, parent_id, onclick, name, count
         )
 
-    def _toggle(self, topic_id=None, cookie=None):
+    def _toggle(self, parent_id="root", topic_id=None, cookie=None):
         if cookie is None:
             cookie = self.read_cookie()
+        kwds = {}
         if topic_id is None:
             tid = "topic"
             tclass = toggle
             onchange = "toggleFilters(this.id);"
         else:
-            tid = topic_id
-            topic = self.by_id[tid]
+            tid = parent_id + ":" + topic_id
+            topic = self.by_id[topic_id]
             if topic.children:
                 tclass = toggle3way
             else:
                 tclass = toggle
-            onchange = "toggleTopic('%s');" % topic_id
+            onchange = "toggleTopicDAG(thid.id);"
+            kwds["classes"] = " ".join([topic_id] + ["sub_" + elt for elt in topic.above()])
 
-        kwds = {}
         if tclass == toggle:
             kwds['checked'] = cookie[topic_id] > 0
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
     def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None):
         return "<td>%s</td><td>%s</td>" % (
-            self._toggle(topic_id, cookie),
+            self._toggle(parent_id, topic_id, cookie),
             self._link(parent_id, topic_id, counts),
         )
 
