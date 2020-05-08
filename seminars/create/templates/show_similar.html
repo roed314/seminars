@@ -1,5 +1,8 @@
 {% extends "homepage.html" %}
 {% block content %}
+  <p>The {% if newseminar.is_conference %} conference {% else %} seminar series {% endif %} name <b>{{newseminar.name}}</b>
+     you entered is similar to the names of some existing {% if newseminar.is_conference %} conference {% else %} seminar series {% endif %}.
+   Please review the list below and click Continue or Cancel as appropriate.</p>
   <form id="seminarform" action="{{ url_for('.edit_seminar') }}" method="POST">
     <input type="hidden" name="shortname" value="{{ newseminar.shortname }}"/>
     <input type="hidden" name="new" value="{{ 'yes' if newseminar.new else 'no' }}"/>
@@ -22,7 +25,8 @@
     <table>
     <tr>
       <td><button type="submit">Continue</button></td>
-      <td><a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('create.index') }}">Cancel creation</a>
+      <td><button type="submit" formaction="{{ url_for('create.index') }}"></button></td>
+      <!--<td><a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('create.index') }}">Cancel creation</a>-->
     </tr>
   </table>
 
