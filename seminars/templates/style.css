@@ -543,6 +543,8 @@ td.weekday, td.date {
     white-space: nowrap;
     margin: 0px;
     padding: 0px;
+    text-align: right;
+
 }
 td.time, td.subscribe {
     text-align: right;
