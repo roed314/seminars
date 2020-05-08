@@ -112,8 +112,6 @@ class TopicDAG(object):
                 onchange = "manageTopicDAG(this.id);"
             kwds["classes"] = " ".join([topic_id] + ["sub_" + elt for elt in topic.ancestors])
 
-        if tclass == toggle:
-            kwds['checked'] = cookie[topic_id] > 0
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
     def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None, manage=None):

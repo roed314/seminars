@@ -2421,73 +2421,66 @@ max-width: 150px;
 .tgl-light + .tgl-btn:after {
   border-radius: 50%;
   background: #fff;
-  -webkit-transition: all .2s ease;
-  transition: all .2s ease;
-}
-
-/* checkmark specific */
-/* see toggle in utils.py */
-.tgl:checked + .tgl-btn:after {
-  left: 50%;
-}
-.tgl-light:checked + .tgl-btn {
-  background: {{ color.button_background }};
+  -webkit-transition: all .4s ease;
+  transition: all .4s ease;
 }
 
 
-/* 3 way toggle switch  styling */
-/* see toggle3way in utils.py */
+
+
+/* 3 and 2 way toggle switch  styling */
+/* see toggle.py */
 /* initial styling */
-input[value='0'] + .tgl-btn:after{
+input[value='-1'] + .tgl-btn:after{
   left: 0%;
 }
-input[value='1'] + .tgl-btn:after {
+input[value='0'] + .tgl-btn:after {
   left: 25%;
 
 }
-input[value='2'] + .tgl-btn:after{
+input[value='1'] + .tgl-btn:after{
   left: 50%;
 }
 
-input[value='0'] + .tgl-btn{
+input[value='-1'] + .tgl-btn{
   background: #d8d8d8;
 }
 
-input[value='1'] + .tgl-btn{
+input[value='0'] + .tgl-btn{
   background: #6fa0d9;
 }
 
-input[value='2'] + .tgl-btn {
-  background: #0066dd;
+input[value='1'] + .tgl-btn {
+  background: {{ color.button_background }};
 }
 /* on change styling
  * as the attribute selector targets the element's attribute,
  * not the DOM node's value property (elem.value),
  * it will not update while the form field is being updated.
 */
-input[data-chosen='0'] + .tgl-btn:after{
+input[data-chosen='-1'] + .tgl-btn:after{
   left: 0%;
 }
 
-input[data-chosen='1'] + .tgl-btn:after {
+input[data-chosen='0'] + .tgl-btn:after {
   left: 25%;
 }
 
-input[data-chosen='2'] + .tgl-btn:after{
+input[data-chosen='1'] + .tgl-btn:after{
   left: 50%;
 }
 
-input[data-chosen='0'] + .tgl-btn{
+input[data-chosen='-1'] + .tgl-btn{
   background: #d8d8d8;
 }
 
-input[data-chosen='1'] + .tgl-btn{
+input[data-chosen='0'] + .tgl-btn{
   background: #6fa0d9;
 }
 
 
-input[data-chosen='2'] + .tgl-btn {
-  background: #0066dd;
+input[data-chosen='1'] + .tgl-btn {
+  background: {{ color.button_background }};
 }
 
 /* end of 3 way toggle switch  styling */

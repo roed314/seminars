@@ -736,23 +736,23 @@ $(document).ready(function() {
 
 //handling subscriptions
 $(document).ready(function(){
-    $("input.subscribe:checkbox").change(function(evt) {
+    $("input.subscribe").change(function(evt) {
         var elem = $(this);
         function success(msg) {
           // this is the row
           var row = elem[0].parentElement.parentElement;
           $(row).notify(msg, {className: "success", position:"right" });
           //evt.stopPropagation();
-          var value = elem[0].value;
+          var name = elem[0].name;
           // is a seminar
-          if( ! elem[0].value.includes('/') ){
+          if( ! name.includes('/') ){
             // apply the same thing to the talks of that seminar
-            console.log('input.subscribe[id^="tlg' + value +'/"]');
-            console.log(elem.is(":checked"));
-            $('input.subscribe[id^="tlg' + value +'/"]').prop("checked", elem.is(":checked"));
+            foo = $('input.subscribe[id^="tlg' + name +'--"]');
+            $('input.subscribe[id^="tlg' + name +'--"]').val(elem.val());
+            $('input.subscribe[id^="tlg' + name +'--"]').attr('data-chosen', elem.val());
           } else {
             // for the browse page
-            if( elem.is(":checked") ) {
+            if( elem.val() == "1" ) {
               $(row).removeClass("calendar-filtered");
             } else {
               $(row).addClass("calendar-filtered");
@@ -766,22 +766,24 @@ $(document).ready(function(){
           $(elem[0].parentElement.parentElement).notify(msg, {className: "error", position:"right" });
           // revert
           evt.stopPropagation();
-          elem.prop("checked", ! elem.is(":checked"));
+          elem.val(-parseInt(elem.val()));
+          elem.attr('data-chosen', elem.val());
         }
-        if($(this).is(":checked")) {
+        console.log($(this).val());
+        if($(this).val() == "1") {
             $.ajax({
-              url: '/user/subscribe/' +  $(this)[0].value,
+              url: '/user/subscribe/' +  $(this)[0].name,
               success: success,
               error: error
             });
-              console.log('/user/subscribe/' +  $(this)[0].value);
+              console.log('/user/subscribe/' +  $(this)[0].name);
         } else {
           $.ajax({
-            url: '/user/unsubscribe/' +  $(this)[0].value,
+            url: '/user/unsubscribe/' +  $(this)[0].name,
             success: success,
             error: error
           });
-            console.log('/user/unsubscribe/' +  $(this)[0].value);
+            console.log('/user/unsubscribe/' +  $(this)[0].name);
         }
     });
 });

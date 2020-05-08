@@ -308,8 +308,8 @@ class WebSeminar(object):
 
         return toggle(
             tglid="tlg" + self.shortname,
-            value=self.shortname,
-            checked=self.is_subscribed(),
+            name=self.shortname,
+            value=1 if self.is_subscribed() else -1,
             classes="subscribe",
         )
 

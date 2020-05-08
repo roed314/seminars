@@ -444,9 +444,12 @@ class WebTalk(object):
         if current_user.is_anonymous:
             return ""
 
-        value = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
+        name = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
         return toggle(
-            tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
+            tglid="tlg" + name.replace('/','--'),
+            name=name,
+            value=1 if self.is_subscribed() else -1,
+            classes="subscribe"
         )
 
     def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
