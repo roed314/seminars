@@ -385,7 +385,7 @@ class WebSeminar(object):
                 if t is None:
                     datetime_tds = '<td></td><td></td><td></td>'
                 else:
-                    datetime_tds = t.strftime('<td class="weekday">%a</td><td class="date">%b %-d</td><td class="time">%H:%M</td>')
+                    datetime_tds = t.strftime('<td class="weekday">%a</td><td class="date">%b %d</td><td class="time">%H:%M</td>')
         cols = []
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
