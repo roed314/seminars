@@ -46,7 +46,7 @@ class TopicDAG(object):
         if manage is not None:
             # manage is a talk or seminar
             return {topic: 1 for topic in manage.topics}
-        res = defaultdict(int)
+        res = defaultdict(lambda:-1)
         if request.cookies.get("topics", ""):
             # old key
             for elt in request.cookies.get("topics", "").split(","):
@@ -63,11 +63,11 @@ class TopicDAG(object):
                 key, val = elt.split(":", 1)
                 try:
                     val = int(val)
-                    if val in [0, 1, 2] and key in self.by_id:
+                    if val in [-1, 0, 1] and key in self.by_id:
                         res[key] = int(elt)
                 except ValueError:
                     pass
-        res[None] = 1 if request.cookies.get('filter_topic', '0') != '0' else 0
+        res[None] = 1 if request.cookies.get('filter_topic', '0') != '0' else -1
         return res
 
     def _link(self, parent_id="root", topic_id=None, counts={}, manage=None):
