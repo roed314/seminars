@@ -177,7 +177,7 @@ def edit_seminar():
             if similar:
                 return render_template(
                     "show_similar.html",
-                    seminar=seminar,
+                    newseminar=seminar,
                     title=title,
                     section=manage,
                     subsection="home",
