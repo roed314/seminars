@@ -5,10 +5,8 @@ from seminars.utils import (
     Toggle,
     ics_file,
     restricted_topics as user_topics,
-    subject_dict,
     subject_pairs,
     topdomain,
-    topics,
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
