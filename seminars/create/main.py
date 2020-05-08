@@ -843,11 +843,13 @@ def layout_schedule(seminar, data):
                 if d >= midnight_begin and d < midnight_end + day:
                     newslots.append((seminar.show_schedule_date(d), seminar.time_slots[i], None))
             w = w + day * seminar.frequency
-        # remove slots that are (exactly) matched by an existing talk
-        # this should handle slots that occur with multiplicity
+        # remove slots that for which there is an existing talk on the same day
+        # remove one slot for each talk in order, rather than trying to match times
+        # this works better in situations where the times vary
         for t in slots:
-            if (t[0], t[1], None) in newslots:
-                newslots.remove((t[0], t[1], None))
+            sameday = [s for s in newslots if s[0] == t[0]]
+            if sameday:
+                newslots.remove(sameday[0])
         slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
     return slots
 
