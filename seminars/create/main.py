@@ -170,8 +170,7 @@ def edit_seminar():
         if seminar.institutions:
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
         if not notsimilar:
-            query = {'is_conference': seminar.is_conference}
-            parse_substring(seminar.name, query, "name", ["name"])
+            query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
             similar = [s for s in seminars_search(query)]
             if seminar.institutions:
                 similar = [s for s in similar if s["institutions"] and set(seminar.institutions) == set(s["institutions"])]
