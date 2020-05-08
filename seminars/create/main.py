@@ -47,7 +47,6 @@ from seminars.institution import (
     institution_types,
     institutions,
 )
-from seminars.homepage.main import parse_substring
 from seminars.lock import get_lock
 from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from lmfdb.utils import flash_error

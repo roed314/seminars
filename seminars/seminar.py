@@ -370,25 +370,23 @@ class WebSeminar(object):
         include_subscribe=True,
         show_attributes=False,
     ):
-        cols = []
+        datetime_tds = ""
         if include_datetime:
             if conference: # include start and end date instead
-                if self.start_date is None:
-                    cols.append(('class="date"', ""))
+                if self.is_conference and self.start_date and self.end_date:
+                    if self.start_date == self.end_date:
+                        datetime_tds = '<td colspan="2" class="date">' + self._show_date(self.start_date) + '</td>'
+                    else:
+                        datetime_tds = '<td class="date">' + self._show_date(self.start_date) + '</td><td class="date">' + self._show_date(self.end_date) + '</td>'
                 else:
-                    cols.append(('class="date"', self.start_date.strftime("%a %b %-d")))
-                if self.end_date is None:
-                    cols.append(('class="date"', ""))
-                else:
-                    cols.append(('class="date"', self.end_date.strftime("%a %b %-d")))
+                    datetime_tds = '<td class="date"></td><td class="date"></td>'
             else: # could include both conferences and seminar series
                 t = adapt_datetime(self.next_talk_time)
                 if t is None:
-                    cols.append(('class="date"', ""))
-                    cols.append(('class="time"', ""))
+                    datetime_tds = '<td class="date"></td><td class="time"></td>'
                 else:
-                    cols.append(('class="date"', t.strftime("%a %b %-d")))
-                    cols.append(('class="time"', t.strftime("%H:%M")))
+                    datetime_tds = '<td class="date">' + self._show_date(t) + '</td><td class="time"></td>' + t.strftime("HH:MM") + '</td>'
+        cols = []
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
             cols.append(('class="institution"', self.show_institutions()))
@@ -398,7 +396,7 @@ class WebSeminar(object):
             cols.append(('class="topics"', self.show_topics()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
-        return "".join("<td %s>%s</td>" % c for c in cols)
+        return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
         return [rec["email"].lower() for rec in self.organizer_data if rec["email"]] + [
