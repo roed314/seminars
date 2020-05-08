@@ -17,6 +17,7 @@ from six import string_types
 from urllib.parse import urlparse
 import pytz
 import re
+from .toggle import toggle
 
 weekdays = [
     "Monday",
@@ -648,8 +649,7 @@ class Toggle(SearchBox):
         main = toggle(
             tglid="toggle_%s" % self.name,
             name=self.name,
-            value="yes",
-            checked=info is not None and info.get(self.name, False),
+            value=1 if (info is not None and info.get(self.name, False)) else -1
         )
         return '<span style="display: inline-block">%s</span>' % (main,)
 

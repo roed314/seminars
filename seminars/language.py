@@ -1,6 +1,7 @@
 import iso639
 from seminars import db
 from seminars.toggle import toggle
+from flask import request
 
 class Languages(object):
     def __init__(self):
@@ -34,7 +35,7 @@ class Languages(object):
 
     def search_options(self):
         return ([("", ""), ("en", "English")] +
-                [(code, lang_dict[code]) for code in self.used() if code != "en"])
+                [(code, self._data[code]) for code in self.used() if code != "en"])
 
     def _link(self, code=None, counts={}):
         if code is None:
@@ -50,7 +51,9 @@ class Languages(object):
             onchange = 'toggleFilters(this.id);'
         else:
             onchange = 'toggleLanguage(this.id);'
-        return toggle(code, "", onchange=onchange)
+        return toggle(code,
+                      value = 1 if request.cookies.get('filter_language', '0') != '0' else -1,
+                      onchange=onchange)
 
     def filter_link(self, code=None, counts={}):
         padding = ' style="padding-right: 2em;"' if code is None else ''

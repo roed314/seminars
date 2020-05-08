@@ -131,7 +131,7 @@ def parse_date(info, query):
 
 def parse_video(info, query):
     v = info.get("video")
-    if v == "yes":
+    if v == "1":
         query["video_link"] = {"$ne": ''}
 
 
