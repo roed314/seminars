@@ -13,12 +13,14 @@
     <input type="hidden" name="is_conference" value="{% if newseminar.is_conference %}yes{% else %}no{% endif %}"/>
     <input type="hidden" name="similar" value="no" />
     <div class='searchresults'>
+      {% set conf = newseminar.is_conference %}
       <table class='ntdata'>
         <thead>
-          <tr>{{ series_header() | safe }}</tr>
+          <tr>{{ series_header(include_subscribe=False,conference=conf,include_datetime=conf) | safe }}</tr>
         </thead>
         {% for seminar in similar %}
-          <tr>{{ seminar.oneline() | safe }}</tr>
+        {% if seminar.
+          <tr>{{ seminar.oneline(include_subscribe=False,conference=conf,include_datetime=conf) | safe }}</tr>
         {% endfor %}
       </table>
     </div>
