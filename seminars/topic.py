@@ -30,17 +30,17 @@ class TopicDAG(object):
     def _link(self, parent_id="root", topic_id=None, counts={}):
         if topic_id is None:
             tid = name = "topic"
-            name = "topic"
             onclick = "toggleFilterView(this.id)"
+            count = ""
         else:
             tid = topic_id
             topic = self.by_id[tid]
             name = topic.name
+            count = counts.get(topic_id, 0)
+            count = (" (%s)" % count) if count else ""
             if not topic.children:
-                return name
+                return name + count
             onclick = "toggleTopicView('%s', '%s')" % (parent_id, tid)
-        count = counts.get(topic_id, 0)
-        count = (" (%s)" % count) if count else ""
         return '<a id="{0}-filter-btn" class="likeknowl {1}-tlink" onclick="{2}; return false;">{3}</a>{4}'.format(tid, parent_id, onclick, name, count)
 
     def _toggle(self, topic_id=None):
@@ -56,10 +56,11 @@ class TopicDAG(object):
         return tclass(tid, "", onchange=onchange)
 
     def filter_link(self, parent_id="root", topic_id=None, counts={}):
-        return "<td>%s</td><td>%s</td>" % (self._toggle(topic_id), self._link(parent_id, topic_id, counts))
+        padding = ' style="padding-right: 2em;"' if topic_id is None else ''
+        return "<td>%s</td><td%s>%s</td>" % (self._toggle(topic_id), padding, self._link(parent_id, topic_id, counts))
 
     def link_pair(self, parent_id="root", topic_id=None, counts={}, cols=1):
-        return """<div class="topic_toggle col{0}">
+        return """<div class="toggle_pair col{0}">
   <table><tr>{1}</tr></table>
 </div>""".format(cols, self.filter_link(parent_id, topic_id, counts))
 

@@ -6,7 +6,6 @@ from seminars import db
 from seminars.create import create
 from seminars.utils import (
     adapt_datetime,
-    clean_language,
     clean_subjects,
     clean_topics,
     flash_warning,
@@ -47,6 +46,7 @@ from seminars.institution import (
     institution_types,
     institutions,
 )
+from seminars.language import languages
 from seminars.lock import get_lock
 from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from lmfdb.utils import flash_error
@@ -408,7 +408,7 @@ def save_seminar():
 
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
+    data["language"] = languages.clean(data.get("language"))
     data["subjects"] = clean_subjects(data.get("subjects"))
     if not data["subjects"]:
         errmsgs.append(format_errmsg("Please select at least one subject."))
@@ -725,7 +725,7 @@ def save_talk():
     if data["start_time"] is None or data["end_time"] is None:
         errmsgs.append("Talks must have both a start and end time.")
     data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
+    data["language"] = languages.clean(data.get("language"))
     data["subjects"] = clean_subjects(data.get("subjects"))
     if not data["subjects"]:
         errmsgs.append("Please select at least one subject")

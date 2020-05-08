@@ -300,13 +300,6 @@ function toggleTopic(id) {
         }
     }
 }
-function getAllTopics(subject) {
-    var toggles = []
-    $(".topic_toggle.subject-"+subject).each(function() {
-        toggles.push(this.id);
-    })
-    return toggles;
-}
 
 function toggleTopicView(pid, cid) {
     var pane = $("#"+pid+"-"+cid+"-pane");
@@ -319,28 +312,8 @@ function toggleTopicView(pid, cid) {
     }
 }
 
-function selectAllTopics(subject) {
-    var toggles = getAllTopics(subject);
-    toggles.forEach(function(id,index){
-        var toggler = $("#" + id);
-        if (! toggler.hasClass("topicselected")) {
-            toggleTopic(id);
-        }
-    })
-}
-
-function clearAllTopics(subject) {
-    var toggles = getAllTopics(subject);
-    toggles.forEach(function(id,index){
-        var toggler = $("#" + id);
-        if (toggler.hasClass("topicselected")) {
-            toggleTopic(id);
-        }
-    })
-}
-
-var filter_menus = ['topic', 'subject', 'language'];
-var filter_classes = [['.topic-filtered', topicFiltering], ['.subject-filtered', subjectFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering]];
+var filter_menus = ['topic', 'language'];
+var filter_classes = [['.topic-filtered', topicFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering]];
 function talksToShow(talks) {
     for (i=0; i<filter_classes.length; i++) {
         if (filter_classes[i][1]()) {
@@ -408,11 +381,14 @@ function toggleFilterView(id) {
         $('#subjects-tabs').tabs({ active: subject_list.indexOf(max_tab)});
     }
     for (i=0; i<filter_menus.length; i++) {
-        var elt = $(filterMenuId(filter_menus[i]));
+        var menu = $(filterMenuId(filter_menus[i]));
+        var link = $("#"+filter_menus[i]+"-filter-btn");
         if (ftype == filter_menus[i]) {
-            elt.slideToggle(150);
+            menu.slideToggle(150);
+            link.toggleClass("active");
         } else {
-            elt.slideUp(150);
+            menu.slideUp(150);
+            link.removeClass("active");
         }
     }
 }

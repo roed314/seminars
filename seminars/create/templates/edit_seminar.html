@@ -264,14 +264,7 @@ const instOptions = [
   {% endfor %}
 ];
 
-const langOptions = [
-  {% for code, name in languages_dict.items() %}
-  {
-    label: "{{ name | safe}}",
-    value: "{{ code }}",
-  },
-  {% endfor %}
-];
+{{ languages.js_options() | safe }}
 
 const subjOptions = [
   {% for sid, name in subjects %}

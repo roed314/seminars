@@ -15,7 +15,6 @@ from psycopg2.sql import SQL
 from seminars import db
 from six import string_types
 from urllib.parse import urlparse
-import iso639
 import pytz
 import re
 
@@ -175,29 +174,6 @@ def is_nighttime(t):
         return False
     # These are times that might be mixed up by using a 24 hour clock
     return 1 <= t.hour < 6
-
-
-def simplify_language_name(name):
-    name = name.split(";")[0]
-    if "(" in name:
-        name = name[: name.find("(") - 1]
-    return name
-
-
-@lru_cache(maxsize=None)
-def languages_dict():
-    return {
-        lang["iso639_1"]: simplify_language_name(lang["name"])
-        for lang in iso639.data
-        if lang["iso639_1"]
-    }
-
-
-def clean_language(inp):
-    if inp not in languages_dict():
-        return "en"
-    else:
-        return inp
 
 
 def sanity_check_times(start_time, end_time):

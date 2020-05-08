@@ -18,7 +18,6 @@ from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
 from seminars.utils import (
-    languages_dict,
     restricted_topics,
     subject_pairs,
     top_menu,
@@ -26,6 +25,7 @@ from seminars.utils import (
     topics,
 )
 from seminars.topic import topic_dag
+from seminars.language import languages
 from seminars.toggle import toggle, toggle3way
 from seminars.knowls import static_knowl
 from .seminar import series_header
@@ -143,12 +143,12 @@ def ctx_proc_userdata():
 
     data["talks_header"] = talks_header
     data["series_header"] = series_header
-    data["languages_dict"] = languages_dict()
     data["static_knowl"] = static_knowl
     data["topdomain"] = topdomain()
     data["toggle"] = toggle
     data["toggle3way"] = toggle3way
     data["topic_dag"] = topic_dag
+    data["languages"] = languages
 
     return data
 

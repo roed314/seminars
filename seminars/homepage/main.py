@@ -4,13 +4,13 @@ from seminars.talk import talks_search, talks_lucky, talks_lookup
 from seminars.utils import (
     Toggle,
     ics_file,
-    languages_dict,
     restricted_topics as user_topics,
     subject_dict,
     subject_pairs,
     topdomain,
     topics,
 )
+from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response
@@ -281,16 +281,10 @@ class TalkSearchArray(SearchArray):
             colspan=(1, 2, 1),
             width=160 * 2 - 1 * 20,
         )
-        lang_dict = languages_dict()
         language = SelectBox(
             name="talk_language",
             label="Language",
-            options=[("", ""), ("en", "English")]
-            + [
-                (code, lang_dict[code])
-                for code in sorted(db.talks.distinct("language"))
-                if code != "en"
-            ],
+            options=languages.search_options(),
         )
         video = Toggle(name="video", label="Has video")
         self.array = [
@@ -357,16 +351,10 @@ class SemSearchArray(SearchArray):
                 ("users", "Any logged-in user can view link"),
             ],
         )
-        lang_dict = languages_dict()
         language = SelectBox(
             name="seminar_language",
             label="Language",
-            options=[("", ""), ("en", "English")]
-            + [
-                (code, lang_dict[code])
-                for code in sorted(db.talks.distinct("language"))
-                if code != "en"
-            ],
+            options=languages.search_options(),
         )
         ## number of results to display
         # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
@@ -451,10 +439,9 @@ def _get_counters(objects):
             for subject in object.subjects:
                 subject_counts[subject] += 1
         language_counts[object.language] += 1
-    lang_dict = languages_dict()
-    languages = [(code, lang_dict[code]) for code in language_counts]
-    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
-    return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts, "languages": languages}
+    langs = [(code, languages.show(code)) for code in language_counts]
+    langs.sort(key=lambda x: (-language_counts[x[0]], x[1]))
+    return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts}
 
 def _get_row_attributes(objects):
     filtered_subjects = set(request.cookies.get('subjects', '').split(','))

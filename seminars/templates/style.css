@@ -490,12 +490,10 @@ div.topic_cmd {
     color: {{color.header_background}};
 }*/
 
-div.subject_toggle, div.topic_toggle, div.language_toggle {
+div.toggle_pair {
+    padding: 3px;
     display: inline-block;
     color: black;
-}
-div.topic_toggle {
-    padding: 3px;
 }
 div.col1 {
     min-width: 90%;
@@ -1525,7 +1523,14 @@ table.statgrid td.cnt {
 a.likeknowl {
     border-bottom: 1px dotted {{ color.knowl_underline }};
 }
-a.likeknowl:hover {
+a.likeknowl:hover, a.likeknowl.active {
+    border-bottom: 2px solid {{ color.knowl_underline }};
+    background: {{ color.knowl_hover }};
+    color: {{ color.knowl_hyper_text }};
+    margin: 0;
+    padding: 3px 0 0 0;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
     cursor: pointer;
 }
 

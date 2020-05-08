@@ -12,8 +12,8 @@ from seminars.utils import (
     adapt_datetime,
     make_links,
     topic_dict,
-    languages_dict,
 )
+from seminars.language import languages
 from seminars.toggle import toggle
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -280,8 +280,7 @@ class WebTalk(object):
 
     def show_lang_topics(self):
         if self.language and self.language != "en":
-            ldict = languages_dict()
-            language = '<span class="language_label">%s</span>' % ldict.get(self.language, "Unknown language")
+            language = '<span class="language_label">%s</span>' % languages.show(self.language)
         else:
             language = ""
         if self.topics:
