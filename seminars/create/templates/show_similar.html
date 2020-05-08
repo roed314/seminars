@@ -12,7 +12,7 @@
     <div class='searchresults'>
       <table class='ntdata'>
         <thead>
-          <tr>{{ series_header() }}</tr>
+          <tr>{{ series_header() | safe }}</tr>
         </thead>
         {% for seminar in similar %}
           <tr>{{ seminar.oneline() | safe }}</tr>
