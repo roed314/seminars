@@ -383,9 +383,9 @@ class WebSeminar(object):
             else: # could include both conferences and seminar series
                 t = adapt_datetime(self.next_talk_time)
                 if t is None:
-                    datetime_tds = '<td></td><td></td><td></td><td></td>'
+                    datetime_tds = '<td></td><td></td><td></td>'
                 else:
-                    datetime_tds = t.strftime('<td class="weekday">%a</td><td class="month">%b</td><td class="day">%-d</td><td class="time">%H:%M</td>')
+                    datetime_tds = t.strftime('<td class="weekday">%a</td><td class="date">%b %-d</td><td class="time">%H:%M</td>')
         cols = []
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
@@ -549,7 +549,7 @@ def series_header(
         if conference:
             cols.append(('colspan="2" class="yourtime"', "Dates"))
         else:
-            cols.append(('colspan="4" class="yourtime"', "Next talk"))
+            cols.append(('colspan="3" class="yourtime"', "Next talk"))
     cols.append(("", "Name"))
     if include_institutions:
         cols.append(("", "Institutions"))

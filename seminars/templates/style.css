@@ -537,8 +537,9 @@ table.ntdata th.yourtime {
 }
 td.date, td.timerange {
     white-space: nowrap;
+    text-align: right;
 }
-td.weekday, td.month, td.day {
+td.weekday, td.date {
     white-space: nowrap;
     margin: 0px;
     padding: 0px;
