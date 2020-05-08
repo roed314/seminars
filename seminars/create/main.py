@@ -173,7 +173,7 @@ def edit_seminar():
             query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
             similar = [s for s in seminars_search(query)]
             if seminar.institutions:
-                similar = [s for s in similar if s["institutions"] and set(seminar.institutions) == set(s["institutions"])]
+                similar = [s for s in similar if s.institutions and set(seminar.institutions) == set(s.institutions)]
             if similar:
                 return render_template(
                     "show_similar.html",
