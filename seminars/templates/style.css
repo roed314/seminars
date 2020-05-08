@@ -538,6 +538,11 @@ table.ntdata th.yourtime {
 td.date, td.timerange {
     white-space: nowrap;
 }
+td.weekday, td.month, td.day {
+    white-space: nowrap;
+    margin: 0px;
+    padding: 0px;
+}
 td.time, td.subscribe {
     text-align: right;
 }
