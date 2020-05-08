@@ -375,7 +375,7 @@ class WebSeminar(object):
             if conference: # include start and end date instead
                 if self.is_conference and self.start_date and self.end_date:
                     if self.start_date == self.end_date:
-                        datetime_tds = '<td colspan="2" class="date">' + self._show_date(self.start_date) + '</td>'
+                        datetime_tds = '<td colspan="2" align="center" class="date">' + self._show_date(self.start_date) + '</td>'
                     else:
                         datetime_tds = '<td class="date">' + self._show_date(self.start_date) + '</td><td class="date">' + self._show_date(self.end_date) + '</td>'
                 else:
