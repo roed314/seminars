@@ -161,7 +161,7 @@ def edit_seminar():
         if not seminar.name:
             errmsgs.append("Seminar name is required.")
         elif len(seminar.name) < 3:
-            errmsgs.append("Seminar name too short, at least three chracters are required.")
+            errmsgs.append(format_errmsg("Seminar name %s is too short, at least three chracters are required.", seminar.name)
         if errmsgs:
             return show_input_errors(errmsgs)
         seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", False)
