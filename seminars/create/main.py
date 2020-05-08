@@ -180,6 +180,7 @@ def edit_seminar():
                     seminar=seminar,
                     title=title,
                     section=manage,
+                    subsection=home,
                     similar=similar,
                 )
 
