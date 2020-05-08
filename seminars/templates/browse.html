@@ -25,7 +25,7 @@
         #}
         {% if user.is_authenticated %}
         <td >
-          {{ toggle(tglid="enable_calendar_filter", value="", onchange="toggleFilters(this.id);") | safe }}
+          {{ toggle(tglid="enable_calendar_filter", value=1 if request.cookies.get('filter_calendar', '0') != '0' else -1, onchange="toggleFilters(this.id);") | safe }}
         </td>
         <td style="padding-right: 2em;">
           Show only saved events

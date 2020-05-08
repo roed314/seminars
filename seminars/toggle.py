@@ -2,7 +2,7 @@
 def toggle(tglid, value, classes="", onchange="", name=""):
     if classes:
         classes += " "
-    #FIXME assert value in [-1, 1]
+    assert value in [-1, 1]
     return """
 <input
     class="{classes}tgl tgl-light tgl2way"
@@ -27,7 +27,7 @@ def toggle(tglid, value, classes="", onchange="", name=""):
 def toggle3way(tglid, value, classes="", onchange="", name=""):
     if classes:
         classes += " "
-    #FIXME assert value in [-1, 0, 1]
+    assert value in [-1, 0, 1]
     return """
 <input
     class="{classes}tgl tgl-light tgl3way"
