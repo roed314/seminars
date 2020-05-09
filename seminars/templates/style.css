@@ -573,7 +573,7 @@ table.ntdata td.enddate {
     padding-left: 2px;
 }
 
-table.ntdata td.name {
+table.ntdata td.seriesname {
     text-align: left;
     min-width: 150px;
 }

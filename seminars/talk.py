@@ -454,7 +454,7 @@ class WebTalk(object):
         datetime_tds = self.start_time.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
         if include_seminar:
-            cols.append(('class="seminar"', self.show_seminar()))
+            cols.append(('class="seriesname"', self.show_seminar()))
         cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
         cols.append(('class="talktitle"', self.show_knowl_title(_external=_external)))
         if include_slides:
