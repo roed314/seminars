@@ -24,6 +24,7 @@ from seminars.utils import (
     daytimes_early,
     daytimes_long,
     date_and_daytimes_to_times,
+    maxlength,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -58,7 +59,6 @@ from dateutil.parser import parse as parse_time
 import pytz
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
-MAX_SLOTS = 12  # Max time slots in a seminar series, must be a multiple of 3
 
 
 @create.route("manage/")
@@ -129,6 +129,7 @@ WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
         deleted_talks=deleted_talks,
         institution_known=institution_known,
         institutions=institutions(),
+        maxlength=maxlength,
         section=manage,
         subsection="home",
         title=manage,
@@ -197,7 +198,7 @@ def edit_seminar():
         institutions=institutions(),
         short_weekdays=short_weekdays,
         timezones=timezones,
-        max_slots=MAX_SLOTS,
+        maxlength=maxlength,
         lock=lock,
     )
 
@@ -223,6 +224,7 @@ def delete_seminar(shortname):
             institutions=institutions(),
             weekdays=weekdays,
             timezones=timezones,
+            maxlength=maxlength,
             lock=lock,
         )
 
@@ -312,6 +314,7 @@ def delete_talk(semid, semctr):
             subsection="edittalk",
             institutions=institutions(),
             timezones=timezones,
+            maxlength=maxlength,
         )
 
     if not talk.user_can_delete():
@@ -441,7 +444,7 @@ def save_seminar():
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     data["weekdays"] = []
     data["time_slots"] = []
-    for i in range(MAX_SLOTS):
+    for i in range(maxlength["time_slots"]):
         weekday = daytimes = None
         try:
             col = "weekday" + str(i)
@@ -585,6 +588,7 @@ def edit_institution():
         title=title,
         section="Manage",
         subsection="editinst",
+        maxlength=maxlength,
     )
 
 
@@ -702,6 +706,7 @@ def edit_talk():
         subsection="edittalk",
         institutions=institutions(),
         timezones=timezones,
+        maxlength=maxlength,
         token=token,
         **extras
     )
@@ -908,6 +913,7 @@ def edit_seminar_schedule():
         schedule=schedule,
         section="Manage",
         subsection="schedule",
+        maxlength=maxlength,
     )
 
 
