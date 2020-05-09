@@ -571,6 +571,8 @@ def edit_institution():
     else:
         data = request.args
     shortname = data.get("shortname", "")
+    if data.get("cancel") == "yes":
+        flash("Changes discarded.")
     new = data.get("new") == "yes"
     name = data.get("name", "")
     resp, institution = can_edit_institution(shortname, name, new)
