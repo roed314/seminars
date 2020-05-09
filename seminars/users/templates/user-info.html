@@ -22,7 +22,7 @@
     </table>
   </form>
 {% else %}
-<h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">logout</a>)</h1>
+<h1>Welcome, {{ user.name }} (<a href="{{ url_for(".logout") }}">logout</a>)</h1>
   <h3> Favorite series </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
