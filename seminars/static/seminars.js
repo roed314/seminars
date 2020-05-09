@@ -345,12 +345,19 @@ function toggleTopicDAG(togid) {
     var to_hide = [];
     console.log(togid);
     var topic = topicFromPair(togid);
-    var toggleval = $("#" + togid).val();
+    var toggle = $("#" + togid);
+    var toggleval = toggle.val();
     console.log(toggleval);
     setTopicCookie(topic, toggleval);
     if (toggleval == 0) {
         $("label.sub_" + topic).css("visibility", "visible");
         $("a.sub_"+topic+",span.sub_"+topic).removeClass("not_toggleable");
+        var pane = $("#"+togid+"-pane");
+        var is_visible = pane.is(":visible");
+        if (!is_visible) {
+            var pair = togid.split("--");
+            toggleTopicView(pair[0], pair[1]);
+        }
         // Need to show rows corresponding to sub-topics.
         // We can't just use $("tgl.sub_"+topic).each(),
         // since some 1s may be under -1s.
@@ -374,6 +381,8 @@ function toggleTopicDAG(togid) {
             to_hide.push(topic);
         }
     }
+    console.log("show", to_show);
+    console.log("hide", to_hide);
     if (to_show.length > 0) {
         var talks = $();
         for (let i=0; i<to_show.length; i++) {
@@ -402,7 +411,7 @@ function toggleTopicDAG(togid) {
 }
 
 function manageTopicView(pid, cid) {
-    var pane = $("#"+pid+"-"+cid+"-pane");
+    var pane = $("#"+pid+"--"+cid+"-pane");
     var is_visible = pane.is(":visible");
     $("."+pid+"-subpane").hide();
     $("."+pid+"-tlink").removeClass("active");
@@ -413,15 +422,27 @@ function manageTopicView(pid, cid) {
 }
 function toggleTopicView(pid, cid) {
     console.log(pid, cid);
-    var pane = $("#"+pid+"-"+cid+"-pane");
+    var tid = "#"+pid+"--"+cid;
+    var toggle = $(tid);
+    var pane = $(tid+"-pane");
     var is_visible = pane.is(":visible");
     $("."+pid+"-subpane").hide();
     $("."+pid+"-tlink").removeClass("active");
     if (!is_visible) {
         pane.show();
         $("#"+cid+"-filter-btn").addClass("active");
-        $("#"+pid+"--"+cid).val(1).trigger('change');;
-    } // If we're closing the pane and we haven't selected anything, should we set the toggle to 0?
+        // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
+        $(tid).attr('data-chosen', 0);
+        if (toggle.val() == "-1") {
+            $(tid).val(0)
+            $(tid).trigger('change');
+        } else if (toggle.val() == "1") {
+            $(tid).val(-1)
+            $(tid).trigger('change');
+            $(tid).val(0)
+            $(tid).trigger('change');
+        }
+    }
 }
 
 var filter_menus = ['topic', 'language'];
@@ -437,7 +458,7 @@ function talksToShow(talks) {
 }
 function filterMenuId(ftype) {
     if (ftype == "topic") {
-        return "#root-topic-pane";
+        return "#root--topic-pane";
     } else {
         return "#"+ftype+"-filter-menu";
     }
@@ -475,22 +496,7 @@ function toggleFilterView(id) {
         toggleFilters(filtid, true);
     }
     if (ftype == "topic" && !visible) {
-        // Count the number of active topics in each tab
-        var max_tab_count = 0;
-        var max_tab = "math";
-        let tabs = $("#subjects-tabs").children("div.tab-subject-panel");
-        tabs.each(function (i, elt) {
-            let tab_count = $("#"+elt.id).children("div.topicselected").length;
-            //console.log(elt.id, tab_count, max_tab_count);
-            if (tab_count > max_tab_count) {
-                max_tab_count = tab_count;
-                max_tab = elt.id.split("-")[1];
-            }
-        });
-        //console.log(max_tab, );
-        // subject_list defined at the bottom of browse.html because I can't figure out how to get
-        // a list of subjects out of jquery.
-        $('#subjects-tabs').tabs({ active: subject_list.indexOf(max_tab)});
+        $('#topic').attr('data-chosen', 1);
     }
     for (i=0; i<filter_menus.length; i++) {
         var menu = $(filterMenuId(filter_menus[i]));

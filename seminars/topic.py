@@ -171,7 +171,7 @@ class TopicDAG(object):
         else:
             cols = 6
         return """
-<div id="{0}-{1}-pane" class="filter-menu {0}-subpane" style="display:none;">
+<div id="{0}--{1}-pane" class="filter-menu {0}-subpane" style="display:none;">
 {2}
 {3}
 </div>""".format(
