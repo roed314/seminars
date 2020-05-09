@@ -578,6 +578,11 @@ table.ntdata td.seriesname {
     min-width: 180px;
 }
 
+table.ntdata td.institutions {
+    text-align: left;
+    min-width: 180px;
+}
+
 table ntdata td.subscribe {
     text-align: right;
     padding-right: 0px;
@@ -592,7 +597,7 @@ table.ntdata td.talktitle {
 }
 
 table.ntdata td.description {
-    min-width: 150px;
+    min-width: 180px;
 }
 
 

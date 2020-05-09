@@ -389,7 +389,7 @@ class WebSeminar(object):
         cols = []
         cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
-            cols.append(('class="institution"', self.show_institutions()))
+            cols.append(('class="institutions"', self.show_institutions()))
         if include_description:
             cols.append(('class="description"', self.show_description()))
         if include_topics:
@@ -550,9 +550,9 @@ def series_header(
             cols.append(('colspan="2" class="yourtime"', "Dates"))
         else:
             cols.append(('colspan="3" class="yourtime"', "Next talk"))
-    cols.append(("", "Name"))
+    cols.append(('class="seriesname"', "Name"))
     if include_institutions:
-        cols.append(("", "Institutions"))
+        cols.append(('class="institutions"', "Institutions"))
     if include_description:
         cols.append(('class="description"', "Description"))
     if include_topics:
