@@ -375,17 +375,17 @@ class WebSeminar(object):
             if conference: # include start and end date instead
                 if self.is_conference and self.start_date and self.end_date:
                     if self.start_date == self.end_date:
-                        datetime_tds = '<td colspan="2" align="center" class="date">' + self._show_date(self.start_date) + '</td>'
+                        datetime_tds = '<td colspan="2" class="onedate">' + self._show_date(self.start_date) + '</td>'
                     else:
-                        datetime_tds = '<td class="date">' + self._show_date(self.start_date) + '</td><td class="date">' + self._show_date(self.end_date) + '</td>'
+                        datetime_tds = '<td class="startdate">' + self._show_date(self.start_date) + '</td><td class="enddate">' + self._show_date(self.end_date) + '</td>'
                 else:
-                    datetime_tds = '<td class="date"></td><td class="date"></td>'
+                    datetime_tds = '<td class="startdate"></td><td class="enddate"></td>'
             else: # could include both conferences and seminar series
                 t = adapt_datetime(self.next_talk_time)
                 if t is None:
                     datetime_tds = '<td></td><td></td><td></td>'
                 else:
-                    datetime_tds = t.strftime('<td class="weekday">%a</td><td class="date">%b %d</td><td class="time">%H:%M</td>')
+                    datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
         cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
@@ -554,7 +554,7 @@ def series_header(
     if include_institutions:
         cols.append(("", "Institutions"))
     if include_description:
-        cols.append(('style="min-width:280px;"', "Description"))
+        cols.append(('class="description"', "Description"))
     if include_topics:
         cols.append(("", "Topics"))
     if include_subscribe:

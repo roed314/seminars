@@ -451,7 +451,7 @@ class WebTalk(object):
         )
 
     def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
-        datetime_tds = self.start_time.strftime('<td class="weekday">%a</td><td class="date">%b %d</td><td class="time">%H:%M</td>')
+        datetime_tds = self.start_time.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
         if include_seminar:
             cols.append(('class="seminar"', self.show_seminar()))
@@ -547,7 +547,7 @@ def talks_header(include_seminar=True, include_slides=False, include_video=False
     if include_seminar:
         cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
-    cols.append((' class="title" style="min-width:300px;"', "Title"))
+    cols.append((' class="title"', "Title"))
     if include_slides:
         cols.append(("", ""))
     if include_video:
