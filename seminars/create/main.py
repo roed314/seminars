@@ -567,7 +567,7 @@ def save_institution():
     raw_data = request.form
     shortname = raw_data["shortname"]
     new = raw_data.get("new") == "yes"
-    name = data.get("name", "")
+    name = raw_data.get("name", "")
     resp, institution = can_edit_institution(shortname, name, new)
     if resp is not None:
         return resp
