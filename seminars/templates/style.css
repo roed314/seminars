@@ -551,6 +551,11 @@ table.ntdata td.monthdate {
     padding-right: 2px;
 }
 
+table.ntdata td.time {
+    text-align: right;
+    padding-left: 2px;
+}
+
 table.ntdata td.startdate {
     text-align: left;
 }
@@ -566,10 +571,6 @@ table.ntdata td.enddate {
 table.ntdata td.name {
     text-align: left;
     min-width: 180px;
-}
-
-table.ntdata td.time {
-    text-align: right;
 }
 
 table ntdata td.subscribe {
