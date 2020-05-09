@@ -171,8 +171,12 @@ def edit_seminar():
         if not notsimilar:
             query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
             similar = [s for s in seminars_search(query)]
+            # When checking for simialr series, don't require an exact match on subjects/institutions
+            # match anything with institutions not set or with an institution in common, and only require a subject in common
             if seminar.institutions:
-                similar = [s for s in similar if s.institutions and set(seminar.institutions) == set(s.institutions)]
+                similar = [s for s in similar if not s.institutions or set(seminar.institutions).intersection(set(s.institutions))]
+            if seminar.subjects:
+                similar = [s for s in similar if set(seminar.subjects).intersection(set(s.subjects))]
             if similar:
                 return render_template(
                     "show_similar.html",
