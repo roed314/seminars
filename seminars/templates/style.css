@@ -575,7 +575,7 @@ table.ntdata td.enddate {
 
 table.ntdata td.seriesname {
     text-align: left;
-    min-width: 150px;
+    min-width: 180px;
 }
 
 table ntdata td.subscribe {
@@ -592,7 +592,7 @@ table.ntdata td.talktitle {
 }
 
 table.ntdata td.description {
-    min-width: 240px;
+    min-width: 150px;
 }
 
 
