@@ -1,9 +1,12 @@
 {% extends "homepage.html" %}
 {% block content %}
   {% set conf = newseminar.is_conference %}
-  {% if conf %} {% set typename = "conference" %} {% else %} {% set typename = "seminar series" %} {% endif %}
-  {% if (similar|length) > 1 %} {% set quant = "some that have" %} {% else %} {% set quant = "one that has" %} {% endif %}
-  <p>The name of the {{ typename }} <b>{{newseminar.name}}</b> you entered is similar to {{ quant }} already been created.</p>
+  {% if conf %} 
+    {% if (similar|length) > 1 %} {% set quant = "some conferences that have" %} {% else %} {% set quant = "a conference that has" %} {% endif %}
+  {% else %}
+    {% if (similar|length) > 1 %} {% set quant = "some seminar series that have" %} {% else %} {% set quant = "a seminar series that has" %} {% endif %}
+  {% endif %}
+  <p>The name of <b>{{newseminar.name}}</b> you entered is similar to the name of {{ phrase }} already been created.</p>
   <p>Please review the list below and click Continue or Cancel as appropriate.</p>
   <form id="seminarform" action="{{ url_for('.edit_seminar') }}" method="POST">
     <input type="hidden" name="shortname" value="{{ newseminar.shortname }}"/>

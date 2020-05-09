@@ -559,7 +559,7 @@ table.ntdata td.time {
 table.ntdata td.startdate {
     white-space: nowrap;
     text-align: left;
-    padding-right: 2px;
+    padding-right: 4px;
 }
 
 table.ntdata td.onedate {
@@ -570,7 +570,7 @@ table.ntdata td.onedate {
 table.ntdata td.enddate {
     white-space: nowrap;
     text-align: right;
-    padding-left: 2px;
+    padding-left: 4px;
 }
 
 table.ntdata td.seriesname {
