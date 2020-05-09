@@ -535,23 +535,27 @@ div.topicselected, div.languageselected, div.subjectselected {
 table.ntdata th.yourtime {
     text-align: center;
 }
-td.date, td.timerange {
+table.ntdata td.date, td.timerange {
     white-space: nowrap;
     text-align: right;
 }
-td.weekday, td.date {
+table.ntdata td.weekday, td.date {
     text-align: right;
     padding-left: 0px;
     padding-right: 0px;
 }
-td.time, td.subscribe {
+table.ntdata td.time, td.subscribe {
     text-align: right;
 }
-/*
-td.speaker {
+
+table.ntdata td.speaker {
     min-width: 136px;
 }
-*/
+
+table.ntdata td.title {
+    min-width: 240px;
+}
+
 
 .talk-table td:nth-child(6) {
     /* Title column on browse */
