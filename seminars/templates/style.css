@@ -540,9 +540,7 @@ td.date, td.timerange {
     text-align: right;
 }
 td.weekday, td.date {
-    white-space: nowrap;
-    margin: 0px;
-    padding: 0px;
+    padding: 20px;
 }
 td.time, td.subscribe {
     text-align: right;
