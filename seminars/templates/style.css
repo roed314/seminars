@@ -535,17 +535,71 @@ div.topicselected, div.languageselected, div.subjectselected {
 table.ntdata th.yourtime {
     text-align: center;
 }
-td.date, td.timerange {
+table.ntdata td.date, td.timerange {
     white-space: nowrap;
-}
-td.time, td.subscribe {
     text-align: right;
 }
-/*
-td.speaker {
-    min-width: 136px;
+table.ntdata td.weekday {
+    text-align: left;
+    padding-right: 2px;
 }
-*/
+
+table.ntdata td.monthdate {
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+table.ntdata td.time {
+    text-align: right;
+    padding-left: 2px;
+}
+
+table.ntdata td.startdate {
+    white-space: nowrap;
+    text-align: left;
+    padding-right: 4px;
+}
+
+table.ntdata td.onedate {
+    white-space: nowrap;
+    text-align: center;
+}
+
+table.ntdata td.enddate {
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 4px;
+}
+
+table.ntdata td.seriesname {
+    text-align: left;
+    min-width: 240px;
+}
+
+table.ntdata td.institutions {
+    text-align: left;
+    min-width: 180px;
+}
+
+table ntdata td.subscribe {
+    text-align: right;
+    padding-right: 0px;
+}
+
+table.ntdata td.speaker {
+    min-width: 120px;
+}
+
+table.ntdata td.talktitle {
+    min-width: 300px;
+}
+
+table.ntdata td.description {
+    min-width: 240px;
+}
+
 
 .talk-table td:nth-child(6) {
     /* Title column on browse */
