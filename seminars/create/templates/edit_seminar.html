@@ -194,7 +194,7 @@
           <td align="center">{{ KNOWL("organizer") }}</td>
           <td align="center">{{ KNOWL("display") }}</td>
         </thead>
-        {% for i in range(max_length["organizers"]) %}
+        {% for i in range(maxlength["organizers"]) %}
         <tr>
           {% if i > 0 and i < (seminar.organizer_data | length) %}
             <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
