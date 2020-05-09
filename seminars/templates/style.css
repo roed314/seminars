@@ -540,12 +540,12 @@ table.ntdata td.date, td.timerange {
     text-align: right;
 }
 table.ntdata td.weekday {
-    white-space: nowrap;
     text-align: left;
     padding-right: 0px;
 }
 
 table.ntdata td.monthdate {
+    white-space: nowrap;
     text-align: right;
     padding-left: 0px;
     padding-right: 0px;
