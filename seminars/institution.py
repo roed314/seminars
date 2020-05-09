@@ -106,11 +106,15 @@ class WebInstitution(object):
         link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
         return '<a href="%s"><i>%s</i></a>' % (link, "Contact this page's maintainer.")
 
-def can_edit_institution(shortname, new):
+def can_edit_institution(shortname, name, new):
     if not allowed_shortname(shortname) or len(shortname) < 2 or len(shortname) > 32:
         flash_error(
             "The identifier must be 2 to 32 characters in length and can include only letters, numbers, hyphens and underscores."
         )
+        return redirect(url_for("list_institutions"), 302), None
+    # We don't allow backticks so that we can use them to delimit strings in javascript
+    if "`" in name:
+        flash_error("The name must not include backticks")
         return redirect(url_for("list_institutions"), 302), None
     institution = db.institutions.lookup(shortname)
     # Check if institution exists
