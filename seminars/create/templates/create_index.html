@@ -40,6 +40,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     </table>
   {% endif %}
 {% endfor %}
+  
 <h2>Create a series</h2>
 
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
@@ -50,7 +51,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   {% else %}
     <input type="hidden" name="subjects" value=""/>
   {% endif %}
-  <table id="make_semconf">
+  <table id="make_semconf" style="margin-top: -10px;">
     <tr>
       <td>{{ ASTKNOWL("is_conference") }}</td>
       <td>
