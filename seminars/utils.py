@@ -27,11 +27,11 @@ daytime_re = re.compile(daytime_re_string)
 # Bounds on input field lengths
 MAX_SHORTNAME_LEN = 32
 MAX_DESCRIPTION_LEN = 64
-MAX_NAME_LEN = 128
+MAX_NAME_LEN = 100
 MAX_TITLE_LEN = 256
 MAX_EMAIL_LEN = 256
-MAX_URL_LEN = 1024
-MAX_TEXT_LEN = 65536
+MAX_URL_LEN = 256
+MAX_TEXT_LEN = 8192
 MAX_SLOTS = 12 # Must be a multiple of 3
 MAX_SPEAKERS = 8 
 MAX_ORGANIZERS = 10
@@ -44,6 +44,7 @@ maxlength = {
     'description' : MAX_DESCRIPTION_LEN,
     'full_name' : MAX_NAME_LEN, # FIXME we should really rename this column to name
     'homepage' : MAX_URL_LEN,
+    'institutions.name' : MAX_DESCRIPTION_LEN,
     'live_link' : MAX_URL_LEN,
     'name' : MAX_NAME_LEN,
     'organizers' : MAX_ORGANIZERS,
@@ -53,7 +54,7 @@ maxlength = {
     'slides_link' : MAX_URL_LEN,
     'speaker': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
     'speakers' : MAX_SPEAKERS,
-    'speaker_affliation': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speaker_affiliation': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
     'speaker_email': MAX_EMAIL_LEN,
     'speaker_homepage': MAX_URL_LEN,
     'stream_link' : MAX_URL_LEN,

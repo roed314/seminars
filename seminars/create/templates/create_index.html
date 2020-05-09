@@ -63,12 +63,12 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     </tr>
     <tr>
       <td>{{ ASTKNOWL("seminar_name") }}</td>
-      <td><input name="name" style="width:500px;" maxlength="100" placeholder="Thule topology colloquium series"/></td>
+      <td><input name="name" style="width:500px;" placeholder="Thule topology colloquium series" maxlength="{{ maxlength['name'] /></td>
       <td class="forminfo">Capitalize first word and proper nouns.</td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("seminar_shortname") }}</td>
-      <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="32"/></td>
+      <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="{{ maxlength['shortname'] /></td>
       <td class="forminfo">Use 3-32 characters, no spaces.
     </tr>
     {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
