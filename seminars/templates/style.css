@@ -540,6 +540,7 @@ table.ntdata td.date, td.timerange {
     text-align: right;
 }
 table.ntdata td.weekday {
+    white-space: nowrap;
     text-align: left;
     padding-right: 0px;
 }
@@ -581,7 +582,7 @@ table.ntdata td.speaker {
 }
 
 table.ntdata td.title {
-    min-width: 240px;
+    min-width: 300px;
 }
 
 table.ntdata td.description {
