@@ -249,8 +249,8 @@
 const topicOptions = [
   {% for ab, topic in user_topics(seminar) %}
   {
-    label: "{{ topic }}",
-    value: "{{ ab }}",
+    label: `{{ topic }}`,
+    value: `{{ ab }}`,
   },
   {% endfor %}
 ];
@@ -258,8 +258,8 @@ const topicOptions = [
 const instOptions = [
   {% for iid, name in institutions %}
   {
-    label: "{{ name | safe }}",
-    value: "{{ iid }}",
+    label: `{{ name | safe }}`,
+    value: `{{ iid }}`,
   },
   {% endfor %}
 ];
@@ -267,8 +267,8 @@ const instOptions = [
 const langOptions = [
   {% for code, name in languages_dict.items() %}
   {
-    label: "{{ name | safe}}",
-    value: "{{ code }}",
+    label: `{{ name | safe}}`,
+    value: `{{ code }}`,
   },
   {% endfor %}
 ];
@@ -276,8 +276,8 @@ const langOptions = [
 const subjOptions = [
   {% for sid, name in subjects %}
   {
-    label: "{{ name }}",
-    value: "{{ sid }}",
+    label: `{{ name }}`,
+    value: `{{ sid }}`,
   },
   {% endfor %}
 ];
