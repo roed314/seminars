@@ -539,17 +539,29 @@ table.ntdata td.date, td.timerange {
     white-space: nowrap;
     text-align: right;
 }
-table.ntdata td.weekday, td.date {
+table.ntdata td.weekday {
+    text-align: left;
+    padding-right: 0px;
+}
+
+table.ntdata td.date {
     text-align: right;
     padding-left: 0px;
     padding-right: 0px;
 }
-table.ntdata td.time, td.subscribe {
+
+table.ntdata td.time {
     text-align: right;
+    padding-left: 0px;
+}
+
+table ntdata td.subscribe {
+    text-align: right;
+    padding-right: 0px;
 }
 
 table.ntdata td.speaker {
-    min-width: 136px;
+    min-width: 120px;
 }
 
 table.ntdata td.title {
