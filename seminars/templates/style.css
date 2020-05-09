@@ -552,7 +552,6 @@ table.ntdata td.date {
 
 table.ntdata td.time {
     text-align: right;
-    padding-left: 0px;
 }
 
 table ntdata td.subscribe {
