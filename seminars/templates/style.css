@@ -541,14 +541,14 @@ table.ntdata td.date, td.timerange {
 }
 table.ntdata td.weekday {
     text-align: left;
-    padding-right: 0px;
+    padding-right: 2px;
 }
 
 table.ntdata td.monthdate {
     white-space: nowrap;
     text-align: right;
-    padding-left: 0px;
-    padding-right: 0px;
+    padding-left: 2px;
+    padding-right: 4px;
 }
 
 table.ntdata td.startdate {
