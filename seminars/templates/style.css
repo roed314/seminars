@@ -575,7 +575,7 @@ table.ntdata td.enddate {
 
 table.ntdata td.seriesname {
     text-align: left;
-    min-width: 180px;
+    min-width: 240px;
 }
 
 table.ntdata td.institutions {
