@@ -547,7 +547,7 @@ def talks_header(include_seminar=True, include_slides=False, include_video=False
     if include_seminar:
         cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
-    cols.append((' class="title" style="min-width:200px;"', "Title"))
+    cols.append((' class="title" style="min-width:300px;"', "Title"))
     if include_slides:
         cols.append(("", ""))
     if include_video:
