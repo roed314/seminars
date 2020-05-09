@@ -22,36 +22,46 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 </p>
 {% endif %}
 {% if seminar.topics %}
-<p>
-  {{seminar.show_topics() | safe}}
-</p>
+  <p>{{seminar.show_topics() | safe}}</p>
 {% endif %}
 {% if seminar.institutions %}
-  <p>
-    {{seminar.show_institutions() | safe}}
-  </p>
+  <p>{{seminar.show_institutions() | safe}}</p>
 {% endif %}
+
+<table style="border-collapse:separate; border-spacing: 0px 10px;">
 {% if seminar.description %}
-  <p>
-    Description: {{(seminar.description | blanknone) | safe }}
-  </p>
+<tr>
+  <td style="padding:0px;">Description:</td>
+  <td>{{seminar.description | safe }}</td>
+</tr>
 {% endif %}
-
-{% if seminar.weekday is not none or seminar.start_time %}
-  <p>{{ seminar.show_weektime_and_duration() }}{% if seminar.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}. {% endif %}</p>
-  {% if (not seminar.online or seminar.room) and seminar.timezone != current_user.timezone %}
-    <p>{{ seminar.show_weektime_and_duration(adapt=False) }} in series time zone, {{ seminar.timezone.replace("_", " ") }}.</p>
-  {% endif %}
+{% if seminar.is_conference %}
+<tr>
+  <td style="padding:0px;">Conference date{% if seminar.start_date != seminar.end_date %}s{% endif %}:</td>
+  <td>{{ seminar.show_conference_dates() | safe }}</td>
+</tr>
+{% else %}
+<tr>
+  <td style="padding:0px;">Seminar time{% if (seminar.weekdays | length) > 1 %}s{% endif %}:</td>
+  <td>{{seminar.show_seminar_times() | safe }}{% if seminar.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}{% endif %}.</td>
+</tr>
 {% endif %}
-
-
-<table>
-  {{ seminar.show_organizers() | safe }}
-  {{ seminar.show_curators() | safe }}
-  <td></td><td class="forminfo">*contact</td>
+{% set n = seminar.num_visible_organizers() %}
+{% if n > 0 %}
+<tr>
+  <td style="padding:0px;">Organizer{%if n > 1 %}s{% endif %}:</td>
+  <td>{{ seminar.show_organizers() | safe }}</td>
+</tr>
+{% endif %}
+{% set n = seminar.num_visible_curators() %}
+{% if n > 0 %}
+<tr>
+  <td style="padding:0px;">Curator{%if n > 1 %}s{% endif %}:</td>
+  <td>{{ seminar.show_curators() | safe }}</td>
+</tr>
+{% endif %}
+<tr><td style="padding:0px;"></td><td class="forminfo">*contact for this listing</td></tr>
 </table>
-
-
 
 {% if seminar.comments %}
   <hr>

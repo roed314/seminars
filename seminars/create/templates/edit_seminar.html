@@ -98,7 +98,7 @@
           </td>
         </tr>
         <tr>
-          <td>{{ KNOWL("per_day") }}</td>
+          <td>{{ ASTKNOWL("per_day") }}</td>
           <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
         </tr>
       {% else %}
@@ -249,8 +249,8 @@
 const topicOptions = [
   {% for ab, topic in user_topics(seminar) %}
   {
-    label: "{{ topic }}",
-    value: "{{ ab }}",
+    label: `{{ topic }}`,
+    value: `{{ ab }}`,
   },
   {% endfor %}
 ];
@@ -258,8 +258,8 @@ const topicOptions = [
 const instOptions = [
   {% for iid, name in institutions %}
   {
-    label: "{{ name | safe }}",
-    value: "{{ iid }}",
+    label: `{{ name | safe }}`,
+    value: `{{ iid }}`,
   },
   {% endfor %}
 ];
@@ -267,8 +267,8 @@ const instOptions = [
 const langOptions = [
   {% for code, name in languages_dict.items() %}
   {
-    label: "{{ name | safe}}",
-    value: "{{ code }}",
+    label: `{{ name | safe}}`,
+    value: `{{ code }}`,
   },
   {% endfor %}
 ];
@@ -276,8 +276,8 @@ const langOptions = [
 const subjOptions = [
   {% for sid, name in subjects %}
   {
-    label: "{{ name }}",
-    value: "{{ sid }}",
+    label: `{{ name }}`,
+    value: `{{ sid }}`,
   },
   {% endfor %}
 ];
