@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", function() {
   {% endfor %}
   function showplusminus(n) {
     document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
-    document.getElementById('slotplus').style.visibility = ( n < {{ max_slots }} ? 'visible' : 'hidden' );
+    document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
   }
   $("a.slotplus").click(function(e){
     e.preventDefault();
