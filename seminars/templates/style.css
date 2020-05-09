@@ -548,7 +548,7 @@ table.ntdata td.monthdate {
     white-space: nowrap;
     text-align: right;
     padding-left: 2px;
-    padding-right: 4px;
+    padding-right: 2px;
 }
 
 table.ntdata td.startdate {
