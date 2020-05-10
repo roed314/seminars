@@ -102,8 +102,8 @@ def index():
         SQL(
             """
 SELECT DISTINCT ON ({Ttalks}.{Cseminar_id}, {Ttalks}.{Cseminar_ctr}) {Ttalks}.{Cseminar_id}, {Ttalks}.{Cseminar_ctr}
-FROM {Ttalks} INNER JOIN {Tsems} ON {Ttalks}.{Cseminar_id} = {Tsems}.{Csname}
-WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
+FROM {Ttalks} INNER JOIN {Tsems} ON {Ttalks}.{Cseminar_id} = {Tsems}.{Csname} INNER JOIN {Torgs} ON {Ttalks}.{Cseminar_id} = {Torgs}.{Cseminar_id}
+WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
             """
         ).format(
             Ttalks=IdentifierWrapper("talks"),
@@ -112,6 +112,7 @@ WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
             Cseminar_ctr=IdentifierWrapper("seminar_ctr"),
             Csname=IdentifierWrapper("shortname"),
             Cowner=IdentifierWrapper("owner"),
+            Cemail=IdentifierWrapper("email"),
             Cdel=IdentifierWrapper("deleted"),
         ),
         [ilike_escape(current_user.email), True, False],
