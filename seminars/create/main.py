@@ -337,7 +337,7 @@ def deleted_talk(semid, semctr):
     except ValueError as err:
         flash_error(str(err))
         return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    return render_template("deleted_talk.html", talk=talk, title="Deleted")
+    return render_template("deleted_talk.html", talk=talk, title="Deleted", section="Manage", subsection="edittalk")
 
 
 @create.route("revive/talk/<semid>/<int:semctr>")

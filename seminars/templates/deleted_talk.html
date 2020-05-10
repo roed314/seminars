@@ -2,18 +2,18 @@
 
 {% block content %}
 
+
+<p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted:</p>
+<table>
+{{ talk.online() | safe }}
+</table>
+
 {% if talk.seminar.owner == user.email %}
-
-<p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted.</p>
-
-<ul>
-  <li><a href="{{ url_for('.revive_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Revive</a></li>
-  <li><a href="{{ url_for('.permdelete_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}" onclick="return confirm('Are you sure you want to permanently delete this talk?  This cannot be undone.');">Delete permanently</a></li>
-</ul>
-
-{% else %}
-
-<p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted.</p>
+<br>
+<table><tr>
+<td><button class="save" type="button" onclick="location.href="{{ url_for('.revive_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Revive talk</button></td>
+<td><button class="delete" type="button" onclick="location.href="{{ url_for('.permdelete_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Permanently delete talk</button></td>
+</tr></table>
 
 {% endif %}
 
