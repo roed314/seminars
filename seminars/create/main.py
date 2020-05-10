@@ -295,7 +295,7 @@ def permdelete_seminar(shortname):
         return redirect(url_for(".index"), 302)
 
 
-@create.route("delete/talk/<semid>/<int:semctr>")
+@create.route("delete/talk/<semid>/<int:semctr>", methods=["POST"])
 @email_confirmed_required
 def delete_talk(semid, semctr):
     try:
