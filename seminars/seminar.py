@@ -228,7 +228,7 @@ class WebSeminar(object):
 
     @property
     def series_type(self):
-        return "conference" if seminar.is_conference else "seminar series"
+        return "conference" if self.is_conference else "seminar series"
 
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"

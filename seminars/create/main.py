@@ -1,4 +1,4 @@
-se# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import current_user
 from seminars.users.main import email_confirmed_required
@@ -236,18 +236,18 @@ def delete_seminar(shortname):
 
     raw_data = request.form if request.method == "POST" else {}
     permdelete = False
-    if talk.deleted:
+    if seminar.deleted:
         if raw_data.get("submit") == "revive":
-            return redirect(url_for(".revive_seminar", shortname=seminar.shortname), 302)
+            return redirect(url_for(".revive_seminar", shortname=shortname), 302)
         if raw_data.get("submit") == "delete":
             permdelete = True
         if raw_data.get("submit") == "permdelete":
-            return redirect(url_for(".permdelete_seminar", seminar_id=seminar.shortname), 302)
+            return redirect(url_for(".permdelete_seminar", seminar_id=shortname), 302)
     else:
         if raw_data.get("submit") == "cancel":
-            return redirect(url_for(".edit_seminar", seminar_id=seminar.shortname), 302)
+            return redirect(url_for(".edit_seminar", seminar_id=shortname), 302)
         if raw_data.get("submit") == "delete":
-            if talk.delete():
+            if seminar.delete():
                 flash(seminar.series_type.capitalize() + " deleted.")
             else:
                 flash_error("Only the creator of %s can delete it."% seminar.name)
@@ -350,14 +350,14 @@ def delete_talk(seminar_id, seminar_ctr):
     permdelete = False
     if talk.deleted:
         if raw_data.get("submit") == "revive":
-            return redirect(url_for(".revive_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
+            return redirect(url_for(".revive_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
         if raw_data.get("submit") == "delete":
             permdelete = True
         if raw_data.get("submit") == "permdelete":
-            return redirect(url_for(".permdelete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
+            return redirect(url_for(".permdelete_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
         if raw_data.get("submit") == "cancel":
-            return redirect(url_for(".edit_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
+            return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
         if raw_data.get("submit") == "delete":
             if talk.delete():
                 flash("Talk deleted")
