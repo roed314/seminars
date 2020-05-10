@@ -102,7 +102,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     {% for seminar in deleted_seminars %}
     <tr>
       <td> {{seminar.name}} (deleted) </td>
-      <td> <a href="{{ url_for('.deleted_seminar', shortname=seminar.shortname) }}">Edit</a> </td>
+      <td> <a href="{{ url_for('.delete_seminar', shortname=seminar.shortname) }}">Edit</a> </td>
     </tr>
     {% endfor %}
   </table>
