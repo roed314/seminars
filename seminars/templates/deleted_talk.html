@@ -11,8 +11,8 @@
 {% if talk.seminar.owner == user.email %}
 <br>
 <table><tr>
-<td><button class="save" type="button" onclick="location.href="{{ url_for('.revive_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Revive talk</button></td>
-<td><button class="delete" type="button" onclick="location.href="{{ url_for('.permdelete_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Permanently delete talk</button></td>
+<td><button class="save" type="button" onclick='location.href="{{ url_for(\".revive_talk\", semid=talk.seminar_id, semctr=talk.seminar_ctr) }}"'>Revive talk</button></td>
+<td><button class="delete" type="button" onclick='location.href="{{ url_for(\".permdelete_talk\", semid=talk.seminar_id, semctr=talk.seminar_ctr) }}"'>Permanently delete talk</button></td>
 </tr></table>
 
 {% endif %}
