@@ -940,6 +940,9 @@ def save_seminar_schedule():
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
+    if raw_data.get("submit") == "cancel":
+        flash("Changes discarded")
+        return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 302)
     frequency = raw_data.get("frequency")
     try:
         frequency = int(frequency)
