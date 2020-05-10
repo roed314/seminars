@@ -321,12 +321,12 @@ def delete_talk(semid, semctr):
         flash_error("Only the organizers of a seminar can delete talks in it")
         return failure()
     raw_data = request.form
-    confirm = False
+    permdelete = False
     if talk.deleted:
         if raw_data.get("submit") == "revive":
             return redirect(url_for(".revive_talk", semid=talk.seminar_id, semctr=talk.seminar_ctr), 302)
         if raw_data.get("submit") == "delete":
-            confirm = True
+            permdelete = True
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_talk", semid=talk.seminar_id, semctr=talk.seminar_ctr), 302)
     else:
@@ -346,7 +346,7 @@ def delete_talk(semid, semctr):
         talk=talk,
         title="Delete talk",
         section="Manage",
-        confirm=confirm,
+        permdelete=permdelete,
     )
 
 
