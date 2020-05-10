@@ -4,11 +4,13 @@
 
 <form action="{{ url_for('.delete_talk',  semid=semid, semctr=semctr) }}" method="POST">
 {% if talk.deleted %}
-    <p>The talk below has been deleted. Click <b>Revive talk</b> to restore it.<br>
-    Click <b>Permanently delete talk</b> to remove the talk from our datebase.</p>
+    {% if permdelete %}
+        <p>Permanently deleting this talk is an irrevocable action that cannot be undone.  Are you sure?</p>
+    {% else %}
+        <p>The talk below has been deleted.</p>
+    {% endif %}
 {% else %}
-    <p>Deleting the talk below will cancel all subscriptions to it.   You can revive the talk later, but any current subscriptions will not be restored.<br>
-    Click <b>Delete talk</b> to proceed.</p>
+    <p>Deleting the talk below will cancel all subscriptions to it.   You can restore the talk later, but subscriptions will not be restored.</p>
 {% endif %}
 <table>
 <tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
@@ -17,7 +19,7 @@
 <br>
 <table><tr>
 {% if talk.deleted %}
-    {% if confirm %}
+    {% if permdelete %}
         <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete talk</button></td>
         <td><button class="cancel" type="submit" name="submit" value="cancel">Cancel permanent deletion</button></td>
     {% else %}

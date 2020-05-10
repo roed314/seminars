@@ -634,7 +634,7 @@ button.delete {
 button.savedelete {
     vertical-align: text-bottom;
     color: white;
-    background-color: #C00000;
+    background-color: #D00000;
 }
 
 table#edit-schedule-table {
