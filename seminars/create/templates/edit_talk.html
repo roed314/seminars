@@ -11,7 +11,7 @@
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
-  <button type="submit" onclick="unsaved = false; return true;" style="float: right;">Save all changes</button>
+  <button class="save" type="submit" value="save" onclick="unsaved = false;" style="float: right;">Save all changes</button>
 
   <h3>Speaker info and talk content</h3>
 
@@ -72,6 +72,7 @@
     </tr>
   <tr>
     <td>{{ KNOWL("abstract") }}</td>
+    <td style="align:right;"><a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a></td>
   </tr>
   </table>
   <table>
@@ -228,28 +229,14 @@
       <tr><td colspan="2" class="forminfo">None set<br><br></td></tr>
     {% endif %}
 </table>
-
-
-  <table>
-    <tr>
-      <td>
-        <button type="submit" onclick="unsaved = false; return true;">Save all changes</button>
-      </td>
-      <td>
-        <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if talk.new %}{{ url_for('show_seminar', shortname=talk.seminar_id) }}{% else %}{{ url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr) }}{% endif %}">Cancel all changes</a>
-      </td>
-      <td>
-        <a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a>
-      </td>
-      <td>
-        {% if talk.user_can_delete() %}
-        <a style="margin-left: 30px"  href="{{ url_for("create.delete_talk", semid=talk.seminar_id, semctr=talk.seminar_ctr) }}" onclick="unsaved = false;return confirm('Are you sure you want to delete this item?');">
-          Delete talk
-        </a>
-        {% endif %}
-      </td>
-    </tr>
-  </table>
+<br>
+<table><tr>
+  <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">Save all changes</button></td>
+  <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">Cancel all changes</button></td>
+  {% if talk.user_can_delete() %}
+  <td><button class="delete" type="submit" name="submit" value="delete" onclick="unsaved = false;">Delete talk</button></td>
+  {% endif %}
+</tr></table>
 </form>
 
 <script defer type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>

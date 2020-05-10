@@ -737,8 +737,13 @@ def save_talk():
     resp, talk = can_edit_talk(raw_data.get("seminar_id", ""), raw_data.get("seminar_ctr", ""), token)
     if resp is not None:
         return resp
-    errmsgs = []
+    if raw_data.get("submit") == "cancel":
+        flash("Changes discarded")
+        return redirect(url_for(".edit_talk", shortname=shortname), 302)
+    if raw_data.get("submit") == "delete":
+        return redirect(url_for(".delete_talk", shortname=shortname), 302)
 
+    errmsgs = []
     data = {
         "seminar_id": talk.seminar_id,
         "token": talk.token,
