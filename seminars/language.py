@@ -30,7 +30,7 @@ class Languages(object):
         return sorted(db.talks.distinct("language"))
 
     def js_options(self):
-        items = ",\n".join('  {\n    label: "%s",\n    value: "%s"\n  }' % (name, code) for (code, name) in self._data.items())
+        items = ",\n".join('  {\n    label: `%s`,\n    value: `%s`\n  }' % (name, code) for (code, name) in self._data.items())
         return "const langOptions = [\n%s\n];" % (items)
 
     def search_options(self):

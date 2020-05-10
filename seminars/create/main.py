@@ -23,6 +23,7 @@ from seminars.utils import (
     daytimes_early,
     daytimes_long,
     date_and_daytimes_to_times,
+    maxlength,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -58,7 +59,6 @@ from dateutil.parser import parse as parse_time
 import pytz
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
-MAX_SLOTS = 12  # Max time slots in a seminar series, must be a multiple of 3
 
 
 @create.route("manage/")
@@ -129,6 +129,7 @@ WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
         deleted_talks=deleted_talks,
         institution_known=institution_known,
         institutions=institutions(),
+        maxlength=maxlength,
         section=manage,
         subsection="home",
         title=manage,
@@ -145,27 +146,49 @@ def edit_seminar():
         data = request.args
     shortname = data.get("shortname", "")
     new = data.get("new") == "yes"
+    notsimilar = data.get("similar") == "no"
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
+    title = "Create series" if new else "Edit series"
+    manage = "Manage" if current_user.is_organizer else "Create"
     if new:
+        errmsgs = []
         subjects = clean_subjects(data.get("subjects"))
         if not subjects:
-            return show_input_errors([format_errmsg("Please select at least one subject.")])
-        else:
-            seminar.subjects = subjects
-
-        seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", None)
-        if seminar.is_conference:
-            seminar.frequency = 1
-            seminar.per_day = 4
+            errmsgs.append("Please select at least one subject")
         seminar.name = data.get("name", "")
+        if not seminar.name:
+            errmsgs.append("Seminar name is required.")
+        elif len(seminar.name) < 3:
+            errmsgs.append(format_errmsg("Seminar name %s is too short, at least three chracters are required.", seminar.name))
+        if errmsgs:
+            return show_input_errors(errmsgs)
+        seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", False)
+        seminar.subjects = subjects
         seminar.institutions = clean_institutions(data.get("institutions"))
         if seminar.institutions:
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
+        if not notsimilar:
+            query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
+            similar = [s for s in seminars_search(query)]
+            # When checking for simialr series, don't require an exact match on subjects/institutions
+            # match anything with institutions not set or with an institution in common, and only require a subject in common
+            if seminar.institutions:
+                similar = [s for s in similar if not s.institutions or set(seminar.institutions).intersection(set(s.institutions))]
+            if seminar.subjects:
+                similar = [s for s in similar if set(seminar.subjects).intersection(set(s.subjects))]
+            if similar:
+                return render_template(
+                    "show_similar.html",
+                    newseminar=seminar,
+                    title=title,
+                    section=manage,
+                    subsection="home",
+                    similar=similar,
+                )
+
     lock = get_lock(shortname, data.get("lock"))
-    title = "Create series" if new else "Edit series"
-    manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "edit_seminar.html",
         seminar=seminar,
@@ -175,7 +198,7 @@ def edit_seminar():
         institutions=institutions(),
         short_weekdays=short_weekdays,
         timezones=timezones,
-        max_slots=MAX_SLOTS,
+        maxlength=maxlength,
         lock=lock,
     )
 
@@ -201,6 +224,7 @@ def delete_seminar(shortname):
             institutions=institutions(),
             weekdays=weekdays,
             timezones=timezones,
+            maxlength=maxlength,
             lock=lock,
         )
 
@@ -290,6 +314,7 @@ def delete_talk(semid, semctr):
             subsection="edittalk",
             institutions=institutions(),
             timezones=timezones,
+            maxlength=maxlength,
         )
 
     if not talk.user_can_delete():
@@ -396,6 +421,8 @@ def save_seminar():
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["name"]:
         errmsgs.append("The name cannot be blank")
+    elif len(data["name"]) < 3:
+        errmsgs.append("Name too short, must be at least three characters.")
     if data["is_conference"] and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date")
     if data["per_day"] is not None and data["per_day"] < 1:
@@ -404,7 +431,7 @@ def save_seminar():
         errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
 
     if data["is_conference"] and not data["per_day"]:
-        flash_warning ("It will be easier to edit the conference schedule if you specify talks per day (an upper bound is fine).")
+        errmsgs.append("Please specify the typical number of talks on each day of your conference (a rough guess is fine).")
 
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
@@ -417,7 +444,7 @@ def save_seminar():
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     data["weekdays"] = []
     data["time_slots"] = []
-    for i in range(MAX_SLOTS):
+    for i in range(maxlength["time_slots"]):
         weekday = daytimes = None
         try:
             col = "weekday" + str(i)
@@ -519,7 +546,6 @@ def save_seminar():
         new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
 
     # Warnings
-    sanity_check_times(new_version.start_time, new_version.end_time)
     if not data["topics"]:
         flash_warning(
             "This series has no topics selected; don't forget to set the topics for each new talk individually."
@@ -545,8 +571,11 @@ def edit_institution():
     else:
         data = request.args
     shortname = data.get("shortname", "")
+    if data.get("cancel") == "yes":
+        flash("Changes discarded.")
     new = data.get("new") == "yes"
-    resp, institution = can_edit_institution(shortname, new)
+    name = data.get("name", "")
+    resp, institution = can_edit_institution(shortname, name, new)
     if resp is not None:
         return resp
     if new:
@@ -561,6 +590,7 @@ def edit_institution():
         title=title,
         section="Manage",
         subsection="editinst",
+        maxlength=maxlength,
     )
 
 
@@ -570,9 +600,15 @@ def save_institution():
     raw_data = request.form
     shortname = raw_data["shortname"]
     new = raw_data.get("new") == "yes"
-    resp, institution = can_edit_institution(shortname, new)
+    name = raw_data.get("name", "")
+    resp, institution = can_edit_institution(shortname, name, new)
     if resp is not None:
         return resp
+    if raw_data.get("submit") == "cancel":
+        if new:
+            return redirect(url_for("list_institutions"), 302)
+        flash("Changes discarded")
+        return redirect(url_for(".edit_institution", shortname=shortname), 302)
 
     data = {}
     data["timezone"] = tz = raw_data.get("timezone", "UTC")
@@ -614,6 +650,10 @@ def save_institution():
         errmsgs.append("Institution name cannot be blank.")
     if not errmsgs and not data["homepage"]:
         errmsgs.append("Institution homepage cannot be blank.")
+    if new and db.institutions.count({'name':data["name"]}):
+        errmsgs.append(format_errmsg("An institution named %s already exists.  Please add disambiguating information to the name.", data["name"]))
+    if not new and data["name"] != institution.name and db.institutions.count({'name':data["name"]}):
+        errmsgs.append(format_errmsg("Unable to change institution name to %s, there is another insituttion with the same name.", data["name"]))
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
@@ -677,6 +717,7 @@ def edit_talk():
         subsection="edittalk",
         institutions=institutions(),
         timezones=timezones,
+        maxlength=maxlength,
         token=token,
         **extras
     )
@@ -786,15 +827,14 @@ def layout_schedule(seminar, data):
     day = timedelta(days=1)
     if seminar.is_conference and (seminar.start_date is None or seminar.end_date is None):
         flash_warning ("You have not specified the start and end dates of your conference (we chose a date range to layout your schedule).")
+    if seminar.is_conference and not seminar.per_day:
+        seminar.per_day = 4
     begin = seminar.start_date if begin is None and seminar.is_conference else begin
     begin = today if begin is None else begin
     end = seminar.end_date if end is None and seminar.is_conference else end
     if end is None:
         if seminar.is_conference:
-            if seminar.per_day:
-                end = begin + day * ceil(SCHEDULE_LEN / seminar.per_day)
-            else:
-                end = begin + 7 * day
+            end = begin + day * ceil(SCHEDULE_LEN / seminar.per_day)
         else:
             if seminar.frequency:
                 end = begin + day * ceil(SCHEDULE_LEN * seminar.frequency / len(seminar.time_slots))
@@ -848,11 +888,13 @@ def layout_schedule(seminar, data):
                 if d >= midnight_begin and d < midnight_end + day:
                     newslots.append((seminar.show_schedule_date(d), seminar.time_slots[i], None))
             w = w + day * seminar.frequency
-        # remove slots that are (exactly) matched by an existing talk
-        # this should handle slots that occur with multiplicity
+        # remove slots that for which there is an existing talk on the same day
+        # remove one slot for each talk in order, rather than trying to match times
+        # this works better in situations where the times vary
         for t in slots:
-            if (t[0], t[1], None) in newslots:
-                newslots.remove((t[0], t[1], None))
+            sameday = [s for s in newslots if s[0] == t[0]]
+            if sameday:
+                newslots.remove(sameday[0])
         slots = sorted(slots + newslots, key=lambda t: slot_start_time(t))
     return slots
 
@@ -882,6 +924,7 @@ def edit_seminar_schedule():
         schedule=schedule,
         section="Manage",
         subsection="schedule",
+        maxlength=maxlength,
     )
 
 

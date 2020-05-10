@@ -3,7 +3,7 @@ from flask_login import current_user
 from seminars import db
 from seminars.utils import (
     adapt_datetime,
-    adapt_weektime,
+    adapt_weektimes,
     allowed_shortname,
     count_distinct,
     format_errmsg,
@@ -112,7 +112,7 @@ class WebSeminar(object):
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
         self.organizer_data = organizer_data
-        self.convert_time_to_times()
+        self.cleanse()
 
     def __repr__(self):
         return self.name
@@ -127,27 +127,32 @@ class WebSeminar(object):
     def __ne__(self, other):
         return not (self == other)
 
-    def convert_time_to_times(self):
+    def cleanse(self):
+        """
+        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This is the only place where columns we plan to drop should be referenced 
+        """
         from seminars.talk import talks_lucky
 
         if self.is_conference:
             self.frequency = None
+            if not self.per_day:
+                self.per_day = 4
         if self.frequency is None:
             self.weekdays = []
             self.time_slots = []
-            return
-        if self.frequency > 1 and self.frequency <= 7:
-            self.frequency = 7
-        elif self.frequency > 7 and self.frequency <= 14:
-            self.frequency = 14
-        elif self.frequency > 14 and self.frequency <= 21:
-            self.frequency = 21
         else:
-            self.frequency = None
-            self.weekdays = []
-            self.time_slots = []
-            return
-        if not self.weekdays or not self.time_slots:
+            if self.frequency > 1 and self.frequency <= 7:
+                self.frequency = 7
+            elif self.frequency > 7 and self.frequency <= 14:
+                self.frequency = 14
+            elif self.frequency > 14 and self.frequency <= 21:
+                self.frequency = 21
+            else:
+                self.frequency = None
+                self.weekdays = []
+                self.time_slots = []
+        if self.frequency and (not self.weekdays or not self.time_slots):
             self.weekdays = []
             self.time_slots = []
             if self.weekday is not None and self.start_time is not None and self.end_time is not None:
@@ -178,6 +183,11 @@ class WebSeminar(object):
         n = min(len(self.weekdays),len(self.time_slots))
         self.weekdays = self.weekdays[0:n]
         self.time_slots = self.time_slots[0:n]
+        self.description = self.description.capitalize() if self.description else ""
+        # remove columns we plan to drop
+        for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
+            if hasattr(self,"attr"):
+                delattr(self,"attr")
 
     def visible(self):
         """
@@ -216,40 +226,44 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
-    def show_day(self, truncate=True, adapt=True):
-        if self.weekday is None:
-            return ""
-        elif self.start_time is None or not adapt:
-            d = weekdays[self.weekday]
-        else:
-            d = weekdays[adapt_weektime(self.start_time, self.tz, weekday=self.weekday)[0]]
-        if truncate:
-            return d[:3]
-        else:
-            return d
+    def _show_date(self, d):
+        format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
+        return d.strftime(format)
 
-    def _show_time(self, t, adapt):
-        """ t is a datetime, adapt is a boolean """
-        if t:
-            if adapt and self.weekday is not None:
-                t = adapt_weektime(t, self.tz, weekday=self.weekday)[1]
-            return t.strftime("%H:%M")
+    def show_conference_dates (self, adapt=True):
+        if self.is_conference:
+            if self.start_date and self.end_date:
+                if self.start_date == self.end_date:
+                    return self._show_date(self.start_date)
+                else:
+                    return self._show_date(self.start_date) + " to " + self._show_date(self.end_date)
+            else:
+                return "TBA"
         else:
             return ""
 
-    def show_start_time(self, adapt=True):
-        return self._show_time(self.start_time, adapt)
-
-    def show_end_time(self, adapt=True):
-        return self._show_time(self.end_time, adapt)
-
-    def show_weektime_and_duration(self, adapt=True):
-        s = self.show_day(truncate=False,adapt=adapt)
-        if s:
-            s += ", "
-        s += self.show_start_time(adapt=adapt)
-        if self.start_time and self.end_time:
-            s += "-" + self.show_end_time(adapt=adapt)
+    def show_seminar_times(self, adapt=True):
+        """ weekday is an integer in [0,6], daytimes is a string "HH:MM-HH:MM" """
+        if self.is_conference or not self.frequency:
+            return ""
+        n = min(len(self.weekdays),len(self.time_slots))
+        if n == 0 or not self.frequency:
+            return "No regular schedule"
+        if self.frequency == 7:
+            s = ""
+        elif self.frequency == 14:
+            s = "Every other "
+        elif self.frequency == 21:
+            s = "Every third "
+        prevd = -1
+        for i in range(n):
+            s += ", " if i else ""
+            d = self.weekdays[i]
+            t = self.time_slots[i]
+            if adapt:
+                d, t = adapt_weektimes (d, t, self.tz, current_user.tz)
+            s += t if d==prevd else (weekdays[d] + " " + t)
+            prevd = d
         return s
 
     def show_topics(self):
@@ -356,35 +370,33 @@ class WebSeminar(object):
         include_subscribe=True,
         show_attributes=False,
     ):
-        cols = []
+        datetime_tds = ""
         if include_datetime:
             if conference: # include start and end date instead
-                if self.start_date is None:
-                    cols.append(('class="date"', ""))
+                if self.is_conference and self.start_date and self.end_date:
+                    if self.start_date == self.end_date:
+                        datetime_tds = '<td colspan="2" class="onedate">' + self._show_date(self.start_date) + '</td>'
+                    else:
+                        datetime_tds = '<td class="startdate">' + self._show_date(self.start_date) + '</td><td class="enddate">' + self._show_date(self.end_date) + '</td>'
                 else:
-                    cols.append(('class="date"', self.start_date.strftime("%a %b %-d")))
-                if self.end_date is None:
-                    cols.append(('class="date"', ""))
-                else:
-                    cols.append(('class="date"', self.end_date.strftime("%a %b %-d")))
+                    datetime_tds = '<td class="startdate"></td><td class="enddate"></td>'
             else: # could include both conferences and seminar series
                 t = adapt_datetime(self.next_talk_time)
                 if t is None:
-                    cols.append(('class="date"', ""))
-                    cols.append(('class="time"', ""))
+                    datetime_tds = '<td></td><td></td><td></td>'
                 else:
-                    cols.append(('class="date"', t.strftime("%a %b %-d")))
-                    cols.append(('class="time"', t.strftime("%H:%M")))
-        cols.append(('class="name"', self.show_name(show_attributes=show_attributes)))
+                    datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
+        cols = []
+        cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes)))
         if include_institutions:
-            cols.append(('class="institution"', self.show_institutions()))
+            cols.append(('class="institutions"', self.show_institutions()))
         if include_description:
             cols.append(('class="description"', self.show_description()))
         if include_topics:
             cols.append(('class="topics"', self.show_topics()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
-        return "".join("<td %s>%s</td>" % c for c in cols)
+        return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
         return [rec["email"].lower() for rec in self.organizer_data if rec["email"]] + [
@@ -422,16 +434,19 @@ class WebSeminar(object):
                     if link and db.users.count({"email":rec["email"], "email_confirmed":True}):
                         namelink += "*"
                     editors.append(namelink)
-        if editors:
-            return "<tr><td>%s:</td><td>%s</td></tr>" % (label, ", ".join(editors))
-        else:
-            return ""
+        return ", ".join(editors)
 
     def show_organizers(self):
         return self._show_editors("Organizers")
 
     def show_curators(self):
         return self._show_editors("Curators", curators=True)
+
+    def num_visible_organizers(self):
+        return len([r for r in self.organizer_data if not r["curator"] and r["display"]])
+
+    def num_visible_curators(self):
+        return len([r for r in self.organizer_data if r["curator"] and r["display"]])
 
     def add_talk_link(self, ptag=True):
         if current_user.email in self.editors():
@@ -527,19 +542,19 @@ class WebSeminar(object):
 
 
 def series_header(
-    conference=False, include_time=True, include_institutions=True, include_description=True, include_topics=False, include_subscribe=True
+    conference=False, include_datetime=True, include_institutions=True, include_description=True, include_topics=False, include_subscribe=True
 ):
     cols = []
-    if include_time:
+    if include_datetime:
         if conference:
             cols.append(('colspan="2" class="yourtime"', "Dates"))
         else:
-            cols.append(('colspan="2" class="yourtime"', "Next talk"))
-    cols.append(("", "Name"))
+            cols.append(('colspan="3" class="yourtime"', "Next talk"))
+    cols.append(('class="seriesname"', "Name"))
     if include_institutions:
-        cols.append(("", "Institutions"))
+        cols.append(('class="institutions"', "Institutions"))
     if include_description:
-        cols.append(('style="min-width:280px;"', "Description"))
+        cols.append(('class="description"', "Description"))
     if include_topics:
         cols.append(("", "Topics"))
     if include_subscribe:
@@ -730,7 +745,7 @@ def can_edit_seminar(shortname, new):
             )
         return show_input_errors(errmsgs), None
     if seminar is not None and seminar.deleted:
-        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302)
+        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302), None
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(

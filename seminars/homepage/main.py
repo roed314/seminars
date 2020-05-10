@@ -9,6 +9,7 @@ from seminars.utils import (
     subject_pairs,
     topdomain,
     topics,
+    maxlength,
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
@@ -671,6 +672,7 @@ def list_institutions():
         section=section,
         subsection="institutions",
         institutions=institutions(),
+        maxlength=maxlength,
     )
 
 

@@ -58,11 +58,23 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   {{talk.seminar.show_comments(prefix="<b>Series comments: </b>") | safe}}
   {% endif %}
 
-  <div style="font-size: 90%;">
+  <div>
     <table>
-      {{ seminar.show_organizers() | safe }}
-      {{ seminar.show_curators() | safe }}
-      <tr><td></td><td class="forminfo">*contact</td></tr>
+      {% set n = seminar.num_visible_organizers() %}
+      {% if n > 0 %}
+      <tr>
+        <td style="padding:0px;">Organizer{%if n > 1 %}s{% endif %}:</td>
+        <td>{{ seminar.show_organizers() | safe }}</td>
+      </tr>
+      {% endif %}
+      {% set n = seminar.num_visible_curators() %}
+      {% if n > 0 %}
+      <tr>
+        <td style="padding:0px;">Curator{%if n > 1 %}s{% endif %}:</td>
+        <td>{{ seminar.show_curators() | safe }}</td>
+      </tr>
+      {% endif %}
+      <tr><td style="padding:0px;"></td><td class="forminfo">*contact for this listing</td></tr>
     </table>
   </div>
   <hr>
