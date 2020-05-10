@@ -607,6 +607,7 @@ def save_institution():
     if raw_data.get("submit") == "cancel":
         if new:
             return redirect(url_for("list_institutions"), 302)
+        flash("Changes discarded")
         return redirect(url_for(".edit_institution", shortname=shortname), 302)
 
     data = {}
