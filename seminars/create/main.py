@@ -604,6 +604,10 @@ def save_institution():
     resp, institution = can_edit_institution(shortname, name, new)
     if resp is not None:
         return resp
+    if raw_data.get("submit") == "cancel":
+        if new:
+            return redirect(url_for("list_institutions"), 302)
+        return redirect(url_for(".edit_institution", shortname=shortname), 302)
 
     data = {}
     data["timezone"] = tz = raw_data.get("timezone", "UTC")
