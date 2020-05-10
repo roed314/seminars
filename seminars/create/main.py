@@ -341,7 +341,6 @@ def delete_talk(semid, semctr):
         talk=talk,
         title="Delete talk",
         section="Manage",
-        subsection="editsem"
     )
 
 
