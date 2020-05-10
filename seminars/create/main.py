@@ -255,7 +255,7 @@ def delete_seminar(shortname):
             else:
                 flash_error("Only the creator of %s can delete it."% seminar.name)
                 return failure()
-    talks = list(talks_search({"seminar_id": shortname}, sort=[("start_time", -1)], include_deleted=True))
+    talks = list(talks_search({"seminar_id": shortname}, sort=["start_time"], include_deleted=seminar.deleted))
 
     return render_template(
         "deleted_seminar.html",
