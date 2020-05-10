@@ -617,19 +617,16 @@ button.textbottom {
 
 button.save {
     vertical-align: middle;
-    margin-left: 0px;
 }
 
 button.cancel {
     vertical-align: middle;
-    margin-left: 10px;
     color: blue;
     background-color: white;
 }
 
 button.delete {
     vertical-align: text-bottom;
-    margin-left: 20px;
     color: red;
     background-color: white;
 }
