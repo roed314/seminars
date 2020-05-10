@@ -320,13 +320,21 @@ def delete_talk(semid, semctr):
     if not talk.user_can_delete():
         flash_error("Only the organizers of a seminar can delete talks in it")
         return failure()
-    else:
+
+    if raw_data.get("submit") == "cancel":
+        return redirect(url_for(".edit_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
+    if raw_data.get("submit") == "revive":
+        return redirect(url_for(".revive_talk", semid=talk.seminar_id, semctr=talk.seminar_ctr), 302)
+    if raw_data.get("submit") == "permdelete":
+        return redirect(url_for(".permdelete_talk", semid=talk.seminar_id, semctr=talk.seminar_ctr), 302)
+    if raw_data.get("submit") == "delete":
         if talk.delete():
             flash("Talk deleted")
-            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 302)
+            return redirect(url_for(".deleted_talk", shortname=talk.seminar_id), 302)
         else:
             flash_error("Only the organizers of a seminar can delete talks in it")
             return failure()
+    return render_template("deleted_talk.html", talk=talk, title="Deleted", section="Manage", subsection="editseminar")
 
 
 @create.route("deleted/talk/<semid>/<int:semctr>")
@@ -337,7 +345,7 @@ def deleted_talk(semid, semctr):
     except ValueError as err:
         flash_error(str(err))
         return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    return render_template("deleted_talk.html", talk=talk, title="Deleted", section="Manage", subsection="edittalk")
+    return render_template("deleted_talk.html", talk=talk, title="Deleted", section="Manage", subsection="editseminar")
 
 
 @create.route("revive/talk/<semid>/<int:semctr>")

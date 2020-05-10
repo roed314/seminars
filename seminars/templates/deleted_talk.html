@@ -2,8 +2,12 @@
 
 {% block content %}
 
-
-<p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted:</p>
+{% if talk.deleted %}
+<p>The talk below has been deleted:</p>
+{% else %}
+<p>Deleting the talk below will cancel all subscriptions to it; you can restore the talk later, but any current subscriptions will not be restored.
+If you wish to proceed, click the "Delete talk" button below.
+{% endif %}
 <table>
 <tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
 <tr>{{ talk.oneline(include_subscribe=False) | safe }}</tr>
@@ -12,8 +16,13 @@
 {% if talk.seminar.owner == user.email %}
 <br>
 <table><tr>
-<td><button class="save" type="button" onclick="location.href=&quot;{{ url_for('.revive_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}&quot;">Revive talk</button></td>
-<td><button class="delete" type="button" onclick="location.href=&quot;{{ url_for('.permdelete_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}&quot;">Permanently delete talk</button></td>
+{% if talk.deleted %}
+<td><button class="save" type="submit" name="submit" value="revive">Revive talk</button></td>
+<td><button class="delete" type="submit" name="submit" value="permdelete">Permanently delete talk</button></td>
+{% else %}
+<td><button class="save" type="sumbit" name="submit" value="delete">Delete talk</button></td>
+<td><button class="cancel" type="sumbit" name="submit" value="cancel">Cancel deletion</button></td>
+{% endif %}
 </tr></table>
 
 {% endif %}
