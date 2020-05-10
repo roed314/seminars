@@ -5,7 +5,8 @@
 
 <p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted:</p>
 <table>
-{{ talk.oneline() | safe }}
+<tr>{{ talks_header() | safe }}</tr>
+<tr>{{ talk.oneline(include_subscribe=False) | safe }}</tr>
 </table>
 
 {% if talk.seminar.owner == user.email %}
