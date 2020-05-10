@@ -333,7 +333,16 @@ def delete_talk(semid, semctr):
         else:
             flash_error("Only the organizers of a seminar can delete talks in it")
             return failure()
-    return render_template("deleted_talk.html", semid=semid, semctr=semctr, talk=talk, title="Delete talk", section="Manage", subsection="editsem")
+    return render_template(
+        "deleted_talk.html",
+        semid=semid,
+        semctr=semctr,
+        seminar=talk.seminar,
+        talk=talk,
+        title="Delete talk",
+        section="Manage",
+        subsection="editsem"
+    )
 
 
 @create.route("revive/talk/<semid>/<int:semctr>")
