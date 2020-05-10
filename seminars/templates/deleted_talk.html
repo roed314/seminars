@@ -4,11 +4,11 @@
 
 <form action="{{ url_for('.delete_talk',  semid=semid, semctr=semctr) }}" method="POST">
 {% if talk.deleted %}
-<p>The talk below has been deleted. Click <b>Revive talk</b> to restore it.<br>
-Click <b>Permanently delete talk</b> to completely remove the talk from the datebase (note that this cannot be undone).</p>
+    <p>The talk below has been deleted. Click <b>Revive talk</b> to restore it.<br>
+    Click <b>Permanently delete talk</b> to completely remove the talk from the datebase (note that this cannot be undone).</p>
 {% else %}
-<p>Deleting the talk below will cancel all subscriptions to it.   You can revive the talk later, but any current subscriptions will not be restored.<br>
-Click <b>Delete talk</b> to proceed.</p>
+    <p>Deleting the talk below will cancel all subscriptions to it.   You can revive the talk later, but any current subscriptions will not be restored.<br>
+    Click <b>Delete talk</b> to proceed.</p>
 {% endif %}
 <table>
 <tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
@@ -17,11 +17,16 @@ Click <b>Delete talk</b> to proceed.</p>
 <br>
 <table><tr>
 {% if talk.deleted %}
-<td><button class="save" type="submit" name="submit" value="revive">Revive talk</button></td>
-<td><button class="delete" type="submit" name="submit" value="permdelete">Permanently delete talk</button></td>
+    {% if confirm %}
+        <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete talk</button></td>
+        <td><button class="cancel" type="submit" name="submit" value="cancel">Cancel permanent deletion</button></td>
+    {% else %}
+        <td><button class="save" type="submit" name="submit" value="revive">Revive talk</button></td>
+        <td><button class="delete" type="submit" name="submit" value="delete">Permanently delete talk</button></td>
+    {% endif %}
 {% else %}
-<td><button class="save" type="sumbit" name="submit" value="delete">Delete talk</button></td>
-<td><button class="cancel" type="sumbit" name="submit" value="cancel">Cancel deletion</button></td>
+    <td><button class="savedelete" type="sumbit" name="submit" value="delete">Delete talk</button></td>
+    <td><button class="cancel" type="sumbit" name="submit" value="cancel">Cancel deletion</button></td>
 {% endif %}
 </tr></table>
 </form>

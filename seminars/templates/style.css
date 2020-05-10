@@ -631,6 +631,12 @@ button.delete {
     background-color: white;
 }
 
+button.confirmdelete {
+    vertical-align: text-bottom;
+    color: white;
+    background-color: red;
+}
+
 table#edit-schedule-table {
   position: relative;
   left: -103px;
