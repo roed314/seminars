@@ -50,8 +50,8 @@
       {% if schedule[i][2] %}
         {% set talk = schedule[i][2] %}
         <td class="speakerinp"><input name="speaker{{i}}" value="{{ talk.speaker | blanknone }}" maxlength="{{ maxlength['speaker'] }}"/></td>
-        <td class="emailinp"><input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" maxlength="{{ maxlength['email'] }}"/></td>
-        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" maxlength="{{ maxlength['affiliation'] }}"/></td>
+        <td class="emailinp"><input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" maxlength="{{ maxlength['speaker_email'] }}"/></td>
+        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" maxlength="{{ maxlength['speaker_affiliation'] }}"/></td>
         <td class="titleinp"><input name="title{{i}}" value="{{ talk.title | blanknone }}" maxlength="{{ maxlength['title'] }}"/></td>
         <td align="left" style="padding-right:0px;"><input type="checkbox" name="hidden{{i}}" value="yes"{% if talk.hidden %} checked {% endif %} /></td>
         <td align="left">{{ talk.details_link() | safe }}</td>
