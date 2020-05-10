@@ -651,9 +651,9 @@ def save_institution():
     if not errmsgs and not data["homepage"]:
         errmsgs.append("Institution homepage cannot be blank.")
     if new and db.institutions.count({'name':data["name"]}):
-        errmsgs.append(format_errmsgs("An institution named %s already exists.  Please add disambiguating information to the name.", data["name"]))
+        errmsgs.append(format_errmsg("An institution named %s already exists.  Please add disambiguating information to the name.", data["name"]))
     if not new and data["name"] != institution.name and db.institutions.count({'name':data["name"]}):
-        errmsgs.append(format_errmsgs("Unable to change institution name to %s, there is another insituttion with the same name.", data["name"]))
+        errmsgs.append(format_errmsg("Unable to change institution name to %s, there is another insituttion with the same name.", data["name"]))
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
