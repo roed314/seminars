@@ -389,8 +389,15 @@ def save_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
-    errmsgs = []
+    if raw_data.get("submit") == "cancel":
+        if new:
+            return redirect(url_for(".index"), 302)
+        flash("Changes discarded")
+        return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+    if raw_data.get("submit") == "delete":
+        return redirect(url_for(".delete_seminar", shortname=shortname), 302)
 
+    errmsgs = []
     if seminar.new:
         data = {
             "shortname": shortname,
