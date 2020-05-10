@@ -615,6 +615,11 @@ button.textbottom {
     margin-left: 20px;
 }
 
+button.cancel {
+    color: blue;
+    background-color: #eaeaea;
+}
+
 table#edit-schedule-table {
   position: relative;
   left: -103px;
