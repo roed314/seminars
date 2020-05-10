@@ -226,6 +226,10 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
+    @property
+    def series_type(self):
+        return "conference" if self.is_conference else "seminar series"
+
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
         return d.strftime(format)
@@ -387,7 +391,7 @@ class WebSeminar(object):
                 else:
                     datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
-        cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes)))
+        cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes,homepage_link=True if self.deleted else False)))
         if include_institutions:
             cols.append(('class="institutions"', self.show_institutions()))
         if include_description:
@@ -514,8 +518,7 @@ class WebSeminar(object):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.seminars.update({"shortname": self.shortname}, {"deleted": True})
-                db.talks.update({"seminar_id": self.shortname}, {"deleted": True})
-                db.seminar_organizers.delete({"seminar_id": self.shortname})
+                db.talks.update({"seminar_id": self.shortname, "deleted": False}, {"deleted": True, "deleted_with_seminar": True})
                 for elt in db.users.search(
                     {"seminar_subscriptions": {"$contains": self.shortname}},
                     ["id", "seminar_subscriptions"],
@@ -536,6 +539,7 @@ class WebSeminar(object):
                 ):
                     del talk_sub[self.shortname]
                     db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+            self.deleted = True
             return True
         else:
             return False

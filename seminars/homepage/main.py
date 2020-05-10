@@ -831,21 +831,21 @@ def ics_seminar_file(shortname):
         user=current_user)
 
 
-@app.route("/talk/<semid>/<int:talkid>/ics")
-def ics_talk_file(semid, talkid):
-    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+@app.route("/talk/<seminar_id>/<int:talkid>/ics")
+def ics_talk_file(seminar_id, talkid):
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
     return ics_file(
         [talk],
-        filename="{}_{}.ics".format(semid, talkid),
+        filename="{}_{}.ics".format(seminar_id, talkid),
         user=current_user)
 
 
-@app.route("/talk/<semid>/<int:talkid>/")
-def show_talk(semid, talkid):
+@app.route("/talk/<seminar_id>/<int:talkid>/")
+def show_talk(seminar_id, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
-    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
     kwds = dict(

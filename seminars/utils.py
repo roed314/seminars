@@ -496,7 +496,7 @@ def adapt_weektimes(weekday, daytimes, oldtz, newtz):
     return start.weekday(), start.strftime("%H:%M") + "-" + end.strftime("%H:%M")
 
 
-def process_user_input(inp, col, typ, tz):
+def process_user_input(inp, col, typ, tz=None):
     """
     INPUT:
 
@@ -519,6 +519,7 @@ def process_user_input(inp, col, typ, tz):
             inp += ":00"  # treat numbers as times not dates
         t = parse_time(inp)
         t = t.replace(year=2020, month=1, day=1)
+        assert tz is not None
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
         if not validate_url(inp) and not (col == "live_link" and (inp == "see comments" or inp == "See comments")):
@@ -527,6 +528,7 @@ def process_user_input(inp, col, typ, tz):
     elif col.endswith("email") and typ == "text":
         return validate_email(inp.strip())["email"]
     elif typ == "timestamp with time zone":
+        assert tz is not None
         return localize_time(parse_time(inp), tz)
     elif typ == "daytime":
         res = validate_daytime(inp)
@@ -551,6 +553,8 @@ def process_user_input(inp, col, typ, tz):
             return False
         raise ValueError("Invalid boolean")
     elif typ == "text":
+        if col.endswith("timezone"):
+            return inp if pytz.timezone(inp) else ""
         # should sanitize somehow?
         return "\n".join(inp.splitlines())
     elif typ in ["int", "smallint", "bigint", "integer"]:

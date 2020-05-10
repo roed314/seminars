@@ -143,7 +143,7 @@
           <div class="submenu-nav{% if subsection == 'home' %} submenu-active{% endif %}">
             <a href="{{ url_for('create.index') }}">Series</a>
           </div>
-          {% if not subsection in ['view', 'editsem', 'schedule', 'viewtalk', 'edittalk'] %}
+          {% if not seminar and subsection in ['view', 'editsem', 'schedule', 'viewtalk', 'edittalk'] %}
             <div class="submenu-nav{% if subsection == 'institutions' %} submenu-active{% endif %}">
               <a href="{{ url_for('list_institutions') }}">Institutions</a>
             </div>
@@ -171,7 +171,7 @@
             <a href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">View series</a>
           </div>
         {% endif %} {# institution/seminar #}
-        {% if talk %}
+        {% if talk and not talk.deleted %}
           <div class="submenu-nav{% if subsection == 'edittalk' %} submenu-active{% endif %}">
             {% if talk.seminar.user_can_edit() %}
             <a href="{{ url_for('create.edit_talk', seminar_id=talk.seminar.shortname, seminar_ctr=talk.seminar_ctr) }}">Edit talk</a>
@@ -181,9 +181,9 @@
           </div>
           <div class="submenu-nav{% if subsection == 'viewtalk' %} submenu-active{% endif %}">
             {% if talk.seminar.user_can_edit() %}
-              <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr) }}">View talk</a>
+              <a href="{{ url_for('show_talk', seminar_id=talk.seminar.shortname, talkid=talk.seminar_ctr) }}">View talk</a>
             {% else %}
-              <a href="{{ url_for('show_talk', semid=talk.seminar.shortname, talkid=talk.seminar_ctr, token=token) }}">View talk</a>
+              <a href="{{ url_for('show_talk', seminar_id=talk.seminar.shortname, talkid=talk.seminar_ctr, token=token) }}">View talk</a>
             {% endif %}
           </div>
         {% endif %} {# talk #}
