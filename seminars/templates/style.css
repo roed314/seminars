@@ -616,11 +616,11 @@ button.textbottom {
 }
 
 button.save {
-    vertical-align: middle;
+    vertical-align: text-bottom;
 }
 
 button.cancel {
-    vertical-align: middle;
+    vertical-align: text-bottom;
     color: blue;
     background-color: white;
 }
