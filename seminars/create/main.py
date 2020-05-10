@@ -242,10 +242,10 @@ def delete_seminar(shortname):
         if raw_data.get("submit") == "delete":
             permdelete = True
         if raw_data.get("submit") == "permdelete":
-            return redirect(url_for(".permdelete_seminar", seminar_id=shortname), 302)
+            return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
     else:
         if raw_data.get("submit") == "cancel":
-            return redirect(url_for(".edit_seminar", seminar_id=shortname), 302)
+            return redirect(url_for(".edit_seminar", shortname=shortname), 302)
         if raw_data.get("submit") == "delete":
             if seminar.delete():
                 flash(seminar.series_type.capitalize() + " deleted.")
