@@ -24,6 +24,46 @@ short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 daytime_re_string = r'\d{1,4}|\d{1,2}:\d\d|'
 daytime_re = re.compile(daytime_re_string)
 
+# Bounds on input field lengths
+MAX_SHORTNAME_LEN = 32
+MAX_DESCRIPTION_LEN = 64
+MAX_NAME_LEN = 100
+MAX_TITLE_LEN = 256
+MAX_EMAIL_LEN = 256
+MAX_URL_LEN = 256
+MAX_TEXT_LEN = 8192
+MAX_SLOTS = 12 # Must be a multiple of 3
+MAX_SPEAKERS = 8 
+MAX_ORGANIZERS = 10
+
+maxlength = {
+    'abstract' : MAX_TEXT_LEN,
+    'aliases' : MAX_NAME_LEN,
+    'city' : MAX_NAME_LEN,
+    'comments' : MAX_TEXT_LEN,
+    'description' : MAX_DESCRIPTION_LEN,
+    'full_name' : MAX_NAME_LEN, # FIXME we should really rename this column to name
+    'homepage' : MAX_URL_LEN,
+    'institutions.name' : MAX_DESCRIPTION_LEN,
+    'live_link' : MAX_URL_LEN,
+    'name' : MAX_NAME_LEN,
+    'organizers' : MAX_ORGANIZERS,
+    'paper_link' : MAX_URL_LEN,
+    'room' : MAX_NAME_LEN,
+    'shortname' : MAX_SHORTNAME_LEN,
+    'slides_link' : MAX_URL_LEN,
+    'speaker': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speakers' : MAX_SPEAKERS,
+    'speaker_affiliation': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speaker_email': MAX_EMAIL_LEN,
+    'speaker_homepage': MAX_URL_LEN,
+    'stream_link' : MAX_URL_LEN,
+    'time_slots' : MAX_SLOTS,
+    'title' : MAX_TITLE_LEN,
+    'video_link' : MAX_URL_LEN,
+    'weekdays' : MAX_SLOTS,
+}
+
 def topdomain():
     # return 'mathseminars.org'
     # return 'researchseminars.org'
@@ -468,7 +508,9 @@ def process_user_input(inp, col, typ, tz):
         inp = inp.strip()
     if not inp:
         return False if typ == "boolean" else ("" if typ == "text" else None)
-    elif typ == "time":
+    if col in maxlength and len(inp) > maxlength[col]:
+        raise ValueError("Input exceeds maximum length permitted")
+    if typ == "time":
         # Note that parse_time, when passed a time with no date, returns
         # a datetime object with the date set to today.  This could cause different
         # relative orders around daylight savings time, so we store all times

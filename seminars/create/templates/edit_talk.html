@@ -22,26 +22,26 @@
     <table>
     <tr>
       <td style="width:150px">{{ KNOWL("speaker") }}</td>
-      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" placeholder="Firstname Lastname"/></td>
+      <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" maxlength="{{ maxlength['speaker'] }}" placeholder="Firstname Lastname"/></td>
     </tr>
     <tr>
       <td>{{ KNOWL("speaker_email") }}</td>
-      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" placeholder="someone@upan.edu"/></td>
+      <td><input name="speaker_email" value="{{ talk.speaker_email | blanknone }}" style="width:600px;" maxlength="{{ maxlength['speaker_email'] }}" placeholder="someone@upan.edu"/></td>
       <td class="forminfo" />Visible only to organizers.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("speaker_affiliation") }}</td>
-      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" placeholder="University of Pangaea" /></td>
+      <td><input name="speaker_affiliation" value="{{ talk.speaker_affiliation | blanknone }}" style="width:600px;" maxlength="{{ maxlength['speaker_affiliation'] }}" placeholder="University of Pangaea" /></td>
     </tr>
     <tr>
       <td>{{ KNOWL("speaker_homepage") }}</td>
-      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone"/></td>
+      <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" maxlength="{{ maxlength['speaker_homepage'] }}"placeholder="https://upan.edu/~someone"/></td>
       <td class="forminfo" />Please set if available.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("title") }}</td>
-      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" placeholder="TeX symbols are OK here" /></td>
-      <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
+      <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" maxlength="{{ maxlength['title'] }}" placeholder="TeX symbols are OK here" /></td>
+      <td class="forminfo" />Capitalize first word and proper nouns only. Leave blank if TBA.</td>
     </tr>
     {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
     <tr>
@@ -64,11 +64,11 @@
     </tr>
     <tr>
       <td>{{ KNOWL("paper_link") }}</td>
-      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" placeholder="https://arxiv.org/abs/9999.99999"/></td>
+      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['paper_link'] }}" placeholder="https://arxiv.org/abs/9999.99999"/></td>
     </tr>
     <tr>
       <td>{{ KNOWL("slide_link") }}</td>
-      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['slides_link'] }}"placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
     </tr>
   <tr>
     <td>{{ KNOWL("abstract") }}</td>
@@ -77,7 +77,7 @@
   <table>
     <tr>
       <td colspan="2">
-        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" placeholder="TeX symbols are OK here.  This is joint work with Leonhard Euler.">{{talk.abstract | blanknone }}</textarea>
+        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" maxlength="{{ maxlength['abstract'] }}" placeholder="TeX symbols are OK here.  This is joint work with Leonhard Euler.">{{talk.abstract | blanknone }}</textarea>
       </td>
     </tr>
   </table>
@@ -167,11 +167,11 @@
     </tr>
     <tr>
       <td>{{ KNOWL("room") }}</td>
-      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building" /></td>
+      <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building" /></td>
     </tr>
     <tr>
       <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
     </tr>
     <tr>
       <td>{{ KNOWL("access") }}</td>
@@ -185,13 +185,13 @@
     </tr>
      <tr>
       <td>{{ KNOWL("video_link") }}</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" placeholder="https://www.youtube.com/watch?v=abc123"></td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['video_link'] }}"placeholder="https://www.youtube.com/watch?v=abc123"></td>
     </tr>
     {% else %}
     {# attributes non-organizers cannot edit #}
     <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
-    <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
-    <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
+    <input type="hidden" name="room" value="{{ talk.room | blanknone }}" maxlength="{{ maxlength['room'] }}" />
+    <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" maxlength="{{ maxlength['live_link'] }}" />
     <input type="hidden" name="access" value="{{ talk.access }}" />
     {# attributes non-organizers can edit #}
     {% if talk.room %}
@@ -214,7 +214,7 @@
       <td colspan="2">{{ KNOWL("talk_comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" placeholder="Talk-specific livestream access instructions?  Notes about the speaker?  HTML and $\TeX$ are OK here.  Both the talk comments and the series comments below will appear on the talk's page.">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Talk-specific livestream access instructions?  Notes about the speaker?  HTML and $\TeX$ are OK here.  Both the talk comments and the series comments below will appear on the talk's page.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
 </table>
 <br>

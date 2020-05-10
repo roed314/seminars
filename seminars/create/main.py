@@ -24,6 +24,7 @@ from seminars.utils import (
     daytimes_early,
     daytimes_long,
     date_and_daytimes_to_times,
+    maxlength,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -58,7 +59,6 @@ from dateutil.parser import parse as parse_time
 import pytz
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
-MAX_SLOTS = 12  # Max time slots in a seminar series, must be a multiple of 3
 
 
 @create.route("manage/")
@@ -129,6 +129,7 @@ WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
         deleted_talks=deleted_talks,
         institution_known=institution_known,
         institutions=institutions(),
+        maxlength=maxlength,
         section=manage,
         subsection="home",
         title=manage,
@@ -197,7 +198,7 @@ def edit_seminar():
         institutions=institutions(),
         short_weekdays=short_weekdays,
         timezones=timezones,
-        max_slots=MAX_SLOTS,
+        maxlength=maxlength,
         lock=lock,
     )
 
@@ -223,6 +224,7 @@ def delete_seminar(shortname):
             institutions=institutions(),
             weekdays=weekdays,
             timezones=timezones,
+            maxlength=maxlength,
             lock=lock,
         )
 
@@ -312,6 +314,7 @@ def delete_talk(semid, semctr):
             subsection="edittalk",
             institutions=institutions(),
             timezones=timezones,
+            maxlength=maxlength,
         )
 
     if not talk.user_can_delete():
@@ -441,7 +444,7 @@ def save_seminar():
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     data["weekdays"] = []
     data["time_slots"] = []
-    for i in range(MAX_SLOTS):
+    for i in range(maxlength["time_slots"]):
         weekday = daytimes = None
         try:
             col = "weekday" + str(i)
@@ -568,6 +571,8 @@ def edit_institution():
     else:
         data = request.args
     shortname = data.get("shortname", "")
+    if data.get("cancel") == "yes":
+        flash("Changes discarded.")
     new = data.get("new") == "yes"
     name = data.get("name", "")
     resp, institution = can_edit_institution(shortname, name, new)
@@ -585,6 +590,7 @@ def edit_institution():
         title=title,
         section="Manage",
         subsection="editinst",
+        maxlength=maxlength,
     )
 
 
@@ -598,6 +604,11 @@ def save_institution():
     resp, institution = can_edit_institution(shortname, name, new)
     if resp is not None:
         return resp
+    if raw_data.get("submit") == "cancel":
+        if new:
+            return redirect(url_for("list_institutions"), 302)
+        flash("Changes discarded")
+        return redirect(url_for(".edit_institution", shortname=shortname), 302)
 
     data = {}
     data["timezone"] = tz = raw_data.get("timezone", "UTC")
@@ -639,6 +650,10 @@ def save_institution():
         errmsgs.append("Institution name cannot be blank.")
     if not errmsgs and not data["homepage"]:
         errmsgs.append("Institution homepage cannot be blank.")
+    if new and db.institutions.count({'name':data["name"]}):
+        errmsgs.append(format_errmsg("An institution named %s already exists.  Please add disambiguating information to the name.", data["name"]))
+    if not new and data["name"] != institution.name and db.institutions.count({'name':data["name"]}):
+        errmsgs.append(format_errmsg("Unable to change institution name to %s, there is another insituttion with the same name.", data["name"]))
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
@@ -702,6 +717,7 @@ def edit_talk():
         subsection="edittalk",
         institutions=institutions(),
         timezones=timezones,
+        maxlength=maxlength,
         token=token,
         **extras
     )
@@ -908,6 +924,7 @@ def edit_seminar_schedule():
         schedule=schedule,
         section="Manage",
         subsection="schedule",
+        maxlength=maxlength,
     )
 
 

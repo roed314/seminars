@@ -670,6 +670,7 @@ def list_institutions():
         section=section,
         subsection="institutions",
         institutions=institutions(),
+        maxlength=maxlength
     )
 
 
