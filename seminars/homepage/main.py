@@ -5,7 +5,6 @@ from seminars.utils import (
     Toggle,
     ics_file,
     restricted_topics as user_topics,
-    subject_dict,
     subject_pairs,
     topdomain,
     topics,
