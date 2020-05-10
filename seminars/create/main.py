@@ -108,6 +108,7 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
         ).format(
             Ttalks=IdentifierWrapper("talks"),
             Tsems=IdentifierWrapper("seminars"),
+            Torgs=IdentifierWrapper("seminar_organizers"),
             Cseminar_id=IdentifierWrapper("seminar_id"),
             Cseminar_ctr=IdentifierWrapper("seminar_ctr"),
             Csname=IdentifierWrapper("shortname"),
