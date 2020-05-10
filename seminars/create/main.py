@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+se# -*- coding: utf-8 -*-
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import current_user
 from seminars.users.main import email_confirmed_required
@@ -205,7 +205,7 @@ def edit_seminar():
     )
 
 
-@create.route("delete/seminar/<shortname>")
+@create.route("delete/seminar/<shortname>" methods=["GET", "POST"])
 @email_confirmed_required
 def delete_seminar(shortname):
     try:
@@ -233,13 +233,36 @@ def delete_seminar(shortname):
     if not seminar or not seminar.user_can_delete():
         flash_error("Only the owner of the seminar can delete it")
         return failure()
+
+    raw_data = request.form if request.method == "POST" else {}
+    permdelete = False
+    if talk.deleted:
+        if raw_data.get("submit") == "revive":
+            return redirect(url_for(".revive_seminar", shortname=seminar.shortname), 302)
+        if raw_data.get("submit") == "delete":
+            permdelete = True
+        if raw_data.get("submit") == "permdelete":
+            return redirect(url_for(".permdelete_seminar", seminar_id=seminar.shortname), 302)
     else:
-        if seminar.delete():
-            flash("Series deleted")
-            return redirect(url_for(".deleted_seminar", shortname=shortname), 302)
-        else:
-            flash_error("Only the owner of the seminar can delete it")
-            return failure()
+        if raw_data.get("submit") == "cancel":
+            return redirect(url_for(".edit_seminar", seminar_id=seminar.shortname), 302)
+        if raw_data.get("submit") == "delete":
+            if talk.delete():
+                flash(seminar.series_type.capitalize() + " deleted.")
+            else:
+                flash_error("Only the creator of %s can delete it."% seminar.name)
+                return failure()
+    talks = list(talks_search({"seminar_id": shortname}, sort=[("start_time", -1)]))
+
+    return render_template(
+        "deleted_seminar.html",
+        shortname=shortname,
+        seminar=seminar,
+        talks=talks,
+        title="Delete series",
+        section="Manage",
+        permdelete=permdelete,
+    )
 
 
 @create.route("deleted/seminar/<shortname>")
@@ -259,19 +282,19 @@ def revive_seminar(shortname):
     seminar = seminars_lookup(shortname, include_deleted=True)
 
     if seminar is None:
-        flash_error("Series %s was deleted permanently", shortname)
+        flash_error("Series %s does not exist (it may have been deleted permanently).", shortname)
         return redirect(url_for(".index"), 302)
     if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
-        flash_error("You do not have permission to revive seminar %s", shortname)
+        flash_error("You do not have permission to revive %s %s", seminar.series_type, shortname)
         return redirect(url_for(".index"), 302)
     if not seminar.deleted:
-        flash_error("Series %s was not deleted, so cannot be revived", shortname)
+        flash_error("%s %s does not need to be revived, it is not marked as deleted.", seminar.series_type.capitalize(), shortname)
     else:
         db.seminars.update({"shortname": shortname}, {"deleted": False})
         db.talks.update({"seminar_id": shortname}, {"deleted": False})
         flash(
-            "Series %s revived.  You should reset the organizers, and note that any users that were subscribed no longer are."
-            % shortname
+            "%s %s revived.  Note that any users that were subscribed no longer are."
+            % (seminar.series_type, shortname)
         )
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
@@ -282,18 +305,18 @@ def permdelete_seminar(shortname):
     seminar = seminars_lookup(shortname, include_deleted=True)
 
     if seminar is None:
-        flash_error("Series %s already deleted permanently", shortname)
+        flash_error("%s %s already deleted permanently", seminar.series_type.capitalize(), shortname)
         return redirect(url_for(".index"), 302)
     if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
-        flash_error("You do not have permission to delete seminar %s", shortname)
+        flash_error("You do not have permission to delete %s %s", seminar.series_type, shortname)
         return redirect(url_for(".index"), 302)
     if not seminar.deleted:
-        flash_error("You must delete seminar %s first", shortname)
+        flash_error("You must delete %s %s first", seminar.series_type, shortname)
         return redirect(url_for(".edit_seminar", shortname=shortname), 302)
     else:
         db.seminars.delete({"shortname": shortname})
         db.talks.delete({"seminar_id": shortname})
-        flash("Series %s permanently deleted" % shortname)
+        flash("%s %s permanently deleted" % (seminar.series_type, shortname))
         return redirect(url_for(".index"), 302)
 
 
@@ -322,7 +345,8 @@ def delete_talk(seminar_id, seminar_ctr):
     if not talk.user_can_delete():
         flash_error("Only the organizers of a seminar can delete talks in it")
         return failure()
-    raw_data = request.form
+
+    raw_data = request.form if request.method == "POST" else {}
     permdelete = False
     if talk.deleted:
         if raw_data.get("submit") == "revive":

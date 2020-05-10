@@ -226,6 +226,10 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
+    @property
+    def series_type(self):
+        return "conference" if seminar.is_conference else "seminar series"
+
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
         return d.strftime(format)
