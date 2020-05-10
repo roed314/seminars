@@ -527,10 +527,6 @@ div.topic_cmd {
     border-radius: 5px 5px 0 0;
 }
 
-br.half {
-  height: 8px;
-}
-
 div.topicselected, div.languageselected, div.subjectselected {
     color: {{color.header_background}};
     background: #aaaaaa;
