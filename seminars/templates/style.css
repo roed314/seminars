@@ -615,8 +615,22 @@ button.textbottom {
     margin-left: 20px;
 }
 
+button.save {
+    vertical-align: text-bottom;
+    margin-left: 20px;
+}
+
 button.cancel {
+    vertical-align: text-bottom;
+    margin-left: 20px;
     color: blue;
+    background-color: white;
+}
+
+button.delete {
+    vertical-align: text-bottom;
+    margin-left: 20px;
+    color: red;
     background-color: white;
 }
 

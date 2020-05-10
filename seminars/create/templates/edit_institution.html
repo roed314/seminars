@@ -48,9 +48,8 @@
   </table>
   <br>
   <div>
-  <button type="submit" name="submit" value="save" onclick="unsaved = false; return true;">{{ 'Create institution' if institution.new else 'Save changes' }}</button>
-  &nbsp;
-  <button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;" return true;">{{ 'Cancel creation' if institution.new else 'Cancel changes' }}</button>
+  <button class="save" type="submit" name="submit" value="save" onclick="unsaved = false; return true;">{{ 'Create institution' if institution.new else 'Save changes' }}</button>
+  <button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false; return true;">{{ 'Cancel creation' if institution.new else 'Cancel changes' }}</button>
   </div>
 </form>
 <script type="text/javascript">
