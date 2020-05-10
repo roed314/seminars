@@ -4,8 +4,8 @@
 
 <form action="{{ url_for('.delete_talk',  semid=semid, semctr=semctr) }}" method="POST">
 {% if talk.deleted %}
-<p>The talk below has been deleted but can still be restroed.<br>
-Click "Revive talk" to restore it, or click "Permanently delete talk" button to remove it from the datebase (this cannot be undone).</p>
+<p>The talk below has been deleted but can still be restored; click "Revive talk" to restore it.<br>
+Click "Permanently delete talk" to completely remove the talk from the datebase (note that this cannot be undone).</p>
 {% else %}
 <p>Deleting the talk below will cancel all subscriptions to it.   You can revive the talk later, but any current subscriptions will not be restored.<br>
 Click the "Delete talk" button to proceed.</p>
