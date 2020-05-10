@@ -357,7 +357,7 @@ def revive_talk(semid, semctr):
     else:
         db.talks.update({"seminar_id": semid, "seminar_ctr": semctr}, {"deleted": False})
         flash("Talk revived.  Note that any users who were subscribed no longer are.")
-        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+        return redirect(url_for(".edit_talk", seminar_id=semid, seminar_ctr=semctr), 302)
 
 
 @create.route("permdelete/talk/<semid>/<int:semctr>")

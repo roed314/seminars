@@ -5,7 +5,7 @@
 
 <p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted:</p>
 <table>
-<tr>{{ talks_header() | safe }}</tr>
+<tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
 <tr>{{ talk.oneline(include_subscribe=False) | safe }}</tr>
 </table>
 
