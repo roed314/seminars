@@ -5,7 +5,7 @@
 
 {% if user.is_subject_admin(seminar) or seminar.owner == user.email %}
 
-<form action="{{ url_for('.delete_talk',  seminar_id=seminar_id, seminar_ctr=seminar_ctr) }}" method="POST">
+<form action="{{ url_for('.delete_seminar',  shortname=shortname) }}" method="POST">
 {% if seminar.deleted %}
     {% if permdelete %}
         <p><b>Are you sure you want to do this?</b> A permanently deleted {{seminar.series_type}} cannot be restored.</p>
