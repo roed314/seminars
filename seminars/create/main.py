@@ -299,7 +299,7 @@ def permdelete_seminar(shortname):
 @email_confirmed_required
 def delete_talk(semid, semctr):
     try:
-        talk = WebTalk(semid, semctr)
+        talk = WebTalk(semid, semctr, deleted=True)
     except ValueError as err:
         flash_error(str(err))
         return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
@@ -330,21 +330,9 @@ def delete_talk(semid, semctr):
     if raw_data.get("submit") == "delete":
         if talk.delete():
             flash("Talk deleted")
-            return redirect(url_for(".deleted_talk", shortname=talk.seminar_id), 302)
         else:
             flash_error("Only the organizers of a seminar can delete talks in it")
             return failure()
-    return render_template("deleted_talk.html", talk=talk, title="Deleted", section="Manage", subsection="editseminar")
-
-
-@create.route("deleted/talk/<semid>/<int:semctr>")
-@email_confirmed_required
-def deleted_talk(semid, semctr):
-    try:
-        talk = WebTalk(semid, semctr, deleted=True)
-    except ValueError as err:
-        flash_error(str(err))
-        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
     return render_template("deleted_talk.html", talk=talk, title="Deleted", section="Manage", subsection="editseminar")
 
 
