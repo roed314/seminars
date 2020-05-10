@@ -539,7 +539,7 @@ class WebSeminar(object):
                 ):
                     del talk_sub[self.shortname]
                     db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
-            seminar.deleted = True
+            self.deleted = True
             return True
         else:
             return False
