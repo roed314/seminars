@@ -233,7 +233,7 @@
       <table><tr>
         <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">{{ ('Create ' + seminar.series_type) if seminar.new else 'Save changes' }}</button></td>
         <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">{{ 'Cancel creation' if seminar.new else 'Cancel changes' }}</button></td>
-        {% if not seminar.new %}
+        {% if not seminar.new and seminar.user_can_delete() %}
         <td><button class="delete" type="submit" name="submit" value="delete" onclick="unsaved = false;">{{ 'Delete ' + seminar.series_type }}</button></td>
         {% endif %}
       </tr></table>
