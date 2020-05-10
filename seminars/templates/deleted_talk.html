@@ -5,7 +5,7 @@
 <form action="{{ url_for('.delete_talk',  seminar_id=seminar_id, seminar_ctr=seminar_ctr) }}" method="POST">
 {% if talk.deleted %}
     {% if permdelete %}
-        <p><b>Are you sure you want to do this?</b> Permanently deleting the talk below is an irrevocable action.</p>
+        <p><b>Are you sure you want to do this?</b> Permanently deleted talks cannot be restored.</p>
     {% else %}
         <p>The talk below has been deleted.</p>
     {% endif %}

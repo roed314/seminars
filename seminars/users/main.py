@@ -179,12 +179,21 @@ def info():
 @login_page.route("/set_info", methods=["POST"])
 @login_required
 def set_info():
-    homepage = request.form.get("homepage")
-    if homepage and not validate_url(homepage):
-        return show_input_errors([format_errmsg("Homepage %s is not a valid URL, it should begin with http:// or https://", homepage)])
-    for k, v in request.form.items():
-        setattr(current_user, k, v)
+    errmsgs = []
+    data = {}
     previous_email = current_user.email
+    for col, inp in request.form.items():
+        try:
+            typ = db.users.col_type[col]
+            data[col] = process_user_input(inp, col, typ)
+        except Exception as err:  # should only be ValueError's but let's be cautious
+            errmsgs.append(format_input_errmsg(err, val, col))
+    if not data.get("name"):
+        errmsgs.append("Name cannot be left blank.  See our <a href=" + url_for('policies') + ">policies page for details.")
+    if errmsgs:
+        return show_input_errors(errmsgs)        
+    for k in data.keys():
+        setattr(current_user, k, data[k])
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))
     if previous_email != current_user.email:
