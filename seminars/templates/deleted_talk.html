@@ -6,8 +6,8 @@
 {% if talk.deleted %}
 <p>The talk below has been deleted but can still be revived.</p>
 {% else %}
-<p>Deleting the talk below will cancel all subscriptions to it.   You can restore the talk later, but any current subscriptions will not be restored.</p>
-<p>If you wish to proceed, click the "Delete talk" button below.</p>
+<p>Deleting the talk below will cancel all subscriptions to it.   You can revive the talk later, but any current subscriptions will not be restored.<br>
+Click the "Delete talk" button to proceed.</p>
 {% endif %}
 <table>
 <tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
