@@ -205,7 +205,7 @@ def edit_seminar():
     )
 
 
-@create.route("delete/seminar/<shortname>" methods=["GET", "POST"])
+@create.route("delete/seminar/<shortname>", methods=["GET", "POST"])
 @email_confirmed_required
 def delete_seminar(shortname):
     try:
