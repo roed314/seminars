@@ -356,13 +356,13 @@ def revive_talk(seminar_id, seminar_ctr):
     talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True)
 
     if talk is None:
-        flash_error("Talk %s/%s was deleted permanently", seminar_id, seminar_ctr)
+        flash_error("Talk %s/%s does not exist (perhaps it was permanently deleted).", seminar_id, seminar_ctr)
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
-    if not current_user.is_subject_admin(talk) and talk.seminar.owner != current_user:
-        flash_error("You do not have permission to revive this talk")
+    if not talk.user_can_delete():
+        flash_error("You do not have permission to revive this talk.")
         return redirect(url_for(".index"), 302)
     if not talk.deleted:
-        flash_error("Talk %s/%s was not deleted, so cannot be revived", seminar_id, seminar_ctr)
+        flash_error("Talk %s/%s does not need to be revived, it is not marked as deleted.", seminar_id, seminar_ctr)
         return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
         db.talks.update({"seminar_id": seminar_id, "seminar_ctr": seminar_ctr}, {"deleted": False})
@@ -376,17 +376,17 @@ def permdelete_talk(seminar_id, seminar_ctr):
     talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True)
 
     if talk is None:
-        flash_error("Talk %s/%s already deleted permanently", seminar_id, seminar_ctr)
+        flash_error("Talk %s/%s does not exist (perhaps it was permanently deleted).", seminar_id, seminar_ctr)
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
-    if not current_user.is_subject_admin(talk) and talk.seminar.owner != current_user:
-        flash_error("You do not have permission to delete this seminar")
+    if not talk.user_can_delete():
+        flash_error("You do not have permission to permanently delete this talk.")
         return redirect(url_for(".index"), 302)
     if not talk.deleted:
-        flash_error("You must delete talk %s/%s first", seminar_id, seminar_ctr)
+        flash_error("You must delete talk %s/%s first.", seminar_id, seminar_ctr)
         return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
         db.talks.delete({"seminar_id": seminar_id, "seminar_ctr": seminar_ctr})
-        flash("Talk %s/%s permanently deleted" % (seminar_id, seminar_ctr))
+        flash("Talk %s/%s has been permanently deleted." % (seminar_id, seminar_ctr))
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
 
 

@@ -190,7 +190,7 @@ def set_info():
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data.get("name"):
-        errmsgs.append(format_errmsg('Name cannot be left blank.  See our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
+        errmsgs.append(format_errmsg('Name cannot be left blank.  See the User behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
     if errmsgs:
         return show_input_errors(errmsgs)        
     for k in data.keys():
