@@ -116,7 +116,7 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
             Cemail=IdentifierWrapper("email"),
             Cdel=IdentifierWrapper("deleted"),
         ),
-        [ilike_escape(current_user.email), True, False],
+        [ilike_escape(current_user.email), ilike_escape(current_user.email), True, False],
     ):
         talk = WebTalk(seminar_id, seminar_ctr, deleted=True)
         deleted_talks.append(talk)
