@@ -10,6 +10,7 @@ from seminars.utils import (
     subject_pairs,
     topdomain,
     topics,
+    maxlength,
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
@@ -670,7 +671,7 @@ def list_institutions():
         section=section,
         subsection="institutions",
         institutions=institutions(),
-        maxlength=maxlength
+        maxlength=maxlength,
     )
 
 
