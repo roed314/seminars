@@ -447,9 +447,10 @@ def _get_counters(objects):
     return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts}
 
 def _get_row_attributes(objects):
-    filtered_subjects = set(request.cookies.get('subjects', '').split(','))
-    filter_subject = request.cookies.get('filter_subject', '0') != '0'
-    filtered_topics = set(request.cookies.get('topics', '').split(','))
+    # Should maybe use topic_dag cookie processing code
+    pairs = [x.split(":") for x in request.cookies.get('topics_dict', '').split(',')]
+    filtered_topics = [pair[0] for pair in pairs if len(pair) == 2 and pair[1] == "1"]
+    #filtered_topics = set(request.cookies.get('topics', '').split(','))
     filter_topic = request.cookies.get('filter_topic', '0') != '0'
     filtered_languages = set(request.cookies.get('languages', '').split(','))
     filter_language = request.cookies.get('filter_language', '0') != '0'
@@ -459,7 +460,8 @@ def _get_row_attributes(objects):
         classes = ['talk']
 
         topic_filtered = True
-        for topic in obj.topics:
+        # Todo: update the data so that obj.topics includes obj.subjects
+        for topic in obj.subjects + obj.topics:
             classes.append("topic-" + topic)
             if topic in filtered_topics:
                 topic_filtered = False
@@ -468,15 +470,15 @@ def _get_row_attributes(objects):
             if filter_topic:
                 filtered = True
 
-        subject_filtered = True
-        for subject in obj.subjects:
-            classes.append("subject-" + subject)
-            if subject in filtered_subjects:
-                subject_filtered = False
-        if subject_filtered:
-            classes.append('subject-filtered')
-            if filter_subject:
-                filtered = True
+        #subject_filtered = True
+        #for subject in obj.subjects:
+        #    classes.append("subject-" + subject)
+        #    if subject in filtered_subjects:
+        #        subject_filtered = False
+        #if subject_filtered:
+        #    classes.append('subject-filtered')
+        #    if filter_subject:
+        #        filtered = True
 
         classes.append("lang-" + obj.language)
         if obj.language not in filtered_languages:

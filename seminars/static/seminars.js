@@ -133,32 +133,24 @@ function getTopicCookieWithValue(value) {
     }
     return with_value;
 }
-function subjectFiltering() {
-    return $('#enable_subject_filter').is(":checked");
-}
-function enableSubjectFiltering() {
-    setCookie("filter_subject", "1");
-    $('#enable_subject_filter').prop("checked", true);
-    toggleFilters(null);
-}
 function topicFiltering() {
-    return $('#enable_topic_filter').is(":checked");
+    return $('#topic').val() == "1";
 }
 function enableTopicFiltering() {
     setCookie("filter_topic", "1");
-    $('#enable_topic_filter').prop("checked", true);
+    $('#enable_topic_filter').val(1);
     toggleFilters(null);
 }
 function languageFiltering() {
-    return $('#enable_language_filter').is(":checked");
+    return $('#language').val() == "1";
 }
 function enableLanguageFiltering() {
     setCookie("filter_language", "1");
-    $('#enable_language_filter').prop("checked", true);
+    $('#language').val(1);
     toggleFilters(null);
 }
 function calFiltering() {
-    return $('#enable_calendar_filter').is(":checked");
+    return $('#enable_calendar_filter').val() == "1";
 }
 
 function setLanguageLinks() {
@@ -365,6 +357,7 @@ function toggleTopicDAG(togid) {
         $('input[value="-1"].tgl3way.sub_'+topic).each(function() {
             blocking_toggles.push(topicFromPair(this.id));
         });
+        console.log("blocking_toggles", blocking_toggles);
         var show_selector = $('input[value="1"].sub_'+topic);
         for (let i=0; i<blocking_toggles.length; i++) {
             show_selector = show_selector.not(".sub_"+blocking_toggles[i]);
@@ -451,7 +444,7 @@ function talksToShow(talks) {
     for (i=0; i<filter_classes.length; i++) {
         if (filter_classes[i][1]()) {
             talks = talks.not(filter_classes[i][0]);
-            console.log(talks.length);
+            console.log("talksToShow", filter_classes[i][0], talks.length);
         }
     }
     return talks;
@@ -469,18 +462,19 @@ function filterMenuVisible(ftype) {
 function toggleFilters(id, on_menu_open=false) {
     console.log("filters", id);
     if (id !== null) {
-        console.log($('#'+id).is(":checked"));
-        var is_enabled = $('#'+id).is(":checked")
-        var ftype = id.split("_")[1]
+        console.log($('#'+id).val());
+        var is_enabled = ($('#'+id).val() == 1);
+        var ftype = id;
         setCookie("filter_" + ftype, is_enabled ? "1" : "0");
         if (!on_menu_open && is_enabled && !filterMenuVisible(ftype) && !getCookie(ftype+"s")) {
             toggleFilterView(ftype+"-filter-btn");
         }
     }
     var talks = $('.talk');
-    console.log(talks.length);
+    console.log("hiding", talks.length, "talks");
     talks.hide();
     talks = talksToShow(talks);
+    console.log("showing", talks.length, "talks");
     talks.show();
     apply_striping();
 }
