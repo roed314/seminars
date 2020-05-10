@@ -255,7 +255,10 @@ def delete_seminar(shortname):
             else:
                 flash_error("Only the creator of %s can delete it."% seminar.name)
                 return failure()
-    talks = list(talks_search({"seminar_id": shortname}, sort=["start_time"], include_deleted=seminar.deleted))
+    if seminar.deleted:
+        talks = list(talks_search({"seminar_id": shortname, "deleted_with_seminar": True}, sort=["start_time"], include_deleted=True))
+    else:
+        talks = list(talks_search({"seminar_id": shortname}, sort=["start_time"]))
 
     return render_template(
         "deleted_seminar.html",
@@ -294,7 +297,7 @@ def revive_seminar(shortname):
         flash_error("%s %s does not need to be revived, it is not marked as deleted.", seminar.series_type.capitalize(), shortname)
     else:
         db.seminars.update({"shortname": shortname}, {"deleted": False})
-        db.talks.update({"seminar_id": shortname}, {"deleted": False})
+        db.talks.update({"seminar_id": shortname, "deleted_with_seminar":True}, {"deleted": False})
         flash(
             "%s %s revived.  Note that any users that were subscribed no longer are."
             % (seminar.series_type, shortname)

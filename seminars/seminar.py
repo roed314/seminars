@@ -518,7 +518,7 @@ class WebSeminar(object):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.seminars.update({"shortname": self.shortname}, {"deleted": True})
-                db.talks.update({"seminar_id": self.shortname}, {"deleted": True})
+                db.talks.update({"seminar_id": self.shortname, "deleted": False}, {"deleted": True, "deleted_with_seminar": True})
                 for elt in db.users.search(
                     {"seminar_subscriptions": {"$contains": self.shortname}},
                     ["id", "seminar_subscriptions"],
