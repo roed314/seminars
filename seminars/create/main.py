@@ -77,6 +77,9 @@ def index():
     for rec in db.seminar_organizers.search({"email": ilike_query(current_user.email)}, ["seminar_id", "curator"]):
         seminar_id = rec["seminar_id"]
         role = "curator" if rec["curator"] else "organizer"
+        # don't waste time loading deleted talks
+        if not seminars_lookup(seminar_id, projection="shortname", objects=False):
+            continue
         seminar = WebSeminar(seminar_id)
         pair = (seminar, role)
         if seminar.is_conference:
