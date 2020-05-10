@@ -10,7 +10,7 @@
         <p>The talk below has been deleted.</p>
     {% endif %}
 {% else %}
-    <p>Deleting the talk below will cancel all subscriptions to it.   You can restore the talk later, but subscriptions will not be restored.</p>
+    <p>Deleting the talk below will cancel any subscriptions to it.   You can restore the talk later, but subscriptions will not be restored.</p>
 {% endif %}
 <table>
 <tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
