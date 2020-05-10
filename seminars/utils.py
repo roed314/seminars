@@ -554,7 +554,7 @@ def process_user_input(inp, col, typ, tz=None):
         raise ValueError("Invalid boolean")
     elif typ == "text":
         if col.endswith("timezone"):
-            return val if pytz.timezone(val) else ""
+            return inp if pytz.timezone(inp) else ""
         # should sanitize somehow?
         return "\n".join(inp.splitlines())
     elif typ in ["int", "smallint", "bigint", "integer"]:

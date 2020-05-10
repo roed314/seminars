@@ -28,13 +28,13 @@ from markupsafe import Markup
 from seminars import db
 
 from seminars.utils import (
-    format_errmsg,
     ics_file,
+    process_user_input,
+    format_input_errmsg,
     show_input_errors,
     timestamp,
     timezones,
     topdomain,
-    validate_url,
 )
 
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
@@ -182,10 +182,10 @@ def set_info():
     errmsgs = []
     data = {}
     previous_email = current_user.email
-    for col, inp in request.form.items():
+    for col, val in request.form.items():
         try:
             typ = db.users.col_type[col]
-            data[col] = process_user_input(inp, col, typ)
+            data[col] = process_user_input(val, col, typ)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data.get("name"):
