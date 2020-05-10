@@ -51,7 +51,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   {% else %}
     <input type="hidden" name="subjects" value=""/>
   {% endif %}
-  <table id="make_semconf" style="margin-top: -15px;">
+  <table id="make_semconf">
     <tr>
       <td>{{ ASTKNOWL("is_conference") }}</td>
       <td>
@@ -81,11 +81,11 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     {% endif %}
     <tr>
       <td>{{ KNOWL("institutions") }}</td>
-      <td><span id="institution_selector"></span></td>
+      <td style="margin-bottom: 10px;"><span id="institution_selector"></span></td>
       <td class="forminfo">Institutions can also be added later.</td>
     <tr>
-      <td><button type="submit" style="margin-top: 10px;">Create</button></td>
-      <td class="forminfo" style="margin-top: 10px;">Before clicking Create, please read our <a href="{{ url_for('policies') }}" target="_blank">policies</a>.  You will have a chance to cancel creation after clicking Create.</td>
+      <td><button type="submit">Create</button></td>
+      <td class="forminfo">Before clicking Create, please read our <a href="{{ url_for('policies') }}" target="_blank">policies</a>.  You will have a chance to cancel creation after clicking Create.</td>
     </tr>
   </table>
 </form>
