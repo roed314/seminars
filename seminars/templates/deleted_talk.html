@@ -2,18 +2,17 @@
 
 {% block content %}
 
+<form action="{{ url_for('.delete_talk') }}" method="POST">
 {% if talk.deleted %}
 <p>The talk below has been deleted:</p>
 {% else %}
 <p>Deleting the talk below will cancel all subscriptions to it; you can restore the talk later, but any current subscriptions will not be restored.
-If you wish to proceed, click the "Delete talk" button below.
+If you wish to proceed, click the "Delete talk" button below.</p>
 {% endif %}
 <table>
 <tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
 <tr>{{ talk.oneline(include_subscribe=False) | safe }}</tr>
 </table>
-
-{% if talk.seminar.owner == user.email %}
 <br>
 <table><tr>
 {% if talk.deleted %}
@@ -24,7 +23,6 @@ If you wish to proceed, click the "Delete talk" button below.
 <td><button class="cancel" type="sumbit" name="submit" value="cancel">Cancel deletion</button></td>
 {% endif %}
 </tr></table>
-
-{% endif %}
+</form>
 
 {% endblock %}
