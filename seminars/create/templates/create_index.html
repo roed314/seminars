@@ -123,7 +123,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
       <td> {{talk.show_start_time() | safe}}</td>
       <td> {{talk.show_speaker(affiliation=False) | safe}}</td>
       <td> {{talk.show_knowl_title() | safe}}</td>
-      <td> <a href="{{ url_for('.deleted_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Edit</a> </td>
+      <td> <a href="{{ url_for('.delete_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Edit</a> </td>
     </tr>
     {% endfor %}
   </table>

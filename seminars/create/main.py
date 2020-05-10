@@ -320,7 +320,7 @@ def delete_talk(semid, semctr):
     if not talk.user_can_delete():
         flash_error("Only the organizers of a seminar can delete talks in it")
         return failure()
-
+    raw_data = request.form
     if raw_data.get("submit") == "cancel":
         return redirect(url_for(".edit_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
     if raw_data.get("submit") == "revive":
