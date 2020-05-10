@@ -209,7 +209,7 @@ def edit_seminar():
 @email_confirmed_required
 def delete_seminar(shortname):
     try:
-        seminar = WebSeminar(shortname)
+        seminar = WebSeminar(shortname, deleted=True)
     except ValueError as err:
         flash_error(str(err))
         return redirect(url_for(".index"), 302)
