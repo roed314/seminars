@@ -628,6 +628,7 @@ button.cancel {
 button.delete {
     vertical-align: text-bottom;
     color: red;
+    font-weight: normal;
     background-color: white;
 }
 
