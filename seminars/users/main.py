@@ -30,6 +30,7 @@ from seminars import db
 from seminars.utils import (
     ics_file,
     process_user_input,
+    format_errmsg,
     format_input_errmsg,
     show_input_errors,
     timestamp,
@@ -189,7 +190,7 @@ def set_info():
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data.get("name"):
-        errmsgs.append('Name cannot be left blank.  See our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.')
+        errmsgs.append(format_errmsg('Name cannot be left blank.  See our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
     if errmsgs:
         return show_input_errors(errmsgs)        
     for k in data.keys():
