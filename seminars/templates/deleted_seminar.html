@@ -17,7 +17,7 @@
     You can restore the {{seminar.series_type}} and its talks later, but subscriptions will not be restored.</p>
 {% endif %}
 <table>
-<tr>{{ seminars_header(include_subscribe=False) | safe }}</tr>
+<tr>{{ series_header(include_subscribe=False) | safe }}</tr>
 <tr>{{ seminar.oneline(include_subscribe=False) | safe }}</tr>
 </table>
 <br>
