@@ -8,7 +8,7 @@
       </div>
       {% if not talk.deleted %}
         <div class="talk-view">
-          ( <a href="{{url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr, _external=_external)}}">view</a> {% if talk.user_can_edit() %} | <a href="{{url_for('create.edit_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr, _external=_external)}}">edit</a> {% endif %} )
+          ( <a href="{{url_for('show_talk', seminar_id=talk.seminar_id, talkid=talk.seminar_ctr, _external=_external)}}">view</a> {% if talk.user_can_edit() %} | <a href="{{url_for('create.edit_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr, _external=_external)}}">edit</a> {% endif %} )
         </div>
       {% endif %}
   </div>
