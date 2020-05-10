@@ -40,7 +40,7 @@
     <hr>
     <table>
     <tr>{{ talks_header(include_seminar=False, include_subscribe=False) | safe }}</tr>
-    {% for talk in deleted_talks %}
+    {% for talk in talks %}
         <tr>{{ talk.oneline(include_seminar=False, include_subscribe=False) | safe }}</tr>
     {% endfor %}
     </table>
