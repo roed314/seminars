@@ -315,6 +315,7 @@ def permdelete_seminar(shortname):
         return redirect(url_for(".edit_seminar", shortname=shortname), 302)
     else:
         db.seminars.delete({"shortname": shortname})
+        db.seminar_organizers.delete({"seminar_id": self.shortname})
         db.talks.delete({"seminar_id": shortname})
         flash("%s %s permanently deleted" % (seminar.series_type, shortname))
         return redirect(url_for(".index"), 302)

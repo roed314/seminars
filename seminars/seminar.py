@@ -519,7 +519,6 @@ class WebSeminar(object):
             with DelayCommit(db):
                 db.seminars.update({"shortname": self.shortname}, {"deleted": True})
                 db.talks.update({"seminar_id": self.shortname}, {"deleted": True})
-                db.seminar_organizers.delete({"seminar_id": self.shortname})
                 for elt in db.users.search(
                     {"seminar_subscriptions": {"$contains": self.shortname}},
                     ["id", "seminar_subscriptions"],
