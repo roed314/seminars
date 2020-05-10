@@ -528,7 +528,7 @@ div.topic_cmd {
 }
 
 br.half {
-  line-height: 8px;
+  height: 8px;
 }
 
 div.topicselected, div.languageselected, div.subjectselected {
