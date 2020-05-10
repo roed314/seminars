@@ -4,7 +4,7 @@
 
 <form action="{{ url_for('.delete_talk',  semid=semid, semctr=semctr) }}" method="POST">
 {% if talk.deleted %}
-<p>The talk below has been deleted:</p>
+<p>The talk below has been deleted but can still be revived.</p>
 {% else %}
 <p>Deleting the talk below will cancel all subscriptions to it; you can restore the talk later, but any current subscriptions will not be restored.
 If you wish to proceed, click the "Delete talk" button below.</p>
