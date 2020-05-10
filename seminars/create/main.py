@@ -741,7 +741,7 @@ def save_talk():
         flash("Changes discarded")
         return redirect(url_for(".edit_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
     if raw_data.get("submit") == "delete":
-        return redirect(url_for(".delete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
+        return redirect(url_for(".delete_talk", semid=talk.seminar_id, semctr=talk.seminar_ctr), 302)
 
     errmsgs = []
     data = {

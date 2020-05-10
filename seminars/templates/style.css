@@ -527,6 +527,10 @@ div.topic_cmd {
     border-radius: 5px 5px 0 0;
 }
 
+br.half {
+  line-height: 8px;
+}
+
 div.topicselected, div.languageselected, div.subjectselected {
     color: {{color.header_background}};
     background: #aaaaaa;
@@ -599,7 +603,6 @@ table.ntdata td.talktitle {
 table.ntdata td.description {
     min-width: 240px;
 }
-
 
 .talk-table td:nth-child(6) {
     /* Title column on browse */
@@ -699,14 +702,6 @@ div.submenu-active, div.toggler-active {
 }
 div.toggler-nav:hover {
     cursor: pointer;
-}
-
-div.inlineh2 {
-    display: inline-block;
-    font-size: 1.5em;
-    margin-block-start: 0.16em;
-    margin-block-end: 0.96em;
-    font-weight: bold;
 }
 
 button.aslink {
