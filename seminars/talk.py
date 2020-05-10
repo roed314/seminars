@@ -265,7 +265,7 @@ class WebTalk(object):
         )
 
     def show_knowl_title(self, _external=False, preload=False):
-        if _external or preload:
+        if self.is_deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
