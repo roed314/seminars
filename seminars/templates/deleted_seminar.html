@@ -11,7 +11,7 @@
 {% else %}
     <p>Deleting the {{seminar.series_type}} below will cancel all subscriptions and ensure that it is not visible on this site.<br>
     {% if talks %} This also applies to all of the associated talks listed below.{% endif %}
-    You will be able to restore the {{seminar.series_type}} and any associated talks later if needed, but subscriptions will not be restored.</p>
+    You will be able to restore the {{seminar.series_type}}{% if talks %} and associated talks{% endif %} later if needed, but subscriptions will not be restored.</p>
     <p>Permanent deletion removes all information related to the {{seminar.series_type}} and its associated talks from our database.<br>
     <b>This cannot be undone</b>.
     </p>
