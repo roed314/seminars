@@ -90,8 +90,9 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   </table>
 </form>
 {% if deleted_seminars or deleted_talks %}
-<p><a href="#" onclick="$('#deleted_stuff').show(); return false;">Show deleted items</a></p>
+<p id="show_deleted_stuff"><a href="#">Show deleted items</a></p>
 <div id="deleted_stuff" style="display:none;">
+<p><a id="hide_deleted_stuff" href="#">Hide deleted items</a></p>
   {% if deleted_seminars %}
   <h2>Deleted series</h2>
   <table class="ntdata">
@@ -151,6 +152,24 @@ const subjOptions = [
   },
   {% endfor %}
 ];
+
+document.getElementById('show_deleted_stuff').addEventListener('click',
+  function(e) {
+    e.preventDefault();
+    $('#show_deleted_stuff').hide();
+    $('#hide_deleted_stuff').show();
+    $('#deleted_stuff').show();
+    return false;
+  });
+
+document.getElementById('hide_deleted_stuff').addEventListener('click',
+  function(e) {
+    e.preventDefault();
+    $('#deleted_stuff').hide();
+    $('#hide_deleted_stuff').hide();
+    $('#show_deleted_stuff').show();
+    return false;
+  });
 
 document.addEventListener("DOMContentLoaded", function() {
   makeInstitutionSelector(instOptions, []);
