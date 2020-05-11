@@ -238,8 +238,8 @@ function toggleTopicDAG(togid) {
         var pane = $("#"+togid+"-pane");
         var is_visible = pane.is(":visible");
         if (!is_visible) {
-            var pair = togid.split("--");
-            toggleTopicView(pair[0], pair[1]);
+            var triple = togid.split("--");
+            toggleTopicView(triple[0], triple[1], triple[2]);
         }
         // Need to show rows corresponding to sub-topics.
         // We can't just use $("tgl.sub_"+topic).each(),
@@ -294,9 +294,9 @@ function toggleTopicDAG(togid) {
     }
 }
 
-function toggleTopicView(pid, cid) {
-    console.log(pid, cid);
-    var tid = "#"+pid+"--"+cid;
+function toggleTopicView(pid, cid, did) {
+    console.log(pid, cid, did);
+    var tid = "#"+pid+"--"+cid+"--"+did;
     var toggle = $(tid);
     var pane = $(tid+"-pane");
     var is_visible = pane.is(":visible");
@@ -304,7 +304,7 @@ function toggleTopicView(pid, cid) {
     $("."+pid+"-tlink").removeClass("active");
     if (!is_visible) {
         pane.show();
-        $("#"+cid+"-filter-btn").addClass("active");
+        $(tid+"-filter-btn").addClass("active");
         // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
         $(tid).attr('data-chosen', 0);
         if (toggle.val() == "-1") {
@@ -332,7 +332,7 @@ function talksToShow(talks) {
 }
 function filterMenuId(ftype) {
     if (ftype == "topic") {
-        return "#root--topic-pane";
+        return "#root--topic--0-pane";
     } else {
         return "#"+ftype+"-filter-menu";
     }

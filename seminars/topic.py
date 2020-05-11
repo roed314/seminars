@@ -1,7 +1,8 @@
 from seminars import db
 from seminars.toggle import toggle, toggle3way
+from seminars.utils import num_columns
 from flask import request
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 
 class WebTopic(object):
@@ -79,15 +80,14 @@ class TopicDAG(object):
         res[None] = 1 if request.cookies.get('filter_topic', '-1') == '1' else -1
         return res
 
-    def _link(self, parent_id="root", topic_id=None, counts={}):
+    def _link(self, parent_id="root", topic_id=None, counts={}, duplicate_ctr=None):
         if topic_id is None:
-            tid = name = "topic"
+            fullid = name = "topic"
             onclick = "toggleFilterView(this.id)"
             count = ""
             classes = "likeknowl root-tlink"
         else:
-            tid = topic_id
-            topic = self.by_id[tid]
+            topic = self.by_id[topic_id]
             name = topic.name
             count = counts.get(topic_id, 0)
             count = (" (%s)" % count) if count else ""
@@ -95,13 +95,14 @@ class TopicDAG(object):
             if not topic.children:
                 classes = " ".join(ancestors)
                 return '<span class="{0}">{1}</span>'.format(classes, name + count)
-            onclick = "toggleTopicView('%s', '%s')" % (parent_id, tid)
+            onclick = "toggleTopicView('%s', '%s', '%s')" % (parent_id, topic_id, duplicate_ctr[topic_id])
             classes = " ".join(["likeknowl", parent_id+"-tlink"] + ancestors)
+            fullid = "--".join([parent_id, topic_id, str(duplicate_ctr[topic_id])])
         return '<a id="{0}-filter-btn" class="{1}" onclick="{2}; return false;">{3}</a>{4}'.format(
-            tid, classes, onclick, name, count
+            fullid, classes, onclick, name, count
         )
 
-    def _toggle(self, parent_id="root", topic_id=None, cookie=None):
+    def _toggle(self, parent_id="root", topic_id=None, cookie=None, duplicate_ctr=None):
         if cookie is None:
             cookie = self.read_cookie()
         kwds = {}
@@ -110,7 +111,7 @@ class TopicDAG(object):
             tclass = toggle
             onchange = "toggleFilters(this.id);"
         else:
-            tid = parent_id + "--" + topic_id
+            tid = "--".join([parent_id, topic_id, str(duplicate_ctr[topic_id])])
             topic = self.by_id[topic_id]
             if topic.children:
                 tclass = toggle3way
@@ -121,23 +122,25 @@ class TopicDAG(object):
 
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
-    def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None):
+    def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None):
         padding = ' style="padding-right: 2em;"' if topic_id is None else ''
         return "<td>%s</td><td%s>%s</td>" % (
-            self._toggle(parent_id, topic_id, cookie),
+            self._toggle(parent_id, topic_id, cookie, duplicate_ctr),
             padding,
-            self._link(parent_id, topic_id, counts),
+            self._link(parent_id, topic_id, counts, duplicate_ctr),
         )
 
-    def link_pair(self, parent_id="root", topic_id=None, counts={}, cols=1, cookie=None):
+    def link_pair(self, parent_id="root", topic_id=None, counts={}, cols=1, cookie=None, duplicate_ctr=None):
         return """
-<div class="toggle_pair col{0}">
+<div class="toggle_wrap col{0}">
+<div class="toggle_pair">
   <table><tr>{1}</tr></table>
+</div>
 </div>""".format(
-            cols, self.filter_link(parent_id, topic_id, counts, cookie=cookie)
+            cols, self.filter_link(parent_id, topic_id, counts, cookie, duplicate_ctr)
         )
 
-    def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None):
+    def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None):
         if cookie is None:
             cookie = self.read_cookie()
         if topic_id is None:
@@ -146,31 +149,30 @@ class TopicDAG(object):
         else:
             tid = topic_id
             topics = self.by_id[tid].children
-        childpanes = [topic.id for topic in topics if topic.children]
-        mlen = max(len(topic.name) for topic in topics)
-        # The following are guesses that haven't been tuned.
-        if mlen > 50:
-            cols = 1
-        elif mlen > 35:
-            cols = 2
-        elif mlen > 25:
-            cols = 3
-        elif mlen > 16:
-            cols = 4
-        elif mlen > 10:
-            cols = 5
-        else:
-            cols = 6
+        if duplicate_ctr is None:
+            duplicate_ctr = Counter()
+        cols = num_columns([topic.name for topic in topics])
+        divs = []
+        delay = []
+        for i, topic in enumerate(topics, 1):
+            duplicate_ctr[topic.id] += 1
+            link = self.link_pair(tid, topic.id, counts, cols, cookie, duplicate_ctr)
+            divs.append(link)
+            if topic.children:
+                filter_pane = self.filter_pane(tid, topic.id, counts, cookie, duplicate_ctr)
+                delay.append(filter_pane)
+            if i % cols == 0 or i == len(topics):
+                divs.extend(delay)
+                delay = []
         return """
-<div id="{0}--{1}-pane" class="filter-menu {0}-subpane" style="display:none;">
-{2}
+<div id="{0}--{1}--{2}-pane" class="filter-menu {0}-subpane" style="display:none;">
 {3}
 </div>""".format(
             parent_id,
             tid,
-            "\n".join(self.link_pair(tid, topic.id, counts, cols, cookie) for topic in topics),
-            "\n".join(self.filter_pane(tid, child, counts, cookie) for child in childpanes),
-        )
+            duplicate_ctr[tid],
+            "\n".join(divs),
+       )
 
 
 topic_dag = TopicDAG()

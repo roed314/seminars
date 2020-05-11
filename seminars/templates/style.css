@@ -492,29 +492,31 @@ div.topic_cmd {
 
 div.toggle_pair {
     padding: 3px;
-    display: inline-block;
     color: black;
 }
+div.toggle_wrap {
+    display: inline-block;
+}
 a.not_toggleable, span.not_toggleable {
-    color: #aaaaaa;
+    color: #aaaaaa!important;
 }
 div.col1 {
     min-width: 90%;
 }
 div.col2 {
-    min-width: 48%;
+    min-width: 49%;
 }
 div.col3 {
-    min-width: 32%;
+    min-width: 33%;
 }
 div.col4 {
-    min-width: 24%;
+    min-width: 24.5%;
 }
 div.col5 {
-    min-width: 19%;
+    min-width: 19.5%;
 }
 div.col6 {
-    min-width: 15%;
+    min-width: 16%;
 }
 
 #filter-table {
@@ -542,6 +544,11 @@ div.col6 {
     border-radius: 5px;
     margin: 15px 5px -15px 5px;
 }*/
+
+#filter-container td {
+    padding-left: 4px;
+    padding-right: 4px;
+}
 
 #filter-controls {
     margin: 0px auto;

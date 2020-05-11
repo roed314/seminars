@@ -708,3 +708,19 @@ def ics_file(talks, filename, user=current_user):
     return send_file(
         bIO, attachment_filename=filename, as_attachment=True, add_etags=False
     )
+
+def num_columns(labels):
+    mlen = max(len(label) for label in labels)
+    # The following are guesses that haven't been tuned much.
+    if mlen > 50:
+        return 1
+    elif mlen > 35:
+        return 2
+    elif mlen > 20:
+        return 3
+    elif mlen > 16:
+        return 4
+    elif mlen > 10:
+        return 5
+    else:
+        return 6

@@ -1,6 +1,7 @@
 import iso639
 from seminars import db
 from seminars.toggle import toggle
+from seminars.utils import num_columns
 from flask import request
 
 class Languages(object):
@@ -61,16 +62,17 @@ class Languages(object):
         padding = ' style="padding-right: 2em;"' if code is None else ''
         return "<td>%s</td><td%s>%s</td>" % (self._toggle(code), padding, self._link(code, counts))
 
-    def link_pair(self, code=None, counts={}, cols=6):
+    def link_pair(self, code=None, counts={}, cols=1):
         return """<div class="toggle_pair col{0}">
   <table><tr>{1}</tr></table>
 </div>""".format(cols, self.filter_link(code, counts))
 
     def filter_pane(self, counts={}):
         langs = sorted(counts, key=lambda x: (-counts[x], self.show(x)))
+        cols = num_columns(langs)
         return """
 <div id="language-filter-menu" class="filter-menu">
 {0}
-</div>""".format("\n".join(self.link_pair(code, counts) for code in langs))
+</div>""".format("\n".join(self.link_pair(code, counts, cols=cols) for code in langs))
 
 languages = Languages()
