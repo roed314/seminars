@@ -450,10 +450,10 @@ def _get_row_attributes(objects):
     pairs = [x.split(":") for x in request.cookies.get('topics_dict', '').split(',')]
     filtered_topics = [pair[0] for pair in pairs if len(pair) == 2 and pair[1] == "1"]
     #filtered_topics = set(request.cookies.get('topics', '').split(','))
-    filter_topic = request.cookies.get('filter_topic', '0') != '0'
+    filter_topic = request.cookies.get('filter_topic', '-1') == '1'
     filtered_languages = set(request.cookies.get('languages', '').split(','))
-    filter_language = request.cookies.get('filter_language', '0') != '0'
-    filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
+    filter_language = request.cookies.get('filter_language', '-1') == '1'
+    filter_calendar = request.cookies.get('filter_calendar', '-1') == '1'
     def filter_classes(obj):
         filtered = False
         classes = ['talk']
