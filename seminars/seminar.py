@@ -694,7 +694,7 @@ def next_talk_sorted(results):
     Returns the sorted list.
     """
     results = list(results)
-    ntdict = next_talks({'visibility':{'$eq':2}})  # only count visible talks when sorting
+    ntdict = next_talks({'hidden':False})  # ignore hidden talks for sorting purposes
     for R in results:
         R.next_talk_time = ntdict[R.shortname]
     results.sort(key=lambda R: (R.next_talk_time, R.name))
