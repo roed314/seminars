@@ -29,18 +29,6 @@
 </tr></table>
 <br>
 <h2>{{ seminar.show_name(plain=True) | safe }}</h2>
-{% if seminar.topics %}
-  <p>{{seminar.show_topics() | safe}}</p>
-{% endif %}
-{% if seminar.institutions %}
-  <p>{{seminar.show_institutions() | safe}}</p>
-{% endif %}
-
-<table>
-<tr>{{ series_header(include_subscribe=False) | safe }}</tr>
-<tr>{{ seminar.oneline(include_subscribe=False) | safe }}</tr>
-</table>
-
 
 {% if talks %}
     <br>
