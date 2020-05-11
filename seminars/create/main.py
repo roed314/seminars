@@ -564,7 +564,7 @@ def save_seminar():
                                 D["email"],
                             )
                         )
-                    if not similar_urls(D["homepage"], r["homepage"]):
+                    if D["homepage"] and r["homepage"] and not similar_urls(D["homepage"], r["homepage"]):
                         flash_warning(
                             "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
                             D["homepage"],
