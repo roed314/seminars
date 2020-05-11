@@ -23,6 +23,8 @@ weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 daytime_re_string = r'\d{1,4}|\d{1,2}:\d\d|'
 daytime_re = re.compile(daytime_re_string)
+dash_re = re.compile(r'[\u002D\u058A\u05BE\u1400\u1806\u2010-\u2015\u2E17\u2E1A\u2E3A\u2E3B\u2E40\u301C\u3030\u30A0\uFE31\uFE32\uFE58\uFE63\uFF0D]')
+
 
 # Bounds on input field lengths
 MAX_SHORTNAME_LEN = 32
@@ -82,8 +84,11 @@ def similar_urls(x,y):
     a, b = urlparse(x), urlparse(y)
     return a[1] == b[1] and (a[2] == b[2] or a[2] == b[2] + "/" or a[2] + "/" == b[2])
 
+def cleanse_dashes(s):
+    # replace unicode variants of dashes (which users might cut-and-paste in) with ascii dashes
+    return '-'.join(re.split(dash_re,s))
+
 def validate_daytime(s):
-    s = s.strip()
     if not daytime_re.fullmatch(s):
         return None
     if len(s) <= 2:
@@ -96,7 +101,7 @@ def validate_daytime(s):
     return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
 
 def validate_daytimes(s):
-    t = s.strip().split('-')
+    t = s.split('-')
     if len(t) != 2:
         return None;
     start, end = validate_daytime(t[0]), validate_daytime(t[1])
@@ -539,6 +544,7 @@ def process_user_input(inp, col, typ, tz=None):
         if res is None:
             raise ValueError("Invalid time of day, expected format is hh:mm")
     elif typ == "daytimes":
+        inp = cleanse_dashes(inp)
         res = validate_daytimes(inp)
         if res is None:
             raise ValueError("Invalid times of day, expected format is hh:mm-hh:mm")

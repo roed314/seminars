@@ -302,6 +302,35 @@ document.addEventListener("DOMContentLoaded", function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
+  makeTopicSelector(
+    topicOptions,
+    {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
+  );
+  makeInstitutionSelector(
+    instOptions,
+    {{ seminar.institutions | safe }},
+  );
+  makeLanguageSelector(
+    langOptions,
+    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
+  );
+  makeSubjectSelector(
+      subjOptions,
+      {{ seminar.subjects | safe }},
+  );
+  $('input[name="subjects"]').change(
+    function (){
+      if( $(this).val() == '[]') {
+      $("#subject_selector").notify(
+      "Please select at least one subject",
+        {className: "error", position: "right"})
+      } else {
+      $("#topic_selector").notify(
+      "Save your changes to load new topics options",
+        {className: "info", position: "right"})
+      }
+    });
+
   function showplusminus(n) {
     document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
     document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
@@ -334,48 +363,27 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     showplusminus(n);
   });
-  makeTopicSelector(
-    topicOptions,
-    {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
-  );
-  makeInstitutionSelector(
-    instOptions,
-    {{ seminar.institutions | safe }},
-  );
-  makeLanguageSelector(
-    langOptions,
-    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
-  );
-  makeSubjectSelector(
-      subjOptions,
-      {{ seminar.subjects | safe }},
-  );
-  $('input[name="subjects"]').change(
-    function (){
-      if( $(this).val() == '[]') {
-      $("#subject_selector").notify(
-      "Please select at least one subject",
-        {className: "error", position: "right"})
+  function showslots() {
+    var n = parseInt(document.getElementById('slots').value);
+    if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+    for ( var i = 0 ; i < n ; i++ ) {
+      if ( i < 3 ) {
+        document.getElementById('weekday'+i).style.visibility = 'visible';
+        document.getElementById('time_slot'+i).style.visibility = 'visible';
       } else {
-      $("#topic_selector").notify(
-      "Save your changes to load new topics options",
-        {className: "info", position: "right"})
+        document.getElementById('weekday'+i).style.display = 'block';
+        document.getElementById('time_slot'+i).style.display = 'block';
       }
-    });
-  var n = parseInt(document.getElementById('slots').value);
-  if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
-  for ( var i = 0 ; i < n ; i++ ) {
-    if ( i < 3 ) {
-      document.getElementById('weekday'+i).style.visibility = 'visible';
-      document.getElementById('time_slot'+i).style.visibility = 'visible';
-    } else {
-      document.getElementById('weekday'+i).style.display = 'block';
-      document.getElementById('time_slot'+i).style.display = 'block';
     }
+    if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
+    showplusminus(n);
   }
-  if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
-  showplusminus(n);
+  // Make sure showslots gets called whenever the page is shown, including via the back button
+  window.onpageshow = function(e) {
+    showslots()
+  };
 });
+
 
 </script>
 
