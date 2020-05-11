@@ -25,6 +25,8 @@ from seminars.utils import (
     daytimes_long,
     date_and_daytimes_to_times,
     maxlength,
+    similar_urls,
+    format_warning,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -488,38 +490,42 @@ def save_seminar():
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     data["weekdays"] = []
     data["time_slots"] = []
-    for i in range(maxlength["time_slots"]):
-        weekday = daytimes = None
-        try:
-            col = "weekday" + str(i)
-            val = raw_data.get(col, "")
-            weekday = process_user_input(val, col, "weekday_number", tz)
-            col = "time_slot" + str(i)
-            val = raw_data.get(col, "")
-            daytimes = process_user_input(val, col, "daytimes", tz)
-        except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_input_errmsg(err, val, col))
-        if weekday is not None and daytimes is not None:
-            data["weekdays"].append(weekday)
-            data["time_slots"].append(daytimes)
-            if daytimes_early(daytimes):
-                flash_warning(
-                    "Time slot %s includes early AM hours; please correct if this is not intended (use 24-hour time format).",
-                    daytimes,
+    if data["frequency"]:
+        for i in range(maxlength["time_slots"]):
+            weekday = daytimes = None
+            try:
+                col = "weekday" + str(i)
+                val = raw_data.get(col, "")
+                weekday = process_user_input(val, col, "weekday_number", tz)
+                col = "time_slot" + str(i)
+                val = raw_data.get(col, "")
+                daytimes = process_user_input(val, col, "daytimes", tz)
+            except Exception as err:  # should only be ValueError's but let's be cautious
+                errmsgs.append(format_input_errmsg(err, val, col))
+            if weekday is not None and daytimes is not None:
+                data["weekdays"].append(weekday)
+                data["time_slots"].append(daytimes)
+                if daytimes_early(daytimes):
+                    flash_warning(
+                        "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                        daytimes,
+                    )
+                elif daytimes_long(daytimes):
+                    flash_warning(
+                        "Time slot %s is longer than 8 hours, please correct if this is not intended.",
+                        daytimes,
                 )
-            elif daytimes_long(daytimes):
-                flash_warning(
-                    "Time slot %s is longer than 8 hours; please correct if this is not intended.",
-                    daytimes,
-                )
-    if data["frequency"] and not data["weekdays"]:
-        errmsgs.append('You must specify at least one time slot, or set periodicty to "no fixed schedule."')
-    if len(data["weekdays"]) > 1:
-        x = sorted(
-            list(zip(data["weekdays"], data["time_slots"])),
-            key=lambda t: t[0] * 24 * 60 + daytime_minutes(t[1].split("-")[0]),
-        )
-        data["weekdays"], data["time_slots"] = [t[0] for t in x], [t[1] for t in x]
+        if not data["weekdays"]:
+            errmsgs.append('You must specify at least one time slot (or set periodicty to "no fixed schedule").')
+        if len(data["weekdays"]) > 1:
+            x = sorted(
+                list(zip(data["weekdays"], data["time_slots"])),
+                key=lambda t: t[0] * 24 * 60 + daytime_minutes(t[1].split("-")[0]),
+            )
+            data["weekdays"], data["time_slots"] = [t[0] for t in x], [t[1] for t in x]
+    else:
+        data["weekdays"] = []
+        data["time_slots"] = []
     organizer_data = []
     contact_count = 0
     for i in range(10):
@@ -549,30 +555,28 @@ def save_seminar():
                     D["email"],
                     D["full_name"],
                     "Set homepage or disable display to prevent this.",
-                ),
+                )
             if D["email"]:
                 r = db.users.lookup(D["email"])
                 if r and r["email_confirmed"]:
                     if D["full_name"] != r["name"]:
-                        errmsgs.append(
-                            format_errmsg(
-                                "Organizer name %s does not match the name %s of the account with email address %s",
+                        flash_warning(
+                            format_warning(
+                                "Organizer name %s does not match the name %s of the account with email address %s.<br>Please verify that you have spelled the name correctly.",
                                 D["full_name"],
                                 r["name"],
                                 D["email"],
                             )
                         )
-                    else:
-                        if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
-                            flash_warning(
-                                "The homepage %s does not match the homepage %s of the account with email address %s; please correct if unintended.",
-                                D["homepage"],
-                                r["homepage"],
-                                D["email"],
-                            )
-                        if D["display"]:
-                            contact_count += 1
-
+                    if D["homepage"] and r["homepage"] and not similar_urls(D["homepage"], r["homepage"]):
+                        flash_warning(
+                            "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
+                            D["homepage"],
+                            r["homepage"],
+                            D["email"],
+                        )
+                    if D["display"]:
+                        contact_count += 1
             organizer_data.append(D)
     if contact_count == 0:
         errmsgs.append(
