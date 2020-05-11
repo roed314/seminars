@@ -628,7 +628,7 @@ def _search_series(conference):
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(
-        "search_seminars.html", title=title, info=info, section="Search",subsection=subsection, bread=None, is_conference=conference
+        "search_seminars.html", title=title, info=info, section="Search", subsection=subsection, bread=None, is_conference=conference
     )
 
 @app.route("/search/talks")
