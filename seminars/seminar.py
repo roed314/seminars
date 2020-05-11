@@ -669,7 +669,7 @@ def next_talks(query=None):
     A dictionary with keys the seminar_ids and values datetimes (either the next talk in that seminar, or datetime.max if no talk scheduled so that they sort at the end.
     """
     if query is None:
-        query = {"end_time": {"$gte": datetime.now(pytz.UTC)}}
+        query = {"end_time": {"$gte": datetime.now(pytz.UTC)}, "hidden": False}  # ignore hidden talks by default
     ans = defaultdict(lambda: pytz.UTC.localize(datetime.max))
     from seminars.talk import _counter as talks_counter
     _selecter = SQL("""
