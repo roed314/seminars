@@ -159,6 +159,7 @@ document.getElementById('show_deleted_stuff').addEventListener('click',
     $('#show_deleted_stuff').hide();
     $('#hide_deleted_stuff').show();
     $('#deleted_stuff').show();
+    return false;
   });
 
 document.getElementById('hide_deleted_stuff').addEventListener('click',
@@ -167,6 +168,7 @@ document.getElementById('hide_deleted_stuff').addEventListener('click',
     $('#deleted_stuff').hide();
     $('#hide_deleted_stuff').hide();
     $('#show_deleted_stuff').show();
+    return false;
   });
 
 document.addEventListener("DOMContentLoaded", function() {
