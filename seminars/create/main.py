@@ -297,7 +297,7 @@ def revive_seminar(shortname):
         db.seminars.update({"shortname": shortname}, {"deleted": False})
         db.talks.update({"seminar_id": shortname, "deleted_with_seminar":True}, {"deleted": False})
         flash(
-            "%s %s revived.  Note that any users that were subscribed no longer are."
+            "%s %s revived.  Note that any users who were subscribed no longer are."
             % (seminar.series_type, shortname)
         )
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
