@@ -7,14 +7,10 @@
 
 <form action="{{ url_for('.delete_seminar',  shortname=shortname) }}" method="POST">
 {% if seminar.deleted %}
-    {% if permdelete %}
-        <p><b>Are you sure you want to do this?</b> A permanently deleted {{seminar.series_type}} cannot be restored.</p>
-    {% else %}
-        <p>The {{seminar.series_type}} below and all its talks have been deleted.  You can restore them later if needed, but users will have to resubscribe to add them to their favorites.</p>
-    {% endif %}
+     <p>The {{seminar.series_type}} below and all its talks have been deleted.  You can restore them or permanently delete them.</p>
 {% else %}
-    <p>Deleting the {{seminar.series_type}} below will delete all the talks it contains, and cancel any subscriptions.
-    You can restore the {{seminar.series_type}} and its talks later, but subscriptions will not be restored.</p>
+    <p>Deleting the {{seminar.series_type}} below will cancel any subscriptions and ensure that the {{seminar.series_type}} and its associated talks are no longer visible on this site.  You will be able to restore them later if needed from the Manage series page (subscriptions will not be restored).</p>
+    <p>Permanent deletion removes all information related to the {{seminar.series_type}} and its associated talks from our database. This operation <b>cannot be undone</b>.
 {% endif %}
 <table>
 <tr>{{ series_header(include_subscribe=False) | safe }}</tr>
@@ -23,16 +19,12 @@
 <br>
 <table><tr>
 {% if seminar.deleted %}
-    {% if permdelete %}
-        <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete seminar</button></td>
-        <td><button class="cancel" type="submit" name="submit" value="cancel">Cancel permanent deletion</button></td>
-    {% else %}
         <td><button class="save" type="submit" name="submit" value="revive">Revive series</button></td>
-        <td><button class="delete" type="submit" name="submit" value="delete">Permanently delete seminar</button></td>
-    {% endif %}
+        <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete series</button></td>
 {% else %}
-    <td><button class="savedelete" type="sumbit" name="submit" value="delete">Delete series</button></td>
     <td><button class="cancel" type="sumbit" name="submit" value="cancel">Cancel deletion</button></td>
+    <td><button class="savedelete" type="sumbit" name="submit" value="delete">Delete series</button></td>
+    <td><button class="delete" type="submit" name="submit" value="permdelete">Permanently delete series</button></td>
 {% endif %}
 </tr></table>
 {% if talks %}
