@@ -14,7 +14,7 @@
   <tbody>
     {% for shortname, name in maintained_institutions %}
     <tr>
-      <td>name</td>
+      <td>{{ name }}</td>
       <td style="border-left: solid 1px;"> <a href='{{ url_for("create.edit_institution", shortname=shortname) }}'>properties</a></td>
       <td style="border-left: solid 1px;"> <a href='{{ url_for("show_institution", shortname=shortname) }}'>{{shortname}}</a></td>
     </tr>
@@ -59,6 +59,7 @@
   </thead>
   {% for shortname, name in institutions %}
   <tr>
+    <td>{{shortname}}</td>
     <td><a href="{{ url_for('show_institution', shortname=shortname) }}">{{name}}</a></td>
   </tr>
   {% endfor %}
