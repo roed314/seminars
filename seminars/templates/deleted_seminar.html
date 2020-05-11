@@ -10,7 +10,7 @@
     {% if permdelete %}
         <p><b>Are you sure you want to do this?</b> A permanently deleted {{seminar.series_type}} cannot be restored.</p>
     {% else %}
-        <p>The {{seminar.series_type}} below has been deleted along with all of its talks.</p>
+        <p>The {{seminar.series_type}} below and all its talks have been deleted.  You can restore them later if needed, but users will have to resubscribe to add them to their favorites.</p>
     {% endif %}
 {% else %}
     <p>Deleting the {{seminar.series_type}} below will delete all the talks it contains, and cancel any subscriptions.
