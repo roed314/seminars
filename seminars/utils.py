@@ -80,7 +80,7 @@ def validate_url(x):
 
 def similar_urls(x,y):
     a, b = urlparse(x), urlparse(y)
-    return a[1] == b[1] and a[2] == b[2] and a[3] == b[3]
+    return a[1] == b[1] and (a[2] == b[2] or a[2] == b[2] + "/" or a[2] + "/" == b[2])
 
 def validate_daytime(s):
     s = s.strip()
