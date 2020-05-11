@@ -153,7 +153,7 @@ const subjOptions = [
   {% endfor %}
 ];
 
-document.getElementById('#hide').addEventListener('click',function(e) { e.preventDefault(); $('#deleted_stuff').hide(); $('#show_deleted_stuff').show(); return false; });
+document.getElementById('hide').addEventListener('click',function(e) { e.preventDefault(); $('#deleted_stuff').hide(); $('#show_deleted_stuff').show(); return false; });
 
 document.addEventListener("DOMContentLoaded", function() {
   makeInstitutionSelector(instOptions, []);
