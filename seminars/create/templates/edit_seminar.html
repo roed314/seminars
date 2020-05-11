@@ -362,20 +362,26 @@ document.addEventListener("DOMContentLoaded", function() {
         {className: "info", position: "right"})
       }
     });
-  var n = parseInt(document.getElementById('slots').value);
-  if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
-  for ( var i = 0 ; i < n ; i++ ) {
-    if ( i < 3 ) {
-      document.getElementById('weekday'+i).style.visibility = 'visible';
-      document.getElementById('time_slot'+i).style.visibility = 'visible';
-    } else {
-      document.getElementById('weekday'+i).style.display = 'block';
-      document.getElementById('time_slot'+i).style.display = 'block';
+  function showslots() {
+    var n = parseInt(document.getElementById('slots').value);
+    if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+    for ( var i = 0 ; i < n ; i++ ) {
+      if ( i < 3 ) {
+        document.getElementById('weekday'+i).style.visibility = 'visible';
+        document.getElementById('time_slot'+i).style.visibility = 'visible';
+      } else {
+        document.getElementById('weekday'+i).style.display = 'block';
+        document.getElementById('time_slot'+i).style.display = 'block';
+      }
     }
+    if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
+    showplusminus(n);
+    console.log('showed slots')
   }
-  if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
-  showplusminus(n);
+  showslots();
 });
+
+
 
 </script>
 
