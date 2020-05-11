@@ -378,9 +378,8 @@ document.addEventListener("DOMContentLoaded", function() {
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
     showplusminus(n);
   }
-  showslots();
+  // Make sure showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
-    console.log('onpageshow')
     showslots()
   };
 });
