@@ -572,8 +572,8 @@ def save_seminar():
                                 r["homepage"],
                                 D["email"],
                             )
-                        if D["display"]:
-                            contact_count += 1
+                    if D["display"]:
+                        contact_count += 1
 
             organizer_data.append(D)
     if contact_count == 0:
