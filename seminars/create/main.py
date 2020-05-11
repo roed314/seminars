@@ -25,6 +25,8 @@ from seminars.utils import (
     daytimes_long,
     date_and_daytimes_to_times,
     maxlength,
+    similar_urls,
+    format_warning,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -554,16 +556,16 @@ def save_seminar():
                 r = db.users.lookup(D["email"])
                 if r and r["email_confirmed"]:
                     if D["full_name"] != r["name"]:
-                        errmsgs.append(
-                            format_errmsg(
-                                "Organizer name %s does not match the name %s of the account with email address %s",
+                        flash_warning(
+                            format_warning(
+                                "Organizer name %s does not match the name %s of the account with email address %s.<br>Please verify that you have spelled the name correctly.",
                                 D["full_name"],
                                 r["name"],
                                 D["email"],
                             )
                         )
                     else:
-                        if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
+                        if not similar_urls(D["homepage"], r["homepage"]):
                             flash_warning(
                                 "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
                                 D["homepage"],
