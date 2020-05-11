@@ -85,6 +85,7 @@ class WebTalk(object):
             if data.get("topics"):
                 data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
+        self.cleanse()
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
@@ -103,6 +104,14 @@ class WebTalk(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def cleanse(self):
+        """
+        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This is the only place where columns we plan to drop should be referenced 
+        """
+        if self.hidden is None:
+            self.hidden = False
 
     def visible(self):
         """
