@@ -90,7 +90,8 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   </table>
 </form>
 {% if deleted_seminars or deleted_talks %}
-<p><a href="#" onclick="$('#deleted_stuff').show(); return false;">Show deleted items</a></p>
+<p id="show_deleted_stuff"><a href="#" onclick="$('#deleted_stuff').show(); $('#show_deleted_stuff').hide(); return false;">Show deleted items</a></p>
+<p id="deleted_stuff"><a href="#" onclick="$('#deleted_stuff').hide(); $('#show_deleted_stuff').show(); return false;">Hide deleted items</a></p>
 <div id="deleted_stuff" style="display:none;">
   {% if deleted_seminars %}
   <h2>Deleted series</h2>
