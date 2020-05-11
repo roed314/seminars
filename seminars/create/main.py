@@ -238,12 +238,9 @@ def delete_seminar(shortname):
         return failure()
 
     raw_data = request.form if request.method == "POST" else {}
-    permdelete = False
     if seminar.deleted:
         if raw_data.get("submit") == "revive":
             return redirect(url_for(".revive_seminar", shortname=shortname), 302)
-        if raw_data.get("submit") == "delete":
-            permdelete = True
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
     else:
@@ -251,10 +248,12 @@ def delete_seminar(shortname):
             return redirect(url_for(".edit_seminar", shortname=shortname), 302)
         if raw_data.get("submit") == "delete":
             if seminar.delete():
-                flash(seminar.series_type.capitalize() + " deleted.")
+                flash("%s %s deleted." % (seminar.series_type, shortname))
             else:
-                flash_error("Only the creator of %s can delete it."% seminar.name)
+                flash_error("You do not have permission to delete the %s %s."% (seminar.series_type, seminar.name))
                 return failure()
+        if raw_data.get("submit") == "permdelete":
+            return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
     if seminar.deleted:
         talks = list(talks_search({"seminar_id": shortname, "deleted_with_seminar": True}, sort=["start_time"], include_deleted=True))
     else:
@@ -267,7 +266,6 @@ def delete_seminar(shortname):
         talks=talks,
         title="Delete series",
         section="Manage",
-        permdelete=permdelete,
     )
 
 
@@ -311,20 +309,16 @@ def permdelete_seminar(shortname):
     seminar = seminars_lookup(shortname, include_deleted=True)
 
     if seminar is None:
-        flash_error("%s %s already deleted permanently", seminar.series_type.capitalize(), shortname)
+        flash_error("%s %s not found (it may have already been permanently deleted).", seminar.series_type.capitalize(), shortname)
         return redirect(url_for(".index"), 302)
     if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
-        flash_error("You do not have permission to delete %s %s", seminar.series_type, shortname)
+        flash_error("Only the owner of the %s %s can permanently delete it.", seminar.series_type, shortname)
         return redirect(url_for(".index"), 302)
-    if not seminar.deleted:
-        flash_error("You must delete %s %s first", seminar.series_type, shortname)
-        return redirect(url_for(".edit_seminar", shortname=shortname), 302)
-    else:
-        db.seminars.delete({"shortname": shortname})
-        db.seminar_organizers.delete({"seminar_id": shortname})
-        db.talks.delete({"seminar_id": shortname})
-        flash("%s %s permanently deleted" % (seminar.series_type, shortname))
-        return redirect(url_for(".index"), 302)
+    db.seminars.delete({"shortname": shortname})
+    db.seminar_organizers.delete({"seminar_id": shortname})
+    db.talks.delete({"seminar_id": shortname})
+    flash("%s %s deleted." % (seminar.series_type, shortname))
+    return redirect(url_for(".index"), 302)
 
 
 @create.route("delete/talk/<seminar_id>/<int:seminar_ctr>", methods=["GET", "POST"])
@@ -354,12 +348,10 @@ def delete_talk(seminar_id, seminar_ctr):
         return failure()
 
     raw_data = request.form if request.method == "POST" else {}
-    permdelete = False
+
     if talk.deleted:
         if raw_data.get("submit") == "revive":
             return redirect(url_for(".revive_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
-        if raw_data.get("submit") == "delete":
-            permdelete = True
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
@@ -367,10 +359,13 @@ def delete_talk(seminar_id, seminar_ctr):
             return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
         if raw_data.get("submit") == "delete":
             if talk.delete():
-                flash("Talk deleted")
+                flash("Talk deleted.")
             else:
-                flash_error("Only the organizers of a seminar can delete talks in it")
+                flash_error("You do not have permission to delete this talk.")
                 return failure()
+        if raw_data.get("submit") == "permdelete":
+            return redirect(url_for(".permdelete_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
+
     return render_template(
         "deleted_talk.html",
         seminar_id=seminar_id,
@@ -379,7 +374,6 @@ def delete_talk(seminar_id, seminar_ctr):
         talk=talk,
         title="Delete talk",
         section="Manage",
-        permdelete=permdelete,
     )
 
 
