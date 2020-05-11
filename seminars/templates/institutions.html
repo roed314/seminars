@@ -24,9 +24,9 @@
 {% endif %}
 
 {% if user.is_creator %}
-<p>If your institution is not listed below, you can add it so that series can be associated with it later.</p>
 
 <h2>Add institution</h2>
+<p>If your institution is not listed below, you can add it so that series can be associated with it later.</p>
 
 <form action="{{ url_for('create.edit_institution') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
