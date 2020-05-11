@@ -94,8 +94,9 @@ function removeFromCookie(item, cookie) {
     return cur_items;
 }
 function setTopicCookie(topic, value) {
+    console.log("setTopicCookie", topic, value);
     var cookie = getCookie("topics_dict");
-    if (cookie == null) {
+    if (cookie == null || cookie == "") {
         var cur_items = [];
     } else {
         var cur_items = cookie.split(",");
@@ -112,7 +113,8 @@ function setTopicCookie(topic, value) {
     if (!found) {
         cur_items.push(new_item);
     }
-    setCookie(cur_items.join(","));
+    console.log(cur_items);
+    setCookie("topics_dict", cur_items.join(","));
 }
 function getTopicCookie(topic) {
     var cur_items = getCookie("topics_dict").split(",");
@@ -160,41 +162,8 @@ function calFiltering() {
     return $('#enable_calendar_filter').val() == "1";
 }
 
-function setLanguageLinks() {
-    var cur_languages = getCookie("languages");
-    if (cur_languages == null) {
-        setCookie("languages", "");
-        cur_languages = "";
-        setCookie("filter_language", "-1");
-    } else {
-        setToggle("enable_language_filter", parseInt(getCookie("filter_language")));
-        $('#enable_language_filter').val(getCookie("filter_language"));
-    }
-    if (cur_languages.length > 0) {
-        cur_languages = cur_languages.split(",");
-        for (var i=0; i<cur_languages.length; i++) {
-            $("#langlink-" + cur_languages[i]).addClass("languageselected");
-            $(".lang-" + cur_languages[i]).removeClass("language-filtered");
-        }
-    }
-}
-
 function topicFromPair(pairid) {
     return pairid.split("--")[1];
-}
-
-function setTopicLinks() {
-    var cur_topics = getCookie("topics");
-    $(".talk").addClass("topic-filtered");
-    $('#enable_topic_filter').prop("checked", Boolean(parseInt(getCookie("filter_topic"))));
-    $('#enable_language_filter').prop("checked", Boolean(parseInt(getCookie("filter_language"))));
-    $('#enable_subject_filter').prop("checked", Boolean(parseInt(getCookie("filter_subject"))));
-    $('#enable_calendar_filter').prop("checked", Boolean(parseInt(getCookie("filter_calendar"))));
-    cur_topics = cur_topics.split(",");
-    for (var i=0; i<cur_topics.length; i++) {
-        $("#topiclink-" + cur_topics[i]).addClass("topicselected");
-        $(".topic-" + cur_topics[i]).removeClass("topic-filtered");
-    }
 }
 
 function reviseCookies() {
@@ -229,70 +198,21 @@ function reviseCookies() {
     }
 }
 
-function setLinks() {
-    if (navigator.cookieEnabled) {
-        reviseCookies();
-        setLanguageLinks();
-        setTopicLinks();
-        toggleFilters(null);
-    }
-}
-
-function toggleSubject(id, welcome=false) {
-    console.log("id", id);
-    var toggler = $("#" + id);
-    console.log(id);
-    var subject = id.substring(12); // subjectlink-*
-    var talks = $(".talk.subject-" + subject);
-    if (toggler.hasClass("subjectselected")) {
-        toggler.removeClass("subjectselected");
-        cur_subjects = removeFromCookie(subject, "subjects").split(",");
-        for (i=0; i<cur_subjects.length; i++) {
-            talks = talks.not(".subject-" + cur_subjects[i]);
-        }
-        talks.addClass("subject-filtered");
-        if (subjectFiltering()) {
-            talks.hide();
-            apply_striping();
-        }
-    } else {
-        toggler.addClass("subjectselected");
-        cur_subjects = addToCookie(subject, "subjects").split(",");
-        if (!welcome && cur_subjects.length == 1) {
-            enableSubjectFiltering();
-        }
-        talks.removeClass("subject-filtered");
-        if (subjectFiltering()) {
-            // elements may be filtered by other criteria
-            talks = talksToShow(talks);
-            talks.show();
-            apply_striping();
-        }
-    }
-}
-
 function toggleLanguage(id) {
-    var toggler = $("#" + id);
-    console.log(id);
+    var toggle = $("#" + id);
+    var toggleval = parseInt(toggle.val());
+    console.log(id, toggleval);
     var lang = id.substring(9); // langlink-*
     var talks = $(".talk.lang-" + lang);
-    if (toggler.hasClass("languageselected")) {
-        toggler.removeClass("languageselected");
-        cur_langs = removeFromCookie(lang, "languages").split(",");
-        for (i=0; i<cur_langs.length; i++) {
-            talks = talks.not(".lang-" + cur_langs[i]);
-        }
+    if (toggleval == -1) {
+        removeFromCookie(lang, "languages");
         talks.addClass("language-filtered");
         if (languageFiltering()) {
             talks.hide();
             apply_striping();
         }
     } else {
-        toggler.addClass("languageselected");
-        cur_langs = addToCookie(lang, "languages").split(",");
-        if (cur_langs.length == 1) {
-            enableLanguageFiltering();
-        }
+        addToCookie(lang, "languages");
         talks.removeClass("language-filtered");
         if (languageFiltering()) {
             // elements may be filtered by other criteria
@@ -303,53 +223,13 @@ function toggleLanguage(id) {
     }
 }
 
-function toggleTopic(id) {
-    var toggler = $("#" + id);
-    console.log(id);
-    var topic = id.substring(10); // topiclink-*
-    var talks = $(".talk.topic-" + topic);
-    if (toggler.hasClass("topicselected")) {
-        toggler.removeClass("topicselected");
-        $("#topictoggle-"+topic).prop("checked", false);
-        cur_topics = removeFromCookie(topic, "topics").split(",");
-        for (i=0; i<cur_topics.length; i++) {
-            talks = talks.not(".topic-" + cur_topics[i]);
-        }
-        talks.addClass("topic-filtered");
-        if (topicFiltering()) {
-            talks.hide();
-            apply_striping();
-        }
-    } else {
-        toggler.addClass("topicselected");
-        $("#topictoggle-"+topic).prop("checked", true);
-        cur_topics = addToCookie(topic, "topics").split(",");
-        if (cur_topics.length == 1) {
-            enableTopicFiltering();
-        }
-        talks.removeClass("topic-filtered");
-        if (topicFiltering()) {
-            // elements may be filtered by other criteria
-            talks = talksToShow(talks);
-            talks.show();
-            apply_striping();
-        }
-    }
-}
-function manageTopicDAG(togid) {
-    var topic = topicFromPair(togid);
-    var toggleval = $("#" + togid).val();
-    /* Need to add/subtract values from a hidden text input for saving
-       and show/hide from a visible div to give current status */
-}
-
 function toggleTopicDAG(togid) {
     var to_show = [];
     var to_hide = [];
     console.log(togid);
     var topic = topicFromPair(togid);
     var toggle = $("#" + togid);
-    var toggleval = toggle.val();
+    var toggleval = parseInt(toggle.val());
     console.log(toggleval);
     setTopicCookie(topic, toggleval);
     if (toggleval == 0) {
@@ -414,16 +294,6 @@ function toggleTopicDAG(togid) {
     }
 }
 
-function manageTopicView(pid, cid) {
-    var pane = $("#"+pid+"--"+cid+"-pane");
-    var is_visible = pane.is(":visible");
-    $("."+pid+"-subpane").hide();
-    $("."+pid+"-tlink").removeClass("active");
-    if (!is_visible) {
-        pane.show();
-        $("#"+cid+"-filter-btn").addClass("active");
-    }
-}
 function toggleTopicView(pid, cid) {
     console.log(pid, cid);
     var tid = "#"+pid+"--"+cid;
@@ -482,10 +352,8 @@ function toggleFilters(id, on_menu_open=false) {
         }
     }
     var talks = $('.talk');
-    console.log("hiding", talks.length, "talks");
     talks.hide();
     talks = talksToShow(talks);
-    console.log("showing", talks.length, "talks");
     talks.show();
     apply_striping();
 }
@@ -493,15 +361,12 @@ function toggleFilterView(id) {
     // If this filter is not enabled, we enable it
     console.log("filterview", id);
     var ftype = id.split("-")[0];
-    var is_enabled = Boolean(parseInt(getCookie("filter_"+ftype)));
+    var is_enabled = (getCookie("filter_"+ftype) == "1");
     var visible = filterMenuVisible(ftype)
+    console.log("enabled", is_enabled, "visible", visible);
     if (!is_enabled && !visible) {
-        var filtid = 'enable_'+ftype+'_filter';
-        $('#'+filtid).prop("checked", true);
-        toggleFilters(filtid, true);
-    }
-    if (ftype == "topic" && !visible) {
-        $('#topic').attr('data-chosen', 1);
+        setToggle(ftype, 1);
+        toggleFilters(ftype, true);
     }
     for (i=0; i<filter_menus.length; i++) {
         var menu = $(filterMenuId(filter_menus[i]));
@@ -660,7 +525,9 @@ $(document).ready(function () {
         displayCookieBanner();
     }
 
-    setLinks();
+    if (navigator.cookieEnabled) {
+        reviseCookies();
+    }
 
     $('.toggler-nav').click(
         function (evt) {
@@ -673,16 +540,6 @@ $(document).ready(function () {
             evt.preventDefault();
             toggleSubject(this.id);
         });
-    /*$('.welcome_toggle').click(
-        function (evt) {
-            evt.preventDefault();
-            toggleSubject(this.id, true);
-        });*/
-    /*$('.topic_toggle').click(
-        function (evt) {
-            evt.preventDefault();
-            toggleTopic(this.id);
-        });*/
     $('.language_toggle').click(
         function (evt) {
             evt.preventDefault();

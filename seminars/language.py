@@ -49,11 +49,13 @@ class Languages(object):
         if code is None:
             code = "language"
             onchange = 'toggleFilters(this.id);'
+            value = 1 if request.cookies.get('filter_language', '-1') == '1' else -1
+            print("filter_language", value)
         else:
             onchange = 'toggleLanguage(this.id);'
-        return toggle(code,
-                      value = 1 if request.cookies.get('filter_language', '0') != '0' else -1,
-                      onchange=onchange)
+            value = 1 if code in request.cookies.get("languages", "").split(",") else -1
+            code = "langlink-" + code
+        return toggle(code, value=value, onchange=onchange)
 
     def filter_link(self, code=None, counts={}):
         padding = ' style="padding-right: 2em;"' if code is None else ''
