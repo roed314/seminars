@@ -523,7 +523,9 @@ def save_seminar():
                 key=lambda t: t[0] * 24 * 60 + daytime_minutes(t[1].split("-")[0]),
             )
             data["weekdays"], data["time_slots"] = [t[0] for t in x], [t[1] for t in x]
-    # Leave time slots unchanged if frequency is set to 0
+    else:
+        data["weekdays"] = []
+        data["time_slots"] = []
     organizer_data = []
     contact_count = 0
     for i in range(10):
