@@ -592,7 +592,7 @@ def save_seminar():
     # Warnings
     if not data["topics"]:
         flash_warning(
-            "This series has no topics selected; don't forget to set the topics for each new talk individually."
+            "This series has no topics selected; set topics for the series here, or set topics for each new talk individually."
         )
     if seminar.new or new_version != seminar:
         new_version.save()
@@ -962,7 +962,7 @@ def edit_seminar_schedule():
         return resp
     if not seminar.topics:
         flash_warning(
-            "This series has no topics selected; don't forget to set the topics for each new talk individually."
+            "This series has no topics selected; set the series' topics on the Edit series page, or set topics for each new talk individually."
         )
     schedule = layout_schedule(seminar, data)
     return render_template(
