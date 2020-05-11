@@ -3,6 +3,26 @@
 {% block content %}
 <div class="text_content">
 
+{% if maintained_institutions %}
+  <h2>Institutions you maintain</h2>
+  <table class="ntdata">
+  <thead>
+    <th>Name</th>
+    <th style="border-left: solid 1px;text-align: center;">Edit</th>
+    <th style="border-left: solid 1px;text-align: center;">View</th>
+  </thead>
+  <tbody>
+    {% for shortname, name in maintained_institutions %}
+    <tr>
+      <td>name</td>
+      <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_institution", shortname=shortname) }}'>properties</a></td>
+      <td style="border-left: solid 1px;"> <a href='{{ url_for("show_institution", shortname=shortname) }}'>{{shortname}}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+{% endif %}
+
 {% if user.is_creator %}
 <p>If your institution is not listed below, you can add it so that series can be associated with it later.</p>
 
@@ -39,7 +59,6 @@
   </thead>
   {% for shortname, name in institutions %}
   <tr>
-    <td>{{shortname}}</td>
     <td><a href="{{ url_for('show_institution', shortname=shortname) }}">{{name}}</a></td>
   </tr>
   {% endfor %}
