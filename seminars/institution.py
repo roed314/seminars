@@ -17,11 +17,11 @@ institution_types = [
 ]
 
 
-def institutions():
+def institutions(admin=None):
     return sorted(
         (
             (rec["shortname"], rec["name"])
-            for rec in db.institutions.search({}, ["shortname", "name"])
+            for rec in db.institutions.search({"admin":admin} if admin else {}, ["shortname", "name"])
         ),
         key=lambda x: x[1].lower(),
     )
