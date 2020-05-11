@@ -454,8 +454,11 @@ class WebTalk(object):
         )
 
     def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
-        t = adapt_datetime(self.start_time)
-        datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
+        t, now, e = adapt_datetime(self.start_time), adapt_datetime(datetime.now()), adapt_datetime(self.end_time)
+        if t < now < e:
+            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
+        else:
+            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
         if include_seminar:
             cols.append(('class="seriesname"', self.show_seminar()))
