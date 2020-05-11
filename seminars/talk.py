@@ -426,7 +426,7 @@ class WebTalk(object):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.talks.update({"seminar_id": self.seminar_id, "seminar_ctr": self.seminar_ctr},
-                                {"deleted": True})
+                                {"deleted": True, "deleted_with_seminar": False})
                 for i, talk_sub in db._execute(
                     SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
                         *map(
