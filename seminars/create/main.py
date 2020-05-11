@@ -238,7 +238,6 @@ def delete_seminar(shortname):
         return failure()
 
     raw_data = request.form if request.method == "POST" else {}
-    permdelete = False
     if seminar.deleted:
         if raw_data.get("submit") == "revive":
             return redirect(url_for(".revive_seminar", shortname=shortname), 302)
@@ -267,7 +266,6 @@ def delete_seminar(shortname):
         talks=talks,
         title="Delete series",
         section="Manage",
-        permdelete=permdelete,
     )
 
 
@@ -350,12 +348,10 @@ def delete_talk(seminar_id, seminar_ctr):
         return failure()
 
     raw_data = request.form if request.method == "POST" else {}
-    permdelete = False
+
     if talk.deleted:
         if raw_data.get("submit") == "revive":
             return redirect(url_for(".revive_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
-        if raw_data.get("submit") == "delete":
-            permdelete = True
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
@@ -363,10 +359,13 @@ def delete_talk(seminar_id, seminar_ctr):
             return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
         if raw_data.get("submit") == "delete":
             if talk.delete():
-                flash("Talk deleted")
+                flash("Talk deleted.")
             else:
-                flash_error("Only the organizers of a seminar can delete talks in it")
+                flash_error("You do not have permission to delete this talk.")
                 return failure()
+        if raw_data.get("submit") == "permdelete":
+            return redirect(url_for(".permdelete_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
+
     return render_template(
         "deleted_talk.html",
         seminar_id=seminar_id,
@@ -375,7 +374,6 @@ def delete_talk(seminar_id, seminar_ctr):
         talk=talk,
         title="Delete talk",
         section="Manage",
-        permdelete=permdelete,
     )
 
 
