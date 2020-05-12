@@ -28,7 +28,6 @@ from lmfdb.utils import (
     SearchArray,
     SelectBox,
     TextBox,
-    EmptyBox,
     flash_error,
     to_dict,
 )
@@ -397,7 +396,7 @@ class SemSearchArray(SearchArray):
             [subject, keywords],
             [topic, name],
             [institution, organizer],
-            [language, EmptyBox() ],
+            [language, ],
             [access, date] if conference else [access],
         ]
 
