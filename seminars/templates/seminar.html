@@ -40,9 +40,9 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
   <td style="padding:0px;">Conference date{% if seminar.start_date != seminar.end_date %}s{% endif %}:</td>
   <td>{{ seminar.show_conference_dates() | safe }}</td>
 </tr>
-{% else %}
+{% elif seminar.frequency %}
 <tr>
-  <td style="padding:0px;">Seminar time{% if (seminar.weekdays | length) > 1 %}s{% endif %}:</td>
+  <td style="padding:0px;">Seminar series time{% if (seminar.weekdays | length) > 1 %}s{% endif %}:</td>
   <td>{{seminar.show_seminar_times() | safe }}{% if seminar.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}{% endif %}.</td>
 </tr>
 {% endif %}
