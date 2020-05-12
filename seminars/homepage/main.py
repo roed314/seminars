@@ -376,17 +376,10 @@ class SemSearchArray(SearchArray):
             name="name",
             label="Name",
             width=textwidth,
-            example="Thule topology colloquium series",
         )
         organizer = TextBox(
             name="organizer",
             label="Organizer",
-            colspan=(1, 2, 1),
-            width=textwidth,
-        )
-        affiliation = TextBox(
-            name="affiliation",
-            label="Affiliation",
             colspan=(1, 2, 1),
             width=textwidth,
         )
@@ -403,8 +396,8 @@ class SemSearchArray(SearchArray):
             [subject, keywords],
             [topic, name],
             [institution, organizer],
-            [language, affiliation],
-            [access, date],
+            [language, ],
+            [access, date] if conference else [access],
         ]
 
         assert conference in [True, False]
