@@ -310,7 +310,6 @@ class TalkSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        print(info)
         return [
             ("talks", "Search talks"),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
