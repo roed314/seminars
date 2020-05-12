@@ -220,14 +220,14 @@ class TalkSearchArray(SearchArray):
 
         ## pick institution where it is held
         institution = SelectBox(
-            name="talk_institution",
+            name="institution",
             label="Institution",
             options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
         venue = SelectBox(
-            name="talk_venue",
+            name="venue",
             label=static_knowl("venue"),
             options=[("", ""),
                      ("online", "online"),
@@ -245,7 +245,7 @@ class TalkSearchArray(SearchArray):
         )
         ## type of access
         access = SelectBox(
-            name="talk_access",
+            name="access",
             label="Access",
             options=[
                 ("", ""),
