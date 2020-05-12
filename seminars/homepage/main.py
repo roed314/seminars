@@ -120,7 +120,7 @@ def parse_date(info, query):
         if end.strip():
             try:
                 end = tz.localize(parse(end))
-                end = end + datetime.timedelta(hours=23, minutes=59, seconds=59)
+                end = end + timedelta(hours=23, minutes=59, seconds=59)
                 sub_query["$lte"] = end
             except Exception:
                 flash_error("Could not parse date: '%s'", end)
