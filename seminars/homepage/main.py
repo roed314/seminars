@@ -172,7 +172,7 @@ def talks_parser(info, query):
     if topdomain() == "mathseminars.org":
         query["subjects"] = ["math"]
 
-def seminars_parser(info, query):
+def seminars_parser(info, query, conference=False):
     parse_subject(info, query, prefix="seminar")
     parse_topic(info, query, prefix="seminar")
     parse_institution_sem(info, query)
@@ -185,7 +185,8 @@ def seminars_parser(info, query):
                      "comments"])
     parse_access(info, query, prefix="seminar")
     parse_language(info, query, prefix="seminar")
-    parse_daterange(info, query, time=False)
+    if conference:
+        parse_daterange(info, query, time=False)
 
     parse_substring(info, query, "name", ["name"])
     query["display"] = True
@@ -620,7 +621,8 @@ def _search_series(conference=False):
     info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
-        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
+        if conference:
+            info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
     try:
         seminar_count = int(info["seminar_count"])
         seminar_start = int(info["seminar_start"])
@@ -631,7 +633,7 @@ def _search_series(conference=False):
         seminar_start = info["seminar_start"] = 0
     seminar_query = {"is_conference": conference}
     organizer = info.get("organizer","")
-    seminars_parser(info, seminar_query)
+    seminars_parser(info, seminar_query, conference=conference)
     # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
