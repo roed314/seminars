@@ -19,7 +19,7 @@ from seminars.seminar import seminars_search, all_seminars, all_organizers, semi
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
-import pytz
+import pytz, sys
 from collections import Counter
 from dateutil.parser import parse
 
@@ -617,7 +617,7 @@ def search_conferences():
     # For now this is basically the same as seminars_search, but they should diverge some (e.g. search on start date)
     return _search_series(conference=True)
 
-def _search_series(conference):
+def _search_series(conference=False):
     info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
@@ -631,15 +631,17 @@ def _search_series(conference):
         seminar_count = info["seminar_count"] = 50
         seminar_start = info["seminar_start"] = 0
     seminar_query = {"is_conference": conference}
+    organizer = info.pop("organizer","")
     seminars_parser(info, seminar_query)
     # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
     if conference:
-        info["results"] = seminars_search(seminar_query, organizer_dict=all_organizers(),sort=["start_date"])
+        sort = ["start_date", "end_date", "name"]
+        info["results"] = seminars_search(seminar_query, organizer=organizer, organizer_dict=all_organizers(),so rt=["start_date"])
     else:
-        info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
+        info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer=organizer, organizer_dict=all_organizers()))
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(
@@ -734,7 +736,7 @@ def talks_search_api(shortname, projection=1):
         elif request.args.get('daterange') == 'future':
             query["start_time"] = {'$gte': get_now()}
         else:
-            parse_date(request.args, query)
+            parse_daterange_time(request.args, query)
     elif 'past' in request.args and 'future' in request.args:
         # no restriction on date
         pass
