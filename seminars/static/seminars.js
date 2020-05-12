@@ -734,7 +734,7 @@ function makeTree(json_tree) {
     bar = instance;
     // remove class for every node
     $('a > i.jstree-checkbox').removeClass('jstree-undetermined')
-    instance.get_bottom_checked(true).reduce(
+    instance.get_checked(true).reduce(
       function (acc, node) {
         let union = new Set(acc)
         for (let elt of node.parents) {
@@ -756,7 +756,8 @@ function makeTree(json_tree) {
       "cascading": "",
     },
     "search": {
-      "show_only_matches": true,
+      "show_only_matches": true, // show only nodes that match
+      "show_only_matches_children": true, // still show their children
     },
     'core': {
       'data' : json_tree,
