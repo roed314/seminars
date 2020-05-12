@@ -27,8 +27,8 @@ from datetime import datetime, timedelta
 class WebTalk(object):
     def __init__(
         self,
-        semid=None,
-        semctr=None,
+        seminar_id=None,
+        seminar_ctr=None,
         data=None,
         seminar=None,
         editing=False,
@@ -37,22 +37,24 @@ class WebTalk(object):
         deleted=False,
     ):
         if data is None and not editing:
-            data = talks_lookup(semid, semctr, include_deleted=deleted)
+            data = talks_lookup(seminar_id, seminar_ctr, include_deleted=deleted)
             if data is None:
-                raise ValueError("Talk %s/%s does not exist" % (semid, semctr))
+                raise ValueError("Talk %s/%s does not exist" % (seminar_id, seminar_ctr))
             data = dict(data.__dict__)
         elif data is not None:
             data = dict(data)
             # avoid Nones
             if data.get("topics") is None:
                 data["topics"] = []
+        if data and data.get("deleted"):
+            deleted = True
         if seminar is None:
-            seminar = WebSeminar(semid, deleted=deleted)
+            seminar = WebSeminar(seminar_id, deleted=deleted)
         self.seminar = seminar
         self.new = data is None
         self.deleted=False
         if self.new:
-            self.seminar_id = semid
+            self.seminar_id = seminar_id
             self.seminar_ctr = None
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = seminar.display
@@ -83,6 +85,7 @@ class WebTalk(object):
             if data.get("topics"):
                 data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
+        self.cleanse()
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
@@ -101,6 +104,14 @@ class WebTalk(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def cleanse(self):
+        """
+        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This is the only place where columns we plan to drop should be referenced 
+        """
+        if self.hidden is None:
+            self.hidden = False
 
     def visible(self):
         """
@@ -260,20 +271,20 @@ class WebTalk(object):
 
     def show_link_title(self):
         return "<a href={url}>{title}</a>".format(
-            url=url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr),
+            url=url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr),
             title=self.show_title(),
         )
 
     def show_knowl_title(self, _external=False, preload=False):
-        if _external or preload:
+        if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
             )
         else:
-            return r'<a title="{title}" knowl="talk/{semid}/{talkid}">{title}</a>'.format(
+            return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
                 title=self.show_title(),
-                semid=self.seminar_id,
+                seminar_id=self.seminar_id,
                 talkid=self.seminar_ctr
             )
 
@@ -365,19 +376,19 @@ class WebTalk(object):
 
     @property
     def ics_link(self):
-        return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+        return url_for("ics_talk_file", seminar_id=self.seminar_id, talkid=self.seminar_ctr,
                        _external=True, _scheme="https")
 
     @property
     def ics_gcal_link(self):
         return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
-            {"cid": url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+            {"cid": url_for("ics_talk_file", seminar_id=self.seminar_id, talkid=self.seminar_ctr,
                             _external=True, _scheme="http")}
         )
 
     @property
     def ics_webcal_link(self):
-        return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+        return url_for("ics_talk_file", seminar_id=self.seminar_id, talkid=self.seminar_ctr,
                        _external=True, _scheme="webcal")
 
     def is_past(self):
@@ -424,7 +435,7 @@ class WebTalk(object):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.talks.update({"seminar_id": self.seminar_id, "seminar_ctr": self.seminar_ctr},
-                                {"deleted": True})
+                                {"deleted": True, "deleted_with_seminar": False})
                 for i, talk_sub in db._execute(
                     SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
                         *map(
@@ -437,6 +448,7 @@ class WebTalk(object):
                     if self.seminar_ctr in talk_sub[self.seminar.shortname]:
                         talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
                         db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+            self.deleted = True
             return True
         else:
             return False
@@ -451,8 +463,11 @@ class WebTalk(object):
         )
 
     def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
-        t = adapt_datetime(self.start_time)
-        datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
+        t, now, e = adapt_datetime(self.start_time), adapt_datetime(datetime.now()), adapt_datetime(self.end_time)
+        if t < now < e:
+            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
+        else:
+            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
         if include_seminar:
             cols.append(('class="seriesname"', self.show_seminar()))
@@ -592,7 +607,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
                 return (
-                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 302),
+                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
                     None,
                 )
         else:
@@ -601,7 +616,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
                     "You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr)
                 )
                 return (
-                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 302),
+                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
                     None,
                 )
     else:

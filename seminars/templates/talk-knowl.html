@@ -6,9 +6,11 @@
         <h3>{{ talk.show_title() | safe }}</h3>
         <h3> <i>{{ talk.show_speaker() | safe }}</i></h3>
       </div>
-      <div class="talk-view">
-        ( <a href="{{url_for('show_talk', semid=talk.seminar_id, talkid=talk.seminar_ctr, _external=_external)}}">view</a> {% if talk.user_can_edit() %} | <a href="{{url_for('create.edit_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr, _external=_external)}}">edit</a> {% endif %} )
-      </div>
+      {% if not talk.deleted %}
+        <div class="talk-view">
+          ( <a href="{{url_for('show_talk', seminar_id=talk.seminar_id, talkid=talk.seminar_ctr, _external=_external)}}">view</a> {% if talk.user_can_edit() %} | <a href="{{url_for('create.edit_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr, _external=_external)}}">edit</a> {% endif %} )
+        </div>
+      {% endif %}
   </div>
   <div style="clear:both;"></div>
 
@@ -44,7 +46,9 @@
 
     <hr>
 
+    {% if not talk.deleted %}
     {{ calendar_block("talk", talk) }}
+    {% endif %}
 
     <div align="right">
         <b>{{ talk.show_time_and_duration() | safe }}</b><br>
@@ -52,7 +56,9 @@
           {% if talk.room %}
             Lecture held in {{ talk.room }}.
           {% endif %}
-          {{ talk.show_live_link() | safe }}
+          {% if not talk.deleted %}
+            {{ talk.show_live_link() | safe }}
+          {% endif %}
         {% endif %}
     </div>
   </div>

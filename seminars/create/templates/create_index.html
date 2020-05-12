@@ -31,8 +31,8 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
       <tr>
         <td> {{elt.name + elt.show_attributes()}} </td>
         <td style="border-left: solid 1px;"> {{role}} </td>
-        <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>Schedule</a></td>
-        <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>Properties</a></td>
+        <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>schedule</a></td>
+        <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>properties</a></td>
         <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a></td>
       </tr>
       {% endfor %}
@@ -40,7 +40,8 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     </table>
   {% endif %}
 {% endfor %}
-<h2>Create a series</h2>
+  
+<h2 style="margin-top: 40px;">Create a series</h2>
 
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
@@ -59,16 +60,16 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
           <option value="no" selected>seminar series</option>
         </select>
       </td>
-      <td class="forminfo"><p style="width:230px;">Click blue captions for more details. Asterisks denote required items.</p></td>
+      <td class="forminfo"><p style="width:230px; margin: 0px;">Click blue captions for more details. Asterisks denote required items.</p></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("seminar_name") }}</td>
-      <td><input name="name" style="width:500px;" maxlength="100" placeholder="Thule topology colloquium series"/></td>
+      <td><input name="name" style="width:500px;" placeholder="Thule topology colloquium series" maxlength="{{ maxlength['name'] }}" /></td>
       <td class="forminfo">Capitalize first word and proper nouns.</td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("seminar_shortname") }}</td>
-      <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="32"/></td>
+      <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="{{ maxlength['shortname'] }}"/></td>
       <td class="forminfo">Use 3-32 characters, no spaces.
     </tr>
     {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
@@ -80,7 +81,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     {% endif %}
     <tr>
       <td>{{ KNOWL("institutions") }}</td>
-      <td><span id="institution_selector"></span></td>
+      <td><span id="institution_selector" style="margin-bottom: 10px;"></span></td>
       <td class="forminfo">Institutions can also be added later.</td>
     <tr>
       <td><button type="submit">Create</button></td>
@@ -89,8 +90,9 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   </table>
 </form>
 {% if deleted_seminars or deleted_talks %}
-<p><a href="#" onclick="$('#deleted_stuff').show(); return false;">Show deleted items</a></p>
+<p id="show_deleted_stuff"><a href="#">Show deleted items</a></p>
 <div id="deleted_stuff" style="display:none;">
+<p><a id="hide_deleted_stuff" href="#">Hide deleted items</a></p>
   {% if deleted_seminars %}
   <h2>Deleted series</h2>
   <table class="ntdata">
@@ -101,7 +103,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
     {% for seminar in deleted_seminars %}
     <tr>
       <td> {{seminar.name}} (deleted) </td>
-      <td> <a href="{{ url_for('.deleted_seminar', shortname=seminar.shortname) }}">Edit</a> </td>
+      <td> <a href="{{ url_for('.delete_seminar', shortname=seminar.shortname) }}">Edit</a> </td>
     </tr>
     {% endfor %}
   </table>
@@ -122,7 +124,7 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
       <td> {{talk.show_start_time() | safe}}</td>
       <td> {{talk.show_speaker(affiliation=False) | safe}}</td>
       <td> {{talk.show_knowl_title() | safe}}</td>
-      <td> <a href="{{ url_for('.deleted_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Edit</a> </td>
+      <td> <a href="{{ url_for('.delete_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr) }}">Edit</a> </td>
     </tr>
     {% endfor %}
   </table>
@@ -150,6 +152,24 @@ const subjOptions = [
   },
   {% endfor %}
 ];
+
+document.getElementById('show_deleted_stuff').addEventListener('click',
+  function(e) {
+    e.preventDefault();
+    $('#show_deleted_stuff').hide();
+    $('#hide_deleted_stuff').show();
+    $('#deleted_stuff').show();
+    return false;
+  });
+
+document.getElementById('hide_deleted_stuff').addEventListener('click',
+  function(e) {
+    e.preventDefault();
+    $('#deleted_stuff').hide();
+    $('#hide_deleted_stuff').hide();
+    $('#show_deleted_stuff').show();
+    return false;
+  });
 
 document.addEventListener("DOMContentLoaded", function() {
   makeInstitutionSelector(instOptions, []);

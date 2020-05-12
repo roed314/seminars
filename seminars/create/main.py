@@ -24,6 +24,9 @@ from seminars.utils import (
     daytimes_early,
     daytimes_long,
     date_and_daytimes_to_times,
+    maxlength,
+    similar_urls,
+    format_warning,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -58,7 +61,6 @@ from dateutil.parser import parse as parse_time
 import pytz
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
-MAX_SLOTS = 12  # Max time slots in a seminar series, must be a multiple of 3
 
 
 @create.route("manage/")
@@ -75,48 +77,53 @@ def index():
         return (role_key[elt[1]], elt[0].name)
 
     for rec in db.seminar_organizers.search({"email": ilike_query(current_user.email)}, ["seminar_id", "curator"]):
-        semid = rec["seminar_id"]
+        seminar_id = rec["seminar_id"]
         role = "curator" if rec["curator"] else "organizer"
-        seminar = WebSeminar(semid)
+        # don't waste time loading deleted talks
+        if not seminars_lookup(seminar_id, projection="shortname", objects=False):
+            continue
+        seminar = WebSeminar(seminar_id)
         pair = (seminar, role)
         if seminar.is_conference:
-            conferences[semid] = pair
+            conferences[seminar_id] = pair
         else:
-            seminars[semid] = pair
+            seminars[seminar_id] = pair
     role = "creator"
-    for semid in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_deleted=True):
-        if semid not in seminars and semid not in conferences:
-            seminar = WebSeminar(semid, deleted=True)  # allow deleted
+    for seminar_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_deleted=True):
+        if seminar_id not in seminars and seminar_id not in conferences:
+            seminar = WebSeminar(seminar_id, deleted=True)  # allow deleted
             pair = (seminar, role)
             if seminar.deleted:
                 deleted_seminars.append(seminar)
             elif seminar.is_conference:
-                conferences[semid] = pair
+                conferences[seminar_id] = pair
             else:
-                seminars[semid] = pair
+                seminars[seminar_id] = pair
     seminars = sorted(seminars.values(), key=key)
     conferences = sorted(conferences.values(), key=key)
     deleted_seminars.sort(key=lambda sem: sem.name)
-    for semid, semctr in db._execute(
+    for seminar_id, seminar_ctr in db._execute(
         # ~~* is case insensitive amtch
         SQL(
             """
-SELECT DISTINCT ON ({Ttalks}.{Csemid}, {Ttalks}.{Csemctr}) {Ttalks}.{Csemid}, {Ttalks}.{Csemctr}
-FROM {Ttalks} INNER JOIN {Tsems} ON {Ttalks}.{Csemid} = {Tsems}.{Csname}
-WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
+SELECT DISTINCT ON ({Ttalks}.{Cseminar_id}, {Ttalks}.{Cseminar_ctr}) {Ttalks}.{Cseminar_id}, {Ttalks}.{Cseminar_ctr}
+FROM {Ttalks} INNER JOIN {Tsems} ON {Ttalks}.{Cseminar_id} = {Tsems}.{Csname} INNER JOIN {Torgs} ON {Ttalks}.{Cseminar_id} = {Torgs}.{Cseminar_id}
+WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
             """
         ).format(
             Ttalks=IdentifierWrapper("talks"),
             Tsems=IdentifierWrapper("seminars"),
-            Csemid=IdentifierWrapper("seminar_id"),
-            Csemctr=IdentifierWrapper("seminar_ctr"),
+            Torgs=IdentifierWrapper("seminar_organizers"),
+            Cseminar_id=IdentifierWrapper("seminar_id"),
+            Cseminar_ctr=IdentifierWrapper("seminar_ctr"),
             Csname=IdentifierWrapper("shortname"),
             Cowner=IdentifierWrapper("owner"),
+            Cemail=IdentifierWrapper("email"),
             Cdel=IdentifierWrapper("deleted"),
         ),
-        [ilike_escape(current_user.email), True, False],
+        [ilike_escape(current_user.email), ilike_escape(current_user.email), True, False],
     ):
-        talk = WebTalk(semid, semctr, deleted=True)
+        talk = WebTalk(seminar_id, seminar_ctr, deleted=True)
         deleted_talks.append(talk)
     deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
@@ -129,6 +136,7 @@ WHERE {Tsems}.{Cowner} ~~* %s AND {Ttalks}.{Cdel} = %s AND {Tsems}.{Cdel} = %s
         deleted_talks=deleted_talks,
         institution_known=institution_known,
         institutions=institutions(),
+        maxlength=maxlength,
         section=manage,
         subsection="home",
         title=manage,
@@ -155,12 +163,12 @@ def edit_seminar():
         errmsgs = []
         subjects = clean_subjects(data.get("subjects"))
         if not subjects:
-            errmsgs.append("Please select at least one subject")
+            errmsgs.append("Please select at least one subject.")
         seminar.name = data.get("name", "")
         if not seminar.name:
-            errmsgs.append("Seminar name is required.")
+            errmsgs.append("Series name is required.")
         elif len(seminar.name) < 3:
-            errmsgs.append(format_errmsg("Seminar name %s is too short, at least three chracters are required.", seminar.name))
+            errmsgs.append(format_errmsg("Series name %s is too short; at least three characters are required.", seminar.name))
         if errmsgs:
             return show_input_errors(errmsgs)
         seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", False)
@@ -179,7 +187,7 @@ def edit_seminar():
                 similar = [s for s in similar if set(seminar.subjects).intersection(set(s.subjects))]
             if similar:
                 return render_template(
-                    "show_similar.html",
+                    "show_similar_seminars.html",
                     newseminar=seminar,
                     title=title,
                     section=manage,
@@ -197,16 +205,16 @@ def edit_seminar():
         institutions=institutions(),
         short_weekdays=short_weekdays,
         timezones=timezones,
-        max_slots=MAX_SLOTS,
+        maxlength=maxlength,
         lock=lock,
     )
 
 
-@create.route("delete/seminar/<shortname>")
+@create.route("delete/seminar/<shortname>", methods=["GET", "POST"])
 @email_confirmed_required
 def delete_seminar(shortname):
     try:
-        seminar = WebSeminar(shortname)
+        seminar = WebSeminar(shortname, deleted=True)
     except ValueError as err:
         flash_error(str(err))
         return redirect(url_for(".index"), 302)
@@ -223,19 +231,44 @@ def delete_seminar(shortname):
             institutions=institutions(),
             weekdays=weekdays,
             timezones=timezones,
+            maxlength=maxlength,
             lock=lock,
         )
 
     if not seminar or not seminar.user_can_delete():
-        flash_error("Only the owner of the seminar can delete it")
+        flash_error("Only the owner of the series can delete it.")
         return failure()
+
+    raw_data = request.form if request.method == "POST" else {}
+    if seminar.deleted:
+        if raw_data.get("submit") == "revive":
+            return redirect(url_for(".revive_seminar", shortname=shortname), 302)
+        if raw_data.get("submit") == "permdelete":
+            return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
     else:
-        if seminar.delete():
-            flash("Series deleted")
-            return redirect(url_for(".deleted_seminar", shortname=shortname), 302)
-        else:
-            flash_error("Only the owner of the seminar can delete it")
-            return failure()
+        if raw_data.get("submit") == "cancel":
+            return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+        if raw_data.get("submit") == "delete":
+            if seminar.delete():
+                flash("%s %s deleted." % (seminar.series_type, shortname))
+            else:
+                flash_error("You do not have permission to delete the %s %s."% (seminar.series_type, seminar.name))
+                return failure()
+        if raw_data.get("submit") == "permdelete":
+            return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
+    if seminar.deleted:
+        talks = list(talks_search({"seminar_id": shortname, "deleted_with_seminar": True}, sort=["start_time"], include_deleted=True))
+    else:
+        talks = list(talks_search({"seminar_id": shortname}, sort=["start_time"]))
+
+    return render_template(
+        "deleted_seminar.html",
+        shortname=shortname,
+        seminar=seminar,
+        talks=talks,
+        title="Delete series",
+        section="Manage",
+    )
 
 
 @create.route("deleted/seminar/<shortname>")
@@ -255,19 +288,19 @@ def revive_seminar(shortname):
     seminar = seminars_lookup(shortname, include_deleted=True)
 
     if seminar is None:
-        flash_error("Series %s was deleted permanently", shortname)
+        flash_error("Series %s does not exist (it may have been deleted permanently).", shortname)
         return redirect(url_for(".index"), 302)
     if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
-        flash_error("You do not have permission to revive seminar %s", shortname)
+        flash_error("You do not have permission to revive %s %s.", seminar.series_type, shortname)
         return redirect(url_for(".index"), 302)
     if not seminar.deleted:
-        flash_error("Series %s was not deleted, so cannot be revived", shortname)
+        flash_error("%s %s does not need to be revived, it is not marked as deleted.", seminar.series_type.capitalize(), shortname)
     else:
         db.seminars.update({"shortname": shortname}, {"deleted": False})
-        db.talks.update({"seminar_id": shortname}, {"deleted": False})
+        db.talks.update({"seminar_id": shortname, "deleted_with_seminar":True}, {"deleted": False})
         flash(
-            "Series %s revived.  You should reset the organizers, and note that any users that were subscribed no longer are."
-            % shortname
+            "%s %s revived.  Note that any users who were subscribed no longer are."
+            % (seminar.series_type, shortname)
         )
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
@@ -278,29 +311,26 @@ def permdelete_seminar(shortname):
     seminar = seminars_lookup(shortname, include_deleted=True)
 
     if seminar is None:
-        flash_error("Series %s already deleted permanently", shortname)
+        flash_error("%s %s not found (it may have already been permanently deleted).", seminar.series_type.capitalize(), shortname)
         return redirect(url_for(".index"), 302)
     if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
-        flash_error("You do not have permission to delete seminar %s", shortname)
+        flash_error("Only the owner of the %s %s can permanently delete it.", seminar.series_type, shortname)
         return redirect(url_for(".index"), 302)
-    if not seminar.deleted:
-        flash_error("You must delete seminar %s first", shortname)
-        return redirect(url_for(".edit_seminar", shortname=shortname), 302)
-    else:
-        db.seminars.delete({"shortname": shortname})
-        db.talks.delete({"seminar_id": shortname})
-        flash("Series %s permanently deleted" % shortname)
-        return redirect(url_for(".index"), 302)
+    db.seminars.delete({"shortname": shortname})
+    db.seminar_organizers.delete({"seminar_id": shortname})
+    db.talks.delete({"seminar_id": shortname})
+    flash("%s %s deleted." % (seminar.series_type, shortname))
+    return redirect(url_for(".index"), 302)
 
 
-@create.route("delete/talk/<semid>/<int:semctr>")
+@create.route("delete/talk/<seminar_id>/<int:seminar_ctr>", methods=["GET", "POST"])
 @email_confirmed_required
-def delete_talk(semid, semctr):
+def delete_talk(seminar_id, seminar_ctr):
     try:
-        talk = WebTalk(semid, semctr)
+        talk = WebTalk(seminar_id, seminar_ctr, deleted=True)
     except ValueError as err:
         flash_error(str(err))
-        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+        return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
 
     def failure():
         return render_template(
@@ -312,69 +342,81 @@ def delete_talk(semid, semctr):
             subsection="edittalk",
             institutions=institutions(),
             timezones=timezones,
+            maxlength=maxlength,
         )
 
     if not talk.user_can_delete():
-        flash_error("Only the organizers of a seminar can delete talks in it")
+        flash_error("Only the organizers of a series can delete talks in it.")
         return failure()
+
+    raw_data = request.form if request.method == "POST" else {}
+
+    if talk.deleted:
+        if raw_data.get("submit") == "revive":
+            return redirect(url_for(".revive_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
+        if raw_data.get("submit") == "permdelete":
+            return redirect(url_for(".permdelete_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
-        if talk.delete():
-            flash("Talk deleted")
-            return redirect(url_for(".edit_seminar_schedule", shortname=talk.seminar_id), 302)
-        else:
-            flash_error("Only the organizers of a seminar can delete talks in it")
-            return failure()
+        if raw_data.get("submit") == "cancel":
+            return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
+        if raw_data.get("submit") == "delete":
+            if talk.delete():
+                flash("Talk deleted.")
+            else:
+                flash_error("You do not have permission to delete this talk.")
+                return failure()
+        if raw_data.get("submit") == "permdelete":
+            return redirect(url_for(".permdelete_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
+
+    return render_template(
+        "deleted_talk.html",
+        seminar_id=seminar_id,
+        seminar_ctr=seminar_ctr,
+        seminar=talk.seminar,
+        talk=talk,
+        title="Delete talk",
+        section="Manage",
+    )
 
 
-@create.route("deleted/talk/<semid>/<int:semctr>")
+@create.route("revive/talk/<seminar_id>/<int:seminar_ctr>")
 @email_confirmed_required
-def deleted_talk(semid, semctr):
-    try:
-        talk = WebTalk(semid, semctr, deleted=True)
-    except ValueError as err:
-        flash_error(str(err))
-        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    return render_template("deleted_talk.html", talk=talk, title="Deleted")
-
-
-@create.route("revive/talk/<semid>/<int:semctr>")
-@email_confirmed_required
-def revive_talk(semid, semctr):
-    talk = talks_lookup(semid, semctr, include_deleted=True)
+def revive_talk(seminar_id, seminar_ctr):
+    talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True)
 
     if talk is None:
-        flash_error("Talk %s/%s was deleted permanently", semid, semctr)
-        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    if not current_user.is_subject_admin(talk) and talk.seminar.owner != current_user:
-        flash_error("You do not have permission to revive this talk")
+        flash_error("Talk %s/%s does not exist (perhaps it was permanently deleted).", seminar_id, seminar_ctr)
+        return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
+    if not talk.user_can_delete():
+        flash_error("You do not have permission to revive this talk.")
         return redirect(url_for(".index"), 302)
     if not talk.deleted:
-        flash_error("Talk %s/%s was not deleted, so cannot be revived", semid, semctr)
-        return redirect(url_for(".edit_talk", seminar_id=semid, seminar_ctr=semctr), 302)
+        flash_error("Talk %s/%s does not need to be revived; it is not marked as deleted.", seminar_id, seminar_ctr)
+        return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
-        db.talks.update({"seminar_id": semid, "seminar_ctr": semctr}, {"deleted": False})
+        db.talks.update({"seminar_id": seminar_id, "seminar_ctr": seminar_ctr}, {"deleted": False})
         flash("Talk revived.  Note that any users who were subscribed no longer are.")
-        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+        return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
 
 
-@create.route("permdelete/talk/<semid>/<int:semctr>")
+@create.route("permdelete/talk/<seminar_id>/<int:seminar_ctr>")
 @email_confirmed_required
-def permdelete_talk(semid, semctr):
-    talk = talks_lookup(semid, semctr, include_deleted=True)
+def permdelete_talk(seminar_id, seminar_ctr):
+    talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True)
 
     if talk is None:
-        flash_error("Talk %s/%s already deleted permanently", semid, semctr)
-        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
-    if not current_user.is_subject_admin(talk) and talk.seminar.owner != current_user:
-        flash_error("You do not have permission to delete this seminar")
+        flash_error("Talk %s/%s does not exist (perhaps it was permanently deleted).", seminar_id, seminar_ctr)
+        return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
+    if not talk.user_can_delete():
+        flash_error("You do not have permission to permanently delete this talk.")
         return redirect(url_for(".index"), 302)
     if not talk.deleted:
-        flash_error("You must delete talk %s/%s first", semid, semctr)
-        return redirect(url_for(".edit_talk", seminar_id=semid, seminar_ctr=semctr), 302)
+        flash_error("You must delete talk %s/%s first.", seminar_id, seminar_ctr)
+        return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
-        db.talks.delete({"seminar_id": semid, "seminar_ctr": semctr})
-        flash("Talk %s/%s permanently deleted" % (semid, semctr))
-        return redirect(url_for(".edit_seminar_schedule", shortname=semid), 302)
+        db.talks.delete({"seminar_id": seminar_id, "seminar_ctr": seminar_ctr})
+        flash("Talk %s/%s has been permanently deleted." % (seminar_id, seminar_ctr))
+        return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
 
 
 @create.route("save/seminar/", methods=["POST"])
@@ -386,8 +428,15 @@ def save_seminar():
     resp, seminar = can_edit_seminar(shortname, new)
     if resp is not None:
         return resp
-    errmsgs = []
+    if raw_data.get("submit") == "cancel":
+        if new:
+            return redirect(url_for(".index"), 302)
+        flash("Changes discarded")
+        return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+    if raw_data.get("submit") == "delete":
+        return redirect(url_for(".delete_seminar", shortname=shortname), 302)
 
+    errmsgs = []
     if seminar.new:
         data = {
             "shortname": shortname,
@@ -417,18 +466,18 @@ def save_seminar():
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["name"]:
-        errmsgs.append("The name cannot be blank")
+        errmsgs.append("The name cannot be blank.")
     elif len(data["name"]) < 3:
-        errmsgs.append("Name too short, must be at least three characters.")
+        errmsgs.append("Name too short; at least three characters are required.")
     if data["is_conference"] and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
-        errmsgs.append("End date cannot precede start date")
+        errmsgs.append("End date cannot precede start date.")
     if data["per_day"] is not None and data["per_day"] < 1:
         errmsgs.append(format_input_errmsg("integer must be positive", data["per_day"], "per_day"))
     if data["is_conference"] and (not data["start_date"] or not data["end_date"]):
         errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
 
     if data["is_conference"] and not data["per_day"]:
-        errmsgs.append("Please specify the typical number of talks on each day of your conference (a rough guess is fine).")
+        errmsgs.append("Please specify the typical number of talks per day of your conference (a rough guess is fine).")
 
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
@@ -441,38 +490,42 @@ def save_seminar():
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     data["weekdays"] = []
     data["time_slots"] = []
-    for i in range(MAX_SLOTS):
-        weekday = daytimes = None
-        try:
-            col = "weekday" + str(i)
-            val = raw_data.get(col, "")
-            weekday = process_user_input(val, col, "weekday_number", tz)
-            col = "time_slot" + str(i)
-            val = raw_data.get(col, "")
-            daytimes = process_user_input(val, col, "daytimes", tz)
-        except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_input_errmsg(err, val, col))
-        if weekday is not None and daytimes is not None:
-            data["weekdays"].append(weekday)
-            data["time_slots"].append(daytimes)
-            if daytimes_early(daytimes):
-                flash_warning(
-                    "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
-                    daytimes,
+    if data["frequency"]:
+        for i in range(maxlength["time_slots"]):
+            weekday = daytimes = None
+            try:
+                col = "weekday" + str(i)
+                val = raw_data.get(col, "")
+                weekday = process_user_input(val, col, "weekday_number", tz)
+                col = "time_slot" + str(i)
+                val = raw_data.get(col, "")
+                daytimes = process_user_input(val, col, "daytimes", tz)
+            except Exception as err:  # should only be ValueError's but let's be cautious
+                errmsgs.append(format_input_errmsg(err, val, col))
+            if weekday is not None and daytimes is not None:
+                data["weekdays"].append(weekday)
+                data["time_slots"].append(daytimes)
+                if daytimes_early(daytimes):
+                    flash_warning(
+                        "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                        daytimes,
+                    )
+                elif daytimes_long(daytimes):
+                    flash_warning(
+                        "Time slot %s is longer than 8 hours, please correct if this is not intended.",
+                        daytimes,
                 )
-            elif daytimes_long(daytimes):
-                flash_warning(
-                    "Time slot %s is longer than 8 hours, please correct if this is not intended.",
-                    daytimes,
-                )
-    if data["frequency"] and not data["weekdays"]:
-        errmsgs.append('You must specify at least one time slot (or set periodicty to "no fixed schedule").')
-    if len(data["weekdays"]) > 1:
-        x = sorted(
-            list(zip(data["weekdays"], data["time_slots"])),
-            key=lambda t: t[0] * 24 * 60 + daytime_minutes(t[1].split("-")[0]),
-        )
-        data["weekdays"], data["time_slots"] = [t[0] for t in x], [t[1] for t in x]
+        if not data["weekdays"]:
+            errmsgs.append('You must specify at least one time slot (or set periodicty to "no fixed schedule").')
+        if len(data["weekdays"]) > 1:
+            x = sorted(
+                list(zip(data["weekdays"], data["time_slots"])),
+                key=lambda t: t[0] * 24 * 60 + daytime_minutes(t[1].split("-")[0]),
+            )
+            data["weekdays"], data["time_slots"] = [t[0] for t in x], [t[1] for t in x]
+    else:
+        data["weekdays"] = []
+        data["time_slots"] = []
     organizer_data = []
     contact_count = 0
     for i in range(10):
@@ -490,7 +543,7 @@ def save_seminar():
                 errmsgs.append(format_input_errmsg(err, val, col))
         if D["homepage"] or D["email"] or D["full_name"]:
             if not D["full_name"]:
-                errmsgs.append(format_errmsg("Organizer name cannot be left blank"))
+                errmsgs.append(format_errmsg("Organizer name cannot be left blank."))
             D["order"] = len(organizer_data)
             # WARNING the header on the template says organizer
             # but it sets the database column curator, so the
@@ -502,37 +555,35 @@ def save_seminar():
                     D["email"],
                     D["full_name"],
                     "Set homepage or disable display to prevent this.",
-                ),
+                )
             if D["email"]:
                 r = db.users.lookup(D["email"])
                 if r and r["email_confirmed"]:
                     if D["full_name"] != r["name"]:
-                        errmsgs.append(
-                            format_errmsg(
-                                "Organizer name %s does not match the name %s of the account with email address %s",
+                        flash_warning(
+                            format_warning(
+                                "Organizer name %s does not match the name %s of the account with email address %s.<br>Please verify that you have spelled the name correctly.",
                                 D["full_name"],
                                 r["name"],
                                 D["email"],
                             )
                         )
-                    else:
-                        if D["homepage"] and r["homepage"] and D["homepage"] != r["homepage"]:
-                            flash_warning(
-                                "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
-                                D["homepage"],
-                                r["homepage"],
-                                D["email"],
-                            )
-                        if D["display"]:
-                            contact_count += 1
-
+                    if D["homepage"] and r["homepage"] and not similar_urls(D["homepage"], r["homepage"]):
+                        flash_warning(
+                            "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
+                            D["homepage"],
+                            r["homepage"],
+                            D["email"],
+                        )
+                    if D["display"]:
+                        contact_count += 1
             organizer_data.append(D)
     if contact_count == 0:
         errmsgs.append(
             format_errmsg(
                 "There must be at least one displayed organizer or curator with a %s so that there is a contact for this listing.<br>%s<br>%s",
                 "confirmed email",
-                "This email will not be visible if homepage is set or display is not checked, it is used only to identify the organizer's account.",
+                "This email address will not be visible if homepage is set or display is not checked; it is used only to identify the organizer's account.",
                 "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
             )
         )
@@ -545,7 +596,7 @@ def save_seminar():
     # Warnings
     if not data["topics"]:
         flash_warning(
-            "This series has no topics selected; don't forget to set the topics for each new talk individually."
+            "This series has no topics selected; set topics for the series here, or set topics for each new talk individually."
         )
     if seminar.new or new_version != seminar:
         new_version.save()
@@ -568,15 +619,39 @@ def edit_institution():
     else:
         data = request.args
     shortname = data.get("shortname", "")
+    if data.get("cancel") == "yes":
+        flash("Changes discarded.")
     new = data.get("new") == "yes"
+    notsimilar = data.get("similar") == "no"
     name = data.get("name", "")
     resp, institution = can_edit_institution(shortname, name, new)
     if resp is not None:
         return resp
-    if new:
-        institution.name = data.get("name", "")
-    # Don't use locks for institutions since there's only one non-admin able to edit.
+    manage = "Manage" if current_user.is_organizer else "Create"
     title = "Create institution" if new else "Edit institution"
+    if new:
+        errmsgs = []
+        institution.name = data.get("name", "")
+        if not institution.name:
+            errmsgs.append("Institution name is required.")
+        elif len(institution.name) < 3:
+            errmsgs.append(format_errmsg("Institution name %s is too short; at least three characters are required.", institution.name))
+        if errmsgs:
+            return show_input_errors(errmsgs)
+        if not notsimilar:
+            query = {'name': {"$ilike": '%' + institution.name + '%'}}
+            similar = institutions(query)
+            if similar:
+                return render_template(
+                    "show_similar_institutions.html",
+                    newinstitution=institution,
+                    title=title,
+                    section=manage,
+                    subsection="home",
+                    similar=similar,
+                )
+
+    # Don't use locks for institutions since there's only one non-admin able to edit.
     return render_template(
         "edit_institution.html",
         institution=institution,
@@ -585,6 +660,7 @@ def edit_institution():
         title=title,
         section="Manage",
         subsection="editinst",
+        maxlength=maxlength,
     )
 
 
@@ -598,6 +674,11 @@ def save_institution():
     resp, institution = can_edit_institution(shortname, name, new)
     if resp is not None:
         return resp
+    if raw_data.get("submit") == "cancel":
+        if new:
+            return redirect(url_for("list_institutions"), 302)
+        flash("Changes discarded")
+        return redirect(url_for(".edit_institution", shortname=shortname), 302)
 
     data = {}
     data["timezone"] = tz = raw_data.get("timezone", "UTC")
@@ -618,10 +699,10 @@ def save_institution():
                         errmsgs.append("You must specify the email address of the maintainer.")
                         continue
                     else:
-                        errmsgs.append(format_errmsg("User %s does not have an account on this site", data[col]))
+                        errmsgs.append(format_errmsg("User %s does not have an account on this site.", data[col]))
                         continue
                 elif not userdata["creator"]:
-                    errmsgs.append(format_errmsg("User %s has not been endorsed", data[col]))
+                    errmsgs.append(format_errmsg("User %s has not been endorsed.", data[col]))
                     continue
                 if not userdata["homepage"]:
                     if current_user.email == userdata["email"]:
@@ -637,8 +718,14 @@ def save_institution():
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["name"]:
         errmsgs.append("Institution name cannot be blank.")
+    elif len(data["name"]) < 3:
+        errmsgs.append(format_errmsg("Institution name %s is too short; at least three characters are required.", institution.name))
     if not errmsgs and not data["homepage"]:
         errmsgs.append("Institution homepage cannot be blank.")
+    if new and db.institutions.count({'name':data["name"]}):
+        errmsgs.append(format_errmsg("An institution named %s already exists.  Please add disambiguating information to the name.", data["name"]))
+    if not new and data["name"] != institution.name and db.institutions.count({'name':data["name"]}):
+        errmsgs.append(format_errmsg("Unable to change institution name to %s: there is another institution with the same name.", data["name"]))
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)
@@ -702,6 +789,7 @@ def edit_talk():
         subsection="edittalk",
         institutions=institutions(),
         timezones=timezones,
+        maxlength=maxlength,
         token=token,
         **extras
     )
@@ -714,8 +802,13 @@ def save_talk():
     resp, talk = can_edit_talk(raw_data.get("seminar_id", ""), raw_data.get("seminar_ctr", ""), token)
     if resp is not None:
         return resp
-    errmsgs = []
+    if raw_data.get("submit") == "cancel":
+        flash("Changes discarded")
+        return redirect(url_for(".edit_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
+    if raw_data.get("submit") == "delete":
+        return redirect(url_for(".delete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
 
+    errmsgs = []
     data = {
         "seminar_id": talk.seminar_id,
         "token": talk.token,
@@ -753,7 +846,7 @@ def save_talk():
     data["language"] = clean_language(data.get("language"))
     data["subjects"] = clean_subjects(data.get("subjects"))
     if not data["subjects"]:
-        errmsgs.append("Please select at least one subject")
+        errmsgs.append("Please select at least one subject.")
 
     # Don't try to create new_version using invalid input
     if errmsgs:
@@ -769,7 +862,7 @@ def save_talk():
         )
     if not data["topics"]:
         flash_warning(
-            "This talk has no topics, and thus will only be visible to users when they disable their topics filter."
+            "This talk has no topics, so it will be visible only to users disabling their topics filter."
         )
     if new_version == talk:
         flash("No changes made to talk.")
@@ -797,7 +890,7 @@ def layout_schedule(seminar, data):
             try:
                 return process_user_input(date, "date", "date", tz)
             except ValueError:
-                flash_warning ("Invalid date %s ignored, please use a format like mmm dd, yyyy or dd-mmm-yyyy or mm/dd/yyyy", date)
+                flash_warning ("Invalid date %s ignored; please use a format like mmm dd, yyyy or dd-mmm-yyyy or mm/dd/yyyy", date)
 
     def slot_start_time(s):
         # put slots with no time specified at the end of the day
@@ -897,7 +990,7 @@ def edit_seminar_schedule():
         return resp
     if not seminar.topics:
         flash_warning(
-            "This series has no topics selected; don't forget to set the topics for each new talk individually."
+            "This series has no topics selected; set the series' topics on the Edit series page, or set topics for each new talk individually."
         )
     schedule = layout_schedule(seminar, data)
     return render_template(
@@ -908,6 +1001,7 @@ def edit_seminar_schedule():
         schedule=schedule,
         section="Manage",
         subsection="schedule",
+        maxlength=maxlength,
     )
 
 
@@ -923,6 +1017,9 @@ def save_seminar_schedule():
     resp, seminar = can_edit_seminar(shortname, new=False)
     if resp is not None:
         return resp
+    if raw_data.get("submit") == "cancel":
+        flash("Changes discarded")
+        return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 302)
     frequency = raw_data.get("frequency")
     try:
         frequency = int(frequency)
@@ -944,14 +1041,14 @@ def save_seminar_schedule():
         if not speaker:
             if not warned and any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
                 warned = True
-                flash_warning("Talks are only saved if you specify a speaker")
+                flash_warning("Talks are saved only if you specify a speaker.")
             elif (
                 not warned
                 and seminar_ctr
                 and not any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols)
             ):
                 warned = True
-                flash_warning("To delete an existing talk, click Details and then click delete on the Edit talk page")
+                flash_warning("To delete an existing talk, click Details and then click delete on the Edit talk page.")
             continue
         date = start_time = end_time = None
         dateval = raw_data.get("date%s" % i).strip()
@@ -976,11 +1073,11 @@ def save_seminar_schedule():
 
         if daytimes_early(interval):
             flash_warning(
-                "Talk for speaker %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                "Talk for speaker %s includes early AM hours; please correct if this is not intended (use 24-hour time format).",
                 speaker,
             )
         elif daytimes_long(interval) > 8 * 60:
-            flash_warning("Time s %s is longer than 8 hours, please correct if this is not intended.", speaker),
+            flash_warning("Time s %s is longer than 8 hours; please correct if this is not intended.", speaker),
 
         if seminar_ctr:
             # existing talk
@@ -1025,7 +1122,7 @@ def save_seminar_schedule():
     if raw_data.get("detailctr"):
         return redirect(url_for(".edit_talk", seminar_id=shortname, seminar_ctr=int(raw_data.get("detailctr")),), 302,)
     else:
-        flash("%s talks updated, %s talks created" % (updated, ctr - curmax - 1))
+        flash("%s talks updated, %s talks created." % (updated, ctr - curmax - 1))
         if warned:
             return redirect(url_for(".edit_seminar_schedule", **raw_data), 302)
         else:
