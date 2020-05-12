@@ -634,7 +634,7 @@ def _search_series(conference=False):
         seminar_count = info["seminar_count"] = 50
         seminar_start = info["seminar_start"] = 0
     seminar_query, org_query = {"is_conference": conference}, {}
-    seminars_parser(info, seminar_query, org_query conference=conference)
+    seminars_parser(info, seminar_query, org_query, conference=conference)
     # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
