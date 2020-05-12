@@ -73,7 +73,7 @@ whitelisted_cols = [
 ]
 renames = [("seminar_id", "series_id"),
            ("seminar_ctr", "series_ctr")]
-def sanitize(result):
+def sanitize_output(result):
     if isinstance(result, dict):
         ans = {key: val for (key, val) in result.items() if key in whitelisted_cols}
         for old, new in renames:
@@ -82,6 +82,10 @@ def sanitize(result):
         return ans
     else:
         return result
+
+def sanitize_query(query):
+    # TODO
+    return query
 
 @api_page.route("/<int:version>/search_series", methods=["GET", "POST"])
 def search_series(version):
@@ -92,7 +96,7 @@ def search_series(version):
             raw_data = request.get_json()
         except Exception:
             raw_data = None
-        query = raw_data.pop("query", {})
+        query = sanitize_query(raw_data.pop("query", {}))
         projection = raw_data.pop("projection", 1)
         query["visibility"] = 2
         invalid = False
@@ -114,7 +118,7 @@ def search_series(version):
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
                         "error": str(err)}, 400)
-    results = [sanitize(rec) for rec in results]
+    results = [sanitize_output(rec) for rec in results]
     return jsonify({"code": "success",
                     "results": results})
 
@@ -159,6 +163,7 @@ def search_talks(version):
     if "series_ctr" in query:
         query["seminar_ctr"] = query.pop("series_ctr")
     query["hidden"] = False
+    visible_series = set(seminars_search({"visibility": 2}, "seminar_id"))
     # TODO: Need to check visibility on the seminar
     try:
         results = talks_search(query, projection, objects=False, **raw_data)
@@ -166,7 +171,7 @@ def search_talks(version):
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
                         "error": str(err)}, 400)
-    results = [sanitize(rec) for rec in results]
+    results = [sanitize_output(rec) for rec in results if rec["seminar_id"] in visible_series]
     return jsonify({"code": "success",
                     "results": results})
 
