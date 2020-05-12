@@ -670,7 +670,7 @@ def list_institutions():
         title="Institutions",
         section=section,
         subsection="institutions",
-        maintained_institutions=institutions(admin=current_user.email),
+        maintained_institutions=institutions({'admin':current_user.email}),
         institutions=institutions(),
         maxlength=maxlength,
     )

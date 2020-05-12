@@ -187,7 +187,7 @@ def edit_seminar():
                 similar = [s for s in similar if set(seminar.subjects).intersection(set(s.subjects))]
             if similar:
                 return render_template(
-                    "show_similar.html",
+                    "show_similar_seminars.html",
                     newseminar=seminar,
                     title=title,
                     section=manage,
@@ -622,14 +622,36 @@ def edit_institution():
     if data.get("cancel") == "yes":
         flash("Changes discarded.")
     new = data.get("new") == "yes"
+    notsimilar = data.get("similar") == "no"
     name = data.get("name", "")
     resp, institution = can_edit_institution(shortname, name, new)
     if resp is not None:
         return resp
-    if new:
-        institution.name = data.get("name", "")
-    # Don't use locks for institutions since there's only one non-admin able to edit.
+    manage = "Manage" if current_user.is_organizer else "Create"
     title = "Create institution" if new else "Edit institution"
+    if new:
+        errmsgs = []
+        institution.name = data.get("name", "")
+        if not institution.name:
+            errmsgs.append("Institution name is required.")
+        elif len(institution.name) < 3:
+            errmsgs.append(format_errmsg("Institution name %s is too short; at least three characters are required.", institution.name))
+        if errmsgs:
+            return show_input_errors(errmsgs)
+        if not notsimilar:
+            query = {'name': {"$ilike": '%' + institution.name + '%'}}
+            similar = institutions(query)
+            if similar:
+                return render_template(
+                    "show_similar_institutions.html",
+                    newinstitition=institution,
+                    title=title,
+                    section=manage,
+                    subsection="home",
+                    similar=similar,
+                )
+
+    # Don't use locks for institutions since there's only one non-admin able to edit.
     return render_template(
         "edit_institution.html",
         institution=institution,
@@ -696,6 +718,8 @@ def save_institution():
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["name"]:
         errmsgs.append("Institution name cannot be blank.")
+    elif len(data["name"]) < 3:
+        errmsgs.append(format_errmsg("Institution name %s is too short; at least three characters are required.", institution.name))
     if not errmsgs and not data["homepage"]:
         errmsgs.append("Institution homepage cannot be blank.")
     if new and db.institutions.count({'name':data["name"]}):
