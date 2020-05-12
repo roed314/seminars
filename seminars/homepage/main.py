@@ -621,8 +621,7 @@ def _search_series(conference=False):
     info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
-        if conference:
-            info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
+        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
     try:
         seminar_count = int(info["seminar_count"])
         seminar_start = int(info["seminar_start"])
