@@ -380,7 +380,7 @@ class SemSearchArray(SearchArray):
         )
         organizer = TextBox(
             name="organizer",
-            label="organizer",
+            label="Organizer",
             colspan=(1, 2, 1),
             width=textwidth,
         )
@@ -629,6 +629,8 @@ def _search_series(conference):
     info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
+        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
+        )
     try:
         seminar_count = int(info["seminar_count"])
         seminar_start = int(info["seminar_start"])
@@ -660,8 +662,7 @@ def search_talks():
     )
     if "search_type" not in info:
         info["talk_online"] = True
-        info["daterange"] = info.get(
-            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
+        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
         )
     try:
         talk_count = int(info["talk_count"])
