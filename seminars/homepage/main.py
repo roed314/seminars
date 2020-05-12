@@ -380,7 +380,6 @@ class SemSearchArray(SearchArray):
         organizer = TextBox(
             name="organizer",
             label="Organizer",
-            colspan=(1, 2, 1),
             width=textwidth,
         )
         date = TextBox(
@@ -413,7 +412,7 @@ class SemSearchArray(SearchArray):
         ]
 
     def hidden(self, info):
-        return []  # [("seminar_start", "seminar_start")]
+        return []
 
 
 @app.route("/")

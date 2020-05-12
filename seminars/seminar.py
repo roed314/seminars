@@ -601,7 +601,6 @@ def _iterator(organizer_dict, objects=True, organizer=""):
             if organizer:
                 orgs = [org for org in organizer_dict.get(rec["shortname"]) if org["display"]]
                 if not [org for org in orgs if any([organizer in org[k].lower() for k in org.keys() if k != "seminar_id" and isinstance(org[k],str)])]:
-                    continue
             yield _construct(organizer_dict)(rec)
 
     return object_iterator if objects else db.seminars._search_iterator
