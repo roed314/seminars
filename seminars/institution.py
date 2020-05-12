@@ -120,7 +120,7 @@ def can_edit_institution(shortname, name, new):
     # Check if institution exists
     if new != (institution is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
-        return redirect(url_for(".index"), 302), None
+        return redirect(url_for("list_institutions"), 302), None
     if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         if institution["admin"].lower() != current_user.email.lower():
