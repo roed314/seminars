@@ -4,33 +4,58 @@
 
 <div class="text_content auto">
 <p>
-   {{meta_description}}  On this site, each <i>talk</i> belongs to a <i>series</i>.  Each series is either a <i>conference</i> (event typically lasting a few days, with several talks per day) or a <i>seminar series</i> (a recurring series of talks spread out over weeks).
+   {{meta_description}}  
+   On this site, each <i>talk</i> belongs to a <i>series</i>.  
+Each series is either a <i>conference</i> (event typically lasting a few days, with several talks per day) or a <i>seminar series</i> (a recurring series of talks spread out over weeks).
 </p>
 
 <h3>Browse</h3>
 
-<p>The <a href="{{ url_for("index") }}">Browse</a> page lists upcoming talks.  There you can click the tabs underneath to instead display conferences, seminar series, or past events.  Also, you can filter results by subject, topic, or language.</p>
+<p>The <a href="{{ url_for("index") }}">Browse</a> page lists upcoming talks.  
+There you can click the tabs underneath to instead display 
+conferences, seminar series, or past events.  
+Also, you can filter results by subject, topic, or language.</p>
 
 <h3>Search</h3>
 
-<p>You can <a href="{{ url_for("search_seminars") }}">search</a> for seminar series, conferences, and talks satisfying various criteria, including specifying keywords within talk abstracts.</p>
+<p>You can <a href="{{ url_for("search_seminars") }}">search</a> 
+for seminar series, conferences, and talks satisfying various criteria, 
+including specifying keywords within talk abstracts.</p>
 
 <h3>Subscribe</h3>
 
-<p>After <a href="{{ url_for('user.register') }}">registering</a>, you can <a href="{{ url_for('user.info') }}">export</a> selected series and talks to your own calendar (e.g., Google calendar, Outlook or iCal).  When you subscribe to a series, new talks will be pushed to your calendar automatically.</p>
+<p>You can <a href="{{ url_for('user.info') }}">export</a> 
+individual series and talks to your own calendar app 
+(e.g., Google calendar, iCal, or Outlook).  
+In addition, <a href="{{ url_for('user.register') }}">registered users</a> 
+can select favorite series and talks and export them as one calendar.
+When you subscribe to a series, 
+new talks will be pushed to your calendar automatically.</p>
 
 <h3>Attend</h3>
 
-<p>Many events include livestreaming links for direct access.  Some organizers make these links visible only to users logged in to a <a href="https://{{topdomain}}">{{topdomain}}</a> account.</p>
+<p>Many events include livestreaming links for direct access.  
+Some organizers make these links visible only to users 
+<a href="{{ url_for('user.register') }}">logged in</a> 
+to a <a href="https://{{topdomain}}">{{topdomain}}</a> account.</p>
 
 <h3>Create</h3>
 
-<p>You can easily add your own series to the site.  Once you <a href="{{ url_for('create.index') }}">create</a> a new series, you can add upcoming or historical talks to it.
-   Series and talks you create will be visible to others once your account has been endorsed.</p>
+<p>
+Once you <a href="{{ url_for('create.index') }}">create</a> 
+a new series on the site, you can add future or past talks to it.
+Series and talks you create will be visible to others 
+once your account has been endorsed.</p>
 
 <h3>Organize</h3>
 
-<p>Organizers can add upcoming talks easily: defaults are filled in from the series but are editable on a per-talk basis.  Sharing a talk's edit link with speakers allows them to update their own title and abstract.  Each series comes with a block of HTML code that when pasted once onto the organizer's homepage or departmental webpage will always display the up-to-date talk schedule.</p>
+<p>Organizers can add upcoming talks easily: 
+defaults are filled in from the series but are editable on a per-talk basis.  
+Sharing a talk's edit link with speakers allows them 
+to update their own title and abstract.  
+Each series comes with a block of HTML code 
+that when pasted once onto the organizer's homepage or departmental webpage 
+will always display the up-to-date talk schedule.</p>
 
 <h3>Questions?  Error reports?  Suggestions?</h3>
 
