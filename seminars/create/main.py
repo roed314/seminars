@@ -999,6 +999,7 @@ def edit_seminar_schedule():
         raw_data=data,
         title="Edit schedule",
         schedule=schedule,
+        filled=len([s for s in schedule if s[2]]),
         section="Manage",
         subsection="schedule",
         maxlength=maxlength,
