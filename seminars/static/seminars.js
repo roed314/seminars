@@ -462,7 +462,7 @@ function makeInstitutionSelector(instOptions, initialInstitutions) {
 }
 function makeLanguageSelector(langOptions, initialLanguage) {
     function callback_language(value) {
-        $('input[name="language"]').value = value;
+        $('input[name="language"]')[0].value = value;
     }
     return new SelectPure("#language_selector", {
         onChange: callback_language,

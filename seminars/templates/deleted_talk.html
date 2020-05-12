@@ -2,19 +2,32 @@
 
 {% block content %}
 
-{% if talk.seminar.owner == user.email %}
-
-<p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted.</p>
-
-<ul>
-  <li><a href="{{ url_for('.revive_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}">Revive</a></li>
-  <li><a href="{{ url_for('.permdelete_talk', semid=talk.seminar_id, semctr=talk.seminar_ctr) }}" onclick="return confirm('Are you sure you want to permanently delete this talk?  This cannot be undone.');">Delete permanently</a></li>
-</ul>
-
+<form action="{{ url_for('.delete_talk',  seminar_id=seminar_id, seminar_ctr=seminar_ctr) }}" method="POST">
+{% if talk.deleted %}
+     <p>The talk below and all its talks have been deleted.  You can restore it or permanently delete it.</p>
 {% else %}
-
-<p>The talk {{talk.seminar_id}}/{{talk.seminar_ctr}} has been deleted.</p>
-
+    <p>Deleting the talk below will cancel all subscriptions and ensure that the talk is not visible on this site.<br>
+    You will be able to restore the talk later if needed, but subscriptions will not be restored.</p>
+    <p>Permanent deletion will remove all information related to this talk from our database.<br>
+    <b>This cannot be undone</b>.
+    </p>
 {% endif %}
+
+<table>
+<tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
+<tr>{{ talk.oneline(include_subscribe=False) | safe }}</tr>
+</table>
+<br>
+<table><tr>
+{% if talk.deleted %}
+        <td><button class="save" type="submit" name="submit" value="revive">Revive talk</button></td>
+        <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete talk</button></td>
+{% else %}
+    <td><button class="cancel" type="sumbit" name="submit" value="cancel">Cancel deletion</button></td>
+    <td><button class="savedelete" type="sumbit" name="submit" value="delete">Delete talk</button></td>
+    <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete talk</button></td>
+{% endif %}
+</tr></table>
+</form>
 
 {% endblock %}
