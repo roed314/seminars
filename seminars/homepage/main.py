@@ -103,7 +103,7 @@ def parse_access(info, query, prefix):
         query["access"] = {"$or": ["open", "users"]}
 
 
-def parse_daterange_time(info, query):
+def parse_daterange(info, query, time=True):
     tz = current_user.tz
     date = info.get("daterange")
     if date:
@@ -115,18 +115,18 @@ def parse_daterange_time(info, query):
         if start.strip():
             try:
                 start = tz.localize(parse(start))
-                sub_query["$gte"] = start
+                sub_query["$gte"] = start if time else start.date
             except Exception as e:
                 flash_error("Could not parse start date %s.  Error: " + str(e), start)
         if end.strip():
             try:
                 end = tz.localize(parse(end))
                 end = end + timedelta(hours=23, minutes=59, seconds=59)
-                sub_query["$lte"] = end
+                sub_query["$lte"] = end if time else end.date
             except Exception as e:
                 flash_error("Could not parse end date %s.  Error: " + str(e), end)
         if sub_query:
-            query["start_time"] = sub_query
+            query["start_time" if time else "start_date"] = sub_query
 
 def parse_video(info, query):
     v = info.get("video")
@@ -159,9 +159,9 @@ def talks_parser(info, query):
     parse_substring(info, query, "speaker", ["speaker"])
     parse_substring(info, query, "affiliation", ["speaker_affiliation"])
     parse_substring(info, query, "title", ["title"])
-    parse_daterange_time(info, query)
     parse_video(info, query)
     parse_language(info, query, prefix="talk")
+    parse_daterange(info, query, time=True)
     query["display"] = True
     # TODO: remove this temporary measure allowing hidden to be None
     query["hidden"] = {"$or": [False, {"$exists": False}]}
@@ -185,6 +185,7 @@ def seminars_parser(info, query):
                      "comments"])
     parse_access(info, query, prefix="seminar")
     parse_language(info, query, prefix="seminar")
+    parse_daterange(info, query, time=False)
 
     parse_substring(info, query, "name", ["name"])
     query["display"] = True
@@ -736,7 +737,7 @@ def talks_search_api(shortname, projection=1):
         elif request.args.get('daterange') == 'future':
             query["start_time"] = {'$gte': get_now()}
         else:
-            parse_daterange_time(request.args, query)
+            parse_daterange(request.args, query, time=True)
     elif 'past' in request.args and 'future' in request.args:
         # no restriction on date
         pass
