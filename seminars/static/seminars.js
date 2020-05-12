@@ -829,9 +829,11 @@ function makeTree(json_tree) {
   var to = false;
   $('#topicDAG_search').keyup(function () {
     if(to) { clearTimeout(to); }
+    if( $('#topicDAG_search').val().length > 1 ) {
     to = setTimeout(function () {
       var v = $('#topicDAG_search').val();
       $('#topicDAG').jstree(true).search(v);
     }, 250);
+    }
   });
 }
