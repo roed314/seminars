@@ -313,6 +313,7 @@ class TalkSearchArray(SearchArray):
         return [
             ("talks", "Search talks"),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
+            BasicSpacer("Showing %d results" % (len(info.results))),
         ]
 
     def hidden(self, info):
