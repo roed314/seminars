@@ -115,14 +115,14 @@ def parse_daterange(info, query, time=True):
         if start.strip():
             try:
                 start = tz.localize(parse(start))
-                sub_query["$gte"] = start if time else start.date
+                sub_query["$gte"] = start if time else start.date()
             except Exception as e:
                 flash_error("Could not parse start date %s.  Error: " + str(e), start)
         if end.strip():
             try:
                 end = tz.localize(parse(end))
                 end = end + timedelta(hours=23, minutes=59, seconds=59)
-                sub_query["$lte"] = end if time else end.date
+                sub_query["$lte"] = end if time else end.date()
             except Exception as e:
                 flash_error("Could not parse end date %s.  Error: " + str(e), end)
         if sub_query:
