@@ -835,7 +835,7 @@ def save_talk():
     else:
         edit_kwds.pop("token", None)
     return redirect(url_for(".edit_talk", **edit_kwds), 302)
->
+
 def process_save_talk(talk, raw_data, warn=flash_warning, format_error=format_errmsg, format_input_error=format_input_errmsg):
     errmsgs = []
     data = {
