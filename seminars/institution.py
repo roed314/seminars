@@ -17,11 +17,11 @@ institution_types = [
 ]
 
 
-def institutions(admin=None):
+def institutions(query={}):
     return sorted(
         (
             (rec["shortname"], rec["name"])
-            for rec in db.institutions.search({"admin":admin} if admin else {}, ["shortname", "name"])
+            for rec in db.institutions.search(query, ["shortname", "name"])
         ),
         key=lambda x: x[1].lower(),
     )
@@ -120,7 +120,7 @@ def can_edit_institution(shortname, name, new):
     # Check if institution exists
     if new != (institution is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
-        return redirect(url_for(".index"), 302), None
+        return redirect(url_for("list_institutions"), 302), None
     if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         if institution["admin"].lower() != current_user.email.lower():
