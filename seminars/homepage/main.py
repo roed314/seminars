@@ -19,7 +19,7 @@ from seminars.seminar import seminars_search, all_seminars, all_organizers, semi
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
-import pytz, sys
+import pytz
 from collections import Counter
 from dateutil.parser import parse
 
@@ -116,15 +116,15 @@ def parse_daterange_time(info, query):
             try:
                 start = tz.localize(parse(start))
                 sub_query["$gte"] = start
-            except Exception:
-                flash_error("Could not parse start date %s.  Error: " + sys.exc_info()[0], start)
+            except Exception as e:
+                flash_error("Could not parse start date %s.  Error: " + str(e), start)
         if end.strip():
             try:
                 end = tz.localize(parse(end))
                 end = end + datetime.timedelta(hours=23, minutes=59, seconds=59)
                 sub_query["$lte"] = end
-            except Exception:
-                flash_error("Could not parse end date %s.  Error: " + sys.exc_info()[0], end)
+            except Exception as e:
+                flash_error("Could not parse end date %s.  Error: " + str(e), end)
         if sub_query:
             query["start_time"] = sub_query
 
