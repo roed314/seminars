@@ -596,8 +596,9 @@ def _construct(organizer_dict, objects=True):
 def _iterator(organizer_dict, objects=True):
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
-            if rec["shortname"] in organizer_dict:
-                yield _construct(organizer_dict)(rec)
+            if isinstance(rec, dict) and "shortname" in rec and not rec["shortname"] in organizer_dict:
+                continue
+            yield _construct(organizer_dict)(rec)
     return object_iterator if objects else db.seminars._search_iterator
 
 
