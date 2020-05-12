@@ -814,7 +814,7 @@ function makeTree(json_tree) {
       mark_undetermined_nodes(data.instance);
     }
   });
-  $('#topicDAG').on('open_node.jstree',
+  $('#topicDAG').on('redraw.jstree',
     function (e, data) {
       // figure out undetermined nodes
       if( data.instance !== undefined ) {
