@@ -27,6 +27,7 @@ from seminars.utils import (
     maxlength,
     similar_urls,
     format_warning,
+    MAX_ORGANIZERS,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -559,7 +560,7 @@ def process_save_seminar(seminar, raw_data, warn=flash_warning, format_error=for
     organizer_data = []
     if update_organizers:
         contact_count = 0
-        for i in range(10):
+        for i in range(MAX_ORGANIZERS):
             D = {"seminar_id": seminar.shortname}
             for col in db.seminar_organizers.search_cols:
                 if col in D:

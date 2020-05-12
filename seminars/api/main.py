@@ -3,11 +3,11 @@ from flask import jsonify, request
 from seminars import db
 from seminars.app import app
 from seminars.api import api_page
-from seminars.seminar import WebSeminar, seminars_lookup
-from seminars.talk import WebTalk, talks_lookup
+from seminars.seminar import WebSeminar, seminars_lookup, seminars_search
+from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser
-from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays
-from seminars.create.main import process_save_seminar, process_save_talk, MAX_SLOTS, MAX_ORGANIZERS
+from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, MAX_SLOTS, MAX_ORGANIZERS
+from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
 
 def format_error(msg, *args):
@@ -21,11 +21,154 @@ class APIError(Exception):
         self.error = error
         self.status = status
 
+def version_error(version):
+    return APIError({"code": "invalid_version",
+                     "description": "Unknown API version: %s" % version}, 400)
+
 @app.errorhandler(APIError)
 def handle_api_error(err):
     response = jsonify(err.error)
     response.status_code = err.status
     return response
+
+# We only allow certain columns, both because of deprecated parts of the schema and for privacy/security
+whitelisted_cols = [
+    "abstract",
+    "access",
+    "comments",
+    "description",
+    "display",
+    "edited_at",
+    "end_date",
+    "end_time",
+    "frequency",
+    "homepage",
+    "institutions",
+    "is_conference",
+    "language",
+    #"live_link", # maybe allow searching on this once access control refined
+    "name",
+    "online",
+    "paper_link",
+    "per_day",
+    "room",
+    "seminar_ctr",
+    "seminar_id",
+    "series_ctr",
+    "series_id",
+    "shortname",
+    "slides_link",
+    "speaker",
+    "speaker_affiliation",
+    "speaker_email",
+    "speaker_homepage",
+    "start_date",
+    "start_time",
+    "stream_link",
+    "time_slots",
+    "timezone",
+    "title",
+    "topics",
+    "video_link"
+]
+renames = [("seminar_id", "series_id"),
+           ("seminar_ctr", "series_ctr")]
+def sanitize(result):
+    if isinstance(result, dict):
+        ans = {key: val for (key, val) in result.items() if key in whitelisted_cols}
+        for old, new in renames:
+            if old in ans:
+                ans[new] = ans.pop(old)
+        return ans
+    else:
+        return result
+
+@api_page.route("/<int:version>/search_series", methods=["GET", "POST"])
+def search_series(version):
+    if version != 0:
+        raise version_error(version)
+    if request.method == "POST":
+        try:
+            raw_data = request.get_json()
+        except Exception:
+            raw_data = None
+        query = raw_data.pop("query", {})
+        projection = raw_data.pop("projection", 1)
+        query["visibility"] = 2
+        invalid = False
+        if isinstance(projection, (list, tuple)):
+            invalid = [col for col in projection if col not in whitelisted_cols]
+        elif not isinstance(projection, int) and projection not in whitelisted_cols:
+            invalid = [projection]
+        if invalid:
+            raise APIError({"code": "invalid_projection",
+                            "description": "at least one column requested is not supported by API",
+                            "errors": invalid}, 400)
+    else:
+        query = dict(request.args)
+        projection = 1
+        raw_data = {}
+    try:
+        results = seminars_search(query, projection, objects=False, **raw_data)
+    except Exception as err:
+        raise APIError({"code": "search_error",
+                        "description": "error in executing search",
+                        "error": str(err)}, 400)
+    results = [sanitize(rec) for rec in results]
+    return jsonify({"code": "success",
+                    "results": results})
+
+@api_page.route("/<int:version>/search_talks", methods=["GET", "POST"])
+def search_talks(version):
+    if version != 0:
+        raise version_error(version)
+    if request.method == "POST":
+        try:
+            raw_data = request.get_json()
+        except Exception:
+            raw_data = None
+        query = raw_data.pop("query", {})
+        projection = raw_data.pop("projection", 1)
+        query["hidden"] = False
+        invalid = False
+        if projection == "series_id":
+            projection = "seminar_id"
+        elif projection == "series_ctr":
+            projection = "seminar_ctr"
+        elif isinstance(projection, (list, tuple)):
+            invalid = [col for col in projection if col not in whitelisted_cols]
+            if "series_id" in projection:
+                projection.remove("series_id")
+                projection.append("seminar_id")
+            if "series_ctr" in projection:
+                projection.remove("series_ctr")
+                projection.append("seminar_ctr")
+        elif not isinstance(projection, int) and projection not in whitelisted_cols:
+            invalid = [projection]
+        if invalid:
+            raise APIError({"code": "invalid_projection",
+                            "description": "at least one column requested is not supported by API",
+                            "errors": invalid}, 400)
+    else:
+        query = dict(request.args)
+        projection = 1
+        raw_data = {}
+    # This isn't sufficient (could have $or, etc)....
+    if "series_id" in query:
+        query["seminar_id"] = query.pop("series_id")
+    if "series_ctr" in query:
+        query["seminar_ctr"] = query.pop("series_ctr")
+    query["hidden"] = False
+    # TODO: Need to check visibility on the seminar
+    try:
+        results = talks_search(query, projection, objects=False, **raw_data)
+    except Exception as err:
+        raise APIError({"code": "search_error",
+                        "description": "error in executing search",
+                        "error": str(err)}, 400)
+    results = [sanitize(rec) for rec in results]
+    return jsonify({"code": "success",
+                    "results": results})
 
 def api_auth_required(fn):
     # Note that this wrapper will pass the user as a keyword argument to the wrapped function
@@ -52,9 +195,9 @@ def api_auth_required(fn):
                             "description": "Token not valid"}, 401)
     return inner
 
-@api_page.route("/test")
+@api_page.route("/<int:version>/test")
 @api_auth_required
-def test_api(user):
+def test_api(version, user):
     response = jsonify({"code": "success"})
     return response
 
@@ -62,8 +205,7 @@ def test_api(user):
 @api_auth_required
 def save_series(version, user):
     if version != 0:
-        raise APIError({"code": "invalid_version",
-                        "description": "Unknown API version: %s" % version}, 400)
+        raise version_error(version)
     try:
         raw_data = request.get_json()
     except Exception:
