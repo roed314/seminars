@@ -21,12 +21,14 @@ class WebTopic(object):
         else:
             return sorted(set([elt.id for elt in self.parents] + sum([elt.ancestors for elt in self.parents], [])))
 
-    @property
-    def json(self):
+    def json(self, selected=[]):
         return {
             'text': self.name,
             'li_attr': {'vertex': self.id},
-            'children': [ elt.json for elt in self.children ]
+            'state': {'opened': int(self.id in selected),
+                      'selected': int(self.id in selected)
+                      },
+            'children': [ elt.json(selected) for elt in self.children ]
         }
 
 
@@ -183,9 +185,8 @@ class TopicDAG(object):
             "\n".join(divs),
        )
 
-    @property
-    def json(self):
-        return [elt.json for elt in self.subjects]
+    def json(self, selected=[]):
+        return [elt.json(selected) for elt in self.subjects]
 
 
 

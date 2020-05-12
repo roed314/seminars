@@ -17,15 +17,15 @@
     <div style="margin-top: 30px">
       <a href="{{ request.referrer }}">Abort</a>
     </div>
-  {% else %}
-      <form id="seminarform" action="{{ url_for('.save_seminar') }}" method="POST">
-        <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
-        <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
-        <input type="hidden" name="subjects" value="{{ seminar.subjects  | safe }}" />
-        <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
-        <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
-        <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
-        <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
+    {% else %}
+    <form id="seminarform" action="{{ url_for('.save_seminar') }}" method="POST">
+      <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
+      <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
+      <input type="hidden" name="subjects" value="{{ seminar.subjects  | safe }}" />
+      <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
+      <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
+      <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
+      <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
       <table>
         <tr>
           <td style="width:150px;">{{ KNOWL("seminar_id") }}</td>
@@ -53,88 +53,101 @@
           <td>{{ ASTKNOWL("subjects") }}</td>
           <td><span id="subject_selector" style="width:610px;"></span></td>
           <td class="forminfo">Select at least one subject</td>
-        <tr>
-        {% endif %}
-        <tr>
-          <td>{{ KNOWL("topics") }}</td>
-          <td><span id="topic_selector" style="width:610px;"></span></td>
-        </tr>
-        <tr>
-          <td>{{ ASTKNOWL("language","Language") }}</td>
-          <td><span id="language_selector" style="width:600px;"></span></td>
-        </tr>
-        <tr>
-          <td>{{ ASTKNOWL("timezone") }}</td>
-          <td>
-            <select name="timezone" style="width:610px;">
-              {% for tz, disp in timezones %}
-                <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
-              {% endfor %}
-            </select>
-          </td>
-          <td class="forminfo" />Be sure to set this correctly.</td>
-        </tr>
-        <tr>
-          <td>{{KNOWL("visibility")}}</td>
-          <td>
-            <select name="visibility" style="width:610px;">
-              <option value="2"{% if seminar.visibility == 2 %} selected{% endif %}>public</option>
-              <option value="1"{% if seminar.visibility == 1 %} selected{% endif %}>unlisted</option>
-              <option value="0"{% if seminar.visibility == 0 %} selected{% endif %}>private</option>
-            </select>
-          </td>
-        </tr>
-      {% if seminar.is_conference %}
-        <tr>
-          <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
-          <td style="padding-top: 20px">
-            <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
-          </td>
-        </tr>
-        <tr>
-          <td> {{ ASTKNOWL("end_date") }}</td>
-          <td>
-            <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
-          </td>
-        </tr>
-        <tr>
-          <td>{{ ASTKNOWL("per_day") }}</td>
-          <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
-        </tr>
-      {% else %}
-        <script>
-        function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
-        </script>
-        <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
-        <tr>
-          <td>{{ KNOWL("periodicity") }}</td>
-          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
-              <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
-              <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
-              <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
-              <option value="21" {% if seminar.frequency == 21 %}selected{% endif %}>every third week</option>
-            </select></td>
-        </tr>
+          <tr>
+            {% endif %}
+            <tr>
+              <td>{{ KNOWL("topics") }}</td>
+              <td><span id="topic_selector" style="width:610px;"></span></td>
+            </tr>
+            <tr>
+              <td>{{ KNOWL("topics") }}</td>
+              <td><span id="topicDAG_selector" style="width:600px;display:block;"></span></td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <div class="topicDAG">
+                  <input id="topicDAG_search" type="text", value="" placeholder="Search">
+                  <button id="topicDAG_deselect_all">Deselect all</button>
+                  <button id="topicDAG_close_all">Close all</button>
+                  <div id="topicDAG"></div>
+                </div>
+              </td>
+              <tr>
+                <td>{{ ASTKNOWL("language","Language") }}</td>
+                <td><span id="language_selector" style="width:600px;"></span></td>
+              </tr>
+              <tr>
+                <td>{{ ASTKNOWL("timezone") }}</td>
+                <td>
+                  <select name="timezone" style="width:610px;">
+                    {% for tz, disp in timezones %}
+                    <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td class="forminfo" />Be sure to set this correctly.</td>
+              </tr>
+              <tr>
+                <td>{{KNOWL("visibility")}}</td>
+                <td>
+                  <select name="visibility" style="width:610px;">
+                    <option value="2"{% if seminar.visibility == 2 %} selected{% endif %}>public</option>
+                    <option value="1"{% if seminar.visibility == 1 %} selected{% endif %}>unlisted</option>
+                    <option value="0"{% if seminar.visibility == 0 %} selected{% endif %}>private</option>
+                  </select>
+                </td>
+              </tr>
+              {% if seminar.is_conference %}
+              <tr>
+                <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
+                <td style="padding-top: 20px">
+                  <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
+                </td>
+              </tr>
+              <tr>
+                <td> {{ ASTKNOWL("end_date") }}</td>
+                <td>
+                  <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
+                </td>
+              </tr>
+              <tr>
+                <td>{{ ASTKNOWL("per_day") }}</td>
+                <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
+              </tr>
+              {% else %}
+              <script>
+                function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
+              </script>
+              <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
+              <tr>
+                <td>{{ KNOWL("periodicity") }}</td>
+                <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
+                    <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
+                    <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
+                    <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
+                    <option value="21" {% if seminar.frequency == 21 %}selected{% endif %}>every third week</option>
+                  </select></td>
+              </tr>
       </table>
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
         {% for i in range(maxlength["time_slots"]//3) %}
-          <tr style="width:750px;">
-            {% if i == 0 %}
-              <td style="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
-              {% set hide="visibility:hidden;" %}
-              <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
-              <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
-            {% else %}
-              {% set hide="display:none;" %}
-              <td></td><td></td><td></td>
-            {% endif %}
+        <tr style="width:750px;">
+          {% if i == 0 %}
+          <td style="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
+          {% set hide="visibility:hidden;" %}
+          <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
+          <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+          {% else %}
+          {% set hide="display:none;" %}
+          <td></td><td></td><td></td>
+          {% endif %}
           </td>
           {% for j in range(3) %}
           <td style="padding-right:1px; margin-right:0px;">
             <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="{{hide}}">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
-                <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
+              <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
               {% endfor %}
             </select>
           </td>
@@ -142,10 +155,10 @@
             <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; {{hide}}" placeholder="15:00-16:00"/>
           </td>
           {% endfor %}
-        {% endfor %}
+          {% endfor %}
       </table>
       <table>
-    {% endif %}
+        {% endif %}
         <tr>
           <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
           <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"/></td>
@@ -197,34 +210,34 @@
         {% for i in range(maxlength["organizers"]) %}
         <tr>
           {% if i > 0 and i < (seminar.organizer_data | length) %}
-            <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
+          <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
           {% else %}
-            <td></td>
+          <td></td>
           {% endif %}
           {% if i < (seminar.organizer_data | length) %}
-            <td>
-              <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['full_name'] }}" />
-            </td>
-            <td>
-              <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
-            </td>
-            <td>
-              <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
-            </td>
-            <td align="center">
-              {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
-              {# but it is displayed in a column labeleled "organizer" so it is checked when curator is false #}
-              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
-            </td>
-            <td align="center">
-              <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
-            </td>
+          <td>
+            <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['full_name'] }}" />
+          </td>
+          <td>
+            <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
+          </td>
+          <td>
+            <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
+          </td>
+          <td align="center">
+            {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
+            {# but it is displayed in a column labeleled "organizer" so it is checked when curator is false #}
+            <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
+          </td>
+          <td align="center">
+            <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
+          </td>
           {% else %}
-            <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
-            <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
-            <td><input name="org_email{{i}}" style="width:220px;" /></td>
-            <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
-            <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
+          <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
+          <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
+          <td><input name="org_email{{i}}" style="width:220px;" /></td>
+          <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
+          <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
           {% endif %}
         </tr>
         {% endfor %}
@@ -238,8 +251,6 @@
         {% endif %}
       </tr></table>
       </form>
-  <input id="topicDAG_search" type="text", value="" placeholder="Search">
-  <div id="topicDAG"></div>
 <script type="text/javascript">
 /* topic and inst selector */
 const topicOptions = [
@@ -271,7 +282,7 @@ const subjOptions = [
   {% endfor %}
 ];
 
-const json_tree = {{ topic_dag.json | safe }};
+const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
 
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
