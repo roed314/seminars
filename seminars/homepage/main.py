@@ -172,7 +172,8 @@ def talks_parser(info, query):
     if topdomain() == "mathseminars.org":
         query["subjects"] = ["math"]
 
-def seminars_parser(info, query, conference=False):
+
+def seminars_parser(info, query, org_query={}, conference=False):
     parse_subject(info, query)
     parse_topic(info, query)
     parse_institution_sem(info, query)
@@ -183,6 +184,10 @@ def seminars_parser(info, query, conference=False):
                      "homepage",
                      "shortname",
                      "comments"])
+    org_cols = ["name", "full_name", "homepage"]
+    if current_user.is_subject_admin(None):
+        org_cols.append("email")
+    parse_substring(info, org_query, "organizer", org_cols)
     parse_access(info, query)
     parse_language(info, query)
     if conference:
@@ -195,8 +200,6 @@ def seminars_parser(info, query, conference=False):
     # FIXME: temporary measure during addition of physics
     if topdomain() == "mathseminars.org":
         query["subjects"] = ["math"]
-
-# Common boxes
 
 
 def institutions_shortnames():
@@ -582,11 +585,11 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
             query["end_date"] = {"$lt": recent}
         else:
             query["end_date"] = {"$gte": recent}
-    if conference and sort is None:
-        if past:
-            sort = [("end_date", -1), ("start_date", -1), "name"]
-        else:
-            sort = ["start_date", "end_date", "name"]
+        if sort is None:
+            if past:
+                sort = [("end_date", -1), ("start_date", -1), "name"]
+            else:
+                sort = ["start_date", "end_date", "name"]
     if sort is None: # not conferences
         # We don't currently call this case in the past, but if we add it we probably
         # need a last_talk_sorted that sorts by end time of last talk in reverse order
@@ -630,18 +633,17 @@ def _search_series(conference=False):
     except (KeyError, ValueError):
         seminar_count = info["seminar_count"] = 50
         seminar_start = info["seminar_start"] = 0
-    seminar_query = {"is_conference": conference}
-    organizer = info.get("organizer","")
-    seminars_parser(info, seminar_query, conference=conference)
+    seminar_query, org_query = {"is_conference": conference}, {}
+    seminars_parser(info, seminar_query, org_query, conference=conference)
     # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
     if conference:
         sort = ["start_date", "end_date", "name"]
-        info["results"] = seminars_search(seminar_query, organizer=organizer, organizer_dict=all_organizers(),sort=sort)
+        info["results"] = seminars_search(seminar_query, organizer_dict=all_organizers(org_query), sort=sort)
     else:
-        info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer=organizer, organizer_dict=all_organizers()))
+        info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers(org_query)))
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(
