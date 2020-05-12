@@ -596,7 +596,7 @@ def _construct(organizer_dict, objects=True):
 def _iterator(organizer_dict, objects=True, organizer=""):
     organizer = organizer.strip().lower()
     X = ["seminar_id"]
-    if not current_user.is_subject_admin():
+    if not current_user.is_subject_admin(None):
         X.append("email")
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
