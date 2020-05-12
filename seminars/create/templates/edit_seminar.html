@@ -33,16 +33,16 @@
         </tr>
         <tr>
           <td>{{ ASTKNOWL("seminar_name") }}</td>
-          <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" /></td>
+          <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" maxlength="{{ maxlength['name'] }}"/></td>
           <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
         </tr>
         <tr>
           <td>{{ KNOWL("seminar_description") }}</td>
-          <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" placeholder="research seminar" maxlength="60"/></td>
+          <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" maxlength="{{ maxlength['description'] }}" placeholder="research seminar" /></td>
         </tr>
         <tr>
           <td>{{ KNOWL("seminar_homepage") }}</td>
-          <td><input name="homepage" value="{{ seminar.homepage | blanknone }}" style="width:600px;" placeholder="https://example.org"/></td>
+          <td><input name="homepage" value="{{ seminar.homepage | blanknone }}" style="width:600px;" maxlength="{{ maxlength['homepage'] }}" placeholder="https://example.org"/></td>
         </tr>
         <tr>
           <td>{{ KNOWL("institutions") }}</td>
@@ -86,19 +86,19 @@
         </tr>
       {% if seminar.is_conference %}
         <tr>
-          <td style="padding-top: 20px">{{ KNOWL("start_date") }}</td>
+          <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
           <td style="padding-top: 20px">
             <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
           </td>
         </tr>
         <tr>
-          <td> {{ KNOWL("end_date") }}</td>
+          <td> {{ ASTKNOWL("end_date") }}</td>
           <td>
             <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
           </td>
         </tr>
         <tr>
-          <td>{{ KNOWL("per_day") }}</td>
+          <td>{{ ASTKNOWL("per_day") }}</td>
           <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
         </tr>
       {% else %}
@@ -107,7 +107,7 @@
         </script>
         <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
         <tr>
-          <td>{{ KNOWL("frequency", "Periodicity") }}</td>
+          <td>{{ KNOWL("periodicity") }}</td>
           <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
               <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
               <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
@@ -117,19 +117,21 @@
         </tr>
       </table>
       <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
-        {% for i in range(max_slots//3) %}
-          <tr>
+        {% for i in range(maxlength["time_slots"]//3) %}
+          <tr style="width:750px;">
             {% if i == 0 %}
-              <td sytle="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
-              <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="visibility:hidden;" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
-              <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="visibility:hidden;" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+              <td style="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
+              {% set hide="visibility:hidden;" %}
+              <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
+              <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
             {% else %}
+              {% set hide="display:none;" %}
               <td></td><td></td><td></td>
             {% endif %}
           </td>
           {% for j in range(3) %}
           <td style="padding-right:1px; margin-right:0px;">
-            <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="display:none;">
+            <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="{{hide}}">
               <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
               {% for wkday in short_weekdays %}
                 <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
@@ -137,7 +139,7 @@
             </select>
           </td>
           <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-            <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; display:none;" placeholder="15:00-16:00"/>
+            <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; {{hide}}" placeholder="15:00-16:00"/>
           </td>
           {% endfor %}
         {% endfor %}
@@ -146,7 +148,7 @@
     {% endif %}
         <tr>
           <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
-          <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" placeholder="Room 2-190 in the Simons building"/></td>
+          <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"/></td>
         </tr>
         <tr>
           <td>{{ ASTKNOWL("online") }}</td>
@@ -159,7 +161,7 @@
         </tr>
         <tr>
           <td>{{ KNOWL("live_link") }}</td>
-          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
           <td class="forminfo" />If link varies, enter "See comments" and put instructions in Comments.</td>
         </tr>
         <tr>
@@ -176,7 +178,7 @@
           <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>
         </tr>
         <tr>
-          <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" placeholder="Instructions for obtaining the livestream link?  Directions to the room?  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
+          <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Instructions for obtaining the livestream link?  Directions to the room?  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
         </tr>
       </table>
       <h3>Organizers</h3>
@@ -186,13 +188,13 @@
       <table>
         <thead>
           <td></td>
-          <td align="center">{{ KNOWL("organizer_name") }}</td>
+          <td align="center">{{ ASTKNOWL("organizer_name") }}</td>
           <td align="center">{{ KNOWL("homepage") }}</td>
           <td align="center">{{ KNOWL("email") }}</td>
           <td align="center">{{ KNOWL("organizer") }}</td>
           <td align="center">{{ KNOWL("display") }}</td>
         </thead>
-        {% for i in range(10) %}
+        {% for i in range(maxlength["organizers"]) %}
         <tr>
           {% if i > 0 and i < (seminar.organizer_data | length) %}
             <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
@@ -201,13 +203,13 @@
           {% endif %}
           {% if i < (seminar.organizer_data | length) %}
             <td>
-              <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px"/>
+              <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['full_name'] }}" />
             </td>
             <td>
-              <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px"/>
+              <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
             </td>
             <td>
-              <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px"/>
+              <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
             </td>
             <td align="center">
               {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
@@ -227,31 +229,22 @@
         </tr>
         {% endfor %}
       </table>
-      <button type="submit" onclick="unsaved = false;return true;">Save</button>
-
-      {% if seminar.new %}
-        <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('create.index') }}">Cancel creation</a>
-      {% else %}
-        <a style="margin-left: 30px" onclick="unsaved = false;" href="{{ url_for('show_seminar', shortname=seminar.shortname) }}">Cancel changes</a>
-        {% if seminar.user_can_delete() %}
-        <a style="margin-left: 30px"  href="{{ url_for("create.delete_seminar", shortname=seminar.shortname) }}" onclick="unsaved = false;return confirm('Are you sure you want to delete this {% if seminar.is_conference %}conference{% else %}seminar{% endif %} and all of its talks?');">
-          <button type="button">
-            Delete series
-          </button>
-        </a>
+      <br>
+      <table><tr>
+        <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">{{ ('Create ' + seminar.series_type) if seminar.new else 'Save changes' }}</button></td>
+        <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">{{ 'Cancel creation' if seminar.new else 'Cancel changes' }}</button></td>
+        {% if not seminar.new and seminar.user_can_delete() %}
+        <td><button class="delete" type="submit" name="submit" value="delete" onclick="unsaved = false;">{{ 'Delete ' + seminar.series_type }}</button></td>
         {% endif %}
-      {% endif %}
+      </tr></table>
       </form>
 <script type="text/javascript">
-/* prevent accidental closing of browser window */
-{{ prevent_unsaved() }}
-
 /* topic and inst selector */
 const topicOptions = [
   {% for ab, topic in user_topics(seminar) %}
   {
-    label: "{{ topic }}",
-    value: "{{ ab }}",
+    label: `{{ topic }}`,
+    value: `{{ ab }}`,
   },
   {% endfor %}
 ];
@@ -259,8 +252,8 @@ const topicOptions = [
 const instOptions = [
   {% for iid, name in institutions %}
   {
-    label: "{{ name | safe }}",
-    value: "{{ iid }}",
+    label: `{{ name | safe }}`,
+    value: `{{ iid }}`,
   },
   {% endfor %}
 ];
@@ -268,8 +261,8 @@ const instOptions = [
 const langOptions = [
   {% for code, name in languages_dict.items() %}
   {
-    label: "{{ name | safe}}",
-    value: "{{ code }}",
+    label: `{{ name | safe}}`,
+    value: `{{ code }}`,
   },
   {% endfor %}
 ];
@@ -277,13 +270,16 @@ const langOptions = [
 const subjOptions = [
   {% for sid, name in subjects %}
   {
-    label: "{{ name }}",
-    value: "{{ sid }}",
+    label: `{{ name }}`,
+    value: `{{ sid }}`,
   },
   {% endfor %}
 ];
 
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function() {
+  /* prevent accidental closing of browser window */
+  {{ prevent_unsaved() }}
+
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
     $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
@@ -306,28 +302,6 @@ $(document).ready(function() {
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
   {% endfor %}
-  function showplusminus(n) {
-    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
-    document.getElementById('slotplus').style.visibility = ( n < {{ max_slots }} ? 'visible' : 'hidden' );
-  }
-  $("a.slotplus").click(function(e){
-    e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value)+1;
-    document.getElementById('slots').value = '' + n;
-    document.getElementById('weekday'+(n-1)).style.display = 'block';
-    document.getElementById('time_slot'+(n-1)).style.display = 'block';
-    showplusminus(n);
-  });
-  $("a.slotminus").click(function(e){
-    e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value)-1;
-    document.getElementById('slots').value = '' + n;
-    document.getElementById('weekday'+n).value = '';
-    document.getElementById('time_slot'+n).value ='';
-    document.getElementById('weekday'+n).style.display = 'none';
-    document.getElementById('time_slot'+n).style.display = 'none';
-    showplusminus(n);
-  });
   makeTopicSelector(
     topicOptions,
     {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
@@ -356,15 +330,60 @@ $(document).ready(function() {
         {className: "info", position: "right"})
       }
     });
-  var n = parseInt(document.getElementById('slots').value);
-  if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
-  for ( var i = 0 ; i < n ; i++ ) {
-    document.getElementById('weekday'+i).style.display = 'block';
-    document.getElementById('time_slot'+i).style.display = 'block';
+
+  function showplusminus(n) {
+    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
+    document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
   }
-  if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
-  showplusminus(n);
+  $("a.slotplus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)+1;
+    document.getElementById('slots').value = '' + n;
+    if ( n <= 3 ) {
+      document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
+      document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
+    } else {
+      document.getElementById('weekday'+(n-1)).style.display = 'block';
+      document.getElementById('time_slot'+(n-1)).style.display = 'block';
+    }
+    showplusminus(n);
+  });
+  $("a.slotminus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)-1;
+    document.getElementById('slots').value = '' + n;
+    document.getElementById('weekday'+n).value = '';
+    document.getElementById('time_slot'+n).value ='';
+    if ( n < 3 ) {
+      document.getElementById('weekday'+n).style.visibility = 'hidden';
+      document.getElementById('time_slot'+n).style.visibility = 'hidden';
+    } else {
+      document.getElementById('weekday'+n).style.display = 'none';
+      document.getElementById('time_slot'+n).style.display = 'none';
+    }
+    showplusminus(n);
+  });
+  function showslots() {
+    var n = parseInt(document.getElementById('slots').value);
+    if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+    for ( var i = 0 ; i < n ; i++ ) {
+      if ( i < 3 ) {
+        document.getElementById('weekday'+i).style.visibility = 'visible';
+        document.getElementById('time_slot'+i).style.visibility = 'visible';
+      } else {
+        document.getElementById('weekday'+i).style.display = 'block';
+        document.getElementById('time_slot'+i).style.display = 'block';
+      }
+    }
+    if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
+    showplusminus(n);
+  }
+  // Make sure showslots gets called whenever the page is shown, including via the back button
+  window.onpageshow = function(e) {
+    showslots()
+  };
 });
+
 
 </script>
 

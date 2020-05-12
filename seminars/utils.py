@@ -23,6 +23,48 @@ weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 daytime_re_string = r'\d{1,4}|\d{1,2}:\d\d|'
 daytime_re = re.compile(daytime_re_string)
+dash_re = re.compile(r'[\u002D\u058A\u05BE\u1400\u1806\u2010-\u2015\u2E17\u2E1A\u2E3A\u2E3B\u2E40\u301C\u3030\u30A0\uFE31\uFE32\uFE58\uFE63\uFF0D]')
+
+
+# Bounds on input field lengths
+MAX_SHORTNAME_LEN = 32
+MAX_DESCRIPTION_LEN = 64
+MAX_NAME_LEN = 100
+MAX_TITLE_LEN = 256
+MAX_EMAIL_LEN = 256
+MAX_URL_LEN = 256
+MAX_TEXT_LEN = 8192
+MAX_SLOTS = 12 # Must be a multiple of 3
+MAX_SPEAKERS = 8 
+MAX_ORGANIZERS = 10
+
+maxlength = {
+    'abstract' : MAX_TEXT_LEN,
+    'aliases' : MAX_NAME_LEN,
+    'city' : MAX_NAME_LEN,
+    'comments' : MAX_TEXT_LEN,
+    'description' : MAX_DESCRIPTION_LEN,
+    'full_name' : MAX_NAME_LEN, # FIXME we should really rename this column to name
+    'homepage' : MAX_URL_LEN,
+    'institutions.name' : MAX_DESCRIPTION_LEN,
+    'live_link' : MAX_URL_LEN,
+    'name' : MAX_NAME_LEN,
+    'organizers' : MAX_ORGANIZERS,
+    'paper_link' : MAX_URL_LEN,
+    'room' : MAX_NAME_LEN,
+    'shortname' : MAX_SHORTNAME_LEN,
+    'slides_link' : MAX_URL_LEN,
+    'speaker': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speakers' : MAX_SPEAKERS,
+    'speaker_affiliation': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speaker_email': MAX_EMAIL_LEN,
+    'speaker_homepage': MAX_URL_LEN,
+    'stream_link' : MAX_URL_LEN,
+    'time_slots' : MAX_SLOTS,
+    'title' : MAX_TITLE_LEN,
+    'video_link' : MAX_URL_LEN,
+    'weekdays' : MAX_SLOTS,
+}
 
 def topdomain():
     # return 'mathseminars.org'
@@ -38,8 +80,15 @@ def validate_url(x):
     except:
         return False
 
+def similar_urls(x,y):
+    a, b = urlparse(x), urlparse(y)
+    return a[1] == b[1] and (a[2] == b[2] or a[2] == b[2] + "/" or a[2] + "/" == b[2])
+
+def cleanse_dashes(s):
+    # replace unicode variants of dashes (which users might cut-and-paste in) with ascii dashes
+    return '-'.join(re.split(dash_re,s))
+
 def validate_daytime(s):
-    s = s.strip()
     if not daytime_re.fullmatch(s):
         return None
     if len(s) <= 2:
@@ -52,7 +101,7 @@ def validate_daytime(s):
     return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
 
 def validate_daytimes(s):
-    t = s.strip().split('-')
+    t = s.split('-')
     if len(t) != 2:
         return None;
     start, end = validate_daytime(t[0]), validate_daytime(t[1])
@@ -65,10 +114,14 @@ def daytime_minutes(s):
     return 60*int(t[0])+int(t[1])
 
 def daytimes_start_minutes(s):
-    return daytime_minutes(s.split(':')[0])
+    return daytime_minutes(s.split('-')[0])
 
 def midnight(date, tz):
     return localize_time(datetime.combine(date, maketime()), tz)
+
+def weekstart(date, tz):
+    t = midnight(date,tz)
+    return t - timedelta(days=1)*t.weekday()
 
 def date_and_daytimes_to_times(date, s, tz):
     d = localize_time(datetime.combine(date, maketime()), tz)
@@ -85,11 +138,14 @@ def daytimes_early(s):
     start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
     return start > end or start < 6*60
 
-def daytimes_long(s):
+def daytimes_minutes(s):
     t = s.split('-')
     start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
     len = end - start if end > start else 24*60-start + end
-    return len > 8*60
+    return len    
+
+def daytimes_long(s):
+    return daytimes_minutes(s) > 8*60
 
 def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
@@ -196,7 +252,7 @@ def top_menu():
         manage = "Create"
     return [
         (url_for("index"), "", "Browse"),
-        (url_for("search"), "", "Search"),
+        (url_for("search_seminars"), "", "Search"),
         (url_for("create.index"), "", manage),
         (url_for("info"), "", "Info"),
         (url_for("user.info"), "", account),
@@ -248,10 +304,9 @@ def user_topics(talk_or_seminar=None):
 @lru_cache(maxsize=None)
 def subject_pairs():
     return sorted(
-        tuple(set(((rec["subject"], rec["subject"].capitalize()) for rec in db.topics.search({}, ["subject"])))),
+        [(rec["subject_id"], rec["name"]) for rec in db.subjects.search({},["subject_id","name"])],
         key=lambda x: x[1].lower(),
     )
-
 
 @lru_cache(maxsize=None)
 def subject_dict():
@@ -263,7 +318,6 @@ def topic_dict(include_subj=True):
         return {subj + "_" + ab: subj.capitalize() + ": " + name for (ab, name, subj) in topics()}
     else:
         return {subj + "_" + ab: name for (ab, name, subj) in topics()}
-
 
 
 def clean_topics(inp):
@@ -434,31 +488,26 @@ def adapt_datetime(t, newtz=None):
     return t.astimezone(newtz)
 
 
-def adapt_weektime(t, oldtz, newtz=None, weekday=None):
+def adapt_weektimes(weekday, daytimes, oldtz, newtz):
     """
-    Converts a weekday and time in a given time zone to the specified new time zone using the next valid date.
+    Converts a weekday in [0,7] and daytimes HH:MM-HH:MM from oldtz to newtz (returns integer in [0,7] and string HH:MM-HH:MM).
+    Note that weekday is for the start time, the end time could be the following day (this is implied by end time <= start time)
     """
     if isinstance(oldtz, str):
         oldtz = pytz.timezone(oldtz)
-    now = datetime.now(oldtz)
-    # The t we obtain from psycopg2 comes with tzinfo, but we need to forget it
-    # in order to compare with now.time()
-    tblank = t.replace(tzinfo=None).time()
-    if weekday is None:
-        days_ahead = 0 if now.time() <= tblank else 1
-    else:
-        days_ahead = weekday - now.weekday()
-        if days_ahead < 0 or (days_ahead == 0 and now.time() > tblank):
-            days_ahead += 7
-    next_t = oldtz.localize(datetime.combine(now.date() + timedelta(days=days_ahead), t.time()))
-    next_t = adapt_datetime(next_t, newtz)
-    if weekday is None:
-        return None, next_t.time()
-    else:
-        return next_t.weekday(), next_t.time()
+    if isinstance(newtz, str):
+        newtz = pytz.timezone(newtz)
+    if newtz == oldtz:
+        return weekday, daytimes
+    oneday = timedelta(days=1)
+    oneminute = timedelta(minutes=1)
+    start = weekstart(datetime.now(oldtz),oldtz) + weekday*oneday + daytimes_start_minutes(daytimes)*oneminute
+    start = adapt_datetime(start, newtz=newtz)
+    end = start + daytimes_minutes(daytimes)*oneminute
+    return start.weekday(), start.strftime("%H:%M") + "-" + end.strftime("%H:%M")
 
 
-def process_user_input(inp, col, typ, tz):
+def process_user_input(inp, col, typ, tz=None):
     """
     INPUT:
 
@@ -470,7 +519,9 @@ def process_user_input(inp, col, typ, tz):
         inp = inp.strip()
     if not inp:
         return False if typ == "boolean" else ("" if typ == "text" else None)
-    elif typ == "time":
+    if col in maxlength and len(inp) > maxlength[col]:
+        raise ValueError("Input exceeds maximum length permitted")
+    if typ == "time":
         # Note that parse_time, when passed a time with no date, returns
         # a datetime object with the date set to today.  This could cause different
         # relative orders around daylight savings time, so we store all times
@@ -479,6 +530,7 @@ def process_user_input(inp, col, typ, tz):
             inp += ":00"  # treat numbers as times not dates
         t = parse_time(inp)
         t = t.replace(year=2020, month=1, day=1)
+        assert tz is not None
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
         if not validate_url(inp) and not (col == "live_link" and (inp == "see comments" or inp == "See comments")):
@@ -487,12 +539,14 @@ def process_user_input(inp, col, typ, tz):
     elif col.endswith("email") and typ == "text":
         return validate_email(inp.strip())["email"]
     elif typ == "timestamp with time zone":
+        assert tz is not None
         return localize_time(parse_time(inp), tz)
     elif typ == "daytime":
         res = validate_daytime(inp)
         if res is None:
             raise ValueError("Invalid time of day, expected format is hh:mm")
     elif typ == "daytimes":
+        inp = cleanse_dashes(inp)
         res = validate_daytimes(inp)
         if res is None:
             raise ValueError("Invalid times of day, expected format is hh:mm-hh:mm")
@@ -511,6 +565,8 @@ def process_user_input(inp, col, typ, tz):
             return False
         raise ValueError("Invalid boolean")
     elif typ == "text":
+        if col.endswith("timezone"):
+            return inp if pytz.timezone(inp) else ""
         # should sanitize somehow?
         return "\n".join(inp.splitlines())
     elif typ in ["int", "smallint", "bigint", "integer"]:

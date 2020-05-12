@@ -1,0 +1,36 @@
+{% extends 'homepage.html' %}
+
+{% block content %}
+<div class="search-container">
+  <div id='searchseminars'>
+    <form class='searchform' id='seminarsform' onsubmit="cleanSubmit(this.id)">
+      {{ info.search_array.html(info) | safe }}
+    </form>
+    <div class='searchresults'>
+      <table class='ntdata'>
+        <thead>
+          <tr>
+            {% if is_conference %}
+            {{ series_header(conference=True, include_description=False, include_topics=True) | safe }}
+            {% else %}
+            {{ series_header() | safe }}
+            {% endif %}
+          </tr>
+        </thead>
+        {% for seminar in info.results %}
+        <tr>
+          {% if is_conference %}
+          {{ seminar.oneline(conference=True, include_description=False, include_topics=True) | safe }}
+          {% else %}
+          {{ seminar.oneline() | safe }}
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+{% include 'debug_info.html' %}
+
+{% endblock %}

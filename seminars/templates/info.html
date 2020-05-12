@@ -4,16 +4,16 @@
 
 <div class="text_content auto">
 <p>
-   {{meta_description}}  On this site, each <i>talk</i> belongs to a <i>series</i>.
+   {{meta_description}}  On this site, each <i>talk</i> belongs to a <i>series</i>.  Each series is either a <i>conference</i> (event typically lasting a few days, with several talks per day) or a <i>seminar series</i> (a recurring series of talks spread out over weeks).
 </p>
 
 <h3>Browse</h3>
 
-<p>The <a href="{{ url_for("index") }}">front page</a> lists upcoming talks.  You can filter them by subject, topic, or language to tailor them to your interests.</p>
+<p>The <a href="{{ url_for("index") }}">Browse</a> page lists upcoming talks.  There you can click the tabs underneath to instead display conferences, seminar series, or past events.  Also, you can filter results by subject, topic, or language.</p>
 
 <h3>Search</h3>
 
-<p>You can <a href="{{ url_for("search") }}">search</a> for series and talks satisfying various criteria, including specifying keywords within talk abstracts.  Each series is either a <i>conference</i> (event typically lasting a few days, with several talks per day) or a <i>seminar series</i> (a recurring series of talks spread out over weeks).</p>
+<p>You can <a href="{{ url_for("search_seminars") }}">search</a> for seminar series, conferences, and talks satisfying various criteria, including specifying keywords within talk abstracts.</p>
 
 <h3>Subscribe</h3>
 
@@ -21,7 +21,7 @@
 
 <h3>Attend</h3>
 
-<p>Many seminars include livestreaming links for direct access.  Some organizers make these links visible only to users logged in to a <a href="https://{{topdomain}}">{{topdomain}}</a> account.</p>
+<p>Many events include livestreaming links for direct access.  Some organizers make these links visible only to users logged in to a <a href="https://{{topdomain}}">{{topdomain}}</a> account.</p>
 
 <h3>Create</h3>
 

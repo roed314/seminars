@@ -3,26 +3,47 @@
 {% block content %}
 <div class="text_content">
 
+{% if maintained_institutions %}
+  <h2>Institutions you maintain</h2>
+  <table class="ntdata">
+  <thead>
+    <th>Name</th>
+    <th style="border-left: solid 1px;text-align: center;">Edit</th>
+    <th style="border-left: solid 1px;text-align: center;">View</th>
+  </thead>
+  <tbody>
+    {% for shortname, name in maintained_institutions %}
+    <tr>
+      <td>{{ name }}</td>
+      <td style="border-left: solid 1px;"> <a href='{{ url_for("create.edit_institution", shortname=shortname) }}'>properties</a></td>
+      <td style="border-left: solid 1px;"> <a href='{{ url_for("show_institution", shortname=shortname) }}'>{{shortname}}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+{% endif %}
+
 {% if user.is_creator %}
-<p>If your institution is not listed below, you can add it so that series can be associated with it later.</p>
 
 <h2>Add institution</h2>
+<p>If your institution is not listed below, you can add it so that series can be associated with it later.</p>
 
 <form action="{{ url_for('create.edit_institution') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
   <table id="make_inst">
     <tr>
       <td>{{ ASTKNOWL("institution_name") }}</td>
-      <td><input name="name" style="width:500px;" placeholder="University of Pangaea" maxlength="64"/></td>
-      <td class="forminfo"><p style="width:230px;">Click blue captions for more details. Asterisks denote required items.</p></td>
+      <td><input name="name" style="width:500px;" placeholder="University of Pangaea" maxlength="{{ maxlength['institutions.name'] }}"/></td>
+      <td class="forminfo"><p style="width:230px; margin: 0px;">Click blue captions for more details. Asterisks denote required items.</p></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("institution_shortname") }}</td>
-      <td><input name="shortname" style="width:500px;" placeholder="UPan" maxlength="32"/></td>
-      <td class="forminfo">Use 2-32 characters, no spaces.
+      <td><input name="shortname" style="width:500px; margin-bottom: 10px;" maxlength="{{ maxlength['shortname'] }}" placeholder="UPan" /></td>
+      <td class="forminfo">Use 2-32 characters, no spaces.</td>
     </tr>
     <tr>
       <td><button type="submit">Create</button></td>
+      <td class="forminfo">Before clicking Create, please read our <a href="{{ url_for('policies') }}" target="_blank">policies</a>.  You will have a chance to cancel creation after clicking Create.</td>
     </tr>
   </table>
 </form>

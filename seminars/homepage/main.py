@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky
+from seminars.talk import talks_search, talks_lucky, talks_lookup
 from seminars.utils import (
     Toggle,
     ics_file,
@@ -8,17 +8,17 @@ from seminars.utils import (
     restricted_topics as user_topics,
     subject_dict,
     subject_pairs,
-    toggle,
     topdomain,
     topics,
+    maxlength,
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
-from flask import render_template, request, redirect, url_for, Response, make_response
+from flask import abort, render_template, request, redirect, url_for, Response, make_response
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 from collections import Counter
 from dateutil.parser import parse
@@ -310,7 +310,7 @@ class TalkSearchArray(SearchArray):
 
     def search_types(self, info):
         return [
-            ("talks", "Search for talks"),
+            ("talks", "Search talks"),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -322,7 +322,7 @@ class SemSearchArray(SearchArray):
     noun = "series"
     plural_noun = "series"
 
-    def __init__(self):
+    def __init__(self, conference=False):
         ## subjects
         subject = SelectBox(name="seminar_subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
@@ -388,12 +388,15 @@ class SemSearchArray(SearchArray):
             # [count],
         ]
 
+        assert conference in [True, False]
+        self.conference = conference
+
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
         return [
-            ("seminars", "Search for series"),
+            ("seminars", "Search " + ("conferences" if self.conference else "seminar series")),
             BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
         ]
 
@@ -403,17 +406,33 @@ class SemSearchArray(SearchArray):
 
 @app.route("/")
 def index():
-    return _index({})
+    return _talks_index(subsection="talks")
+
+@app.route("/conferences")
+def conf_index():
+    return _series_index({"is_conference": True}, subsection="conferences", conference=True)
+
+@app.route("/seminar_series")
+def semseries_index():
+    return _series_index({"is_conference": False}, subsection="semseries", conference=False)
+
+@app.route("/past")
+def past_index():
+    return _talks_index(subsection="past_talks", past=True)
+
+@app.route("/past_conferences")
+def past_conf_index():
+    return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
 def by_subject(subject):
     subject = subject.lower()
     if subject not in subject_dict():
-        return render_template("404.html", title="Subject %s not found" % subject)
-    return lambda: _index({"subjects": {"$contains": subject}})
+        return abort(404, "Subject %s not found" % subject)
+    return lambda: _talks_index({"subjects": {"$contains": subject}})
 
 def by_topic(subject, topic):
     full_topic = subject + "_" + topic
-    return lambda: _index({"topics": {"$contains": full_topic}})
+    return lambda: _talks_index({"topics": {"$contains": full_topic}})
 
 # We don't want to intercept other routes by doing @app.route("/<subject>") etc.
 for subject in subject_dict():
@@ -421,7 +440,87 @@ for subject in subject_dict():
 for ab, name, subject in topics():
     app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
 
-def _index(query):
+def _get_counters(objects):
+    topic_counts = Counter()
+    language_counts = Counter()
+    subject_counts = Counter()
+    for object in objects:
+        if object.topics:
+            for topic in object.topics:
+                topic_counts[topic] += 1
+        if object.subjects:
+            for subject in object.subjects:
+                subject_counts[subject] += 1
+        language_counts[object.language] += 1
+    lang_dict = languages_dict()
+    languages = [(code, lang_dict[code]) for code in language_counts]
+    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
+    return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts, "languages": languages}
+
+def _get_row_attributes(objects):
+    filtered_subjects = set(request.cookies.get('subjects', '').split(','))
+    filter_subject = request.cookies.get('filter_subject', '0') != '0'
+    filtered_topics = set(request.cookies.get('topics', '').split(','))
+    filter_topic = request.cookies.get('filter_topic', '0') != '0'
+    filtered_languages = set(request.cookies.get('languages', '').split(','))
+    filter_language = request.cookies.get('filter_language', '0') != '0'
+    filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
+    def filter_classes(obj):
+        filtered = False
+        classes = ['talk']
+
+        topic_filtered = True
+        for topic in obj.topics:
+            classes.append("topic-" + topic)
+            if topic in filtered_topics:
+                topic_filtered = False
+        if topic_filtered:
+            classes.append('topic-filtered')
+            if filter_topic:
+                filtered = True
+
+        subject_filtered = True
+        for subject in obj.subjects:
+            classes.append("subject-" + subject)
+            if subject in filtered_subjects:
+                subject_filtered = False
+        if subject_filtered:
+            classes.append('subject-filtered')
+            if filter_subject:
+                filtered = True
+
+        classes.append("lang-" + obj.language)
+        if obj.language not in filtered_languages:
+            classes.append("language-filtered")
+            if filter_language:
+                filtered = True
+        if not obj.is_subscribed():
+            classes.append("calendar-filtered")
+            if filter_calendar:
+                filtered = True
+        return classes, filtered
+
+    attributes = []
+    visible_counter = 0
+    for obj in objects:
+        classes, filtered = filter_classes(obj)
+        if filtered:
+            style = "display: none;"
+        else:
+            visible_counter += 1
+            if visible_counter % 2: # odd
+                style = "background: none;"
+            else:
+                style = "background: #E3F2FD;"
+        row_attributes = 'class="{classes}" style="{style}"'.format(
+            classes=' '.join(classes),
+            style=style)
+        attributes.append(row_attributes)
+
+    return attributes
+
+
+def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
     query = dict(query)
     subs = subject_pairs()
@@ -436,70 +535,120 @@ def _index(query):
         query["subjects"] = ["math"]
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
-    query["end_time"] = {"$gte": datetime.now()}
-    talks = list(talks_search(query, sort=["start_time"], seminar_dict=all_seminars()))
+    if past:
+        query["end_time"] = {"$lt": datetime.now()}
+        if sort is None:
+            sort = [("start_time", -1), "seminar_id"]
+    else:
+        query["end_time"] = {"$gte": datetime.now()}
+        if sort is None:
+            sort = ["start_time", "seminar_id"]
+    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars()))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
-    topic_counts = Counter()
-    language_counts = Counter()
-    subject_counts = Counter()
-    for talk in talks:
-        if talk.topics:
-            for topic in talk.topics:
-                topic_counts[topic] += 1
-        if talk.subjects:
-            for subject in talk.subjects:
-                subject_counts[subject] += 1
-        language_counts[talk.language] += 1
-    lang_dict = languages_dict()
-    languages = [(code, lang_dict[code]) for code in language_counts]
-    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
-    # menu[0] = ("#", "$('#filter-menu').slideToggle(400); return false;", "Filter")
+    counters = _get_counters(talks)
+    row_attributes = _get_row_attributes(talks)
     return render_template(
-        "browse.html",
-        title="Browse",
+        "browse_talks.html",
+        title="Browse talks",
         hide_filters=hide_filters,
-        topic_counts=topic_counts,
-        subject_counts=subject_counts,
-        languages=languages,
-        language_counts=language_counts,
-        talks=talks,
         subjects=subs,
         section="Browse",
-        toggle=toggle,
+        subsection=subsection,
+        talk_row_attributes=zip(talks, row_attributes),
+        past=past,
+        **counters
     )
 
-@app.route("/search")
-def search():
-    info = to_dict(
-        request.args, seminar_search_array=SemSearchArray(), talks_search_array=TalkSearchArray()
+def _series_index(query, sort=None, subsection=None, conference=True, past=False):
+    query = dict(query)
+    query["display"] = True
+    query["visibility"] = 2
+    if conference:
+        # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.  Ignore the possibility that the user/conference is in Kiribati.
+        recent = datetime.now().date() - timedelta(days=1)
+        if past:
+            query["end_date"] = {"$lt": recent}
+        else:
+            query["end_date"] = {"$gte": recent}
+    if conference and sort is None:
+        if past:
+            sort = [("end_date", -1), ("start_date", -1), "name"]
+        else:
+            sort = ["start_date", "end_date", "name"]
+    if sort is None: # not conferences
+        # We don't currently call this case in the past, but if we add it we probably
+        # need a last_talk_sorted that sorts by end time of last talk in reverse order
+        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers()))
+    else:
+        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers()))
+    counters = _get_counters(series)
+    row_attributes = _get_row_attributes(series)
+    title = "Browse conferences" if conference else "Browse seminar series"
+    return render_template(
+        "browse_series.html",
+        title=title,
+        hide_filters=[],
+        subjects=subject_pairs(),
+        section="Browse",
+        subsection=subsection,
+        series_row_attributes=zip(series, row_attributes),
+        is_conference=conference,
+        **counters
     )
+
+@app.route("/search/seminars")
+def search_seminars():
+    return _search_series(conference=False)
+
+@app.route("/search/conferences")
+def search_conferences():
+    # For now this is basically the same as seminars_search, but they should diverge some (e.g. search on start date)
+    return _search_series(conference=True)
+
+def _search_series(conference):
+    info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
-        info["talk_online"] = info["seminar_online"] = True
-        info["daterange"] = info.get(
-            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
-        )
+        info["seminar_online"] = True
     try:
         seminar_count = int(info["seminar_count"])
-        talk_count = int(info["talk_count"])
         seminar_start = int(info["seminar_start"])
         if seminar_start < 0:
             seminar_start += (1 - (seminar_start + 1) // seminar_count) * seminar_count
-        talk_start = int(info["talk_start"])
-        if talk_start < 0:
-            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
     except (KeyError, ValueError):
         seminar_count = info["seminar_count"] = 50
-        talk_count = info["talk_count"] = 50
         seminar_start = info["seminar_start"] = 0
-        talk_start = info["talk_start"] = 0
-    seminar_query = {}
+    seminar_query = {"is_conference": conference}
     seminars_parser(info, seminar_query)
     # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
-    info["seminar_results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    subsection = "conferences" if conference else "seminars"
+    title = "Search " + ("conferences" if conference else "seminar series")
+    return render_template(
+        "search_seminars.html", title=title, info=info, section="Search", subsection=subsection, bread=None, is_conference=conference
+    )
+
+@app.route("/search/talks")
+def search_talks():
+    info = to_dict(
+        request.args, search_array=TalkSearchArray()
+    )
+    if "search_type" not in info:
+        info["talk_online"] = True
+        info["daterange"] = info.get(
+            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
+        )
+    try:
+        talk_count = int(info["talk_count"])
+        talk_start = int(info["talk_start"])
+        if talk_start < 0:
+            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
+    except (KeyError, ValueError):
+        talk_count = info["talk_count"] = 50
+        talk_start = info["talk_start"] = 0
     talk_query = {}
     talks_parser(info, talk_query)
     talks = talks_search(
@@ -507,9 +656,9 @@ def search():
     )  # limit=talk_count, offset=talk_start
     # The talk query isn't sufficient since we don't do a join so don't have access to whether the seminar is private
     talks = [talk for talk in talks if talk.searchable()]
-    info["talk_results"] = talks
+    info["results"] = talks
     return render_template(
-        "search.html", title="Search", info=info, section="Search", bread=None,
+        "search_talks.html", title="Search talks", info=info, section="Search", subsection="talks", bread=None,
     )
 
 
@@ -521,7 +670,9 @@ def list_institutions():
         title="Institutions",
         section=section,
         subsection="institutions",
+        maintained_institutions=institutions({'admin':current_user.email}),
         institutions=institutions(),
+        maxlength=maxlength,
     )
 
 
@@ -529,10 +680,10 @@ def list_institutions():
 def show_seminar(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
-        return render_template("404.html", title="Seminar not found")
+        return abort(404, "Seminar not found")
     if not seminar.visible():
         flash_error("You do not have permission to view %s", seminar.name)
-        return redirect(url_for("search"), 302)
+        return redirect(url_for("search_seminars"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
     future = []
@@ -586,7 +737,7 @@ def talks_search_api(shortname, projection=1):
 def show_seminar_raw(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return render_template("404.html", title="Seminar not found")
+        return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
     return render_template(
         "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
@@ -596,7 +747,7 @@ def show_seminar_raw(shortname):
 def show_seminar_bare(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return render_template("404.html", title="Seminar not found")
+        return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
     resp = make_response(render_template("seminar_bare.html",
                                          title=seminar.name, talks=talks,
@@ -610,16 +761,24 @@ def show_seminar_bare(shortname):
 def show_seminar_json(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return render_template("404.html", title="Seminar not found")
+        return abort(404, "Seminar not found")
     # FIXME
     cols = [
-        "start_time",
-        "end_time",
-        "speaker",
-        "title",
-        "abstract",
-        "speaker_affiliation",
-        "speaker_homepage",
+        'speaker',
+        'video_link',
+        'slides_link',
+        'title',
+        'room',
+        'comments',
+        'abstract',
+        'start_time',
+        'end_time',
+        'speaker_affiliation',
+        'speaker_homepage',
+        'language',
+        'deleted',
+        'paper_link',
+        'stream_link',
     ]
     talks = [
         {c: getattr(elt, c) for c in cols}
@@ -665,7 +824,7 @@ def embed_seminar_js():
 def ics_seminar_file(shortname):
     seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
-        return render_template("404.html", title="Seminar not found")
+        return abort(404, "Seminar not found")
 
     return ics_file(
         seminar.talks(),
@@ -673,23 +832,23 @@ def ics_seminar_file(shortname):
         user=current_user)
 
 
-@app.route("/talk/<semid>/<int:talkid>/ics")
-def ics_talk_file(semid, talkid):
-    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+@app.route("/talk/<seminar_id>/<int:talkid>/ics")
+def ics_talk_file(seminar_id, talkid):
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
-        return render_template("404.html", title="Talk not found")
+        return abort(404, "Talk not found")
     return ics_file(
         [talk],
-        filename="{}_{}.ics".format(semid, talkid),
+        filename="{}_{}.ics".format(seminar_id, talkid),
         user=current_user)
 
 
-@app.route("/talk/<semid>/<int:talkid>/")
-def show_talk(semid, talkid):
+@app.route("/talk/<seminar_id>/<int:talkid>/")
+def show_talk(seminar_id, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
-    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
-        return render_template("404.html", title="Talk not found")
+        return abort(404, "Talk not found")
     kwds = dict(
         title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token
     )
@@ -711,12 +870,21 @@ def show_talk(semid, talkid):
         kwds["section"] = "Manage"
     return render_template("talk.html", **kwds)
 
+# We allow async queries for title knowls
+@app.route("/knowl/talk/<series_id>/<int:series_ctr>")
+def title_knowl(series_id, series_ctr, **kwds):
+    talk = talks_lookup(series_id, series_ctr)
+    if talk is None:
+        return render_template("404_content.html"), 404
+    else:
+        return render_template("talk-knowl.html", talk=talk)
+
 
 @app.route("/institution/<shortname>/")
 def show_institution(shortname):
     institution = db.institutions.lookup(shortname)
     if institution is None:
-        return render_template("404.html", title="Institution not found")
+        return abort(404, "Institution not found")
     institution = WebInstitution(shortname, data=institution)
     section = "Manage" if current_user.is_creator else None
     query = {"institutions": {"$contains": shortname}}
@@ -759,7 +927,24 @@ def faq():
     return render_template("faq.html", title="Frequently asked questions", section="Info", subsection="faq")
 
 
-# @app.route("/<topic>")
-# def by_topic(topic):
-#    # raise error if not existing topic?
-#    return search({"seminars_topic": topic, "talks_topic": topic})
+@app.route("/ams")
+def ams():
+    seminars = next_talk_sorted(
+        seminars_search(
+            query={"subjects": {'$contains': "math"}},
+            organizer_dict=all_organizers()
+        )
+    )
+    from collections import defaultdict
+    math_topics = {elt['subject'] + '_' + elt['abbreviation'] : elt['name'].capitalize() for elt in db.topics.search() if elt['subject'] == 'math'}
+    seminars_dict = defaultdict(list)
+    for sem in seminars:
+        for topic in sem.topics:
+            if topic in math_topics:
+                seminars_dict[topic].append(sem)
+    return render_template("ams.html",
+                           title="AMS example",
+                           math_topics=sorted(math_topics.items(), key=lambda x: x[1]),
+                           seminars_dict=seminars_dict)
+
+

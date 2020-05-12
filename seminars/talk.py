@@ -27,8 +27,8 @@ from datetime import datetime, timedelta
 class WebTalk(object):
     def __init__(
         self,
-        semid=None,
-        semctr=None,
+        seminar_id=None,
+        seminar_ctr=None,
         data=None,
         seminar=None,
         editing=False,
@@ -37,22 +37,24 @@ class WebTalk(object):
         deleted=False,
     ):
         if data is None and not editing:
-            data = talks_lookup(semid, semctr, include_deleted=deleted)
+            data = talks_lookup(seminar_id, seminar_ctr, include_deleted=deleted)
             if data is None:
-                raise ValueError("Talk %s/%s does not exist" % (semid, semctr))
+                raise ValueError("Talk %s/%s does not exist" % (seminar_id, seminar_ctr))
             data = dict(data.__dict__)
         elif data is not None:
             data = dict(data)
             # avoid Nones
             if data.get("topics") is None:
                 data["topics"] = []
+        if data and data.get("deleted"):
+            deleted = True
         if seminar is None:
-            seminar = WebSeminar(semid, deleted=deleted)
+            seminar = WebSeminar(seminar_id, deleted=deleted)
         self.seminar = seminar
         self.new = data is None
         self.deleted=False
         if self.new:
-            self.seminar_id = semid
+            self.seminar_id = seminar_id
             self.seminar_ctr = None
             self.token = "%016x" % random.randrange(16 ** 16)
             self.display = seminar.display
@@ -83,6 +85,7 @@ class WebTalk(object):
             if data.get("topics"):
                 data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
+        self.cleanse()
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
@@ -101,6 +104,14 @@ class WebTalk(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def cleanse(self):
+        """
+        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This is the only place where columns we plan to drop should be referenced 
+        """
+        if self.hidden is None:
+            self.hidden = False
 
     def visible(self):
         """
@@ -260,15 +271,23 @@ class WebTalk(object):
 
     def show_link_title(self):
         return "<a href={url}>{title}</a>".format(
-            url=url_for("show_talk", semid=self.seminar_id, talkid=self.seminar_ctr),
+            url=url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr),
             title=self.show_title(),
         )
 
-    def show_knowl_title(self, _external=False):
-        return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
-            title=self.show_title(),
-            content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
-        )
+    def show_knowl_title(self, _external=False, preload=False):
+        if self.deleted or _external or preload:
+            return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
+                title=self.show_title(),
+                content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
+            )
+        else:
+            return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
+                title=self.show_title(),
+                seminar_id=self.seminar_id,
+                talkid=self.seminar_ctr
+            )
+
 
     def show_lang_topics(self):
         if self.language and self.language != "en":
@@ -357,19 +376,19 @@ class WebTalk(object):
 
     @property
     def ics_link(self):
-        return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+        return url_for("ics_talk_file", seminar_id=self.seminar_id, talkid=self.seminar_ctr,
                        _external=True, _scheme="https")
 
     @property
     def ics_gcal_link(self):
         return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(
-            {"cid": url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+            {"cid": url_for("ics_talk_file", seminar_id=self.seminar_id, talkid=self.seminar_ctr,
                             _external=True, _scheme="http")}
         )
 
     @property
     def ics_webcal_link(self):
-        return url_for("ics_talk_file", semid=self.seminar_id, talkid=self.seminar_ctr,
+        return url_for("ics_talk_file", seminar_id=self.seminar_id, talkid=self.seminar_ctr,
                        _external=True, _scheme="webcal")
 
     def is_past(self):
@@ -416,7 +435,7 @@ class WebTalk(object):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.talks.update({"seminar_id": self.seminar_id, "seminar_ctr": self.seminar_ctr},
-                                {"deleted": True})
+                                {"deleted": True, "deleted_with_seminar": False})
                 for i, talk_sub in db._execute(
                     SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
                         *map(
@@ -429,6 +448,7 @@ class WebTalk(object):
                     if self.seminar_ctr in talk_sub[self.seminar.shortname]:
                         talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
                         db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+            self.deleted = True
             return True
         else:
             return False
@@ -442,30 +462,34 @@ class WebTalk(object):
             tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
         )
 
-    def oneline(self, include_seminar=True, include_subscribe=True, tz=None, _external=False):
+    def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
+        t, now, e = adapt_datetime(self.start_time), adapt_datetime(datetime.now()), adapt_datetime(self.end_time)
+        if t < now < e:
+            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
+        else:
+            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
-        cols.append(('class="date"', self.show_date(tz=tz)))
-        cols.append(('class="time"', self.show_start_time(tz=tz)))
         if include_seminar:
-            cols.append(('class="seminar"', self.show_seminar()))
+            cols.append(('class="seriesname"', self.show_seminar()))
         cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
         cols.append(('class="talktitle"', self.show_knowl_title(_external=_external)))
+        if include_slides:
+            cols.append(('', self.show_slides_link()))
+        if include_video:
+            cols.append(('', self.show_video_link()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
         #cols.append(('style="display: none;"', self.show_link_title()))
-        return "".join("<td %s>%s</td>" % c for c in cols)
+        return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
 
-    def show_comments(self):
+    def show_comments(self, prefix=""):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.comments).split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + self.comments).split("\n\n"))
         else:
             return ""
 
     def show_abstract(self):
-        if self.abstract:
-            return "<p><b>Abstract</b></p>\n" + "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(self.abstract).split("\n\n"))
-        else:
-            return "<p>Abstract TBA</p>"
+        return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links("<b>Abstract: </b>" + self.abstract).split("\n\n")) if self.abstract else ""
 
     def speaker_link(self):
         return url_for("create.edit_talk_with_token",
@@ -533,13 +557,17 @@ Email link to speaker
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 
-def talks_header(include_seminar=True, include_subscribe=True, datetime_header="Your time"):
+def talks_header(include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, datetime_header="Your time"):
     cols = []
-    cols.append((' colspan="2" class="yourtime"', datetime_header))
+    cols.append((' colspan="3" class="yourtime"', datetime_header))
     if include_seminar:
         cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
     cols.append((' class="title"', "Title"))
+    if include_slides:
+        cols.append(("", ""))
+    if include_video:
+        cols.append(("", ""))
     if include_subscribe:
         if current_user.is_anonymous:
             cols.append(("", ""))
@@ -579,7 +607,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
                 return (
-                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 302),
+                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
                     None,
                 )
         else:
@@ -588,7 +616,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
                     "You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr)
                 )
                 return (
-                    redirect(url_for("show_talk", semid=seminar_id, talkid=seminar_ctr), 302),
+                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
                     None,
                 )
     else:
@@ -617,10 +645,8 @@ _maxer = SQL(
 )
 
 
-def _construct(seminar_dict):
-    def inner_construct(rec):
-        # The following would break if we had jsonb columns holding dictionaries in the talks table,
-        # but that's not currently true.
+def _construct(seminar_dict, objects=True):
+    def object_construct(rec):
         if not isinstance(rec, dict):
             return rec
         else:
@@ -630,16 +656,18 @@ def _construct(seminar_dict):
                 seminar=seminar_dict.get(rec["seminar_id"]),
                 data=rec,
             )
+    def default_construct(rec):
+        return rec
 
-    return inner_construct
+    return object_construct if objects else default_construct
 
 
-def _iterator(seminar_dict):
-    def inner_iterator(cur, search_cols, extra_cols, projection):
+def _iterator(seminar_dict, objects=True):
+    def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.talks._search_iterator(cur, search_cols, extra_cols, projection):
             yield _construct(seminar_dict)(rec)
 
-    return inner_iterator
+    return object_iterator if objects else db.talks._search_iterator
 
 
 def talks_count(query={}, include_deleted=False):
@@ -663,7 +691,8 @@ def talks_search(*args, **kwds):
     Doesn't support split_ors or raw.  Always computes count.
     """
     seminar_dict = kwds.pop("seminar_dict", {})
-    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict), *args, **kwds)
+    objects = kwds.pop("objects", True)
+    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects), *args, **kwds)
 
 
 def talks_lucky(*args, **kwds):
@@ -671,13 +700,15 @@ def talks_lucky(*args, **kwds):
     Replacement for db.talks.lucky to account for versioning, return a WebTalk object or None.
     """
     seminar_dict = kwds.pop("seminar_dict", {})
-    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict), *args, **kwds)
+    objects = kwds.pop("objects", True)
+    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, objects=True):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
         include_deleted=include_deleted,
+        objects=objects,
     )

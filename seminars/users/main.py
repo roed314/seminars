@@ -28,13 +28,14 @@ from markupsafe import Markup
 from seminars import db
 
 from seminars.utils import (
-    format_errmsg,
     ics_file,
+    process_user_input,
+    format_errmsg,
+    format_input_errmsg,
     show_input_errors,
     timestamp,
     timezones,
     topdomain,
-    validate_url,
 )
 
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
@@ -179,12 +180,21 @@ def info():
 @login_page.route("/set_info", methods=["POST"])
 @login_required
 def set_info():
-    homepage = request.form.get("homepage")
-    if homepage and not validate_url(homepage):
-        return show_input_errors([format_errmsg("Homepage %s is not a valid URL, it should begin with http:// or https://", homepage)])
-    for k, v in request.form.items():
-        setattr(current_user, k, v)
+    errmsgs = []
+    data = {}
     previous_email = current_user.email
+    for col, val in request.form.items():
+        try:
+            typ = db.users.col_type[col]
+            data[col] = process_user_input(val, col, typ)
+        except Exception as err:  # should only be ValueError's but let's be cautious
+            errmsgs.append(format_input_errmsg(err, val, col))
+    if not data.get("name"):
+        errmsgs.append(format_errmsg('Name cannot be left blank.  See the User behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
+    if errmsgs:
+        return show_input_errors(errmsgs)        
+    for k in data.keys():
+        setattr(current_user, k, data[k])
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))
     if previous_email != current_user.email:
@@ -334,7 +344,7 @@ def send_confirmation_email(email):
         import sys
 
         flash_error(
-            'Unable to send email confirmation link, please contact <a href="mailto:mathseminars@math.mit.edu">mathseminars@math.mit.edu</a> directly to confirm your email'
+            'Unable to send email confirmation link, please contact <a href="mailto:researchseminars@math.mit.edu">researchseminars@math.mit.edu</a> directly to confirm your email'
         )
         app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
         return False
@@ -424,7 +434,7 @@ def reset_password_wtoken(token):
 @login_page.route("/endorse", methods=["POST"])
 @creator_required
 def get_endorsing_link():
-    email = request.form["email"]
+    email = request.form["email"].strip()
     try:
         email = validate_email(email)["email"]
     except EmailNotValidError as e:
@@ -564,8 +574,13 @@ def talk_subscriptions_remove(shortname, ctr):
 
 @login_page.route("/ics/<token>")
 def user_ics_file(token):
+    from itsdangerous.exc import BadSignature
     try:
-        uid = read_token(token, "ics")
+        try:
+            uid = read_token(token, "ics")
+        except BadSignature:
+            # old key
+            uid = read_token(token, "ics", key="vVjYyCM99DtirZqMaGMrle")
         user = SeminarsUser(uid=int(uid))
         if not user.email_confirmed:
             return flask.abort(404, "The email has not yet been confirmed!")
@@ -581,7 +596,7 @@ def user_ics_file(token):
             talks.append(talk)
     return ics_file(
         talks=talks,
-        filename="semianars.ics",
+        filename="seminars.ics",
         user=user)
 
 

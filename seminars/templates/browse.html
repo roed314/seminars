@@ -33,32 +33,11 @@
   </tr>
 </table>
 
-<br>
-<table id="timezone-table">
-   <tr>
-    <td style="padding-right: 2em;">
-      Times in {{ user.show_timezone("browse") }}
-    </td>
-   </tr>
-</table>
-
-<table id="browse-talks" class="talk-table ntdata">
-  <thead>
-  <tr> {{ talks_header()  | safe }} </tr>
-  </thead>
-  <tbody>
-    {% for talk in talks %}
-    {# filter_topic, filter_suject, filter_language #}
-    <tr class="talk {% for topic in talk.topics %} topic-{{topic}} {% endfor %} subject-filtered {% for subject in talk.subjects %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
-      {{ talk.oneline() | safe }}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% block browsing %}{% endblock %}
 
 <!-- topic tabs -->
 <script>
-  $( function() {
+document.addEventListener("DOMContentLoaded", function() {
   $( "#subjects-tabs" ).tabs();
   } );
   var subject_list = [{% for ab, name in subjects %}"{{ab}}",{% endfor %}];

@@ -3,8 +3,8 @@
  * Returns a function, that, as long as it continues to be invoked, will not
  * be triggered. The function will be called after it stops being called for
  * N milliseconds. If `immediate` is passed, trigger the function on the
- * leading edge, instead of the trailing. The function also has a property 'clear' 
- * that is a function which will clear the timer to prevent previously scheduled executions. 
+ * leading edge, instead of the trailing. The function also has a property 'clear'
+ * that is a function which will clear the timer to prevent previously scheduled executions.
  *
  * Copyright (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative
  * Reporters & Editors
@@ -132,8 +132,9 @@ function knowl_click_handler(evt) {
   var uid = knowl.getAttribute("knowl-uid")
   var output_id = 'knowl-output-' + uid
   var output = document.getElementById(output_id)
-  var kwargs = knowl.getAttribute("kwargs")
   var tagname = knowl.parentNode.tagName.toLowerCase()
+  var kwargs = knowl.getAttribute("kwargs")
+  var knowl_id = knowl.getAttribute("knowl")
 
   var table_mode = tagname == "td" || tagname == "th"
 
@@ -158,10 +159,37 @@ function knowl_click_handler(evt) {
     knowl.classList.add("active")
     // create the element for the content, insert it after the one where the
     // knowl element is included (e.g. inside a <h1> tag) (sibling in DOM)
-    knowl_output = document.createElement('div')
+    var knowl_output = document.createElement('div')
     knowl_output.classList.add('knowl-output')
     knowl_output.setAttribute('id', output_id)
-    knowl_output.innerHTML = '<div class="knowl"><div><div class="knowl-content">' + kwargs + '</div></div></div>'
+
+    var knowl_div = document.createElement('div')
+    knowl_div.classList.add("knowl")
+    knowl_div.innerHTML = 'loading...'
+    knowl_output.appendChild(knowl_div)
+    knowl_output.classList.add("loading");
+
+    var knowl_content = document.createElement('div')
+    knowl_content.classList.add("knowl-content")
+
+    function finish_knowl (content) {
+      knowl_content.innerHTML = content;
+      knowl_div.innerHTML = '';
+      knowl_output.classList.remove("loading");
+      knowl_div.appendChild(knowl_content);
+      // render latex
+      defer( function () {
+        try
+        {
+          renderMathInElement(document.getElementById(output_id), katexOpts)
+        }
+        catch(err) {
+          console.log("err:" + err)
+        }
+      }, 'renderMathInElement')
+      // enable knowls inside knowls
+      knowl_register_onclick(knowl_output);
+    }
     // behave a bit differently, if the knowl is inside a td or th in a table.
     // otherwise assume its sitting inside a <div> or <p>
     if(table_mode) {
@@ -189,10 +217,15 @@ function knowl_click_handler(evt) {
 
       //compute max number of columns in the table
       var cols = Array.from(tr_tag.children).reduce((acc, td) => acc + td.colSpan, 0)
-      cols = Array.from(siblings(tr_tag, 'tr')).reduce((ac, tr) => Math.max(ac, Array.from(tr.children).reduce((acc, td) => acc + td.colSpan, 0)), cols);
+      var tr_siblings = siblings(tr_tag, 'tr');
+      cols = Array.from(tr_siblings).reduce((ac, tr) => Math.max(ac, Array.from(tr.children).reduce((acc, td) => acc + td.colSpan, 0)), cols);
       console.log("cols: " + cols);
-      for (var i = 0; i < max_rowspan-1; i++)
-        tr_tag = tr_tag.next();
+      for(var i = 0; i < tr_siblings.length; i++) {
+        if(tr_tag == tr_siblings[i]) {
+          tr_tag = tr_siblings[i + max_rowspan - 1];
+          break;
+        }
+      }
 
 
 
@@ -214,19 +247,27 @@ function knowl_click_handler(evt) {
     } else {
       knowl.parentNode.insertAdjacentElement('afterend', knowl_output)
     }
-    defer( function () {
-      try
-      {
-        renderMathInElement(document.getElementById(output_id), katexOpts)
-      }
-      catch(err) {
-        console.log("err:" + err)
-      }
-    }, 'renderMathInElement')
+
+    if(knowl_id == "dynamic_show") {
+      finish_knowl(kwargs);
+    } else {
+      var xhr = new XMLHttpRequest();
+      xhr.responseType = "document";
+      xhr.addEventListener("load", function(event) {
+        finish_knowl(new XMLSerializer().serializeToString(this.responseXML));
+      });
+      xhr.addEventListener("error", function(event) { knowl_content.innerHTML = "Failed loading knowl"; });
+      xhr.addEventListener("abort", function(event) { knowl_content.innerHTML = "Canceled loading knowl"; });
+      xhr.addEventListener("progress", function(event) { knowl_content.innerHTML += "."; });
+      fetchURL = '/knowl/' + knowl_id + "?" + kwargs;
+      console.log("Initiating fetch from " + fetchURL);
+      xhr.open("GET", fetchURL, true);
+      xhr.send();
+    }
+    // even if the knowl is not loaded, this gives the user some feedback
     setTimeout(function () {
       toggle(knowl_output);
     }, 10);
-    knowl_register_onclick(knowl_output);
   }
 } //~~ end click handler for *[knowl] elements
 
@@ -248,7 +289,6 @@ function knowl_handle(evt) {
 
 function knowl_register_onclick(element) {
   console.log("knowl_register_onclick");
-  console.log(element.querySelectorAll('*[knowl]'));
   element.querySelectorAll('a[knowl]').forEach(
    (knowl) => {
      knowl.onclick = debounce(knowl_handle, 500, true)
@@ -257,11 +297,11 @@ function knowl_register_onclick(element) {
 }
 
 if( document.readyState !== 'loading' ) {
-    console.log( 'document is already ready, just execute code here' );
+    console.log( 'document is already ready, registering knowls');
     knowl_register_onclick(document);
 } else {
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('document was not ready, place code here' );
+        console.log('document was not ready, wait until it is done to register knowls' );
         knowl_register_onclick(document);
     });
 }

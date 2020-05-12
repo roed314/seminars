@@ -22,13 +22,13 @@
     </table>
   </form>
 {% else %}
-<h1>Welcome {{ user.name }} (<a href="{{ url_for(".logout") }}">logout</a>)</h1>
+<h1>Welcome, {{ user.name }} (<a href="{{ url_for(".logout") }}">logout</a>)</h1>
   <h3> Favorite series </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
     <thead>
       <tr>
-        {{ seminars_header() | safe }}
+        {{ series_header() | safe }}
       </tr>
     </thead>
     {% for seminar in user.seminars: %}
@@ -117,7 +117,7 @@
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
       <tr>
-        <td>Timezone</td>
+        <td>Time zone</td>
         <td>
           <select name="timezone" style="width:356px;">
             {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}

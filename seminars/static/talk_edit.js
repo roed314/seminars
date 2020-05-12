@@ -56,7 +56,3 @@ function view_refresh() {
   $('#refresh-view').hide();
 }
 
-function set_saved() {
-  unsaved = false;
-  return true;
-}

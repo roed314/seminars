@@ -12,9 +12,6 @@ from lmfdb.logger import make_logger
 from distutils.version import StrictVersion
 
 
-# secret key, necessary for sessions, and sessions are
-# in turn necessary for users to login
-app.secret_key = "vVjYyCM99DtirZqMaGMrle"
 
 login_manager.init_app(app)
 

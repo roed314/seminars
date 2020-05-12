@@ -11,7 +11,7 @@
     </tr>
     <tr>
       <td>{{ ASTKNOWL('institution_name') }}</td>
-      <td><input name="name" id="sname" value="{{ institution.name | blanknone }}" style="width:500px;" /></td>
+      <td><input name="name" id="sname" value="{{ institution.name | blanknone }}" style="width:500px;" maxlength="{{ maxlength['institutions.name'] }}"/></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL('institution_type') }}</td>
@@ -25,11 +25,11 @@
     </tr>
     <tr>
       <td>{{ ASTKNOWL('institution_homepage') }}</td>
-      <td><input style="width:500px;" name="homepage" value="{{ institution.homepage | blanknone }}" placeholder="https://math.mit.edu/"/></td>
+      <td><input style="width:500px;" name="homepage" value="{{ institution.homepage | blanknone }}" maxlength="{{ maxlength['homepage'] }}" placeholder="https://mit.edu/"/></td>
     </tr>
     <tr>
       <td>{{ KNOWL('institution_city') }}</td>
-      <td><input name="city" value="{{ institution.city | blanknone }}" style="width:500px;" placeholder="Cambridge, MA, USA"/></td>
+      <td><input name="city" value="{{ institution.city | blanknone }}" style="width:500px;" maxlength="{{ maxlength['city'] }}" placeholder="Cambridge, MA, USA"/></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL('institution_timezone') }}</td>
@@ -43,20 +43,21 @@
     </tr>
     <tr>
       <td>{{ ASTKNOWL('institution_admin') }}</td>
-      <td><input name="admin" value="{{ institution.admin }}" style="width:500px;" /></td>
+      <td><input name="admin" value="{{ institution.admin }}" style="width:500px;" maxlength="{{ maxlength['admin'] }}"/></td>
     </tr>
   </table>
-  <button type="submit" onclick="return set_saved();">Save</button>
-
-  <a style="margin-left: 30px" onclick="unsaved = false;" href="{% if institution.new %}{{ url_for('list_institutions') }}{% else %}{{ url_for('show_institution', shortname=institution.shortname) }}{% endif %}">cancel</a>
+  <br>
+  <table><tr>
+  <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">{{ 'Create institution' if institution.new else 'Save changes' }}</button></td>
+  <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">{{ 'Cancel creation' if institution.new else 'Cancel changes' }}</button></td>
+  </tr></table>
 </form>
 <script type="text/javascript">
 /* prevent accidental closing of browser window */
-window.onbeforeunload = function() {
-  if(unsaved) {
-    return "There are unsaved edits. Really close?";
-  }
-}
+document.addEventListener("DOMContentLoaded", function() {
+  /* prevent accidental closing of browser window */
+  {{ prevent_unsaved() }}
+});
 </script>
 
 {% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'homepage.html' %}
+{% block content %}
+{% for topic, name in math_topics %}
+<h3>{{ name }}</h3>
+  <table class='ntdata'>
+    <thead>
+      <tr>
+        {{ series_header() | safe }}
+      </tr>
+    </thead>
+    {% for seminar in seminars_dict[topic] %}
+    <tr>
+      {{ seminar.oneline() | safe }}
+    </tr>
+    {% endfor %}
+  </table>
+{% endfor %}
+{% endblock %}
+

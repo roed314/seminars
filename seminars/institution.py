@@ -17,11 +17,11 @@ institution_types = [
 ]
 
 
-def institutions():
+def institutions(query={}):
     return sorted(
         (
             (rec["shortname"], rec["name"])
-            for rec in db.institutions.search({}, ["shortname", "name"])
+            for rec in db.institutions.search(query, ["shortname", "name"])
         ),
         key=lambda x: x[1].lower(),
     )
@@ -106,21 +106,25 @@ class WebInstitution(object):
         link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
         return '<a href="%s"><i>%s</i></a>' % (link, "Contact this page's maintainer.")
 
-def can_edit_institution(shortname, new):
+def can_edit_institution(shortname, name, new):
     if not allowed_shortname(shortname) or len(shortname) < 2 or len(shortname) > 32:
         flash_error(
             "The identifier must be 2 to 32 characters in length and can include only letters, numbers, hyphens and underscores."
         )
         return redirect(url_for("list_institutions"), 302), None
+    # We don't allow backticks so that we can use them to delimit strings in javascript
+    if "`" in name:
+        flash_error("The name must not include backticks")
+        return redirect(url_for("list_institutions"), 302), None
     institution = db.institutions.lookup(shortname)
     # Check if institution exists
     if new != (institution is None):
         flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
-        return redirect(url_for(".index"), 302), None
+        return redirect(url_for("list_institutions"), 302), None
     if not new and not current_user.is_admin:
         # Make sure user has permission to edit
         if institution["admin"].lower() != current_user.email.lower():
-            rec = userdb.lookup(institution["admin"], "full_name")
+            rec = userdb.lookup(institution["admin"])
             link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
             owner = "%s (%s)" % (rec['name'], link)
             flash_error(

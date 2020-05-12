@@ -384,10 +384,17 @@ i.fa.close:hover {
 }
 
 .talk-header-container {
-    width 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+
+.talk-details-container {
+    padding: 0px;
+    margin: 0px;
 }
 
 .talk-title {
@@ -395,7 +402,7 @@ i.fa.close:hover {
 }
 
 .talk-view {
-    padding: 20px;
+    padding: 0px 20px;
     white-space: nowrap;
     text-align: right;
 }
@@ -437,9 +444,6 @@ i.fa.close:hover {
     border-top-left-radius: 5px !important;
     border-top-right-radius: 5px !important;
 }
-
-
-
 
 .ui-tabs-panel {
     background: #373737 !important;
@@ -531,17 +535,70 @@ div.topicselected, div.languageselected, div.subjectselected {
 table.ntdata th.yourtime {
     text-align: center;
 }
-td.date, td.timerange {
+table.ntdata td.date, td.timerange {
     white-space: nowrap;
-}
-td.time, td.subscribe {
     text-align: right;
 }
-/*
-td.speaker {
-    min-width: 136px;
+table.ntdata td.weekday {
+    text-align: left;
+    padding-right: 2px;
 }
-*/
+
+table.ntdata td.monthdate {
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+table.ntdata td.time {
+    text-align: right;
+    padding-left: 2px;
+}
+
+table.ntdata td.startdate {
+    white-space: nowrap;
+    text-align: left;
+    padding-right: 4px;
+}
+
+table.ntdata td.onedate {
+    white-space: nowrap;
+    text-align: center;
+}
+
+table.ntdata td.enddate {
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 4px;
+}
+
+table.ntdata td.seriesname {
+    text-align: left;
+    min-width: 240px;
+}
+
+table.ntdata td.institutions {
+    text-align: left;
+    min-width: 180px;
+}
+
+table ntdata td.subscribe {
+    text-align: right;
+    padding-right: 0px;
+}
+
+table.ntdata td.speaker {
+    min-width: 120px;
+}
+
+table.ntdata td.talktitle {
+    min-width: 300px;
+}
+
+table.ntdata td.description {
+    min-width: 240px;
+}
 
 .talk-table td:nth-child(6) {
     /* Title column on browse */
@@ -555,6 +612,29 @@ td.speaker {
 button.textbottom {
     vertical-align: text-bottom;
     margin-left: 20px;
+}
+
+button.save {
+    vertical-align: text-bottom;
+}
+
+button.cancel {
+    vertical-align: text-bottom;
+    color: blue;
+    background-color: white;
+}
+
+button.delete {
+    vertical-align: text-bottom;
+    color: red;
+    font-weight: 300;
+    background-color: white;
+}
+
+button.savedelete {
+    vertical-align: text-bottom;
+    color: white;
+    background-color: #D00000;
 }
 
 table#edit-schedule-table {
@@ -624,14 +704,6 @@ div.submenu-active, div.toggler-active {
 }
 div.toggler-nav:hover {
     cursor: pointer;
-}
-
-div.inlineh2 {
-    display: inline-block;
-    font-size: 1.5em;
-    margin-block-start: 0.16em;
-    margin-block-end: 0.96em;
-    font-weight: bold;
 }
 
 button.aslink {
@@ -937,7 +1009,7 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
    font-size: 80%;
    font-style: italic;
    color: {RGC(70,70,70)};
-   vertical-align: top;
+   vertical-align: middle;
 }
 
 input, textarea {
@@ -1550,9 +1622,15 @@ table .knowl a {
 }
 
 
-.knowl-output .knowl-output {
+.knowl-output .knowl-output,
+.knowl-output .knowl-output.loading {
  margin-left: 0;
  margin-right: 0;
+}
+.knowl-output.loading {
+ color: {{color.grey}};
+ font-style: italic;
+ font-size: small;
 }
 
 .knowl-output h1, .knowl-output h2 {

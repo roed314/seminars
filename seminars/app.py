@@ -17,9 +17,17 @@ from flask import (
 from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
-from seminars.utils import topics, restricted_topics, subject_pairs, top_menu, languages_dict, topdomain
+from seminars.utils import (
+    languages_dict,
+    restricted_topics,
+    subject_pairs,
+    top_menu,
+    topdomain,
+    topics,
+    toggle,
+)
 from seminars.knowls import static_knowl
-from .seminar import seminars_header
+from .seminar import series_header
 from .talk import talks_header
 
 SEMINARS_VERSION = "Seminars Release 0.1"
@@ -76,11 +84,15 @@ app.logger.addHandler(logger_file_handler())
 if app.debug:
     try:
         from flask_debugtoolbar import DebugToolbarExtension
-
         app.config["SECRET_KEY"] = """shh, it's a secret"""
         toolbar = DebugToolbarExtension(app)
     except ImportError:
         pass
+
+# secret key, necessary for sessions and tokens
+# sessions are in turn necessary for users to login
+from lmfdb.utils.config import get_secret_key
+app.secret_key = get_secret_key()
 
 # tell jinja to remove linebreaks
 app.jinja_env.trim_blocks = True
@@ -129,10 +141,11 @@ def ctx_proc_userdata():
     data["top_menu"] = top_menu()
 
     data["talks_header"] = talks_header
-    data["seminars_header"] = seminars_header
+    data["series_header"] = series_header
     data["languages_dict"] = languages_dict()
     data["static_knowl"] = static_knowl
     data["topdomain"] = topdomain()
+    data["toggle"] = toggle
 
     return data
 
@@ -204,7 +217,7 @@ def not_found_404(error):
     messages = (
         error.description if isinstance(error.description, (list, tuple)) else (error.description,)
     )
-    return render_template("404.html", title="Page Not Found", messages=messages), 404
+    return render_template("404.html", title="Page not found", messages=messages), 404
 
 
 @app.errorhandler(500)
