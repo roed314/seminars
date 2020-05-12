@@ -656,7 +656,6 @@ table.ntdata td.description {
     min-width: 240px;
 }
 
-
 .talk-table td:nth-child(6) {
     /* Title column on browse */
     max-width: 380px;
@@ -669,6 +668,29 @@ table.ntdata td.description {
 button.textbottom {
     vertical-align: text-bottom;
     margin-left: 20px;
+}
+
+button.save {
+    vertical-align: text-bottom;
+}
+
+button.cancel {
+    vertical-align: text-bottom;
+    color: blue;
+    background-color: white;
+}
+
+button.delete {
+    vertical-align: text-bottom;
+    color: red;
+    font-weight: 300;
+    background-color: white;
+}
+
+button.savedelete {
+    vertical-align: text-bottom;
+    color: white;
+    background-color: #D00000;
 }
 
 table#edit-schedule-table {
@@ -738,14 +760,6 @@ div.submenu-active, div.toggler-active {
 }
 div.toggler-nav:hover {
     cursor: pointer;
-}
-
-div.inlineh2 {
-    display: inline-block;
-    font-size: 1.5em;
-    margin-block-start: 0.16em;
-    margin-block-end: 0.96em;
-    font-weight: bold;
 }
 
 button.aslink {

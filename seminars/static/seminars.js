@@ -141,6 +141,11 @@ function setToggle(id, value) {
     toggle.val(value)
     toggle.attr('data-chosen', value);
 }
+function setOtherToggles(tid, value) {
+    var toggles = $(".tgl." + tid);
+    toggles.val(value);
+    toggles.attr('data-chosen', value);
+}
 
 function topicFiltering() {
     return $('#topic').val() == "1";
@@ -162,8 +167,8 @@ function calFiltering() {
     return $('#enable_calendar_filter').val() == "1";
 }
 
-function topicFromPair(pairid) {
-    return pairid.split("--")[1];
+function topicFromTriple(tripleid) {
+    return tripleid.split("--")[1];
 }
 
 function reviseCookies() {
@@ -227,11 +232,13 @@ function toggleTopicDAG(togid) {
     var to_show = [];
     var to_hide = [];
     console.log(togid);
-    var topic = topicFromPair(togid);
+    var topic = topicFromTriple(togid);
     var toggle = $("#" + togid);
     var toggleval = parseInt(toggle.val());
     console.log(toggleval);
     setTopicCookie(topic, toggleval);
+    // Update other toggles in other parts of the tree that have the same id
+    setOtherToggles(topic, toggleval);
     if (toggleval == 0) {
         $("label.sub_" + topic).css("visibility", "visible");
         $("a.sub_"+topic+",span.sub_"+topic).removeClass("not_toggleable");
@@ -246,7 +253,7 @@ function toggleTopicDAG(togid) {
         // since some 1s may be under -1s.
         var blocking_toggles = [];
         $('input[value="-1"].tgl3way.sub_'+topic).each(function() {
-            blocking_toggles.push(topicFromPair(this.id));
+            blocking_toggles.push(topicFromTriple(this.id));
         });
         console.log("blocking_toggles", blocking_toggles);
         var show_selector = $('input[value="1"].sub_'+topic);
@@ -254,7 +261,7 @@ function toggleTopicDAG(togid) {
             show_selector = show_selector.not(".sub_"+blocking_toggles[i]);
         }
         show_selector.each(function() {
-            to_show.push(topicFromPair(this.id));
+            to_show.push(topicFromTriple(this.id));
         });
     } else {
         $("label.sub_" + topic).css("visibility", "hidden");
@@ -462,7 +469,7 @@ function makeInstitutionSelector(instOptions, initialInstitutions) {
 }
 function makeLanguageSelector(langOptions, initialLanguage) {
     function callback_language(value) {
-        $('input[name="language"]').value = value;
+        $('input[name="language"]')[0].value = value;
     }
     return new SelectPure("#language_selector", {
         onChange: callback_language,

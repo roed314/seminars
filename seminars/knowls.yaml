@@ -263,7 +263,7 @@ organizer:
 display:
   title: Display
   contents: |
-    Check this box for an organizer or curator whose name should appear on the series' home page.
+    Check this box for each organizer or curator whose name should appear on the series' home page.
     This box must be checked for at least one organizer/curator whose name and email match that of a registered user.
 seminar:
   title: Series

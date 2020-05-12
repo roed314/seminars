@@ -23,6 +23,7 @@ from seminars.utils import (
     top_menu,
     topdomain,
     topics,
+    url_for_with_args,
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
@@ -149,6 +150,7 @@ def ctx_proc_userdata():
     data["toggle3way"] = toggle3way
     data["topic_dag"] = topic_dag
     data["languages"] = languages
+    data["url_for_with_args"] = url_for_with_args
 
     return data
 

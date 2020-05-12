@@ -170,8 +170,8 @@ class PostgresUserTable(PostgresSearchTable):
         email = data["email"]
         with DelayCommit(db):
             # We probably have code that assumes that admin/owner isn't None....
-            db.institutions.update({"admin": ilike_query(email)}, {"admin": "mathseminars-dev@googlegroups.com"})
-            db.seminars.update({"owner": ilike_query(email)}, {"owner": "mathseminars-dev@googlegroups.com"})
+            db.institutions.update({"admin": ilike_query(email)}, {"admin": "researchseminars@math.mit.edu"})
+            db.seminars.update({"owner": ilike_query(email)}, {"owner": "researchseminars@math.mit.edu"})
             db.seminar_organizers.delete({"email": ilike_query(email)})
             db.talks.update({"speaker_email": ilike_query(email)}, {"speaker_email": ""})
             self.update({"id": uid}, {key: None for key in self.search_cols}, restat=False)
@@ -471,6 +471,8 @@ class SeminarsUser(UserMixin):
         if self.is_admin:
             return True
         sa = self._data.get("subject_admin")
+        if not talk_or_seminar:
+            return sa
         subjects = talk_or_seminar.subjects
         return sa and (not subjects or sa in subjects)
 

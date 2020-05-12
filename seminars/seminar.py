@@ -226,6 +226,10 @@ class WebSeminar(object):
     def tz(self):
         return pytz.timezone(self.timezone)
 
+    @property
+    def series_type(self):
+        return "conference" if self.is_conference else "seminar series"
+
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
         return d.strftime(format)
@@ -387,7 +391,7 @@ class WebSeminar(object):
                 else:
                     datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
-        cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes)))
+        cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes,homepage_link=True if self.deleted else False)))
         if include_institutions:
             cols.append(('class="institutions"', self.show_institutions()))
         if include_description:
@@ -514,8 +518,7 @@ class WebSeminar(object):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.seminars.update({"shortname": self.shortname}, {"deleted": True})
-                db.talks.update({"seminar_id": self.shortname}, {"deleted": True})
-                db.seminar_organizers.delete({"seminar_id": self.shortname})
+                db.talks.update({"seminar_id": self.shortname, "deleted": False}, {"deleted": True, "deleted_with_seminar": True})
                 for elt in db.users.search(
                     {"seminar_subscriptions": {"$contains": self.shortname}},
                     ["id", "seminar_subscriptions"],
@@ -536,6 +539,7 @@ class WebSeminar(object):
                 ):
                     del talk_sub[self.shortname]
                     db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+            self.deleted = True
             return True
         else:
             return False
@@ -589,9 +593,18 @@ def _construct(organizer_dict, objects=True):
     return object_construct if objects else default_construct
 
 
-def _iterator(organizer_dict, objects=True):
+def _iterator(organizer_dict, objects=True, organizer=""):
+    organizer = organizer.strip().lower()
+    X = ["seminar_id"]
+    if not current_user.is_subject_admin(None):
+        X.append("email")
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
+            # if organizer is specified do a keyword search on each text column other than seminar_id
+            if organizer:
+                orgs = [org for org in organizer_dict.get(rec["shortname"]) if org["display"]]
+                if not [org for org in orgs if any([organizer in org[k].lower() for k in org.keys() if not k in X and isinstance(org[k],str)])]:
+                    continue
             yield _construct(organizer_dict)(rec)
 
     return object_iterator if objects else db.seminars._search_iterator
@@ -616,8 +629,9 @@ def seminars_search(*args, **kwds):
     """
     organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
+    organizer = kwds.pop("organizer", "") # organizer keyword
     return search_distinct(
-        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects), *args, **kwds
+        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, organizer=organizer), *args, **kwds
     )
 
 
@@ -665,7 +679,7 @@ def next_talks(query=None):
     A dictionary with keys the seminar_ids and values datetimes (either the next talk in that seminar, or datetime.max if no talk scheduled so that they sort at the end.
     """
     if query is None:
-        query = {"end_time": {"$gte": datetime.now(pytz.UTC)}}
+        query = {"end_time": {"$gte": datetime.now(pytz.UTC)}, "hidden": False}  # ignore hidden talks by default
     ans = defaultdict(lambda: pytz.UTC.localize(datetime.max))
     from seminars.talk import _counter as talks_counter
     _selecter = SQL("""

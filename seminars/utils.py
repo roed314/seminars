@@ -14,7 +14,7 @@ from markupsafe import Markup, escape
 from psycopg2.sql import SQL
 from seminars import db
 from six import string_types
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 import pytz
 import re
 from .toggle import toggle
@@ -31,6 +31,8 @@ weekdays = [
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 daytime_re_string = r"\d{1,4}|\d{1,2}:\d\d|"
 daytime_re = re.compile(daytime_re_string)
+dash_re = re.compile(r'[\u002D\u058A\u05BE\u1400\u1806\u2010-\u2015\u2E17\u2E1A\u2E3A\u2E3B\u2E40\u301C\u3030\u30A0\uFE31\uFE32\uFE58\uFE63\uFF0D]')
+
 
 # Bounds on input field lengths
 MAX_SHORTNAME_LEN = 32
@@ -87,9 +89,15 @@ def validate_url(x):
     except:
         return False
 
+def similar_urls(x,y):
+    a, b = urlparse(x), urlparse(y)
+    return a[1] == b[1] and (a[2] == b[2] or a[2] == b[2] + "/" or a[2] + "/" == b[2])
+
+def cleanse_dashes(s):
+    # replace unicode variants of dashes (which users might cut-and-paste in) with ascii dashes
+    return '-'.join(re.split(dash_re,s))
 
 def validate_daytime(s):
-    s = s.strip()
     if not daytime_re.fullmatch(s):
         return None
     if len(s) <= 2:
@@ -103,7 +111,7 @@ def validate_daytime(s):
 
 
 def validate_daytimes(s):
-    t = s.strip().split("-")
+    t = s.split('-')
     if len(t) != 2:
         return None
     start, end = validate_daytime(t[0]), validate_daytime(t[1])
@@ -564,7 +572,7 @@ def adapt_weektimes(weekday, daytimes, oldtz, newtz):
     return start.weekday(), start.strftime("%H:%M") + "-" + end.strftime("%H:%M")
 
 
-def process_user_input(inp, col, typ, tz):
+def process_user_input(inp, col, typ, tz=None):
     """
     INPUT:
 
@@ -587,6 +595,7 @@ def process_user_input(inp, col, typ, tz):
             inp += ":00"  # treat numbers as times not dates
         t = parse_time(inp)
         t = t.replace(year=2020, month=1, day=1)
+        assert tz is not None
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
         if not validate_url(inp) and not (
@@ -597,12 +606,14 @@ def process_user_input(inp, col, typ, tz):
     elif col.endswith("email") and typ == "text":
         return validate_email(inp.strip())["email"]
     elif typ == "timestamp with time zone":
+        assert tz is not None
         return localize_time(parse_time(inp), tz)
     elif typ == "daytime":
         res = validate_daytime(inp)
         if res is None:
             raise ValueError("Invalid time of day, expected format is hh:mm")
     elif typ == "daytimes":
+        inp = cleanse_dashes(inp)
         res = validate_daytimes(inp)
         if res is None:
             raise ValueError("Invalid times of day, expected format is hh:mm-hh:mm")
@@ -621,6 +632,8 @@ def process_user_input(inp, col, typ, tz):
             return False
         raise ValueError("Invalid boolean")
     elif typ == "text":
+        if col.endswith("timezone"):
+            return inp if pytz.timezone(inp) else ""
         # should sanitize somehow?
         return "\n".join(inp.splitlines())
     elif typ in ["int", "smallint", "bigint", "integer"]:
@@ -724,3 +737,7 @@ def num_columns(labels):
         return 5
     else:
         return 6
+
+def url_for_with_args(name, args, **kwargs):
+    query = ('?' + urlencode(args)) if args else ''
+    return url_for(name, **kwargs) + query
