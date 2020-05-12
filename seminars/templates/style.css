@@ -1054,11 +1054,17 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
    vertical-align: middle;
 }
 
-input, textarea {
+input, textarea, #topicDAG_selector {
   border: 2px solid {{color.input_border}};
   font-size: 110%;
   padding: 3px;
   border-radius: 5px;
+}
+
+#topicDAG_selector {
+  width: 600px;
+  display: block;
+  min-height: 25px;
 }
 /* TODO: above? */
 

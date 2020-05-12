@@ -732,7 +732,7 @@ function makeTree(json_tree) {
   function mark_undetermined_nodes(instance) {
     console.log("mark_undetermined_nodes");
     bar = instance;
-    // remove class for every node
+    // remove class from every node
     $('a > i.jstree-checkbox').removeClass('jstree-undetermined')
     instance.get_checked(true).reduce(
       function (acc, node) {
@@ -747,6 +747,42 @@ function makeTree(json_tree) {
           $('#' + id + ' > a > i.jstree-checkbox').addClass('jstree-undetermined')
         }
       }
+    )
+  }
+
+  function selected_nodes_by_vertex(instance) {
+    console.log("selected_nodes");
+    return Array.from(
+      new Set(instance.get_json('#', { flat: true }).reduce(
+        function (acc, node) {
+          if( node.state.selected ) {
+            return acc.concat([node]);
+          } else {
+            return acc;
+          }
+        }, [])
+      )
+    );
+  }
+  function callback_topics(instance) {
+    var vertices = selected_nodes_by_vertex(instance);
+    $('input[name="topics"]')[0].value = "[" + Array.from(
+      vertices.reduce(
+        function (acc, node) {
+          return acc.add("'" + node.li_attr['vertex'] + "'");
+        },
+        new Set()
+      )
+    ) + "]";
+    $('#topicDAG_selector').html(
+      Array.from(
+        vertices.reduce(
+          function (acc, node) {
+            return acc.add("<span class='topic_label'>" + node.text + "</span>");
+          },
+          new Set()
+        )
+      ).join("\n")
     )
   }
 
@@ -809,9 +845,11 @@ function makeTree(json_tree) {
         }
       }
     }
-    // figure out undetermined nodes
     if( data.instance !== undefined ) {
+      // figure out undetermined nodes
       mark_undetermined_nodes(data.instance);
+      // add topics to hidden input and the desired box
+      callback_topics(data.instance);
     }
   });
   $('#topicDAG').on('redraw.jstree',
@@ -823,8 +861,13 @@ function makeTree(json_tree) {
     }
   )
 
-  $('#deselect_all').on('click', function () {
+  $('#topicDAG_deselect_all').on('click', function () {
     $('#topicDAG').jstree('deselect_all');
+    return false;
+  });
+  $('#topicDAG_close_all').on('click', function () {
+    $('#topicDAG').jstree('close_all');
+    return false;
   });
 
   var to = false;
