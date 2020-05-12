@@ -585,11 +585,11 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
             query["end_date"] = {"$lt": recent}
         else:
             query["end_date"] = {"$gte": recent}
-    if conference and sort is None:
-        if past:
-            sort = [("end_date", -1), ("start_date", -1), "name"]
-        else:
-            sort = ["start_date", "end_date", "name"]
+        if sort is None:
+            if past:
+                sort = [("end_date", -1), ("start_date", -1), "name"]
+            else:
+                sort = ["start_date", "end_date", "name"]
     if sort is None: # not conferences
         # We don't currently call this case in the past, but if we add it we probably
         # need a last_talk_sorted that sorts by end time of last talk in reverse order
@@ -640,6 +640,7 @@ def _search_series(conference=False):
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
     if conference:
+        sort = ["start_date", "end_date", "name"]
         info["results"] = seminars_search(seminar_query, organizer_dict=all_organizers(org_query), sort=sort)
     else:
         info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers(org_query)))
