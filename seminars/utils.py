@@ -649,4 +649,4 @@ def ics_file(talks, filename, user=current_user):
 
 def url_for_with_args(name, args, **kwargs):
     query = '?' + urlencode(args) if args else ''
-    return url_for(name, kwargs) + query
+    return url_for(name, **kwargs) + query
