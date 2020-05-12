@@ -644,7 +644,7 @@ def edit_institution():
             if similar:
                 return render_template(
                     "show_similar_institutions.html",
-                    newinstitition=institution,
+                    newinstitution=institution,
                     title=title,
                     section=manage,
                     subsection="home",
