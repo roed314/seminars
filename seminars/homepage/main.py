@@ -265,7 +265,7 @@ class TalkSearchArray(SearchArray):
             name="affiliation",
             label="Affiliation",
             colspan=(1, 2, 1),
-            width=160 * 2 - 1 * 20,
+            width=textwidth,
         )
         title = TextBox(
             name="title",
@@ -280,7 +280,7 @@ class TalkSearchArray(SearchArray):
             example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
             colspan=(1, 2, 1),
-            width=160 * 2 - 1 * 20,
+            width=textwidth,
         )
         lang_dict = languages_dict()
         language = SelectBox(
@@ -378,14 +378,33 @@ class SemSearchArray(SearchArray):
             width=textwidth,
             example="Thule topology colloquium series",
         )
-
+        organizer = TextBox(
+            name="organizer",
+            label="organizer",
+            colspan=(1, 2, 1),
+            width=textwidth,
+        )
+        affiliation = TextBox(
+            name="affiliation",
+            label="Affiliation",
+            colspan=(1, 2, 1),
+            width=textwidth,
+        )
+        date = TextBox(
+            name="daterange",
+            id="daterange",
+            label="Date",
+            example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
+            example_value=True,
+            colspan=(1, 2, 1),
+            width=textwidth,
+        )
         self.array = [
             [subject, keywords],
             [topic, name],
-            [institution, access],
-            [language],
-            # [venue],
-            # [count],
+            [institution, organizer],
+            [language, affiliation],
+            [access, date],
         ]
 
         assert conference in [True, False]
