@@ -103,7 +103,7 @@ def parse_access(info, query, prefix):
         query["access"] = {"$or": ["open", "users"]}
 
 
-def parse_date(info, query):
+def parse_daterange_time(info, query):
     tz = current_user.tz
     date = info.get("daterange")
     if date:
@@ -117,17 +117,16 @@ def parse_date(info, query):
                 start = tz.localize(parse(start))
                 sub_query["$gte"] = start
             except Exception:
-                flash_error("Could not parse date: '%s'", start)
+                flash_error("Could not parse start date %s.  Error: " + sys.exc_info()[0], start)
         if end.strip():
             try:
                 end = tz.localize(parse(end))
                 end = end + datetime.timedelta(hours=23, minutes=59, seconds=59)
                 sub_query["$lte"] = end
             except Exception:
-                flash_error("Could not parse date: '%s'", end)
+                flash_error("Could not parse end date %s.  Error: " + sys.exc_info()[0], end)
         if sub_query:
             query["start_time"] = sub_query
-
 
 def parse_video(info, query):
     v = info.get("video")
@@ -160,7 +159,7 @@ def talks_parser(info, query):
     parse_substring(info, query, "speaker", ["speaker"])
     parse_substring(info, query, "affiliation", ["speaker_affiliation"])
     parse_substring(info, query, "title", ["title"])
-    parse_date(info, query)
+    parse_daterange_time(info, query)
     parse_video(info, query)
     parse_language(info, query, prefix="talk")
     query["display"] = True
@@ -622,8 +621,7 @@ def _search_series(conference):
     info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
-        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
-        )
+        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
     try:
         seminar_count = int(info["seminar_count"])
         seminar_start = int(info["seminar_start"])
