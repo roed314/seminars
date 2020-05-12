@@ -639,7 +639,7 @@ def _search_series(conference=False):
     # The second downside is that we need to do two queries.
     if conference:
         sort = ["start_date", "end_date", "name"]
-        info["results"] = seminars_search(seminar_query, organizer=organizer, organizer_dict=all_organizers(),so rt=["start_date"])
+        info["results"] = seminars_search(seminar_query, organizer=organizer, organizer_dict=all_organizers(),sort=sort)
     else:
         info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer=organizer, organizer_dict=all_organizers()))
     subsection = "conferences" if conference else "seminars"
