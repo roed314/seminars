@@ -1080,6 +1080,11 @@ input, textarea, #topicDAG_selector {
   display: block;
   min-height: 25px;
 }
+
+.topicDAG {
+  width: 610px;
+}
+
 /* TODO: above? */
 
 button, select {

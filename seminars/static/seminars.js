@@ -874,6 +874,7 @@ function makeTree(json_tree) {
   });
   $('#topicDAG_close_all').on('click', function () {
     $('#topicDAG').jstree('close_all');
+    $('#topicDAG_search').val('');
     return false;
   });
 
