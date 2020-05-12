@@ -13,7 +13,7 @@
         <thead>
           <tr><th>Identifier</th><th>name</th></tr>
         </thead>
-        {% for shortname, name in institutions %}
+        {% for shortname, name in similar %}
         <tr>
           <td>{{shortname}}</td>
           <td><a href="{{ url_for('show_institution', shortname=shortname) }}">{{name}}</a></td>
