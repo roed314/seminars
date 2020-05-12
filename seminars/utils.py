@@ -14,7 +14,7 @@ from markupsafe import Markup, escape
 from psycopg2.sql import SQL
 from seminars import db
 from six import string_types
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 import iso639
 import pytz
 import re
@@ -649,5 +649,4 @@ def ics_file(talks, filename, user=current_user):
 
 def url_for_with_args(name, args, **kwargs):
     query = ('?' + urlencode(args)) if args else ''
-    print(query)
     return url_for(name, **kwargs) + query
