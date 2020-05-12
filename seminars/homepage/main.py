@@ -652,7 +652,6 @@ def _search_series(conference=False):
         subsection=subsection,
         bread=None,
         is_conference=conference,
-        timezone_display="Times in %s" % (current_user.show_timezone("browse")),
     )
 
 @app.route("/search/talks")
