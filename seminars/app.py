@@ -25,6 +25,7 @@ from seminars.utils import (
     topdomain,
     topics,
     toggle,
+    url_for_with_args,
 )
 from seminars.knowls import static_knowl
 from .seminar import series_header
@@ -146,6 +147,7 @@ def ctx_proc_userdata():
     data["static_knowl"] = static_knowl
     data["topdomain"] = topdomain()
     data["toggle"] = toggle
+    data["url_for_with_args"] = url_for_with_args
 
     return data
 

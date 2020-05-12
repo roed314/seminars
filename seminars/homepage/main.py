@@ -414,7 +414,6 @@ class SemSearchArray(SearchArray):
     def hidden(self, info):
         return []
 
-
 @app.route("/")
 def index():
     return _talks_index(subsection="talks")

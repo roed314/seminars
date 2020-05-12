@@ -124,13 +124,13 @@
     <header class="inner">
       <div class="submenu-inner">
         <div class="submenu-nav{% if subsection == 'seminars' %} submenu-active{% endif %}">
-          <a href="{{ url_for('search_seminars') }}">Seminar series</a>
+          <a href="{{ url_for_with_args('search_seminars', request.args) }}">Seminar series</a>
         </div>
         <div class="submenu-nav{% if subsection == 'conferences' %} submenu-active{% endif %}">
-          <a href="{{ url_for('search_conferences')+'/' }}">Conferences</a>
+          <a href="{{ url_for_with_args('search_conferences', request.args) }}">Conferences</a>
         </div>
         <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
-          <a href="{{ url_for('search_talks') }}">Talks</a>
+          <a href="{{ url_for_with_args('search_seminars', request.args) }}">Talks</a>
         </div>
       </div>
     </header>

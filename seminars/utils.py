@@ -647,3 +647,6 @@ def ics_file(talks, filename, user=current_user):
     bIO.seek(0)
     return send_file(bIO, attachment_filename=filename, as_attachment=True, add_etags=False)
 
+def url_for_with_args(name, args, **kwargs):
+    query = '?' + urlencode(args) if args else ''
+    return url_for(name, kwargs) + query
