@@ -241,6 +241,7 @@ organizer_name:
     Enter the full name of the organizer.
     This must be nonempty for each organizer.
     Names for which the Display box is checked will appear on the series' page, in the order given here.
+    After names are entered and saved, you can change the ordering by using the two-headed arrows on the left to transpose adjacent names.
 homepage:
   title: Homepage
   contents: |
