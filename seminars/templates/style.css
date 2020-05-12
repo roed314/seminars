@@ -533,7 +533,7 @@ div.col6 {
 
 .filter-menu {
     display: none;
-    background: #f5f5f5;
+    background: #fafafa;
     border: #cdcdcd solid 5px;
     border-radius: 5px;
     margin: 5px;
@@ -1665,7 +1665,7 @@ table .knowl a {
 
 .knowl-output {
   background: {{ color.knowl_background }};
-  border: 10px solid {{ color.knowl_border }};
+  border: 5px solid {{ color.knowl_border }};
   {{ BORDER_RADIUS(10) }}
   padding: 0px;
   margin-top: 10px;
