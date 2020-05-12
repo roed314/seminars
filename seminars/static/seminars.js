@@ -830,11 +830,13 @@ function makeTree(json_tree) {
   var to = false;
   $('#topicDAG_search').keyup(function () {
     if(to) { clearTimeout(to); }
-    if( $('#topicDAG_search').val().length > 1 ) {
     to = setTimeout(function () {
-      var v = $('#topicDAG_search').val();
+      if( $('#topicDAG_search').val().length != 1 ) {
+        var v = $('#topicDAG_search').val();
+      } else {
+        var v = '';
+      }
       $('#topicDAG').jstree(true).search(v);
     }, 250);
-    }
   });
 }
