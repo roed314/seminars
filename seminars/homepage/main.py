@@ -28,6 +28,7 @@ from lmfdb.utils import (
     SearchArray,
     SelectBox,
     TextBox,
+    EmptyBox,
     flash_error,
     to_dict,
 )
@@ -396,7 +397,7 @@ class SemSearchArray(SearchArray):
             [subject, keywords],
             [topic, name],
             [institution, organizer],
-            [language, ],
+            [language, EmptyBox() ],
             [access, date] if conference else [access],
         ]
 
@@ -645,7 +646,14 @@ def _search_series(conference=False):
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(
-        "search_seminars.html", title=title, info=info, section="Search", subsection=subsection, bread=None, is_conference=conference
+        "search_seminars.html",
+        title=title,
+        info=info,
+        section="Search",
+        subsection=subsection,
+        bread=None,
+        is_conference=conference,
+        timezone_display="Times in %s" % (current_user.show_timezone("browse")),
     )
 
 @app.route("/search/talks")

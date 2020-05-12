@@ -4,7 +4,15 @@
 <div class="search-container">
   <div id='searchseminars'>
     <form class='searchform' id='seminarsform' onsubmit="cleanSubmit(this.id)">
-      {{ info.search_array.html(info) | safe }}
+      <table border="0">
+         <tr style="height:12px"></tr>
+        <tr>
+          <td class="button"><button type='submit' name='search_type' value='seminars' style='width: 170px;' onclick='resetStart()'>Search conferences</button></td>
+          <td> display_timezone </td>
+          <td> Showing {{ info.results | length }} results </td>
+        </tr>
+      </table>
+      <!-- {{ info.search_array.html(info) | safe }} -->
     </form>
     <div class='searchresults'>
       <table class='ntdata'>
