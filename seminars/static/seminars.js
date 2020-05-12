@@ -724,3 +724,114 @@ function checkpw() {
 }
 
 
+
+
+/* jstree initialization */
+
+function makeTree(json_tree) {
+  function mark_undetermined_nodes(instance) {
+    console.log("mark_undetermined_nodes");
+    bar = instance;
+    // remove class for every node
+    $('a > i.jstree-checkbox').removeClass('jstree-undetermined')
+    instance.get_bottom_checked(true).reduce(
+      function (acc, node) {
+        let union = new Set(acc)
+        for (let elt of node.parents) {
+          union.add(elt)
+        }
+        return union}, new Set()
+    ).forEach(
+      function(id) {
+        if( id != '#' ) {
+          $('#' + id + ' > a > i.jstree-checkbox').addClass('jstree-undetermined')
+        }
+      }
+    )
+  }
+
+  $('#topicDAG').jstree({
+    "checkbox" : {
+      "three_state": false,
+      "cascading": "",
+    },
+    "search": {
+      "show_only_matches": true,
+    },
+    'core': {
+      'data' : json_tree,
+      'worker': false,
+      'loaded_state': true,
+      'themes': {
+        'name': 'proton',
+        "stripes" : true,
+        "icons": false,
+        "responsive": true,
+      },
+    },
+    "plugins": ["checkbox", "wholerow", "search"]
+  });
+  // bind to events triggered on the tree
+  $('#topicDAG').on("changed.jstree", function (e, data) {
+    if( data.node !== undefined) {
+      foo = data;
+      //stop propagation
+      e.preventDefault();
+      var selected = data.instance.is_selected(data.node);
+      var vertex = data.node.li_attr['vertex'];
+      var vertices = data.instance.get_json('#', { flat: true }).reduce(
+        function (acc, node) {
+          if( node.li_attr['vertex'] == data.node.li_attr['vertex'] ) {
+            return acc.concat([node.id]);
+          } else {
+            return acc;
+          }
+        }, []);
+      if( selected ) {
+        // select the parents of every vertex
+        vertices.forEach(function(id) {
+          var nodev = data.instance.get_node(id)
+          data.instance.check_node(nodev);
+          data.instance.check_node(nodev.parents);
+        });
+      } else {
+        // reselect if any children are selected
+        if ( data.instance.get_checked_descendants(data.node['id']).length > 0 ) {
+          data.instance.check_node(data.node);
+          data.instance.select_node(data.node);
+        } else {
+          // deselect other vertices
+          vertices.forEach(function(id) {
+            var nodev = data.instance.get_node(id)
+            data.instance.uncheck_node(nodev);
+          });
+        }
+      }
+    }
+    // figure out undetermined nodes
+    if( data.instance !== undefined ) {
+      mark_undetermined_nodes(data.instance);
+    }
+  });
+  $('#topicDAG').on('open_node.jstree',
+    function (e, data) {
+      // figure out undetermined nodes
+      if( data.instance !== undefined ) {
+        mark_undetermined_nodes(data.instance);
+      }
+    }
+  )
+
+  $('#deselect_all').on('click', function () {
+    $('#topicDAG').jstree('deselect_all');
+  });
+
+  var to = false;
+  $('#topicDAG_search').keyup(function () {
+    if(to) { clearTimeout(to); }
+    to = setTimeout(function () {
+      var v = $('#topicDAG_search').val();
+      $('#topicDAG').jstree(true).search(v);
+    }, 250);
+  });
+}

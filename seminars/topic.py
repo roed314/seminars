@@ -21,6 +21,15 @@ class WebTopic(object):
         else:
             return sorted(set([elt.id for elt in self.parents] + sum([elt.ancestors for elt in self.parents], [])))
 
+    @property
+    def json(self):
+        return {
+            'text': self.name,
+            'li_attr': {'vertex': self.id},
+            'children': [ elt.json for elt in self.children ]
+        }
+
+
 
 class TopicDAG(object):
     def __init__(self):
@@ -173,6 +182,12 @@ class TopicDAG(object):
             duplicate_ctr[tid],
             "\n".join(divs),
        )
+
+    @property
+    def json(self):
+        return [elt.json for elt in self.subjects]
+
+
 
 
 topic_dag = TopicDAG()

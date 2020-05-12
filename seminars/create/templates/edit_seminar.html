@@ -244,6 +244,8 @@
         {% endif %}
       {% endif %}
       </form>
+  <input id="topicDAG_search" type="text", value="">
+  <div id="topicDAG"></div>
 <script type="text/javascript">
 /* topic and inst selector */
 const topicOptions = [
@@ -274,6 +276,8 @@ const subjOptions = [
   },
   {% endfor %}
 ];
+
+const json_tree = {{ topic_dag.json | safe }};
 
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
@@ -374,6 +378,9 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
   showplusminus(n);
+
+
+  makeTree(json_tree);
 });
 
 </script>

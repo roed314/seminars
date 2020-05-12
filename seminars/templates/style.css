@@ -2549,3 +2549,9 @@ input[data-chosen='1'] + .tgl-btn {
 
 /* end of 3 way toggle switch  styling */
 /* end of toggle styling */
+
+/* override jstree template such that
+  undetermined > checkbox */
+.jstree-proton .jstree-anchor > .jstree-undetermined {
+	background-position: -197px -5px ! important;
+}
