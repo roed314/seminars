@@ -595,12 +595,15 @@ def _construct(organizer_dict, objects=True):
 
 def _iterator(organizer_dict, objects=True, organizer=""):
     organizer = organizer.strip().lower()
+    X = ["seminar_id"]
+    if not current_user.is_subject_admin(None):
+        X.append("email")
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
             # if organizer is specified do a keyword search on each text column other than seminar_id
             if organizer:
                 orgs = [org for org in organizer_dict.get(rec["shortname"]) if org["display"]]
-                if not [org for org in orgs if any([organizer in org[k].lower() for k in org.keys() if k != "seminar_id" and isinstance(org[k],str)])]:
+                if not [org for org in orgs if any([organizer in org[k].lower() for k in org.keys() if not k in X and isinstance(org[k],str)])]:
                     continue
             yield _construct(organizer_dict)(rec)
 
