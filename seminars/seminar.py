@@ -15,6 +15,7 @@ from seminars.utils import (
     toggle,
     topic_dict,
     weekdays,
+    killattr,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -187,13 +188,11 @@ class WebSeminar(object):
         self.description = s[0].upper() + s[1:] if s else ""
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
-            if hasattr(self, "attr"):
-                delattr(self,"attr")
+            killatr(self, "attr")
         for i in range(len(self.organizers)):
             if not self.organizers[i].get("name") and self.organizers[i].get("full_name"):
                 self.organizers[i]["name"] = self.organizers[i]["full_name"]
-            if hasattr(self, "full_name"):
-                delattr(self.organizers[i], "full_name")
+            killattr(self.organizers[i], "full_name")
 
     def visible(self):
         """
