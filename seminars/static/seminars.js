@@ -735,7 +735,13 @@ function checkpw() {
 
 /* jstree initialization */
 
-function makeTree(json_tree) {
+function makeTopicsTree(json_tree) {
+  $("div.topicDAG").css("display", "none");
+  $("div.topicDAG").html(
+  `<input id="topicDAG_search" type="text", value="" placeholder="Search">
+   <button class="cancel" id="topicDAG_deselect_all">Deselect all</button>
+   <button class="cancel" id="topicDAG_close_all">Close all</button>
+   <div id="topicDAG"></div>`);
   function mark_undetermined_nodes(instance) {
     console.log("mark_undetermined_nodes");
     bar = instance;
@@ -808,7 +814,6 @@ function makeTree(json_tree) {
       'loaded_state': true,
       'themes': {
         'name': 'proton',
-        "stripes" : true,
         "icons": false,
         "responsive": true,
       },
@@ -875,6 +880,7 @@ function makeTree(json_tree) {
   $('#topicDAG_close_all').on('click', function () {
     $('#topicDAG').jstree('close_all');
     $('#topicDAG_search').val('');
+    $('#topicDAG_search').trigger('keyup');
     return false;
   });
 
@@ -890,4 +896,21 @@ function makeTree(json_tree) {
       $('#topicDAG').jstree(true).search(v);
     }, 250);
   });
+
+  $(document).mouseup(function(e)
+    {
+      var divcontainer = $("div.topicDAG");
+      var spancontainer = $("span.topicDAG");
+      // if the target of the click isn't the container nor a descendant of the container
+      if( spancontainer.is(e.target) || spancontainer.has(e.target).length > 0) {
+        divcontainer.toggle();
+        if( divcontainer.css('display') != 'none' ){
+          $('#topicDAG_search').focus();
+        }
+      } else if (!divcontainer.is(e.target) && divcontainer.has(e.target).length === 0) 
+      {
+        divcontainer.hide();
+      }
+    });
+
 }

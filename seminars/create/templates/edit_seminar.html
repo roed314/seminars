@@ -1,307 +1,276 @@
 {% extends "homepage.html" %}
 {% block content %}
 
-  {% if lock %}
-    <div style="color: {{color.red}}; font-weight: bold; font-size: 200%;">Concurrent Edit!!!</div>
+{% if lock %}
+<div style="color: {{color.red}}; font-weight: bold; font-size: 200%;">Concurrent Edit!!!</div>
 
-    <div>
-      The seminar {{ seminar.shortname }} is currently or has been recently edited by
-      <a href="mailto:{{ lock.email }}">{{ lock.name }}</a>
-      at {{ lock.timestamp|fmtdatetime }}. There might be a conflict!
-    </div>
+<div>
+  The seminar {{ seminar.shortname }} is currently or has been recently edited by
+  <a href="mailto:{{ lock.email }}">{{ lock.name }}</a>
+  at {{ lock.timestamp|fmtdatetime }}. There might be a conflict!
+</div>
 
-    <div style="margin-top: 30px">
-      <a href="{{ url_for('.edit_seminar', shortname=seminar.shortname, lock='ignore') }}">Continue</a>
-    </div>
+<div style="margin-top: 30px">
+  <a href="{{ url_for('.edit_seminar', shortname=seminar.shortname, lock='ignore') }}">Continue</a>
+</div>
 
-    <div style="margin-top: 30px">
-      <a href="{{ request.referrer }}">Abort</a>
-    </div>
+<div style="margin-top: 30px">
+  <a href="{{ request.referrer }}">Abort</a>
+</div>
+{% else %}
+<form id="seminarform" action="{{ url_for('.save_seminar') }}" method="POST">
+  <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
+  <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
+  <input type="hidden" name="subjects" value="{{ seminar.subjects  | safe }}" />
+  <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
+  <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
+  <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
+  <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
+  <table>
+    <tr>
+      <td style="width:150px;">{{ KNOWL("seminar_id") }}</td>
+      <td>{{ seminar.shortname }}</td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("seminar_name") }}</td>
+      <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" maxlength="{{ maxlength['name'] }}"/></td>
+      <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("seminar_description") }}</td>
+      <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" maxlength="{{ maxlength['description'] }}" placeholder="research seminar" /></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("seminar_homepage") }}</td>
+      <td><input name="homepage" value="{{ seminar.homepage | blanknone }}" style="width:600px;" maxlength="{{ maxlength['homepage'] }}" placeholder="https://example.org"/></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("institutions") }}</td>
+      <td><span id="institution_selector" style="width:610px;"></span></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("topics") }}</td>
+      <td><span class="topicDAG" id="topicDAG_selector"></span></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <div class="topicDAG"></div>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("language","Language") }}</td>
+      <td><span id="language_selector" style="width:600px;"></span></td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("timezone") }}</td>
+      <td>
+        <select name="timezone" style="width:610px;">
+          {% for tz, disp in timezones %}
+          <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td class="forminfo" />Be sure to set this correctly.</td>
+    </tr>
+    <tr>
+      <td>{{KNOWL("visibility")}}</td>
+      <td>
+        <select name="visibility" style="width:610px;">
+          <option value="2"{% if seminar.visibility == 2 %} selected{% endif %}>public</option>
+          <option value="1"{% if seminar.visibility == 1 %} selected{% endif %}>unlisted</option>
+          <option value="0"{% if seminar.visibility == 0 %} selected{% endif %}>private</option>
+        </select>
+      </td>
+    </tr>
+    {% if seminar.is_conference %}
+    <tr>
+      <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
+      <td style="padding-top: 20px">
+        <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
+      </td>
+    </tr>
+    <tr>
+      <td> {{ ASTKNOWL("end_date") }}</td>
+      <td>
+        <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
+      </td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("per_day") }}</td>
+      <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
+    </tr>
     {% else %}
-    <form id="seminarform" action="{{ url_for('.save_seminar') }}" method="POST">
-      <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
-      <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
-      <input type="hidden" name="subjects" value="{{ seminar.subjects  | safe }}" />
-      <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
-      <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
-      <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
-      <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
-      <table>
-        <tr>
-          <td style="width:150px;">{{ KNOWL("seminar_id") }}</td>
-          <td>{{ seminar.shortname }}</td>
-        </tr>
-        <tr>
-          <td>{{ ASTKNOWL("seminar_name") }}</td>
-          <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" maxlength="{{ maxlength['name'] }}"/></td>
-          <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
-        </tr>
-        <tr>
-          <td>{{ KNOWL("seminar_description") }}</td>
-          <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" maxlength="{{ maxlength['description'] }}" placeholder="research seminar" /></td>
-        </tr>
-        <tr>
-          <td>{{ KNOWL("seminar_homepage") }}</td>
-          <td><input name="homepage" value="{{ seminar.homepage | blanknone }}" style="width:600px;" maxlength="{{ maxlength['homepage'] }}" placeholder="https://example.org"/></td>
-        </tr>
-        <tr>
-          <td>{{ KNOWL("institutions") }}</td>
-          <td><span id="institution_selector" style="width:610px;"></span></td>
-        </tr>
-        {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
-        <tr>
-          <td>{{ ASTKNOWL("subjects") }}</td>
-          <td><span id="subject_selector" style="width:610px;"></span></td>
-          <td class="forminfo">Select at least one subject</td>
-          <tr>
-            {% endif %}
-            <tr>
-              <td>{{ KNOWL("topics") }}</td>
-              <td><span id="topic_selector" style="width:610px;"></span></td>
-            </tr>
-            <tr>
-              <td>{{ KNOWL("topics") }}</td>
-              <td><span id="topicDAG_selector"></span></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>
-                <div class="topicDAG">
-                  <input id="topicDAG_search" type="text", value="" placeholder="Search">
-                  <button id="topicDAG_deselect_all">Deselect all</button>
-                  <button id="topicDAG_close_all">Close all</button>
-                  <div id="topicDAG"></div>
-                </div>
-              </td>
-              <tr>
-                <td>{{ ASTKNOWL("language","Language") }}</td>
-                <td><span id="language_selector" style="width:600px;"></span></td>
-              </tr>
-              <tr>
-                <td>{{ ASTKNOWL("timezone") }}</td>
-                <td>
-                  <select name="timezone" style="width:610px;">
-                    {% for tz, disp in timezones %}
-                    <option value="{{ tz }}"{% if seminar.timezone == tz %} selected{% endif %}>{{disp}}</option>
-                    {% endfor %}
-                  </select>
-                </td>
-                <td class="forminfo" />Be sure to set this correctly.</td>
-              </tr>
-              <tr>
-                <td>{{KNOWL("visibility")}}</td>
-                <td>
-                  <select name="visibility" style="width:610px;">
-                    <option value="2"{% if seminar.visibility == 2 %} selected{% endif %}>public</option>
-                    <option value="1"{% if seminar.visibility == 1 %} selected{% endif %}>unlisted</option>
-                    <option value="0"{% if seminar.visibility == 0 %} selected{% endif %}>private</option>
-                  </select>
-                </td>
-              </tr>
-              {% if seminar.is_conference %}
-              <tr>
-                <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
-                <td style="padding-top: 20px">
-                  <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
-                </td>
-              </tr>
-              <tr>
-                <td> {{ ASTKNOWL("end_date") }}</td>
-                <td>
-                  <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
-                </td>
-              </tr>
-              <tr>
-                <td>{{ ASTKNOWL("per_day") }}</td>
-                <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
-              </tr>
-              {% else %}
-              <script>
-                function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
-              </script>
-              <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
-              <tr>
-                <td>{{ KNOWL("periodicity") }}</td>
-                <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
-                    <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
-                    <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
-                    <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
-                    <option value="21" {% if seminar.frequency == 21 %}selected{% endif %}>every third week</option>
-                  </select></td>
-              </tr>
-      </table>
-      <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
-        {% for i in range(maxlength["time_slots"]//3) %}
-        <tr style="width:750px;">
-          {% if i == 0 %}
-          <td style="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
-          {% set hide="visibility:hidden;" %}
-          <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
-          <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
-          {% else %}
-          {% set hide="display:none;" %}
-          <td></td><td></td><td></td>
-          {% endif %}
-          </td>
-          {% for j in range(3) %}
-          <td style="padding-right:1px; margin-right:0px;">
-            <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="{{hide}}">
-              <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
-              {% for wkday in short_weekdays %}
-              <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
-              {% endfor %}
-            </select>
-          </td>
-          <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-            <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; {{hide}}" placeholder="15:00-16:00"/>
-          </td>
+    <script>
+      function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
+    </script>
+    <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
+    <tr>
+      <td>{{ KNOWL("periodicity") }}</td>
+      <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
+          <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
+          <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
+          <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
+          <option value="21" {% if seminar.frequency == 21 %}selected{% endif %}>every third week</option>
+        </select></td>
+    </tr>
+  </table>
+  <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
+    {% for i in range(maxlength["time_slots"]//3) %}
+    <tr style="width:750px;">
+      {% if i == 0 %}
+      <td style="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
+      {% set hide="visibility:hidden;" %}
+      <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
+      <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
+      {% else %}
+      {% set hide="display:none;" %}
+      <td></td><td></td><td></td>
+      {% endif %}
+      </td>
+      {% for j in range(3) %}
+      <td style="padding-right:1px; margin-right:0px;">
+        <select id="weekday{{3*i+j}}" name="weekday{{3*i+j}}" style="{{hide}}">
+          <option value="" {% if not seminar.weekdays[3*i+j] %} selected{% endif %}></option>
+          {% for wkday in short_weekdays %}
+          <option value="{{loop.index0}}"{% if seminar.weekdays[3*i+j] == loop.index0 %} selected{% endif %}>{{wkday}}</option>
           {% endfor %}
-          {% endfor %}
-      </table>
-      <table>
-        {% endif %}
-        <tr>
-          <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
-          <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"/></td>
-        </tr>
-        <tr>
-          <td>{{ ASTKNOWL("online") }}</td>
-          <td>
-            <select name="online" style="width:610px;">
-              <option value="yes"{% if seminar.online %} selected{% endif %}>yes</option>
-              <option value="no"{% if not seminar.online %} selected{% endif %}>no</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>{{ KNOWL("live_link") }}</td>
-          <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
-          <td class="forminfo" />If link varies, enter "See comments" and put instructions in Comments.</td>
-        </tr>
-        <tr>
-          <td>{{ KNOWL("access") }}</td>
-          <td>
-            <select name="access" style="width:610px;">
-              <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view livestream link</option>
-              <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Only logged-in users can view livestream link</option>
-              <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view livestream link</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>
-        </tr>
-        <tr>
-          <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Instructions for obtaining the livestream link?  Directions to the room?  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
-        </tr>
-      </table>
-      <h3>Organizers</h3>
-      <p class="forminfo">
-        Normally, leave "Organizer" checked.  Uncheck for an assistant with permission to edit the seminar despite not being responsible for the scientific organization, or for a seminar email address not associated to a single person.  At least one <i>person</i> displayed must be a registered user.
-      </p>
-      <table>
-        <thead>
-          <td></td>
-          <td align="center">{{ ASTKNOWL("organizer_name") }}</td>
-          <td align="center">{{ KNOWL("homepage") }}</td>
-          <td align="center">{{ KNOWL("email") }}</td>
-          <td align="center">{{ KNOWL("organizer") }}</td>
-          <td align="center">{{ KNOWL("display") }}</td>
-        </thead>
-        {% for i in range(maxlength["organizers"]) %}
-        <tr>
-          {% if i > 0 and i < (seminar.organizer_data | length) %}
-          <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
-          {% else %}
-          <td></td>
-          {% endif %}
-          {% if i < (seminar.organizer_data | length) %}
-          <td>
-            <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['full_name'] }}" />
-          </td>
-          <td>
-            <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
-          </td>
-          <td>
-            <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
-          </td>
-          <td align="center">
-            {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
-            {# but it is displayed in a column labeleled "organizer" so it is checked when curator is false #}
-            <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
-          </td>
-          <td align="center">
-            <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
-          </td>
-          {% else %}
-          <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
-          <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
-          <td><input name="org_email{{i}}" style="width:220px;" /></td>
-          <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
-          <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
-          {% endif %}
-        </tr>
-        {% endfor %}
-      </table>
-      <br>
-      <table><tr>
-        <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">{{ ('Create ' + seminar.series_type) if seminar.new else 'Save changes' }}</button></td>
-        <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">{{ 'Cancel creation' if seminar.new else 'Cancel changes' }}</button></td>
-        {% if not seminar.new and seminar.user_can_delete() %}
-        <td><button class="delete" type="submit" name="submit" value="delete" onclick="unsaved = false;">{{ 'Delete ' + seminar.series_type }}</button></td>
-        {% endif %}
-      </tr></table>
-      </form>
+        </select>
+      </td>
+      <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
+        <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; {{hide}}" placeholder="15:00-16:00"/>
+      </td>
+      {% endfor %}
+      {% endfor %}
+  </table>
+  <table>
+    {% endif %}
+    <tr>
+      <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
+      <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"/></td>
+    </tr>
+    <tr>
+      <td>{{ ASTKNOWL("online") }}</td>
+      <td>
+        <select name="online" style="width:610px;">
+          <option value="yes"{% if seminar.online %} selected{% endif %}>yes</option>
+          <option value="no"{% if not seminar.online %} selected{% endif %}>no</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("live_link") }}</td>
+      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+      <td class="forminfo" />If link varies, enter "See comments" and put instructions in Comments.</td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("access") }}</td>
+      <td>
+        <select name="access" style="width:610px;">
+          <option value="open"{% if seminar.access == 'open' %} selected{% endif %}>All visitors can view livestream link</option>
+          <option value="users"{% if seminar.access == 'users' %} selected{% endif %}>Only logged-in users can view livestream link</option>
+          <option value="endorsed"{% if seminar.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view livestream link</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>
+    </tr>
+    <tr>
+      <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Instructions for obtaining the livestream link?  Directions to the room?  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
+    </tr>
+  </table>
+  <h3>Organizers</h3>
+  <p class="forminfo">
+    Normally, leave "Organizer" checked.  Uncheck for an assistant with permission to edit the seminar despite not being responsible for the scientific organization, or for a seminar email address not associated to a single person.  At least one <i>person</i> displayed must be a registered user.
+  </p>
+  <table>
+    <thead>
+      <td></td>
+      <td align="center">{{ ASTKNOWL("organizer_name") }}</td>
+      <td align="center">{{ KNOWL("homepage") }}</td>
+      <td align="center">{{ KNOWL("email") }}</td>
+      <td align="center">{{ KNOWL("organizer") }}</td>
+      <td align="center">{{ KNOWL("display") }}</td>
+    </thead>
+    {% for i in range(maxlength["organizers"]) %}
+    <tr>
+      {% if i > 0 and i < (seminar.organizer_data | length) %}
+      <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
+      {% else %}
+      <td></td>
+      {% endif %}
+      {% if i < (seminar.organizer_data | length) %}
+      <td>
+        <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['full_name'] }}" />
+      </td>
+      <td>
+        <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
+      </td>
+      <td>
+        <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
+      </td>
+      <td align="center">
+        {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
+        {# but it is displayed in a column labeleled "organizer" so it is checked when curator is false #}
+        <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
+      </td>
+      <td align="center">
+        <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
+      </td>
+      {% else %}
+      <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
+      <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
+      <td><input name="org_email{{i}}" style="width:220px;" /></td>
+      <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
+      <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+  <br>
+  <table><tr>
+      <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">{{ ('Create ' + seminar.series_type) if seminar.new else 'Save changes' }}</button></td>
+      <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">{{ 'Cancel creation' if seminar.new else 'Cancel changes' }}</button></td>
+      {% if not seminar.new and seminar.user_can_delete() %}
+      <td><button class="delete" type="submit" name="submit" value="delete" onclick="unsaved = false;">{{ 'Delete ' + seminar.series_type }}</button></td>
+      {% endif %}
+    </tr></table>
+</form>
 <script type="text/javascript">
-/* topic and inst selector */
-const topicOptions = [
-  {% for ab, topic in user_topics(seminar) %}
-  {
-    label: `{{ topic }}`,
-    value: `{{ ab }}`,
-  },
-  {% endfor %}
-];
+  /* topic, language and inst selector */
 
-const instOptions = [
-  {% for iid, name in institutions %}
-  {
-    label: `{{ name | safe }}`,
-    value: `{{ iid }}`,
-  },
-  {% endfor %}
-];
+  const instOptions = [
+    {% for iid, name in institutions %}
+    {
+      label: `{{ name | safe }}`,
+        value: `{{ iid }}`,
+    },
+    {% endfor %}
+  ];
 
-{{ languages.js_options() | safe }}
+  {{ languages.js_options() | safe }}
 
-const subjOptions = [
-  {% for sid, name in subjects %}
-  {
-    label: `{{ name }}`,
-    value: `{{ sid }}`,
-  },
-  {% endfor %}
-];
 
-const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
+  const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
 
-document.addEventListener("DOMContentLoaded", function() {
-  /* prevent accidental closing of browser window */
-  {{ prevent_unsaved() }}
+  document.addEventListener("DOMContentLoaded", function() {
+    /* prevent accidental closing of browser window */
+    {{ prevent_unsaved() }}
 
-  function swapv(a,b) {
-    var x = $('input[name="'+a+'"]')[0].value;
-    $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
-    $('input[name="'+b+'"]')[0].value = x;
-    x = $('input[name="'+a+'"]')[0].value;
-  }
-  function swapc(a,b) {
-    var x = $('input[name="'+a+'"]')[0].checked;
-    $('input[name="'+a+'"]')[0].checked = $('input[name="'+b+'"]')[0].checked;
-    $('input[name="'+b+'"]')[0].checked = x;
-    x = $('input[name="'+a+'"]')[0].checked;
-  }
-  {% for i in range(1,(seminar.organizer_data | length)) %}
+    function swapv(a,b) {
+      var x = $('input[name="'+a+'"]')[0].value;
+      $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
+      $('input[name="'+b+'"]')[0].value = x;
+      x = $('input[name="'+a+'"]')[0].value;
+    }
+    function swapc(a,b) {
+      var x = $('input[name="'+a+'"]')[0].checked;
+      $('input[name="'+a+'"]')[0].checked = $('input[name="'+b+'"]')[0].checked;
+      $('input[name="'+b+'"]')[0].checked = x;
+      x = $('input[name="'+a+'"]')[0].checked;
+    }
+    {% for i in range(1,(seminar.organizer_data | length)) %}
     $("a.swap{{i}}").click(function(e){
       e.preventDefault();
       swapv("org_full_name{{i-1}}","org_full_name{{i}}");
@@ -310,89 +279,71 @@ document.addEventListener("DOMContentLoaded", function() {
       swapc("org_curator{{i-1}}","org_curator{{i}}");
       swapc("org_display{{i-1}}","org_display{{i}}");
     });
-  {% endfor %}
-  makeTopicSelector(
-    topicOptions,
-    {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
-  );
-  makeInstitutionSelector(
-    instOptions,
-    {{ seminar.institutions | safe }},
-  );
-  makeLanguageSelector(
-    langOptions,
-    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
-  );
-  makeSubjectSelector(
-      subjOptions,
-      {{ seminar.subjects | safe }},
-  );
-  $('input[name="subjects"]').change(
-    function (){
-      if( $(this).val() == '[]') {
-      $("#subject_selector").notify(
-      "Please select at least one subject",
-        {className: "error", position: "right"})
-      } else {
-      $("#topic_selector").notify(
-      "Save your changes to load new topics options",
-        {className: "info", position: "right"})
-      }
-    });
+    {% endfor %}
 
-  function showplusminus(n) {
-    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
-    document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
-  }
-  $("a.slotplus").click(function(e){
-    e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value)+1;
-    document.getElementById('slots').value = '' + n;
-    if ( n <= 3 ) {
-      document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
-      document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
-    } else {
-      document.getElementById('weekday'+(n-1)).style.display = 'block';
-      document.getElementById('time_slot'+(n-1)).style.display = 'block';
+    makeTopicsTree(json_tree);
+
+    makeInstitutionSelector(
+      instOptions,
+      {{ seminar.institutions | safe }},
+    );
+    makeLanguageSelector(
+      langOptions,
+      {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
+    );
+
+    function showplusminus(n) {
+      document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
+      document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
     }
-    showplusminus(n);
-  });
-  $("a.slotminus").click(function(e){
-    e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value)-1;
-    document.getElementById('slots').value = '' + n;
-    document.getElementById('weekday'+n).value = '';
-    document.getElementById('time_slot'+n).value ='';
-    if ( n < 3 ) {
-      document.getElementById('weekday'+n).style.visibility = 'hidden';
-      document.getElementById('time_slot'+n).style.visibility = 'hidden';
-    } else {
-      document.getElementById('weekday'+n).style.display = 'none';
-      document.getElementById('time_slot'+n).style.display = 'none';
-    }
-    showplusminus(n);
-  });
-  function showslots() {
-    var n = parseInt(document.getElementById('slots').value);
-    if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
-    for ( var i = 0 ; i < n ; i++ ) {
-      if ( i < 3 ) {
-        document.getElementById('weekday'+i).style.visibility = 'visible';
-        document.getElementById('time_slot'+i).style.visibility = 'visible';
+    $("a.slotplus").click(function(e){
+      e.preventDefault();
+      var n = parseInt(document.getElementById('slots').value)+1;
+      document.getElementById('slots').value = '' + n;
+      if ( n <= 3 ) {
+        document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
+        document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
       } else {
-        document.getElementById('weekday'+i).style.display = 'block';
-        document.getElementById('time_slot'+i).style.display = 'block';
+        document.getElementById('weekday'+(n-1)).style.display = 'block';
+        document.getElementById('time_slot'+(n-1)).style.display = 'block';
       }
+      showplusminus(n);
+    });
+    $("a.slotminus").click(function(e){
+      e.preventDefault();
+      var n = parseInt(document.getElementById('slots').value)-1;
+      document.getElementById('slots').value = '' + n;
+      document.getElementById('weekday'+n).value = '';
+      document.getElementById('time_slot'+n).value ='';
+      if ( n < 3 ) {
+        document.getElementById('weekday'+n).style.visibility = 'hidden';
+        document.getElementById('time_slot'+n).style.visibility = 'hidden';
+      } else {
+        document.getElementById('weekday'+n).style.display = 'none';
+        document.getElementById('time_slot'+n).style.display = 'none';
+      }
+      showplusminus(n);
+    });
+    function showslots() {
+      var n = parseInt(document.getElementById('slots').value);
+      if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+      for ( var i = 0 ; i < n ; i++ ) {
+        if ( i < 3 ) {
+          document.getElementById('weekday'+i).style.visibility = 'visible';
+          document.getElementById('time_slot'+i).style.visibility = 'visible';
+        } else {
+          document.getElementById('weekday'+i).style.display = 'block';
+          document.getElementById('time_slot'+i).style.display = 'block';
+        }
+      }
+      if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
+      showplusminus(n);
     }
-    if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
-    showplusminus(n);
-  }
-  // Make sure showslots gets called whenever the page is shown, including via the back button
-  window.onpageshow = function(e) {
-    showslots()
-  };
-  makeTree(json_tree);
-});
+    // Make sure showslots gets called whenever the page is shown, including via the back button
+    window.onpageshow = function(e) {
+      showslots()
+    };
+  });
 
 
 </script>
