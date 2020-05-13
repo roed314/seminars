@@ -113,7 +113,6 @@ function setTopicCookie(topic, value) {
     if (!found) {
         cur_items.push(new_item);
     }
-    console.log(cur_items);
     setCookie("topics_dict", cur_items.join(","));
 }
 function getTopicCookie(topic) {
@@ -748,16 +747,26 @@ function makeTopicsTree(json_tree) {
     )
   }
 
-  function depth_compare(a, b) {
-    return a.parents.length - b.parents.length;
-  }
+
 
 
   function callback_topics(instance) {
-    var vertices = instance.get_selected(true).sort(depth_compare);
-    console.log(vertices);
-    var uniq_vertices = uniqByKeepLast(vertices, node => node.li_attr['vertex']).sort(depth_compare);
-    console.log(uniq_vertices);
+    function cmp(a, b) {
+      var ad = instance.get_checked_descendants(a.id).length > 0;
+      var bd = instance.get_checked_descendants(b.id).length > 0;
+      if( ad == bd) {
+        //use depth
+        return b.parents.length - a.parents.length;
+      } else {
+        if ( ad ) {
+          return 1;
+        } else {
+          return -1;
+        }
+      }
+    }
+    var vertices = instance.get_selected(true).sort(cmp);
+    var uniq_vertices = uniqByKeepLast(vertices, node => node.li_attr['vertex']).sort(cmp);
     $('input[name="topics"]')[0].value = "[" +
       uniq_vertices.reduce(
         function (acc, node) {
@@ -766,17 +775,23 @@ function makeTopicsTree(json_tree) {
         []
       ) + "]";
     $('#topicDAG_selector').html(
-        uniq_vertices.reduce(
-          function (acc, node) {
-            if(instance.get_checked_descendants(node.id).length == 0) {
-              return acc.concat(["<span class='topic_label'>" + node.text + "<i class='fa fa-times'></i ></span>"]);
-            } else {
-              return acc.concat(["<span class='topic_label'>" + node.text + "</span>"]);
-            }
-          },
-          []
+      uniq_vertices.reduce(
+        function (acc, node) {
+          if(instance.get_checked_descendants(node.id).length == 0) {
+            return acc.concat(["<span class='topic_label'>" + node.text + "<i class='fa fa-times' nodeid='" + node.id + "'></i ></span>"]);
+          } else {
+            return acc.concat(["<span class='topic_label'>" + node.text + "</span>"]);
+          }
+        },
+        []
       ).join("\n")
     )
+    $("span.topic_label > i[nodeid]").on('mouseup',
+      function (e) {
+        console.log("yellow");
+        e.preventDefault();
+        $.jstree.reference('#topicDAG').deselect_node($(this).attr('nodeid'));
+      });
   }
 
   $('#topicDAG').jstree({
@@ -855,6 +870,7 @@ function makeTopicsTree(json_tree) {
     }
   )
 
+
   $('#topicDAG_deselect_all').on('click', function () {
     $('#topicDAG').jstree('deselect_all');
     return false;
@@ -883,14 +899,14 @@ function makeTopicsTree(json_tree) {
     {
       var divcontainer = $("div.topicDAG");
       var spancontainer = $("span.topicDAG");
-      // if the target of the click isn't the container nor a descendant of the container
-      if( spancontainer.is(e.target) || spancontainer.has(e.target).length > 0) {
+      if( e.target.matches("i[nodeid]") ) {
+        divcontainer.show();
+      } else if ( spancontainer.is(e.target) || spancontainer.has(e.target).length > 0) {
         divcontainer.toggle();
         if( divcontainer.css('display') != 'none' ){
           $('#topicDAG_search').focus();
         }
-      } else if (!divcontainer.is(e.target) && divcontainer.has(e.target).length === 0) 
-      {
+      } else if (!divcontainer.is(e.target) && divcontainer.has(e.target).length === 0) {
         divcontainer.hide();
       }
     });

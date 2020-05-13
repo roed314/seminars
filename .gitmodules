@@ -1,6 +1,6 @@
 [submodule "lmfdb"]
 	path = lmfdb
-	url = https://github.com/jamiesully/lmfdb.git
+	url = https://github.com/LMFDB/lmfdb.git
 [submodule "seminars/static/select-pure"]
 	path = seminars/static/select-pure
 	url = https://github.com/duetosymmetry/select-pure.git
