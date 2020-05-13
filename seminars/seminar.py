@@ -194,6 +194,7 @@ class WebSeminar(object):
             if not org.get("name") and org.get("full_name"):
                 org["name"] = org["full_name"]
             killattr(org, "full_name")
+            print(org)
             self.organizers[i] = org
 
     def visible(self):
