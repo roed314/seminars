@@ -227,7 +227,8 @@ function toggleLanguage(id) {
     }
 }
 
-function toggleTopicDAG(togid) {
+
+function toggleTopicDAG_core(togid) {
     var to_show = [];
     var to_hide = [];
     console.log(togid);
@@ -298,6 +299,12 @@ function toggleTopicDAG(togid) {
             apply_striping();
         }
     }
+}
+
+function toggleTopicDAG(togid) {
+  console.log(togid);
+  var foo = togid;
+  setTimeout(() => toggleTopicDAG_core(foo), 50);
 }
 
 function toggleTopicView(pid, cid, did) {
