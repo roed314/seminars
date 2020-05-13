@@ -13,7 +13,7 @@ def toggle(tglid, value, classes="", onchange="", name=""):
     ></input>
 <label class="{classes}tgl-btn"
        for="{tglid}"
-        onclick="this.control.value = -parseInt(this.control.value);this.control.dataset.chosen=this.control.value;setTimeout( function () {this.control.dispatchEvent(new Event('change'))}, 50);"
+        onclick="this.control.value = -parseInt(this.control.value);this.control.dataset.chosen=this.control.value;this.control.dispatchEvent(new Event('change'));"
        ></label>
 """.format(
         tglid=tglid,
