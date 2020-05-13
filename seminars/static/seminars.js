@@ -230,7 +230,7 @@ function toggleLanguage_core(id) {
 function toggleLanguage(togid) {
   console.log(togid);
   var foo = togid;
-  setTimeout(() => toggleLanguage_core(foo), 50);
+  setTimeout(() => toggleLanguage_core(foo), 5);
 }
 
 
@@ -310,7 +310,7 @@ function toggleTopicDAG_core(togid) {
 function toggleTopicDAG(togid) {
   console.log(togid);
   var foo = togid;
-  setTimeout(() => toggleTopicDAG_core(foo), 50);
+  setTimeout(() => toggleTopicDAG_core(foo), 5);
 }
 
 function toggleTopicView(pid, cid, did) {
