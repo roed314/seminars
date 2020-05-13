@@ -8,7 +8,9 @@ from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser
 from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, MAX_SLOTS, MAX_ORGANIZERS
 from seminars.create.main import process_save_seminar, process_save_talk
-from functools import wraps
+from functools import wraps, lru_cache
+from psycopg2.sql import SQL
+from lmfdb.backend.searchtable import PostgresSearchTable
 
 def format_error(msg, *args):
     return msg % args
@@ -73,6 +75,32 @@ whitelisted_cols = [
 ]
 renames = [("seminar_id", "series_id"),
            ("seminar_ctr", "series_ctr")]
+
+@lru_cache(maxsize=None)
+def duplicate_table(name):
+    cur = db._execute(SQL(
+        "SELECT name, label_col, sort, count_cutoff, id_ordered, out_of_order, "
+        "has_extras, stats_valid, total, include_nones FROM meta_tables WHERE name=%s"
+    ), [name])
+    def update(self, query, changes, resort=False, restat=False, commit=True):
+        raise APIError({"code": "update_prohibited"}, 500)
+    def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
+        raise APIError({"code": "insert_prohibited"}, 500)
+    from seminars import count
+    table = PostgresSearchTable(db, *cur.fetchone())
+    table.update = update.__get__(table)
+    table.count = count.__get__(table)
+    table.insert_many = insert_many.__get__(table)
+    table.search_cols = [col for col in table.search_cols if col in whitelisted_cols]
+    table.col_type = {col: typ for (col, typ) in table.col_type.items() if col in whitelisted_cols}
+    return table
+
+def sanitized_seminars():
+    return duplicate_table("seminars")
+
+def sanitized_talks():
+    return duplicate_table("talks")
+
 def sanitize_output(result):
     if isinstance(result, dict):
         ans = {key: val for (key, val) in result.items() if key in whitelisted_cols}
@@ -84,7 +112,7 @@ def sanitize_output(result):
         return result
 
 def sanitize_query(query):
-    # TODO
+    # TODO: write versions of seminar_search, etc using the santized tables
     return query
 
 @api_page.route("/<int:version>/search_series", methods=["GET", "POST"])
