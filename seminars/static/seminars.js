@@ -202,7 +202,7 @@ function reviseCookies() {
     }
 }
 
-function toggleLanguage(id) {
+function toggleLanguage_core(id) {
     var toggle = $("#" + id);
     var toggleval = parseInt(toggle.val());
     console.log(id, toggleval);
@@ -225,6 +225,12 @@ function toggleLanguage(id) {
             apply_striping();
         }
     }
+}
+
+function toggleLanguage(togid) {
+  console.log(togid);
+  var foo = togid;
+  setTimeout(() => toggleLanguage_core(foo), 50);
 }
 
 
