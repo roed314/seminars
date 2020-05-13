@@ -10,6 +10,7 @@ from seminars.utils import (
     subject_pairs,
     topdomain,
     topics,
+    maxlength,
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
@@ -39,15 +40,15 @@ def get_now():
     return datetime.now(pytz.UTC)
 
 
-def parse_subject(info, query, prefix):
-    subject = info.get(prefix + "_subject")
+def parse_subject(info, query):
+    subject = info.get("subject")
     if subject:
         query["subjects"] = {"$contains": subject}
 
 
-def parse_topic(info, query, prefix):
+def parse_topic(info, query):
     # of the talk
-    topic = info.get(prefix + "_topic")
+    topic = info.get("topic")
     if topic:
         # FIXME: temporary bridge during addition of physics
         if "_" not in topic:
@@ -55,8 +56,8 @@ def parse_topic(info, query, prefix):
         query["topics"] = {"$or": [{"$contains": topic}, {"$contains": topic[5:]}]}
 
 
-def parse_institution_sem(info, query, prefix="seminar"):
-    inst = info.get(prefix + "_institution")
+def parse_institution_sem(info, query):
+    inst = info.get("institution")
     if inst == "None":
         query["institutions"] = []
     elif inst:
@@ -64,17 +65,17 @@ def parse_institution_sem(info, query, prefix="seminar"):
         query["institutions"] = {"$contains": inst}
 
 
-def parse_institution_talk(info, query, prefix="talk"):
-    if info.get(prefix + "_institution"):
+def parse_institution_talk(info, query):
+    if info.get("institution"):
         sub_query = {}
         # one day we will do joins
-        parse_institution_sem(info, sub_query, prefix="talk")
+        parse_institution_sem(info, sub_query)
         sem_shortnames = list(seminars_search(sub_query, "shortname"))
         query["seminar_id"] = {"$in": sem_shortnames}
 
 
-def parse_venue(info, query, prefix):
-    value = info.get(prefix + "_venue")
+def parse_venue(info, query):
+    value = info.get("venue")
     if value == "online":
         query["online"] = True
     elif value == "in-person":
@@ -93,16 +94,16 @@ def parse_substring(info, query, field, qfields, start="%", end="%"):
         )
 
 
-def parse_access(info, query, prefix):
+def parse_access(info, query):
     # we want exact matches
-    access = info.get(prefix + "_access")
+    access = info.get("access")
     if access == "open":
         query["access"] = "open"
     elif access == "users":
         query["access"] = {"$or": ["open", "users"]}
 
 
-def parse_date(info, query):
+def parse_daterange(info, query, time=True):
     tz = current_user.tz
     date = info.get("daterange")
     if date:
@@ -114,19 +115,18 @@ def parse_date(info, query):
         if start.strip():
             try:
                 start = tz.localize(parse(start))
-                sub_query["$gte"] = start
-            except Exception:
-                flash_error("Could not parse date: '%s'", start)
+                sub_query["$gte"] = start if time else start.date()
+            except Exception as e:
+                flash_error("Could not parse start date %s.  Error: " + str(e), start)
         if end.strip():
             try:
                 end = tz.localize(parse(end))
                 end = end + timedelta(hours=23, minutes=59, seconds=59)
-                sub_query["$lte"] = end
-            except Exception:
-                flash_error("Could not parse date: '%s'", end)
+                sub_query["$lte"] = end if time else end.date()
+            except Exception as e:
+                flash_error("Could not parse end date %s.  Error: " + str(e), end)
         if sub_query:
-            query["start_time"] = sub_query
-
+            query["start_time" if time else "start_date"] = sub_query
 
 def parse_video(info, query):
     v = info.get("video")
@@ -134,18 +134,18 @@ def parse_video(info, query):
         query["video_link"] = {"$ne": ''}
 
 
-def parse_language(info, query, prefix):
-    v = info.get(prefix + "_language")
+def parse_language(info, query):
+    v = info.get("language")
     if v:
         query["language"] = v
 
 
 def talks_parser(info, query):
-    parse_subject(info, query, prefix="talk")
-    parse_topic(info, query, prefix="talk")
+    parse_subject(info, query)
+    parse_topic(info, query)
     parse_institution_talk(info, query)
-    #parse_venue(info, query, prefix="talk")
-    parse_substring(info, query, "talk_keywords",
+    #parse_venue(info, query)
+    parse_substring(info, query, "keywords",
                     ["title",
                      "abstract",
                      "speaker",
@@ -154,14 +154,14 @@ def talks_parser(info, query):
                      "comments",
                      "speaker_homepage",
                      "paper_link"])
-    parse_access(info, query, prefix="talk")
+    parse_access(info, query)
 
     parse_substring(info, query, "speaker", ["speaker"])
     parse_substring(info, query, "affiliation", ["speaker_affiliation"])
     parse_substring(info, query, "title", ["title"])
-    parse_date(info, query)
     parse_video(info, query)
-    parse_language(info, query, prefix="talk")
+    parse_language(info, query)
+    parse_daterange(info, query, time=True)
     query["display"] = True
     # TODO: remove this temporary measure allowing hidden to be None
     query["hidden"] = {"$or": [False, {"$exists": False}]}
@@ -172,19 +172,26 @@ def talks_parser(info, query):
     if topdomain() == "mathseminars.org":
         query["subjects"] = ["math"]
 
-def seminars_parser(info, query):
-    parse_subject(info, query, prefix="seminar")
-    parse_topic(info, query, prefix="seminar")
+
+def seminars_parser(info, query, org_query={}, conference=False):
+    parse_subject(info, query)
+    parse_topic(info, query)
     parse_institution_sem(info, query)
-    #parse_venue(info, query, prefix="seminar")
-    parse_substring(info, query, "seminar_keywords",
+    #parse_venue(info, query)
+    parse_substring(info, query, "keywords",
                     ["name",
                      "description",
                      "homepage",
                      "shortname",
                      "comments"])
-    parse_access(info, query, prefix="seminar")
-    parse_language(info, query, prefix="seminar")
+    org_cols = ["name", "full_name", "homepage"]
+    if current_user.is_subject_admin(None):
+        org_cols.append("email")
+    parse_substring(info, org_query, "organizer", org_cols)
+    parse_access(info, query)
+    parse_language(info, query)
+    if conference:
+        parse_daterange(info, query, time=False)
 
     parse_substring(info, query, "name", ["name"])
     query["display"] = True
@@ -193,8 +200,6 @@ def seminars_parser(info, query):
     # FIXME: temporary measure during addition of physics
     if topdomain() == "mathseminars.org":
         query["subjects"] = ["math"]
-
-# Common boxes
 
 
 def institutions_shortnames():
@@ -212,20 +217,20 @@ class TalkSearchArray(SearchArray):
 
     def __init__(self):
         ## subjects
-        subject = SelectBox(name="seminar_subject", label="Subject", options=[("", "")] + subject_pairs())
+        subject = SelectBox(name="subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
-        topic = SelectBox(name="talk_topic", label="Topic", options=[("", "")] + user_topics())
+        topic = SelectBox(name="topic", label="Topic", options=[("", "")] + user_topics())
 
         ## pick institution where it is held
         institution = SelectBox(
-            name="talk_institution",
+            name="institution",
             label="Institution",
             options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
         venue = SelectBox(
-            name="talk_venue",
+            name="venue",
             label=static_knowl("venue"),
             options=[("", ""),
                      ("online", "online"),
@@ -236,14 +241,14 @@ class TalkSearchArray(SearchArray):
 
         ## keywords for seminar or talk
         keywords = TextBox(
-            name="talk_keywords",
+            name="keywords",
             label="Anywhere",
             colspan=(1, 2, 1),
             width=textwidth,
         )
         ## type of access
         access = SelectBox(
-            name="talk_access",
+            name="access",
             label="Access",
             options=[
                 ("", ""),
@@ -264,7 +269,7 @@ class TalkSearchArray(SearchArray):
             name="affiliation",
             label="Affiliation",
             colspan=(1, 2, 1),
-            width=160 * 2 - 1 * 20,
+            width=textwidth,
         )
         title = TextBox(
             name="title",
@@ -279,11 +284,11 @@ class TalkSearchArray(SearchArray):
             example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
             colspan=(1, 2, 1),
-            width=160 * 2 - 1 * 20,
+            width=textwidth,
         )
         lang_dict = languages_dict()
         language = SelectBox(
-            name="talk_language",
+            name="language",
             label="Language",
             options=[("", ""), ("en", "English")]
             + [
@@ -323,20 +328,20 @@ class SemSearchArray(SearchArray):
 
     def __init__(self, conference=False):
         ## subjects
-        subject = SelectBox(name="seminar_subject", label="Subject", options=[("", "")] + subject_pairs())
+        subject = SelectBox(name="subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
-        topic = SelectBox(name="seminar_topic", label="Topic", options=[("", "")] + user_topics())
+        topic = SelectBox(name="topic", label="Topic", options=[("", "")] + user_topics())
 
         ## pick institution where it is held
         institution = SelectBox(
-            name="seminar_institution",
+            name="institution",
             label="Institution",
             options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
         )
 
         venue = SelectBox(
-            name="seminar_venue",
+            name="venue",
             label=static_knowl("venue"),
             options=[("", ""),
                      ("online", "online"),
@@ -346,10 +351,10 @@ class SemSearchArray(SearchArray):
         assert venue
 
         ## keywords for seminar or talk
-        keywords = TextBox(name="seminar_keywords", label="Anywhere", width=textwidth,)
+        keywords = TextBox(name="keywords", label="Anywhere", width=textwidth,)
         ## type of access
         access = SelectBox(
-            name="seminar_access",
+            name="access",
             label="Access",
             options=[
                 ("", ""),
@@ -359,7 +364,7 @@ class SemSearchArray(SearchArray):
         )
         lang_dict = languages_dict()
         language = SelectBox(
-            name="seminar_language",
+            name="language",
             label="Language",
             options=[("", ""), ("en", "English")]
             + [
@@ -375,16 +380,27 @@ class SemSearchArray(SearchArray):
             name="name",
             label="Name",
             width=textwidth,
-            example="Thule topology colloquium series",
         )
-
+        organizer = TextBox(
+            name="organizer",
+            label="Organizer",
+            width=textwidth,
+        )
+        date = TextBox(
+            name="daterange",
+            id="daterange",
+            label="Date",
+            example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
+            example_value=True,
+            colspan=(1, 2, 1),
+            width=textwidth,
+        )
         self.array = [
             [subject, keywords],
             [topic, name],
-            [institution, access],
-            [language],
-            # [venue],
-            # [count],
+            [institution, organizer],
+            [language, ],
+            [access, date] if conference else [access],
         ]
 
         assert conference in [True, False]
@@ -400,8 +416,7 @@ class SemSearchArray(SearchArray):
         ]
 
     def hidden(self, info):
-        return []  # [("seminar_start", "seminar_start")]
-
+        return []
 
 @app.route("/")
 def index():
@@ -570,11 +585,11 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
             query["end_date"] = {"$lt": recent}
         else:
             query["end_date"] = {"$gte": recent}
-    if conference and sort is None:
-        if past:
-            sort = [("end_date", -1), ("start_date", -1), "name"]
-        else:
-            sort = ["start_date", "end_date", "name"]
+        if sort is None:
+            if past:
+                sort = [("end_date", -1), ("start_date", -1), "name"]
+            else:
+                sort = ["start_date", "end_date", "name"]
     if sort is None: # not conferences
         # We don't currently call this case in the past, but if we add it we probably
         # need a last_talk_sorted that sorts by end time of last talk in reverse order
@@ -605,10 +620,11 @@ def search_conferences():
     # For now this is basically the same as seminars_search, but they should diverge some (e.g. search on start date)
     return _search_series(conference=True)
 
-def _search_series(conference):
+def _search_series(conference=False):
     info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
+        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
     try:
         seminar_count = int(info["seminar_count"])
         seminar_start = int(info["seminar_start"])
@@ -617,17 +633,27 @@ def _search_series(conference):
     except (KeyError, ValueError):
         seminar_count = info["seminar_count"] = 50
         seminar_start = info["seminar_start"] = 0
-    seminar_query = {"is_conference": conference}
-    seminars_parser(info, seminar_query)
+    seminar_query, org_query = {"is_conference": conference}, {}
+    seminars_parser(info, seminar_query, org_query, conference=conference)
     # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
     # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
     # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
     # The second downside is that we need to do two queries.
-    info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers()))
+    if conference:
+        sort = ["start_date", "end_date", "name"]
+        info["results"] = seminars_search(seminar_query, organizer_dict=all_organizers(org_query), sort=sort)
+    else:
+        info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers(org_query)))
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(
-        "search_seminars.html", title=title, info=info, section="Search",subsection=subsection, bread=None, is_conference=conference
+        "search_seminars.html",
+        title=title,
+        info=info,
+        section="Search",
+        subsection=subsection,
+        bread=None,
+        is_conference=conference,
     )
 
 @app.route("/search/talks")
@@ -637,8 +663,7 @@ def search_talks():
     )
     if "search_type" not in info:
         info["talk_online"] = True
-        info["daterange"] = info.get(
-            "daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
+        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
         )
     try:
         talk_count = int(info["talk_count"])
@@ -669,7 +694,9 @@ def list_institutions():
         title="Institutions",
         section=section,
         subsection="institutions",
+        maintained_institutions=institutions({'admin':current_user.email}),
         institutions=institutions(),
+        maxlength=maxlength,
     )
 
 
@@ -717,7 +744,7 @@ def talks_search_api(shortname, projection=1):
         elif request.args.get('daterange') == 'future':
             query["start_time"] = {'$gte': get_now()}
         else:
-            parse_date(request.args, query)
+            parse_daterange(request.args, query, time=True)
     elif 'past' in request.args and 'future' in request.args:
         # no restriction on date
         pass
@@ -829,21 +856,21 @@ def ics_seminar_file(shortname):
         user=current_user)
 
 
-@app.route("/talk/<semid>/<int:talkid>/ics")
-def ics_talk_file(semid, talkid):
-    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+@app.route("/talk/<seminar_id>/<int:talkid>/ics")
+def ics_talk_file(seminar_id, talkid):
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
     return ics_file(
         [talk],
-        filename="{}_{}.ics".format(semid, talkid),
+        filename="{}_{}.ics".format(seminar_id, talkid),
         user=current_user)
 
 
-@app.route("/talk/<semid>/<int:talkid>/")
-def show_talk(semid, talkid):
+@app.route("/talk/<seminar_id>/<int:talkid>/")
+def show_talk(seminar_id, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
-    talk = talks_lucky({"seminar_id": semid, "seminar_ctr": talkid})
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
     kwds = dict(

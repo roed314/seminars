@@ -29,7 +29,16 @@
       <td style="padding-left:20px;"><button type="submit" name="refresh" value="yes">Refresh</button></td>    </tr>
   </table>
   <br>
-  <div><div class="inlineh2">Schedule</div> <button type="submit" class="textbottom">Save all changes</button> <a style="margin-left: 30px" href="{{ url_for('.edit_seminar_schedule', shortname=seminar.shortname) }}">Cancel all changes</a></div>
+  <table><tr>
+    <th style="padding-left:0px; padding-right:15px; font-size:147%;">Schedule</th>
+    <td><button class="save" type="submit" name="submit" value="save">Save all changes</button></td>
+    <td><button class="cancel" type="submit" name="submit" value="cancel">Cancel all changes</button><td>
+    {% if not seminar.is_conference and filled == 0 and seminar.frequency and seminar.frequency > 7 %}
+    <td class="forminfo">If dates are misaligned, enter details for the first talk, correct the date, and click save.</td>
+    {% endif %}
+    <td class="forminfo">
+  </tr></table>
+  <br>
   <table id="edit-schedule-table">
     <thead>
       <tr>
@@ -49,18 +58,18 @@
       <td class="timerange"><input style="width: 96px;" name="time{{i}}" value="{{ schedule[i][1] }}" placeholder="15:00-16:00" /></td>
       {% if schedule[i][2] %}
         {% set talk = schedule[i][2] %}
-        <td class="speakerinp"><input name="speaker{{i}}" value="{{ talk.speaker | blanknone }}" /></td>
-        <td class="emailinp"><input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" /></td>
-        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" /></td>
-        <td class="titleinp"><input name="title{{i}}" value="{{ talk.title | blanknone }}" /></td>
+        <td class="speakerinp"><input name="speaker{{i}}" value="{{ talk.speaker | blanknone }}" maxlength="{{ maxlength['speaker'] }}"/></td>
+        <td class="emailinp"><input name="speaker_email{{i}}" value="{{ talk.speaker_email | blanknone }}" maxlength="{{ maxlength['speaker_email'] }}"/></td>
+        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="{{ talk.speaker_affiliation | blanknone }}" maxlength="{{ maxlength['speaker_affiliation'] }}"/></td>
+        <td class="titleinp"><input name="title{{i}}" value="{{ talk.title | blanknone }}" maxlength="{{ maxlength['title'] }}"/></td>
         <td align="left" style="padding-right:0px;"><input type="checkbox" name="hidden{{i}}" value="yes"{% if talk.hidden %} checked {% endif %} /></td>
         <td align="left">{{ talk.details_link() | safe }}</td>
         <input type="hidden" name="seminar_ctr{{i}}" value="{{ talk.seminar_ctr }}" />
       {% else %}
-        <td class="speakerinp"><input name="speaker{{i}}" value="" /></td>
-        <td class="emailinp"><input name="speaker_email{{i}}" value="" /></td>
-        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="" /></td>
-        <td class="titleinp"><input name="title{{i}}" value="" /></td>
+        <td class="speakerinp"><input name="speaker{{i}}" value="" maxlength="{{ maxlength['speaker'] }}"/></td>
+        <td class="emailinp"><input name="speaker_email{{i}}" value="" maxlength="{{ maxlength['email'] }}"/></td>
+        <td class="affiliationinp"><input name="speaker_affiliation{{i}}" value="" maxlength="{{ maxlength['affiliation'] }}"/></td>
+        <td class="titleinp"><input name="title{{i}}" value="" maxlength="{{ maxlength['title'] }}"/></td>
         <td><input type="checkbox" name="hidden{{i}}" value="yes"/></td>
         <input type="hidden" name="seminar_ctr{{i}}" value="" />
       {% endif %}

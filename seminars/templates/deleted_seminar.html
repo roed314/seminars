@@ -2,18 +2,53 @@
 
 {% block content %}
 
+
 {% if user.is_subject_admin(seminar) or seminar.owner == user.email %}
 
-<p>Your seminar, {{seminar.name}}, has been deleted with all of its talks.  They will no longer show up in search results or on the browse page.</p>
+<form action="{{ url_for('.delete_seminar',  shortname=shortname) }}" method="POST">
+{% if seminar.deleted %}
+     <p>The {{seminar.series_type}} below and all its talks have been deleted.  You can restore them or permanently delete them.</p>
+{% else %}
+    <p>Deleting the {{seminar.series_type}} below will cancel all subscriptions and ensure that it is not visible on this site.<br>
+    {% if talks %} This also applies to all of the associated talks listed below.{% endif %}
+    You will be able to restore the {{seminar.series_type}}{% if talks %} and associated talks{% endif %} later if needed, but subscriptions will not be restored.</p>
+    <p>Permanent deletion removes all information related to the {{seminar.series_type}} and its associated talks from our database.<br>
+    <b>This cannot be undone</b>.
+    </p>
+{% endif %}
+<br>
+<table><tr>
+{% if seminar.deleted %}
+        <td><button class="save" type="submit" name="submit" value="revive">Revive series</button></td>
+        <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete series</button></td>
+{% else %}
+    <td><button class="cancel" type="sumbit" name="submit" value="cancel">Cancel deletion</button></td>
+    <td><button class="savedelete" type="sumbit" name="submit" value="delete">Delete series</button></td>
+    <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete series</button></td>
+{% endif %}
+</tr></table>
+<br>
+<h2>{{ seminar.show_name(plain=True) | safe }}</h2>
 
-<ul>
-  <li><a href="{{ url_for('.revive_seminar', shortname=seminar.shortname) }}">Revive</a> (will also revive all talks)</li>
-  <li><a href="{{ url_for('.permdelete_seminar', shortname=seminar.shortname) }}" onclick="return confirm('Are you sure you want to permanently delete this seminar and all of its talks?  This cannot be undone.');">Delete permanently</a></li>
-</ul>
+{% if talks %}
+    <hr>
+    <table>
+    <tr>{{ talks_header(include_seminar=False, include_subscribe=False) | safe }}</tr>
+    {% for talk in talks %}
+        <tr>{{ talk.oneline(include_seminar=False, include_subscribe=False) | safe }}</tr>
+    {% endfor %}
+    </table>
+{% endif %}
+</form>
 
 {% else %}
 
-<p>The seminar {{seminar.name}} has been deleted.</p>
+{% if seminar.deleted %}
+    <p>The {{seminar.series_type}} {{seminar.name}} has been deleted.  You do not have permission to revive it.</p>
+{% else %}
+    <p>You do not have permission to delete this {{seminar.series_type}}.</p>
+{% endif %}
+
 
 {% endif %}
 

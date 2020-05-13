@@ -1,0 +1,31 @@
+{% extends "homepage.html" %}
+{% block content %}
+  {% if (similar|length) > 1 %} {% set phrase = "some institutions that have" %} {% else %} {% set phrase = "an institution that has" %} {% endif %}
+  <p>The institution name <b>{{newinstitution.name}}</b> you entered is similar to the name of {{ phrase }} already been created.</p>
+  <p>Please review the list below and click Continue or Cancel as appropriate.</p>
+  <form id="instform" action="{{ url_for('.edit_institution') }}" method="POST">
+    <input type="hidden" name="shortname" value="{{ newinstitution.shortname }}"/>
+    <input type="hidden" name="name" value="{{ newinstitution.name }}"/>
+    <input type="hidden" name="new" value="{{ 'yes' if newinstitution.new else 'no' }}"/>
+    <input type="hidden" name="similar" value="no" />
+    <div class='searchresults'>
+      <table class='ntdata'>
+        <thead>
+          <tr><th>Identifier</th><th>name</th></tr>
+        </thead>
+        {% for shortname, name in similar %}
+        <tr>
+          <td>{{shortname}}</td>
+          <td><a href="{{ url_for('show_institution', shortname=shortname) }}">{{name}}</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <table>
+    <tr>
+      <td><button type="submit">Continue</button></td>
+      <td><button type="submit" formmethod="get" formaction="{{ url_for('list_institutions') }}">Cancel</button></td>
+    </tr>
+  </table>
+  </form>
+{% endblock %}

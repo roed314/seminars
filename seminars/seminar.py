@@ -183,7 +183,8 @@ class WebSeminar(object):
         n = min(len(self.weekdays),len(self.time_slots))
         self.weekdays = self.weekdays[0:n]
         self.time_slots = self.time_slots[0:n]
-        self.description = self.description.capitalize() if self.description else ""
+        s = self.description
+        self.description = s[0].upper() + s[1:] if s else ""
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             if hasattr(self,"attr"):
@@ -225,6 +226,10 @@ class WebSeminar(object):
     @property
     def tz(self):
         return pytz.timezone(self.timezone)
+
+    @property
+    def series_type(self):
+        return "conference" if self.is_conference else "seminar series"
 
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
@@ -387,7 +392,7 @@ class WebSeminar(object):
                 else:
                     datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
-        cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes)))
+        cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes,homepage_link=True if self.deleted else False)))
         if include_institutions:
             cols.append(('class="institutions"', self.show_institutions()))
         if include_description:
@@ -514,8 +519,7 @@ class WebSeminar(object):
         if self.user_can_delete():
             with DelayCommit(db):
                 db.seminars.update({"shortname": self.shortname}, {"deleted": True})
-                db.talks.update({"seminar_id": self.shortname}, {"deleted": True})
-                db.seminar_organizers.delete({"seminar_id": self.shortname})
+                db.talks.update({"seminar_id": self.shortname, "deleted": False}, {"deleted": True, "deleted_with_seminar": True})
                 for elt in db.users.search(
                     {"seminar_subscriptions": {"$contains": self.shortname}},
                     ["id", "seminar_subscriptions"],
@@ -536,6 +540,7 @@ class WebSeminar(object):
                 ):
                     del talk_sub[self.shortname]
                     db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+            self.deleted = True
             return True
         else:
             return False
@@ -592,8 +597,9 @@ def _construct(organizer_dict, objects=True):
 def _iterator(organizer_dict, objects=True):
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
+            if isinstance(rec, dict) and "shortname" in rec and not rec["shortname"] in organizer_dict:
+                continue
             yield _construct(organizer_dict)(rec)
-
     return object_iterator if objects else db.seminars._search_iterator
 
 
@@ -640,13 +646,13 @@ def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_di
     )
 
 
-def all_organizers():
+def all_organizers(query={}):
     """
     A dictionary with keys the seminar ids and values a list of organizer data as fed into WebSeminar.
     Usable for the organizer_dict input to seminars_search, seminars_lucky and seminars_lookup
     """
     organizers = defaultdict(list)
-    for rec in db.seminar_organizers.search({}, sort=["seminar_id", "order"]):
+    for rec in db.seminar_organizers.search(query, sort=["seminar_id", "order"]):
         organizers[rec["seminar_id"]].append(rec)
     return organizers
 
@@ -665,7 +671,7 @@ def next_talks(query=None):
     A dictionary with keys the seminar_ids and values datetimes (either the next talk in that seminar, or datetime.max if no talk scheduled so that they sort at the end.
     """
     if query is None:
-        query = {"end_time": {"$gte": datetime.now(pytz.UTC)}}
+        query = {"end_time": {"$gte": datetime.now(pytz.UTC)}, "hidden": False}  # ignore hidden talks by default
     ans = defaultdict(lambda: pytz.UTC.localize(datetime.max))
     from seminars.talk import _counter as talks_counter
     _selecter = SQL("""
