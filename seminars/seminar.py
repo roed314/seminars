@@ -190,9 +190,11 @@ class WebSeminar(object):
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, "attr")
         for i in range(len(self.organizers)):
-            if not self.organizers[i].get("name") and self.organizers[i].get("full_name"):
-                self.organizers[i]["name"] = self.organizers[i]["full_name"]
-            killattr(self.organizers[i], "full_name")
+            org = self.organizers[i]
+            if not org.get("name") and org.get("full_name"):
+                org["name"] = org["full_name"]
+            killattr(org, "full_name")
+            self.organizers[i] = org
 
     def visible(self):
         """
