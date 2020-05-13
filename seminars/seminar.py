@@ -222,8 +222,8 @@ class WebSeminar(object):
         # Need to allow for deleting organizers, so we delete them all then add them back
         with DelayCommit(db):
             db.seminar_organizers.delete({"seminar_id": self.shortname})
-            for i in range(len(self.organizers)):
-                self.
+            for i in range(len(self.organizers)): # FIXME: remove once this code is live
+                self.organizers[i]["full_name"] = self.organizers[i]["name"] # FIXME: remove once this code is live
             db.seminar_organizers.insert_many(self.organizers)
 
     # We use timestamps on January 1, 2020 to save start and end times
