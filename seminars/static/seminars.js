@@ -709,7 +709,13 @@ function checkpw() {
   }
 }
 
-
+function uniqByKeepLast(a, key) {
+    return [
+        ...new Map(
+            a.map(x => [key(x), x])
+        ).values()
+    ]
+}
 
 
 /* jstree initialization */
@@ -742,42 +748,33 @@ function makeTopicsTree(json_tree) {
     )
   }
 
-  function selected_nodes_by_vertex(instance) {
-    console.log("selected_nodes");
-    return Array.from(
-      new Set(instance.get_json('#', { flat: true }).reduce(
-        function (acc, node) {
-          if( node.state.selected ) {
-            return acc.concat([node]);
-          } else {
-            return acc;
-          }
-        }, [])
-      )
-    );
+  function depth_compare(a, b) {
+    return a.parents.length - b.parents.length;
   }
+
+
   function callback_topics(instance) {
-    var vertices = instance.get_selected(true);
-    $('input[name="topics"]')[0].value = "[" + Array.from(
-      vertices.reduce(
+    var vertices = instance.get_selected(true).sort(depth_compare);
+    console.log(vertices);
+    var uniq_vertices = uniqByKeepLast(vertices, node => node.li_attr['vertex']).sort(depth_compare);
+    console.log(uniq_vertices);
+    $('input[name="topics"]')[0].value = "[" +
+      uniq_vertices.reduce(
         function (acc, node) {
-          return acc.add("'" + node.li_attr['vertex'] + "'");
+          return acc.concat(["'" + node.li_attr['vertex'] + "'"]);
         },
-        new Set()
-      )
-    ) + "]";
+        []
+      ) + "]";
     $('#topicDAG_selector').html(
-      Array.from(
-        vertices.reduce(
+        uniq_vertices.reduce(
           function (acc, node) {
             if(instance.get_checked_descendants(node.id).length == 0) {
-              return acc.add("<span class='topic_label'>" + node.text + "<i class='fa fa-times'></i ></span>");
+              return acc.concat(["<span class='topic_label'>" + node.text + "<i class='fa fa-times'></i ></span>"]);
             } else {
-              return acc.add("<span class='topic_label'>" + node.text + "</span>");
+              return acc.concat(["<span class='topic_label'>" + node.text + "</span>"]);
             }
           },
-          new Set()
-        )
+          []
       ).join("\n")
     )
   }
@@ -823,7 +820,9 @@ function makeTopicsTree(json_tree) {
         vertices.forEach(function(id) {
           var nodev = data.instance.get_node(id)
           data.instance.check_node(nodev);
+          data.instance.select_node(nodev);
           data.instance.check_node(nodev.parents);
+          data.instance.select_node(nodev.parents);
         });
       } else {
         // reselect if any children are selected
@@ -835,6 +834,7 @@ function makeTopicsTree(json_tree) {
           vertices.forEach(function(id) {
             var nodev = data.instance.get_node(id)
             data.instance.uncheck_node(nodev);
+            data.instance.deselect_node(nodev);
           });
         }
       }
