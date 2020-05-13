@@ -695,7 +695,7 @@ def num_columns(labels):
     # The following are guesses that haven't been tuned much.
     if mlen > 50:
         return 1
-    elif mlen > 32:
+    elif mlen > 34:
         return 2
     elif mlen > 20:
         return 3
