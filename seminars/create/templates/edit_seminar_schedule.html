@@ -33,7 +33,7 @@
     <th style="padding-left:0px; padding-right:15px; font-size:147%;">Schedule</th>
     <td><button class="save" type="submit" name="submit" value="save">Save all changes</button></td>
     <td><button class="cancel" type="submit" name="submit" value="cancel">Cancel all changes</button><td>
-    {% if not seminar.is_conference and filled == 0 and seminar.frequency > 7 %}
+    {% if not seminar.is_conference and filled == 0 and seminar.frequency and seminar.frequency > 7 %}
     <td class="forminfo">If dates are misaligned, enter details for the first talk, correct the date, and click save.</td>
     {% endif %}
     <td class="forminfo">
