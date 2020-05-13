@@ -65,7 +65,7 @@ maxlength = {
     'weekdays' : MAX_SLOTS,
 }
 
-def killattr(obj,attr)
+def killattr(obj,attr):
     if hasattr(obj,attr):
         delattr(obj,attr)
 
