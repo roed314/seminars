@@ -344,6 +344,11 @@ i.fa.close:hover {
     color: #fff;
     padding: 3px 7px;
 }
+.topic_label i {
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 7px;
+}
 
 .access_button {
     display: inline-block;
@@ -2586,3 +2591,5 @@ input[data-chosen='1'] + .tgl-btn {
 .jstree-proton-responsive .jstree-wholerow-clicked {
     background: rgba(0,0,0,.02) ! important;
 }
+
+

@@ -779,7 +779,6 @@ function makeTopicsTree(json_tree) {
   }
   function callback_topics(instance) {
     var vertices = instance.get_selected(true);
-    var bottom_vertices_ids = instance.get_bottom_selected();
     $('input[name="topics"]')[0].value = "[" + Array.from(
       vertices.reduce(
         function (acc, node) {
@@ -792,8 +791,8 @@ function makeTopicsTree(json_tree) {
       Array.from(
         vertices.reduce(
           function (acc, node) {
-            if(bottom_vertices_ids.includes(node.id)) {
-              return acc.add("<span class='topic_label'>" + node.text + "<i class='fa fa-times' data-value='" + node.li_attr['vertex'] + '"></i></span>');
+            if(instance.get_checked_descendants(node.id).length == 0) {
+              return acc.add("<span class='topic_label'>" + node.text + "<i class='fa fa-times'></i ></span>");
             } else {
               return acc.add("<span class='topic_label'>" + node.text + "</span>");
             }
