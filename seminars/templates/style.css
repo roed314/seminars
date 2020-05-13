@@ -2580,3 +2580,9 @@ input[data-chosen='1'] + .tgl-btn {
 .jstree-proton .jstree-anchor > .jstree-undetermined {
 	background-position: -197px -5px ! important;
 }
+.jstree-proton-responsive .jstree-anchor > .jstree-undetermined {
+  background-position: 0 -90px ! important;
+}
+.jstree-proton-responsive .jstree-wholerow-clicked {
+    background: rgba(0,0,0,.02) ! important;
+}
