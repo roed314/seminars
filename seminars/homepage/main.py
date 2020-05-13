@@ -184,7 +184,7 @@ def seminars_parser(info, query, org_query={}, conference=False):
                      "homepage",
                      "shortname",
                      "comments"])
-    org_cols = ["name", "full_name", "homepage"]
+    org_cols = ["name", "name", "full_name", "homepage"] #FIXME: remove full_name
     if current_user.is_subject_admin(None):
         org_cols.append("email")
     parse_substring(info, org_query, "organizer", org_cols)

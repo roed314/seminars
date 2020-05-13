@@ -526,7 +526,7 @@ def save_seminar():
     else:
         data["weekdays"] = []
         data["time_slots"] = []
-    organizer_data = []
+    organizers = []
     contact_count = 0
     for i in range(10):
         D = {"seminar_id": seminar.shortname}
@@ -541,10 +541,10 @@ def save_seminar():
                 D[col] = process_user_input(val, col, typ, tz)
             except Exception as err:  # should only be ValueError's but let's be cautious
                 errmsgs.append(format_input_errmsg(err, val, col))
-        if D["homepage"] or D["email"] or D["full_name"]:
-            if not D["full_name"]:
+        if D["homepage"] or D["email"] or D["name"]:
+            if not D["name"]:
                 errmsgs.append(format_errmsg("Organizer name cannot be left blank."))
-            D["order"] = len(organizer_data)
+            D["order"] = len(organizers)
             # WARNING the header on the template says organizer
             # but it sets the database column curator, so the
             # boolean needs to be inverted
@@ -553,17 +553,17 @@ def save_seminar():
                 flash_warning(
                     "The email address %s of organizer %s will be publicly visible.<br>%s",
                     D["email"],
-                    D["full_name"],
+                    D["name"],
                     "Set homepage or disable display to prevent this.",
                 )
             if D["email"]:
                 r = db.users.lookup(D["email"])
                 if r and r["email_confirmed"]:
-                    if D["full_name"] != r["name"]:
+                    if D["name"] != r["name"]:
                         flash_warning(
                             format_warning(
                                 "Organizer name %s does not match the name %s of the account with email address %s.<br>Please verify that you have spelled the name correctly.",
-                                D["full_name"],
+                                D["name"],
                                 r["name"],
                                 D["email"],
                             )
@@ -577,7 +577,7 @@ def save_seminar():
                         )
                     if D["display"]:
                         contact_count += 1
-            organizer_data.append(D)
+            organizers.append(D)
     if contact_count == 0:
         errmsgs.append(
             format_errmsg(
@@ -591,7 +591,7 @@ def save_seminar():
     if errmsgs:
         return show_input_errors(errmsgs)
     else:  # to make it obvious that these two statements should be together
-        new_version = WebSeminar(shortname, data=data, organizer_data=organizer_data)
+        new_version = WebSeminar(shortname, data=data, organizers=organizers)
 
     # Warnings
     if not data["topics"]:
@@ -602,9 +602,9 @@ def save_seminar():
         new_version.save()
         edittype = "created" if new else "edited"
         flash("Series %s successfully!" % edittype)
-    elif seminar.organizer_data == new_version.organizer_data:
+    elif seminar.organizers == new_version.organizers:
         flash("No changes made to series.")
-    if seminar.new or seminar.organizer_data != new_version.organizer_data:
+    if seminar.new or seminar.organizers != new_version.organizers:
         new_version.save_organizers()
         if not seminar.new:
             flash("Series organizers updated!")
@@ -842,6 +842,9 @@ def save_talk():
         errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
     if data["start_time"] is None or data["end_time"] is None:
         errmsgs.append("Talks must have both a start and end time.")
+    if data["title"].upper() == "TBA":
+        data["title"] = ""
+        flash_warning("TBA title left blank (it will appear as TBA)")
     data["topics"] = clean_topics(data.get("topics"))
     data["language"] = clean_language(data.get("language"))
     data["subjects"] = clean_subjects(data.get("subjects"))
