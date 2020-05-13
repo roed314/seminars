@@ -778,7 +778,8 @@ function makeTopicsTree(json_tree) {
     );
   }
   function callback_topics(instance) {
-    var vertices = selected_nodes_by_vertex(instance);
+    var vertices = instance.get_selected(true);
+    var bottom_vertices_ids = instance.get_bottom_selected();
     $('input[name="topics"]')[0].value = "[" + Array.from(
       vertices.reduce(
         function (acc, node) {
@@ -791,7 +792,11 @@ function makeTopicsTree(json_tree) {
       Array.from(
         vertices.reduce(
           function (acc, node) {
-            return acc.add("<span class='topic_label'>" + node.text + "</span>");
+            if(bottom_vertices_ids.includes(node.id)) {
+              return acc.add("<span class='topic_label'>" + node.text + "<i class='fa fa-times' data-value='" + node.li_attr['vertex'] + '"></i></span>');
+            } else {
+              return acc.add("<span class='topic_label'>" + node.text + "</span>");
+            }
           },
           new Set()
         )
@@ -823,7 +828,6 @@ function makeTopicsTree(json_tree) {
   // bind to events triggered on the tree
   $('#topicDAG').on("changed.jstree", function (e, data) {
     if( data.node !== undefined) {
-      foo = data;
       //stop propagation
       e.preventDefault();
       var selected = data.instance.is_selected(data.node);
