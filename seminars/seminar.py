@@ -186,18 +186,31 @@ class WebSeminar(object):
         self.description = self.description.capitalize() if self.description else ""
         # Port old subjects and topics to the new topic scheme
         if self.subjects:
-            topics = self.topics
-            subjects = self.subjects
-            new_topics = list(subjects)
-            if "mp" in topics or "math-ph" in topics:
-                if "math" not in subjects:
-                    new_topics.append("math")
-                if "physics" not in subjects:
-                    new_topics.append("physics")
-                
-                new_topics.append("math-ph")
+            def update_topic(topic):
+                if topic in ["math", "physics", "bio"]:
+                    return [topic]
+                if topic in ["math_mp", "mp", "math-ph"]:
+                    return ["math", "physics", "math-ph"]
+                if len(topic) == 2:
+                    return ["math", "math_" + topic.upper()]
+                if topic.startswith("math_"):
+                    return ["math", topic]
+                if topic.startswith("bio_"):
+                    return ["bio", "bio_" + topic[4:].upper()]
+                if topic.startswith("nlin_"):
+                    return ["physics", "nlin", topic]
+                if topic.startswith("cond-mat_"):
+                    return ["physics", "cond-mat", topic]
+                if topic.startswith("nucl-"):
+                    return ["physics", "nucl-ph", topic]
+                if topic.startswith("hep-"):
+                    return ["physics", "hep", topic]
+                if topic.startswith("astro-ph_"):
+                    return ["physics", "astro-ph", topic]
+                return ["physics", topic]
+            self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
         # remove columns we plan to drop
-        for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
+        for attr in ["start_time","end_time","start_times","end_times","weekday","archived","subjects"]:
             if hasattr(self,"attr"):
                 delattr(self,"attr")
 
