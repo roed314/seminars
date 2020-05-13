@@ -184,6 +184,18 @@ class WebSeminar(object):
         self.weekdays = self.weekdays[0:n]
         self.time_slots = self.time_slots[0:n]
         self.description = self.description.capitalize() if self.description else ""
+        # Port old subjects and topics to the new topic scheme
+        if self.subjects:
+            topics = self.topics
+            subjects = self.subjects
+            new_topics = list(subjects)
+            if "mp" in topics or "math-ph" in topics:
+                if "math" not in subjects:
+                    new_topics.append("math")
+                if "physics" not in subjects:
+                    new_topics.append("physics")
+                
+                new_topics.append("math-ph")
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             if hasattr(self,"attr"):
