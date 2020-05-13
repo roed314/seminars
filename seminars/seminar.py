@@ -193,8 +193,7 @@ class WebSeminar(object):
             org = self.organizers[i]
             if not org.get("name") and org.get("full_name"):
                 org["name"] = org["full_name"]
-            killattr(org, "full_name")
-            print(org)
+            org.pop("full_name")
             self.organizers[i] = org
 
     def visible(self):
