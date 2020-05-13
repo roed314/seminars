@@ -44,7 +44,6 @@ maxlength = {
     'city' : MAX_NAME_LEN,
     'comments' : MAX_TEXT_LEN,
     'description' : MAX_DESCRIPTION_LEN,
-    'full_name' : MAX_NAME_LEN, # FIXME we should really rename this column to name
     'homepage' : MAX_URL_LEN,
     'institutions.name' : MAX_DESCRIPTION_LEN,
     'live_link' : MAX_URL_LEN,

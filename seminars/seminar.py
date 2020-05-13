@@ -88,7 +88,7 @@ class WebSeminar(object):
                         "seminar_id": self.shortname,
                         "email": current_user.email,
                         "homepage": current_user.homepage,
-                        "full_name": current_user.name,
+                        "name": current_user.name,
                         "order": 0,
                         "curator": False,
                         "display": True,
@@ -187,8 +187,13 @@ class WebSeminar(object):
         self.description = s[0].upper() + s[1:] if s else ""
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
-            if hasattr(self,"attr"):
+            if hasattr(self, "attr"):
                 delattr(self,"attr")
+        for i in range(len(self.organizers)):
+            if not self.organizers[i].get("name") and self.organizers[i].get("full_name"):
+                self.organizers[i]["name"] = self.organizers[i]["full_name"]
+            if hasattr(self, "full_name"):
+                delattr(self.organizers[i], "full_name")
 
     def visible(self):
         """
@@ -433,7 +438,7 @@ class WebSeminar(object):
             show = rec["curator"] if curators else not rec["curator"]
             if show and rec["display"]:
                 link = (rec["homepage"] if rec["homepage"] else ("mailto:%s" % (rec["email"]) if rec["email"] else ""))
-                name = rec["full_name"] if rec["full_name"] else link
+                name = rec["name"] if rec["name"] else link
                 if name:
                     namelink = '<a href="%s">%s</a>' % (link, name) if link else name
                     if link and db.users.count({"email":rec["email"], "email_confirmed":True}):

@@ -203,7 +203,7 @@
           {% endif %}
           {% if i < (seminar.organizer_data | length) %}
             <td>
-              <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['full_name'] }}" />
+              <input name="org_name{{i}}" value="{{ seminar.organizer_data[i].get('name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['name'] }}" />
             </td>
             <td>
               <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
@@ -220,7 +220,7 @@
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
             </td>
           {% else %}
-            <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
+            <td><input name="org_name{{i}}" style="width:180px;" /></td>
             <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
             <td><input name="org_email{{i}}" style="width:220px;" /></td>
             <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", function() {
   {% for i in range(1,(seminar.organizer_data | length)) %}
     $("a.swap{{i}}").click(function(e){
       e.preventDefault();
-      swapv("org_full_name{{i-1}}","org_full_name{{i}}");
+      swapv("org_name{{i-1}}","org_name{{i}}");
       swapv("org_homepage{{i-1}}","org_homepage{{i}}");
       swapv("org_email{{i-1}}","org_email{{i}}");
       swapc("org_curator{{i-1}}","org_curator{{i}}");
