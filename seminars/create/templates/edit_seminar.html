@@ -196,31 +196,31 @@
         </thead>
         {% for i in range(maxlength["organizers"]) %}
         <tr>
-          {% if i > 0 and i < (seminar.organizer_data | length) %}
+          {% if i > 0 and i < (seminar.organizers | length) %}
             <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
           {% else %}
             <td></td>
           {% endif %}
-          {% if i < (seminar.organizer_data | length) %}
+          {% if i < (seminar.organizers | length) %}
             <td>
-              <input name="org_full_name{{i}}" value="{{ seminar.organizer_data[i].get('full_name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['full_name'] }}" />
+              <input name="org_name{{i}}" value="{{ seminar.organizers[i].get('name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['name'] }}" />
             </td>
             <td>
-              <input name="org_homepage{{i}}" value="{{ seminar.organizer_data[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
+              <input name="org_homepage{{i}}" value="{{ seminar.organizers[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
             </td>
             <td>
-              <input name="org_email{{i}}" value="{{ seminar.organizer_data[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
+              <input name="org_email{{i}}" value="{{ seminar.organizers[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
             </td>
             <td align="center">
               {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
               {# but it is displayed in a column labeleled "organizer" so it is checked when curator is false #}
-              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizer_data[i].get("curator") %}checked{% endif %} />
+              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizers[i].get("curator") %}checked{% endif %} />
             </td>
             <td align="center">
-              <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizer_data[i].get("display") %}checked{% endif %} />
+              <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizers[i].get("display") %}checked{% endif %} />
             </td>
           {% else %}
-            <td><input name="org_full_name{{i}}" style="width:180px;" /></td>
+            <td><input name="org_name{{i}}" style="width:180px;" /></td>
             <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
             <td><input name="org_email{{i}}" style="width:220px;" /></td>
             <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
@@ -292,10 +292,10 @@ document.addEventListener("DOMContentLoaded", function() {
     $('input[name="'+b+'"]')[0].checked = x;
     x = $('input[name="'+a+'"]')[0].checked;
   }
-  {% for i in range(1,(seminar.organizer_data | length)) %}
+  {% for i in range(1,(seminar.organizers | length)) %}
     $("a.swap{{i}}").click(function(e){
       e.preventDefault();
-      swapv("org_full_name{{i-1}}","org_full_name{{i}}");
+      swapv("org_name{{i-1}}","org_name{{i}}");
       swapv("org_homepage{{i-1}}","org_homepage{{i}}");
       swapv("org_email{{i-1}}","org_email{{i}}");
       swapc("org_curator{{i-1}}","org_curator{{i}}");
