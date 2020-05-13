@@ -112,6 +112,7 @@ class WebSeminar(object):
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
         self.organizers = organizers
+        print(self.organizers)
         self.cleanse()
 
     def __repr__(self):
