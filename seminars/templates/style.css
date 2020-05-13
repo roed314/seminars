@@ -2463,15 +2463,15 @@ max-width: 150px;
   background: #d8d8d8;
   border-radius: 1.25em;
   padding: 2px;
-  -webkit-transition: background .4s ease;
-  transition: background .4s ease;
+  -webkit-transition: background .2s ease;
+  transition: background .2s ease;
   margin: auto;
 }
 .tgl-light + .tgl-btn:after {
   border-radius: 50%;
   background: #fff;
-  -webkit-transition: left .4s ease;
-  transition: left .4s ease;
+  -webkit-transition: left .2s ease;
+  transition: left .2s ease;
 }
 
 
