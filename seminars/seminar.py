@@ -188,7 +188,7 @@ class WebSeminar(object):
         self.description = s[0].upper() + s[1:] if s else ""
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
-            killatr(self, "attr")
+            killattr(self, "attr")
         for i in range(len(self.organizers)):
             if not self.organizers[i].get("name") and self.organizers[i].get("full_name"):
                 self.organizers[i]["name"] = self.organizers[i]["full_name"]
