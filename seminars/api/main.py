@@ -56,8 +56,6 @@ whitelisted_cols = [
     "room",
     "seminar_ctr",
     "seminar_id",
-    "series_ctr",
-    "series_id",
     "shortname",
     "slides_link",
     "speaker",
@@ -73,8 +71,6 @@ whitelisted_cols = [
     "topics",
     "video_link"
 ]
-renames = [("seminar_id", "series_id"),
-           ("seminar_ctr", "series_ctr")]
 
 @lru_cache(maxsize=None)
 def duplicate_table(name):
@@ -161,35 +157,10 @@ def search_talks(version):
             raw_data = None
         query = raw_data.pop("query", {})
         projection = raw_data.pop("projection", 1)
-        query["hidden"] = False
-        invalid = False
-        if projection == "series_id":
-            projection = "seminar_id"
-        elif projection == "series_ctr":
-            projection = "seminar_ctr"
-        elif isinstance(projection, (list, tuple)):
-            invalid = [col for col in projection if col not in whitelisted_cols]
-            if "series_id" in projection:
-                projection.remove("series_id")
-                projection.append("seminar_id")
-            if "series_ctr" in projection:
-                projection.remove("series_ctr")
-                projection.append("seminar_ctr")
-        elif not isinstance(projection, int) and projection not in whitelisted_cols:
-            invalid = [projection]
-        if invalid:
-            raise APIError({"code": "invalid_projection",
-                            "description": "at least one column requested is not supported by API",
-                            "errors": invalid}, 400)
     else:
         query = dict(request.args)
         projection = 1
         raw_data = {}
-    # This isn't sufficient (could have $or, etc)....
-    if "series_id" in query:
-        query["seminar_id"] = query.pop("series_id")
-    if "series_ctr" in query:
-        query["seminar_ctr"] = query.pop("series_ctr")
     query["hidden"] = False
     visible_series = set(seminars_search({"visibility": 2}, "seminar_id"))
     # TODO: Need to check visibility on the seminar
