@@ -54,6 +54,25 @@ class TopicDAG(object):
             (topic for topic in self.by_id.values() if not topic.parents), key=sort_key
         )
 
+    def leaves(self, topic_list):
+        """
+        Returns the elements in the topic list that don't have children in the topic list
+
+        INPUT:
+
+        - ``topic_list`` -- a list of topic ids
+
+        OUTPUT:
+
+        The names of topics with no children also in the list
+        """
+        leaves = []
+        for topic in topic_list:
+            topic = self.by_id[topic]
+            if all(child.id not in topic_list for child in topic.children):
+                leaves.append(topic.name)
+        return leaves
+
     def port_cookie(self):
         cur_cookie = request.cookies.get("topics", "")
         topics = []

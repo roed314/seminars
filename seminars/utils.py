@@ -284,17 +284,6 @@ def topics():
     )
 
 
-# A temporary measure in case talks/seminars with physics topics are visible (they might be crosslisted with math)
-@lru_cache(maxsize=None)
-def physics_topic_dict():
-    return dict(
-        [
-            (rec["subject"] + "_" + rec["abbreviation"], rec["name"])
-            for rec in db.topics.search()
-        ]
-    )
-
-
 def restricted_topics(talk_or_seminar=None):
     if topdomain() == "mathseminars.org":
         if talk_or_seminar is None or talk_or_seminar.subjects is None:
@@ -341,11 +330,6 @@ def subject_pairs():
 
 
 @lru_cache(maxsize=None)
-def subject_dict():
-    return dict(subject_pairs())
-
-
-@lru_cache(maxsize=None)
 def topic_dict(include_subj=True):
     if include_subj:
         return {
@@ -369,22 +353,6 @@ def clean_topics(inp):
             inp = [inp]
     if isinstance(inp, Iterable):
         inp = [elt for elt in inp if elt in topic_dict()]
-    return inp
-
-
-def clean_subjects(inp):
-    if inp is None:
-        return []
-    if isinstance(inp, str):
-        inp = inp.strip()
-        if inp and inp[0] == "[" and inp[-1] == "]":
-            inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
-            if inp == [""]:  # was an empty array
-                return []
-        else:
-            inp = [inp]
-    if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in subject_dict()]
     return inp
 
 

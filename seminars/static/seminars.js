@@ -479,22 +479,6 @@ function makeLanguageSelector(langOptions, initialLanguage) {
         classNames: selectPureClassNames,
     });
 }
-function makeSubjectSelector(subjOptions, initialSubjects) {
-    function callback_subjects(value) {
-      // hidden inputs by default don't trigger a change event
-        $('input[name="subjects"]').val('[' + value + ']').trigger('change');
-    }
-    return new SelectPure("#subject_selector", {
-        onChange: callback_subjects,
-        options: subjOptions,
-        multiple: true,
-        autocomplete: true,
-        icon: "fa fa-times",
-        inlineIcon: false,
-        value: initialSubjects,
-        classNames: selectPureClassNames,
-    });
-}
 
 function copySourceOfId(id) {
   var copyText = $("#"+id);
@@ -541,11 +525,6 @@ $(document).ready(function () {
             evt.preventDefault();
             toggle_time(this.id);
             return false;
-        });
-    $('.subject_toggle').click(
-        function (evt) {
-            evt.preventDefault();
-            toggleSubject(this.id);
         });
     $('.language_toggle').click(
         function (evt) {

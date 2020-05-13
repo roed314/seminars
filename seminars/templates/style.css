@@ -329,10 +329,6 @@ i.fa.close:hover {
     filter: brightness(0) saturate(100%) invert(100%);
 }
 
-#topic-filter-menu #subjects-tabs i {
-    margin: 12px 8px 0px 2px;
-}
-
 .topic_label, .language_label {
     border-radius: 4px;
     display: inline-block;
@@ -459,42 +455,6 @@ i.fa.close:hover {
     border-top-right-radius: 5px !important;
 }
 
-/*div.topic_toggle, div.language_toggle, div.subject_toggle, div.welcome_toggle {
-    display: inline-block;
-    min-width: 15%;
-    padding: 5px;
-    color: #aaaaaa;
-}
-
-div.topic_toggle.subject-physics {
-    min-width: 32%;
-}
-
-div.subject_toggle, div.welcome_toggle, div.language_toggle  {
-    text-align: center;
-    background: #373737;
-    min-width: 10%;
-}
-
-#welcome-popup {
-    margin: 0px auto;
-    max-width: 1000px;
-    display: none;
-}
-
-div.topic_toggle:hover, div.language_toggle:hover, div.subject_toggle:hover, div.welcome_toggle:hover, div.topic_cmd {
-    cursor: pointer;
-}
-div.topic_cmd {
-    display: inline-block;
-    margin: 10px 30px 10px 30px;
-    padding: 4px 8px 4px 8px;
-    border: solid black 2px;
-    border-radius: 4px;
-    background: white;
-    color: {{color.header_background}};
-}*/
-
 div.toggle_pair {
     padding: 3px;
     color: black;
@@ -587,11 +547,6 @@ div.col6 {
     color: {{color.header_background}};
     border-radius: 5px 5px 0 0;
 }
-
-/*div.topicselected, div.languageselected, div.subjectselected {
-    color: {{color.header_background}};
-    background: #aaaaaa;
-}*/
 
 table.ntdata th.yourtime {
     text-align: center;

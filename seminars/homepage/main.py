@@ -5,7 +5,6 @@ from seminars.utils import (
     Toggle,
     ics_file,
     restricted_topics as user_topics,
-    subject_pairs,
     topdomain,
     topics,
     maxlength,
@@ -40,12 +39,6 @@ def get_now():
     return datetime.now(pytz.UTC)
 
 
-def parse_subject(info, query):
-    subject = info.get("subject")
-    if subject:
-        query["subjects"] = {"$contains": subject}
-
-
 def parse_topic(info, query):
     # of the talk
     topic = info.get("topic")
@@ -54,6 +47,9 @@ def parse_topic(info, query):
         if "_" not in topic:
             topic = "math_" + topic
         query["topics"] = {"$or": [{"$contains": topic}, {"$contains": topic[5:]}]}
+    # FIXME: temporary measure during addition of physics
+    elif topdomain() == "mathseminars.org":
+        query["topic"] = {"$contains": "math"}
 
 
 def parse_institution_sem(info, query):
@@ -141,7 +137,6 @@ def parse_language(info, query):
 
 
 def talks_parser(info, query):
-    parse_subject(info, query)
     parse_topic(info, query)
     parse_institution_talk(info, query)
     #parse_venue(info, query)
@@ -168,12 +163,7 @@ def talks_parser(info, query):
     # These are necessary but not succificient conditions to display the talk
     # Also need that the seminar has visibility 2.
 
-    # FIXME: temporary measure during addition of physics
-    if topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
-
 def seminars_parser(info, query, conference=False):
-    parse_subject(info, query)
     parse_topic(info, query)
     parse_institution_sem(info, query)
     #parse_venue(info, query)
@@ -192,10 +182,6 @@ def seminars_parser(info, query, conference=False):
     query["display"] = True
     query["visibility"] = 2
 
-    # FIXME: temporary measure during addition of physics
-    if topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
-
 # Common boxes
 
 
@@ -213,8 +199,6 @@ class TalkSearchArray(SearchArray):
     plural_noun = "talks"
 
     def __init__(self):
-        ## subjects
-        subject = SelectBox(name="subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
         topic = SelectBox(name="topic", label="Topic", options=[("", "")] + user_topics())
 
@@ -290,12 +274,11 @@ class TalkSearchArray(SearchArray):
         )
         video = Toggle(name="video", label="Has video")
         self.array = [
-            [subject, keywords],
-            [topic, title],
-            [institution, speaker],
-            [language, affiliation],
-            [access, date],
-            [video]
+            [topic, keywords],
+            [institution, title],
+            [language, speaker],
+            [access, affiliation],
+            [video, date],
             # [venue],
             # [count],
         ]
@@ -318,8 +301,6 @@ class SemSearchArray(SearchArray):
     plural_noun = "series"
 
     def __init__(self, conference=False):
-        ## subjects
-        subject = SelectBox(name="subject", label="Subject", options=[("", "")] + subject_pairs())
         ## topics
         topic = SelectBox(name="topic", label="Topic", options=[("", "")] + user_topics())
 
@@ -381,10 +362,9 @@ class SemSearchArray(SearchArray):
             width=textwidth,
         )
         self.array = [
-            [subject, keywords],
-            [topic, name],
-            [institution, organizer],
-            [language, ],
+            [topic, keywords],
+            [institution, name],
+            [language, organizer],
             [access, date] if conference else [access],
         ]
 
@@ -423,38 +403,17 @@ def past_index():
 def past_conf_index():
     return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
-#def by_subject(subject):
-#    subject = subject.lower()
-#    if subject not in subject_dict():
-#        return abort(404, "Subject %s not found" % subject)
-#    return lambda: _talks_index({"subjects": {"$contains": subject}})
-
-#def by_topic(subject, topic):
-#    full_topic = subject + "_" + topic
-#    return lambda: _talks_index({"topics": {"$contains": full_topic}})
-
-## We don't want to intercept other routes by doing @app.route("/<subject>") etc.
-#for subject in subject_dict():
-#    app.add_url_rule("/%s/" % subject, "by_subject_%s" % subject, by_subject(subject))
-#for ab, name, subject in topics():
-#    app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
-
 def _get_counters(objects):
     topic_counts = Counter()
     language_counts = Counter()
-    subject_counts = Counter()
     for object in objects:
         if object.topics:
             for topic in object.topics:
                 topic_counts[topic] += 1
-        if object.subjects:
-            for subject in object.subjects:
-                topic_counts[subject] += 1
-                #subject_counts[subject] += 1
         language_counts[object.language] += 1
     langs = [(code, languages.show(code)) for code in language_counts]
     langs.sort(key=lambda x: (-language_counts[x[0]], x[1]))
-    return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts}
+    return {"topic_counts": topic_counts, "language_counts": language_counts}
 
 def _get_row_attributes(objects):
     # Should maybe use topic_dag cookie processing code
@@ -470,8 +429,7 @@ def _get_row_attributes(objects):
         classes = ['talk']
 
         topic_filtered = True
-        # Todo: update the data so that obj.topics includes obj.subjects
-        for topic in obj.subjects + obj.topics:
+        for topic in obj.topics:
             classes.append("topic-" + topic)
             if topic in filtered_topics:
                 topic_filtered = False
@@ -479,16 +437,6 @@ def _get_row_attributes(objects):
             classes.append('topic-filtered')
             if filter_topic:
                 filtered = True
-
-        #subject_filtered = True
-        #for subject in obj.subjects:
-        #    classes.append("subject-" + subject)
-        #    if subject in filtered_subjects:
-        #        subject_filtered = False
-        #if subject_filtered:
-        #    classes.append('subject-filtered')
-        #    if filter_subject:
-        #        filtered = True
 
         classes.append("lang-" + obj.language)
         if obj.language not in filtered_languages:
@@ -524,16 +472,8 @@ def _get_row_attributes(objects):
 def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
     query = dict(query)
-    subs = subject_pairs()
-    hide_filters = []
-    if "subjects" in query:
-        subject = query["subjects"]["$contains"]
-        hide_filters = ["subject"]
-        subs = ((subject, subject.capitalize()),)
-    elif "topics" in query:
-        hide_filters = ["subject", "topic"]
-    elif topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
+    if topdomain() == "mathseminars.org":
+        query["topics"] = {"$contains": "math"}
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
@@ -552,8 +492,6 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse talks",
-        hide_filters=hide_filters,
-        subjects=subs,
         section="Browse",
         subsection=subsection,
         talk_row_attributes=zip(talks, row_attributes),
@@ -595,8 +533,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     response = make_response(render_template(
         "browse_series.html",
         title=title,
-        hide_filters=[],
-        subjects=subject_pairs(),
         section="Browse",
         subsection=subsection,
         series_row_attributes=zip(series, row_attributes),
@@ -955,12 +891,12 @@ def faq():
 def ams():
     seminars = next_talk_sorted(
         seminars_search(
-            query={"subjects": {'$contains': "math"}},
+            query={"topics": {'$contains': "math"}},
             organizer_dict=all_organizers()
         )
     )
     from collections import defaultdict
-    math_topics = {elt['subject'] + '_' + elt['abbreviation'] : elt['name'].capitalize() for elt in db.topics.search() if elt['subject'] == 'math'}
+    math_topics = {rec["topic_id"]: rec["name"].capitalize() for rec in db.new_topics.search({"topic_id":{"$in":list(db.new_topics.lookup("math", "children"))}})}
     seminars_dict = defaultdict(list)
     for sem in seminars:
         for topic in sem.topics:

@@ -19,7 +19,7 @@
     {% endif %}
   </thead>
   <tbody>
-    {% for talk, row_attributes  in talk_row_attributes %}
+    {% for talk, row_attributes in talk_row_attributes %}
     <tr {{ row_attributes | safe }} >
       {% if past %}
       {{ talk.oneline(include_slides=True, include_video=True, include_subscribe=False) | safe }}

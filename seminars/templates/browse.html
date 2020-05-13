@@ -28,12 +28,4 @@
 
 {% block browsing %}{% endblock %}
 
-<!-- topic tabs -->
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  $( "#subjects-tabs" ).tabs();
-  } );
-  var subject_list = [{% for ab, name in subjects %}"{{ab}}",{% endfor %}];
-</script>
-
 {% endblock %}

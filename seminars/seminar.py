@@ -15,6 +15,7 @@ from seminars.utils import (
     topic_dict,
     weekdays,
 )
+from seminars.topic import topic_dag
 from seminars.toggle import toggle
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -103,9 +104,6 @@ class WebSeminar(object):
                     data["start_time"] = adapt_datetime(data["start_time"], tz)
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
-            # transition to topics including the subject
-            if data.get("topics"):
-                data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
         if organizer_data is None:
             organizer_data = list(
@@ -185,18 +183,20 @@ class WebSeminar(object):
         self.time_slots = self.time_slots[0:n]
         self.description = self.description.capitalize() if self.description else ""
         # Port old subjects and topics to the new topic scheme
-        if self.subjects:
+        if getattr(self, "subjects", None):
             def update_topic(topic):
                 if topic in ["math", "physics", "bio"]:
                     return [topic]
-                if topic in ["math_mp", "mp", "math-ph"]:
+                if topic in ["math_mp", "mp", "physics_math-ph"]:
                     return ["math", "physics", "math-ph"]
                 if len(topic) == 2:
                     return ["math", "math_" + topic.upper()]
                 if topic.startswith("math_"):
-                    return ["math", topic]
-                if topic.startswith("bio_"):
-                    return ["bio", "bio_" + topic[4:].upper()]
+                    return ["math", "math_" + topic[5:].upper()]
+                if topic.startswith("bio_bio_"):
+                    return ["bio", "bio_" + topic[8:].upper()]
+                assert topic.startswith("physics_")
+                topic = topic[8:]
                 if topic.startswith("nlin_"):
                     return ["physics", "nlin", topic]
                 if topic.startswith("cond-mat_"):
@@ -211,8 +211,8 @@ class WebSeminar(object):
             self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived","subjects"]:
-            if hasattr(self,"attr"):
-                delattr(self,"attr")
+            if hasattr(self, attr):
+                delattr(self, attr)
 
     def visible(self):
         """
@@ -297,9 +297,7 @@ class WebSeminar(object):
 
     def show_topics(self):
         if self.topics:
-            subjects = set(topic.split("_", 1)[0] for topic in self.topics)
-            tdict = topic_dict(include_subj=(len(subjects) > 1))
-            return " ".join('<span class="topic_label">%s</span>' % tdict[topic] for topic in self.topics)
+            return " ".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
         else:
             return ""
 

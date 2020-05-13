@@ -15,6 +15,7 @@ from seminars.utils import (
 )
 from seminars.language import languages
 from seminars.toggle import toggle
+from seminars.topic import topic_dag
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
 from markupsafe import Markup
@@ -81,9 +82,6 @@ class WebTalk(object):
                     data["start_time"] = adapt_datetime(data["start_time"], tz)
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
-            # transition to topics including the subject
-            if data.get("topics"):
-                data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
         self.cleanse()
 
@@ -295,9 +293,7 @@ class WebTalk(object):
         else:
             language = ""
         if self.topics:
-            subjects = set(topic.split("_", 1)[0] for topic in self.topics)
-            tdict = topic_dict(include_subj=(len(subjects) > 1))
-            return language + "".join('<span class="topic_label">%s</span>' % tdict[topic] for topic in self.topics)
+            return language + "".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
         else:
             return language
 

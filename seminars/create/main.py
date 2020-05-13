@@ -6,7 +6,6 @@ from seminars import db
 from seminars.create import create
 from seminars.utils import (
     adapt_datetime,
-    clean_subjects,
     clean_topics,
     flash_warning,
     format_errmsg,
@@ -161,9 +160,6 @@ def edit_seminar():
     manage = "Manage" if current_user.is_organizer else "Create"
     if new:
         errmsgs = []
-        subjects = clean_subjects(data.get("subjects"))
-        if not subjects:
-            errmsgs.append("Please select at least one subject.")
         seminar.name = data.get("name", "")
         if not seminar.name:
             errmsgs.append("Series name is required.")
@@ -172,19 +168,16 @@ def edit_seminar():
         if errmsgs:
             return show_input_errors(errmsgs)
         seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", False)
-        seminar.subjects = subjects
         seminar.institutions = clean_institutions(data.get("institutions"))
         if seminar.institutions:
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
         if not notsimilar:
             query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
             similar = [s for s in seminars_search(query)]
-            # When checking for simialr series, don't require an exact match on subjects/institutions
-            # match anything with institutions not set or with an institution in common, and only require a subject in common
+            # When checking for similar series, don't require an exact match on institutions
+            # match anything with institutions not set or with an institution in common
             if seminar.institutions:
                 similar = [s for s in similar if not s.institutions or set(seminar.institutions).intersection(set(s.institutions))]
-            if seminar.subjects:
-                similar = [s for s in similar if set(seminar.subjects).intersection(set(s.subjects))]
             if similar:
                 return render_template(
                     "show_similar_seminars.html",
@@ -481,10 +474,11 @@ def save_seminar():
 
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
+    if not data["topics"]:
+        errmsgs.append(format_errmsg("Please select at least one topic."))
+    if not data["topics"]:
+        errmsgs.append("Please select at least one topic.")
     data["language"] = languages.clean(data.get("language"))
-    data["subjects"] = clean_subjects(data.get("subjects"))
-    if not data["subjects"]:
-        errmsgs.append(format_errmsg("Please select at least one subject."))
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
@@ -843,10 +837,9 @@ def save_talk():
     if data["start_time"] is None or data["end_time"] is None:
         errmsgs.append("Talks must have both a start and end time.")
     data["topics"] = clean_topics(data.get("topics"))
+    if not data["topics"]:
+        errmsgs.append("Please select at least one topic.")
     data["language"] = languages.clean(data.get("language"))
-    data["subjects"] = clean_subjects(data.get("subjects"))
-    if not data["subjects"]:
-        errmsgs.append("Please select at least one subject.")
 
     # Don't try to create new_version using invalid input
     if errmsgs:

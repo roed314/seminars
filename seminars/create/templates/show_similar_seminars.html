@@ -1,7 +1,7 @@
 {% extends "homepage.html" %}
 {% block content %}
   {% set conf = newseminar.is_conference %}
-  {% if conf %} 
+  {% if conf %}
     {% if (similar|length) > 1 %} {% set phrase = "some conferences that have" %} {% else %} {% set phrase = "a conference that has" %} {% endif %}
   {% else %}
     {% if (similar|length) > 1 %} {% set phrase = "some seminar series that have" %} {% else %} {% set phrase = "a seminar series that has" %} {% endif %}
@@ -12,7 +12,6 @@
     <input type="hidden" name="shortname" value="{{ newseminar.shortname }}"/>
     <input type="hidden" name="name" value="{{ newseminar.name }}"/>
     <input type="hidden" name="new" value="{{ 'yes' if newseminar.new else 'no' }}"/>
-    <input type="hidden" name="subjects" value="{{ newseminar.subjects  | safe }}" />
     <input type="hidden" name="topics" value="{{ newseminar.topics  | safe }}"/>
     <input type="hidden" name="institutions" value="{{ newseminar.institutions  | safe }}"/>
     <input type="hidden" name="language" value="{{ newseminar.language  | safe }}"/>

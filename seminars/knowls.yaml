@@ -79,11 +79,6 @@ seminar_homepage:
   contents: |
     The external homepage of your series, if one exists.
     This should be a URL beginning with "http".
-subjects:
-  title: Subjects
-  contents: |
-    You need to associate one or more subjects to a series.
-    The list of subjects can be changed at any time.
 institutions:
   title: Institutions
   contents: |
@@ -92,9 +87,10 @@ institutions:
 topics:
   title: Topics
   contents: |
-    You may associate zero or more topics to a series or talk.
-    Each topic corresponds to an arXiv subject class;
+    You need to associate one or more topics to a series or talk.
+    In math and physics, topics correspond to an arXiv subject class;
     for example, <i>number theory</i> corresponds to <a href="https://arxiv.org/list/math.NT/recent">math.NT</a>.
+    In other areas, topics may be drawn from other classification schemes.
     New talks inherit the topics of the series to which they belong;
     these can then be modified for a particular talk if desired.
     Changing the topics of a series has no impact on existing talks.
