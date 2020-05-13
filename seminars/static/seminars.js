@@ -735,7 +735,7 @@ function checkpw() {
 
 /* jstree initialization */
 
-function makeTree(json_tree) {
+function makeTopicsTree(json_tree) {
   $("div.topicDAG").css("display", "none");
   $("div.topicDAG").html(
   `<input id="topicDAG_search" type="text", value="" placeholder="Search">
