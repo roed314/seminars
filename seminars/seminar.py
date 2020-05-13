@@ -32,7 +32,7 @@ combine = datetime.combine
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False, deleted=False
+        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False
     ):
         if data is None and not editing:
             data = seminars_lookup(shortname, include_deleted=deleted)
@@ -82,8 +82,8 @@ class WebSeminar(object):
                         "Need to update seminar code to account for schema change key=%s" % key
                     )
                     setattr(self, key, None)
-            if organizer_data is None:
-                organizer_data = [
+            if organizers is None:
+                organizers = [
                     {
                         "seminar_id": self.shortname,
                         "email": current_user.email,
@@ -107,11 +107,11 @@ class WebSeminar(object):
             if data.get("topics"):
                 data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
-        if organizer_data is None:
-            organizer_data = list(
+        if organizers is None:
+            organizers = list(
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
-        self.organizer_data = organizer_data
+        self.organizers = organizers
         self.cleanse()
 
     def __repr__(self):
@@ -222,7 +222,9 @@ class WebSeminar(object):
         # Need to allow for deleting organizers, so we delete them all then add them back
         with DelayCommit(db):
             db.seminar_organizers.delete({"seminar_id": self.shortname})
-            db.seminar_organizers.insert_many(self.organizer_data)
+            for i in range(len(self.organizers)):
+                self.
+            db.seminar_organizers.insert_many(self.organizers)
 
     # We use timestamps on January 1, 2020 to save start and end times
     # so that we have a well defined conversion between time zone and UTC offset (which
@@ -409,7 +411,7 @@ class WebSeminar(object):
         return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
-        return [rec["email"].lower() for rec in self.organizer_data if rec["email"]] + [
+        return [rec["email"].lower() for rec in self.organizers if rec["email"]] + [
             self.owner.lower()
         ]
 
@@ -434,7 +436,7 @@ class WebSeminar(object):
     def _show_editors(self, label, curators=False):
         """ shows organizors (or curators if curators is True) """
         editors = []
-        for rec in self.organizer_data:
+        for rec in self.organizers:
             show = rec["curator"] if curators else not rec["curator"]
             if show and rec["display"]:
                 link = (rec["homepage"] if rec["homepage"] else ("mailto:%s" % (rec["email"]) if rec["email"] else ""))
@@ -453,10 +455,10 @@ class WebSeminar(object):
         return self._show_editors("Curators", curators=True)
 
     def num_visible_organizers(self):
-        return len([r for r in self.organizer_data if not r["curator"] and r["display"]])
+        return len([r for r in self.organizers if not r["curator"] and r["display"]])
 
     def num_visible_curators(self):
-        return len([r for r in self.organizer_data if r["curator"] and r["display"]])
+        return len([r for r in self.organizers if r["curator"] and r["display"]])
 
     def add_talk_link(self, ptag=True):
         if current_user.email in self.editors():
@@ -591,7 +593,7 @@ def _construct(organizer_dict, objects=True):
             return rec
         else:
             return WebSeminar(
-                rec["shortname"], organizer_data=organizer_dict.get(rec["shortname"]), data=rec
+                rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec
             )
     def default_construct(rec):
         return rec
