@@ -130,6 +130,27 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   </table>
   {% endif %}
 </div>
+
+<script type="text/javascript">
+document.getElementById('show_deleted_stuff').addEventListener('click',
+  function(e) {
+    e.preventDefault();
+    $('#show_deleted_stuff').hide();
+    $('#hide_deleted_stuff').show();
+    $('#deleted_stuff').show();
+    return false;
+  });
+
+document.getElementById('hide_deleted_stuff').addEventListener('click',
+  function(e) {
+    e.preventDefault();
+    $('#deleted_stuff').hide();
+    $('#hide_deleted_stuff').hide();
+    $('#show_deleted_stuff').show();
+    return false;
+  });
+</script>
+
 {% endif %}
 </div>
 
@@ -152,24 +173,6 @@ const subjOptions = [
   },
   {% endfor %}
 ];
-
-document.getElementById('show_deleted_stuff').addEventListener('click',
-  function(e) {
-    e.preventDefault();
-    $('#show_deleted_stuff').hide();
-    $('#hide_deleted_stuff').show();
-    $('#deleted_stuff').show();
-    return false;
-  });
-
-document.getElementById('hide_deleted_stuff').addEventListener('click',
-  function(e) {
-    e.preventDefault();
-    $('#deleted_stuff').hide();
-    $('#hide_deleted_stuff').hide();
-    $('#show_deleted_stuff').show();
-    return false;
-  });
 
 document.addEventListener("DOMContentLoaded", function() {
   makeInstitutionSelector(instOptions, []);
