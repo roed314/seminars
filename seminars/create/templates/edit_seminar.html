@@ -392,14 +392,13 @@ document.addEventListener("DOMContentLoaded", function() {
     showplusminus(n);
   }
   function showswaps() {
-    console.log("showswaps")
     var n = {{maxlength["organizers"]}};
     var x = $('input[class="org_name"]');
     var m = 0;
     for ( var i = 1 ; i < n ; i++ ) if ( x[i].value != '' ) m = i;
-    console.log("m ="+m)
+    console.log("showswaps m = "+m)
     for ( var i = 1 ; i < n ; i++ )
-      document.getElementById('swap'+i).visibility = ( i <= m ? 'visible;' : 'hidden' );
+      document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible;' : 'hidden' );
   }
   // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
