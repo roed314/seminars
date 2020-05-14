@@ -225,7 +225,7 @@ class TalkSearchArray(SearchArray):
     noun = "talk"
     plural_noun = "talks"
 
-    def __init__(self):
+    def __init__(self, past=False):
         ## pick institution where it is held
         institution = SelectBox(
             name="institution",
@@ -299,11 +299,10 @@ class TalkSearchArray(SearchArray):
 
         video = Toggle(name="video", label="Has video")
         self.array = [
-            [institution, video],
+            [institution, video if past else recent],
             [keywords, title],
             [speaker, affiliation],
             [time, date],
-            [recent],
         ]
 
     def main_table(self, info=None):
@@ -320,7 +319,7 @@ class SemSearchArray(SearchArray):
     noun = "series"
     plural_noun = "series"
 
-    def __init__(self, conference=False):
+    def __init__(self, conference=False, past=False):
         ## pick institution where it is held
         institution = SelectBox(
             name="institution",
@@ -361,6 +360,7 @@ class SemSearchArray(SearchArray):
             example_value=True,
             colspan=(1, 2, 1),
             width=textwidth,
+            extra=['autocomplete="off"'],
         )
         self.array = [
             [keywords, institution],
@@ -481,7 +481,7 @@ def _get_row_attributes(objects):
 
 def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
-    search_array = TalkSearchArray()
+    search_array = TalkSearchArray(past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     query = dict(query)
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
@@ -546,7 +546,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     return response
 
 def _series_index(query, sort=None, subsection=None, conference=True, past=False):
-    search_array = SemSearchArray(conference=conference)
+    search_array = SemSearchArray(conference=conference, past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     query = dict(query)
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
