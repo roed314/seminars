@@ -117,7 +117,7 @@ def validate_daytimes(s):
     t = s.split('-')
     if len(t) != 2:
         return None
-    start, end = validate_daytime(t[0]), validate_daytime(t[1])
+    start, end = validate_daytime(t[0].strip()), validate_daytime(t[1].strip())
     if start is None or end is None:
         return None
     return start + "-" + end
