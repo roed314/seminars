@@ -286,7 +286,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var homepages = $('input[class="org_homepage"]');
     var emails = $('input[class="org_email"]');
     var m = 0;
-    for ( var i = 1 ; i <= m ; i++ )
+    for ( var i = 1 ; i <= n ; i++ )
       if ( names[i].value || homepages[i].value || emails[i].value  ) m = i;
     console.log("m = "+m);
     for ( var i = 1 ; i < n ; i++ )
