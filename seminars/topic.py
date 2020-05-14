@@ -148,7 +148,7 @@ class TopicDAG(object):
             else:
                 tclass = toggle
             onchange = "toggleTopicDAG(this.id);"
-            kwds["classes"] = " ".join([topic_id] + ["sub_" + elt for elt in topic.ancestors])
+            kwds["classes"] = " ".join([topic_id, "sub_topic"] + ["sub_" + elt for elt in topic.ancestors])
 
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
