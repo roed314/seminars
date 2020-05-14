@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
   }
-  $("input.org_name").change(function(showswaps));
+  $("input.org_name").change(showswaps);
   // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
     console.log("onpageshow")
