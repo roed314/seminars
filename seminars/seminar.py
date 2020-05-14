@@ -12,7 +12,6 @@ from seminars.utils import (
     max_distinct,
     search_distinct,
     show_input_errors,
-    topic_dict,
     weekdays,
 )
 from seminars.topic import topic_dag
@@ -127,7 +126,7 @@ class WebSeminar(object):
 
     def cleanse(self):
         """
-        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
         from seminars.talk import talks_lucky

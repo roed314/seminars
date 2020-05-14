@@ -272,50 +272,6 @@ def allowed_shortname(shortname):
     return bool(shortname_re.match(shortname))
 
 
-# Note the caching: if you add a topic you have to restart the server
-@lru_cache(maxsize=None)
-def topics():
-    return sorted(
-        (
-            (rec["abbreviation"], rec["name"], rec["subject"])
-            for rec in db.topics.search({}, ["abbreviation", "name", "subject"])
-        ),
-        key=lambda x: (x[2].lower(), x[1].lower()),
-    )
-
-
-def restricted_topics(talk_or_seminar=None):
-    if topdomain() == "mathseminars.org":
-        if talk_or_seminar is None or talk_or_seminar.subjects is None:
-            subjects = []
-        else:
-            subjects = talk_or_seminar.subjects
-        return [
-            ("math_" + ab, name)
-            for (ab, name, subj) in topics()
-            if subj == "math" or subj in subjects
-        ]
-    else:
-        return user_topics(talk_or_seminar)
-
-
-def user_topics(talk_or_seminar=None):
-    subjects = []
-    if talk_or_seminar is not None:
-        subjects = sorted(set(subjects + talk_or_seminar.subjects))
-    if len(subjects) == 1:
-        subject = subjects[0]
-        return [
-            (subj + "_" + ab, name) for (ab, name, subj) in topics() if subj == subject
-        ]
-    if len(subjects) == 0:
-        # Show all subjects rather than none
-        subjects = [subj for (subj, name) in subject_pairs()]
-    return [
-        (subj + "_" + ab, subj.capitalize() + ": " + name)
-        for (ab, name, subj) in topics()
-        if subj in subjects
-    ]
 
 
 @lru_cache(maxsize=None)
@@ -328,19 +284,8 @@ def subject_pairs():
         key=lambda x: x[1].lower(),
     )
 
-
-@lru_cache(maxsize=None)
-def topic_dict(include_subj=True):
-    if include_subj:
-        return {
-            subj + "_" + ab: subj.capitalize() + ": " + name
-            for (ab, name, subj) in topics()
-        }
-    else:
-        return {subj + "_" + ab: name for (ab, name, subj) in topics()}
-
-
 def clean_topics(inp):
+    from .topic import topic_dag # avoiding circular import
     if inp is None:
         return []
     if isinstance(inp, str):
@@ -352,7 +297,8 @@ def clean_topics(inp):
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in topic_dict()]
+        inp = [elt for elt in inp if elt in topic_dag.by_id]
+        inp.sort()
     return inp
 
 

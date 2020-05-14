@@ -213,7 +213,7 @@ function reviseCookies() {
     }
 }
 
-function toggleLanguage(id) {
+function toggleLanguage_core(id) {
     var toggle = $("#" + id);
     var toggleval = parseInt(toggle.val());
     console.log(id, toggleval);
@@ -236,6 +236,12 @@ function toggleLanguage(id) {
             apply_striping();
         }
     }
+}
+
+function toggleLanguage(togid) {
+  console.log(togid);
+  var foo = togid;
+  setTimeout(() => toggleLanguage_core(foo), 5);
 }
 
 
@@ -316,7 +322,7 @@ function toggleTopicDAG_core(togid) {
 function toggleTopicDAG(togid) {
   console.log(togid);
   var foo = togid;
-  setTimeout(() => toggleTopicDAG_core(foo), 50);
+  setTimeout(() => toggleTopicDAG_core(foo), 5);
 }
 
 function anyHasValue(selector, value) {
@@ -812,7 +818,7 @@ function makeTopicsTree(json_tree) {
           return acc.concat(["'" + node.li_attr['vertex'] + "'"]);
         },
         []
-      ) + "]";
+      ).sort().join(', ') + "]";
     $('#topicDAG_selector').html(
       uniq_vertices.reduce(
         function (acc, node) {

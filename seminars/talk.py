@@ -11,7 +11,6 @@ from seminars.utils import (
     max_distinct,
     adapt_datetime,
     make_links,
-    topic_dict,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -110,6 +109,33 @@ class WebTalk(object):
         """
         if self.hidden is None:
             self.hidden = False
+        # Port old subjects and topics to the new topic scheme
+        if getattr(self, "subjects", None):
+            def update_topic(topic):
+                if topic in ["math", "physics", "bio"]:
+                    return [topic]
+                if topic in ["math_mp", "mp", "physics_math-ph"]:
+                    return ["math", "physics", "math-ph"]
+                if len(topic) == 2:
+                    return ["math", "math_" + topic.upper()]
+                if topic.startswith("math_"):
+                    return ["math", "math_" + topic[5:].upper()]
+                if topic.startswith("bio_bio_"):
+                    return ["bio", "bio_" + topic[8:].upper()]
+                assert topic.startswith("physics_")
+                topic = topic[8:]
+                if topic.startswith("nlin_"):
+                    return ["physics", "nlin", topic]
+                if topic.startswith("cond-mat_"):
+                    return ["physics", "cond-mat", topic]
+                if topic.startswith("nucl-"):
+                    return ["physics", "nucl-ph", topic]
+                if topic.startswith("hep-"):
+                    return ["physics", "hep", topic]
+                if topic.startswith("astro-ph_"):
+                    return ["physics", "astro-ph", topic]
+                return ["physics", topic]
+            self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
 
     def visible(self):
         """
