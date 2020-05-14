@@ -370,8 +370,8 @@ def search_distinct(
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
     if more:
-        cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols) + [more[0]])
-        extra_cols.append("more")
+        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more[0]])
+        extra_cols = extra_cols + ("more",)
         values = more[1] + values
     else:
         cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
@@ -623,7 +623,7 @@ class Toggle(SearchBox):
         main = toggle(
             tglid="toggle_%s" % self.name,
             name=self.name,
-            value=1 if (info is not None and info.get(self.name, False)) else -1
+            value=int(info.get(self.name, -1)),
         )
         return '<span style="display: inline-block">%s</span>' % (main,)
 

@@ -664,7 +664,7 @@ def seminars_search(*args, **kwds):
         if more is None:
             more = Placeholder()
             moreval = [True]
-        more = (more, moreval)
+        kwds["more"] = more = (more, moreval)
     return search_distinct(
         db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
     )

@@ -273,6 +273,7 @@ class TalkSearchArray(SearchArray):
             colspan=(1, 2, 1),
             width=textwidth,
         )
+
         video = Toggle(name="video", label="Has video")
         self.array = [
             [institution, video],
@@ -378,8 +379,9 @@ def past_conf_index():
 
 def read_search_cookie(search_array):
     info = {}
-    for box in search_array.array:
-        info[box.name] = request.cookies.get("search_" + box.name, "")
+    for row in search_array.array:
+        for box in row:
+            info[box.name] = request.cookies.get("search_" + box.name, "")
     return info
 
 def _get_counters(objects):

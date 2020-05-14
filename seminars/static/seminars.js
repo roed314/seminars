@@ -213,7 +213,8 @@ function reviseCookies() {
     }
 }
 function setSearchCookies() {
-    $("div.more-filter-menu input,select").each(function() {
+    $("#more-filter-menu input,#more-filter-menu select").each(function() {
+        console.log("SearchCookie", this.name, $(this).val());
         setCookie("search_" + this.name, $(this).val());
     });
     setCookie("filter_more", "1");
