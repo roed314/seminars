@@ -108,7 +108,7 @@
         <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
         <tr>
           <td>{{ KNOWL("periodicity") }}</td>
-          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
+          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes();" />
               <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
               <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
               <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
@@ -196,8 +196,9 @@
         </thead>
         {% for i in range(maxlength["organizers"]) %}
         <tr>
-          {% if i > 0 and i < (seminar.organizers | length) %}
-            <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
+          {% if i > 0 %}
+            <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px; {% if i >= (seminar.organizers | length) %}visibility:hidden;{% endif %}"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
+            <script>function showswap{{i}}() { if ( $('.swap{{i}}').show(); }</script>
           {% else %}
             <td></td>
           {% endif %}
@@ -220,7 +221,7 @@
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizers[i].get("display") %}checked{% endif %} />
             </td>
           {% else %}
-            <td><input name="org_name{{i}}" style="width:180px;" /></td>
+            <td><input name="org_name{{i}}" style="width:180px;" onchange="showswap{{i}}();" /></td>
             <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
             <td><input name="org_email{{i}}" style="width:220px;" /></td>
             <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
