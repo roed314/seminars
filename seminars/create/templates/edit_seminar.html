@@ -197,7 +197,7 @@
         {% for i in range(maxlength["organizers"]) %}
         <tr>
           {% if i > 0 %}
-            <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a id="swap{{i}}" {% if i >= (seminar.organizers | length) %}style="visibility:hidden;"{% endif %} href="#"><font size="+1">&#x2B0D;</font></a></td>
+            <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" id="swap{{i}}" {% if i >= (seminar.organizers | length) %}style="visibility:hidden;"{% endif %} href="#"><font size="+1">&#x2B0D;</font></a></td>
           {% else %}
             <td></td>
           {% endif %}
@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", function() {
     x = $('input[name="'+a+'"]')[0].checked;
   }
   {% for i in range(1,maxlength["organizers"]) %}
-    document.getElementById('swap{{i}}').click(function(e){
+    $("a.swap{{i}}").click(function(e){
       e.preventDefault();
       swapv("org_name{{i-1}}","org_name{{i}}");
       swapv("org_homepage{{i-1}}","org_homepage{{i}}");
