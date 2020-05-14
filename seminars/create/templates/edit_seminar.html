@@ -198,7 +198,6 @@
         <tr>
           {% if i > 0 %}
             <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" {% if i >= (seminar.organizers | length) %}style="visibility:hidden;"{% endif %} href="#"><font size="+1">&#x2B0D;</font></a></td>
-            <script>function showswap{{i}}() { $('.swap{{i}}').show(); }</script>
           {% else %}
             <td></td>
           {% endif %}
@@ -221,7 +220,7 @@
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizers[i].get("display") %}checked{% endif %} />
             </td>
           {% else %}
-            <td><input name="org_name{{i}}" style="width:180px;" onchange="showswap{{i}}();" /></td>
+            <td><input name="org_name{{i}}" style="width:180px;" onchange="(function(){$('.swap{{i}}').show();})()" /></td>
             <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
             <td><input name="org_email{{i}}" style="width:220px;" /></td>
             <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
