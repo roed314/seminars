@@ -138,6 +138,11 @@ def weekstart(date, tz):
     t = midnight(date,tz)
     return t - timedelta(days=1)*t.weekday()
 
+def date_and_daytime_to_time(date, s, tz):
+    d = localize_time(datetime.combine(date, maketime()), tz)
+    m = timedelta(minutes=1)
+    return d + m * daytime_minutes(s)
+
 def date_and_daytimes_to_times(date, s, tz):
     d = localize_time(datetime.combine(date, maketime()), tz)
     m = timedelta(minutes=1)
@@ -535,6 +540,7 @@ def process_user_input(inp, col, typ, tz=None):
         res = validate_daytime(inp)
         if res is None:
             raise ValueError("Invalid time of day, expected format is hh:mm")
+        return res
     elif typ == "daytimes":
         inp = cleanse_dashes(inp)
         res = validate_daytimes(inp)

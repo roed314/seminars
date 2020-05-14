@@ -6,6 +6,10 @@ from seminars.utils import (
     ics_file,
     topdomain,
     maxlength,
+    adapt_datetime,
+    date_and_daytime_to_time,
+    date_and_daytimes_to_times,
+    process_user_input
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
@@ -461,6 +465,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     query = dict(query)
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
+    # Note that talks_parser ignores the "time" field at the moment; see below for workaround
     talks_parser(info, more)
     if topdomain() == "mathseminars.org":
         query["topics"] = {"$contains": "math"}
@@ -477,6 +482,30 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
+    # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
+    timerange = info.get("timerange", "").strip()
+    if timerange:
+        tz = current_user.tz
+        try:
+            timerange = process_user_input(timerange, col="search", typ="daytimes")
+        except ValueError:
+            try:
+                onetime = process_user_input(timerange, col="search", typ="daytime")
+            except ValueError:
+                flash_error("Invalid time range input: %s", timerange)
+            else:
+                for talk in talks:
+                    if talk.more:
+                        talkstart = adapt_datetime(talk.start_time, tz)
+                        t = date_and_daytime_to_time(talkstart.date(), onetime, tz)
+                        talk.more = (t == talkstart)
+        else:
+            for talk in talks:
+                if talk.more:
+                    talkstart = adapt_datetime(talk.start_time, tz)
+                    talkend = adapt_datetime(talk.end_time, tz)
+                    t0, t1 = date_and_daytimes_to_times(talkstart.date(), timerange, tz)
+                    talk.more = (t0 <= talkstart) and (talkend <= t1)
     counters = _get_counters(talks)
     row_attributes = _get_row_attributes(talks)
     response = make_response(render_template(
