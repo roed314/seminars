@@ -292,7 +292,8 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
   }
   $("input.org_name").change(showswaps); $("input.org_homepage").change(showswaps); $("input.org_email").change(showswaps);
-  $("input.org_name").addEventListener('keyup', (event) => { alert('hi'); showswaps(); });
+  var names = $('input[class="org_name"]');
+  for var i = 1 ; i < {{maxlength["organizers"]}} ; i++ ) names[i].addEventListener('keyup', (event) => { alert('hi'); showswaps(); });
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
     $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
