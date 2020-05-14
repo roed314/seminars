@@ -361,6 +361,7 @@ class SemSearchArray(SearchArray):
             example_value=True,
             colspan=(1, 2, 1),
             width=textwidth,
+            extra=['autocomplete="off"'],
         )
         self.array = [
             [keywords, institution],
