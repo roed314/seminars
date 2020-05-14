@@ -210,8 +210,9 @@ class WebSeminar(object):
                     return ["physics", "astro-ph", topic]
                 return ["physics", topic]
             self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
+            self.subjects = []
         # remove columns we plan to drop
-        for attr in ["start_time","end_time","start_times","end_times","weekday","archived","subjects"]:
+        for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, attr)
         for i in range(len(self.organizers)):
             org = self.organizers[i]
