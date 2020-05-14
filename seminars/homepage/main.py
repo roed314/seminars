@@ -127,6 +127,17 @@ def parse_daterange(info, query, time=True):
         if sub_query:
             query["start_time" if time else "start_date"] = sub_query
 
+def parse_recent_edit(info, query):
+    recent = info.get("recent", "").strip()
+    if recent:
+        try:
+            recent = float(recent)
+        except Exception as e:
+            flash_error("Could not parse recent edit input %s.  Error: " + str(e), recent)
+        else:
+            recent = datetime.now() - timedelta(hours=recent)
+            query["edited_at"] = {"$gte": recent}
+
 def parse_video(info, query):
     v = info.get("video")
     if v == "1":
@@ -160,6 +171,7 @@ def talks_parser(info, query):
     parse_video(info, query)
     parse_language(info, query)
     parse_daterange(info, query, time=True)
+    parse_recent_edit(info, query)
     query["display"] = True
     # TODO: remove this temporary measure allowing hidden to be None
     query["hidden"] = {"$or": [False, {"$exists": False}]}
@@ -271,9 +283,16 @@ class TalkSearchArray(SearchArray):
         )
         time = TextBox(
             name="timerange",
-            id="timerange",
             label="Time",
             example="8:00 - 18:00",
+            example_span=False,
+            colspan=(1, 2, 1),
+            width=textwidth,
+        )
+        recent = TextBox(
+            name="recent",
+            label="Edited within (hours)",
+            example="168",
             colspan=(1, 2, 1),
             width=textwidth,
         )
@@ -283,7 +302,8 @@ class TalkSearchArray(SearchArray):
             [institution, video],
             [keywords, title],
             [speaker, affiliation],
-            [date, time],
+            [time, date],
+            [recent],
         ]
 
     def main_table(self, info=None):
