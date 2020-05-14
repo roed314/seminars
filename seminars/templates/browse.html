@@ -13,17 +13,26 @@
         {{ languages.filter_link() | safe }}
         {% if user.is_authenticated %}
         <td >
-          {{ toggle(tglid="enable_calendar_filter", value=1 if request.cookies.get('filter_calendar', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
+          {{ toggle(tglid="calendar", value=1 if request.cookies.get('filter_calendar', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
         </td>
         <td style="padding-right: 2em;">
           Show only saved events
         </td>
         {% endif %}
+        <td>
+          {{ toggle(tglid="more", value=1 if request.cookies.get('filter_more', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
+        </td>
+        <td style="padding-right: 2em;">
+          <a id="more-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">More</a>
+        </td>
       </tr>
     </table>
   </div>
   {{ topic_dag.filter_pane(counts=topic_counts) | safe }}
   {{ languages.filter_pane(counts=language_counts) | safe }}
+  <div id="more-filter-menu" class="filter-menu">
+    {{ info.search_array.html(info) | safe }}
+  </div>
 </div>
 
 {% block browsing %}{% endblock %}

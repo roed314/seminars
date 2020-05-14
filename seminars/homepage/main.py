@@ -489,10 +489,14 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     talks = [talk for talk in talks if talk.searchable()]
     counters = _get_counters(talks)
     row_attributes = _get_row_attributes(talks)
+    info = to_dict(
+        request.args, search_array=TalkSearchArray()
+    )
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse talks",
         section="Browse",
+        info=info,
         subsection=subsection,
         talk_row_attributes=zip(talks, row_attributes),
         past=past,
@@ -530,11 +534,13 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
     title = "Browse conferences" if conference else "Browse seminar series"
+    info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     response = make_response(render_template(
         "browse_series.html",
         title=title,
         section="Browse",
         subsection=subsection,
+        info=info,
         series_row_attributes=zip(series, row_attributes),
         is_conference=conference,
         **counters

@@ -165,6 +165,14 @@ function enableLanguageFiltering() {
 function calFiltering() {
     return $('#enable_calendar_filter').val() == "1";
 }
+function moreFiltering() {
+    return $('#more').val() == "1";
+}
+function enableMoreFiltering() {
+    setCookie("filter_more", "1");
+    setToggle("more", 1);
+    toggleFilters(null);
+}
 
 function topicFromTriple(tripleid) {
     return tripleid.split("--")[1];
@@ -174,6 +182,9 @@ function reviseCookies() {
     // This function sets cookies initially if they aren't set and changes them when needed by code changes
     if (getCookie("languages") == null) {
         setCookie("languages", "");
+    }
+    if (getCookie("mores") == null) {
+        setCookie("mores", "");
     }
     if (getCookie("topics_dict") == null) {
         cur_topics = getCookie("topics");
@@ -193,7 +204,7 @@ function reviseCookies() {
             eraseCookie("topics");
         }
     }
-    var ftypes = ["topic", "language", "calendar", "time", "location"];
+    var ftypes = ["topic", "language", "calendar", "more", "time", "location"];
     var pm1 = ["-1", "1"];
     for (i=0; i<ftypes.length; i++) {
         if (!(getCookie("filter_"+ftypes[i]) in pm1)) {
@@ -344,8 +355,8 @@ function toggleTopicView(pid, cid, did) {
     }
 }
 
-var filter_menus = ['topic', 'language'];
-var filter_classes = [['.topic-filtered', topicFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering]];
+var filter_menus = ['topic', 'language', 'more'];
+var filter_classes = [['.topic-filtered', topicFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering], ['.more-filtered', moreFiltering]];
 function talksToShow(talks) {
     for (i=0; i<filter_classes.length; i++) {
         if (filter_classes[i][1]()) {
@@ -390,7 +401,7 @@ function toggleFilterView(id) {
     var is_enabled = (getCookie("filter_"+ftype) == "1");
     var visible = filterMenuVisible(ftype)
     console.log("enabled", is_enabled, "visible", visible);
-    if (!is_enabled && !visible) { // showing
+    if (!is_enabled && !visible && ftype != "more") { // showing
         console.log("showing");
         setToggle(ftype, 1);
         toggleFilters(ftype, true);
