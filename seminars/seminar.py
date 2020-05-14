@@ -661,7 +661,7 @@ def seminars_search(*args, **kwds):
     objects = kwds.pop("objects", True)
     more = kwds.get("more", False)
     if more is not False: # might empty dictionary
-        more, moreval = db.talks._parse_dict(more)
+        more, moreval = db.seminars._parse_dict(more)
         if more is None:
             more = Placeholder()
             moreval = [True]

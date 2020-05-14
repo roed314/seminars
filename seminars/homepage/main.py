@@ -546,7 +546,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     return response
 
 def _series_index(query, sort=None, subsection=None, conference=True, past=False):
-    search_array = TalkSearchArray()
+    search_array = SemSearchArray(conference=conference)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     query = dict(query)
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
@@ -574,7 +574,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
     title = "Browse conferences" if conference else "Browse seminar series"
-    info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
     response = make_response(render_template(
         "browse_series.html",
         title=title,
