@@ -13,6 +13,7 @@ from seminars.utils import (
     search_distinct,
     show_input_errors,
     weekdays,
+    killattr,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
@@ -32,7 +33,7 @@ combine = datetime.combine
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizer_data=None, editing=False, showing=False, saving=False, deleted=False
+        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False
     ):
         if data is None and not editing:
             data = seminars_lookup(shortname, include_deleted=deleted)
@@ -82,13 +83,13 @@ class WebSeminar(object):
                         "Need to update seminar code to account for schema change key=%s" % key
                     )
                     setattr(self, key, None)
-            if organizer_data is None:
-                organizer_data = [
+            if organizers is None:
+                organizers = [
                     {
                         "seminar_id": self.shortname,
                         "email": current_user.email,
                         "homepage": current_user.homepage,
-                        "full_name": current_user.name,
+                        "name": current_user.name,
                         "order": 0,
                         "curator": False,
                         "display": True,
@@ -104,11 +105,11 @@ class WebSeminar(object):
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
             self.__dict__.update(data)
-        if organizer_data is None:
-            organizer_data = list(
+        if organizers is None:
+            organizers = list(
                 db.seminar_organizers.search({"seminar_id": self.shortname}, sort=["order"])
             )
-        self.organizer_data = organizer_data
+        self.organizers = organizers
         self.cleanse()
 
     def __repr__(self):
@@ -180,7 +181,8 @@ class WebSeminar(object):
         n = min(len(self.weekdays),len(self.time_slots))
         self.weekdays = self.weekdays[0:n]
         self.time_slots = self.time_slots[0:n]
-        self.description = self.description.capitalize() if self.description else ""
+        s = self.description
+        self.description = s[0].upper() + s[1:] if s else ""
         # Port old subjects and topics to the new topic scheme
         if getattr(self, "subjects", None):
             def update_topic(topic):
@@ -210,8 +212,14 @@ class WebSeminar(object):
             self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived","subjects"]:
-            if hasattr(self, attr):
-                delattr(self, attr)
+            killattr(self, attr)
+        for i in range(len(self.organizers)):
+            org = self.organizers[i]
+            if not org.get("name") and org.get("full_name"):
+                org["name"] = org["full_name"]
+            if org.get("full_name"):
+                org.pop("full_name")
+            self.organizers[i] = org
 
     def visible(self):
         """
@@ -240,7 +248,9 @@ class WebSeminar(object):
         # Need to allow for deleting organizers, so we delete them all then add them back
         with DelayCommit(db):
             db.seminar_organizers.delete({"seminar_id": self.shortname})
-            db.seminar_organizers.insert_many(self.organizer_data)
+            for i in range(len(self.organizers)): # FIXME: remove once this code is live
+                self.organizers[i]["full_name"] = self.organizers[i]["name"] # FIXME: remove once this code is live
+            db.seminar_organizers.insert_many(self.organizers)
 
     # We use timestamps on January 1, 2020 to save start and end times
     # so that we have a well defined conversion between time zone and UTC offset (which
@@ -425,7 +435,7 @@ class WebSeminar(object):
         return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
-        return [rec["email"].lower() for rec in self.organizer_data if rec["email"]] + [
+        return [rec["email"].lower() for rec in self.organizers if rec["email"]] + [
             self.owner.lower()
         ]
 
@@ -450,11 +460,11 @@ class WebSeminar(object):
     def _show_editors(self, label, curators=False):
         """ shows organizors (or curators if curators is True) """
         editors = []
-        for rec in self.organizer_data:
+        for rec in self.organizers:
             show = rec["curator"] if curators else not rec["curator"]
             if show and rec["display"]:
                 link = (rec["homepage"] if rec["homepage"] else ("mailto:%s" % (rec["email"]) if rec["email"] else ""))
-                name = rec["full_name"] if rec["full_name"] else link
+                name = rec["name"] if rec["name"] else link
                 if name:
                     namelink = '<a href="%s">%s</a>' % (link, name) if link else name
                     if link and db.users.count({"email":rec["email"], "email_confirmed":True}):
@@ -469,10 +479,10 @@ class WebSeminar(object):
         return self._show_editors("Curators", curators=True)
 
     def num_visible_organizers(self):
-        return len([r for r in self.organizer_data if not r["curator"] and r["display"]])
+        return len([r for r in self.organizers if not r["curator"] and r["display"]])
 
     def num_visible_curators(self):
-        return len([r for r in self.organizer_data if r["curator"] and r["display"]])
+        return len([r for r in self.organizers if r["curator"] and r["display"]])
 
     def add_talk_link(self, ptag=True):
         if current_user.email in self.editors():
@@ -609,7 +619,7 @@ def _construct(organizer_dict, objects=True, more=False):
             if more:
                 moreval = rec.pop("more")
             seminar = WebSeminar(
-                rec["shortname"], organizer_data=organizer_dict.get(rec["shortname"]), data=rec
+                rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec
             )
             if more:
                 seminar.more = moreval
@@ -620,20 +630,12 @@ def _construct(organizer_dict, objects=True, more=False):
     return object_construct if objects else default_construct
 
 
-def _iterator(organizer_dict, objects=True, organizer="", more=False):
-    organizer = organizer.strip().lower()
-    X = ["seminar_id"]
-    if not current_user.is_subject_admin(None):
-        X.append("email")
+def _iterator(organizer_dict, objects=True, more=False):
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
-            # if organizer is specified do a keyword search on each text column other than seminar_id
-            if organizer:
-                orgs = [org for org in organizer_dict.get(rec["shortname"]) if org["display"]]
-                if not [org for org in orgs if any([organizer in org[k].lower() for k in org.keys() if not k in X and isinstance(org[k],str)])]:
-                    continue
+            if isinstance(rec, dict) and "shortname" in rec and not rec["shortname"] in organizer_dict:
+                continue
             yield _construct(organizer_dict, more=more)(rec)
-
     return object_iterator if objects else db.seminars._search_iterator
 
 
@@ -656,7 +658,6 @@ def seminars_search(*args, **kwds):
     """
     organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
-    organizer = kwds.pop("organizer", "") # organizer keyword
     more = kwds.get("more", False)
     if more is not False: # might empty dictionary
         more, moreval = db.talks._parse_dict(more)
@@ -665,7 +666,7 @@ def seminars_search(*args, **kwds):
             moreval = [True]
         more = (more, moreval)
     return search_distinct(
-        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, organizer=organizer, more=more), *args, **kwds
+        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
     )
 
 
@@ -688,13 +689,13 @@ def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_di
     )
 
 
-def all_organizers():
+def all_organizers(query={}):
     """
     A dictionary with keys the seminar ids and values a list of organizer data as fed into WebSeminar.
     Usable for the organizer_dict input to seminars_search, seminars_lucky and seminars_lookup
     """
     organizers = defaultdict(list)
-    for rec in db.seminar_organizers.search({}, sort=["seminar_id", "order"]):
+    for rec in db.seminar_organizers.search(query, sort=["seminar_id", "order"]):
         organizers[rec["seminar_id"]].append(rec)
     return organizers
 

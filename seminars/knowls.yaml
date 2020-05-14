@@ -237,6 +237,7 @@ organizer_name:
     Enter the full name of the organizer.
     This must be nonempty for each organizer.
     Names for which the Display box is checked will appear on the series' page, in the order given here.
+    After names are entered and saved, you can change the ordering by using the two-headed arrows on the left to transpose adjacent rows.
 homepage:
   title: Homepage
   contents: |
@@ -309,7 +310,7 @@ title:
     this should be in <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>,
     with only the first word and proper nouns capitalized.
     If you have co-authors, it is better to mention them not here, 
-    but in the abstract.
+    but in the abstract.  If the title is not yet known, leave it blank (it will be listed as TBA).
 abstract:
   title: Abstract
   contents: |

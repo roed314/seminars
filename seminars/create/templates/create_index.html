@@ -118,21 +118,8 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
   </table>
   {% endif %}
 </div>
-{% endif %}
-</div>
-
 
 <script type="text/javascript">
-
-const instOptions = [
-  {% for iid, name in institutions %}
-  {
-    label: `{{ name | safe}}`,
-    value: `{{ iid }}`,
-  },
-  {% endfor %}
-];
-
 document.getElementById('show_deleted_stuff').addEventListener('click',
   function(e) {
     e.preventDefault();
@@ -150,6 +137,22 @@ document.getElementById('hide_deleted_stuff').addEventListener('click',
     $('#show_deleted_stuff').show();
     return false;
   });
+</script>
+
+{% endif %}
+</div>
+
+
+<script type="text/javascript">
+
+const instOptions = [
+  {% for iid, name in institutions %}
+  {
+    label: `{{ name | safe}}`,
+    value: `{{ iid }}`,
+  },
+  {% endfor %}
+];
 
 document.addEventListener("DOMContentLoaded", function() {
   makeInstitutionSelector(instOptions, []);

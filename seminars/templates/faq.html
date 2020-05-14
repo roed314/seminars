@@ -85,11 +85,15 @@
             Registered users can save series and talks to their favorites.
             Then on the <a href="{{ url_for("index") }}">Browse</a> page 
             they can click "Show only saved events" to display only those.
-            Moreover, on the Account page, they can export these to their own calendars.
+            Moreover, on the Account page, they can export these to their
+            own calendar app as a single calendar that gets updated
+            automatically as the user changes their favorites or as
+            new talks are added to the selected series.
           </li>
           <li>
             Registered users can view all livestream links for connecting online to a talk.  
-            (Many livestream links are viewable to all, but some organizers may restrict access to registered users.)
+            (Many livestream links are viewable to all, 
+            but some organizers may restrict access to registered users.)
           </li>
           <li>
             Registered users, once endorsed, can create their own seminar series and conferences for others to see.
@@ -107,7 +111,8 @@
 
   <li>
       <h4>
-        Can I register an alias email address for a group of organizers, like <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span>?
+        Can I register an alias email address for a group of organizers, 
+        like <span style="font-family:'Lucida Console' ,monospace">prob_seminar@mit.edu</span>?
       </h4>
     <p>No.  Our policy is that each registered user must be a <i>person</i>.  
       What you should do is register as yourself, 
@@ -122,7 +127,7 @@
   <ul>
     <li>
       <h4>
-        If I export some series to my Google calendar, do I have to export them again every week to see the latest talks?
+        If I export some series to my calendar app, do I have to export them again every week to see the latest talks?
       </h4>
       <p> No, once you export a series to your calendar, talks added to that series later will be pushed to your calendar automatically!</p>
     </li>
@@ -156,9 +161,19 @@
 
    <li>
       <h4>
+        Should I try to become an endorsed user?
+      </h4>
+     <p>If you are an organizer for a seminar series or conference, then yes.
+       If you want only to view the content on this site and export it to your calendar, 
+       then getting endorsed is not necessary.</p>
+    </li>
+
+   <li>
+      <h4>
         How do I get endorsed?
       </h4>
-     <p>After <a href="{{ url_for('user.register') }}">registering</a>, just ask someone in the <a href="{{ url_for('user.public_users') }}">list of public users</a>.</p>
+     <p>After <a href="{{ url_for('user.register') }}">registering</a>, 
+       just ask someone in the <a href="{{ url_for('user.public_users') }}">list of public users</a>.</p>
     </li>
 
     <li>
@@ -254,7 +269,7 @@
 
     <li>
       <h4>
-        Is it possible to create a draft of a schedule that is only visible to organizers?
+        Is it possible to create a <i>draft</i> of a schedule that is only visible to organizers?
       </h4>
       <p>
         Yes.  When you create or edit a series, you choose to make it <i>public</i> (it will appear on the front page and in search results), <i>unlisted</i> (it will not be listed but anyone with the link can access it), or <i>private</i> (visible only to the series' organizers).  Also, when you create a talk within a series, you can temporarily mark it as <i>hidden</i> so that it is visible only to organizers.  Visibility of a talk is also affected by its series' settings: for example, an unhidden talk in a private series is visible only to organizers.  Finally, neither series nor talks will appear until you have been endorsed.
@@ -265,8 +280,13 @@
       <h4>
         What should I do if I'm organizing a seminar series that doesn't meet once a week?
       </h4>
-      <p> If it meets every other week on the same day, set the Frequency to 14 in the "Edit series" page for the series.
-        We don't currently support series meeting multiple times per week (though we plan to in the future); for now, we suggest changing the "Talks per day" field in the "Edit series" page of the series to the number of times it meets per week, then editing the date on the schedule page.</p>
+      <p>After initially creating the series, 
+        you will be editing its properties on the "Create series" page 
+        (which is later renamed as the "Edit series" page).
+        Change the "Periodicity" as appropriate, perhaps to "no fixed schedule".
+        This setting determines only the initial layout of time slots 
+        on the scheduling grid on the "Edit schedule" page.
+        You will always be able to add talks at irregular times there.</p>
     </li>
 
     <li>
@@ -284,6 +304,30 @@
         How can I avoid having to edit my talk schedule in two places, on both {{topdomain}} and the external homepage of the series?
       </h4>
       On the <a href="{{ url_for('create.index') }}">Manage</a> page, click the short identifier of your series in the <b>View</b> column to go to the "View series" page.  Then click "Embed this schedule" and copy the HTML code to your external webpage to have it display the talk schedule.  From then on, any changes you make to the talk schedule on {{topdomain}} will automatically appear on your external webpage.
+    </li>
+  </ul>
+
+<h2>
+  Miscellaneous
+</h2>
+
+  <ul>
+    <li>
+      <h4>
+        When was {{topdomain}} created?
+      </h4>
+      <p>
+        The public beta release of mathseminars.org occurred on April 10, 2020, and the site was renamed as researchseminars.org when it started covering subjects beyond mathematics.  Development of the site is ongoing, with new features being added daily.
+      </p>
+    </li>
+
+    <li>
+      <h4>
+        How many people are using {{topdomain}}?
+      </h4>
+      <p>
+        During the first 28 days after the public beta release, while the site consisted mostly of mathematics talks, the site received 411,015 page views from 83,618 visitors.
+      </p>
     </li>
 
     <li>
