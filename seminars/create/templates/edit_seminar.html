@@ -288,6 +288,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var m = 0;
     for ( var i = 1 ; i <= m ; i++ )
       if ( names[i].value || homepages[i].value || emails[i].value  ) m = i;
+    console.log("m = "+m);
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
   }
@@ -297,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function() {
   for ( var i = 1 ; i < {{maxlength["organizers"]}} ; i++ ) {
     names[i].addEventListener('keyup', (event) => { showswaps(); });
     homepages[i].addEventListener('keyup', (event) => { showswaps(); });
-    homepages[i].addEventListener('keyup', (event) => { showswaps(); });
+    emails[i].addEventListener('keyup', (event) => { showswaps(); });
   }
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
