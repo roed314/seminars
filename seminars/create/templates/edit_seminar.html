@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for ( var i = 1 ; i < n ; i++ ) if ( x[i].value != '' ) m = i;
     console.log("showswaps m = "+m)
     for ( var i = 1 ; i < n ; i++ )
-      document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible;' : 'hidden' );
+      document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
   }
   // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
