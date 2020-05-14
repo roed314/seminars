@@ -1,4 +1,16 @@
 {% extends "homepage.html" %}
+<script type="text/javascript">
+function showswaps() {
+  console.log("showswaps")
+  var n = {{maxlength["organizers"]}};
+  var x = $('input[class="org_name"]');
+  var m = 0;
+  for ( var i = 1 ; i < n ; i++ ) if ( x[i].value != '' ) m = i;
+  console.log("m ="+m)
+  for ( var i = 1 ; i < n ; i++ )
+    document.getElementById('swap'+i).visibility = ( i <= m ? 'visible;' : 'hidden' );
+}
+</script>
 {% block content %}
 
   {% if lock %}
@@ -378,17 +390,10 @@ document.addEventListener("DOMContentLoaded", function() {
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
     showplusminus(n);
   }
-  function showswaps() {
-    var n = {{maxlength["organizers"]}};
-    var x = $('input[class="org_name"]');
-    var m = 0;
-    for ( var i = 1 ; i < n ; i++ ) if ( x[i].value != '' ) m = i;
-    for ( var i = 1 ; i < n ; i++ )
-      document.getElementById('swap'+i).visibility = ( i <= m ? 'visible;' : 'hidden' );
-  }
   $('input[class="org_name"]').change(showswaps);
   // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
+    console.log("onpageshow")
     showswaps()
     showslots()
   };
