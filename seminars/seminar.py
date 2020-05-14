@@ -184,7 +184,7 @@ class WebSeminar(object):
         s = self.description
         self.description = s[0].upper() + s[1:] if s else ""
         # Port old subjects and topics to the new topic scheme
-        if getattr(self, "subjects", None):
+        if getattr(self, "subjects", []):
             def update_topic(topic):
                 if topic in ["math", "physics", "bio"]:
                     return [topic]
@@ -210,7 +210,7 @@ class WebSeminar(object):
                     return ["physics", "astro-ph", topic]
                 return ["physics", topic]
             self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
-            self.subjects = []
+        self.subjects = []
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, attr)

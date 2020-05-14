@@ -110,7 +110,7 @@ class WebTalk(object):
         if self.hidden is None:
             self.hidden = False
         # Port old subjects and topics to the new topic scheme
-        if getattr(self, "subjects", None):
+        if getattr(self, "subjects", []):
             def update_topic(topic):
                 if topic in ["math", "physics", "bio"]:
                     return [topic]
@@ -136,7 +136,7 @@ class WebTalk(object):
                     return ["physics", "astro-ph", topic]
                 return ["physics", topic]
             self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
-            self.subjets = []
+        self.subjects = []
 
     def visible(self):
         """
