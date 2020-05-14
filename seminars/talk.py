@@ -669,27 +669,32 @@ _maxer = SQL(
 )
 
 
-def _construct(seminar_dict, objects=True):
+def _construct(seminar_dict, objects=True, more=False):
     def object_construct(rec):
         if not isinstance(rec, dict):
             return rec
         else:
-            return WebTalk(
+            if more:
+                moreval = rec.pop("more")
+            talk = WebTalk(
                 rec["seminar_id"],
                 rec["seminar_ctr"],
                 seminar=seminar_dict.get(rec["seminar_id"]),
                 data=rec,
             )
+            if more:
+                talk.more = moreval
+            return talk
     def default_construct(rec):
         return rec
 
     return object_construct if objects else default_construct
 
 
-def _iterator(seminar_dict, objects=True):
+def _iterator(seminar_dict, objects=True, more=False):
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.talks._search_iterator(cur, search_cols, extra_cols, projection):
-            yield _construct(seminar_dict)(rec)
+            yield _construct(seminar_dict, more=more)(rec)
 
     return object_iterator if objects else db.talks._search_iterator
 
@@ -716,7 +721,14 @@ def talks_search(*args, **kwds):
     """
     seminar_dict = kwds.pop("seminar_dict", {})
     objects = kwds.pop("objects", True)
-    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects), *args, **kwds)
+    more = kwds.get("more", False)
+    if more is not False: # might empty dictionary
+        more, moreval = db.talks._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+        more = (more, moreval)
+    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects, more=more), *args, **kwds)
 
 
 def talks_lucky(*args, **kwds):

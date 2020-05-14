@@ -212,6 +212,12 @@ function reviseCookies() {
         }
     }
 }
+function setSearchCookies() {
+    $("div.more-filter-menu input,select").each(function() {
+        setCookie("search_" + this.name, $(this).val());
+    });
+    setCookie("filter_more", "1");
+}
 
 function toggleLanguage_core(id) {
     var toggle = $("#" + id);

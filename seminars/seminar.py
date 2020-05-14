@@ -601,21 +601,26 @@ _maxer = SQL(
 )
 
 
-def _construct(organizer_dict, objects=True):
+def _construct(organizer_dict, objects=True, more=False):
     def object_construct(rec):
         if not isinstance(rec, dict):
             return rec
         else:
-            return WebSeminar(
+            if more:
+                moreval = rec.pop("more")
+            seminar = WebSeminar(
                 rec["shortname"], organizer_data=organizer_dict.get(rec["shortname"]), data=rec
             )
+            if more:
+                seminar.more = moreval
+            return seminar
     def default_construct(rec):
         return rec
 
     return object_construct if objects else default_construct
 
 
-def _iterator(organizer_dict, objects=True, organizer=""):
+def _iterator(organizer_dict, objects=True, organizer="", more=False):
     organizer = organizer.strip().lower()
     X = ["seminar_id"]
     if not current_user.is_subject_admin(None):
@@ -627,7 +632,7 @@ def _iterator(organizer_dict, objects=True, organizer=""):
                 orgs = [org for org in organizer_dict.get(rec["shortname"]) if org["display"]]
                 if not [org for org in orgs if any([organizer in org[k].lower() for k in org.keys() if not k in X and isinstance(org[k],str)])]:
                     continue
-            yield _construct(organizer_dict)(rec)
+            yield _construct(organizer_dict, more=more)(rec)
 
     return object_iterator if objects else db.seminars._search_iterator
 
@@ -652,8 +657,15 @@ def seminars_search(*args, **kwds):
     organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
     organizer = kwds.pop("organizer", "") # organizer keyword
+    more = kwds.get("more", False)
+    if more is not False: # might empty dictionary
+        more, moreval = db.talks._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+        more = (more, moreval)
     return search_distinct(
-        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, organizer=organizer), *args, **kwds
+        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, organizer=organizer, more=more), *args, **kwds
     )
 
 

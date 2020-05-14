@@ -24,6 +24,7 @@ from lmfdb.utils import (
     BasicSpacer,
     SearchArray,
     SelectBox,
+    SearchButton,
     TextBox,
     flash_error,
     to_dict,
@@ -189,23 +190,31 @@ def institutions_shortnames():
     )
 
 
-textwidth = 400
+textwidth = 300
 
+class PushForCookie(SearchButton):
+    def _input(self, info):
+        onclick = " onclick='setSearchCookies(); window.location.reload(true); return false;'"
+        btext = "<button type='submit' name='search_type' value='{val}' style='width: {width}px;'{onclick}>{desc}</button>"
+        return btext.format(
+            width=self.width,
+            val=self.value,
+            desc=self.description,
+            onclick=onclick,
+        )
 
 class TalkSearchArray(SearchArray):
     noun = "talk"
     plural_noun = "talks"
 
     def __init__(self):
-        ## topics
-        topic = SelectBox(name="topic", label="Topic", options=[("", "")] )
-
         ## pick institution where it is held
         institution = SelectBox(
             name="institution",
             label="Institution",
             options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
+            width=textwidth+10, # select boxes need 10px more than text areas
         )
 
         venue = SelectBox(
@@ -225,18 +234,6 @@ class TalkSearchArray(SearchArray):
             colspan=(1, 2, 1),
             width=textwidth,
         )
-        ## type of access
-        access = SelectBox(
-            name="access",
-            label="Access",
-            options=[
-                ("", ""),
-                ("open", "Any visitor can view link"),
-                ("users", "Any logged-in user can view link"),
-            ],
-        )
-        ## number of results to display
-        # count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
 
         speaker = TextBox(
             name="speaker",
@@ -262,33 +259,31 @@ class TalkSearchArray(SearchArray):
             label="Date",
             example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
+            example_span=False,
             colspan=(1, 2, 1),
             width=textwidth,
         )
-        language = SelectBox(
-            name="language",
-            label="Language",
-            options=languages.search_options(),
+        time = TextBox(
+            name="timerange",
+            id="timerange",
+            label="Time",
+            example="8:00 - 18:00",
+            colspan=(1, 2, 1),
+            width=textwidth,
         )
         video = Toggle(name="video", label="Has video")
         self.array = [
-            [topic, keywords],
-            [institution, title],
-            [language, speaker],
-            [access, affiliation],
-            [video, date],
-            # [venue],
-            # [count],
+            [institution, video],
+            [keywords, title],
+            [speaker, affiliation],
+            [date, time],
         ]
 
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [
-            ("talks", "Search talks"),
-            BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
-        ]
+        return [PushForCookie("talks", "Apply")]
 
     def hidden(self, info):
         return []  # [("talk_start", "talk_start")]
@@ -299,15 +294,13 @@ class SemSearchArray(SearchArray):
     plural_noun = "series"
 
     def __init__(self, conference=False):
-        ## topics
-        topic = SelectBox(name="topic", label="Topic", options=[("", "")])
-
         ## pick institution where it is held
         institution = SelectBox(
             name="institution",
             label="Institution",
             options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
+            width=textwidth+10, # select boxes need 10px more than text areas
         )
 
         venue = SelectBox(
@@ -322,23 +315,6 @@ class SemSearchArray(SearchArray):
 
         ## keywords for seminar or talk
         keywords = TextBox(name="keywords", label="Anywhere", width=textwidth,)
-        ## type of access
-        access = SelectBox(
-            name="access",
-            label="Access",
-            options=[
-                ("", ""),
-                ("open", "Any visitor can view link"),
-                ("users", "Any logged-in user can view link"),
-            ],
-        )
-        language = SelectBox(
-            name="language",
-            label="Language",
-            options=languages.search_options(),
-        )
-        ## number of results to display
-        # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
 
         name = TextBox(
             name="name",
@@ -360,11 +336,11 @@ class SemSearchArray(SearchArray):
             width=textwidth,
         )
         self.array = [
-            [topic, keywords],
-            [institution, name],
-            [language, organizer],
-            [access, date] if conference else [access],
+            [keywords, institution],
+            [name, organizer],
         ]
+        if conference:
+            self.array.append([date])
 
         assert conference in [True, False]
         self.conference = conference
@@ -373,10 +349,7 @@ class SemSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [
-            ("seminars", "Search " + ("conferences" if self.conference else "seminar series")),
-            BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
-        ]
+        return [PushForCookie("seminars", "Apply")]
 
     def hidden(self, info):
         return []
@@ -401,6 +374,12 @@ def past_index():
 def past_conf_index():
     return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
+def read_search_cookie(search_array):
+    info = {}
+    for box in search_array.array:
+        info[box.name] = request.cookies.get("search_" + box.name, "")
+    return info
+
 def _get_counters(objects):
     topic_counts = Counter()
     language_counts = Counter()
@@ -422,6 +401,7 @@ def _get_row_attributes(objects):
     filtered_languages = set(request.cookies.get('languages', '').split(','))
     filter_language = request.cookies.get('filter_language', '-1') == '1'
     filter_calendar = request.cookies.get('filter_calendar', '-1') == '1'
+    filter_more = request.cookies.get('filter_more', '-1') == '1'
     def filter_classes(obj):
         filtered = False
         classes = ['talk']
@@ -444,6 +424,10 @@ def _get_row_attributes(objects):
         if not obj.is_subscribed():
             classes.append("calendar-filtered")
             if filter_calendar:
+                filtered = True
+        if not obj.more:
+            classes.append("more-filtered")
+            if filter_more:
                 filtered = True
         return classes, filtered
 
@@ -469,7 +453,11 @@ def _get_row_attributes(objects):
 
 def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
+    search_array = TalkSearchArray()
+    info = to_dict(read_search_cookie(search_array), search_array=search_array)
     query = dict(query)
+    more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
+    talks_parser(info, more)
     if topdomain() == "mathseminars.org":
         query["topics"] = {"$contains": "math"}
     query["display"] = True
@@ -482,14 +470,11 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
         query["end_time"] = {"$gte": datetime.now()}
         if sort is None:
             sort = ["start_time", "seminar_id"]
-    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars()))
+    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
     counters = _get_counters(talks)
     row_attributes = _get_row_attributes(talks)
-    info = to_dict(
-        request.args, search_array=TalkSearchArray()
-    )
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse talks",
@@ -508,7 +493,11 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     return response
 
 def _series_index(query, sort=None, subsection=None, conference=True, past=False):
+    search_array = TalkSearchArray()
+    info = to_dict(read_search_cookie(search_array), search_array=search_array)
     query = dict(query)
+    more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
+    seminars_parser(info, more)
     query["display"] = True
     query["visibility"] = 2
     if conference:
@@ -526,9 +515,9 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     if sort is None: # not conferences
         # We don't currently call this case in the past, but if we add it we probably
         # need a last_talk_sorted that sorts by end time of last talk in reverse order
-        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers()))
+        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers(), more=more))
     else:
-        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers()))
+        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers(), more=more))
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
     title = "Browse conferences" if conference else "Browse seminar series"

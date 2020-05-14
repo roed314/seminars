@@ -31,7 +31,11 @@
   {{ topic_dag.filter_pane(counts=topic_counts) | safe }}
   {{ languages.filter_pane(counts=language_counts) | safe }}
   <div id="more-filter-menu" class="filter-menu">
-    {{ info.search_array.html(info) | safe }}
+    <div style="margin: 0px auto;">
+      <div style="padding: 10px;">
+        {{ info.search_array.html(info) | safe }}
+      </div>
+    </div>
   </div>
 </div>
 

@@ -339,6 +339,7 @@ def search_distinct(
     sort=None,
     info=None,
     include_deleted=False,
+    more=False,
 ):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -359,13 +360,18 @@ def search_distinct(
         query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
-    cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     tbl = IdentifierWrapper(table.search_table)
     nres = count_distinct(table, counter, query)
     if limit is None:
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
+    if more:
+        cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols) + [more[0]])
+        extra_cols.append("more")
+        values = more[1] + values
+    else:
+        cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
     cur = table._execute(
         fselecter,
