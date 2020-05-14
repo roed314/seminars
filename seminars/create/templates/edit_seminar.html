@@ -220,7 +220,7 @@
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizers[i].get("display") %}checked{% endif %} />
             </td>
           {% else %}
-            <td><input name="org_name{{i}}" style="width:180px;" onchange="(function(){ alert('hi');document.getElementById('show{{i}}').style.visibility='visible';})()" /></td>
+            <td><input name="org_name{{i}}" style="width:180px;" onchange="(function(){ alert('hi');document.getElementById('swap{{i}}').style.visibility='visible';})()" /></td>
             <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
             <td><input name="org_email{{i}}" style="width:220px;" /></td>
             <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
