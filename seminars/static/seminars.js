@@ -264,7 +264,8 @@ function toggleTopicDAG_core(togid) {
             to_show.push(topicFromTriple(this.id));
         });
     } else {
-        $("label.sub_" + topic).css("visibility", "hidden");
+        console.log("TEST", togid + "-pane");
+        $("#" + togid + "-pane label.tgl-btn").css("visibility", "hidden");
         if (toggleval == 1) {
             to_show.push(topic);
         } else {
@@ -307,6 +308,10 @@ function toggleTopicDAG(togid) {
   setTimeout(() => toggleTopicDAG_core(foo), 50);
 }
 
+function anyHasValue(selector, value) {
+    return $(selector).filter(function() { return $(this).val() == value; }).length > 0;
+}
+
 function toggleTopicView(pid, cid, did) {
     console.log(pid, cid, did);
     var tid = "#"+pid+"--"+cid+"--"+did;
@@ -315,19 +320,26 @@ function toggleTopicView(pid, cid, did) {
     var is_visible = pane.is(":visible");
     $("."+pid+"-subpane").hide();
     $("."+pid+"-tlink").removeClass("active");
-    if (!is_visible) {
+    if (is_visible) {
+        if (toggle.val() == "0" && !anyHasValue(".tgl.sub_" + cid, "1")) {
+            toggle.val(1);
+            toggle.trigger('change');
+            toggle.val(-1);
+            toggle.trigger('change');
+        }
+    } else {
         pane.show();
         $(tid+"-filter-btn").addClass("active");
         // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
-        $(tid).attr('data-chosen', 0);
+        toggle.attr('data-chosen', 0);
         if (toggle.val() == "-1") {
-            $(tid).val(0)
-            $(tid).trigger('change');
+            toggle.val(0);
+            toggle.trigger('change');
         } else if (toggle.val() == "1") {
-            $(tid).val(-1)
-            $(tid).trigger('change');
-            $(tid).val(0)
-            $(tid).trigger('change');
+            toggle.val(-1);
+            toggle.trigger('change');
+            toggle.val(0);
+            toggle.trigger('change');
         }
     }
 }
@@ -357,9 +369,9 @@ function toggleFilters(id, on_menu_open=false) {
     console.log("filters", id);
     if (id !== null) {
         console.log($('#'+id).val());
-        var is_enabled = ($('#'+id).val() == 1);
+        var is_enabled = ($('#'+id).val() == "1");
         var ftype = id;
-        setCookie("filter_" + ftype, is_enabled ? "1" : "0");
+        setCookie("filter_" + ftype, is_enabled ? "1" : "-1");
         if (!on_menu_open && is_enabled && !filterMenuVisible(ftype) && !getCookie(ftype+"s")) {
             toggleFilterView(ftype+"-filter-btn");
         }
@@ -374,12 +386,21 @@ function toggleFilterView(id) {
     // If this filter is not enabled, we enable it
     console.log("filterview", id);
     var ftype = id.split("-")[0];
+    console.log("ftype", ftype);
     var is_enabled = (getCookie("filter_"+ftype) == "1");
     var visible = filterMenuVisible(ftype)
     console.log("enabled", is_enabled, "visible", visible);
-    if (!is_enabled && !visible) {
+    if (!is_enabled && !visible) { // showing
+        console.log("showing");
         setToggle(ftype, 1);
         toggleFilters(ftype, true);
+    } else if (visible) { // hiding
+        console.log("hiding");
+        if (!anyHasValue(".tgl.sub_" + ftype, "1")) {
+            console.log("set to -1")
+            setToggle(ftype, -1);
+            toggleFilters(ftype, true);
+        }
     }
     for (i=0; i<filter_menus.length; i++) {
         var menu = $(filterMenuId(filter_menus[i]));

@@ -47,6 +47,7 @@ class Languages(object):
             return self.show(code) + count
 
     def _toggle(self, code=None):
+        kwds = {}
         if code is None:
             code = "language"
             onchange = 'toggleFilters(this.id);'
@@ -56,7 +57,8 @@ class Languages(object):
             onchange = 'toggleLanguage(this.id);'
             value = 1 if code in request.cookies.get("languages", "").split(",") else -1
             code = "langlink-" + code
-        return toggle(code, value=value, onchange=onchange)
+            kwds["classes"] = "sub_language"
+        return toggle(code, value=value, onchange=onchange, **kwds)
 
     def filter_link(self, code=None, counts={}):
         padding = ' style="padding-right: 2em;"' if code is None else ''
