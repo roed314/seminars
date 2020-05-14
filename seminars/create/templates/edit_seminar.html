@@ -1,4 +1,5 @@
 {% extends "homepage.html" %}
+
 {% block content %}
 
   {% if lock %}
@@ -108,7 +109,7 @@
         <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
         <tr>
           <td>{{ KNOWL("periodicity") }}</td>
-          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes(); return false;" />
+          <td><select id="frequency" name="frequency" value="{{ seminar.frequency | blanknone }}" style="width:610px;" onchange="showtimes();" />
               <option value="0" {% if not seminar.frequency %}selected{% endif %}>no fixed schedule</option>
               <option value="7" {% if seminar.frequency == 7 %}selected{% endif %}>weekly</option>
               <option value="14" {% if seminar.frequency == 14 %}selected{% endif %}>every other week</option>
@@ -196,20 +197,20 @@
         </thead>
         {% for i in range(maxlength["organizers"]) %}
         <tr>
-          {% if i > 0 and i < (seminar.organizers | length) %}
-            <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" href="#"><font size="+1">&#x2B0D;</font></a></td>
+          {% if i > 0 %}
+            <td style="padding-right:0px; padding-top:0px; position:relative; top:-15px;"><a class="swap{{i}}" id="swap{{i}}" {% if i >= (seminar.organizers | length) %}style="visibility:hidden;"{% endif %} href="#"><font size="+1">&#x2B0D;</font></a></td>
           {% else %}
             <td></td>
           {% endif %}
           {% if i < (seminar.organizers | length) %}
             <td>
-              <input name="org_name{{i}}" value="{{ seminar.organizers[i].get('name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['name'] }}" />
+              <input class="org_name" name="org_name{{i}}" value="{{ seminar.organizers[i].get('name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['name'] }}" />
             </td>
             <td>
-              <input name="org_homepage{{i}}" value="{{ seminar.organizers[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
+              <input class="org_homepage" name="org_homepage{{i}}" value="{{ seminar.organizers[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
             </td>
             <td>
-              <input name="org_email{{i}}" value="{{ seminar.organizers[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
+              <input class="org_email" name="org_email{{i}}" value="{{ seminar.organizers[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
             </td>
             <td align="center">
               {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
@@ -220,9 +221,9 @@
               <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizers[i].get("display") %}checked{% endif %} />
             </td>
           {% else %}
-            <td><input name="org_name{{i}}" style="width:180px;" /></td>
-            <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
-            <td><input name="org_email{{i}}" style="width:220px;" /></td>
+            <td><input class="org_name" name="org_name{{i}}" style="width:180px;" maxlength="{{ maxlength['name'] }}" /></td>
+            <td><input class="org_homepage" name="org_homepage{{i}}" style="width:220px;" maxlength="{{ maxlength['hoempage'] }}"/></td>
+            <td><input class="org_email" name="org_email{{i}}" style="width:220px;" maxlength="{{ maxlength['email'] }}" /></td>
             <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
             <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
           {% endif %}
@@ -279,7 +280,26 @@ const subjOptions = [
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
   {{ prevent_unsaved() }}
-
+  function showswaps() {
+    var n = {{maxlength["organizers"]}};
+    var names = $('input[class="org_name"]');
+    var homepages = $('input[class="org_homepage"]');
+    var emails = $('input[class="org_email"]');
+    var m = 0;
+    for ( var i = 1 ; i < n ; i++ )
+      if ( names[i].value || homepages[i].value || emails[i].value  ) m = i;
+    for ( var i = 1 ; i < n ; i++ )
+      document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
+  }
+  $("input.org_name").change(showswaps); $("input.org_homepage").change(showswaps); $("input.org_email").change(showswaps);
+  var names = $('input[class="org_name"]');
+  var homepages = $('input[class="org_homepage"]');
+  var emails = $('input[class="org_email"]');
+  for ( var i = 1 ; i < {{maxlength["organizers"]}} ; i++ ) {
+    names[i].addEventListener('keyup', (event) => { showswaps(); });
+    homepages[i].addEventListener('keyup', (event) => { showswaps(); });
+    emails[i].addEventListener('keyup', (event) => { showswaps(); });
+  }
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
     $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
@@ -292,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function() {
     $('input[name="'+b+'"]')[0].checked = x;
     x = $('input[name="'+a+'"]')[0].checked;
   }
-  {% for i in range(1,(seminar.organizers | length)) %}
+  {% for i in range(1,maxlength["organizers"]) %}
     $("a.swap{{i}}").click(function(e){
       e.preventDefault();
       swapv("org_name{{i-1}}","org_name{{i}}");
@@ -300,6 +320,7 @@ document.addEventListener("DOMContentLoaded", function() {
       swapv("org_email{{i-1}}","org_email{{i}}");
       swapc("org_curator{{i-1}}","org_curator{{i}}");
       swapc("org_display{{i-1}}","org_display{{i}}");
+      showswaps();
     });
   {% endfor %}
   makeTopicSelector(
@@ -378,8 +399,9 @@ document.addEventListener("DOMContentLoaded", function() {
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
     showplusminus(n);
   }
-  // Make sure showslots gets called whenever the page is shown, including via the back button
+  // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
+    showswaps()
     showslots()
   };
 });
