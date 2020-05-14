@@ -286,17 +286,14 @@ document.addEventListener("DOMContentLoaded", function() {
     var homepages = $('input[class="org_homepage"]');
     var emails = $('input[class="org_email"]');
     var m = 0;
-    for ( var i = 1 ; i < n ; i++ ) {
+    for ( var i = 1 ; i < n ; i++ )
       if ( names[i].value || homepages[i].value || emails[i].value  ) m = i;
-      console.log("names"+i+"="+(names[i].value?"true":"false"));
-      console.log("homepages"+i+"="+(homepages[i].value?"true":"false"));
-      console.log("emails"+i+"="+(emails[i].value?"true":"false"));
-      console.log("showswaps m = "+m)
-    }
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
   }
   $("input.org_name").change(showswaps);
+  $("input.org_homepage").change(showswaps);
+  $("input.org_email").change(showswaps);
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
     $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
