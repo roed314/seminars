@@ -282,9 +282,12 @@ document.addEventListener("DOMContentLoaded", function() {
   {{ prevent_unsaved() }}
   function showswaps() {
     var n = {{maxlength["organizers"]}};
-    var x = $('input[class="org_name"]');
+    var names = $('input[class="org_name"]');
+    var homepages = $('input[class="org_homepage"]');
+    var emails = $('input[class="org_email"]');
     var m = 0;
-    for ( var i = 1 ; i < n ; i++ ) if ( x[i].value != '' ) m = i;
+    for ( var i = 1 ; i < n ; i++ )
+      if ( names[i].value || homepages[i].value !| emails[i]  ) m = i;
     console.log("showswaps m = "+m)
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
