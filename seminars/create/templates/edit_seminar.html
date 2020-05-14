@@ -203,28 +203,28 @@
           {% endif %}
           {% if i < (seminar.organizers | length) %}
             <td>
-              <input name="org_name{{i}}" value="{{ seminar.organizers[i].get('name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['name'] }}" />
+              <input class="org" name="org_name{{i}}" value="{{ seminar.organizers[i].get('name') | blanknone }}" style="width:180px" maxlength="{{ maxlength['name'] }}" />
             </td>
             <td>
-              <input name="org_homepage{{i}}" value="{{ seminar.organizers[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
+              <input class="org" name="org_homepage{{i}}" value="{{ seminar.organizers[i].get('homepage') | blanknone }}" style="width:220px" maxlength="{{ maxlength['homepage'] }}" />
             </td>
             <td>
-              <input name="org_email{{i}}" value="{{ seminar.organizers[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
+              <input class="org" name="org_email{{i}}" value="{{ seminar.organizers[i].get('email') | blanknone }}" style="width:220px" maxlength="{{ maxlength['email'] }}"/>
             </td>
             <td align="center">
               {# Note the checkbox is called org_curator because it comes from the curator column in seminar organizers, #}
               {# but it is displayed in a column labeleled "organizer" so it is checked when curator is false #}
-              <input type="checkbox" name="org_curator{{i}}" value="yes" {% if not seminar.organizers[i].get("curator") %}checked{% endif %} />
+              <input type="checkbox" class="org" name="org_curator{{i}}" value="yes" {% if not seminar.organizers[i].get("curator") %}checked{% endif %} />
             </td>
             <td align="center">
-              <input type="checkbox" name="org_display{{i}}" value="yes" {% if seminar.organizers[i].get("display") %}checked{% endif %} />
+              <input type="checkbox" class="org" name="org_display{{i}}" value="yes" {% if seminar.organizers[i].get("display") %}checked{% endif %} />
             </td>
           {% else %}
-            <td><input name="org_name{{i}}" style="width:180px;" onchange="(function(){document.getElementById('swap{{i}}').style.visibility='visible';})()" /></td>
-            <td><input name="org_homepage{{i}}" style="width:220px;" /></td>
-            <td><input name="org_email{{i}}" style="width:220px;" /></td>
-            <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
-            <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
+            <td><input class="org" name="org_name{{i}}" style="width:180px;" /></td>
+            <td><input class="org" name="org_homepage{{i}}" style="width:220px;" /></td>
+            <td><input class="org" name="org_email{{i}}" style="width:220px;" /></td>
+            <td align="center"><input type="checkbox" class="org" name="org_curator{{i}}" value="yes" /></td>
+            <td align="center"><input type="checkbox" class="org" name="org_display{{i}}" value="yes" /></td>
           {% endif %}
         </tr>
         {% endfor %}
@@ -378,8 +378,19 @@ document.addEventListener("DOMContentLoaded", function() {
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
     showplusminus(n);
   }
-  // Make sure showslots gets called whenever the page is shown, including via the back button
+  function showswaps() {
+    var n = {{maxlength["organizers"]}};
+    var m = 0;
+    for ( var i = 1 ; i < n ; i++ )
+      if ( document.getElementById('org_name'+i).value != '' ) m = i;
+    for ( var i = 1 ; i < n ; i++ )
+      document.getElementById('swap'+i).visibility = ( i <= m ? 'visible;' : 'hidden' );
+  }
+  $('input[class="org"]').change(showswaps);
+  $('input[class="org"]').change(showswaps);
+  // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
+    showswaps()
     showslots()
   };
 });
