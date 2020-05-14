@@ -280,7 +280,16 @@ const subjOptions = [
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
   {{ prevent_unsaved() }}
-
+  function showswaps() {
+    var n = {{maxlength["organizers"]}};
+    var x = $('input[class="org_name"]');
+    var m = 0;
+    for ( var i = 1 ; i < n ; i++ ) if ( x[i].value != '' ) m = i;
+    console.log("showswaps m = "+m)
+    for ( var i = 1 ; i < n ; i++ )
+      document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
+  }
+  $("input.org_name").change(showswaps);
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
     $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
@@ -301,6 +310,7 @@ document.addEventListener("DOMContentLoaded", function() {
       swapv("org_email{{i-1}}","org_email{{i}}");
       swapc("org_curator{{i-1}}","org_curator{{i}}");
       swapc("org_display{{i-1}}","org_display{{i}}");
+      showswaps();
     });
   {% endfor %}
   makeTopicSelector(
@@ -379,16 +389,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
     showplusminus(n);
   }
-  function showswaps() {
-    var n = {{maxlength["organizers"]}};
-    var x = $('input[class="org_name"]');
-    var m = 0;
-    for ( var i = 1 ; i < n ; i++ ) if ( x[i].value != '' ) m = i;
-    console.log("showswaps m = "+m)
-    for ( var i = 1 ; i < n ; i++ )
-      document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
-  }
-  $("input.org_name").change(showswaps);
   // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
     console.log("onpageshow")
