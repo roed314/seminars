@@ -382,6 +382,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var n = {{maxlength["organizers"]}};
     var m = 0;
     for ( var i = 1 ; i < n ; i++ )
+      console.log('org_name'+i)
       if ( document.getElementById('org_name'+i).value != '' ) m = i;
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).visibility = ( i <= m ? 'visible;' : 'hidden' );
