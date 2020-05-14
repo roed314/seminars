@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var emails = $('input[class="org_email"]');
     var m = 0;
     for ( var i = 1 ; i < n ; i++ )
-      if ( names[i].value || homepages[i].value !| emails[i]  ) m = i;
+      if ( names[i].value || homepages[i].value || emails[i].value  ) m = i;
     console.log("showswaps m = "+m)
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
