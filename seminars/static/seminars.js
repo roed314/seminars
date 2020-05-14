@@ -807,7 +807,7 @@ function makeTopicsTree(json_tree) {
           return acc.concat(["'" + node.li_attr['vertex'] + "'"]);
         },
         []
-      ) + "]";
+      ).sort().join(', ') + "]";
     $('#topicDAG_selector').html(
       uniq_vertices.reduce(
         function (acc, node) {

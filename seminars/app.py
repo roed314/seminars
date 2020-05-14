@@ -18,10 +18,8 @@ from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
 from seminars.utils import (
-    restricted_topics,
     top_menu,
     topdomain,
-    topics,
     url_for_with_args,
 )
 from seminars.topic import topic_dag
@@ -136,8 +134,6 @@ def ctx_proc_userdata():
     # debug mode?
     data["DEBUG"] = is_debug_mode()
 
-    data["topics"] = topics()
-    data["user_topics"] = restricted_topics
     data["top_menu"] = top_menu()
 
     data["talks_header"] = talks_header

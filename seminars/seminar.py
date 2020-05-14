@@ -12,7 +12,6 @@ from seminars.utils import (
     max_distinct,
     search_distinct,
     show_input_errors,
-    topic_dict,
     weekdays,
 )
 from seminars.topic import topic_dag

@@ -1,6 +1,6 @@
 from seminars import db
-from seminars.toggle import toggle, toggle3way
-from seminars.utils import num_columns
+from .toggle import toggle, toggle3way
+from .utils import num_columns
 from flask import request
 from collections import defaultdict, Counter
 

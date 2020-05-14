@@ -11,7 +11,6 @@ from seminars.utils import (
     max_distinct,
     adapt_datetime,
     make_links,
-    topic_dict,
 )
 from seminars.language import languages
 from seminars.toggle import toggle

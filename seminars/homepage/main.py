@@ -4,9 +4,7 @@ from seminars.talk import talks_search, talks_lucky, talks_lookup
 from seminars.utils import (
     Toggle,
     ics_file,
-    restricted_topics as user_topics,
     topdomain,
-    topics,
     maxlength,
 )
 from seminars.topic import topic_dag
@@ -200,7 +198,7 @@ class TalkSearchArray(SearchArray):
 
     def __init__(self):
         ## topics
-        topic = SelectBox(name="topic", label="Topic", options=[("", "")] + user_topics())
+        topic = SelectBox(name="topic", label="Topic", options=[("", "")] )
 
         ## pick institution where it is held
         institution = SelectBox(
@@ -302,7 +300,7 @@ class SemSearchArray(SearchArray):
 
     def __init__(self, conference=False):
         ## topics
-        topic = SelectBox(name="topic", label="Topic", options=[("", "")] + user_topics())
+        topic = SelectBox(name="topic", label="Topic", options=[("", "")])
 
         ## pick institution where it is held
         institution = SelectBox(
