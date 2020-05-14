@@ -291,7 +291,9 @@ document.addEventListener("DOMContentLoaded", function() {
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
   }
-  $("input.org_name").input(showswaps); $("input.org_homepage").input(showswaps); $("input.org_email").input(showswaps);
+  $("input.org_name").change(showswaps); $("input.org_homepage").change(showswaps); $("input.org_email").change(showswaps);
+  $("input.org_name").paste(showswaps); $("input.org_homepage").paste(showswaps); $("input.org_email").paste(showswaps);
+  $("input.org_name").keyup(showswaps); $("input.org_homepage").keyup(showswaps); $("input.org_email").keyup(showswaps);
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
     $('input[name="'+a+'"]')[0].value = $('input[name="'+b+'"]')[0].value;
