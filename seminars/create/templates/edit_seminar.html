@@ -280,21 +280,13 @@ const subjOptions = [
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
   {{ prevent_unsaved() }}
-  function showswaps(i) {
-    if ( i ) {
-      if ( $('input[name="org_name"'+i+'"]')[0].value ||
-           $('input[name="org_homepage"'+i+'"]')[0].value ||
-           $('input[name="org_email"'+i+'"]')[0].value ) {
-        document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
-        return false;
-      }
-    }
+  function showswaps() {
     var n = {{maxlength["organizers"]}};
     var names = $('input[class="org_name"]');
     var homepages = $('input[class="org_homepage"]');
     var emails = $('input[class="org_email"]');
     var m = 0;
-    for ( var i = 1 ; i < n ; i++ )
+    for ( var i = 1 ; i <= m ; i++ )
       if ( names[i].value || homepages[i].value || emails[i].value  ) m = i;
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
@@ -303,9 +295,9 @@ document.addEventListener("DOMContentLoaded", function() {
   var homepages = $('input[class="org_homepage"]');
   var emails = $('input[class="org_email"]');
   for ( var i = 1 ; i < {{maxlength["organizers"]}} ; i++ ) {
-    names[i].addEventListener('keyup', (event) => { showswaps(i); });
-    homepages[i].addEventListener('keyup', (event) => { showswaps(i); });
-    homepages[i].addEventListener('keyup', (event) => { showswaps(i); });
+    names[i].addEventListener('keyup', (event) => { showswaps(); });
+    homepages[i].addEventListener('keyup', (event) => { showswaps(); });
+    homepages[i].addEventListener('keyup', (event) => { showswaps(); });
   }
   function swapv(a,b) {
     var x = $('input[name="'+a+'"]')[0].value;
@@ -408,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
-    showswaps(0)
+    showswaps()
     showslots()
   };
 });
