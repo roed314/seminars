@@ -29,7 +29,6 @@ from lmfdb.utils import (
     to_dict,
 )
 from lmfdb.utils.search_boxes import (
-    BasicSpacer,
     SearchArray,
     SearchBox,
     SelectBox,
@@ -318,11 +317,6 @@ class SemSearchArray(SearchArray):
         )
         assert venue
 
-        name = TextBox(
-            name="name",
-            label="Name",
-            width=textwidth,
-        )
         organizer = TextBox(
             name="organizer",
             label="Organizer",

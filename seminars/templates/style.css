@@ -6,8 +6,6 @@
 
 {# end defs #}
 
-* { zoom: 0; }
-
 img { border: 0; }
 
 body {
@@ -110,9 +108,6 @@ a {
     font-family: sans-serif;
 }
 
-a[knowl] {
-    color: {{color.col_a_knowl}};
-}
 
 a.inactive {
     color: {{color.a_inactive}};
@@ -1661,6 +1656,7 @@ a.likeknowl {
     border-bottom: 1px dotted {{ color.knowl_underline }};
 }
 a.likeknowl:hover, a.likeknowl.active {
+  /* FIXME, do we really want a different color for underline */
     border-bottom: 2px solid {{ color.knowl_underline }};
     background: {{ color.knowl_hover }};
     color: {{ color.knowl_hyper_text }};

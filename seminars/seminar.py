@@ -25,6 +25,7 @@ import pytz
 from collections import defaultdict
 from datetime import datetime
 from lmfdb.logger import critical
+from psycopg2.sql import Placeholder
 
 import urllib.parse
 
