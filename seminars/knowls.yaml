@@ -372,16 +372,35 @@ export:
 filter:
   title: Filter
   contents: |
-    <p>Each filter restricts the talk list,
-    and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.</p>
-    <p>Start by clicking the word <u>topic</u> above, which sets the topic filter and opens the topic menu.
-    Initially no topics are selected, so the activation of the filter means that no talks are displayed,
-    but as you add topics, talks with that topic will appear.
-    When a topic has subtopics, you can toggle between showing all subtopics (rightmost position), showing no subtopics (leftmost position) and selecting subtopics individually (center position).
+    <p>Each filter toggle restricts the event list,
+    and the events displayed are those in the <i>intersection</i> 
+    of the subsets defined by the activated filters and the search box.</p>
+    <p>Start by clicking the word <u>topic</u> above, 
+    which sets the topic filter and opens the topic menu.
+    Initially no topics are selected, so the activation of the filter 
+    means that no events are displayed,
+    but as you add topics, events with that topic will appear.
+    Many toggles for adding topics are 3-way: 
+    clicking anywhere in the toggle cycles between 
+    none (left), some (center), and all (right).  
+    If some (center), subtopics are displayed; 
+    initially none are selected but you can click their toggles to add them.
+    (The topics are organized into a structure that is close to a tree, 
+    but actually is an acyclic directed graph 
+    since some topics have more than one parent.)
     Click <u>topic</u> again to close the menu.
-    Toggling the topic filter off and on now switches between displaying all talks vs. only talks with your selected topics.</p>
-    <p>You can also click <u>language</u> to restrict to talks in the languages you understand.
-    If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.</p>
+    Toggling the topic filter off and on now switches between 
+    displaying all events vs. 
+    only events in the union of your selected topics.</p>
+    <p>You can also click <u>language</u> to further restrict to 
+    events in the languages you understand.
+    Once you have <a href="user/info">registered</a>, clicking <u>saved</u>
+    will restrict the list to talks and series you have saved as favorites.
+    Click <u>more</u> to open a box with additional filters; 
+    these take effect when you click the Apply button inside the box.
+    If text is entered in the search box, then once you hit return
+    or click the magnifying glass, that text must appear in one of the
+    event's attributes.</p>
     <table>
     <tr>
       <td>
@@ -392,12 +411,19 @@ filter:
       </td>
     </tr>
     </table>
-    <p style="text-align:right;">To close this box, click the blue word <u>Filter</u> above.</p>
+    <p style="text-align:right;">To close this box, 
+    click the blue word <u>Filter</u> above.</p>
 saved:
   title: saved
   contents: |
-    Use this filter if you only want to see the talks that you have saved as favorites
+    Setting this filter restricts the list to events 
+    you have saved as favorites.
 saved_ad:
   title: saved
   contents: |
-    If you register, you will be able to save talks and series, export them to an external calendar app (e.g. Google calendar, iCal, or Outlook) and use this filter to only see your favorites.
+    Only registered users can apply this filter.
+    If you <a href="user/register">register</a>, 
+    you will be able to save talks and series, 
+    export them to an external calendar app 
+    (e.g., Google Calendar, iCal, or Outlook), 
+    and use this filter to restrict the list below to your saved favorites.
