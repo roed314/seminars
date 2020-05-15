@@ -193,7 +193,7 @@ online:
 access_control:
   title: Access control
   contents: |
-    For online talks and series this determines how access to the live meeting link is controlled.  The following options are available:
+    For online talks and series this determines how access to the live link is controlled.  The following options are available:
     <ul>
     <li><b>open access</b>: The link will be visible to all at all times.</li>
     <li><b>time restricted</b>: The link will be visible only within a set time window before the talk starts.</li>
@@ -223,7 +223,7 @@ access_registration:
     Online events with manual registration must provide a URL or email address that visitors can use to register for the event.
     All registered users should be emailed the live meeting link and any password that is required.
 live_link:
-  title: Live meeting link
+  title: Live link
   contents: |
     Events taking place online should list a URL that provides interactive
     access to the event (e.g. a Zoom meeting link), either in the series properties 
@@ -233,7 +233,7 @@ live_link:
     The visibility of this URL is determined by the access control settings.
     If the series' live meeting link is set, new talks in the series inherit it.
 stream_link:
-  title: Live streaming link
+  title: Passive live link
   contents: |
     Events taking place online may optionally list a URL that allows visitors to
     view the event without the possiblity of interaction (e.g. on YouTube),
