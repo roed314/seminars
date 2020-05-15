@@ -389,7 +389,7 @@ function filterMenuId(ftype) {
 function filterMenuVisible(ftype) {
     return $(filterMenuId(ftype)).is(":visible");
 }
-function toggleFilters(id, on_menu_open=false) {
+function toggleFilters_core(id, on_menu_open=false) {
     console.log("filters", id);
     if (id !== null) {
         console.log($('#'+id).val());
@@ -406,6 +406,12 @@ function toggleFilters(id, on_menu_open=false) {
     talks.show();
     apply_striping();
 }
+function toggleFilters(id, on_menu_open=False) {
+  var copy_id = id;
+  var copy_on_menu_open = on_menu_open;
+  setTimeout( () => toggleFilters_core(copy_id, copy_on_menu_open), 5);
+}
+
 function toggleFilterView(id) {
     // If this filter is not enabled, we enable it
     console.log("filterview", id);
