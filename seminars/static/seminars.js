@@ -305,7 +305,7 @@ function toggleTopicDAG_core(togid) {
     // Update other toggles in other parts of the tree that have the same id
     setOtherToggles(topic, toggleval);
     if (toggleval == 0) {
-        $("label.sub_" + topic).css("visibility", "visible");
+        $("input.tgl.sub_" + topic).removeClass("disabled");
         $("#" + togid + "-pane " + "a.sub_"+topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).removeClass("not_toggleable");
         var pane = $("#"+togid+"-pane");
         var is_visible = pane.is(":visible");
@@ -330,7 +330,7 @@ function toggleTopicDAG_core(togid) {
         });
     } else {
         console.log("togid = ", togid);
-        $("#" + togid + "-pane label.tgl-btn").css("visibility", "hidden");
+        $("#" + togid + "-pane input.tgl").addClass("disabled");
         if (toggleval == 1) {
             to_show.push(topic);
         } else {
@@ -400,9 +400,7 @@ function toggleTopicView(pid, cid, did) {
   } else {
     pane.show();
     $("#"+tid+"-filter-btn").addClass("active");
-    // console.log('label[for="' + tid + '"]');
-    // console.log("visible", $('label[for="' + tid + '"]').css("visibility"));
-    if ( $('label[for="' + tid + '"]').css("visibility") != "hidden" ) {
+    if ( !$("#"+tid).hasClass("disabled") ) {
       // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
       if (_val(tid) == -1) {
         setToggle(tid, 0, trigger=true);

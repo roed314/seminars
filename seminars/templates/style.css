@@ -2617,6 +2617,11 @@ input[data-chosen='1'] + .tgl-btn {
   background: {{ color.button_background }};
 }
 
+input.tgl.disabled + .tgl-btn,
+input.tgl.disabled + .tgl-btn:after {
+  visibility: hidden;
+}
+
 /* end of 3 way toggle switch  styling */
 /* end of toggle styling */
 
