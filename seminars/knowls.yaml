@@ -392,7 +392,7 @@ filter:
     Toggling the topic filter off and on now switches between 
     displaying all events vs. 
     only events in the union of your selected topics.</p>
-    <p>You can also click <u>language</u> to restrict to 
+    <p>You can also click <u>language</u> to further restrict to 
     events in the languages you understand.
     Once you have <a href="user/info">registered</a>, clicking <u>saved</u>
     will restrict the list to talks and series you have saved as favorites.
@@ -401,11 +401,6 @@ filter:
     If text is entered in the search box, then once you hit return
     or click the magnifying glass, that text must appear in one of the
     event's attributes.</p>
-    <p>
-    If all the filters are turned on, 
-    then an event must satisfy all the criteria 
-    (including matching the search box text)
-    in order to be displayed.</p>
     <table>
     <tr>
       <td>
