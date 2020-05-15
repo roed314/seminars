@@ -329,7 +329,6 @@ function toggleTopicDAG_core(togid) {
             to_show.push(topicFromTriple(this.id));
         });
     } else {
-        console.log("TEST", togid + "-pane");
         $("#" + togid + "-pane label.tgl-btn").css("visibility", "hidden");
         if (toggleval == 1) {
             to_show.push(topic);
@@ -382,7 +381,15 @@ function toggleTopicView(pid, cid, did) {
     var tid = pid+"--"+cid+"--"+did;
     var pane = $("#"+tid+"-pane");
     var is_visible = pane.is(":visible");
-    $("."+pid+"-subpane").hide();
+    $("."+pid+"-subpane:visible").each(function () {
+        lastid = this.id.substring(0, this.id.length - 5); // remove -pane
+        lastcid = lastid.split("--")[1];
+        if (_val(lastid) == 0 && !anyHasValue(".tgl.sub_" + lastcid, 1)) {
+            setToggle(lastid, 1, trigger=true);
+            setToggle(lastid, -1, trigger=true);
+        }
+        $(this).hide();
+    });
     $("."+pid+"-tlink").removeClass("active");
     if (is_visible) {
         if (_val(tid) == 0 && !anyHasValue(".tgl.sub_" + cid, 1)) {
@@ -456,6 +463,14 @@ function toggleFilters(id, on_menu_open=false) {
   setTimeout( () => toggleFilters_core(copy_id, copy_on_menu_open), 5);
 }
 
+function shouldUnsetFilterToggle(ftype) {
+    return (ftype == "more" &&
+            $("#more-filter-menu input,#more-filter-menu select").filter(function () {
+                return $.trim($(this).val()).length != 0
+            }).length == 0 ||
+            ftype != "more" &&
+            !anyHasValue(".tgl.sub_" + ftype, "1"));
+}
 function toggleFilterView(id) {
     // If this filter is not enabled, we enable it
     console.log("filterview", id);
@@ -474,12 +489,7 @@ function toggleFilterView(id) {
         }
     } else if (visible) { // hiding
         console.log("hiding");
-        if (ftype == "more" &&
-            $("#more-filter-menu input,#more-filter-menu select").filter(function () {
-                return $.trim($(this).val()).length != 0
-            }).length == 0 ||
-            ftype != "more" &&
-            !anyHasValue(".tgl.sub_" + ftype, "1")) {
+        if (shouldUnsetFilterToggle(ftype)) {
             setToggle(ftype, -1);
             toggleFilters(ftype, true);
         }
@@ -491,8 +501,12 @@ function toggleFilterView(id) {
             setCookie("visible_" + filter_menus[i], visible ? "-1" : "1");
             menu.slideToggle(150);
             link.toggleClass("active");
-        } else {
+        } else if (menu.is(":visible")) {
             setCookie("visible_" + filter_menus[i], "-1");
+            if (shouldUnsetFilterToggle(filter_menus[i])) {
+                setToggle(filter_menus[i], 1, trigger=true);
+                setToggle(filter_menus[i], -1, trigger=true);
+            }
             menu.slideUp(150);
             link.removeClass("active");
         }
