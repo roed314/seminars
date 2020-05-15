@@ -400,7 +400,7 @@ function toggleTopicView(pid, cid, did) {
         pane.show();
         $("#"+tid+"-filter-btn").addClass("active");
         // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
-        setToggle(tid, 0);
+        setToggle(tid, 0, trigger=true);
         if (_val(tid) == -1) {
             setToggle(tid, 0, trigger=true);
         } else if (_val(tid) == 1) {
