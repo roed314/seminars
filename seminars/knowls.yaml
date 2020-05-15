@@ -372,7 +372,7 @@ export:
 filter:
   title: Filter
   contents: |
-    <p>Each filter restricts the event list,
+    <p>Each filter toggle restricts the event list,
     and the events displayed are those in the <i>intersection</i> 
     of the subsets defined by the activated filters and the search box.</p>
     <p>Start by clicking the word <u>topic</u> above, 
@@ -394,7 +394,7 @@ filter:
     only events in the union of your selected topics.</p>
     <p>You can also click <u>language</u> to restrict to 
     events in the languages you understand.
-    Once you have <a href="user/info">registered</a>, clicking <u>saved</u>
+    Once you have <a href="user/register">registered</a>, clicking <u>saved</u>
     will restrict the list to talks and series you have saved as favorites.
     Click <u>more</u> to open a box with additional filters; 
     these take effect when you click the Apply button inside the box.
@@ -427,7 +427,7 @@ saved_ad:
   title: saved
   contents: |
     Only registered users can apply this filter.
-    If you <a href="user/info">register</a>, 
+    If you <a href="user/register">register</a>, 
     you will be able to save talks and series, 
     export them to an external calendar app 
     (e.g., Google Calendar, iCal, or Outlook), 
