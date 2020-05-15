@@ -16,6 +16,7 @@ from seminars.utils import (
     topic_dict,
     weekdays,
     killattr,
+    sanitized_table,
 )
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
@@ -641,8 +642,13 @@ def seminars_search(*args, **kwds):
     """
     organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("seminars")
+    else:
+        table = db.seminars
     return search_distinct(
-        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects), *args, **kwds
+        table, _selecter, _counter, _iterator(organizer_dict, objects=objects), *args, **kwds
     )
 
 

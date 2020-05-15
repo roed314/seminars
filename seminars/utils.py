@@ -18,6 +18,9 @@ from urllib.parse import urlparse, urlencode
 import iso639
 import pytz
 import re
+from psycopg2.sql import SQL
+from lmfdb.backend.searchtable import PostgresSearchTable
+
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -657,3 +660,67 @@ def ics_file(talks, filename, user=current_user):
 def url_for_with_args(name, args, **kwargs):
     query = ('?' + urlencode(args)) if args else ''
     return url_for(name, **kwargs) + query
+
+# For API calls, we only allow certain columns, both because of deprecated parts of the schema and for privacy/security
+whitelisted_cols = [
+    "abstract",
+    "access",
+    "comments",
+    "description",
+    "display",
+    "edited_at",
+    "end_date",
+    "end_time",
+    "frequency",
+    "homepage",
+    "institutions",
+    "is_conference",
+    "language",
+    #"live_link", # maybe allow searching on this once access control refined
+    "name",
+    "online",
+    "paper_link",
+    "per_day",
+    "room",
+    "seminar_ctr",
+    "seminar_id",
+    "shortname",
+    "slides_link",
+    "speaker",
+    "speaker_affiliation",
+    "speaker_email",
+    "speaker_homepage",
+    "start_date",
+    "start_time",
+    "stream_link",
+    "time_slots",
+    "timezone",
+    "title",
+    "topics",
+    "video_link"
+]
+
+class APIError(Exception):
+    def __init__(self, error, status):
+        self.error = error
+        self.status = status
+
+@lru_cache(maxsize=None)
+def sanitized_table(name):
+    cur = db._execute(SQL(
+        "SELECT name, label_col, sort, count_cutoff, id_ordered, out_of_order, "
+        "has_extras, stats_valid, total, include_nones FROM meta_tables WHERE name=%s"
+    ), [name])
+    def update(self, query, changes, resort=False, restat=False, commit=True):
+        raise APIError({"code": "update_prohibited"}, 500)
+    def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
+        raise APIError({"code": "insert_prohibited"}, 500)
+    from seminars import count
+    table = PostgresSearchTable(db, *cur.fetchone())
+    table.update = update.__get__(table)
+    table.count = count.__get__(table)
+    table.insert_many = insert_many.__get__(table)
+    table.search_cols = [col for col in table.search_cols if col in whitelisted_cols]
+    table.col_type = {col: typ for (col, typ) in table.col_type.items() if col in whitelisted_cols}
+    return table
+

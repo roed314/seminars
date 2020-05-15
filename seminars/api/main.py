@@ -6,22 +6,15 @@ from seminars.api import api_page
 from seminars.seminar import WebSeminar, seminars_lookup, seminars_search
 from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser
-from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, MAX_SLOTS, MAX_ORGANIZERS
+from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, APIError, MAX_SLOTS, MAX_ORGANIZERS
 from seminars.create.main import process_save_seminar, process_save_talk
-from functools import wraps, lru_cache
-from psycopg2.sql import SQL
-from lmfdb.backend.searchtable import PostgresSearchTable
+from functools import wraps
 
 def format_error(msg, *args):
     return msg % args
 
 def format_input_error(err, inp, col):
     return 'Unable to process input "%s" for property %s: %s' % (inp, col, err)
-
-class APIError(Exception):
-    def __init__(self, error, status):
-        self.error = error
-        self.status = status
 
 def version_error(version):
     return APIError({"code": "invalid_version",
@@ -33,84 +26,6 @@ def handle_api_error(err):
     response.status_code = err.status
     return response
 
-# We only allow certain columns, both because of deprecated parts of the schema and for privacy/security
-whitelisted_cols = [
-    "abstract",
-    "access",
-    "comments",
-    "description",
-    "display",
-    "edited_at",
-    "end_date",
-    "end_time",
-    "frequency",
-    "homepage",
-    "institutions",
-    "is_conference",
-    "language",
-    #"live_link", # maybe allow searching on this once access control refined
-    "name",
-    "online",
-    "paper_link",
-    "per_day",
-    "room",
-    "seminar_ctr",
-    "seminar_id",
-    "shortname",
-    "slides_link",
-    "speaker",
-    "speaker_affiliation",
-    "speaker_email",
-    "speaker_homepage",
-    "start_date",
-    "start_time",
-    "stream_link",
-    "time_slots",
-    "timezone",
-    "title",
-    "topics",
-    "video_link"
-]
-
-@lru_cache(maxsize=None)
-def duplicate_table(name):
-    cur = db._execute(SQL(
-        "SELECT name, label_col, sort, count_cutoff, id_ordered, out_of_order, "
-        "has_extras, stats_valid, total, include_nones FROM meta_tables WHERE name=%s"
-    ), [name])
-    def update(self, query, changes, resort=False, restat=False, commit=True):
-        raise APIError({"code": "update_prohibited"}, 500)
-    def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
-        raise APIError({"code": "insert_prohibited"}, 500)
-    from seminars import count
-    table = PostgresSearchTable(db, *cur.fetchone())
-    table.update = update.__get__(table)
-    table.count = count.__get__(table)
-    table.insert_many = insert_many.__get__(table)
-    table.search_cols = [col for col in table.search_cols if col in whitelisted_cols]
-    table.col_type = {col: typ for (col, typ) in table.col_type.items() if col in whitelisted_cols}
-    return table
-
-def sanitized_seminars():
-    return duplicate_table("seminars")
-
-def sanitized_talks():
-    return duplicate_table("talks")
-
-def sanitize_output(result):
-    if isinstance(result, dict):
-        ans = {key: val for (key, val) in result.items() if key in whitelisted_cols}
-        for old, new in renames:
-            if old in ans:
-                ans[new] = ans.pop(old)
-        return ans
-    else:
-        return result
-
-def sanitize_query(query):
-    # TODO: write versions of seminar_search, etc using the santized tables
-    return query
-
 @api_page.route("/<int:version>/search_series", methods=["GET", "POST"])
 def search_series(version):
     if version != 0:
@@ -118,26 +33,26 @@ def search_series(version):
     if request.method == "POST":
         try:
             raw_data = request.get_json()
-        except Exception:
-            raw_data = None
-        query = sanitize_query(raw_data.pop("query", {}))
-        projection = raw_data.pop("projection", 1)
-        query["visibility"] = 2
-        invalid = False
-        if isinstance(projection, (list, tuple)):
-            invalid = [col for col in projection if col not in whitelisted_cols]
-        elif not isinstance(projection, int) and projection not in whitelisted_cols:
-            invalid = [projection]
-        if invalid:
-            raise APIError({"code": "invalid_projection",
-                            "description": "at least one column requested is not supported by API",
-                            "errors": invalid}, 400)
+        except Exception as err:
+            raise APIError({"code": "json_parse_error",
+                            "description": "could not parse json",
+                            "error": str(err)}, 400)
+        query = raw_data.pop("query", {})
+        tz = raw_data.pop("tz", "UTC")
     else:
         query = dict(request.args)
-        projection = 1
+        tz = current_user.tz # Is this the right choice?
+        for col, val in query.items():
+            if col in db.seminars.col_type:
+                query[col] = process_user_input(val, col, db.seminars.col_type[col], tz)
+            else:
+                raise APIError({"code": "unknown_column",
+                                "description": "%s not a column of seminars" % col}, 400)
         raw_data = {}
+    query["visibility"] = 2
+    # TODO: encode the times....
     try:
-        results = seminars_search(query, projection, objects=False, **raw_data)
+        results = seminars_search(query, objects=False, sanitized=True, **raw_data)
     except Exception as err:
         raise APIError({"code": "search_error",
                         "description": "error in executing search",

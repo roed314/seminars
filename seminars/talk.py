@@ -14,6 +14,7 @@ from seminars.utils import (
     make_links,
     topic_dict,
     languages_dict,
+    sanitized_table,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -692,6 +693,11 @@ def talks_search(*args, **kwds):
     """
     seminar_dict = kwds.pop("seminar_dict", {})
     objects = kwds.pop("objects", True)
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("talks")
+    else:
+        table = db.talks
     return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects), *args, **kwds)
 
 
