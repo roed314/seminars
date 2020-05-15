@@ -164,6 +164,66 @@ table tbody tr.trivial a:hover {
 }
 */
 
+input.search {
+    width: 314px;
+    padding-left:30px;
+    padding-right:30px;
+}
+span.search, span.cancel-search {
+    position: absolute;
+    z-index: 3;
+    top: 5px;
+    font-size: 17px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+span.search {
+    left: 2px;
+    color: #373737;
+}
+span.cancel-search {
+    right: 2px;
+    color: #373737;
+}
+span.search.inactive {
+    color: #cdcdcd;
+}
+span.cancel-search.inactive {
+    visibility: hidden;
+}
+button.search, button.cancel-search, button.search:hover, button.cancel-search:hover {
+    position: absolute;
+    top: 0px;
+    z-index: 4;
+    background: none;
+    border: 0;
+    outline: none;
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    margin: 0px;
+    padding: 0px;
+}
+button.search {
+    left: 0px;
+}
+button.cancel-search {
+    right: 0px;
+}
+button.search.inactive, button.cancel-search.inactive {
+    display: none;
+}
+
+span.cancel-search {
+    position: absolute;
+    z-index: 3;
+    right: 2px;
+    top: 5px;
+    font-size: 17px;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #373737;
+}
 
 body.checklist {
  font-size: 70%;

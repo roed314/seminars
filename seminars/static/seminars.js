@@ -588,6 +588,17 @@ $(document).ready(function () {
             evt.preventDefault();
             toggleLanguage(this.id);
         });
+    $('input[name="keywords"]').on(
+        "input",
+        function (e) {
+            $(".search").removeClass("inactive");
+            $(".cancel-search").removeClass("inactive");
+        });
+    $('button.cancel-search').on(
+        "click",
+        function (e) {
+            $("input[name=keywords]").val("");
+        });
 
     var today = new Date();
     var minute = today.getMinutes();
