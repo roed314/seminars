@@ -2,11 +2,13 @@
 
 {% block browsing %}
 
-{% if not is_conference %}
 <div id="timezone-table" style="padding: 10px 4px 0px 4px;">
-  Times in {{ user.show_timezone("browse") }}
-</div>
+{% if not is_conference %}
+Times in {{ user.show_timezone("browse") }}
+{% else %}
+Dates in conference time zone
 {% endif %}
+</div>
 
 <table id="browse-confs" class="conf-table ntdata">
   <thead>
