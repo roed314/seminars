@@ -372,7 +372,7 @@ export:
 filter:
   title: Filter
   contents: |
-    <p>Each filter toggle restricts the event list,
+    <p>Each filter toggle in the top row <i>restricts</i> the event list,
     and the events displayed are those in the <i>intersection</i> 
     of the subsets defined by the activated filters and the search box.</p>
     <p>Start by clicking the word <u>topic</u> above, 
