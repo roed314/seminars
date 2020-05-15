@@ -4,6 +4,7 @@
 
 <div id="filter-container">
   <div id="filter-controls">
+    <div style="display: inline-block;">
     <table id="filter-table">
       <tr>
         <td>
@@ -16,24 +17,39 @@
           {{ toggle(tglid="calendar", value=1 if request.cookies.get('filter_calendar', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
         </td>
         <td style="padding-right: 2em;">
-          Show only saved events
+          {{ KNOWL("saved") }}
+        </td>
+        {% else %}
+        <td>
+          <input class="tgl tgl-light tgl2way" value="-1" id="saved_disabled"></input> <label class="tgl-btn" for="saved_disabled" style="cursor: default;"></label>
+        </td>
+        <td style="padding-right: 2em;">
+          {{ KNOWL("saved_ad") }}
         </td>
         {% endif %}
         <td>
           {{ toggle(tglid="more", value=1 if request.cookies.get('filter_more', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
         </td>
         <td style="padding-right: 2em;">
-          <a id="more-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">More</a>
+          <a id="more-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">more</a>
         </td>
       </tr>
     </table>
+    </div>
+    <div style="float: right;">
+      <form>
+        {{ info.anywhere_search.html(info) | safe }}
+      </form>
+    </div>
   </div>
   {{ topic_dag.filter_pane(counts=topic_counts) | safe }}
   {{ languages.filter_pane(counts=language_counts) | safe }}
   <div id="more-filter-menu" class="filter-menu">
     <div style="margin: 0px auto;">
       <div style="padding: 10px;">
-        {{ info.search_array.html(info) | safe }}
+        <form>
+          {{ info.search_array.html(info) | safe }}
+        </form>
       </div>
     </div>
   </div>

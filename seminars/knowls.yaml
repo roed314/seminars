@@ -393,3 +393,11 @@ filter:
     </tr>
     </table>
     <p style="text-align:right;">To close this box, click the blue word <u>Filter</u> above.</p>
+saved:
+  title: saved
+  contents: |
+    Use this filter if you only want to see the talks that you have saved as favorites
+saved_ad:
+  title: saved
+  contents: |
+    If you register, you will be able to save talks and series, export them to an external calendar app (e.g. Google calendar, iCal, or Outlook) and use this filter to only see your favorites.

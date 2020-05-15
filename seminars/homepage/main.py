@@ -154,15 +154,6 @@ def talks_parser(info, query):
     parse_topic(info, query)
     parse_institution_talk(info, query)
     #parse_venue(info, query)
-    parse_substring(info, query, "keywords",
-                    ["title",
-                     "abstract",
-                     "speaker",
-                     "speaker_affiliation",
-                     "seminar_id",
-                     "comments",
-                     "speaker_homepage",
-                     "paper_link"])
     parse_access(info, query)
 
     parse_substring(info, query, "speaker", ["speaker"])
@@ -182,12 +173,6 @@ def seminars_parser(info, query, org_query={}, conference=False):
     parse_topic(info, query)
     parse_institution_sem(info, query)
     #parse_venue(info, query)
-    parse_substring(info, query, "keywords",
-                    ["name",
-                     "description",
-                     "homepage",
-                     "shortname",
-                     "comments"])
     org_cols = ["name", "name", "full_name", "homepage"] #FIXME: remove full_name
     if current_user.is_subject_admin(None):
         org_cols.append("email")
@@ -280,6 +265,7 @@ class TalkSearchArray(SearchArray):
             example_span=False,
             colspan=(1, 2, 1),
             width=textwidth,
+            extra=['autocomplete="off"'],
         )
         time = TextBox(
             name="timerange",
@@ -291,18 +277,19 @@ class TalkSearchArray(SearchArray):
         )
         recent = TextBox(
             name="recent",
-            label="Edited within (hours)",
+            label="Edited within",
             example="168",
+            example_span="hours",
             colspan=(1, 2, 1),
-            width=textwidth,
+            width=textwidth-100,
         )
 
         video = Toggle(name="video", label="Has video")
         self.array = [
             [institution, video if past else recent],
-            [keywords, title],
+            #[keywords, title],
             [speaker, affiliation],
-            [time, date],
+            [date, time],
         ]
 
     def main_table(self, info=None):
@@ -339,9 +326,6 @@ class SemSearchArray(SearchArray):
         )
         assert venue
 
-        ## keywords for seminar or talk
-        keywords = TextBox(name="keywords", label="Anywhere", width=textwidth,)
-
         name = TextBox(
             name="name",
             label="Name",
@@ -363,8 +347,8 @@ class SemSearchArray(SearchArray):
             extra=['autocomplete="off"'],
         )
         self.array = [
-            [keywords, institution],
-            [name, organizer],
+            [institution],
+            [organizer],
         ]
         if conference:
             self.array.append([date])
@@ -380,6 +364,22 @@ class SemSearchArray(SearchArray):
 
     def hidden(self, info):
         return []
+
+class AnywhereSearchArray(SearchArray):
+    def __init__(self):
+        ## keywords for seminar or talk
+        keywords = TextBox(name="keywords", label="", width=textwidth,)
+        self.array = [[keywords]]
+
+    def main_table(self, info=None):
+        return self._print_table(self.array, info, layout_type="horizontal")
+
+    def search_types(self, info):
+        return []
+
+    def hidden(self, info):
+        return []
+
 
 @app.route("/")
 def index():
@@ -482,8 +482,19 @@ def _get_row_attributes(objects):
 def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
     search_array = TalkSearchArray(past=past)
-    info = to_dict(read_search_cookie(search_array), search_array=search_array)
+    anywhere_search = AnywhereSearchArray()
+    info = to_dict(read_search_cookie(search_array), search_array=search_array, anywhere_search=anywhere_search)
+    info.update(request.args)
     query = dict(query)
+    parse_substring(info, query, "keywords",
+                    ["title",
+                     "abstract",
+                     "speaker",
+                     "speaker_affiliation",
+                     "seminar_id",
+                     "comments",
+                     "speaker_homepage",
+                     "paper_link"])
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     # Note that talks_parser ignores the "time" field at the moment; see below for workaround
     talks_parser(info, more)
@@ -547,8 +558,16 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
 
 def _series_index(query, sort=None, subsection=None, conference=True, past=False):
     search_array = SemSearchArray(conference=conference, past=past)
-    info = to_dict(read_search_cookie(search_array), search_array=search_array)
+    anywhere_search = AnywhereSearchArray()
+    info = to_dict(read_search_cookie(search_array), search_array=search_array, anywhere_search=anywhere_search)
+    info.update(request.args)
     query = dict(query)
+    parse_substring(info, query, "keywords",
+                    ["name",
+                     "description",
+                     "homepage",
+                     "shortname",
+                     "comments"])
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more)
     query["display"] = True

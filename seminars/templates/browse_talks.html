@@ -2,13 +2,9 @@
 
 {% block browsing %}
 
-<table id="timezone-table">
-   <tr>
-    <td style="padding-right: 2em;">
-      Times in {{ user.show_timezone("browse") }}
-    </td>
-   </tr>
-</table>
+<div id="timezone-table">
+  Times in {{ user.show_timezone("browse") }}
+</div>
 
 <table id="browse-talks" class="talk-table ntdata">
   <thead>

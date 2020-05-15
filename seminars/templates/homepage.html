@@ -14,7 +14,7 @@
       <div class="upper">
         <div id="title">{{ title|safe }}</div>
         <div id="domain"> {{ topdomain }} {% if 'mathseminars' in topdomain  %}(beta){% else %}(test){%endif%}</div>
-        <div id="top-menu" style="margin-right: 100px;">
+        <div id="top-menu" style="margin-right: 200px;">
         {% for url, onclick, label in top_menu -%}
           <div {% if section == label %} class="menu-active"{% endif %}><a href="{{url}}"{% if onclick %} onclick="{{onclick}}"{% endif %}>{{label}}</a></div>
         {%- endfor %}
