@@ -212,12 +212,46 @@ function reviseCookies() {
         }
     }
 }
+
+function enableMoreButton() {
+    $('#more-filter-menu button').html("Apply");
+    $('#more-filter-menu button').prop('disabled', false);
+}
+function disableMoreButton() {
+    $('#more-filter-menu button').html("Applied");
+    $('#more-filter-menu button').prop('disabled', true);
+}
+function moreHasChanges() {
+    return $("#more-filter-menu input,#more-filter-menu select").filter(function() {
+        return $(this).val() != getCookie("search_" + this.name)
+    }).length != 0
+}
+function setMoreButton() {
+    // This function can be called when the more input fields are changed or the more toggle changes to correctly set the state of the Apply/Applied button
+    if (!moreFiltering() || moreHasChanges()) {
+        enableMoreButton();
+    } else {
+        disableMoreButton();
+    }
+}
 function setSearchCookies() {
     $("#more-filter-menu input,#more-filter-menu select").each(function() {
         console.log("SearchCookie", this.name, $(this).val());
         setCookie("search_" + this.name, $(this).val());
     });
     setCookie("filter_more", "1");
+}
+function pushForCookies() {
+    if (moreHasChanges()) {
+        setSearchCookies();
+        window.location.reload(true)
+    } else {
+        if (!moreFiltering()) {
+            setToggle("more", 1);
+            toggleFilters("more", true);
+        }
+        disableMoreButton();
+    }
 }
 
 function toggleLanguage_core(id) {
@@ -399,6 +433,13 @@ function toggleFilters_core(id, on_menu_open=false) {
         if (!on_menu_open && is_enabled && !filterMenuVisible(ftype) && !getCookie(ftype+"s")) {
             toggleFilterView(ftype+"-filter-btn");
         }
+        if (ftype == "more") {
+            if (is_enabled) {
+                disableMoreButton();
+            } else {
+                enableMoreButton();
+            }
+        }
     }
     var talks = $('.talk');
     talks.hide();
@@ -420,14 +461,22 @@ function toggleFilterView(id) {
     var is_enabled = (getCookie("filter_"+ftype) == "1");
     var visible = filterMenuVisible(ftype)
     console.log("enabled", is_enabled, "visible", visible);
-    if (!is_enabled && !visible && ftype != "more") { // showing
+    if (!is_enabled && !visible) { // showing
         console.log("showing");
-        setToggle(ftype, 1);
-        toggleFilters(ftype, true);
+        if (ftype == "more") {
+            setMoreButton();
+        } else {
+            setToggle(ftype, 1);
+            toggleFilters(ftype, true);
+        }
     } else if (visible) { // hiding
         console.log("hiding");
-        if (!anyHasValue(".tgl.sub_" + ftype, "1")) {
-            console.log("set to -1")
+        if (ftype == "more" &&
+            $("#more-filter-menu input,#more-filter-menu select").filter(function () {
+                return $.trim($(this).val()).length != 0
+            }).length == 0 ||
+            ftype != "more" &&
+            !anyHasValue(".tgl.sub_" + ftype, "1")) {
             setToggle(ftype, -1);
             toggleFilters(ftype, true);
         }
@@ -436,9 +485,11 @@ function toggleFilterView(id) {
         var menu = $(filterMenuId(filter_menus[i]));
         var link = $("#"+filter_menus[i]+"-filter-btn");
         if (ftype == filter_menus[i]) {
+            setCookie("visible_" + filter_menus[i], visible ? "-1" : "1");
             menu.slideToggle(150);
             link.toggleClass("active");
         } else {
+            setCookie("visible_" + filter_menus[i], "-1");
             menu.slideUp(150);
             link.removeClass("active");
         }
@@ -599,6 +650,16 @@ $(document).ready(function () {
         function (e) {
             $("input[name=keywords]").val("");
         });
+    $('#more-filter-menu input,#more-filter-menu select').on(
+        "input",
+        function (e) {
+            setMoreButton();
+        });
+    for (let i=0; i<filter_menus.length; i++) {
+        if (getCookie("visible_" + filter_menus[i]) == "1") {
+            toggleFilterView(filter_menus[i]);
+        }
+    }
 
     var today = new Date();
     var minute = today.getMinutes();

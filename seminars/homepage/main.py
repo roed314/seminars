@@ -198,15 +198,20 @@ def institutions_shortnames():
 
 textwidth = 300
 
-class PushForCookie(SearchButton):
+class PushForCookies(SearchButton):
+    def __init__(self, value, description, disabled=False, **kwds):
+        self.disabled = disabled
+        SearchButton.__init__(self, value, description, **kwds)
     def _input(self, info):
-        onclick = " onclick='setSearchCookies(); window.location.reload(true); return false;'"
-        btext = "<button type='submit' name='search_type' value='{val}' style='width: {width}px;'{onclick}>{desc}</button>"
+        onclick = " onclick='pushForCookies(); return false;'"
+        disabled = ' disabled="disabled"' if self.disabled else ""
+        btext = "<button type='submit' name='search_type' value='{val}' style='width: {width}px;'{onclick}{disabled}>{desc}</button>"
         return btext.format(
             width=self.width,
             val=self.value,
             desc=self.description,
             onclick=onclick,
+            disabled=disabled,
         )
 
 class TalkSearchArray(SearchArray):
@@ -279,7 +284,11 @@ class TalkSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [PushForCookie("talks", "Apply")]
+        active_search = info and any(info.get(elt.name) for row in self.array for elt in row)
+        if active_search:
+            return [PushForCookies("talks", "Applied", disabled=True)]
+        else:
+            return [PushForCookies("talks", "Apply")]
 
     def hidden(self, info):
         return []  # [("talk_start", "talk_start")]
@@ -342,7 +351,11 @@ class SemSearchArray(SearchArray):
         return self._print_table(self.array, info, layout_type="horizontal")
 
     def search_types(self, info):
-        return [PushForCookie("seminars", "Apply")]
+        active_search = info and any(info.get(elt.name) for row in self.array for elt in row)
+        if active_search:
+            return [PushForCookies("seminars", "Applied", disabled=True)]
+        else:
+            return [PushForCookies("seminars", "Apply")]
 
     def hidden(self, info):
         return []

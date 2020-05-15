@@ -704,6 +704,15 @@ table.ntdata td.description {
     max-width: 600px;
 }
 
+button:disabled {
+    cursor: default;
+    background: #aaaaaa;
+    border: 2px solid #373737;
+}
+button {
+    outline: none;
+}
+
 button.textbottom {
     vertical-align: text-bottom;
     margin-left: 20px;
