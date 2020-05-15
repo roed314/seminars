@@ -372,10 +372,11 @@ export:
 filter:
   title: Filter
   contents: |
-    <p>Each filter toggle in the top row <i>restricts</i> the event list,
-    and the events displayed are those in the <i>intersection</i> 
+    <p>Each filter toggle in the top row <i>restricts</i> the event list.
+    The events displayed are those in the <i>intersection</i> 
     of the subsets defined by the activated filters and the search box.</p>
-    <p>Start by clicking the word <u>topic</u> above, 
+    <ul>
+        <li>Start by clicking the word <u>topic</u> above, 
     which activates the topic filter and opens the topic menu.
     Initially no topics are selected, so the activation of the filter 
     means that no events are displayed,
@@ -388,16 +389,17 @@ filter:
     Click <u>topic</u> again to close the menu.
     Toggling the topic filter off and on now switches between 
     displaying all events vs. 
-    only events in the union of your selected topics.</p>
-    <p>You can also click <u>language</u> to further restrict to 
-    events in the languages you understand.
-    Once you have <a href="user/info">registered</a>, clicking <u>saved</u>
-    will restrict the list to talks and series you have saved as favorites.
-    Click <u>more</u> to open a box with additional filters; 
-    these take effect when you click the Apply button inside the box.
-    If text is entered in the search box, then once you hit return
+    only events in the union of your selected topics.</li>
+    <li>You can also click <u>language</u> to further restrict to 
+    events in the languages you understand.</li>
+    <li>Once you have <a href="user/info">registered</a>, clicking <u>saved</u>
+    will restrict the list to talks and series you have saved as favorites.</li>
+    <li>Click <u>more</u> to open a box with additional filters; 
+    these take effect when you click the Apply button inside the box.</li>
+    <li>If text is entered in the search box, then once you hit return
     or click the magnifying glass, that text must appear in one of the
-    event's attributes.</p>
+    event's attributes.</li>
+    </ul>
     <table>
     <tr>
       <td>
