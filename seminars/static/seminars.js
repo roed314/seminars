@@ -292,7 +292,7 @@ function toggleLanguage_core(id) {
 function toggleLanguage(togid) {
   console.log(togid);
   var foo = togid;
-  setTimeout(() => toggleLanguage_core(foo), 5);
+  setTimeout(() => toggleLanguage_core(foo), 1);
 }
 
 
@@ -370,7 +370,7 @@ function toggleTopicDAG_core(togid) {
 function toggleTopicDAG(togid) {
   console.log(togid);
   var foo = togid;
-  setTimeout(() => toggleTopicDAG_core(foo), 5);
+  setTimeout(() => toggleTopicDAG_core(foo), 1);
 }
 
 function anyHasValue(selector, value) {
@@ -404,12 +404,12 @@ function toggleTopicView(pid, cid, did) {
     // console.log("visible", $('label[for="' + tid + '"]').css("visibility"));
     if ( $('label[for="' + tid + '"]').css("visibility") != "hidden" ) {
       // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
-      setToggle(tid, 0, trigger=true);
       if (_val(tid) == -1) {
         setToggle(tid, 0, trigger=true);
       } else if (_val(tid) == 1) {
+        console.log("\n\n\nhere");
         setToggle(tid, -1, trigger=true);
-        setToggle(tid, 0, trigger=true);
+        setTimeout(() => setToggle(tid, 0, trigger=true), 2);
       }
     }
   }
@@ -465,7 +465,7 @@ function toggleFilters_core(id, on_menu_open=false) {
 function toggleFilters(id, on_menu_open=false) {
   var copy_id = id;
   var copy_on_menu_open = on_menu_open;
-  setTimeout( () => toggleFilters_core(copy_id, copy_on_menu_open), 5);
+  setTimeout( () => toggleFilters_core(copy_id, copy_on_menu_open), 1);
 }
 
 function shouldUnsetFilterToggle(ftype) {
