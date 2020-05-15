@@ -396,8 +396,8 @@ filter:
 saved:
   title: saved
   contents: |
-    Use this filter if you only want to see the talks that you have saved as favorites
+    Setting this filter restricts the list below to events you have saved as favorites.
 saved_ad:
   title: saved
   contents: |
-    If you register, you will be able to save talks and series, export them to an external calendar app (e.g. Google calendar, iCal, or Outlook) and use this filter to only see your favorites.
+    If you register by clicking Login, you will be able to save talks and series, export them to an external calendar app (e.g., Google Calendar, iCal, or Outlook), and use this filter to restrict the list below to your saved favorites.
