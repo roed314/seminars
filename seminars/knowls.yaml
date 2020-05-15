@@ -233,7 +233,7 @@ live_link:
     The visibility of this URL is determined by the access control settings.
     If the series' live meeting link is set, new talks in the series inherit it.
 stream_link:
-  title: Passive live link
+  title: Secondary live link
   contents: |
     Events taking place online may optionally list a URL that allows visitors to
     view the event without the possiblity of interaction (e.g. on YouTube),
