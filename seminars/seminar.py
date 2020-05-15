@@ -655,7 +655,7 @@ def all_organizers(query={}):
     print(query)
     for rec in db.seminar_organizers.search(query, sort=["seminar_id", "order"]):
         organizers[rec["seminar_id"]].append(rec)
-    printf(len(organizers.keys()))
+    print(len(organizers.keys()))
     return organizers
 
 
