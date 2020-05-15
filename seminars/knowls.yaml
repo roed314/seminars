@@ -402,9 +402,9 @@ filter:
             Click <u>more</u> to open a box with additional filters; 
             these take effect when you click the Apply button 
             inside the box.</li>
-    <li><b>Search box:<b>
-            If text is entered here, then once you hit return
-            or click the magnifying glass, 
+    <li><b>search:</b>
+            If text is entered in the search box, 
+            then once you hit return or click the magnifying glass, 
             that text must appear in one of the event's attributes.</li>
     </ul>
     <table>
