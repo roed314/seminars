@@ -1,0 +1,289 @@
+/* edit these as you wish */
+:root {
+  --knowl-background: #efefef40;
+  --knowl-border-color: #cdcdcd80;
+  --link-color: #1565C0ee;
+  --link-hover-color: black;
+  --link-hover-background: #e0e0e040;
+  --row-background-even: #0000000f;
+  --row-background-odd: #ffffff0f;
+  --font: sans-serif;
+}
+
+
+div.embedded_schedule {
+    margin: 0px;
+    padding: 0px;
+    font-family: var(--font);
+}
+
+div.embedded_schedule a {
+  color: var(--link-color);
+  text-decoration: none;
+  font-family: var(--font);
+}
+
+div.embedded_schedule  a:visited {
+  color: var(--link-color);
+}
+
+div.embedded_schedule  a:hover {
+  color: var(--link-hover-color);
+  background: var(--link-hover-background);
+}
+
+
+
+div.embedded_schedule table.ntdata th.yourtime {
+    text-align: center;
+}
+div.embedded_schedule  table.ntdata td.weekday {
+  text-align: left;
+  padding-right: 2px;
+}
+
+div.embedded_schedule  table.ntdata td.monthdate {
+  white-space: nowrap;
+  text-align: right;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+div.embedded_schedule table.ntdata td.time {
+  text-align: right;
+  padding-left: 2px;
+}
+div.embedded_schedule table.ntdata td.speaker {
+  min-width: 120px;
+}
+
+div.embedded_schedule table.ntdata td.talktitle {
+  min-width: 300px;
+}
+div.embedded_schedule .hidden {
+  visibility: hidden;
+  height: 0px;
+  display: none;
+}
+
+div.embedded_schedule table.ntdata a.knowl-link,
+div.embedded_schedule table.ntdata a[knowl],
+div.embedded_schedule table a.knowl-link,
+div.embedded_schedule table a[knowl] {
+    display: inline;
+    padding: 0;
+}
+
+div.embedded_schedule table.ntdata a {
+    display: inline;
+}
+
+div.embedded_schedule table.ntdata td {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-right: 7px;
+    padding-left: 7px;
+}
+
+
+div.embedded_schedule table.ntdata {
+    width: auto;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 0px;
+    border-collapse: collapse;
+}
+
+
+div.embedded_schedule table.ntdata > thead {
+    border-bottom: 2px solid #373737;
+}
+
+div.embedded_schedule table.ntdata th {
+    text-align: left;
+    padding-right: 7px;
+    padding-left: 7px;
+}
+
+div.embedded_schedule table.ntdata > caption {
+    caption-side: bottom;
+    padding-top: 10px;
+    text-align: right;
+}
+
+
+div.embedded_schedule table.ntdata > tr.even,
+div.embedded_schedule table.ntdata > tbody > tr.even,
+div.embedded_schedule table.ntdata > thead > tr.even,
+div.embedded_schedule table.ntdata > tr:nth-of-type(even),
+div.embedded_schedule table.ntdata > tbody > tr:nth-of-type(even),
+div.embedded_schedule table.ntdata > thead > tr:nth-of-type(even) {
+    background: var(--row-background-even);
+}
+
+div.embedded_schedule table.ntdata thead th,
+div.embedded_schedule table.ntdata > tr.odd, 
+div.embedded_schedule table.ntdata > tbody > tr.odd,
+div.embedded_schedule table.ntdata > thead > tr.odd,
+div.embedded_schedule table.ntdata > tr:nth-of-type(odd),
+div.embedded_schedule table.ntdata > tbody > tr:nth-of-type(odd),
+div.embedded_schedule table.ntdata > thead > tr:nth-of-type(odd),
+div.embedded_schedule table.ntdata > tr:first-child table.ntdata > tbody > tr:first-child table.ntdata > thead > tr:first-child {
+    background: var(--row-background-odd);
+}
+
+div.embedded_schedule *[knowl] {
+    border-bottom: 1px dotted var(--link-color);
+    cursor: pointer;
+    border-radius: 0;
+    margin: 3px 0 0 0;
+}
+
+div.embedded_schedule *[knowl]:hover, *[knowl].active {
+    border-bottom: 2px solid var(--link-color);
+    background: var(--link-hover-background);
+    color: var(--link-color);
+    margin: 0;
+    padding: 3px 0 0 0;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+
+
+/* display of knowls */
+
+
+div.embedded_schedule  .talk-header-container {
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+div.embedded_schedule  .talk-details-container {
+  padding: 0px;
+  margin: 0px;
+}
+
+div.embedded_schedule  .talk-title {
+  align: left;
+}
+
+div.embedded_schedule  .talk-view {
+  padding: 0px 20px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+div.embedded_schedule div > *[knowl], p > *[knowl] {
+    position: relative;
+}
+
+div.embedded_schedule table .knowl a {
+    padding: 0;
+}
+
+div.embedded_schedule .knowl-output {
+    background: var(--knowl-background);
+    border: 5px solid var(--knowl-border-color);
+    border-radius: 10px;
+    padding: 0px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    margin-right: 10px;
+    text-align: left;
+    overflow-y: hidden;
+    max-height: 1000px;
+    transition: max-height 0.4s ease, border-width 0.4s step-start;
+}
+
+div.embedded_schedule .knowl-output:not(.open) {
+    transition: max-height 0.4s ease, border-width 0.4s step-end;
+    max-height: 0px;
+    border-width: 0px;
+    margin: 0px;
+}
+div.embedded_schedule .knowl-output a {
+    display: inline;
+}
+
+div.embedded_schedule .knowl-content {
+    padding: 0 10px;
+}
+
+/* horizontal bar */
+div.embedded_schedule hr {
+    border: 2px solid #aaaaaa;
+    margin: 15px 0;
+}
+
+/* ics links */
+div.embedded_schedule  ul.ical-detail {
+  display: inline-flex;
+  list-style: none;
+  padding-left: 1em;
+}
+
+div.embedded_schedule  li.ical-detail {
+  padding-right: 2em;
+}
+
+/* topic and language labels */
+div.embedded_schedule .topic_label,
+div.embedded_schedule .language_label {
+    border-radius: 4px;
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+}
+
+div.embedded_schedule  .topic_label {
+    background: #373737;
+    color: #fff;
+    padding: 3px 7px;
+}
+div.embedded_schedule  .topic_label i {
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 7px;
+}
+
+div.embedded_schedule  .access_button {
+    display: inline-block;
+    margin: 2px 4px 2px 4px;
+    padding: 3px 7px;
+    display: inline-block;
+    background: white;
+    border: 2px solid #373737;
+}
+
+div.embedded_schedule  .access_button.is_link {
+    background: white;
+    color: black;
+}
+
+div.embedded_schedule .starting_soon.access_button.is_link{
+    border: none;
+    border-radius: 4px;
+    background: red !important;
+}
+
+div.embedded_schedule .starting_soon.access_button.is_link a {
+    color: #fff !important;
+}
+
+div.embedded_schedule  .starting_soon a:hover {
+    background: inherit;
+}
+
+div.embedded_schedule .access_button.no_link {
+    border: 2px solid black;
+    background: #fff;
+}
+
+div.embedded_schedule  .starting_soon.access_button.no_link {
+    border: 2px solid red !important;
+    background: #fff !important;
+}
