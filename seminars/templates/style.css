@@ -2547,4 +2547,13 @@ input[data-chosen='1'] + .tgl-btn {
     background: rgba(0,0,0,.02) ! important;
 }
 
+.jstree-proton-responsive .jstree-anchor {
+  height: 22px ! important;
+}
+@media (max-width: 768px) {
+.jstree-proton-responsive .jstree-anchor {
+  height: 38px ! important;
+}
+}
+
 
