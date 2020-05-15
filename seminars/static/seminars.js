@@ -406,7 +406,7 @@ function toggleFilters_core(id, on_menu_open=false) {
     talks.show();
     apply_striping();
 }
-function toggleFilters(id, on_menu_open=False) {
+function toggleFilters(id, on_menu_open=false) {
   var copy_id = id;
   var copy_on_menu_open = on_menu_open;
   setTimeout( () => toggleFilters_core(copy_id, copy_on_menu_open), 5);
