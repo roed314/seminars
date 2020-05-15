@@ -184,10 +184,12 @@ def seminars_parser(info, query, org_query={}, conference=False):
                      "homepage",
                      "shortname",
                      "comments"])
-    org_cols = ["name", "name", "full_name", "homepage"] #FIXME: remove full_name
+    org_cols = ["name", "homepage"]
     if current_user.is_subject_admin(None):
         org_cols.append("email")
     parse_substring(info, org_query, "organizer", org_cols)
+    if not info.get("organizer"):
+        parse_substring(info, org_query, "keywords", org_cols)
     parse_access(info, query)
     parse_language(info, query)
     if conference:
