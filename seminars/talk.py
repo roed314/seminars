@@ -23,6 +23,7 @@ import urllib.parse
 from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
+from psycopg2.sql import Placeholder
 
 class WebTalk(object):
     def __init__(
