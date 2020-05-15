@@ -639,7 +639,7 @@ def _search_series(conference=False):
     # process query again with keywords applied to seminar_organizers rather than seminars
     if "keywords" in info:
         seminars_parser(info, seminar_query, org_query, org_keywords=True, conference=conference)
-        res += [s for seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
+        res += [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
     info["results"] = date_sorted(res) if conference else next_talk_sorted(res)
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
