@@ -153,7 +153,7 @@ class TopicDAG(object):
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
     def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None):
-        padding = ' style="padding-right: 2em;"' if topic_id is None else ''
+        padding = ' class="fknowl"' if topic_id is None else ''
         return "<td>%s</td><td%s>%s</td>" % (
             self._toggle(parent_id, topic_id, cookie, duplicate_ctr),
             padding,

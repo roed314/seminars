@@ -61,7 +61,7 @@ class Languages(object):
         return toggle(code, value=value, onchange=onchange, **kwds)
 
     def filter_link(self, code=None, counts={}):
-        padding = ' style="padding-right: 2em;"' if code is None else ''
+        padding = ' class="fknowl"' if code is None else ''
         return "<td>%s</td><td%s>%s</td>" % (self._toggle(code), padding, self._link(code, counts))
 
     def link_pair(self, code=None, counts={}, cols=1):
