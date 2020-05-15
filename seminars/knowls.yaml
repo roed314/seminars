@@ -205,20 +205,43 @@ access_control:
         If this option is chosen you must provide a URL or email address where visitors can register to receive an email providing access information.</li>
     </ul>
     The access control setting for a series is inherited by by all talks in the series.
-live_link:
-  title: Livestream link
+access_time:
+  title: Access time
   contents: |
-    Events taking place online should list the livestream's URL,
+    For online events using time restricted access control this determines when the live meeting link will become publicly visible.
+access_hint:
+  title: Password hint
+  contents: |
+    Online events using password restricted access control must provides a hint that
+    should allow users knowledgable in the subject to determine the password.
+    <br><br>
+    If you do not wish to provide a password hint you should choose the manual
+    registration and email the password to registered participants.
+access_registration:
+  title: Registration link
+  contents: |
+    Online events with manual registration must provide a URL or email address that visitors can use to register for the event.
+    Registered users should then be emailed the live meeting link and any password that is required.
+live_link:
+  title: Live meeting link
+  contents: |
+    Events taking place online should list a URL that provides interactive
+    access to the event (e.g. a Zoom meeting link), either in the series properties 
+    (if the URL is the same for all talks in the series)
+    on in each talk's properties
+    (if each talk has a different live meeting link).
+    The visibility of this URL is determined by the access control settings.
+    If the series' live meeting link is set, new talks in the series inherit it.
+stream_link:
+  title: Live streaming link
+  contents: |
+    Events taking place online may optionally list a URL that allows visitors to
+    view the event without the possiblity of interaction (e.g. on YouTube),
     either in the series properties 
     (if the URL is the same for all talks in the series)
     on in each talk's properties
     (if each talk has a different livestream URL).
-    If further instructions are required 
-    (e.g., password, password hint, 
-    or additional procedure for obtaining the URL or password information),
-    then enter "See comments" here and leave the instructions 
-    in the Comments box below.
-    If the series' livestream link is set, new talks in the series inherit it.
+    If the series' live streaming link is set, new talks in the series inherit it.
 comments:
   title: Comments
   contents: |
