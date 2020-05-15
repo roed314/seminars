@@ -251,10 +251,10 @@ def alive():
         abort(503)
 
 
-@app.route("/acknowledgment")
+@app.route("/acknowledgments")
 def acknowledgment():
     return render_template(
-        "acknowledgment.html", title="Acknowledgments", section="Info", subsection="acknowledgments"
+        "acknowledgments.html", title="Acknowledgments", section="Info", subsection="acknowledgments"
     )
 
 
