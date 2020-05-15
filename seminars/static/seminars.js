@@ -241,10 +241,13 @@ function setSearchCookies() {
     });
     setCookie("filter_more", "1");
 }
+function reloadForCookies() {
+    setSearchCookies();
+    window.location.reload(true);
+}
 function pushForCookies() {
     if (moreHasChanges()) {
-        setSearchCookies();
-        window.location.reload(true)
+        reloadForCookies();
     } else {
         if (!moreFiltering()) {
             setToggle("more", 1);
@@ -434,6 +437,9 @@ function toggleFilters_core(id, on_menu_open=false) {
             toggleFilterView(ftype+"-filter-btn");
         }
         if (ftype == "more") {
+            if (is_enabled && moreHasChanges()) {
+                return reloadForCookies();
+            }
             if (is_enabled) {
                 disableMoreButton();
             } else {
