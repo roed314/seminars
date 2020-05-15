@@ -10,24 +10,33 @@
   <ul>
     <li>
       <h4>
-        How do I browse only <i>physics</i> talks?
+        How do I browse only <i>physics</i> conferences?
       </h4>
-      <p> On the <a href="{{ url_for("index") }}">Browse</a> page,
-        click "topic" to open the topic menu.
-        This also applies the topic filter, so no talks will be displayed until you start adding topics.
-        Now add physics by clicking on the toggle next to "Physics."
+      <p> On the <a href="{{ url_for("index") }}">Browse</a> page, 
+        click the Conferences tab to display conferences,
+        and click "topic" to open the topic menu.
+        This also applies the topic filter, 
+        so no conferences will be displayed until you start adding topics.
+        Now add physics by clicking on the "Physics" toggle
+        <i>twice</i> (if you click only once, it means that you want 
+        only <i>some</i> of the physics subtopics, with the default being
+        that none are selected).
         To close the topic menu, click "topic" again.
-        The topic toggle will now switch between displaying all talks and displaying only physics talks.
+        The topic toggle will now switch between displaying all conferences 
+        and displaying only physics conferences.
       </p>
     </li>
     <li>
       <h4>
-        How do I browse only talks on a specific topic within physics, like <i>optics</i>?
+        How do I browse only talks on a specific topic within physics, 
+        like <i>optics</i>?
       </h4>
       <p> On the <a href="{{ url_for("index") }}">Browse</a> page,
-        open the "topic" menu, the click on "Physics" to see subtopics.
-        Now click on the toggle next to "optics".
-        You can also select more than one topic.
+        click "topic", the click on "Physics" once to open the subtopic menu.
+        Initially no subtopics are selected.
+        Now click the "optics" toggle.
+        You can also select more than one subtopic, even subtopics
+        from different disciplines.
         To close the topics menu, click "topic" again.</p>
     </li>
     
