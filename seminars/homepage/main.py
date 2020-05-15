@@ -182,6 +182,7 @@ def seminars_parser(info, query, org_query={}, org_keywords=False, conference=Fa
     if current_user.is_subject_admin(None):
         org_cols.append("email")
     parse_substring(info, org_query, "organizer", org_cols)
+    print(org_keywords)
     if org_keywords:    
         parse_substring(info, org_query, "keywords", org_cols)
     else:
