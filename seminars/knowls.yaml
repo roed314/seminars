@@ -394,7 +394,7 @@ filter:
     only events in the union of your selected topics.</p>
     <p>You can also click <u>language</u> to restrict to 
     events in the languages you understand.
-    Once you have <a href="user/register">registered</a>, clicking <u>saved</u>
+    Once you have <a href="user/info">registered</a>, clicking <u>saved</u>
     will restrict the list to talks and series you have saved as favorites.
     Click <u>more</u> to open a box with additional filters; 
     these take effect when you click the Apply button inside the box.
