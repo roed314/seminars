@@ -18,7 +18,6 @@ from seminars.utils import (
     short_weekdays,
     show_input_errors,
     timezones,
-    weekdays,
     midnight,
     daytime_minutes,
     daytimes_early,
@@ -33,6 +32,10 @@ from seminars.seminar import (
     can_edit_seminar,
     seminars_lookup,
     seminars_search,
+    access_control_options,
+    access_time_options,
+    frequency_options,
+    visibility_options,
 )
 from seminars.talk import (
     WebTalk,
@@ -62,6 +65,16 @@ import pytz
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 
+def seminar_options():
+    return {
+        'institution': institutions(),
+        'timezone' : timezones,
+        'weekday' : short_weekdays,
+        'access_control' : access_control_options,
+        'access_time' : access_time_options,
+        'frequency' : frequency_options,
+        'visibilty' : visibility_options,
+    }
 
 @create.route("manage/")
 @email_confirmed_required
@@ -202,9 +215,7 @@ def edit_seminar():
         title=title,
         section=manage,
         subsection="editsem",
-        institutions=institutions(),
-        short_weekdays=short_weekdays,
-        timezones=timezones,
+        options=seminar_options(),
         maxlength=maxlength,
         lock=lock,
     )
@@ -228,9 +239,7 @@ def delete_seminar(shortname):
             title="Edit series",
             section=manage,
             subsection="editsem",
-            institutions=institutions(),
-            weekdays=weekdays,
-            timezones=timezones,
+            options=seminar_options(),
             maxlength=maxlength,
             lock=lock,
         )

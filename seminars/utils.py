@@ -40,6 +40,8 @@ MAX_ORGANIZERS = 10
 
 maxlength = {
     'abstract' : MAX_TEXT_LEN,
+    'access_hint' : MAX_DESCRIPTION_LEN,
+    'access_registration' : MAX_URL_LEN,
     'aliases' : MAX_NAME_LEN,
     'city' : MAX_NAME_LEN,
     'comments' : MAX_TEXT_LEN,
