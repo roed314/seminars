@@ -255,6 +255,10 @@ header.shortinner {
 #header {
   background: {{color.header_background}};
   box-shadow: 0px 5px 5px {{color.header_shadow}};
+  min-width: 1000px;
+}
+#browse-submenu {
+  min-width: 1000px;
 }
 
 body.knowl #header {
