@@ -329,6 +329,7 @@ function toggleTopicDAG_core(togid) {
             to_show.push(topicFromTriple(this.id));
         });
     } else {
+        console.log("togid = ", togid);
         $("#" + togid + "-pane label.tgl-btn").css("visibility", "hidden");
         if (toggleval == 1) {
             to_show.push(topic);
@@ -399,13 +400,15 @@ function toggleTopicView(pid, cid, did) {
     } else {
         pane.show();
         $("#"+tid+"-filter-btn").addClass("active");
-        // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
-        setToggle(tid, 0, trigger=true);
-        if (_val(tid) == -1) {
-            setToggle(tid, 0, trigger=true);
-        } else if (_val(tid) == 1) {
-            setToggle(tid, -1, trigger=true);
-            setToggle(tid, 0, trigger=true);
+        if ( $('label[for="' + tid + '"]').is('visible') ) {
+          // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
+          setToggle(tid, 0, trigger=true);
+          if (_val(tid) == -1) {
+              setToggle(tid, 0, trigger=true);
+          } else if (_val(tid) == 1) {
+              setToggle(tid, -1, trigger=true);
+              setToggle(tid, 0, trigger=true);
+          }
         }
     }
 }
