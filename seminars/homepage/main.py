@@ -182,7 +182,6 @@ def seminars_parser(info, query, org_query={}, org_keywords=False, conference=Fa
     if current_user.is_subject_admin(None):
         org_cols.append("email")
     parse_substring(info, org_query, "organizer", org_cols)
-    print(org_keywords)
     if org_keywords:    
         parse_substring(info, org_query, "keywords", org_cols)
     else:
@@ -636,17 +635,12 @@ def _search_series(conference=False):
         seminar_start = info["seminar_start"] = 0
     seminar_query, org_query = {"is_conference": conference}, {}
     seminars_parser(info, seminar_query, org_query, conference=conference)
-    print(seminar_query)
-    print(org_query)
     res = [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
-    print(len(res))
     # process query again with keywords applied to seminar_organizers rather than seminars
     if "keywords" in info:
+        seminar_query, org_query = {"is_conference": conference}, {}
         seminars_parser(info, seminar_query, org_query, org_keywords=True, conference=conference)
-        print(seminar_query)
-        print(org_query)
         res += [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
-        print(len(res))
     info["results"] = date_sorted(res) if conference else next_talk_sorted(res)
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
