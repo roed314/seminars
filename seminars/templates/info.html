@@ -14,21 +14,16 @@ Each series is either a <i>conference</i> (event typically lasting a few days, w
 <p>The <a href="{{ url_for("index") }}">Browse</a> page lists upcoming talks.  
 There you can click the tabs underneath to instead display 
 conferences, seminar series, or past events.  
-Also, you can filter results by topic or language.</p>
-
-<h3>Search</h3>
-
-<p>You can <a href="{{ url_for("search_seminars") }}">search</a> 
-for seminar series, conferences, and talks satisfying various criteria, 
-including specifying keywords within talk abstracts.</p>
+You can filter results by topic, language, and other attributes.
+Finally, you can search for names or text, even in talk abstracts.</p>
 
 <h3>Subscribe</h3>
 
-<p>You can <a href="{{ url_for('user.info') }}">export</a> 
-individual series and talks to your own calendar app 
+<p>You can export individual series and talks to your own calendar app 
 (e.g., Google calendar, iCal, or Outlook).  
 In addition, <a href="{{ url_for('user.register') }}">registered users</a> 
-can select favorite series and talks and export them as one calendar.
+can select favorite series and talks and 
+<a href="{{ url_for('user.info') }}">export</a> them as one calendar.
 When you subscribe to a series, 
 new talks will be pushed to your calendar automatically.</p>
 
@@ -59,7 +54,9 @@ will always display the up-to-date talk schedule.</p>
 
 <h3>Questions?  Error reports?  Suggestions?</h3>
 
-<p>If your issue is not addressed by the <a href="{{ url_for("faq") }}">FAQ</a>, please <a href="{{ url_for('contact') }}">contact us</a>!</p>
+<p>If your issue is not addressed by 
+the <a href="{{ url_for("faq") }}">FAQ</a>, 
+please <a href="{{ url_for('contact') }}">contact us</a>!</p>
 
 </div>
 
