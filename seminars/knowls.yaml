@@ -406,7 +406,9 @@ filter:
     <li><b>search:</b>
             If text is entered in the search box, 
             then once you hit <kbd>return</kbd> or click the magnifying glass, 
-            that text must appear in one of the event's attributes.</li>
+            that text must appear in one of the event's attributes.
+            Clicking the x inside the search box clears the text
+            and removes the restriction.</li>
     </ul>
     <table>
     <tr>
