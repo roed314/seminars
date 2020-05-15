@@ -4,7 +4,7 @@
 
 <div id="filter-container">
   <div id="filter-controls">
-    <div style="display: inline-block;">
+    <div id="filter-table-wrap">
       <table id="filter-table">
         <tr>
           <td>
@@ -16,27 +16,27 @@
           <td >
             {{ toggle(tglid="calendar", value=1 if request.cookies.get('filter_calendar', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
           </td>
-            <td style="padding-right: 2em;">
+            <td class="fknowl">
               {{ KNOWL("saved") }}
             </td>
             {% else %}
             <td>
               <input class="tgl tgl-light tgl2way" value="-1" id="saved_disabled"></input> <label class="tgl-btn" for="saved_disabled" style="cursor: default;"></label>
             </td>
-            <td style="padding-right: 2em;">
+            <td class="fknowl">
               {{ KNOWL("saved_ad") }}
             </td>
             {% endif %}
             <td>
               {{ toggle(tglid="more", value=1 if request.cookies.get('filter_more', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
             </td>
-            <td style="padding-right: 2em;">
+            <td class="fknowl">
               <a id="more-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">more</a>
             </td>
         </tr>
       </table>
     </div>
-    <div style="float: right; position: relative;">
+    <div id="search-form-wrap">
       <form>
         <div>
           <input type="text" name="keywords" class="search" value="{{info.get('keywords', '')}}" />
@@ -50,9 +50,9 @@
   </div>
   {{ topic_dag.filter_pane(counts=topic_counts) | safe }}
   {{ languages.filter_pane(counts=language_counts) | safe }}
-  <div id="more-filter-menu" class="filter-menu">
-    <div style="margin: 0px auto;">
-      <div style="padding: 10px;">
+  <div id="more-filter-menu" class="filter-menu more-centering">
+    <div id="more-centering">
+      <div id="more-padding">
         <form>
           {{ info.search_array.html(info) | safe }}
         </form>

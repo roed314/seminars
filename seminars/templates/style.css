@@ -574,10 +574,26 @@ div.col6 {
     padding-left: 4px;
     padding-right: 4px;
 }
+#filter-container td.fknowl {
+    padding-right: 3em;
+}
 
 #filter-controls {
     margin: 0px auto;
     width: 1000px;
+}
+#filter-table-wrap {
+    display: inline-block;
+}
+#search-form-wrap {
+    float: right;
+    position: relative;
+}
+#more-centering {
+    margin: 0px auto;
+}
+#more-padding {
+    padding: 10px;
 }
 
 #javascript-explanation {

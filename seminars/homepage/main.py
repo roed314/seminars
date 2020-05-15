@@ -25,13 +25,16 @@ from collections import Counter
 from dateutil.parser import parse
 
 from lmfdb.utils import (
+    flash_error,
+    to_dict,
+)
+from lmfdb.utils.search_boxes import (
     BasicSpacer,
     SearchArray,
+    SearchBox,
     SelectBox,
     SearchButton,
     TextBox,
-    flash_error,
-    to_dict,
 )
 
 from lmfdb.utils.search_parsing import collapse_ors
@@ -230,30 +233,14 @@ class TalkSearchArray(SearchArray):
         )
         assert venue
 
-        ## keywords for seminar or talk
-        keywords = TextBox(
-            name="keywords",
-            label="Anywhere",
-            colspan=(1, 2, 1),
-            width=textwidth,
-        )
-
         speaker = TextBox(
             name="speaker",
             label="Speaker",
-            colspan=(1, 2, 1),
             width=textwidth,
         )
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
-            colspan=(1, 2, 1),
-            width=textwidth,
-        )
-        title = TextBox(
-            name="title",
-            label="Title",
-            colspan=(1, 2, 1),
             width=textwidth,
         )
         date = TextBox(
@@ -263,7 +250,6 @@ class TalkSearchArray(SearchArray):
             example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
             example_span=False,
-            colspan=(1, 2, 1),
             width=textwidth,
             extra=['autocomplete="off"'],
         )
@@ -272,22 +258,19 @@ class TalkSearchArray(SearchArray):
             label="Time",
             example="8:00 - 18:00",
             example_span=False,
-            colspan=(1, 2, 1),
             width=textwidth,
         )
         recent = TextBox(
             name="recent",
-            label="Edited within",
+            label="Edited within (hours)",
             example="168",
-            example_span="hours",
-            colspan=(1, 2, 1),
-            width=textwidth-100,
+            example_span=False,
+            width=textwidth,
         )
 
         video = Toggle(name="video", label="Has video")
         self.array = [
             [institution, video if past else recent],
-            #[keywords, title],
             [speaker, affiliation],
             [date, time],
         ]
@@ -342,7 +325,6 @@ class SemSearchArray(SearchArray):
             label="Date",
             example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
-            colspan=(1, 2, 1),
             width=textwidth,
             extra=['autocomplete="off"'],
         )
@@ -389,7 +371,8 @@ def read_search_cookie(search_array):
     info = {}
     for row in search_array.array:
         for box in row:
-            info[box.name] = request.cookies.get("search_" + box.name, "")
+            if isinstance(box, SearchBox):
+                info[box.name] = request.cookies.get("search_" + box.name, "")
     return info
 
 def _get_counters(objects):

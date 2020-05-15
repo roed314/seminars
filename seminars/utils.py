@@ -652,6 +652,8 @@ def ics_file(talks, filename, user=current_user):
     )
 
 def num_columns(labels):
+    if not labels:
+        return 1
     mlen = max(len(label) for label in labels)
     # The following are guesses that haven't been tuned much.
     if mlen > 50:
