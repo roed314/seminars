@@ -306,7 +306,7 @@ function toggleTopicDAG_core(togid) {
     setOtherToggles(topic, toggleval);
     if (toggleval == 0) {
         $("label.sub_" + topic).css("visibility", "visible");
-        $("a.sub_"+topic+",span.sub_"+topic).removeClass("not_toggleable");
+        $("#" + togid + "-pane " + "a.sub_"+topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).removeClass("not_toggleable");
         var pane = $("#"+togid+"-pane");
         var is_visible = pane.is(":visible");
         if (!is_visible) {
@@ -334,7 +334,7 @@ function toggleTopicDAG_core(togid) {
         if (toggleval == 1) {
             to_show.push(topic);
         } else {
-            $("a.sub_"+topic+",span.sub_"+topic).addClass("not_toggleable");
+            $("#" + togid + "-pane " + "a.sub_" + topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).addClass("not_toggleable");
             to_hide.push(topic);
         }
     }
