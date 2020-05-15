@@ -5,40 +5,44 @@
 <div id="filter-container">
   <div id="filter-controls">
     <div style="display: inline-block;">
-    <table id="filter-table">
-      <tr>
-        <td>
-          {{ KNOWL("filter") }} by:
-        </td>
-        {{ topic_dag.filter_link() | safe }}
-        {{ languages.filter_link() | safe }}
-        {% if user.is_authenticated %}
-        <td >
-          {{ toggle(tglid="calendar", value=1 if request.cookies.get('filter_calendar', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
-        </td>
-        <td style="padding-right: 2em;">
-          {{ KNOWL("saved") }}
-        </td>
-        {% else %}
-        <td>
-          <input class="tgl tgl-light tgl2way" value="-1" id="saved_disabled"></input> <label class="tgl-btn" for="saved_disabled" style="cursor: default;"></label>
-        </td>
-        <td style="padding-right: 2em;">
-          {{ KNOWL("saved_ad") }}
-        </td>
-        {% endif %}
-        <td>
-          {{ toggle(tglid="more", value=1 if request.cookies.get('filter_more', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
-        </td>
-        <td style="padding-right: 2em;">
-          <a id="more-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">more</a>
-        </td>
-      </tr>
-    </table>
+      <table id="filter-table">
+        <tr>
+          <td>
+            {{ KNOWL("filter") }} by:
+          </td>
+          {{ topic_dag.filter_link() | safe }}
+          {{ languages.filter_link() | safe }}
+          {% if user.is_authenticated %}
+          <td >
+            {{ toggle(tglid="calendar", value=1 if request.cookies.get('filter_calendar', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
+          </td>
+            <td style="padding-right: 2em;">
+              {{ KNOWL("saved") }}
+            </td>
+            {% else %}
+            <td>
+              <input class="tgl tgl-light tgl2way" value="-1" id="saved_disabled"></input> <label class="tgl-btn" for="saved_disabled" style="cursor: default;"></label>
+            </td>
+            <td style="padding-right: 2em;">
+              {{ KNOWL("saved_ad") }}
+            </td>
+            {% endif %}
+            <td>
+              {{ toggle(tglid="more", value=1 if request.cookies.get('filter_more', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
+            </td>
+            <td style="padding-right: 2em;">
+              <a id="more-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">more</a>
+            </td>
+        </tr>
+      </table>
     </div>
-    <div style="float: right;">
+    <div style="float: right; position: relative;">
       <form>
-        <input type="text" name="keywords" style="width: 300px;" value="{{info.get('keywords', '')}}" />
+        <div>
+          <input type="text" name="keywords" style="width: 300px; padding-left:35px; padding-right:35px;" value="{{info.get('keywords', '')}}" />
+        </div>
+          <span style="position: absolute;top: 3px; z-index: 3; left: 0px; font-size: 23px;padding-left: 5px;padding-right: 5px;"><i class="fas fa-search"></i></span>
+          <span style="position: absolute;top: 3px; z-index: 3; right: 0px; font-size: 23px;padding-left: 5px;padding-right: 5px;"><i class="far fa-times-circle"></i></span>
       </form>
     </div>
   </div>
