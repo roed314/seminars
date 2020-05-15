@@ -113,6 +113,7 @@ function setTopicCookie(topic, value) {
     if (!found) {
         cur_items.push(new_item);
     }
+    console.log(cur_items.join(","));
     setCookie("topics_dict", cur_items.join(","));
 }
 function getTopicCookie(topic) {
@@ -135,10 +136,17 @@ function getTopicCookieWithValue(value) {
     }
     return with_value;
 }
-function setToggle(id, value) {
+function _val(id) {
+    var toggle = $('#'+id);
+    return parseInt(toggle.attr('data-chosen'));
+}
+function setToggle(id, value, trigger=false) {
     var toggle = $('#'+id);
     toggle.val(value)
     toggle.attr('data-chosen', value);
+    if (trigger) {
+        toggle.trigger('change');
+    }
 }
 function setOtherToggles(tid, value) {
     var toggles = $(".tgl." + tid);
@@ -147,7 +155,7 @@ function setOtherToggles(tid, value) {
 }
 
 function topicFiltering() {
-    return $('#topic').val() == "1";
+    return _val('topic') == 1;
 }
 function enableTopicFiltering() {
     setCookie("filter_topic", "1");
@@ -155,7 +163,7 @@ function enableTopicFiltering() {
     toggleFilters(null);
 }
 function languageFiltering() {
-    return $('#language').val() == "1";
+    return _val('language') == 1;
 }
 function enableLanguageFiltering() {
     setCookie("filter_language", "1");
@@ -163,10 +171,10 @@ function enableLanguageFiltering() {
     toggleFilters(null);
 }
 function calFiltering() {
-    return $('#enable_calendar_filter').val() == "1";
+    return _val('enable_calendar_filter') == 1;
 }
 function moreFiltering() {
-    return $('#more').val() == "1";
+    return _val('more') == 1;
 }
 function enableMoreFiltering() {
     setCookie("filter_more", "1");
@@ -258,8 +266,7 @@ function pushForCookies() {
 }
 
 function toggleLanguage_core(id) {
-    var toggle = $("#" + id);
-    var toggleval = parseInt(toggle.val());
+    var toggleval = _val(id);
     console.log(id, toggleval);
     var lang = id.substring(9); // langlink-*
     var talks = $(".talk.lang-" + lang);
@@ -292,11 +299,8 @@ function toggleLanguage(togid) {
 function toggleTopicDAG_core(togid) {
     var to_show = [];
     var to_hide = [];
-    console.log(togid);
     var topic = topicFromTriple(togid);
-    var toggle = $("#" + togid);
-    var toggleval = parseInt(toggle.val());
-    console.log(toggleval);
+    var toggleval = _val(togid);
     setTopicCookie(topic, toggleval);
     // Update other toggles in other parts of the tree that have the same id
     setOtherToggles(topic, toggleval);
@@ -313,11 +317,11 @@ function toggleTopicDAG_core(togid) {
         // We can't just use $("tgl.sub_"+topic).each(),
         // since some 1s may be under -1s.
         var blocking_toggles = [];
-        $('input[value="-1"].tgl3way.sub_'+topic).each(function() {
+        $('input[data-chosen="-1"].tgl3way.sub_'+topic).each(function() {
             blocking_toggles.push(topicFromTriple(this.id));
         });
         console.log("blocking_toggles", blocking_toggles);
-        var show_selector = $('input[value="1"].sub_'+topic);
+        var show_selector = $('input[data-chosen="1"].sub_'+topic);
         for (let i=0; i<blocking_toggles.length; i++) {
             show_selector = show_selector.not(".sub_"+blocking_toggles[i]);
         }
@@ -339,7 +343,7 @@ function toggleTopicDAG_core(togid) {
     if (to_show.length > 0) {
         var talks = $();
         for (let i=0; i<to_show.length; i++) {
-            talks = talks.add(".talk.topic-filtered.topic-" + topic);
+            talks = talks.add(".talk.topic-filtered.topic-" + to_show[i]);
         }
         talks.removeClass("topic-filtered");
         if (topicFiltering()) {
@@ -370,37 +374,31 @@ function toggleTopicDAG(togid) {
 }
 
 function anyHasValue(selector, value) {
-    return $(selector).filter(function() { return $(this).val() == value; }).length > 0;
+    return $(selector).filter(function() { return _val(this.id) == value; }).length > 0;
 }
 
 function toggleTopicView(pid, cid, did) {
     console.log(pid, cid, did);
-    var tid = "#"+pid+"--"+cid+"--"+did;
-    var toggle = $(tid);
-    var pane = $(tid+"-pane");
+    var tid = pid+"--"+cid+"--"+did;
+    var pane = $("#"+tid+"-pane");
     var is_visible = pane.is(":visible");
     $("."+pid+"-subpane").hide();
     $("."+pid+"-tlink").removeClass("active");
     if (is_visible) {
-        if (toggle.val() == "0" && !anyHasValue(".tgl.sub_" + cid, "1")) {
-            toggle.val(1);
-            toggle.trigger('change');
-            toggle.val(-1);
-            toggle.trigger('change');
+        if (_val(tid) == 0 && !anyHasValue(".tgl.sub_" + cid, 1)) {
+            setToggle(tid, 1, trigger=true);
+            setToggle(tid, -1, trigger=true);
         }
     } else {
         pane.show();
-        $(tid+"-filter-btn").addClass("active");
+        $("#"+tid+"-filter-btn").addClass("active");
         // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
-        toggle.attr('data-chosen', 0);
-        if (toggle.val() == "-1") {
-            toggle.val(0);
-            toggle.trigger('change');
-        } else if (toggle.val() == "1") {
-            toggle.val(-1);
-            toggle.trigger('change');
-            toggle.val(0);
-            toggle.trigger('change');
+        setToggle(tid, 0);
+        if (_val(tid) == -1) {
+            setToggle(tid, 0, trigger=true);
+        } else if (_val(tid) == 1) {
+            setToggle(tid, -1, trigger=true);
+            setToggle(tid, 0, trigger=true);
         }
     }
 }
@@ -429,8 +427,7 @@ function filterMenuVisible(ftype) {
 function toggleFilters_core(id, on_menu_open=false) {
     console.log("filters", id);
     if (id !== null) {
-        console.log($('#'+id).val());
-        var is_enabled = ($('#'+id).val() == "1");
+        var is_enabled = (_val(id) == 1);
         var ftype = id;
         setCookie("filter_" + ftype, is_enabled ? "1" : "-1");
         if (!on_menu_open && is_enabled && !filterMenuVisible(ftype) && !getCookie(ftype+"s")) {

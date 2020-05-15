@@ -7,6 +7,7 @@ def toggle(tglid, value, classes="", onchange="", name=""):
 <input
     class="{classes}tgl tgl-light tgl2way"
     value="{value}"
+    data-chosen="{value}"
     id="{tglid}"
     onchange="{onchange}"
     name="{name}"
@@ -32,6 +33,7 @@ def toggle3way(tglid, value, classes="", onchange="", name=""):
 <input
     class="{classes}tgl tgl-light tgl3way"
     value="{value}" id="{tglid}"
+    data-chosen="{value}"
     onchange="{onchange}"
     name="{name}"
     ></input>
