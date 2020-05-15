@@ -378,39 +378,41 @@ function anyHasValue(selector, value) {
 }
 
 function toggleTopicView(pid, cid, did) {
-    console.log(pid, cid, did);
-    var tid = pid+"--"+cid+"--"+did;
-    var pane = $("#"+tid+"-pane");
-    var is_visible = pane.is(":visible");
-    $("."+pid+"-subpane:visible").each(function () {
-        lastid = this.id.substring(0, this.id.length - 5); // remove -pane
-        lastcid = lastid.split("--")[1];
-        if (_val(lastid) == 0 && !anyHasValue(".tgl.sub_" + lastcid, 1)) {
-            setToggle(lastid, 1, trigger=true);
-            setToggle(lastid, -1, trigger=true);
-        }
-        $(this).hide();
-    });
-    $("."+pid+"-tlink").removeClass("active");
-    if (is_visible) {
-        if (_val(tid) == 0 && !anyHasValue(".tgl.sub_" + cid, 1)) {
-            setToggle(tid, 1, trigger=true);
-            setToggle(tid, -1, trigger=true);
-        }
-    } else {
-        pane.show();
-        $("#"+tid+"-filter-btn").addClass("active");
-        if ( $('label[for="' + tid + '"]').is('visible') ) {
-          // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
-          setToggle(tid, 0, trigger=true);
-          if (_val(tid) == -1) {
-              setToggle(tid, 0, trigger=true);
-          } else if (_val(tid) == 1) {
-              setToggle(tid, -1, trigger=true);
-              setToggle(tid, 0, trigger=true);
-          }
-        }
+  console.log(pid, cid, did);
+  var tid = pid+"--"+cid+"--"+did;
+  var pane = $("#"+tid+"-pane");
+  var is_visible = pane.is(":visible");
+  $("."+pid+"-subpane:visible").each(function () {
+    lastid = this.id.substring(0, this.id.length - 5); // remove -pane
+    lastcid = lastid.split("--")[1];
+    if (_val(lastid) == 0 && !anyHasValue(".tgl.sub_" + lastcid, 1)) {
+      setToggle(lastid, 1, trigger=true);
+      setToggle(lastid, -1, trigger=true);
     }
+    $(this).hide();
+  });
+  $("."+pid+"-tlink").removeClass("active");
+  if (is_visible) {
+    if (_val(tid) == 0 && !anyHasValue(".tgl.sub_" + cid, 1)) {
+      setToggle(tid, 1, trigger=true);
+      setToggle(tid, -1, trigger=true);
+    }
+  } else {
+    pane.show();
+    $("#"+tid+"-filter-btn").addClass("active");
+    // console.log('label[for="' + tid + '"]');
+    // console.log("visible", $('label[for="' + tid + '"]').css("visibility"));
+    if ( $('label[for="' + tid + '"]').css("visibility") != "hidden" ) {
+      // We need to trigger the change event multiple times since toggleTopic is written assuming the cycle -1 -> 0 -> 1 -> -1
+      setToggle(tid, 0, trigger=true);
+      if (_val(tid) == -1) {
+        setToggle(tid, 0, trigger=true);
+      } else if (_val(tid) == 1) {
+        setToggle(tid, -1, trigger=true);
+        setToggle(tid, 0, trigger=true);
+      }
+    }
+  }
 }
 
 var filter_menus = ['topic', 'language', 'more'];
