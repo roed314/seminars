@@ -652,6 +652,7 @@ def all_organizers(query={}):
     Usable for the organizer_dict input to seminars_search, seminars_lucky and seminars_lookup
     """
     organizers = defaultdict(list)
+    print(query)
     for rec in db.seminar_organizers.search(query, sort=["seminar_id", "order"]):
         organizers[rec["seminar_id"]].append(rec)
     return organizers
