@@ -188,7 +188,7 @@ online:
   title: Online
   contents: |
     If your event can be attended online, indicate that here.
-    Events that have a physical presence <i>and</i> are livestreamed
+    Events that have a physical presence <i>and</i> can also be viewed online
     should enter the location in Room and set the Online option to yes.
 access_control:
   title: Access control
@@ -221,7 +221,7 @@ access_registration:
   title: Registration link
   contents: |
     Online events with manual registration must provide a URL or email address that visitors can use to register for the event.
-    Registered users should then be emailed the live meeting link and any password that is required.
+    All registered users should be emailed the live meeting link and any password that is required.
 live_link:
   title: Live meeting link
   contents: |
@@ -246,7 +246,7 @@ comments:
   title: Comments
   contents: |
     Use the comments field to display additional information on the series page,
-    especially details on how to find the room or access the livestreaming link.
+    especially details on how to find the room or access the live meeting link.
     On a talk page, both the talk comments and the series comments are displayed,
     so talk-specific comments should not be entered here.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
@@ -262,7 +262,7 @@ talk_comments:
   contents: |
     The talk page will display both the talk comments and the series comments,
     so here enter only additional information specific to this talk,
-    such as how to find the room or access the livestreaming link if
+    such as how to find the room or access the live meeting link if
     these instructions change from talk to talk.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
     You may also use HTML hyperlinks and TeX symbols.
