@@ -365,22 +365,6 @@ class SemSearchArray(SearchArray):
     def hidden(self, info):
         return []
 
-class AnywhereSearchArray(SearchArray):
-    def __init__(self):
-        ## keywords for seminar or talk
-        keywords = TextBox(name="keywords", label="", width=textwidth,)
-        self.array = [[keywords]]
-
-    def main_table(self, info=None):
-        return self._print_table(self.array, info, layout_type="horizontal")
-
-    def search_types(self, info):
-        return []
-
-    def hidden(self, info):
-        return []
-
-
 @app.route("/")
 def index():
     return _talks_index(subsection="talks")
@@ -482,8 +466,7 @@ def _get_row_attributes(objects):
 def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
     search_array = TalkSearchArray(past=past)
-    anywhere_search = AnywhereSearchArray()
-    info = to_dict(read_search_cookie(search_array), search_array=search_array, anywhere_search=anywhere_search)
+    info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
     query = dict(query)
     parse_substring(info, query, "keywords",
@@ -558,8 +541,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
 
 def _series_index(query, sort=None, subsection=None, conference=True, past=False):
     search_array = SemSearchArray(conference=conference, past=past)
-    anywhere_search = AnywhereSearchArray()
-    info = to_dict(read_search_cookie(search_array), search_array=search_array, anywhere_search=anywhere_search)
+    info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
     query = dict(query)
     parse_substring(info, query, "keywords",

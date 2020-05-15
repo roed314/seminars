@@ -38,7 +38,7 @@
     </div>
     <div style="float: right;">
       <form>
-        {{ info.anywhere_search.html(info) | safe }}
+        <input type="text" name="keywords" style="width: 300px;" value="{{info.get('keywords', '')}}" />
       </form>
     </div>
   </div>
