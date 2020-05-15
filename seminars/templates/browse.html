@@ -33,20 +33,23 @@
             <td class="fknowl">
               <a id="more-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">more</a>
             </td>
+            <td>
+              <div id="search-form-wrap">
+                <form>
+                  <div>
+                    <input type="text" name="keywords" class="search" value="{{info.get('keywords', '')}}" />
+                  </div>
+                  <button type="submit" class="search inactive"></button>
+                  <button type="submit" class="cancel-search{% if not info.get('keywords', '') %} inactive{% endif %}" onclick="clearSearch();"></button>
+                  <span class="search inactive"><i class="fas fa-search"></i></span>
+                  <span class="cancel-search{% if not info.get('keywords', '') %} inactive{% endif %}"><i class="far fa-times-circle"></i></span>
+                </form>
+              </div>
+            </td>
         </tr>
       </table>
     </div>
-    <div id="search-form-wrap">
-      <form>
-        <div>
-          <input type="text" name="keywords" class="search" value="{{info.get('keywords', '')}}" />
-        </div>
-        <button type="submit" class="search inactive"></button>
-        <button type="submit" class="cancel-search{% if not info.get('keywords', '') %} inactive{% endif %}" onclick="clearSearch();"></button>
-        <span class="search inactive"><i class="fas fa-search"></i></span>
-        <span class="cancel-search{% if not info.get('keywords', '') %} inactive{% endif %}"><i class="far fa-times-circle"></i></span>
-      </form>
-    </div>
+
   </div>
   {{ topic_dag.filter_pane(counts=topic_counts) | safe }}
   {{ languages.filter_pane(counts=language_counts) | safe }}
