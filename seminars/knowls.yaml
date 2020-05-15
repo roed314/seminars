@@ -384,8 +384,9 @@ filter:
             Many toggles for adding topics are 3-way: 
             clicking anywhere in the toggle cycles between 
             <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right).  
-            If some (center), subtopics are displayed; 
-            initially none are selected 
+            If the current position indicates <i>some</i>, 
+            then subtopics are displayed; 
+            initially none are selected, 
             but you can click their toggles to add them.
             Click <u>topic</u> again to close the menu.
             Toggling the topic filter off and on now switches between 
@@ -404,7 +405,7 @@ filter:
             inside the box.</li>
     <li><b>search:</b>
             If text is entered in the search box, 
-            then once you hit return or click the magnifying glass, 
+            then once you hit <kbd>return</kbd> or click the magnifying glass, 
             that text must appear in one of the event's attributes.</li>
     </ul>
     <table>
