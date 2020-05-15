@@ -372,22 +372,19 @@ export:
 filter:
   title: Filter
   contents: |
-    <p>Each filter toggle restricts the event list,
+    <p>Each filter toggle in the top row <i>restricts</i> the event list,
     and the events displayed are those in the <i>intersection</i> 
     of the subsets defined by the activated filters and the search box.</p>
     <p>Start by clicking the word <u>topic</u> above, 
-    which sets the topic filter and opens the topic menu.
+    which activates the topic filter and opens the topic menu.
     Initially no topics are selected, so the activation of the filter 
     means that no events are displayed,
     but as you add topics, events with that topic will appear.
     Many toggles for adding topics are 3-way: 
     clicking anywhere in the toggle cycles between 
-    none (left), some (center), and all (right).  
+    <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right).  
     If some (center), subtopics are displayed; 
     initially none are selected but you can click their toggles to add them.
-    (The topics are organized into a structure that is close to a tree, 
-    but actually is an acyclic directed graph 
-    since some topics have more than one parent.)
     Click <u>topic</u> again to close the menu.
     Toggling the topic filter off and on now switches between 
     displaying all events vs. 
