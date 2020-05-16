@@ -26,7 +26,7 @@
   <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
   <table style="min-wdith:750px;">
     <tr>
-      <td style="width:150px;">{{ KNOWL("seminar_id") }}</td>
+      <td style="min-width:150px;">{{ KNOWL("seminar_id") }}</td>
       <td>{{ seminar.shortname }}</td>
     </tr>
     <tr>
@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
     showplusminus(n);
   }
-  document.getElementById('frequency').setAttribute("onchange", showtimes);
+  $('select[name="frequency"]').change(showslots);
   $("a.slotplus").click(addslot);
   $("a.slotminus").click(removeslot);
 
@@ -412,7 +412,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     return false;
   }
-  $('select[name="frequency"]').change(showslots);
   $('select[name="online"]').change(showaccess);
   $('select[name="access_control"]').change(showaccess);
 
