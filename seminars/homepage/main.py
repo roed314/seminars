@@ -568,7 +568,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         info=info,
         series_row_attributes=zip(series, row_attributes),
         is_conference=conference,
-        past=past
+        past=past,
         **counters
     ))
     if request.cookies.get("topics", ""):
