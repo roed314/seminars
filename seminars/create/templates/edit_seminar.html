@@ -116,7 +116,7 @@
     {% for i in range(maxlength["time_slots"]//3) %}
       <tr>
         {% if i == 0 %}
-          <td style="margin-right:0px; min-width:100px;">{{ KNOWL("seminar_time_slots") }}</td>
+          <td style="margin-right:0px; min-width:69px;">{{ KNOWL("seminar_time_slots") }}</td>
           {% set hide="visibility:hidden;" %}
           <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
           <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function() {
   function showaccess() {
     console.log("showaccess");
     $('tr.online').hide();
-    if ( ! document.getElementById('online').value ) return false;
+    if ( document.getElementById('online').value == "no" ) return false;
     console.log("online true");
     $('tr.access_control').show();
     $('tr.stream_link').show();
