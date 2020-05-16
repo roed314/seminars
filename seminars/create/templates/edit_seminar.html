@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
     showplusminus(n);
   }
-  document.getElementById('frequency').change(showtimes);
+  document.getElementById('frequency').setAttribute("onchange", showtimes);
   $("a.slotplus").click(addslot);
   $("a.slotminus").click(removeslot);
 
@@ -410,8 +410,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     return false;
   }
-  document.getElementById("online").change(showaccess);
-  document.getElementById("access_control").change(showaccess);
+  document.getElementById("online").setAttribute("onchange", showaccess);
+  document.getElementById("access_control").setAttribute("onchange", showaccess);
 
   // organizer swapping
   function showswaps() {
