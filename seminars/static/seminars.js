@@ -171,7 +171,7 @@ function enableLanguageFiltering() {
     toggleFilters(null);
 }
 function calFiltering() {
-    return _val('enable_calendar_filter') == 1;
+    return _val('calendar') == 1;
 }
 function moreFiltering() {
     return _val('more') == 1;
