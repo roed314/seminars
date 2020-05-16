@@ -116,20 +116,21 @@ class TopicDAG(object):
             onclick = "toggleFilterView(this.id)"
             count = ""
             classes = "likeknowl root-tlink"
+            spanclasses = ""
         else:
             topic = self.by_id[topic_id]
             name = topic.name
             count = counts.get(topic_id, 0)
             count = (" (%s)" % count) if count else ""
             ancestors = ["sub_" + elt for elt in topic.ancestors]
+            spanclasses = " ".join(ancestors)
             if not topic.children:
-                classes = " ".join(ancestors)
-                return '<span class="{0}">{1}</span>'.format(classes, name + count)
+                return '<span class="{0}">{1}</span>'.format(spanclasses, name + count)
             onclick = "toggleTopicView('%s', '%s', '%s')" % (parent_id, topic_id, duplicate_ctr[topic_id])
             classes = " ".join(["likeknowl", parent_id+"-tlink"] + ancestors)
             fullid = "--".join([parent_id, topic_id, str(duplicate_ctr[topic_id])])
-        return '<a id="{0}-filter-btn" class="{1}" onclick="{2}; return false;">{3}</a>{4}'.format(
-            fullid, classes, onclick, name, count
+        return '<a id="{0}-filter-btn" class="{1}" onclick="{2}; return false;">{3}</a><span class="{4}">{5}</span>'.format(
+            fullid, classes, onclick, name, spanclasses, count
         )
 
     def _toggle(self, parent_id="root", topic_id=None, cookie=None, duplicate_ctr=None):
@@ -149,6 +150,10 @@ class TopicDAG(object):
                 tclass = toggle
             onchange = "toggleTopicDAG(this.id);"
             kwds["classes"] = " ".join([topic_id, "sub_topic"] + ["sub_" + elt for elt in topic.ancestors])
+            if cookie[parent_id] != 0 and parent_id != "root":
+                kwds["classes"] += " disabled"
+            kwds["name"] = topic_id
+
 
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
