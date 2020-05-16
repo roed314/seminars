@@ -894,6 +894,24 @@ def show_talk(seminar_id, talkid):
         kwds["section"] = "Manage"
     return render_template("talk.html", **kwds)
 
+
+@app.route("/register/talk/<seminar_id>/<int:talkid>/")
+def register_for_talk(seminar_id, talk_d):
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
+    if talk is None:
+        return abort(404, "Talk not found")
+    if not talk.user_can_register():
+        flash_error("You must be logged in to a confirmed account in order to register.")
+        return redirect(url_for("index"))
+    if not talk.live_link:
+        return abort(404, "Livestream link for talk not found")
+    if talk.register_user():
+        flash_infomsg("You have been registered, enjoy the talk!")
+    else:
+        flash_infomsg("Previous registration confirmed, enjoy the talk!")
+    return redirect(talk.live_link)
+
+
 # We allow async queries for title knowls
 @app.route("/knowl/talk/<series_id>/<int:series_ctr>")
 def title_knowl(series_id, series_ctr, **kwds):

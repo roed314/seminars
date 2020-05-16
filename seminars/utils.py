@@ -67,6 +67,25 @@ maxlength = {
     'weekdays' : MAX_SLOTS,
 }
 
+def how_long(delta):
+    minute = timedelta(minutes=1)
+    if delta < minute:
+        return "less than a minute"
+    if delta < 90 * minute:
+        return "%s minutes" % round(delta / minute)
+    if delta < 36 * 60 * minute:
+        return "%s hours" % round(delta / (60*minute))
+    day = timedelta(days=1)
+    if delta < 11 * day:
+        return "%s days" % round(delta / day)
+    if delta < 7 * 7 * day:
+        return "%s weeks" % round(delta / (7*day))
+    year = timedelta(days=365.25)
+    if delta < 2 * year:
+        return "%s months" % round(delta / timedelta(days=30.4))
+    return "%s years" % round(delta / year)
+
+
 def killattr(obj,attr):
     if hasattr(obj,attr):
         delattr(obj,attr)

@@ -15,6 +15,7 @@ from seminars.utils import (
     topic_dict,
     languages_dict,
     killattr,
+    how_long,
 )
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
@@ -150,6 +151,16 @@ class WebTalk(object):
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
+    def user_can_register(self):
+        return current_user.email_confirmed
+
+    def register_user(self):
+        reg = {'seminar_id':talk.seminar_id, 'seminar_ctr':talk.seminar_ctr, 'user_id': int(current_user.id)}
+        if db.talk_registrations.count(reg):
+            return False
+        reg["registration_time"] = datetime.now(tz=pytz.UTC)
+        return db.talk_registrations.upsert(reg)
+
     @classmethod
     def _editable_time(cls, t):
         if not t:
@@ -210,13 +221,6 @@ class WebTalk(object):
         start = self.start_time
         end = self.end_time
         now = datetime.now(pytz.utc)
-        delta = timedelta
-        minute = delta(minutes=1)
-        hour = delta(hours=1)
-        day = delta(days=1)
-        week = delta(weeks=1)
-        month = delta(days=30.4)
-        year = delta(days=365)
         newtz = None if adapt else self.tz
 
         def ans(rmk):
@@ -230,37 +234,11 @@ class WebTalk(object):
         if start <= now <= end:
             return ans("ongoing")
         elif now < start:
-            until = start - now
-            if until < minute:
-                return ans("starts in less than a minute")
-            elif until < 90 * minute:
-                return ans("starts in %s minutes" % (round(until / minute)))
-            elif until < 36 * hour:
-                return ans("starts in %s hours" % (round(until / hour)))
-            elif until < 11 * day:
-                return ans("%s days from now" % (round(until / day)))
-            elif until < 7 * week:
-                return ans("%s weeks from now" % (round(until / week)))
-            elif until < 2 * year:
-                return ans("%s months from now" % (round(until / month)))
-            else:
-                return ans("%s years from now" % (round(until / year)))
+            delta = start - now
+            return ans("starts in " + how_long(delta)) if delta < timedelta(hours=36) else ans(how_long(delta) + " from now")
         else:
-            ago = now - end
-            if ago < minute:
-                return ans("ended less than a minute ago")
-            elif ago < 90 * minute:
-                return ans("ended %s minutes ago" % (round(ago / minute)))
-            elif ago < 36 * hour:
-                return ans("ended %s hours ago" % (round(ago / hour)))
-            elif ago < 11 * day:
-                return ans("%s days ago" % (round(ago / day)))
-            elif ago < 7 * week:
-                return ans("%s weeks ago" % (round(ago / week)))
-            elif ago < 2 * year:
-                return ans("%s months ago" % (round(ago / month)))
-            else:
-                return ans("%s years ago" % (round(ago / year)))
+            delta = now - end
+            return ans("ended " + how_long(delta) + " ago") if delta < timedelta(hours=36) else ans(how_long(delta) + " ago")
 
     def show_title(self, visibility_info=False):
         title = self.title if self.title else "TBA"
@@ -335,38 +313,53 @@ class WebTalk(object):
         return ans
 
     def show_live_link(self, user=current_user, raw=False):
-        if not self.live_link:
-            return ""
-        if raw:
-            success = self.live_link
-        else:
-            if self.live_link.startswith("http"):
-                if self.is_starting_soon():
-                    success = '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> </a></b></div>' % self.live_link
-                else:
-                    success = '<div class="access_button is_link">Livestream access <a href="%s">available</a></div>' % self.live_link
+        now = datetime.now(pytz.utc)
+
+        def showit(self, raw=False, reg=False):
+            link = self.live_link if self.live_link else self.stream_link
+            if raw:
+                return link
+            if not link:
+                return '<div class=access_button no_link">Livestream link missing, please <a href="%s">contact an organizer</a>.</div>' % (
+                    url_for("view_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+            note = " (view only)" if link != self.live_link else ""
+            if reg and link == self.live_link:
+                note = (" (you will be auto-registered)"
+                link = url_for("register_and_goto_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+            if self.is_starting_soon():
+                return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> %s</a></b></div>' % (
+                    link, note)
             else:
-                if self.is_starting_soon():
-                    success = '<div class="access_button no_link starting_soon"><b>Livestream access: %s </b></div>' % self.live_link
-                else:
-                    success = '<div class="access_button no_link">Livestream access: %s</div>' % self.live_link
-        if self.access == "open":
-            return success
-        elif self.access == "users":
+                return '<div class="access_button is_link">%s <a href="%s">available%s</a></div>' % (link, note)
+
+        if not self.online or now < self.end_time:
+            return ""
+        if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
+            return showit(self, raw=raw)
+        elif self.access_control == 1:
+            show_link_time = self.start_time - timedelta(minutes=self.access_time)
+            if show_link_time <= now:
+                return showit(self, raw=raw)
+            else:
+                return "" if raw else '<div class="access_button no_link">Livestream access available in %s</div>' % how_long(show_link_time-now)
+        elif self.access_control == 2:
+            return showit(self, raw=raw)
+        elif self.access_control in [3,4]:
             if user.is_anonymous:
-                return '<div class="access_button no_link">To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % (
-                    url_for("user.info")
-                )
+                return '<div class="access_button no_link">To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % url_for("user.info")
             elif not user.email_confirmed:
                 return '<div class="access_button no_link">To see access link, please confirm your email.</div>'
             else:
-                return success
-        elif self.access == "endorsed":
-            if user.is_creator:
-                return success
-            else:
-                # TODO: add link to an explanation of endorsement
-                return '<div class="access_button no_link">To see access link, you must be endorsed by another user.</div>'
+                return showit(self, raw=raw, reg=(self.access_control==4))
+        elif self.access_control == 5:
+            if self.stream_link:
+                return showit(self, raw=raw)
+            if not self.access_registration:
+                # This should never happen, registration link is required
+                return "" if raw else '<div class="access_button no_link">Registration link missing, please <a href="%s">contact an organizer</a>.</div>' % (
+                    url_for("view_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+            reg_link = "mailto:" + self.access_registration if "@" in self.access_registration else self.access_registration
+            return reg_link if raw else '<div class="access_button no_link"><a href="%s">Register here</a>for livestream access</div>' % reg_link
         else:  # should never happen
             return ""
 
