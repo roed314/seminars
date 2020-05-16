@@ -114,7 +114,7 @@ class WebTalk(object):
         if self.online and self.access_control is None:
             self.access_control = 0 if self.access == 'open' else self.access_control
             self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
-        if "comments" in self.live_link:
+        if self.online and self.link_link and "comments" in self.live_link:
             self.live_link = ""
         # remove columns we plan to drop
         for attr in ["subject", "visibility"]:
