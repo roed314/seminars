@@ -545,7 +545,7 @@ def process_user_input(inp, col, typ, tz=None):
         assert tz is not None
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
-        if not valid_url(inp) and not (col == "live_link" and (inp == "see comments" or inp == "See comments")):
+        if not valid_url(inp):
             raise ValueError("Invalid URL")
         return inp
     elif col.endswith("email") and typ == "text":
