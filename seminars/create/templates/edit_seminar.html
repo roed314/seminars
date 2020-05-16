@@ -25,7 +25,7 @@
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
   <table>
-    <tr style="min-wdith:750pxc;">
+    <tr style="min-wdith:750px;">
       <td>{{ KNOWL("seminar_id") }}</td>
       <td>{{ seminar.shortname }}</td>
     </tr>
@@ -339,6 +339,7 @@ document.addEventListener("DOMContentLoaded", function() {
     return false;
   }
   function showplusminus(n) {
+    console.log("showplusminus");
     document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
     document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
   }
@@ -389,13 +390,14 @@ document.addEventListener("DOMContentLoaded", function() {
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
     showplusminus(n);
   }
-  $("input.frequency").change(showtimes);
+  document.getElementById('frequency').change(showtimes);
   $("a.slotplus").click(addslot);
   $("a.slotminus").click(removeslot);
 
   // online access control
   function showaccess() {
-    $('tr.online').hide(); 
+    console.log("showaccess");
+    $('tr.online').hide();
     if ( ! document.getElementById('online').value ) return false;
     $('tr.access_control').show();
     $('tr.stream_link').show();
@@ -408,7 +410,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     return false;
   }
-  $("input.online").change(showaccess); $("input.access_control").change(showaccess);
+  document.getElementById('online").change(showaccess);
+  document.getElementById('access_control").change(showaccess);
 
   // organizer swapping
   function showswaps() {
