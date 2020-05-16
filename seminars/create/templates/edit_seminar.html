@@ -402,7 +402,7 @@ document.addEventListener("DOMContentLoaded", function() {
     console.log("online true");
     $('tr.access_control').show();
     $('tr.stream_link').show();
-    n = parseint(document.getElementById('access_control').value);
+    n = parseInt(document.getElementById('access_control').value);
     console.log("access control is "+n);
     switch(n) {
       case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
