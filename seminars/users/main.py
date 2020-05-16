@@ -445,7 +445,8 @@ def get_endorsing_link():
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
         if db.preendorsed_users.count({'email':email}):
-            endorsing_link = "<p>{0} has already been pre-endorsed.</p>".format(email)
+            flash_infomsg("The email address %s has already been pre-endorsed.", email)
+            return redirect(url_for(".info"))
         else:
             db.preendorsed_users.insert_many([{"email": email, "endorser": current_user._uid}])
             to_send = """Hello,
@@ -483,6 +484,11 @@ def get_endorsing_link():
     """.format(
                 email=email, msg=urlencode(data, quote_via=quote)
             )
+        flash_infomsg("""
+            When the person with email address %s registers and confirms their email they will be able to create content.<br>
+            Click the "Send email" button below to let them know.""",email)
+        session["endorsing link"] = endorsing_link
+        return redirect(url_for(".info"))
     else:
         target_name = rec["name"]
         if rec["creator"]:
@@ -507,9 +513,8 @@ Thanks for using {topdomain}!
             send_email(email, subject, to_send)
             userdb.make_creator(email, int(current_user.id))
             flash_infomsg("%s is now able to create content.", target_name if target_name else email)
-    session["endorsing link"] = endorsing_link
-    return redirect(url_for(".info"))
-
+            return redirect(url_for(".info"))
+    raise Exception("The function get_endorsing_link did not return a value")
 
 def generate_endorsement_token(endorser, email):
     rec = [int(endorser.id), email]
