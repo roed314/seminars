@@ -25,8 +25,8 @@
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
   <table>
-    <tr>
-      <td style="width:150px;">{{ KNOWL("seminar_id") }}</td>
+    <tr style="min-wdith:750pxc;">
+      <td>{{ KNOWL("seminar_id") }}</td>
       <td>{{ seminar.shortname }}</td>
     </tr>
     <tr>
@@ -114,7 +114,7 @@
   </table>
   <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
     {% for i in range(maxlength["time_slots"]//3) %}
-      <tr style="width:750px;">
+      <tr style="min-width:750px;">
         {% if i == 0 %}
           <td style="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
           {% set hide="visibility:hidden;" %}
@@ -334,15 +334,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // timeslots
   function showtimes() {
+    console.log("showtimes");
     if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show();
+    return false;
   }
   function showplusminus(n) {
     document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
     document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
   }
-  function addslot() {
+  function addslot(e) {
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value)+1;
+    console.log("addslot "+n);
     document.getElementById('slots').value = '' + n;
     if ( n <= 3 ) {
       document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
@@ -352,10 +355,12 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById('time_slot'+(n-1)).style.display = 'block';
     }
     showplusminus(n);
+    return true;
   }
-  function removeslot() {
+  function removeslot(e) {
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value)-1;
+    console.log("remove slot "+n);
     document.getElementById('slots').value = '' + n;
     document.getElementById('weekday'+n).value = '';
     document.getElementById('time_slot'+n).value ='';
@@ -367,6 +372,7 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById('time_slot'+n).style.display = 'none';
     }
     showplusminus(n);
+    return true;
   }
   function showslots() {
     var n = parseInt(document.getElementById('slots').value);
@@ -400,6 +406,7 @@ document.addEventListener("DOMContentLoaded", function() {
       case 5: $('tr.access_registration').show(); break;
       default: $('tr.live_link').show();
     }
+    return false;
   }
   $("input.online").change(showaccess); $("input.access_control").change(showaccess);
 
@@ -444,6 +451,7 @@ document.addEventListener("DOMContentLoaded", function() {
       swapc("org_curator{{i-1}}","org_curator{{i}}");
       swapc("org_display{{i-1}}","org_display{{i}}");
       showswaps();
+      return true;
     });
   {% endfor %}
 
