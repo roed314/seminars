@@ -743,7 +743,7 @@ $(document).ready(function() {
     }
   }
   var ranges = {
-           'No restriction': [minDate, maxDate],
+           //'No restriction': [minDate, maxDate],
            'Future': [moment(), maxDate],
            'Past': [minDate, moment()],
            'Today': [moment(), moment()],
