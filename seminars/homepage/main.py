@@ -213,10 +213,32 @@ class PushForCookies(SearchButton):
             disabled=disabled,
         )
 
-class TalkSearchArray(SearchArray):
-    noun = "talk"
-    plural_noun = "talks"
+class ComboBox(TextBox):
+    def __init__(self, name, label, spantext, spanextras="", **kwds):
+        TextBox.__init__(self, name, label, **kwds)
+        self.spantext = spantext
+        self.spanextras = spanextras
+    def _input(self, info):
+        inp = TextBox._input(self, info)
+        span = '<span{extras}>{text}</span>'.format(extras=self.spanextras, text=self.spantext)
+        return inp + span
 
+class SemSearchArray(SearchArray):
+    def main_table(self, info=None):
+        return self._print_table(self.array, info, layout_type="horizontal")
+
+    def hidden(self, info):
+        return []  # [("talk_start", "talk_start")]
+
+    def buttons(self, info=None):
+        active_search = info and any(info.get(elt.name) for row in self.array for elt in row)
+        if active_search:
+            button = PushForCookies("reload", "Applied", disabled=True)
+        else:
+            button = PushForCookies("reload", "Apply")
+        return self._print_table([[button]], info, layout_type="vertical")
+
+class TalkSearchArray(SemSearchArray):
     def __init__(self, past=False):
         ## pick institution where it is held
         institution = SelectBox(
@@ -241,6 +263,7 @@ class TalkSearchArray(SearchArray):
             name="speaker",
             label="Speaker",
             width=textwidth,
+            extra=['style="width:300px; margin-right:64px;"'],
         )
         affiliation = TextBox(
             name="affiliation",
@@ -264,12 +287,14 @@ class TalkSearchArray(SearchArray):
             example_span=False,
             width=textwidth,
         )
-        recent = TextBox(
+        recent = ComboBox(
             name="recent",
-            label="Edited within (hours)",
+            label="Edited within",
+            spantext="hours",
+            spanextras=' style="margin-left:15px;"',
             example="168",
             example_span=False,
-            width=textwidth,
+            width=100,
         )
 
         video = Toggle(name="video", label="Has video")
@@ -279,24 +304,7 @@ class TalkSearchArray(SearchArray):
             [date, time],
         ]
 
-    def main_table(self, info=None):
-        return self._print_table(self.array, info, layout_type="horizontal")
-
-    def search_types(self, info):
-        active_search = info and any(info.get(elt.name) for row in self.array for elt in row)
-        if active_search:
-            return [PushForCookies("talks", "Applied", disabled=True)]
-        else:
-            return [PushForCookies("talks", "Apply")]
-
-    def hidden(self, info):
-        return []  # [("talk_start", "talk_start")]
-
-
-class SemSearchArray(SearchArray):
-    noun = "series"
-    plural_noun = "series"
-
+class SeriesSearchArray(SemSearchArray):
     def __init__(self, conference=False, past=False):
         ## pick institution where it is held
         institution = SelectBox(
@@ -340,19 +348,6 @@ class SemSearchArray(SearchArray):
 
         assert conference in [True, False]
         self.conference = conference
-
-    def main_table(self, info=None):
-        return self._print_table(self.array, info, layout_type="horizontal")
-
-    def search_types(self, info):
-        active_search = info and any(info.get(elt.name) for row in self.array for elt in row)
-        if active_search:
-            return [PushForCookies("seminars", "Applied", disabled=True)]
-        else:
-            return [PushForCookies("seminars", "Apply")]
-
-    def hidden(self, info):
-        return []
 
 @app.route("/")
 def index():
@@ -530,7 +525,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     return response
 
 def _series_index(query, sort=None, subsection=None, conference=True, past=False):
-    search_array = SemSearchArray(conference=conference, past=past)
+    search_array = SeriesSearchArray(conference=conference, past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
     query = dict(query)
@@ -592,7 +587,7 @@ def search_conferences():
     return _search_series(conference=True)
 
 def _search_series(conference=False):
-    info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
+    info = to_dict(request.args, search_array=SeriesSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
         info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))

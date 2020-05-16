@@ -588,6 +588,9 @@ div.col6 {
 #filter-table-wrap {
     display: inline-block;
 }
+.root-subpane {
+    min-width: 970px;
+}
 #search-form-wrap {
     float: right;
     position: relative;
