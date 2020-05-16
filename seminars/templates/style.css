@@ -234,7 +234,11 @@ a:hover {
     background: {{color.a_background_hover}};
 }
 
-#logo a, #logo a:hover, body.knowl #logo a:hover {
+
+#logo a,
+#logo a:hover,
+body.knowl #logo a:hover,
+a.nohover:hover {
   background: none;
 }
 
