@@ -814,8 +814,7 @@ def edit_talk():
         title=title,
         section="Manage",
         subsection="edittalk",
-        institutions=institutions(),
-        timezones=timezones,
+        options=talk_options(),
         maxlength=maxlength,
         token=token,
         **extras
