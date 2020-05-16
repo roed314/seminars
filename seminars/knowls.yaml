@@ -62,7 +62,7 @@ seminar_id:
 seminar_name:
   title: Name
   contents: |
-    This is the full name of the series, to appear on the browse and search pages.
+    This is the full name of the series, to appear on the Browse page.
     It can be changed at any time.
     Like Wikipedia, our site uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>
     for titles:
@@ -70,9 +70,11 @@ seminar_name:
 seminar_description:
   title: Short description
   contents: |
-    A short desciption of your series that will be displayed in our search pages
-    along with the name and institutions.
-    Here you might indicate, for example, whether the series is a research seminar series or a learning seminar series.
+    The short description of your seminar series will appear with 
+    the name and institutions when seminar series are displayed 
+    on the Browse page.
+    Here you might indicate, for example, whether the series is 
+    a research seminar series or a learning seminar series.
     The short desription can be at most 50 characters long.
 seminar_homepage:
   title: Homepage
@@ -352,9 +354,10 @@ visibility:
   title: Visibility
   contents: |
     <i>Public</i>: Any user can see the series and its talks.<br>
-    <i>Unlisted</i>: The series and its talks are not listed on the Browse or Search pages,
+    <i>Unlisted</i>: The series and its talks are not listed on the Browse page,
                       but you can share their links with anyone.<br>
-    <i>Private</i>: Only your co-organizers can see the series and its talks.<br><br>
+    <i>Private</i>: Only your co-organizers can see 
+                      the series and its talks.<br><br>
     You must be endorsed in order for your series to be visible to anyone else;
     your setting here will become active once you get endorsed.
 hidden:
@@ -407,7 +410,8 @@ filter:
     <li><b>search:</b>
             If text is entered in the search box, 
             then once you hit <kbd>return</kbd> or click the magnifying glass, 
-            that text must appear in one of the event's attributes.
+            an event will be listed only if one of its attributes
+            matches the text.
             Clicking the x inside the search box clears the text
             and removes the restriction.</li>
     </ul>
