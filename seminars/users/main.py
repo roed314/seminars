@@ -486,7 +486,7 @@ def get_endorsing_link():
     else:
         target_name = rec["name"]
         if rec["creator"]:
-            flash_warnmsg("%s is already able to create content.", target_name)
+            flash_infomsg("%s is already able to create content.", target_name)
             return redirect(url_for(".info"))
         else:
             welcome = "Hello" if not target_name else ("Dear " + target_name)
