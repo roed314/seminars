@@ -314,7 +314,7 @@ title:
     this should be in <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>,
     with only the first word and proper nouns capitalized.
     If you have co-authors, it is better to mention them not here, 
-    but in the abstract.
+    but in the abstract.  If the title is not yet known, leave it blank (it will be listed as TBA).
 abstract:
   title: Abstract
   contents: |
