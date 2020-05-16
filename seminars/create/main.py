@@ -545,8 +545,6 @@ def save_seminar():
         data["time_slots"] = []
 
     if data["online"]:
-        if not data["access_control"] in access_control_options:
-            errmsgs.append(format_errmsg("Unknown access control option %s", data["access_control"]))
         if data["access_control"] == 2 and not data["access_hint"]:
             errmsgs.append("You must provide a password hint.")
         if data["access_control"] == 5:
@@ -878,8 +876,6 @@ def save_talk():
         errmsgs.append("Please select at least one subject.")
 
     if data["online"]:
-        if not data["access_control"] in access_control_options:
-            errmsgs.append(format_errmsg("Unknown access control option %s", data["access_control"]))
         if data["access_control"] == 2 and not data["access_hint"]:
             errmsgs.append("You must provide a password hint.")
         if data["access_control"] == 5:
