@@ -388,7 +388,8 @@ filter:
             then subtopics are displayed; 
             initially none are selected, 
             but you can click their toggles to add them.
-            Click <u>topic</u> again to close the menu.
+            Click <u>topic</u> again to close the topic menu 
+            and all its submenus.
             Toggling the topic filter off and on now switches between 
             displaying all events vs. 
             only events in the union of your selected topics.</li>
