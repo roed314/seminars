@@ -427,9 +427,6 @@ def permdelete_talk(seminar_id, seminar_ctr):
     if not talk.user_can_delete():
         flash_error("You do not have permission to permanently delete this talk.")
         return redirect(url_for(".index"), 302)
-    if not talk.deleted:
-        flash_error("You must delete talk %s/%s first.", seminar_id, seminar_ctr)
-        return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
         db.talks.delete({"seminar_id": seminar_id, "seminar_ctr": seminar_ctr})
         flash("Talk %s/%s has been permanently deleted." % (seminar_id, seminar_ctr))
