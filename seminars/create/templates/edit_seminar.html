@@ -191,11 +191,13 @@
     </tr>
     <tr class="online live_link">
       <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/... or https://bluejeans.com/j/... or https://www.google.meet/..."/></td>
+      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/..., https://bluejeans.com/j/..., https://www.google.meet/..."/></td>
+      <td>Leave blank if link varies by talk.</td>
     </tr>
     <tr class="online stream_link">
       <td>{{ KNOWL("stream_link") }}</td>
       <td><input name="stream_link" value="{{ seminar.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="e.g., https://www.youtube.com/watch?v=..."/></td>
+      <td>Leave blank if link varies by talk.</td>
     </tr>
     <tr>
       <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>

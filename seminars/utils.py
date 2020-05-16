@@ -76,12 +76,21 @@ def topdomain():
     # return 'researchseminars.org'
     return '.'.join(urlparse(request.url).netloc.split('.')[-2:])
 
-def validate_url(x):
+def valid_url(x):
     if not (x.startswith("http://") or x.startswith("https://")):
         return False
     try:
         result = urlparse(x)
         return all([result.scheme, result.netloc])
+    except:
+        return False
+
+def valid_email(x):
+    if not "@" in x:
+        return False
+    try:
+        result = validate_email(x)
+        return True if result else False
     except:
         return False
 
@@ -156,7 +165,7 @@ def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
     tokens = re.split(r'(\s+)',x)
     for i in range(len(tokens)):
-        if validate_url(tokens[i]):
+        if valid_url(tokens[i]):
             tokens[i] = '<a href="%s">%s</a>'%(tokens[i], tokens[i][tokens[i].index("//")+2:])
     return ''.join(tokens)
 
@@ -536,7 +545,7 @@ def process_user_input(inp, col, typ, tz=None):
         assert tz is not None
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
-        if not validate_url(inp) and not (col == "live_link" and (inp == "see comments" or inp == "See comments")):
+        if not valid_url(inp) and not (col == "live_link" and (inp == "see comments" or inp == "See comments")):
             raise ValueError("Invalid URL")
         return inp
     elif col.endswith("email") and typ == "text":
