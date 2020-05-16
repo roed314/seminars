@@ -352,7 +352,7 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById('time_slot'+(n-1)).style.display = 'block';
     }
     showplusminus(n);
-  });
+  }
   function removeslot {
     e.preventDefault();
     var n = parseInt(document.getElementById('slots').value)-1;
@@ -367,7 +367,7 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById('time_slot'+n).style.display = 'none';
     }
     showplusminus(n);
-  });
+  }
   function showslots() {
     var n = parseInt(document.getElementById('slots').value);
     if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
