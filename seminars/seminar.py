@@ -85,7 +85,10 @@ class WebSeminar(object):
             self.shortname = shortname
             self.display = current_user.is_creator
             self.online = True  # default
-            self.access = "open"  # default
+            self.access = "open"  # default FIXME: remove once we switch to access_control
+            self.access_control = 0 # default is public
+            self.access_time = None
+            self.edited_by = current_user.id
             self.visibility = 2 # public by default, once display is set to True
             self.is_conference = False  # seminar by default
             self.frequency = 7
@@ -106,8 +109,6 @@ class WebSeminar(object):
                 elif typ == "timestamp with time zone[]":
                     setattr(self, key, [])
                 elif typ == "date":
-                    setattr(self, key, None)
-                elif typ == "bigint":
                     setattr(self, key, None)
                 else:
                     critical(
@@ -219,7 +220,7 @@ class WebSeminar(object):
         self.description = s[0].upper() + s[1:] if s else ""
         if self.online and self.access_control is None:
             self.access_control = 0 if self.access == 'open' else self.access_control
-            self.access_control = 3 if self.access == 'users' else self.access_control
+            self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, "attr")
