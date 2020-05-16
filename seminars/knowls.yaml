@@ -223,24 +223,25 @@ access_registration:
     Online events with manual registration must provide a URL or email address that visitors can use to register for the event.
     All registered users should be emailed the live meeting link and any password that is required.
 live_link:
-  title: Live link
+  title: Interactive livestream
   contents: |
-    Events taking place online should list a URL that provides interactive
+    Events taking place online may list a URL that provides interactive
     access to the event (e.g. a Zoom meeting link), either in the series properties 
     (if the URL is the same for all talks in the series)
     on in each talk's properties
-    (if each talk has a different live meeting link).
+    (if each talk has a different interactive livestream).
     The visibility of this URL is determined by the access control settings.
     If the series' live meeting link is set, new talks in the series inherit it.
 stream_link:
-  title: Secondary live link
+  title: View-only livestream
   contents: |
-    Events taking place online may optionally list a URL that allows visitors to
+    Events taking place online may list a URL that allows visitors to
     view the event without the possiblity of interaction (e.g. on YouTube),
     either in the series properties 
     (if the URL is the same for all talks in the series)
     on in each talk's properties
-    (if each talk has a different livestream URL).
+    (if each talk has a different view-only livestream).
+    This URL will be visiable to all visitors.
     If the series' live streaming link is set, new talks in the series inherit it.
 comments:
   title: Comments
