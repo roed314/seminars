@@ -544,7 +544,7 @@ def save_seminar():
         if data["access_control"] == 5:
             if not data["access_registration"]:
                 errmsgs.append("You must provide a registration link or contact email.")
-            if not valid_url(data["access_registration"]) and not valid_email(data["access_registration"]):
+            elif not valid_url(data["access_registration"]) and not valid_email(data["access_registration"]):
                 errmsgs.append(format_errmsg("Registration link %s must be a valid URL or email address", data["access_registration"]))
 
     organizers = []
