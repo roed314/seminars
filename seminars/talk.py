@@ -324,7 +324,7 @@ class WebTalk(object):
                     url_for("view_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
             note = " (view only)" if link != self.live_link else ""
             if reg and link == self.live_link:
-                note = (" (you will be auto-registered)"
+                note = " (you will be auto-registered)"
                 link = url_for("register_and_goto_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
             if self.is_starting_soon():
                 return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> %s</a></b></div>' % (
