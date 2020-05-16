@@ -24,9 +24,9 @@
   <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
-  <table>
-    <tr style="min-wdith:750px;">
-      <td>{{ KNOWL("seminar_id") }}</td>
+  <table style="min-wdith:750px;">
+    <tr>
+      <td style="width:150px;">{{ KNOWL("seminar_id") }}</td>
       <td>{{ seminar.shortname }}</td>
     </tr>
     <tr>
@@ -104,7 +104,7 @@
     <tr>
       <td>{{ KNOWL("periodicity") }}</td>
       <td>
-        <select id="frequency" name="frequency" style="width:610px;" />
+        <select name="frequency" style="width:610px;" />
           {% for opt in options["frequency"] %}
             <option value="{{opt[0]}}" {% if seminar.frequency == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -112,7 +112,7 @@
       </td>
     </tr>
   </table>
-  <table class='times' {% if not seminar.frequency %} style="display:none;" {% endif %}>
+  <table class='times' {% if not seminar.frequency %} style="display:none;"{% else %} style="min-wdith:750px;"{% endif %}>
     {% for i in range(maxlength["time_slots"]//3) %}
       <tr style="min-width:750px;">
         {% if i == 0 %}
@@ -140,7 +140,7 @@
       {% endfor %}
     {% endfor %}
   </table>
-  <table>
+  <table style="min-wdith:750px;">
   {% endif %}
     <tr>
       <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
@@ -158,7 +158,7 @@
     <tr class="online">
       <td>{{ ASTKNOWL("access_control") }}</td>
       <td>
-        <select id="access_control" name="access_control" style="width:610px;" onchange="showaccess();" />
+        <select name="access_control" style="width:610px;" onchange="showaccess();" />
           {% for opt in options["access_control"] %}
             <option value="{{opt[0]}}" {% if seminar.access_control == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -399,9 +399,11 @@ document.addEventListener("DOMContentLoaded", function() {
     console.log("showaccess");
     $('tr.online').hide();
     if ( ! document.getElementById('online').value ) return false;
+    consol.log("online true");
     $('tr.access_control').show();
     $('tr.stream_link').show();
     n = document.getElementById('access_control').value;
+    consol.log("access control is "+n);
     switch(n) {
       case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
       case 2: $('tr.live_link').show(); $('tr.access_hint').show(); break;
@@ -410,8 +412,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     return false;
   }
-  document.getElementById("online").setAttribute("onchange", showaccess);
-  document.getElementById("access_control").setAttribute("onchange", showaccess);
+  $('select[name="frequency"]').change(showslots);
+  $('select[name="online"]').change(showaccess);
+  $('select[name="access_control"]').change(showaccess);
 
   // organizer swapping
   function showswaps() {
