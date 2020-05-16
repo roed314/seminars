@@ -150,6 +150,10 @@ class TopicDAG(object):
                 tclass = toggle
             onchange = "toggleTopicDAG(this.id);"
             kwds["classes"] = " ".join([topic_id, "sub_topic"] + ["sub_" + elt for elt in topic.ancestors])
+            if cookie[parent_id] != 0 and parent_id != "root":
+                kwds["classes"] += " disabled"
+            kwds["name"] = topic_id
+
 
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
