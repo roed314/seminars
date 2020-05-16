@@ -36,7 +36,6 @@ from seminars.utils import (
     timestamp,
     timezones,
     topdomain,
-    flash_warnmsg,
     flash_infomsg,
 )
 
