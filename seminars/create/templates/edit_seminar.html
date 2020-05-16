@@ -73,7 +73,7 @@
       <td class="forminfo" />Be sure to set this correctly.</td>
     </tr>
     <tr>
-      <td>{{KNOWL("visibility")}}</td>
+      <td>{{ASTKNOWL("visibility")}}</td>
       <td>
         <select name="visibility" style="width:610px;">
           {% for opt in options["visibility"] %}
@@ -100,14 +100,11 @@
       <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
     </tr>
   {% else %}
-    <script>
-    function showtimes() { if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); }
-    </script>
     <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
     <tr>
       <td>{{ KNOWL("periodicity") }}</td>
       <td>
-        <select id="frequency" name="frequency" style="width:610px;"onchange="showtimes();" />
+        <select id="frequency" name="frequency" style="width:610px;" />
           {% for opt in options["frequency"] %}
             <option value="{{opt[0]}}" {% if seminar.frequency == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -152,26 +149,26 @@
     <tr>
       <td>{{ ASTKNOWL("online") }}</td>
       <td>
-        <select name="online" style="width:610px;" onchange="showaccess();">
+        <select name="online" style="width:610px;">
           <option value="yes"{% if seminar.online %} selected{% endif %}>yes</option>
           <option value="no"{% if not seminar.online %} selected{% endif %}>no</option>
         </select>
       </td>
     </tr>
-    <tr>
+    <tr class="online">
       <td>{{ ASTKNOWL("access_control") }}</td>
       <td>
         <select id="access_control" name="access_control" style="width:610px;" onchange="showaccess();" />
           {% for opt in options["access_control"] %}
-            <option value="{{opt[0]}}" {% if seminar.frequency == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
+            <option value="{{opt[0]}}" {% if seminar.access_control == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
         </select>
       </td>
     </tr>
-    <tr>
+    <tr class="online access_time">
       <td>{{ ASTKNOWL("access_time") }}</td>
       <td>
-        <select id="access_time" name="access_time" style="width:610px;" />
+        <select name="access_time" style="width:610px;" />
           {% for opt in options["access_time"] %}
             <option value="{{opt[0]}}" {% if seminar.access_time == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -179,28 +176,32 @@
       </td>
     </tr>
     <tr>
-    <tr>
+    <tr class="online access_hint">
       <td>{{ ASTKNOWL("access_hint") }}</td>
       <td>
         <input name="access_hint" value="{{ seminar.access_hint }}" style="width:600px;" maxlength={{ maxlength['access_hint'] }}" placeholder="The order of the Weyl group of $E_8$." />
       </td>
     </tr>
     <tr>
-    <tr>
+    <tr class="online access_registration">
       <td>{{ ASTKNOWL("access_registration") }}</td>
       <td>
         <input name="access_registration" value="{{ seminar.access_registration }}" style="width:600px;" maxlength={{ maxlength['access_registration'] }}" placeholder="theorganizer@upan.edu or https://docs.google.com/forms/d/e/xxx/viewform?usp=sf_link" />
       </td>
     </tr>
-    <tr>
+    <tr class="online live_link">
       <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
+      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/... or https://bluejeans.com/j/... or https://www.google.meet/..."/></td>
+    </tr>
+    <tr class="online stream_link">
+      <td>{{ KNOWL("stream_link") }}</td>
+      <td><input name="stream_link" value="{{ seminar.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="e.g., https://www.youtube.com/watch?v=..."/></td>
     </tr>
     <tr>
       <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Instructions for obtaining the livestream link?  Directions to the room?  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Further instructions for obtaining livestream links?  Directions to the room?  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
     </tr>
   </table>
   <h3>Organizers</h3>
@@ -302,6 +303,107 @@ const subjOptions = [
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
   {{ prevent_unsaved() }}
+
+  // institutions
+  makeInstitutionSelector(instOptions,{{ seminar.institutions | safe }});
+
+  //subjects and topics
+  makeSubjectSelector(subjOptions,{{ seminar.subjects | safe }});
+  $('input[name="subjects"]').change(
+    function (){
+      if( $(this).val() == '[]') {
+      $("#subject_selector").notify(
+      "Please select at least one subject",
+        {className: "error", position: "right"})
+      } else {
+      $("#topic_selector").notify(
+      "Save your changes to load new topics options",
+        {className: "info", position: "right"})
+      }
+    });
+  makeTopicSelector(
+    topicOptions,
+    {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
+  );
+
+  // language
+  makeLanguageSelector(
+    langOptions,
+    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
+  );
+
+  // timeslots
+  function showtimes() {
+    if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show();
+  }
+  function showplusminus(n) {
+    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
+    document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
+  }
+  function addslot() {
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)+1;
+    document.getElementById('slots').value = '' + n;
+    if ( n <= 3 ) {
+      document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
+      document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
+    } else {
+      document.getElementById('weekday'+(n-1)).style.display = 'block';
+      document.getElementById('time_slot'+(n-1)).style.display = 'block';
+    }
+    showplusminus(n);
+  });
+  function removeslot {
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)-1;
+    document.getElementById('slots').value = '' + n;
+    document.getElementById('weekday'+n).value = '';
+    document.getElementById('time_slot'+n).value ='';
+    if ( n < 3 ) {
+      document.getElementById('weekday'+n).style.visibility = 'hidden';
+      document.getElementById('time_slot'+n).style.visibility = 'hidden';
+    } else {
+      document.getElementById('weekday'+n).style.display = 'none';
+      document.getElementById('time_slot'+n).style.display = 'none';
+    }
+    showplusminus(n);
+  });
+  function showslots() {
+    var n = parseInt(document.getElementById('slots').value);
+    if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+    for ( var i = 0 ; i < n ; i++ ) {
+      if ( i < 3 ) {
+        document.getElementById('weekday'+i).style.visibility = 'visible';
+        document.getElementById('time_slot'+i).style.visibility = 'visible';
+      } else {
+        document.getElementById('weekday'+i).style.display = 'block';
+        document.getElementById('time_slot'+i).style.display = 'block';
+      }
+    }
+    if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
+    showplusminus(n);
+  }
+  $("input.frequency").change(showtimes);
+  $("a.slotplus").click(addslot);
+  $("a.slotminus").click(removeslot);
+
+  // online access control
+  function showaccess() {
+    $('tr.online').hide(); 
+    if ( ! document.getElementById('online').value ) return false;
+    $('tr.access_control').show();
+    $('tr.stream_link').show();
+    n = document.getElementById('access_control').value;
+    switch(n) {
+      case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
+      case 2: $('tr.live_link').show(); $('tr.access_hint').show(); break;
+      case 5: $('tr.access_registration').show(); break;
+      default: $('tr.live_link').show();
+    }
+  }
+  $("input.online").change(showaccess); $("input.access_control").change(showaccess);
+
+  // organizer swapping
   function showswaps() {
     var n = {{maxlength["organizers"]}};
     var names = $('input[class="org_name"]');
@@ -313,7 +415,6 @@ document.addEventListener("DOMContentLoaded", function() {
     for ( var i = 1 ; i < n ; i++ )
       document.getElementById('swap'+i).style.visibility = ( i <= m ? 'visible' : 'hidden' );
   }
-  $("input.org_name").change(showswaps); $("input.org_homepage").change(showswaps); $("input.org_email").change(showswaps);
   var names = $('input[class="org_name"]');
   var homepages = $('input[class="org_homepage"]');
   var emails = $('input[class="org_email"]');
@@ -345,86 +446,12 @@ document.addEventListener("DOMContentLoaded", function() {
       showswaps();
     });
   {% endfor %}
-  makeTopicSelector(
-    topicOptions,
-    {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
-  );
-  makeInstitutionSelector(
-    instOptions,
-    {{ seminar.institutions | safe }},
-  );
-  makeLanguageSelector(
-    langOptions,
-    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
-  );
-  makeSubjectSelector(
-      subjOptions,
-      {{ seminar.subjects | safe }},
-  );
-  $('input[name="subjects"]').change(
-    function (){
-      if( $(this).val() == '[]') {
-      $("#subject_selector").notify(
-      "Please select at least one subject",
-        {className: "error", position: "right"})
-      } else {
-      $("#topic_selector").notify(
-      "Save your changes to load new topics options",
-        {className: "info", position: "right"})
-      }
-    });
 
-  function showplusminus(n) {
-    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
-    document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
-  }
-  $("a.slotplus").click(function(e){
-    e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value)+1;
-    document.getElementById('slots').value = '' + n;
-    if ( n <= 3 ) {
-      document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
-      document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
-    } else {
-      document.getElementById('weekday'+(n-1)).style.display = 'block';
-      document.getElementById('time_slot'+(n-1)).style.display = 'block';
-    }
-    showplusminus(n);
-  });
-  $("a.slotminus").click(function(e){
-    e.preventDefault();
-    var n = parseInt(document.getElementById('slots').value)-1;
-    document.getElementById('slots').value = '' + n;
-    document.getElementById('weekday'+n).value = '';
-    document.getElementById('time_slot'+n).value ='';
-    if ( n < 3 ) {
-      document.getElementById('weekday'+n).style.visibility = 'hidden';
-      document.getElementById('time_slot'+n).style.visibility = 'hidden';
-    } else {
-      document.getElementById('weekday'+n).style.display = 'none';
-      document.getElementById('time_slot'+n).style.display = 'none';
-    }
-    showplusminus(n);
-  });
-  function showslots() {
-    var n = parseInt(document.getElementById('slots').value);
-    if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
-    for ( var i = 0 ; i < n ; i++ ) {
-      if ( i < 3 ) {
-        document.getElementById('weekday'+i).style.visibility = 'visible';
-        document.getElementById('time_slot'+i).style.visibility = 'visible';
-      } else {
-        document.getElementById('weekday'+i).style.display = 'block';
-        document.getElementById('time_slot'+i).style.display = 'block';
-      }
-    }
-    if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
-    showplusminus(n);
-  }
   // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
-    showswaps()
-    showslots()
+    showslots();
+    showaccess();
+    showswaps();
   };
 });
 </script>
