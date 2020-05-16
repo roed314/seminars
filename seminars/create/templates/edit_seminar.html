@@ -104,7 +104,7 @@
     <tr>
       <td>{{ KNOWL("periodicity") }}</td>
       <td>
-        <select name="frequency" style="width:610px;" />
+        <select id="frequency" name="frequency" style="width:610px;" />
           {% for opt in options["frequency"] %}
             <option value="{{opt[0]}}" {% if seminar.frequency == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -158,7 +158,7 @@
     <tr class="online">
       <td>{{ ASTKNOWL("access_control") }}</td>
       <td>
-        <select name="access_control" style="width:610px;" onchange="showaccess();" />
+        <select id="access_control" name="access_control" style="width:610px;" onchange="showaccess();" />
           {% for opt in options["access_control"] %}
             <option value="{{opt[0]}}" {% if seminar.access_control == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
