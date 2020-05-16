@@ -57,15 +57,13 @@ class WebTalk(object):
             self.seminar_id = seminar_id
             self.seminar_ctr = None
             self.token = "%016x" % random.randrange(16 ** 16)
-            self.display = seminar.display
-            self.online = getattr(seminar, "online", bool(seminar.live_link))
-            self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
                 elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
                     # carry over from seminar, but not comments
                     setattr(self, key, getattr(seminar, key) if key != "comments" else "")
+                    print("talk inherited %s = %s from seminar"%(key,getattr(self,key)))
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
@@ -112,6 +110,15 @@ class WebTalk(object):
         """
         if self.hidden is None:
             self.hidden = False
+        if self.online and self.access_control is None:
+            self.access_control = 0 if self.access == 'open' else self.access_control
+            self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
+        if "comments" in self.live_link:
+            self.live_link = ""
+        # remove columns we plan to drop
+        for attr in ["subject", "visibility"]:
+            killattr(self, "attr")
+
 
     def visible(self):
         """

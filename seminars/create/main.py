@@ -877,6 +877,15 @@ def save_talk():
     if not data["subjects"]:
         errmsgs.append("Please select at least one subject.")
 
+    if data["online"]:
+        if data["access_control"] == 2 and not data["access_hint"]:
+            errmsgs.append("You must provide a password hint.")
+        if data["access_control"] == 5:
+            if not data["access_registration"]:
+                errmsgs.append("You must provide a registration link or contact email.")
+            elif not valid_url(data["access_registration"]) and not valid_email(data["access_registration"]):
+                errmsgs.append(format_errmsg("Registration link %s must be a valid URL or email address", data["access_registration"]))
+
     # Don't try to create new_version using invalid input
     if errmsgs:
         return show_input_errors(errmsgs)

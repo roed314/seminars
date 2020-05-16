@@ -332,14 +332,11 @@ document.addEventListener("DOMContentLoaded", function() {
   // online access control (copied from edit_seminar.html)
 {% if talk.seminar.user_can_edit() %}
   function showaccess() {
-    console.log("showaccess");
     $('tr.online').hide();
     if ( document.getElementById('online').value == "no" ) return false;
-    console.log("online true");
     $('tr.access_control').show();
     $('tr.stream_link').show();
     n = parseInt(document.getElementById('access_control').value);
-    console.log("access control is "+n);
     switch(n) {
       case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
       case 2: $('tr.live_link').show(); $('tr.access_hint').show(); break;

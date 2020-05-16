@@ -337,19 +337,16 @@ document.addEventListener("DOMContentLoaded", function() {
   {% if not seminar.is_conference %}
     // timeslots
     function showtimes() {
-      console.log("showtimes");
       if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show();
       return false;
     }
     function showplusminus(n) {
-      console.log("showplusminus");
       document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
       document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
     }
     function addslot(e) {
       e.preventDefault();
       var n = parseInt(document.getElementById('slots').value)+1;
-      console.log("addslot "+n);
       document.getElementById('slots').value = '' + n;
       if ( n <= 3 ) {
         document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
@@ -364,7 +361,6 @@ document.addEventListener("DOMContentLoaded", function() {
     function removeslot(e) {
       e.preventDefault();
       var n = parseInt(document.getElementById('slots').value)-1;
-      console.log("remove slot "+n);
       document.getElementById('slots').value = '' + n;
       document.getElementById('weekday'+n).value = '';
       document.getElementById('time_slot'+n).value ='';
@@ -400,14 +396,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // online access control
   function showaccess() {
-    console.log("showaccess");
     $('tr.online').hide();
     if ( document.getElementById('online').value == "no" ) return false;
-    console.log("online true");
     $('tr.access_control').show();
     $('tr.stream_link').show();
     n = parseInt(document.getElementById('access_control').value);
-    console.log("access control is "+n);
     switch(n) {
       case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
       case 2: $('tr.live_link').show(); $('tr.access_hint').show(); break;

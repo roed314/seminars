@@ -218,7 +218,7 @@ access_hint:
     If you do not wish to provide a password hint you should choose the manual
     registration and email the password to registered participants.
 access_registration:
-  title: Register here
+  title: Registeration link
   contents: |
     Online events with manual registration must provide a URL or email address that visitors can use to register for the event.
     All registered users should be emailed the live meeting link and any password that is required.
