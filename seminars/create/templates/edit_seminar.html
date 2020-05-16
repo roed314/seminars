@@ -149,7 +149,7 @@
     <tr>
       <td>{{ ASTKNOWL("online") }}</td>
       <td>
-        <select name="online" style="width:610px;">
+        <select id="online" name="online" style="width:610px;">
           <option value="yes"{% if seminar.online %} selected{% endif %}>yes</option>
           <option value="no"{% if not seminar.online %} selected{% endif %}>no</option>
         </select>
