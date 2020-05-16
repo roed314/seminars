@@ -545,6 +545,8 @@ def save_seminar():
         data["time_slots"] = []
 
     if data["online"]:
+        if not data["access_control"] in access_options:
+            errmsgs.append(format_errmsg("Unknown access control option %s", data["access_control"]))
         if data["access_control"] == 2 and not data["access_hint"]:
             errmsgs.append("You must provide a password hint.")
         if data["access_control"] == 5:
@@ -860,8 +862,6 @@ def save_talk():
             val = raw_data.get(col, "")
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
-            if col == "access" and data[col] not in ["open", "users", "endorsed"]:
-                errmsgs.append(format_errmsg("Access type %s invalid", data[col]))
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["speaker"]:
@@ -878,6 +878,8 @@ def save_talk():
         errmsgs.append("Please select at least one subject.")
 
     if data["online"]:
+        if not data["access_control"] in access_options:
+            errmsgs.append(format_errmsg("Unknown access control option %s", data["access_control"]))
         if data["access_control"] == 2 and not data["access_hint"]:
             errmsgs.append("You must provide a password hint.")
         if data["access_control"] == 5:
