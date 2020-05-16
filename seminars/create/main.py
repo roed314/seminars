@@ -73,7 +73,7 @@ def seminar_options():
         'access_control' : access_control_options,
         'access_time' : access_time_options,
         'frequency' : frequency_options,
-        'visibilty' : visibility_options,
+        'visibility' : visibility_options,
     }
 
 @create.route("manage/")
