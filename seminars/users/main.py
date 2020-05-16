@@ -510,7 +510,7 @@ Thanks for using {topdomain}!
                 topdomain = topdomain()
             )
             subject = "Endorsement to create content on " + topdomain()
-            #send_email(email, subject, to_send)
+            send_email(email, subject, to_send)
             userdb.make_creator(email, int(current_user.id))
             flash_infomsg("%s is now able to create content.", target_name if target_name else email)
             return redirect(url_for(".info"))
