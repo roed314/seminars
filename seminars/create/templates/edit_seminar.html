@@ -114,9 +114,9 @@
   </table>
   <table class='times' {% if not seminar.frequency %} style="display:none;"{% else %} style="min-wdith:750px;"{% endif %}>
     {% for i in range(maxlength["time_slots"]//3) %}
-      <tr style="min-width:750px;">
+      <tr>
         {% if i == 0 %}
-          <td style="margin-right:0px; min-width:150px;">{{ KNOWL("seminar_time_slots") }}</td>
+          <td style="margin-right:0px; min-width:100px;">{{ KNOWL("seminar_time_slots") }}</td>
           {% set hide="visibility:hidden;" %}
           <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
           <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", function() {
     $('tr.access_control').show();
     $('tr.stream_link').show();
     n = document.getElementById('access_control').value;
-    consol.log("access control is "+n);
+    console.log("access control is "+n);
     switch(n) {
       case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
       case 2: $('tr.live_link').show(); $('tr.access_hint').show(); break;
