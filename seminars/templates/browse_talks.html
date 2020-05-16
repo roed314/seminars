@@ -1,6 +1,7 @@
 {% extends 'browse.html' %}
 
 {% block browsing %}
+<input type="hidden" name="past" value="{{ past }}">
 
 <div id="timezone-table" style="padding: 10px 4px 0px 4px;">
   Times in {{ user.show_timezone("browse") }}

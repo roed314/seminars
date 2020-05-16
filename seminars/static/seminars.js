@@ -716,36 +716,61 @@ $(document).ready(function () {
 
 $(document).ready(function() {
   dr = $("input[name='daterange']")
-  var beginningoftime = 'January 1, 2020';
-  var endoftime = 'January 1, 2050';
-  var start = moment();
-  var end = moment().add(6, 'days');
+  var past = $('input[name="past"]').val() === "True";
+  var minDate = 'January 1, 2020';
+  var maxDate = 'January 1, 2050';
+  if (past) {
+    var end = maxDate = moment();
+    var start = moment().subtract(6, 'days');
+    dr.attr('placeholder', moment().format('- MMMM D, YYYY'));
+  } else {
+    var start = minDate = moment();
+    var end = moment().add(6, 'days');
+  }
+
   if( dr.length > 0 ) {
-    var drval = dr[0].value;
+    var drval = dr.val();
     if( drval.includes('-') ) {
       var se = drval.split('-');
       start = se[0].trim();
       end = se[1].trim();
-    } else {
-      start = beginningoftime;
-      end = endoftime;
     }
     if(start == '') {
-      start = beginningoftime;
+      start = minDate;
     }
     if(end == '') {
-      end = endoftime;
+      end = maxDate;
     }
+  }
+  var ranges = {
+           'No restriction': [minDate, maxDate],
+           'Future': [moment(), maxDate],
+           'Past': [minDate, moment()],
+           'Today': [moment(), moment()],
+           'Next 7 Days': [moment(), moment().add(6, 'days')],
+           'Past 7 Days': [moment().subtract(6, 'days'), moment()],
+           'Next 30 Days': [moment(), moment().add(29, 'days')],
+           'Past 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+  if ( past ) {
+    delete ranges['Future'];
+    delete ranges['Next 7 Days'];
+    delete ranges['Next 30 Days'];
+  } else {
+    delete ranges['Past'];
+    delete ranges['Past 7 Days'];
+    delete ranges['Past 30 Days'];
   }
 
 
+
   function cd(start, end, label) {
-      if(start.format('MMMM D, YYYY') == beginningoftime){
+      if(start.format('MMMM D, YYYY') == minDate){
         start = '';
       } else {
         start = start.format('MMMM D, YYYY')
       }
-      if(end.format('MMMM D, YYYY') == endoftime) {
+      if(end.format('MMMM D, YYYY') == maxDate) {
         end = '';
       } else {
         end =  end.format('MMMM D, YYYY')
@@ -772,17 +797,12 @@ $(document).ready(function() {
     $('#daterange').daterangepicker({
         startDate: start,
         endDate: end,
+        minDate: minDate,
+        maxDate: maxDate,
         autoUpdateInput: false,
         opens: "center",
         drops: "down",
-        ranges: {
-           'No restriction': [beginningoftime, endoftime],
-           'Future': [moment(), endoftime],
-           'Past': [beginningoftime, moment()],
-           'Today': [moment(), moment()],
-           'Next 7 Days': [moment(), moment().add(6, 'days')],
-           'Next 30 Days': [moment(), moment().add(29, 'days')],
-        },
+        ranges: ranges,
         locale: {
           format: "MMMM D, YYYY",
         },
