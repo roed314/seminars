@@ -155,7 +155,7 @@ class WebTalk(object):
         return current_user.email_confirmed
 
     def register_user(self):
-        reg = {'seminar_id':talk.seminar_id, 'seminar_ctr':talk.seminar_ctr, 'user_id': int(current_user.id)}
+        reg = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(current_user.id)}
         if db.talk_registrations.count(reg):
             return False
         reg["registration_time"] = datetime.now(tz=pytz.UTC)
@@ -325,7 +325,7 @@ class WebTalk(object):
             note = " (view only)" if link != self.live_link else ""
             if reg and link == self.live_link:
                 note = " (you will be auto-registered)"
-                link = url_for("register_and_goto_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+                link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
             if self.is_starting_soon():
                 return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> %s</a></b></div>' % (
                     link, note)

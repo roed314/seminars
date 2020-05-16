@@ -14,7 +14,7 @@ from seminars.utils import (
 )
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
-from flask import abort, render_template, request, redirect, url_for, Response, make_response
+from flask import abort, render_template, request, redirect, url_for, Response, make_response, flash
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
 from flask_login import current_user
 import json
@@ -896,7 +896,7 @@ def show_talk(seminar_id, talkid):
 
 
 @app.route("/register/talk/<seminar_id>/<int:talkid>/")
-def register_for_talk(seminar_id, talk_d):
+def register_for_talk(seminar_id, talkid):
     talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
@@ -906,9 +906,9 @@ def register_for_talk(seminar_id, talk_d):
     if not talk.live_link:
         return abort(404, "Livestream link for talk not found")
     if talk.register_user():
-        flash_infomsg("You have been registered, enjoy the talk!")
+        flash("You have been registered, enjoy the talk!")
     else:
-        flash_infomsg("Previous registration confirmed, enjoy the talk!")
+        flash("Previous registration confirmed, enjoy the talk!")
     return redirect(talk.live_link)
 
 
