@@ -78,6 +78,13 @@ def seminar_options():
         'visibility' : visibility_options,
     }
 
+def talk_options():
+    return {
+        'timezone' : timezones,
+        'access_control' : access_control_options,
+        'access_time' : access_time_options,
+    }
+
 @create.route("manage/")
 @email_confirmed_required
 def index():
@@ -351,8 +358,7 @@ def delete_talk(seminar_id, seminar_ctr):
             title="Edit talk",
             section="Manage",
             subsection="edittalk",
-            institutions=institutions(),
-            timezones=timezones,
+            options=talk_options(),
             maxlength=maxlength,
         )
 

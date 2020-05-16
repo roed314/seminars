@@ -24,7 +24,7 @@
   <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
-  <table style="min-wdith:750px;">
+  <table style="min-width:750px;">
     <tr>
       <td style="min-width:150px;">{{ KNOWL("seminar_id") }}</td>
       <td>{{ seminar.shortname }}</td>
@@ -179,14 +179,14 @@
     <tr class="online access_hint">
       <td>{{ ASTKNOWL("access_hint") }}</td>
       <td>
-        <input name="access_hint" value="{{ seminar.access_hint }}" style="width:600px;" maxlength={{ maxlength['access_hint'] }}" placeholder="The order of the Weyl group of $E_8$." />
+        <input name="access_hint" value="{{ seminar.access_hint | blanknone }}" style="width:600px;" maxlength={{ maxlength['access_hint'] }}" placeholder="The order of the Weyl group of $E_8$." />
       </td>
     </tr>
     <tr>
     <tr class="online access_registration">
       <td>{{ ASTKNOWL("access_registration") }}</td>
       <td>
-        <input name="access_registration" value="{{ seminar.access_registration }}" style="width:600px;" maxlength={{ maxlength['access_registration'] }}" placeholder="theorganizer@upan.edu or https://docs.google.com/forms/d/e/xxx/viewform?usp=sf_link" />
+        <input name="access_registration" value="{{ seminar.access_registration | blanknone }}" style="width:600px;" maxlength={{ maxlength['access_registration'] }}" placeholder="theorganizer@upan.edu or https://docs.google.com/forms/d/e/xxx/viewform?usp=sf_link" />
       </td>
     </tr>
     <tr class="online live_link">
@@ -464,7 +464,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   {% endfor %}
 
-  // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
+  // Make sure showslots, showaccess, and showswaps get called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
     {% if not seminar.is_conference %} showslots(); {% endif %}
     showaccess();

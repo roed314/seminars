@@ -13,15 +13,15 @@
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
   <button class="save" type="submit" value="save" onclick="unsaved = false;" style="float: right;">Save all changes</button>
 
-  <h3>Speaker info and talk content</h3>
+  <h3>Speaker details and talk content</h3>
 
 {% if talk.seminar.user_can_edit() %}
   {{ talk.send_speaker_link() | safe }}
 {% endif %}
 
-    <table>
+  <table style="min-width:750px;">
     <tr>
-      <td style="width:150px">{{ KNOWL("speaker") }}</td>
+      <td style="min-width:150px">{{ KNOWL("speaker") }}</td>
       <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" maxlength="{{ maxlength['speaker'] }}" placeholder="Firstname Lastname"/></td>
     </tr>
     <tr>
@@ -96,20 +96,12 @@
 
 <h3>Time</h3>
 
-  <table>
-{#
-    <tr>
-      <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
-      <td>
-        <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
-      </td>
-    </tr>
- #}
+  <table style="min-width:750px;">
 
     {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
     <tr>
-      <td>{{ ASTKNOWL("timezone") }}</td>
+      <td style="min-width:150px;">{{ ASTKNOWL("timezone") }}</td>
       <td>
         <select name="timezone" style="width:610px;">
           {% for tz, disp in timezones %}
@@ -146,54 +138,84 @@
     {% endif %} {# attributes non-organizers can edit #}
 </table>
 
-<h3>Venue and access links</h3>
+<h3>Venue and access</h3>
 
 <table>
-    {# only seminar organizers can edit the following attributes #}
-    {% if talk.seminar.user_can_edit() %}
+  {# only seminar organizers can edit the following attributes #}
+  {% if talk.seminar.user_can_edit() %}
     <tr>
-      <td>{{ KNOWL("hide_talk") }}</td>
+      <td style="min-width:150px;">{{ KNOWL("hide_talk") }}</td>
       <td>
         <input name="hidden" value="yes" type="checkbox"{% if talk.hidden %} checked{% endif %} />
       </td>
     </tr>
-    <tr>
-      <td>{{ ASTKNOWL("online") }}</td>
-      <td>
-        <select name="online" style="width:610px;">
-          <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
-          <option value="no"{% if not talk.online %} selected{% endif %}>no</option>
-        </select>
-      </td>
-    </tr>
+    {# the rest of this table is essentially a copy of the venue table in edit_seminar.html with seminar replaced by talk #}
     <tr>
       <td>{{ KNOWL("room") }}</td>
       <td><input name="room" value="{{ talk.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building" /></td>
     </tr>
     <tr>
-      <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/1234 or https://www.youtube.com/watch?v=1234"/></td>
-    </tr>
-    <tr>
-      <td>{{ KNOWL("access") }}</td>
+      <td>{{ ASTKNOWL("online") }}</td>
       <td>
-        <select name="access" style="width:610px;">
-          <option value="open"{% if talk.access == 'open' %} selected{% endif %}>All visitors can view livestream link</option>
-          <option value="users"{% if talk.access == 'users' %} selected{% endif %}>Only logged-in users can view livestream link</option>
-          <option value="endorsed"{% if talk.access == 'endorsed' %} selected{% endif %}>Only endorsed users can view livestream link</option>
+        <select id="online" name="online" style="width:610px;">
+          <option value="yes"{% if talk.online %} selected{% endif %}>yes</option>
+          <option value="no"{% if not talk.online %} selected{% endif %}>no</option>
         </select>
       </td>
     </tr>
-     <tr>
-      <td>{{ KNOWL("video_link") }}</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['video_link'] }}"placeholder="https://www.youtube.com/watch?v=abc123"></td>
+    <tr class="online access_control">
+      <td>{{ ASTKNOWL("access_control") }}</td>
+      <td>
+        <select id="access_control" name="access_control" style="width:610px;" onchange="showaccess();" />
+          {% for opt in options["access_control"] %}
+            <option value="{{opt[0]}}" {% if talk.access_control == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr class="online access_time">
+      <td>{{ ASTKNOWL("access_time") }}</td>
+      <td>
+        <select name="access_time" style="width:610px;" />
+          {% for opt in options["access_time"] %}
+            <option value="{{opt[0]}}" {% if talk.access_time == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+    <tr class="online access_hint">
+      <td>{{ ASTKNOWL("access_hint") }}</td>
+      <td>
+        <input name="access_hint" value="{{ talk.access_hint | blanknone }}" style="width:600px;" maxlength={{ maxlength['access_hint'] }}" placeholder="The order of the Weyl group of $E_8$." />
+      </td>
+    </tr>
+    <tr>
+    <tr class="online access_registration">
+      <td>{{ ASTKNOWL("access_registration") }}</td>
+      <td>
+        <input name="access_registration" value="{{ talk.access_registration | blanknone }}" style="width:600px;" maxlength={{ maxlength['access_registration'] }}" placeholder="theorganizer@upan.edu or https://docs.google.com/forms/d/e/xxx/viewform?usp=sf_link" />
+      </td>
+    </tr>
+    <tr class="online live_link">
+      <td>{{ KNOWL("live_link") }}</td>
+      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/..., https://bluejeans.com/j/..., https://www.google.meet/..."/></td>
+    </tr>
+    <tr class="online stream_link">
+      <td>{{ KNOWL("stream_link") }}</td>
+      <td><input name="stream_link" value="{{ talk.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="e.g., https://www.youtube.com/watch?v=..."/></td>
     </tr>
     {% else %}
     {# attributes non-organizers cannot edit #}
     <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
-    <input type="hidden" name="room" value="{{ talk.room | blanknone }}" maxlength="{{ maxlength['room'] }}" />
-    <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" maxlength="{{ maxlength['live_link'] }}" />
-    <input type="hidden" name="access" value="{{ talk.access }}" />
+    <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
+    <input type="hidden" name="room" value="{{ 'yes' if talk.online else 'no' }}" />
+    <input type="hidden" name="access_control" value="{{ talk.access_control }}" />
+    <input type="hidden" name="access_time" value="{{ talk.access_time }}" />
+    <input type="hidden" name="access_hint" value="{{ talk.access_hint | blanknone }}" />
+    <input type="hidden" name="access_registration" value="{{ talk.access_control | blanknone }}" />
+    <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
+    <input type="hidden" name="stream_link" value="{{ talk.stream_link | blanknone }}" />
     {# attributes non-organizers can edit #}
     {% if talk.room %}
     <tr>
@@ -307,6 +329,32 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
 
+  // online access control (copied from edit_seminar.html)
+{% if talk.seminar.user_can_edit() %}
+  function showaccess() {
+    console.log("showaccess");
+    $('tr.online').hide();
+    if ( document.getElementById('online').value == "no" ) return false;
+    console.log("online true");
+    $('tr.access_control').show();
+    $('tr.stream_link').show();
+    n = parseInt(document.getElementById('access_control').value);
+    console.log("access control is "+n);
+    switch(n) {
+      case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
+      case 2: $('tr.live_link').show(); $('tr.access_hint').show(); break;
+      case 5: $('tr.access_registration').show(); break;
+      default: $('tr.live_link').show();
+    }
+    return false;
+  }
+  $('select[name="online"]').change(showaccess);
+  $('select[name="access_control"]').change(showaccess);
+
+  window.onpageshow = function(e) {
+    showaccess();
+  };
+{% endif %}
 });
 </script>
 
