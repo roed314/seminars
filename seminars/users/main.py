@@ -36,6 +36,8 @@ from seminars.utils import (
     timestamp,
     timezones,
     topdomain,
+    flash_warnmsg,
+    flash_infomsg,
 )
 
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
@@ -484,7 +486,8 @@ def get_endorsing_link():
     else:
         target_name = rec["name"]
         if rec["creator"]:
-            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
+            flash_infomsg("%s is already able to create content.", target_name)
+            return redirect(url_for(".info"))
         else:
             welcome = "Hello" if not target_name else ("Dear " + target_name)
             to_send = """{welcome},<br>
@@ -503,9 +506,7 @@ Thanks for using {topdomain}!
             subject = "Endorsement to create content on " + topdomain()
             send_email(email, subject, to_send)
             userdb.make_creator(email, int(current_user.id))
-            endorsing_link = "<p>{target_name} is now able to create content.</p> ".format(
-                target_name=target_name if target_name else email
-            )
+            flash_infomsg("% is now able to create content.", target_name if target_name else email)
     session["endorsing link"] = endorsing_link
     return redirect(url_for(".info"))
 
