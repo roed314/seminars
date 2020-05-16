@@ -294,7 +294,7 @@ class TalkSearchArray(SemSearchArray):
             spanextras=' style="margin-left:15px;"',
             example="168",
             example_span=False,
-            width=100,
+            width=50,
         )
 
         video = Toggle(name="video", label="Has video")
