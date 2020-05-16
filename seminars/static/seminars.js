@@ -297,8 +297,7 @@ function toggleLanguage(togid) {
 
 
 function toggleTopicDAG_core(togid) {
-    var to_show = [];
-    var to_hide = [];
+    var previous = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
     var topic = topicFromTriple(togid);
     var toggleval = _val(togid);
     setTopicCookie(topic, toggleval);
@@ -313,6 +312,7 @@ function toggleTopicDAG_core(togid) {
             var triple = togid.split("--");
             toggleTopicView(triple[0], triple[1], triple[2]);
         }
+      /*
         // Need to show rows corresponding to sub-topics.
         // We can't just use $("tgl.sub_"+topic).each(),
         // since some 1s may be under -1s.
@@ -328,18 +328,41 @@ function toggleTopicDAG_core(togid) {
         show_selector.each(function() {
             to_show.push(topicFromTriple(this.id));
         });
+        */
     } else {
         console.log("togid = ", togid);
         $("#" + togid + "-pane input.tgl").addClass("disabled");
         if (toggleval == 1) {
-            to_show.push(topic);
+        //    to_show.push(topic);
+          previous = previous.filter(item => item !== topic)
         } else {
             $("#" + togid + "-pane " + "a.sub_" + topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).addClass("not_toggleable");
-            to_hide.push(topic);
+            previous = previous.concat([topic]);
+        //   to_hide.push(topic);
         }
     }
-    console.log("show", to_show);
-    console.log("hide", to_hide);
+    var now = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
+    var to_hide = previous.filter(x => !now.includes(x) );
+    // We cannot take the difference to figure out to_show
+    // if previous = [math, math-ph], and now = [math-ph],
+    // if we take the difference then to_show = []
+    var to_show = now; //  now.filter(x => !previous.includes(x) );
+    console.log("now ", now);
+    console.log("previous ", previous);
+    console.log("to_show ", to_show);
+    console.log("to_hide ", to_hide);
+    if (to_hide.length > 0) {
+        var talks = $(".talk.topic-" + topic);
+        var cur_topics = getTopicCookieWithValue(1);
+        for (let i=0; i<cur_topics.length; i++) {
+            talks = talks.not(".topic-" + cur_topics[i]);
+        }
+        talks.addClass("topic-filtered");
+        if (topicFiltering()) {
+            talks.hide();
+            apply_striping();
+        }
+    }
     if (to_show.length > 0) {
         var talks = $();
         for (let i=0; i<to_show.length; i++) {
@@ -353,18 +376,7 @@ function toggleTopicDAG_core(togid) {
             apply_striping();
         }
     }
-    if (to_hide.length > 0) {
-        var talks = $(".talk.topic-" + topic);
-        var cur_topics = getTopicCookieWithValue(1);
-        for (let i=0; i<cur_topics.length; i++) {
-            talks = talks.not(".topic-" + cur_topics[i]);
-        }
-        talks.addClass("topic-filtered");
-        if (topicFiltering()) {
-            talks.hide();
-            apply_striping();
-        }
-    }
+
 }
 
 function toggleTopicDAG(togid) {
