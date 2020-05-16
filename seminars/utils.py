@@ -609,7 +609,7 @@ def format_infomsg(infomsg, *args):
     return Markup(infomsg % tuple("<span style='color:blue'>%s</span>" % escape(x) for x in args))
 
 
-def flash_info(infomsg, *args):
+def flash_infomsg(infomsg, *args):
     flash(format_infomsg(infomsg, *args), "info")
 
 def show_input_errors(errmsgs):
