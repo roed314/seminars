@@ -230,8 +230,9 @@ live_link:
     (if the URL is the same for all talks in the series)
     on in each talk's properties
     (if each talk has a different interactive livestream).
-    The visibility of this URL is determined by the access control settings.
     If the series' live meeting link is set, new talks in the series inherit it.
+    <br><br>
+    The visibility of this URL depends on access control settings.
 stream_link:
   title: View-only livestream
   contents: |
@@ -241,8 +242,9 @@ stream_link:
     (if the URL is the same for all talks in the series)
     on in each talk's properties
     (if each talk has a different view-only livestream).
-    This URL will be visiable to all visitors.
     If the series' live streaming link is set, new talks in the series inherit it.
+    <br><br>
+    This URL will be visiable to all visitors.
 comments:
   title: Comments
   contents: |
