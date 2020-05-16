@@ -46,13 +46,15 @@
     
   <li>
       <h4>
-        If several filters are set on the <a href="{{ url_for("index") }}">Browse</a> page, what will be displayed?
+        If several filters are set on 
+        the <a href="{{ url_for("index") }}">Browse</a> page, 
+        what will be displayed?
       </h4>
        <p>
          Each activated filter as well as the search box 
          defines a subset of all the events, 
-         and the events in the <i>intersection</i> of these subsets 
-         are displayed.
+         and the displayed events are those 
+         in the <i>intersection</i> of these subsets.
       </p>
     </li>
 
@@ -63,25 +65,36 @@
        <p>
          <i>Your</i> time zone, displayed at the upper right.
          <ul>
-           <li>If you're logged in, this is the time zone associated with your account, which you can set on the Account page.</li>
-           <li>If you're not logged in, this is the time zone provided by your browser.</li>
+           <li>If you're logged in, 
+             this is the time zone associated with your account, 
+             which you can set on 
+             the <a href="{{ url_for('user.info')}}">Account</a> page.</li>
+           <li>If you're not logged in, 
+             this is the time zone provided by your browser.</li>
          </ul><br>
-         Exception (for organizers and speakers): When editing a series or talk, times are displayed in the time zone <i>of the series or talk</i>; this time zone can be set at the series' "Edit series" page or the talk's "Edit talk" page, respectively.
+         Exception (for organizers and speakers):
+         When editing a series or talk, 
+         times are displayed in the time zone <i>of the series or talk</i>; 
+         this time zone can be set at the "Edit series" or "Edit talk" page, 
+         respectively.
       </p>
     </li>
 
     <li>
       <h4>
-        What should I do if I cannot connect to an online talk?  What if I need a link or password that is not listed?
+        What should I do if I cannot connect to an online talk?  
+        What if I need a link or password that is not listed?
       </h4>
       <p>
         Check the external webpage, usually reachable by clicking
-        "External homepage" at the series' page on this site.  Many organizers post
-        passwords just before each talk starts or email them to users subscribed to their
-        mailing list.
+        "External homepage" at the series' page on this site.  
+        Many organizers post passwords just before each talk starts 
+        or email them to users subscribed to their mailing list.
       </p>
       <p>
-        If you are still having trouble, contact one of the series' scientific organizers; you may need to go to the external webpage to find their contact details.
+        If you are still having trouble, 
+        contact the series' scientific organizers; 
+        you may need to go to the external homepage to find their contact details.
       </p>
     </li>
 </ul>
@@ -102,9 +115,11 @@
             Registered users can save series and talks to their favorites.
             Then on the <a href="{{ url_for("index") }}">Browse</a> page 
             they can click "saved" to display only those.
-            Moreover, on the Account page, they can export these to their
-            own calendar app as a single calendar that gets updated
-            automatically as the user changes their favorites or as
+            Moreover, on the 
+            <a href="{{ url_for('user.info')}}">Account</a> page, 
+            they can export these to their own calendar app 
+            as a single calendar that gets updated automatically 
+            as the user changes their favorites or as
             new talks are added to the selected series.
           </li>
           <li>
@@ -114,7 +129,8 @@
             but some organizers may restrict access to registered users.)
           </li>
           <li>
-            Registered users, once endorsed, can create their own seminar series and conferences for others to see.
+            Registered users, once endorsed, can create 
+            their own seminar series and conferences for others to see.
           </li>
         </ol>
       </p>
@@ -124,7 +140,21 @@
       <h4>
         Will my email address be displayed on the site if I register?
       </h4>
-      <p>No.  The only situation in which we would display your email publicly is if you list yourself as an organizer of a series <i>and</i> indicate that your name should be displayed <i>and</i> do not provide a homepage URL (if your email address and homepage URL are both provided, we would display only the URL), or if similarly you list yourself as maintainer of an institution without providing your homepage URL as a way for people to contact you.  Another situation in which your email address might be shared in a very limited way: Independently of whether you register, if a series organizer enters your email address when scheduling a talk by you, then the email address would be visible also to other organizers of that series.</p>
+      <p>No.  The only situation in which we would display your email publicly 
+        is if you list yourself as an organizer of a series 
+        <i>and</i> indicate that your name should be displayed 
+        <i>and</i> do not provide a homepage URL 
+        (if your email address and homepage URL are both provided, 
+        we would display only the URL), 
+        or if similarly you list yourself as maintainer of an institution 
+        without providing your homepage URL as a way for people to contact you.  
+        Another situation in which your email address might be shared 
+        in a very limited way: 
+        Independently of whether you register, 
+        if a series organizer enters your email address 
+        when scheduling a talk by you, 
+        then the email address would be visible also 
+        to other organizers of that series.</p>
     </li>
 
   <li>
