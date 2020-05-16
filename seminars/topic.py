@@ -150,7 +150,7 @@ class TopicDAG(object):
             onchange = "toggleTopicDAG(this.id);"
             kwds["classes"] = " ".join([topic_id, "sub_topic"] + ["sub_" + elt for elt in topic.ancestors])
             if cookie[parent_id] != 0:
-                kwds["classes"].append("disabled")
+                kwds["classes"] += " disabled"
             kwds["name"] = topic_id
 
 
