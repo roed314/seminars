@@ -116,7 +116,7 @@
     {% for i in range(maxlength["time_slots"]//3) %}
       <tr style="min-width:750px;">
         {% if i == 0 %}
-          <td style="margin-right:0px;">{{ KNOWL("seminar_time_slots") }}</td>
+          <td style="margin-right:0px; min-width:150px;">{{ KNOWL("seminar_time_slots") }}</td>
           {% set hide="visibility:hidden;" %}
           <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="slotplus" id="slotplus" style="{{hide}}" href="#"><i style="color:green;" class="fas fa-plus-square"></i></a></td>
           <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="slotminus" id="slotminus" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-minus-square"></i></a></td>
