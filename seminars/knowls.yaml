@@ -400,7 +400,7 @@ filter:
             events in the languages you understand.</li>
         <li><b>saved:</b> 
             After you have <a href="user/info">registered</a>, 
-            clicking <u>saved</u> will restrict the list 
+            clicking the toggle labeled <u>saved</u> will restrict the list 
             to talks and series you have saved as favorites.</li>
         <li><b>more:</b>
             Click <u>more</u> to open a box with additional filters; 
