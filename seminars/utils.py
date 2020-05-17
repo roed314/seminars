@@ -29,6 +29,7 @@ dash_re = re.compile(r'[\u002D\u058A\u05BE\u1400\u1806\u2010-\u2015\u2E17\u2E1A\
 # Bounds on input field lengths
 MAX_SHORTNAME_LEN = 32
 MAX_DESCRIPTION_LEN = 64
+MAX_HINT_LEN = 48
 MAX_NAME_LEN = 100
 MAX_TITLE_LEN = 256
 MAX_EMAIL_LEN = 256
@@ -40,7 +41,7 @@ MAX_ORGANIZERS = 10
 
 maxlength = {
     'abstract' : MAX_TEXT_LEN,
-    'access_hint' : MAX_DESCRIPTION_LEN,
+    'access_hint' : MAX_HINT_LEN,
     'access_registration' : MAX_URL_LEN,
     'aliases' : MAX_NAME_LEN,
     'city' : MAX_NAME_LEN,

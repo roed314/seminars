@@ -31,7 +31,7 @@
     </tr>
     <tr>
       <td>{{ ASTKNOWL("seminar_name") }}</td>
-      <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" maxlength="{{ maxlength['name'] }}"/></td>
+      <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" maxlength="{{ maxlength['name'] }}" required /></td>
       <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
     </tr>
     <tr>
@@ -86,18 +86,16 @@
     <tr>
       <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
       <td style="padding-top: 20px">
-        <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
+        <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" required />
       </td>
     </tr>
     <tr>
       <td> {{ ASTKNOWL("end_date") }}</td>
-      <td>
-        <input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" />
-      </td>
+      <td><input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" required /></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("per_day") }}</td>
-      <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1"/></td>
+      <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1" required /></td>
     </tr>
   {% else %}
     <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
