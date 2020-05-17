@@ -2,18 +2,18 @@
 
 {% block content %}
 
-{% if lock %}
-<div style="color: {{color.red}}; font-weight: bold; font-size: 200%;">Concurrent Edit!!!</div>
+  {% if lock %}
+    <div style="color: {{color.red}}; font-weight: bold; font-size: 200%;">Concurrent Edit!!!</div>
 
-<div>
-  The seminar {{ seminar.shortname }} is currently or has been recently edited by
-  <a href="mailto:{{ lock.email }}">{{ lock.name }}</a>
-  at {{ lock.timestamp|fmtdatetime }}. There might be a conflict!
-</div>
+    <div>
+      The seminar {{ seminar.shortname }} is currently or has been recently edited by
+      <a href="mailto:{{ lock.email }}">{{ lock.name }}</a>
+      at {{ lock.timestamp|fmtdatetime }}. There might be a conflict!
+    </div>
 
-<div style="margin-top: 30px">
-  <a href="{{ url_for('.edit_seminar', shortname=seminar.shortname, lock='ignore') }}">Continue</a>
-</div>
+    <div style="margin-top: 30px">
+      <a href="{{ url_for('.edit_seminar', shortname=seminar.shortname, lock='ignore') }}">Continue</a>
+    </div>
 
     <div style="margin-top: 30px">
       <a href="{{ request.referrer }}">Abort</a>
@@ -146,7 +146,6 @@
       </table>
       <table>
     {% endif %}
-
         <tr>
           <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
           <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"/></td>
@@ -314,55 +313,56 @@ document.addEventListener("DOMContentLoaded", function() {
       {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
     );
 
-    function showplusminus(n) {
-      document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
-      document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
+  function showplusminus(n) {
+    document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );
+    document.getElementById('slotplus').style.visibility = ( n < {{ maxlength["time_slots"] }} ? 'visible' : 'hidden' );
+  }
+  $("a.slotplus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)+1;
+    document.getElementById('slots').value = '' + n;
+    if ( n <= 3 ) {
+      document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
+      document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
+    } else {
+      document.getElementById('weekday'+(n-1)).style.display = 'block';
+      document.getElementById('time_slot'+(n-1)).style.display = 'block';
     }
-    $("a.slotplus").click(function(e){
-      e.preventDefault();
-      var n = parseInt(document.getElementById('slots').value)+1;
-      document.getElementById('slots').value = '' + n;
-      if ( n <= 3 ) {
-        document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
-        document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
-      } else {
-        document.getElementById('weekday'+(n-1)).style.display = 'block';
-        document.getElementById('time_slot'+(n-1)).style.display = 'block';
-      }
-      showplusminus(n);
-    });
-    $("a.slotminus").click(function(e){
-      e.preventDefault();
-      var n = parseInt(document.getElementById('slots').value)-1;
-      document.getElementById('slots').value = '' + n;
-      document.getElementById('weekday'+n).value = '';
-      document.getElementById('time_slot'+n).value ='';
-      if ( n < 3 ) {
-        document.getElementById('weekday'+n).style.visibility = 'hidden';
-        document.getElementById('time_slot'+n).style.visibility = 'hidden';
-      } else {
-        document.getElementById('weekday'+n).style.display = 'none';
-        document.getElementById('time_slot'+n).style.display = 'none';
-      }
-      showplusminus(n);
-    });
-    function showslots() {
-      var n = parseInt(document.getElementById('slots').value);
-      if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
-      for ( var i = 0 ; i < n ; i++ ) {
-        if ( i < 3 ) {
-          document.getElementById('weekday'+i).style.visibility = 'visible';
-          document.getElementById('time_slot'+i).style.visibility = 'visible';
-        } else {
-          document.getElementById('weekday'+i).style.display = 'block';
-          document.getElementById('time_slot'+i).style.display = 'block';
-        }
-      }
-      if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show();
-      showplusminus(n);
+    showplusminus(n);
+  });
+  $("a.slotminus").click(function(e){
+    e.preventDefault();
+    var n = parseInt(document.getElementById('slots').value)-1;
+    document.getElementById('slots').value = '' + n;
+    document.getElementById('weekday'+n).value = '';
+    document.getElementById('time_slot'+n).value ='';
+    if ( n < 3 ) {
+      document.getElementById('weekday'+n).style.visibility = 'hidden';
+      document.getElementById('time_slot'+n).style.visibility = 'hidden';
+    } else {
+      document.getElementById('weekday'+n).style.display = 'none';
+      document.getElementById('time_slot'+n).style.display = 'none';
     }
+    showplusminus(n);
+  });
+  function showslots() {
+    var n = parseInt(document.getElementById('slots').value);
+    if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+    for ( var i = 0 ; i < n ; i++ ) {
+      if ( i < 3 ) {
+        document.getElementById('weekday'+i).style.visibility = 'visible';
+        document.getElementById('time_slot'+i).style.visibility = 'visible';
+      } else {
+        document.getElementById('weekday'+i).style.display = 'block';
+        document.getElementById('time_slot'+i).style.display = 'block';
+      }
+    }
+    if ( document.getElementById("frequency").value == 0 ) $('.times').hide(); else $('.times').show(); 
+    showplusminus(n);
+  }
   // Make sure showswaps and showslots gets called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
+    showswaps()
     showslots()
   };
 });
