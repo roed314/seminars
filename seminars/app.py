@@ -206,7 +206,7 @@ def netloc_redirect():
     # *beantheory.org, *mathseminars.org, *rsem.org -> *researchseminars.org
     for otherdomain in ["beantheory.org", "mathseminars.org", "rsem.org"]:
         if urlparts.netloc.endswith(otherdomain):
-            newnetloc = netloc[:-len(otherdomain)] + "researchseminars.org"
+            newnetloc = urlparts.netloc[:-len(otherdomain)] + "researchseminars.org"
             replaced = urlparts._replace(netloc=newnetloc, scheme="https")
             return redirect(urlunparse(replaced), code=301)
     if urlparts.netloc == "www.researchseminars.org":
