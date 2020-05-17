@@ -158,6 +158,7 @@ class WebTalk(object):
         rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(current_user.id)}
         print("checking registration for %s"%rec)
         if db.talk_registrations.count(rec):
+            print("count = %s" % db.talk_registrations.count(rec))
             return False
         reg = rec
         reg["registration_time"] = datetime.now(tz=pytz.UTC)
