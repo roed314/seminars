@@ -832,6 +832,7 @@ $(document).ready(function() {
   dr.on("showCalendar.daterangepicker", function () {
     console.log($("div.daterangepicker button.applyBtn"));
     $("div.daterangepicker button.applyBtn").text("Select")
+    $("div.daterangepicker button.cancelBtn").before($("div.daterangepicker button.applyBtn"));
   })
 
 
