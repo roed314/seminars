@@ -352,6 +352,7 @@ body.knowl #header {
 
 #top-menu {
     display: inline-block;
+    margin-right: 200px;
 }
 
 #top-menu div {
