@@ -112,11 +112,11 @@
     </tr>
     <tr>
       <td>{{ ASTKNOWL("talk_start_time") }}</td>
-      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" /></td>
+      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" required/></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("talk_end_time") }}</td>
-      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
+      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" required/></td>
     </tr>
 
  {% else %}
