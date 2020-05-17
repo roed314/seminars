@@ -332,7 +332,7 @@ class WebTalk(object):
             else:
                 return '<div class="access_button is_link">%s <a href="%s">available%s</a></div>' % (link, note)
 
-        if not self.online or now < self.end_time:
+        if not self.online or now > self.end_time:
             return ""
         if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
             return showit(self, raw=raw)
