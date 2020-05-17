@@ -280,6 +280,8 @@ body.knowl #header {
     padding-left: 48px;
     vertical-align: top;
     width: calc(100% - 210px);
+    height: 90px;
+    position: relative;
 }
 #header #title {
     font-size: 180%;
@@ -351,8 +353,10 @@ body.knowl #header {
 }
 
 #top-menu {
-    display: inline-block;
-    margin-right: 200px;
+  display: inline-block;
+  position: absolute;
+  left: 48px;
+  bottom: 0px;
 }
 
 #top-menu div {
