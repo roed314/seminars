@@ -387,9 +387,8 @@ filter:
             Many toggles for adding topics are 3-way: 
             clicking anywhere in the toggle cycles between 
             <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right).  
-            If the current position indicates <i>some</i>, 
-            then subtopics are displayed; 
-            initially none are selected, 
+            When a submenu for a centered toggle is open, 
+            subtopics are displayed; initially none are selected, 
             but you can click their toggles to add them.
             Click <u>topic</u> again to close the topic menu 
             and all its submenus.
