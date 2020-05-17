@@ -69,12 +69,13 @@ class Languages(object):
   <table><tr>{1}</tr></table>
 </div>""".format(cols, self.filter_link(code, counts))
 
-    def filter_pane(self, counts={}):
+    def filter_pane(self, counts={}, visible=False):
         langs = sorted(counts, key=lambda x: (-counts[x], self.show(x)))
         cols = num_columns(langs)
         return """
-<div id="language-filter-menu" class="filter-menu">
+<div id="language-filter-menu" class="filter-menu" style="display:{1};">
 {0}
-</div>""".format("\n".join(self.link_pair(code, counts, cols=cols) for code in langs))
+</div>""".format("\n".join(self.link_pair(code, counts, cols=cols) for code in langs),
+                 "block" if visible else "none")
 
 languages = Languages()

@@ -687,11 +687,12 @@ $(document).ready(function () {
         function (e) {
             setMoreButton();
         });
-    for (let i=0; i<filter_menus.length; i++) {
-        if (getCookie("visible_" + filter_menus[i]) == "1") {
-            toggleFilterView(filter_menus[i]);
-        }
-    }
+    // this is now done on the server side
+    //for (let i=0; i<filter_menus.length; i++) {
+    //    if (getCookie("visible_" + filter_menus[i]) == "1") {
+    //        toggleFilterView(filter_menus[i]);
+    //    }
+    //}
 
     var today = new Date();
     var minute = today.getMinutes();

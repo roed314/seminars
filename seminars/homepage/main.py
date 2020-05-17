@@ -390,10 +390,16 @@ def _get_counters(objects):
     return {"topic_counts": topic_counts, "language_counts": language_counts}
 
 def _get_row_attributes(objects):
-    # Should maybe use topic_dag cookie processing code
-    pairs = [x.split(":") for x in request.cookies.get('topics_dict', '').split(',')]
-    filtered_topics = [pair[0] for pair in pairs if len(pair) == 2 and pair[1] == "1"]
-    #filtered_topics = set(request.cookies.get('topics', '').split(','))
+    topic_dag_cookie = dict(topic_dag.read_cookie()) # disable default dict
+    # FIXME, this is not enough!!!, as we also need to check the anscestors
+    filtered_topics = set([k for k, v in topic_dag_cookie.items() if (
+        k != None and
+        v == 1 and
+        (topic_dag.by_id[k].parents == [] or
+        any(topic_dag_cookie[parent.id] == 0 for parent in topic_dag.by_id[k].parents)
+         )
+    )
+                           ])
     filter_topic = request.cookies.get('filter_topic', '-1') == '1'
     filtered_languages = set(request.cookies.get('languages', '').split(','))
     filter_language = request.cookies.get('filter_language', '-1') == '1'

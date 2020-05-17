@@ -51,9 +51,14 @@
     </div>
 
   </div>
-  {{ topic_dag.filter_pane(counts=topic_counts) | safe }}
-  {{ languages.filter_pane(counts=language_counts) | safe }}
-  <div id="more-filter-menu" class="filter-menu more-centering">
+  {{ topic_dag.filter_pane(counts=topic_counts, visible=request.cookies.get('visible_topic', '-1') == '1') | safe }}
+  {{ languages.filter_pane(counts=language_counts, visible=request.cookies.get('visible_language', '-1') == '1') | safe }}
+  <div id="more-filter-menu"
+       class="filter-menu more-centering"
+  {% if request.cookies.get('visible_more', '-1') == '1' %}
+       style="display: block;"
+  {% endif %}
+  >
     <div id="more-centering">
       <div id="more-padding">
         <form>

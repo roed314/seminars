@@ -150,6 +150,7 @@ class TopicDAG(object):
                 tclass = toggle
             onchange = "toggleTopicDAG(this.id);"
             kwds["classes"] = " ".join([topic_id, "sub_topic"] + ["sub_" + elt for elt in topic.ancestors])
+            # FIXME: this is not enough, as we also need to check the anscestors
             if cookie[parent_id] != 0 and parent_id != "topic":
                 kwds["classes"] += " disabled"
             kwds["name"] = topic_id
@@ -175,7 +176,7 @@ class TopicDAG(object):
             cols, self.filter_link(parent_id, topic_id, counts, cookie, duplicate_ctr)
         )
 
-    def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None):
+    def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None, visible=False):
         if cookie is None:
             cookie = self.read_cookie()
         if topic_id is None:
@@ -200,13 +201,14 @@ class TopicDAG(object):
                 divs.extend(delay)
                 delay = []
         return """
-<div id="{0}--{1}--{2}-pane" class="filter-menu {0}-subpane" style="display:none;">
+<div id="{0}--{1}--{2}-pane" class="filter-menu {0}-subpane" style="display:{4};">
 {3}
 </div>""".format(
             parent_id,
             tid,
             duplicate_ctr[tid],
             "\n".join(divs),
+            "block" if visible else "none"
        )
 
     def json(self, selected=[]):
