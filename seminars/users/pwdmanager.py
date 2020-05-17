@@ -473,8 +473,8 @@ class SeminarsUser(UserMixin):
         sa = self._data.get("subject_admin")
         if not talk_or_seminar:
             return sa
-        subjects = talk_or_seminar.subjects
-        return sa and (not subjects or sa in subjects)
+        topics = talk_or_seminar.topics
+        return sa and sa in topics
 
     @property
     def is_creator(self):

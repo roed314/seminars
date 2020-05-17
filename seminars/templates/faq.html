@@ -10,36 +10,52 @@
   <ul>
     <li>
       <h4>
-        How do I browse only <i>physics</i> talks?
+        How do I browse only <i>physics</i> conferences?
       </h4>
-      <p> On the <a href="{{ url_for("index") }}">Browse</a> page,
-        click "subject" to open the subject menu.
-        This also applies the subject filter, so no talks will be displayed until you start adding subjects.
-        Now add "Physics".
-        To close the subject menu, click "subject" again.
-        The subject toggle will now switch between displaying all talks and displaying only physics talks.
+      <p> On the <a href="{{ url_for("index") }}">Browse</a> page, 
+        click the <a href="{{ url_for('conf_index') }}">Conferences</a> tab 
+        to display conferences,
+        and click <u>topic</u> to open the topic menu.
+        This also applies the topic filter, 
+        so no conferences will be displayed until you start adding topics.
+        Now add physics by clicking on the "Physics" toggle
+        <i>twice</i> (if you click only once, it means that you want 
+        only <i>some</i> of the physics subtopics, with the default being
+        that none are selected).
+        To close the topic menu, click <u>topic</u> again.
+        The topic toggle will now switch between displaying all conferences 
+        and displaying only physics conferences.
       </p>
     </li>
     <li>
       <h4>
-        How do I browse only talks on a specific topic within physics, like <i>optics</i>?
+        How do I browse only talks on a specific topic within physics, 
+        like <i>optics</i>?
       </h4>
       <p> On the <a href="{{ url_for("index") }}">Browse</a> page,
-        first make sure that physics talks are being displayed 
-        (if the subject filter is on, make sure that physics is a selected subject).
-        Then click "topic" to open the topic menu.
-        This also applies the topic filter, so no talks will be displayed until you start adding topics.
-        Now click on "optics".
-        You can also select more than one topic.
-        To close the topics menu, click "topic" again.</p>
+        click <u>topic</u>, 
+        then click on "Physics" once to open the subtopic menu.
+        Initially no subtopics are selected.
+        Now click the "optics" toggle.
+        You can also select more than one subtopic, even subtopics 
+        from different disciplines.
+        (The topics are organized into a structure that is close to a tree, 
+        but actually is an acyclic directed graph 
+        since some topics have more than one parent.)
+        To close the topics menu, click <u>topic</u> again.</p>
     </li>
     
   <li>
       <h4>
-        If several filters are set on the <a href="{{ url_for("index") }}">Browse</a> page, what will be displayed?
+        If several filters are set on 
+        the <a href="{{ url_for("index") }}">Browse</a> page, 
+        what will be displayed?
       </h4>
        <p>
-         Each activated filter defines a subset of all the talks, and the talks in the <i>intersection</i> of these subsets are displayed.
+         Each activated filter as well as the search box 
+         defines a subset of all the events, 
+         and the displayed events are those 
+         in the <i>intersection</i> of these subsets.
       </p>
     </li>
 
@@ -50,25 +66,36 @@
        <p>
          <i>Your</i> time zone, displayed at the upper right.
          <ul>
-           <li>If you're logged in, this is the time zone associated with your account, which you can set on the Account page.</li>
-           <li>If you're not logged in, this is the time zone provided by your browser.</li>
+           <li>If you're logged in, 
+             this is the time zone associated with your account, 
+             which you can set on 
+             the <a href="{{ url_for('user.info')}}">Account</a> page.</li>
+           <li>If you're not logged in, 
+             this is the time zone provided by your browser.</li>
          </ul><br>
-         Exception (for organizers and speakers): When editing a series or talk, times are displayed in the time zone <i>of the series or talk</i>; this time zone can be set at the series' "Edit series" page or the talk's "Edit talk" page, respectively.
+         Exception (for organizers and speakers):
+         When editing a series or talk, 
+         times are displayed in the time zone <i>of the series or talk</i>; 
+         this time zone can be set at the "Edit series" or "Edit talk" page, 
+         respectively.
       </p>
     </li>
 
     <li>
       <h4>
-        What should I do if I cannot connect to an online talk?  What if I need a link or password that is not listed?
+        What should I do if I cannot connect to an online talk?  
+        What if I need a link or password that is not listed?
       </h4>
       <p>
         Check the external webpage, usually reachable by clicking
-        "External homepage" at the series' page on this site.  Many organizers post
-        passwords just before each talk starts or email them to users subscribed to their
-        mailing list.
+        "External homepage" at the series' page on this site.  
+        Many organizers post passwords just before each talk starts 
+        or email them to users subscribed to their mailing list.
       </p>
       <p>
-        If you are still having trouble, contact one of the series' scientific organizers; you may need to go to the external webpage to find their contact details.
+        If you are still having trouble, 
+        contact the series' scientific organizers; 
+        you may need to go to the external homepage to find their contact details.
       </p>
     </li>
 </ul>
@@ -80,26 +107,31 @@
     
 <li>
       <h4>
-        What are the benefits of <a href="{{ url_for('user.register') }}">registering</a>?
+        What are the benefits of 
+        <a href="{{ url_for('user.register') }}">registering</a>?
       </h4>
       <p>
         <ol>
           <li>
             Registered users can save series and talks to their favorites.
             Then on the <a href="{{ url_for("index") }}">Browse</a> page 
-            they can click "Show only saved events" to display only those.
-            Moreover, on the Account page, they can export these to their
-            own calendar app as a single calendar that gets updated
-            automatically as the user changes their favorites or as
+            they can click "saved" to display only those.
+            Moreover, on the 
+            <a href="{{ url_for('user.info')}}">Account</a> page, 
+            they can export these to their own calendar app 
+            as a single calendar that gets updated automatically 
+            as the user changes their favorites or as
             new talks are added to the selected series.
           </li>
           <li>
-            Registered users can view all livestream links for connecting online to a talk.  
+            Registered users can view all livestream links 
+            for connecting online to a talk.  
             (Many livestream links are viewable to all, 
             but some organizers may restrict access to registered users.)
           </li>
           <li>
-            Registered users, once endorsed, can create their own seminar series and conferences for others to see.
+            Registered users, once endorsed, can create 
+            their own seminar series and conferences for others to see.
           </li>
         </ol>
       </p>
@@ -109,7 +141,21 @@
       <h4>
         Will my email address be displayed on the site if I register?
       </h4>
-      <p>No.  The only situation in which we would display your email publicly is if you list yourself as an organizer of a series <i>and</i> indicate that your name should be displayed <i>and</i> do not provide a homepage URL (if your email address and homepage URL are both provided, we would display only the URL), or if similarly you list yourself as maintainer of an institution without providing your homepage URL as a way for people to contact you.  Another situation in which your email address might be shared in a very limited way: Independently of whether you register, if a series organizer enters your email address when scheduling a talk by you, then the email address would be visible also to other organizers of that series.</p>
+      <p>No.  The only situation in which we would display your email publicly 
+        is if you list yourself as an organizer of a series 
+        <i>and</i> indicate that your name should be displayed 
+        <i>and</i> do not provide a homepage URL 
+        (if your email address and homepage URL are both provided, 
+        we would display only the URL), 
+        or if similarly you list yourself as maintainer of an institution 
+        without providing your homepage URL as a way for people to contact you.  
+        Another situation in which your email address might be shared 
+        in a very limited way: 
+        Independently of whether you register, 
+        if a series organizer enters your email address 
+        when scheduling a talk by you, 
+        then the email address would be visible also 
+        to other organizers of that series.</p>
     </li>
 
   <li>
@@ -329,7 +375,7 @@
         How many people are using {{topdomain}}?
       </h4>
       <p>
-        During the first 28 days after the public beta release, while the site consisted mostly of mathematics talks, the site received 411,015 page views from 83,618 visitors.
+        During the first 28 days after the public beta release, while the site consisted mostly of mathematics talks, the site received 411,015 page views from 83,618 visitors (not necessarily distinct people).
       </p>
     </li>
 

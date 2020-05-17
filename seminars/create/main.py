@@ -6,8 +6,6 @@ from seminars import db
 from seminars.create import create
 from seminars.utils import (
     adapt_datetime,
-    clean_language,
-    clean_subjects,
     clean_topics,
     flash_warnmsg,
     format_errmsg,
@@ -55,6 +53,7 @@ from seminars.institution import (
     institution_types,
     institutions,
 )
+from seminars.language import languages
 from seminars.lock import get_lock
 from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from lmfdb.utils import flash_error
@@ -183,9 +182,6 @@ def edit_seminar():
     manage = "Manage" if current_user.is_organizer else "Create"
     if new:
         errmsgs = []
-        subjects = clean_subjects(data.get("subjects"))
-        if not subjects:
-            errmsgs.append("Please select at least one subject.")
         seminar.name = data.get("name", "")
         if not seminar.name:
             errmsgs.append("Series name is required.")
@@ -194,19 +190,16 @@ def edit_seminar():
         if errmsgs:
             return show_input_errors(errmsgs)
         seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", False)
-        seminar.subjects = subjects
         seminar.institutions = clean_institutions(data.get("institutions"))
         if seminar.institutions:
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
         if not notsimilar:
             query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
             similar = [s for s in seminars_search(query)]
-            # When checking for simialr series, don't require an exact match on subjects/institutions
-            # match anything with institutions not set or with an institution in common, and only require a subject in common
+            # When checking for similar series, don't require an exact match on institutions
+            # match anything with institutions not set or with an institution in common
             if seminar.institutions:
                 similar = [s for s in similar if not s.institutions or set(seminar.institutions).intersection(set(s.institutions))]
-            if seminar.subjects:
-                similar = [s for s in similar if set(seminar.subjects).intersection(set(s.subjects))]
             if similar:
                 return render_template(
                     "show_similar_seminars.html",
@@ -495,10 +488,11 @@ def save_seminar():
 
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
-    data["subjects"] = clean_subjects(data.get("subjects"))
-    if not data["subjects"]:
-        errmsgs.append(format_errmsg("Please select at least one subject."))
+    if not data["topics"]:
+        errmsgs.append(format_errmsg("Please select at least one topic."))
+    if not data["topics"]:
+        errmsgs.append("Please select at least one topic.")
+    data["language"] = languages.clean(data.get("language"))
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
@@ -625,7 +619,7 @@ def save_seminar():
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
-        flash("Series %s successfully!" % edittype)
+        flash("Series %s successfully!  Now visit the Edit schedule tab to add talks." % edittype)
     elif seminar.organizers == new_version.organizers:
         flash("No changes made to series.")
     if seminar.new or seminar.organizers != new_version.organizers:
@@ -867,10 +861,9 @@ def save_talk():
         data["title"] = ""
         flash_warnmsg("TBA title left blank (it will appear as TBA)")
     data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
-    data["subjects"] = clean_subjects(data.get("subjects"))
-    if not data["subjects"]:
-        errmsgs.append("Please select at least one subject.")
+    if not data["topics"]:
+        errmsgs.append("Please select at least one topic.")
+    data["language"] = languages.clean(data.get("language"))
 
     if data["online"]:
         if data["access_control"] == 2 and not data["access_hint"]:

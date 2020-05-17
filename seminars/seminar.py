@@ -12,11 +12,11 @@ from seminars.utils import (
     max_distinct,
     search_distinct,
     show_input_errors,
-    toggle,
-    topic_dict,
     weekdays,
     killattr,
 )
+from seminars.topic import topic_dag
+from seminars.toggle import toggle
 from lmfdb.utils import flash_error
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from markupsafe import Markup
@@ -25,6 +25,7 @@ import pytz
 from collections import defaultdict
 from datetime import datetime
 from lmfdb.logger import critical
+from psycopg2.sql import Placeholder
 
 import urllib.parse
 
@@ -136,9 +137,6 @@ class WebSeminar(object):
                     data["start_time"] = adapt_datetime(data["start_time"], tz)
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
-            # transition to topics including the subject
-            if data.get("topics"):
-                data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
         if organizers is None:
             organizers = list(
@@ -162,7 +160,7 @@ class WebSeminar(object):
 
     def cleanse(self):
         """
-        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
         from seminars.talk import talks_lucky
@@ -223,9 +221,37 @@ class WebSeminar(object):
             self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
         if self.online and self.live_link and "comments" in self.live_link:
             self.live_link = ""
+        # Port old subjects and topics to the new topic scheme
+        if getattr(self, "subjects", []):
+            def update_topic(topic):
+                if topic in ["math", "physics", "bio"]:
+                    return [topic]
+                if topic in ["math_mp", "mp", "physics_math-ph"]:
+                    return ["math", "physics", "math-ph"]
+                if len(topic) == 2:
+                    return ["math", "math_" + topic.upper()]
+                if topic.startswith("math_"):
+                    return ["math", "math_" + topic[5:].upper()]
+                if topic.startswith("bio_bio_"):
+                    return ["bio", "bio_" + topic[8:].upper()]
+                assert topic.startswith("physics_")
+                topic = topic[8:]
+                if topic.startswith("nlin_"):
+                    return ["physics", "nlin", topic]
+                if topic.startswith("cond-mat_"):
+                    return ["physics", "cond-mat", topic]
+                if topic.startswith("nucl-"):
+                    return ["physics", "nucl-ph", topic]
+                if topic.startswith("hep-"):
+                    return ["physics", "hep", topic]
+                if topic.startswith("astro-ph_"):
+                    return ["physics", "astro-ph", topic]
+                return ["physics", topic]
+            self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
+        self.subjects = []
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
-            killattr(self, "attr")
+            killattr(self, attr)
 
     def visible(self):
         """
@@ -310,9 +336,7 @@ class WebSeminar(object):
 
     def show_topics(self):
         if self.topics:
-            subjects = set(topic.split("_", 1)[0] for topic in self.topics)
-            tdict = topic_dict(include_subj=(len(subjects) > 1))
-            return " ".join('<span class="topic_label">%s</span>' % tdict[topic] for topic in self.topics)
+            return " ".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
         else:
             return ""
 
@@ -380,8 +404,8 @@ class WebSeminar(object):
 
         return toggle(
             tglid="tlg" + self.shortname,
-            value=self.shortname,
-            checked=self.is_subscribed(),
+            name=self.shortname,
+            value=1 if self.is_subscribed() else -1,
             classes="subscribe",
         )
 
@@ -633,26 +657,31 @@ _maxer = SQL(
 )
 
 
-def _construct(organizer_dict, objects=True):
+def _construct(organizer_dict, objects=True, more=False):
     def object_construct(rec):
         if not isinstance(rec, dict):
             return rec
         else:
-            return WebSeminar(
+            if more:
+                moreval = rec.pop("more")
+            seminar = WebSeminar(
                 rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec
             )
+            if more:
+                seminar.more = moreval
+            return seminar
     def default_construct(rec):
         return rec
 
     return object_construct if objects else default_construct
 
 
-def _iterator(organizer_dict, objects=True):
+def _iterator(organizer_dict, objects=True, more=False):
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
             if isinstance(rec, dict) and "shortname" in rec and not rec["shortname"] in organizer_dict:
                 continue
-            yield _construct(organizer_dict)(rec)
+            yield _construct(organizer_dict, more=more)(rec)
     return object_iterator if objects else db.seminars._search_iterator
 
 
@@ -675,8 +704,15 @@ def seminars_search(*args, **kwds):
     """
     organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
+    more = kwds.get("more", False)
+    if more is not False: # might empty dictionary
+        more, moreval = db.seminars._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+        kwds["more"] = more = (more, moreval)
     return search_distinct(
-        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects), *args, **kwds
+        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
     )
 
 

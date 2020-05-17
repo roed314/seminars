@@ -48,14 +48,12 @@
     </tr>
     {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
     <tr>
-      <td>{{ ASTKNOWL("subjects") }}</td>
-      <td><span id="subject_selector" style="width:610px;"></span></td>
-      <td class="forminfo">Select at least one subject</td>
+      <td>{{ ASTKNOWL("topics") }}</td>
+      <td><span class="topicDAG" id="topicDAG_selector"></span></td>
+    </tr>
     <tr>
-    {% endif %}
-    <tr>
-      <td>{{ KNOWL("topics") }}</td>
-      <td><span id="topic_selector" style="width:610px;"></span></td>
+      <td></td>
+      <td><div class="topicDAG"></div></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("language","Language") }}</td>
@@ -264,15 +262,7 @@
 </form>
 
 <script type="text/javascript">
-/* topic and inst selector */
-const topicOptions = [
-  {% for ab, topic in user_topics(seminar) %}
-  {
-    label: `{{ topic }}`,
-    value: `{{ ab }}`,
-  },
-  {% endfor %}
-];
+  /* topic, language and inst selector */
 
 const instOptions = [
   {% for iid, name in options["institution"] %}
@@ -283,23 +273,10 @@ const instOptions = [
   {% endfor %}
 ];
 
-const langOptions = [
-  {% for code, name in languages_dict.items() %}
-  {
-    label: `{{ name | safe}}`,
-    value: `{{ code }}`,
-  },
-  {% endfor %}
-];
+  {{ languages.js_options() | safe }}
 
-const subjOptions = [
-  {% for sid, name in subjects %}
-  {
-    label: `{{ name }}`,
-    value: `{{ sid }}`,
-  },
-  {% endfor %}
-];
+
+const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
 
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
@@ -455,6 +432,17 @@ document.addEventListener("DOMContentLoaded", function() {
       return true;
     });
   {% endfor %}
+
+  makeTopicsTree(json_tree);
+
+    makeInstitutionSelector(
+    instOptions,
+      {{ seminar.institutions | safe }},
+    );
+    makeLanguageSelector(
+      langOptions,
+      {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
+    );
 
   // Make sure showslots, showaccess, and showswaps get called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {

@@ -18,15 +18,13 @@ from flask_mail import Mail, Message
 
 from lmfdb.logger import logger_file_handler
 from seminars.utils import (
-    languages_dict,
-    restricted_topics,
-    subject_pairs,
     top_menu,
     topdomain,
-    topics,
-    toggle,
     url_for_with_args,
 )
+from seminars.topic import topic_dag
+from seminars.language import languages
+from seminars.toggle import toggle, toggle3way
 from seminars.knowls import static_knowl
 from .seminar import series_header
 from .talk import talks_header
@@ -127,7 +125,7 @@ def ctx_proc_userdata():
     # meta_description appears in the meta tag "description"
     data[
         "meta_description"
-    ] = r"Welcome to {topdomain}, a listing of research seminars and conferences!".format(topdomain = topdomain())
+    ] = r"Welcome to {topdomain}, a list of research seminars and conferences!".format(topdomain = topdomain())
     data[
         "feedbackpage"
     ] = r"https://docs.google.com/forms/d/e/1FAIpQLSdJNJ0MwBXzqZleN5ibAI9u1gPPu9Aokzsy08ot802UitiDRw/viewform"
@@ -136,17 +134,16 @@ def ctx_proc_userdata():
     # debug mode?
     data["DEBUG"] = is_debug_mode()
 
-    data["topics"] = topics()
-    data["user_topics"] = restricted_topics
-    data["subjects"] = subject_pairs()
     data["top_menu"] = top_menu()
 
     data["talks_header"] = talks_header
     data["series_header"] = series_header
-    data["languages_dict"] = languages_dict()
     data["static_knowl"] = static_knowl
     data["topdomain"] = topdomain()
     data["toggle"] = toggle
+    data["toggle3way"] = toggle3way
+    data["topic_dag"] = topic_dag
+    data["languages"] = languages
     data["url_for_with_args"] = url_for_with_args
 
     return data
@@ -203,9 +200,14 @@ def netloc_redirect():
     """
 
     urlparts = urlparse(request.url)
-
-    if urlparts.netloc in ["beantheory.org", "www.mathseminars.org"]:
-        replaced = urlparts._replace(netloc="mathseminars.org", scheme="https")
+    # *beantheory.org, *mathseminars.org, *rsem.org -> *researchseminars.org
+    for otherdomain in ["beantheory.org", "mathseminars.org", "rsem.org"]:
+        if urlparts.netloc.endswith(otherdomain):
+            newnetloc = urlparts.netloc[:-len(otherdomain)] + "researchseminars.org"
+            replaced = urlparts._replace(netloc=newnetloc, scheme="https")
+            return redirect(urlunparse(replaced), code=301)
+    if urlparts.netloc == "www.researchseminars.org":
+        replaced = urlparts._replace(netloc="researchseminars.org", scheme="https")
         return redirect(urlunparse(replaced), code=301)
 
 
@@ -254,10 +256,10 @@ def alive():
         abort(503)
 
 
-@app.route("/acknowledgment")
+@app.route("/acknowledgments")
 def acknowledgment():
     return render_template(
-        "acknowledgment.html", title="Acknowledgments", section="Info", subsection="acknowledgments"
+        "acknowledgments.html", title="Acknowledgments", section="Info", subsection="acknowledgments"
     )
 
 
