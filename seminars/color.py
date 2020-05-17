@@ -18,3 +18,4 @@ class Slate(SteelBlue):
     col_main_l = "#aaaaaa"  # button background
     a_background_hover = "#e0e0e0"
     table_background_hover = "#e0e0e0"
+    knowl_background = "#fffaed"

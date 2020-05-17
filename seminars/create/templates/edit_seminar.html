@@ -49,16 +49,15 @@
           <td>{{ KNOWL("institutions") }}</td>
           <td><span id="institution_selector" style="width:610px;"></span></td>
         </tr>
-        {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
         <tr>
-          <td>{{ ASTKNOWL("subjects") }}</td>
-          <td><span id="subject_selector" style="width:610px;"></span></td>
-          <td class="forminfo">Select at least one subject</td>
+          <td>{{ ASTKNOWL("topics") }}</td>
+          <td><span class="topicDAG" id="topicDAG_selector"></span></td>
+        </tr>
         <tr>
-        {% endif %}
-        <tr>
-          <td>{{ KNOWL("topics") }}</td>
-          <td><span id="topic_selector" style="width:610px;"></span></td>
+          <td></td>
+          <td>
+            <div class="topicDAG"></div>
+          </td>
         </tr>
         <tr>
           <td>{{ ASTKNOWL("language","Language") }}</td>
@@ -240,42 +239,21 @@
       </tr></table>
       </form>
 <script type="text/javascript">
-/* topic and inst selector */
-const topicOptions = [
-  {% for ab, topic in user_topics(seminar) %}
-  {
-    label: `{{ topic }}`,
-    value: `{{ ab }}`,
-  },
-  {% endfor %}
-];
+  /* topic, language and inst selector */
 
-const instOptions = [
-  {% for iid, name in institutions %}
-  {
-    label: `{{ name | safe }}`,
-    value: `{{ iid }}`,
-  },
-  {% endfor %}
-];
+  const instOptions = [
+    {% for iid, name in institutions %}
+    {
+      label: `{{ name | safe }}`,
+        value: `{{ iid }}`,
+    },
+    {% endfor %}
+  ];
 
-const langOptions = [
-  {% for code, name in languages_dict.items() %}
-  {
-    label: `{{ name | safe}}`,
-    value: `{{ code }}`,
-  },
-  {% endfor %}
-];
+  {{ languages.js_options() | safe }}
 
-const subjOptions = [
-  {% for sid, name in subjects %}
-  {
-    label: `{{ name }}`,
-    value: `{{ sid }}`,
-  },
-  {% endfor %}
-];
+
+const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
 
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
@@ -323,34 +301,17 @@ document.addEventListener("DOMContentLoaded", function() {
       showswaps();
     });
   {% endfor %}
-  makeTopicSelector(
-    topicOptions,
-    {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
-  );
-  makeInstitutionSelector(
+
+  makeTopicsTree(json_tree);
+
+    makeInstitutionSelector(
     instOptions,
-    {{ seminar.institutions | safe }},
-  );
-  makeLanguageSelector(
-    langOptions,
-    {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
-  );
-  makeSubjectSelector(
-      subjOptions,
-      {{ seminar.subjects | safe }},
-  );
-  $('input[name="subjects"]').change(
-    function (){
-      if( $(this).val() == '[]') {
-      $("#subject_selector").notify(
-      "Please select at least one subject",
-        {className: "error", position: "right"})
-      } else {
-      $("#topic_selector").notify(
-      "Save your changes to load new topics options",
-        {className: "info", position: "right"})
-      }
-    });
+      {{ seminar.institutions | safe }},
+    );
+    makeLanguageSelector(
+      langOptions,
+      {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
+    );
 
   function showplusminus(n) {
     document.getElementById('slotminus').style.visibility = ( n > 1 ? 'visible' : 'hidden' );

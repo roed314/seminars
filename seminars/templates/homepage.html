@@ -31,73 +31,6 @@
 </div>
 
 {% if section == "Browse" %}
-  <div id="subject-filter-menu">
-    <span id="close-subject-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
-    {% for ab, name in subjects %}
-      <div class="subject_toggle" id="subjectlink-{{ab}}">
-        {{name}}
-        {% if subject_counts[ab] %} ({{subject_counts[ab]}}) {% endif %}
-      </div>
-    {% endfor %}
-  </div>
-
-  <div id="topic-filter-menu">
-    {% if topdomain == "mathseminars.org" %}
-    {% for ab, name, topic_subject in topics %}
-    {% if topic_subject == "math" %}
-    <div class="topic_toggle subject-math" id="topiclink-math_{{ab}}">
-      {{name}}
-      {% if topic_counts["math_"+ab] %} ({{topic_counts["math_"+ab]}}){% endif %}
-    </div>
-    {% endif %}
-    {% endfor %}
-    <div id="topic-filter-head">
-      {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics('math');"), ("CLR", "Clear all", "clearAllTopics('math');")] %}
-      <div class="topic_cmd" id="topiclink-math_{{ab}}" onclick="{{onclick}}">
-        {{name}}
-      </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div id="subjects-tabs">
-      <ul class="tab-subject-nav">
-        <li><span id="close-topic-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span></li>
-        {% for ab, name in subjects %}
-          <li><a href="#tab-{{ab}}-content" class="tab-subject-nav">{{name}}</a></li>
-        {% endfor %}
-      </ul>
-
-     {% for subject_ab, subject_name in subjects %}
-       <div id="tab-{{subject_ab}}-content" class="tab-subject-panel">
-         {% for ab, name, topic_subject in topics %}
-           {% if topic_subject == subject_ab %}
-             <div class="topic_toggle subject-{{topic_subject}}" id="topiclink-{{subject_ab}}_{{ab}}">
-               {{name}}
-               {% if topic_counts[subject_ab+"_"+ab] %} ({{topic_counts[subject_ab+"_"+ab]}}){% endif %}
-             </div>
-           {% endif %}
-         {% endfor %}
-         <div id="topic-filter-head">
-          {% for ab, name, onclick in [("ALL", "Select all", "selectAllTopics('"+subject_ab+"');"), ("CLR", "Clear all", "clearAllTopics('"+subject_ab+"');")] %}
-            <div class="topic_cmd" id="topiclink-{{subject_ab}}_{{ab}}" onclick="{{onclick}}">
-              {{name}}
-            </div>
-          {% endfor %}
-         </div>
-      </div>
-    {% endfor %}
-    </div>
-    {% endif %}
-  </div>
-
-  <div id="language-filter-menu">
-    <span id="close-language-btn" onclick="toggleFilterView(this.id);"><i class="fa fa-times close"></i></span>
-    {% for ab, name in languages %}
-      <div class="language_toggle" id="langlink-{{ab}}">
-        {{name}} ({{language_counts[ab]}})
-      </div>
-    {% endfor %}
-  </div>
   <div id="browse-submenu">
     <header class="inner">
       <div class="submenu-inner">
@@ -119,6 +52,7 @@
       </div>
     </header>
   </div>
+
 {% elif section == "Search" %}
   <div id="search-submenu">
     <header class="inner">

@@ -46,11 +46,6 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
 <form action="{{ url_for('.edit_seminar') }}" method="POST">
   <input type="hidden" name="new" value="yes"/>
   <input type="hidden" name="institutions" value=""/>
-  {% if topdomain == "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
-    <input type="hidden" name="subjects" value="['math']"/>
-  {% else %}
-    <input type="hidden" name="subjects" value=""/>
-  {% endif %}
   <table id="make_semconf">
     <tr>
       <td>{{ ASTKNOWL("is_conference") }}</td>
@@ -72,13 +67,6 @@ You may want to <a href="{{ url_for('list_institutions') }}">add your institutio
       <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="{{ maxlength['shortname'] }}" required /></td>
       <td class="forminfo">Use 3-32 characters, no spaces.
     </tr>
-    {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
-    <tr>
-      <td>{{ ASTKNOWL("subjects") }}</td>
-      <td><span id="subject_selector"></span></td>
-      <td class="forminfo">Select at least one subject.</td>
-    <tr>
-    {% endif %}
     <tr>
       <td>{{ KNOWL("institutions") }}</td>
       <td><span id="institution_selector" style="margin-bottom: 10px;"></span></td>
@@ -165,18 +153,9 @@ const instOptions = [
   },
   {% endfor %}
 ];
-const subjOptions = [
-  {% for sid, name in subjects %}
-  {
-    label: `{{ name }}`,
-    value: `{{ sid }}`,
-  },
-  {% endfor %}
-];
 
 document.addEventListener("DOMContentLoaded", function() {
   makeInstitutionSelector(instOptions, []);
-  makeSubjectSelector(subjOptions, []);
 });
 </script>
 
