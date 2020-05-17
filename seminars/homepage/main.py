@@ -291,7 +291,7 @@ class TalkSearchArray(SemSearchArray):
             name="recent",
             label="Edited within",
             spantext="hours",
-            spanextras=' style="margin-left:15px;"',
+            spanextras=' style="margin-left:5px;"',
             example="168",
             example_span=False,
             width=50,
