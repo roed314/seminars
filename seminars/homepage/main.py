@@ -396,7 +396,6 @@ def _get_counters(objects):
     return {"topic_counts": topic_counts, "language_counts": language_counts}
 
 def _get_row_attributes(objects):
-    topic_dag_cookie = dict(topic_dag.read_cookie()) # disable default dict
     filtered_topics = topic_dag.filtered_topics()
     filter_topic = request.cookies.get('filter_topic', '-1') == '1'
     filtered_languages = set(request.cookies.get('languages', '').split(','))
