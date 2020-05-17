@@ -314,8 +314,8 @@ class WebTalk(object):
 
     def show_password_hint(self):
         now = datetime.now(pytz.utc)
-        if all([self.online, self.access_control==2, self.live_link, self.password_hint, now <= self.end_time]):
-            return '<div class="password_hint">Password hint: %s</div>' % self.password_hint
+        if all([self.online, self.access_control==2, self.live_link, self.access_hint, now <= self.end_time]):
+            return '<div class="password_hint">Password hint: %s</div>' % self.access_hint
         else:
             return ""
 
