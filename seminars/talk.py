@@ -11,8 +11,6 @@ from seminars.utils import (
     max_distinct,
     adapt_datetime,
     make_links,
-    topic_dict,
-    languages_dict,
     killattr,
     how_long,
 )
