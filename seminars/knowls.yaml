@@ -213,7 +213,8 @@ access_hint:
   title: Password hint
   contents: |
     Online events using password restricted access control must provides a hint that
-    should allow users knowledgable in the subject to determine the password.
+    will allow users knowledgable in the subject to determine the password.
+    This hint will become visible shortly before the talk starts and remain visible until it ends.
     <br><br>
     If you do not wish to provide a password hint you should choose the manual
     registration and email the password to registered participants.

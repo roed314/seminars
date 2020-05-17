@@ -314,12 +314,15 @@ class WebTalk(object):
 
     def show_password_hint(self):
         now = datetime.now(pytz.utc)
-        if all([self.online, self.access_control==2, self.live_link, self.access_hint, now <= self.end_time]):
-            return '<div class="password_hint">Password hint: %s</div>' % self.access_hint
+        if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint, self.starting_soon()]):
+            return '<div class="password_hint"><b>Password hint<b>: <i>%s<i></div>' % self.access_hint
         else:
             return ""
 
     def show_live_link(self, user=current_user, raw=False):
+        if self.deleted or not self.online or now > self.end_time:
+            return ""
+
         now = datetime.now(pytz.utc)
 
         def showit(self, raw=False, reg=False):
@@ -339,8 +342,6 @@ class WebTalk(object):
             else:
                 return '<div class="access_button is_link"> Livestream access <a href="%s">available%s</a></div>' % (link, note)
 
-        if not self.online or now > self.end_time:
-            return ""
         if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
             return showit(self, raw=raw)
         elif self.access_control == 1:

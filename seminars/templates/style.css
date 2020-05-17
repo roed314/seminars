@@ -383,6 +383,10 @@ i.fa.close:hover {
     background: #fff !important;
 }
 
+.password_hint {
+    display: inline-block;
+}
+
 .talk-header-container {
     width: 100%;
     padding: 0px;
