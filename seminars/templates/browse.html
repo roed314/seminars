@@ -2,45 +2,73 @@
 
 {% block content %}
 
-<table id="filter-table">
-  <tr>
-    <td>
-      {{ KNOWL("filter") }} by:
-    </td>
-    {% if topdomain == "mathseminars.org" %}
-    {% set ftypes = ["topic", "language"] %}
-    {% else %}
-    {% set ftypes = ["subject", "topic", "language"] %}
-    {% endif %}
-    {% for ftype in ftypes %}
-    {% if ftype not in hide_filters %}
-    <td>
-      {{ toggle(tglid="enable_"+ftype+"_filter", value="", onchange="toggleFilters(this.id);") | safe }}
-    </td>
-    <td style="padding-right: 2em;">
-      <a id="{{ftype}}-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">{{ftype}}</a>
-    </td>
-    {% endif %}
-    {% endfor %}
-    {% if user.is_authenticated %}
-    <td >
-      {{ toggle(tglid="enable_calendar_filter", value="", onchange="toggleFilters(this.id);") | safe }}
-    </td>
-    <td style="padding-right: 2em;">
-      Show only saved events
-    </td>
-    {% endif %}
-  </tr>
-</table>
+<div id="filter-container">
+  <div id="filter-controls">
+    <div id="filter-table-wrap">
+      <table id="filter-table">
+        <tr>
+          <td>
+            {{ KNOWL("filter") }} by:
+          </td>
+          {{ topic_dag.filter_link() | safe }}
+          {{ languages.filter_link() | safe }}
+          {% if user.is_authenticated %}
+          <td >
+            {{ toggle(tglid="calendar", value=1 if request.cookies.get('filter_calendar', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
+          </td>
+            <td class="fknowl">
+              {{ KNOWL("saved") }}
+            </td>
+            {% else %}
+            <td>
+              <input class="tgl tgl-light tgl2way" value="-1" id="saved_disabled"></input> <label class="tgl-btn" for="saved_disabled" style="cursor: default;"></label>
+            </td>
+            <td class="fknowl">
+              {{ KNOWL("saved_ad") }}
+            </td>
+            {% endif %}
+            <td>
+              {{ toggle(tglid="more", value=1 if request.cookies.get('filter_more', '-1') == '1' else -1, onchange="toggleFilters(this.id);") | safe }}
+            </td>
+            <td class="fknowl">
+              <a id="more-filter-btn" class="likeknowl" onclick="toggleFilterView(this.id); return false;">more</a>
+            </td>
+            <td>
+              <div id="search-form-wrap">
+                <form>
+                  <div>
+                    <input type="text" name="keywords" class="search" value="{{info.get('keywords', '')}}" />
+                  </div>
+                  <button type="submit" class="search inactive"></button>
+                  <button type="submit" class="cancel-search{% if not info.get('keywords', '') %} inactive{% endif %}" onclick="clearSearch();"></button>
+                  <span class="search inactive"><i class="fas fa-search"></i></span>
+                  <span class="cancel-search{% if not info.get('keywords', '') %} inactive{% endif %}"><i class="far fa-times-circle"></i></span>
+                </form>
+              </div>
+            </td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+  {{ topic_dag.filter_pane(counts=topic_counts, visible=request.cookies.get('visible_topic', '-1') == '1') | safe }}
+  {{ languages.filter_pane(counts=language_counts, visible=request.cookies.get('visible_language', '-1') == '1') | safe }}
+  <div id="more-filter-menu"
+       class="filter-menu more-centering"
+  {% if request.cookies.get('visible_more', '-1') == '1' %}
+       style="display: block;"
+  {% endif %}
+  >
+    <div id="more-centering">
+      <div id="more-padding">
+        <form>
+          {{ info.search_array.html(info) | safe }}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% block browsing %}{% endblock %}
-
-<!-- topic tabs -->
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  $( "#subjects-tabs" ).tabs();
-  } );
-  var subject_list = [{% for ab, name in subjects %}"{{ab}}",{% endfor %}];
-</script>
 
 {% endblock %}
