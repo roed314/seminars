@@ -57,7 +57,7 @@
             Lecture held in {{ talk.room }}.
           {% endif %}
           {% if not talk.deleted %}
-            {{ talk.show_live_link() | safe }}
+            {{ talks.show_passowrd_int() | safe }} {{ talk.show_live_link() | safe }}
           {% endif %}
         {% endif %}
     </div>

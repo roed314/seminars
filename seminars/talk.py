@@ -312,6 +312,18 @@ class WebTalk(object):
             ans += " as part of %s" % (self.show_seminar(external=external))
         return ans
 
+    def talk_show_password_hint():
+        if all([
+            self.online,
+            self.access_control==2,
+            self.live_link,
+            self.password_hint,
+            datetime.now(pytz.utc) <= self.end_time,
+            ])
+            return '<div class="password_hint">Password hint: %s</div>' % self.password_hint
+        else:
+            return ""
+
     def show_live_link(self, user=current_user, raw=False):
         now = datetime.now(pytz.utc)
 
