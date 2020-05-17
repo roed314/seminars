@@ -330,7 +330,7 @@ class WebTalk(object):
                 return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> %s</a></b></div>' % (
                     link, note)
             else:
-                return '<div class="access_button is_link">%s <a href="%s">available%s</a></div>' % (link, note)
+                return '<div class="access_button is_link"> <a href="%s">available%s</a></div>' % (link, note)
 
         if not self.online or now > self.end_time:
             return ""
