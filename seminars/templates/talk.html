@@ -90,7 +90,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 <tr><th>Name</th><th>Affiliation</th><th>Time</th></tr>
 {% for name, homepage, affiliation, time in talk.registered_users() %}
   <tr>
-    <td>{% if homepage %}<a href="{{homepage"}}">name</a>{% else %} {{name}} {% endif %}</td>
+    <td>{% if homepage %}<a href="{{homepage}}">{{name}}</a>{% else %} {{name}} {% endif %}</td>
     <td>{{ affiliation }}</td>
     <td>{{ time.strftime("%a %b %-d, %H:%M") }}</td>
   </tr>
