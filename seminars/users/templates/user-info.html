@@ -176,26 +176,28 @@
 
 {# this script constructs a url and shows it as a link, just for testing #}
 <script type="text/javascript">
-function makelink() {
-   var url = $("#url").val();
-   if (url.substring(0,7) != "http://" && url.substring(0,8) != "https://") {
-     url = "http://" + url;
-   }
-   $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
-}
+  document.addEventListener("DOMContentLoaded", function() {
+    function makelink() {
+      var url = $("#url").val();
+      if (url.substring(0,7) != "http://" && url.substring(0,8) != "https://") {
+        url = "http://" + url;
+      }
+      $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
+    }
 
-$(function() {
-   $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
-});
+    $(function() {
+      $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
+    });
 
-makelink();
+    makelink();
 
-/* this tells the user if the passwords match */
-$(function () {
-  $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-  $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-  checkpw();
-})
+    /* this tells the user if the passwords match */
+    $(function () {
+      $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+      $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+      checkpw();
+    })
+  })
 </script>
 
 {%endif%}
