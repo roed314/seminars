@@ -170,7 +170,7 @@ class TopicDAG(object):
     def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None, disabled=False):
         padding = ' class="fknowl"' if topic_id is None else ''
         return "<td>%s</td><td%s>%s</td>" % (
-            self._toggle(parent_id, topic_id, cookie, duplicate_ctr, disabled),
+            self._toggle(parent_id, topic_id, cookie, duplicate_ctr, disabled=disabled),
             padding,
             self._link(parent_id, topic_id, counts, duplicate_ctr),
         )
@@ -182,7 +182,7 @@ class TopicDAG(object):
   <table><tr>{1}</tr></table>
 </div>
 </div>""".format(
-            cols, self.filter_link(parent_id, topic_id, counts, cookie, duplicate_ctr, disabled)
+            cols, self.filter_link(parent_id, topic_id, counts, cookie, duplicate_ctr, disabled=disabled)
         )
 
     def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None, visible=False, disabled=False):
