@@ -909,9 +909,9 @@ def register_for_talk(seminar_id, talkid):
     else:
         flash("Previous registration confirmed, enjoy the talk!")
     if talk.is_starting_soon():
-        redirect(talk.live_link)
+        return redirect(talk.live_link)
     else:
-        redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
+        return redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
 
 
 
