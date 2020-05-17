@@ -320,10 +320,9 @@ class WebTalk(object):
             return ""
 
     def show_live_link(self, user=current_user, raw=False):
+        now = datetime.now(pytz.utc)
         if self.deleted or not self.online or now > self.end_time:
             return ""
-
-        now = datetime.now(pytz.utc)
 
         def showit(self, raw=False, reg=False):
             link = self.live_link if self.live_link else self.stream_link
