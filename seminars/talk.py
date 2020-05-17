@@ -160,6 +160,7 @@ class WebTalk(object):
             return False
         reg = rec
         reg["registration_time"] = datetime.now(tz=pytz.UTC)
+        print(reg)
         return db.talk_registrations.upsert(rec,reg)
 
     @classmethod
