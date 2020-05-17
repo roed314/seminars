@@ -188,7 +188,7 @@ class WebSeminar(object):
         self.description = s[0].upper() + s[1:] if s else ""
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
-            killattr(self, "attr")
+            killattr(self, attr)
 
     def visible(self):
         """
