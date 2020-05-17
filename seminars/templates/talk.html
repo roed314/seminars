@@ -86,8 +86,10 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 {{ calendar_block('talk', talk) }}
 
 {% if talk.online and talk.access_control == 4 and user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
+<br>
+<div>
 <table>
-<tr><th colspan="3" style="align: center;">Registered users</th></tr>
+<tr><th colspan="3" style="align: center;"><u>Registered users</u></th></tr>
 <tr><th>Name</th><th>Affiliation</th><th>Registration</th></tr>
 {% for name, homepage, affiliation, time in talk.registered_users() %}
   <tr>
@@ -97,6 +99,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   </tr>
 {% endfor %}
 </table>
+</div>
 {% endif %}
 
 {% endblock %}
