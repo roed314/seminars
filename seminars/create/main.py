@@ -501,12 +501,12 @@ def save_seminar():
                 data["time_slots"].append(daytimes)
                 if daytimes_early(daytimes):
                     flash_warning(
-                        "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
+                        "Time slot %s includes early AM hours; please correct if this is not intended (use 24-hour time format).",
                         daytimes,
                     )
                 elif daytimes_long(daytimes):
                     flash_warning(
-                        "Time slot %s is longer than 8 hours, please correct if this is not intended.",
+                        "Time slot %s is longer than 8 hours; please correct if this is not intended.",
                         daytimes,
                 )
         if not data["weekdays"]:
@@ -595,7 +595,7 @@ def save_seminar():
     if seminar.new or new_version != seminar:
         new_version.save()
         edittype = "created" if new else "edited"
-        flash("Series %s successfully!" % edittype)
+        flash("Series %s successfully!  Now visit the Edit schedule tab to add talks." % edittype)
     elif seminar.organizers == new_version.organizers:
         flash("No changes made to series.")
     if seminar.new or seminar.organizers != new_version.organizers:
