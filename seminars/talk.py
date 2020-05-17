@@ -344,7 +344,7 @@ class WebTalk(object):
                 return link
             if not link:
                 return '<div class=access_button no_link">Livestream link missing, please <a href="%s">contact an organizer</a>.</div>' % (
-                    url_for("view_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+                    url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
             note = " (view only)" if link != self.live_link else ""
             if reg and link == self.live_link:
                 note = " (auto-registration)"
@@ -378,7 +378,7 @@ class WebTalk(object):
             if not self.access_registration:
                 # This should never happen, registration link is required
                 return "" if raw else '<div class="access_button no_link">Registration link missing, please <a href="%s">contact an organizer</a>.</div>' % (
-                    url_for("view_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+                    url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
             reg_link = "mailto:" + self.access_registration if "@" in self.access_registration else self.access_registration
             return reg_link if raw else '<div class="access_button no_link"><a href="%s">Register here</a>for livestream access</div>' % reg_link
         else:  # should never happen
