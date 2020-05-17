@@ -104,7 +104,7 @@
       <td style="min-width:150px;">{{ ASTKNOWL("timezone") }}</td>
       <td>
         <select name="timezone" style="width:610px;">
-          {% for tz, disp in timezones %}
+          {% for tz, disp in options["timezone"] %}
           <option value="{{ tz }}"{% if talk.timezone == tz %} selected{% endif %}>{{disp}}</option>
           {% endfor %}
         </select>
