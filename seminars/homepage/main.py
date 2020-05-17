@@ -908,7 +908,11 @@ def register_for_talk(seminar_id, talkid):
         flash("You have been registered, enjoy the talk!")
     else:
         flash("Previous registration confirmed, enjoy the talk!")
-    return redirect(talk.live_link)
+    if talk.is_starting_soon():
+        redirect(talk.live_link)
+    else:
+        redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
+
 
 
 # We allow async queries for title knowls
