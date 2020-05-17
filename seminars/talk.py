@@ -165,6 +165,17 @@ class WebTalk(object):
         print(reg)
         return db.talk_registrations.upsert(rec,reg)
 
+    def registered_users(self):
+        """ returns a list of tuples (name, affiliation, homepage, email, registration_time) in reverse order by registration time """
+        # FIXME: Should we use IdentifierWrapper here?
+        query = """
+            SELECT users.name, users.homepage, users.affiliation, talk_registrations.registration_time
+            FROM talk_registrations INNER JOIN users ON users.id = talk_registrations.user_id
+            WHERE talk_registrations.seminar_id = '%s' AND talk_registrations.seminar_ctr = %d
+            ORDER BY talk_registrations.registration_time DESC
+        """
+        return list(db._execute(SQL(query % (self.seminar_id, self.seminar_ctr))))
+
     @classmethod
     def _editable_time(cls, t):
         if not t:
@@ -317,7 +328,6 @@ class WebTalk(object):
         return ans
 
     def show_password_hint(self):
-        now = datetime.now(pytz.utc)
         if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint, self.is_starting_soon()]):
             return '<div class="password_hint">(Hint: %s)</div>' % self.access_hint
         else:

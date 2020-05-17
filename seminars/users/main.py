@@ -608,7 +608,7 @@ def public_users():
     user_list = sorted(
         [
             (r["affiliation"], r["name"], r["homepage"])
-            for r in db.users.search({"homepage": {"$ne": ""}, "name": {"$ne": ""}, "creator": True})
+            for r in db.users.search({"homepage": {"$ne": ""}, "affiliation": {"$ne": ""}, "name": {"$ne": ""}, "creator": True})
         ]
     )
     return render_template("public_users.html", title="Public users", public_users=user_list)

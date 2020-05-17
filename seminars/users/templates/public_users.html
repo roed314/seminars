@@ -12,8 +12,8 @@
 <table>
   {% for affiliation, name, homepage in public_users %}
   <tr>
-    <td>{{ affiliation }}</td>
     <td><a href="{{ homepage }}">{{ name }}</a></td>
+    <td>{{ affiliation }}</td>
   </tr>
   {% endfor %}
 </table>
