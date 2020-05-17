@@ -15,6 +15,7 @@ from flask import (
     abort,
 )
 from flask_mail import Mail, Message
+from flask_cors import CORS
 
 from lmfdb.logger import logger_file_handler
 from seminars.utils import (
@@ -50,6 +51,10 @@ mail_settings = {
 
 app.config.update(mail_settings)
 mail = Mail(app)
+
+
+# Enable cross origin for fonts
+CORS(app, resources={r"/fontawesome/webfonts/*": {"origins": "*"}})
 
 ############################
 # App attribute functions  #
