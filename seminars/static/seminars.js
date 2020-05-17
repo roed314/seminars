@@ -715,20 +715,20 @@ $(document).ready(function () {
 });
 
 $(document).ready(function() {
-  dr = $("input[name='daterange']")
+  dr = $('#daterange')
   var past = $('input[name="past"]').val() === "True";
   var minDate = 'January 1, 2020';
   var maxDate = 'January 1, 2050';
   if (past) {
-    var end = maxDate = moment();
-    var start = moment().subtract(6, 'days');
+    maxDate = moment();
     dr.attr('placeholder', moment().format('- MMMM D, YYYY'));
   } else {
-    var start = minDate = moment();
-    var end = moment().add(6, 'days');
+    minDate = moment();
   }
 
-  if( dr.length > 0 ) {
+  var start = false;
+  var end = false;
+  function deduce_start_end_from_value() {
     var drval = dr.val();
     if( drval.includes('-') ) {
       var se = drval.split('-');
@@ -736,12 +736,17 @@ $(document).ready(function() {
       end = se[1].trim();
     }
     if(start == '') {
-      start = minDate;
+      start = false;
     }
     if(end == '') {
-      end = maxDate;
+      end = false;
     }
   }
+  if(dr.lenght > 0) {
+    deduce_start_end_from_value();
+  }
+
+  console.log(start, end);
   var ranges = {
            //'No restriction': [minDate, maxDate],
            'Future': [moment(), maxDate],
@@ -765,12 +770,13 @@ $(document).ready(function() {
 
 
   function cd(start, end, label) {
-      if(start.format('MMMM D, YYYY') == minDate){
+    console.log('cd');
+      if(start.format('MMMM D, YYYY') == minDate && past){
         start = '';
       } else {
         start = start.format('MMMM D, YYYY')
       }
-      if(end.format('MMMM D, YYYY') == maxDate) {
+      if(end.format('MMMM D, YYYY') == maxDate && !past) {
         end = '';
       } else {
         end =  end.format('MMMM D, YYYY')
@@ -783,34 +789,52 @@ $(document).ready(function() {
         end = ''
       }
       if(start == '' && end == '') {
-        $('#daterange').val('');
+        dr.val('');
       } else {
-        $('#daterange').val(start + ' - ' + end);
+        dr.val(start + ' - ' + end);
       }
     };
 
 
-  $('input[name="daterange"]').on('cancel.daterangepicker', function(ev, picker) {
+  dr.on('cancel.daterangepicker', function(ev, picker) {
       $(this).val('');
   });
 
-    $('#daterange').daterangepicker({
-        startDate: start,
-        endDate: end,
-        minDate: minDate,
-        maxDate: maxDate,
-        autoUpdateInput: false,
-        opens: "center",
-        drops: "down",
-        ranges: ranges,
-        locale: {
-          format: "MMMM D, YYYY",
-        },
-      },
-      cd
-    );
 
-    //cb(start, end);
+  dr.daterangepicker({
+    startDate: start,
+    endDate: end,
+    minDate: minDate,
+    maxDate: maxDate,
+    autoUpdateInput: false,
+    opens: "center",
+    drops: "down",
+    ranges: ranges,
+    locale: {
+      format: "MMMM D, YYYY",
+    },
+  },
+    cd
+  );
+
+  var daterangepicker_changed = true; // the picker doesn't detect all changes
+  dr.on('apply.daterangepicker', function(ev, picker) {
+    if( daterangepicker_changed ) {
+      cd(picker.startDate, picker.endDate, "");
+    }
+    daterangepicker_changed = false;
+  });
+  dr.on("keyup", function() {
+    daterangepicker_changed = true;
+  });
+
+  // change the word Apply to Select
+  dr.on("showCalendar.daterangepicker", function () {
+    console.log($("div.daterangepicker button.applyBtn"));
+    $("div.daterangepicker button.applyBtn").text("Select")
+  })
+
+
 
 
 });
