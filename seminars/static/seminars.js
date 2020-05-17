@@ -810,6 +810,7 @@ $(document).ready(function() {
     opens: "center",
     drops: "down",
     ranges: ranges,
+    cancelButtonClasses: "cancelcolors",
     locale: {
       format: "MMMM D, YYYY",
     },

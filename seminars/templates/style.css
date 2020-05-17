@@ -730,6 +730,10 @@ button.cancel {
     color: blue;
     background-color: white;
 }
+button.cancelcolors{
+    color: blue;
+    background-color: white;
+}
 
 button.delete {
     vertical-align: text-bottom;
