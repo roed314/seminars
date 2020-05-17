@@ -391,15 +391,8 @@ def _get_counters(objects):
 
 def _get_row_attributes(objects):
     topic_dag_cookie = dict(topic_dag.read_cookie()) # disable default dict
-    # FIXME, this is not enough!!!, as we also need to check the anscestors
-    filtered_topics = set([k for k, v in topic_dag_cookie.items() if (
-        k != None and
-        v == 1 and
-        (topic_dag.by_id[k].parents == [] or
-        any(topic_dag_cookie[parent.id] == 0 for parent in topic_dag.by_id[k].parents)
-         )
-    )
-                           ])
+    filtered_topics = topic_dag.filtered_topics()
+    print(filtered_topics)
     filter_topic = request.cookies.get('filter_topic', '-1') == '1'
     filtered_languages = set(request.cookies.get('languages', '').split(','))
     filter_language = request.cookies.get('filter_language', '-1') == '1'

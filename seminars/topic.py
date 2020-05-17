@@ -54,6 +54,16 @@ class TopicDAG(object):
             (topic for topic in self.by_id.values() if not topic.parents), key=sort_key
         )
 
+    def filtered_topics(self, topic=None):
+        cookie = self.read_cookie()
+        res = []
+        for elt in (self.subjects if topic is None else topic.children):
+            if cookie[elt.id] == 1:
+                res.append(elt.id)
+            elif cookie[elt.id] == 0:
+                res.extend(self.filtered_topics(elt))
+        return res
+
     def leaves(self, topic_list):
         """
         Returns the elements in the topic list that don't have children in the topic list
@@ -133,7 +143,7 @@ class TopicDAG(object):
             fullid, classes, onclick, name, spanclasses, count
         )
 
-    def _toggle(self, parent_id="root", topic_id=None, cookie=None, duplicate_ctr=None):
+    def _toggle(self, parent_id="root", topic_id=None, cookie=None, duplicate_ctr=None, disabled=False):
         if cookie is None:
             cookie = self.read_cookie()
         kwds = {}
@@ -150,33 +160,32 @@ class TopicDAG(object):
                 tclass = toggle
             onchange = "toggleTopicDAG(this.id);"
             kwds["classes"] = " ".join([topic_id, "sub_topic"] + ["sub_" + elt for elt in topic.ancestors])
-            # FIXME: this is not enough, as we also need to check the anscestors
-            if cookie[parent_id] != 0 and parent_id != "topic":
+            if disabled:
                 kwds["classes"] += " disabled"
             kwds["name"] = topic_id
 
 
         return tclass(tid, value=cookie[topic_id], onchange=onchange, **kwds)
 
-    def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None):
+    def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None, disabled=False):
         padding = ' class="fknowl"' if topic_id is None else ''
         return "<td>%s</td><td%s>%s</td>" % (
-            self._toggle(parent_id, topic_id, cookie, duplicate_ctr),
+            self._toggle(parent_id, topic_id, cookie, duplicate_ctr, disabled),
             padding,
             self._link(parent_id, topic_id, counts, duplicate_ctr),
         )
 
-    def link_pair(self, parent_id="root", topic_id=None, counts={}, cols=1, cookie=None, duplicate_ctr=None):
+    def link_pair(self, parent_id="root", topic_id=None, counts={}, cols=1, cookie=None, duplicate_ctr=None, disabled=False):
         return """
 <div class="toggle_wrap col{0}">
 <div class="toggle_pair">
   <table><tr>{1}</tr></table>
 </div>
 </div>""".format(
-            cols, self.filter_link(parent_id, topic_id, counts, cookie, duplicate_ctr)
+            cols, self.filter_link(parent_id, topic_id, counts, cookie, duplicate_ctr, disabled)
         )
 
-    def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None, visible=False):
+    def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None, visible=False, disabled=False):
         if cookie is None:
             cookie = self.read_cookie()
         if topic_id is None:
@@ -192,10 +201,10 @@ class TopicDAG(object):
         delay = []
         for i, topic in enumerate(topics, 1):
             duplicate_ctr[topic.id] += 1
-            link = self.link_pair(tid, topic.id, counts, cols, cookie, duplicate_ctr)
+            link = self.link_pair(tid, topic.id, counts, cols, cookie, duplicate_ctr, disabled=disabled)
             divs.append(link)
             if topic.children:
-                filter_pane = self.filter_pane(tid, topic.id, counts, cookie, duplicate_ctr)
+                filter_pane = self.filter_pane(tid, topic.id, counts, cookie, duplicate_ctr, disabled=disabled or cookie[tid] != 0)
                 delay.append(filter_pane)
             if i % cols == 0 or i == len(topics):
                 divs.extend(delay)
