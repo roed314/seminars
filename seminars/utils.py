@@ -246,11 +246,9 @@ def sanity_check_times(start_time, end_time):
     if start_time > end_time:
         end_time = end_time + timedelta(days=1)
     if start_time + timedelta(hours=8) < end_time:
-        flash_warning(
-            "Time range exceeds 8 hours, please update if that was unintended."
-        )
+        flash_warnmsg("Time range exceeds 8 hours, please update if that was unintended.")
     if is_nighttime(start_time) or is_nighttime(end_time):
-        flash_warning(
+        flash_warnmsg(
             "Time range includes monring hours before 6am. Please update using 24-hour notation, or specify am/pm, if that was unintentional."
         )
 
@@ -612,9 +610,16 @@ def format_warning(warnmsg, *args):
     )
 
 
-def flash_warning(warnmsg, *args):
+def flash_warnmsg(warnmsg, *args):
     flash(format_warning(warnmsg, *args), "warning")
 
+
+def format_infomsg(infomsg, *args):
+    return Markup(infomsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
+
+
+def flash_infomsg(infomsg, *args):
+    flash(format_infomsg(infomsg, *args), "info")
 
 def show_input_errors(errmsgs):
     """ Flashes a list of specific user input error messages then displays a generic message telling the user to fix the problems and resubmit. """

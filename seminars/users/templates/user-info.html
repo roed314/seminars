@@ -75,7 +75,7 @@
           Email
         </td>
         <td>
-          <input name="email" size="30" tabindex="1" />
+          <input name="email" size="30" tabindex="1" required />
         </td>
         <td>
           <button type="submit" tabindex="2">Endorse</button>
@@ -94,7 +94,7 @@
       </tr>
       <tr>
         <td>Email</td>
-        <td><input name="email" value="{{user.email}}" size="30" tabindex="1" /></td>
+        <td><input name="email" value="{{user.email}}" size="30" tabindex="1" required /></td>
         {% if not user.email_confirmed %}
         <td>
           (not yet confirmed <a href="{{ url_for('.resend_confirmation_email') }}">Resend link?</a>)
@@ -103,7 +103,7 @@
       </tr>
       <tr>
         <td>Name</td>
-        <td><input name="name" value="{{user.name}}" size="30" tabindex="1" /></td>
+        <td><input name="name" value="{{user.name}}" size="30" tabindex="1" required /></td>
         <td/>
       </tr>
       <tr>
@@ -150,14 +150,14 @@
    <table>
     <tr>
      <td>Old password</td>
-     <td><input name="oldpwd" type="password" style="width:260px;"/></td>
-     <tr><td colspan="2" class="forminfo" />Don't use a password that you use elsewhere!</tr>
+     <td><input name="oldpwd" type="password" style="width:260px;" required /></td>
+     <td class="forminfo" />Don't use a password that you use elsewhere!</td>
      <tr><td>New password</td>
-         <td><input id="pw1" name="password1" type="password" style="width:260px;"/></td>
+         <td><input id="pw1" name="password1" type="password" style="width:260px;" required /></td>
          <td class="forminfo" id="pw1status" style="color: {{color.red}};"></td></tr>
      </tr>
      <tr><td>New password (repeat)</td>
-         <td><input id="pw2" name="password2" type="password" style="width:260px;"/></td>
+         <td><input id="pw2" name="password2" type="password" style="width:260px;" required /></td>
          <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td></tr>
     <tr>
      <tr><td colspan="2" class="spacing" /></tr>

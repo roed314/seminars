@@ -16,7 +16,7 @@ from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, date_sorted
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
@@ -171,14 +171,20 @@ def talks_parser(info, query):
     # These are necessary but not succificient conditions to display the talk
     # Also need that the seminar has visibility 2.
 
-def seminars_parser(info, query, org_query={}, conference=False):
+def seminars_parser(info, query, org_query={}, org_keywords=False, conference=False):
     parse_topic(info, query)
     parse_institution_sem(info, query)
     #parse_venue(info, query)
-    org_cols = ["name", "name", "full_name", "homepage"] #FIXME: remove full_name
+    org_cols = ["name", "homepage"]
     if current_user.is_subject_admin(None):
         org_cols.append("email")
     parse_substring(info, org_query, "organizer", org_cols)
+    if org_keywords:
+        parse_substring(info, org_query, "keywords", org_cols)
+    else:
+        parse_substring(info, query,
+            "keywords", ["name", "description", "homepage", "shortname", "comments"]
+        )
     parse_access(info, query)
     parse_language(info, query)
     if conference:
@@ -601,15 +607,13 @@ def _search_series(conference=False):
         seminar_start = info["seminar_start"] = 0
     seminar_query, org_query = {"is_conference": conference}, {}
     seminars_parser(info, seminar_query, org_query, conference=conference)
-    # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
-    # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
-    # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
-    # The second downside is that we need to do two queries.
-    if conference:
-        sort = ["start_date", "end_date", "name"]
-        info["results"] = seminars_search(seminar_query, organizer_dict=all_organizers(org_query), sort=sort)
-    else:
-        info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers(org_query)))
+    res = [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
+    # process query again with keywords applied to seminar_organizers rather than seminars
+    if "keywords" in info:
+        seminar_query, org_query = {"is_conference": conference}, {}
+        seminars_parser(info, seminar_query, org_query, org_keywords=True, conference=conference)
+        res += [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
+    info["results"] = date_sorted(res) if conference else next_talk_sorted(res)
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(

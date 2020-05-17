@@ -215,13 +215,6 @@ class WebSeminar(object):
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, attr)
-        for i in range(len(self.organizers)):
-            org = self.organizers[i]
-            if not org.get("name") and org.get("full_name"):
-                org["name"] = org["full_name"]
-            if org.get("full_name"):
-                org.pop("full_name")
-            self.organizers[i] = org
 
     def visible(self):
         """
@@ -250,8 +243,6 @@ class WebSeminar(object):
         # Need to allow for deleting organizers, so we delete them all then add them back
         with DelayCommit(db):
             db.seminar_organizers.delete({"seminar_id": self.shortname})
-            for i in range(len(self.organizers)): # FIXME: remove once this code is live
-                self.organizers[i]["full_name"] = self.organizers[i]["name"] # FIXME: remove once this code is live
             db.seminar_organizers.insert_many(self.organizers)
 
     # We use timestamps on January 1, 2020 to save start and end times
@@ -749,6 +740,14 @@ def next_talk_sorted(results):
         if R.next_talk_time.replace(tzinfo=None) == datetime.max:
             R.next_talk_time = None
     return results
+
+def date_sorted(results):
+    """
+    Sort a list of WebSeminars that are conferencs by start_date, end_date, name
+
+    Returns the sorted list.
+    """
+    return sorted(results, key=lambda res: [res.start_date, res.end_date, res.name])
 
 def next_talk(shortname):
     """
