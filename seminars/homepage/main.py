@@ -15,7 +15,7 @@ from seminars.utils import (
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response, flash
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, date_sorted
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
