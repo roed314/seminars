@@ -280,29 +280,9 @@ document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window */
   {{ prevent_unsaved() }}
 
-  // institutions
+  // institutions, topics, language selectors
   makeInstitutionSelector(instOptions,{{ seminar.institutions | safe }});
-
-  //subjects and topics
-  makeSubjectSelector(subjOptions,{{ seminar.subjects | safe }});
-  $('input[name="subjects"]').change(
-    function (){
-      if( $(this).val() == '[]') {
-      $("#subject_selector").notify(
-      "Please select at least one subject",
-        {className: "error", position: "right"})
-      } else {
-      $("#topic_selector").notify(
-      "Save your changes to load new topics options",
-        {className: "info", position: "right"})
-      }
-    });
-  makeTopicSelector(
-    topicOptions,
-    {% if seminar.new or not seminar.topics %}[]{% else %}{{ seminar.topics | safe }}{% endif %},
-  );
-
-  // language
+  makeTopicsTree(json_tree);
   makeLanguageSelector(
     langOptions,
     {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
@@ -430,17 +410,6 @@ document.addEventListener("DOMContentLoaded", function() {
       return true;
     });
   {% endfor %}
-
-  makeTopicsTree(json_tree);
-
-    makeInstitutionSelector(
-    instOptions,
-      {{ seminar.institutions | safe }},
-    );
-    makeLanguageSelector(
-      langOptions,
-      {% if seminar.new %}defaultLanguage(){% else %}"{{ seminar.language }}"{% endif %},
-    );
 
   // Make sure showslots, showaccess, and showswaps get called whenever the page is shown, including via the back button
   window.onpageshow = function(e) {
