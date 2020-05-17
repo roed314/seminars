@@ -380,7 +380,7 @@ class WebTalk(object):
                 return "" if raw else '<div class="access_button no_link">Registration link missing, please <a href="%s">contact an organizer</a>.</div>' % (
                     url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
             reg_link = "mailto:" + self.access_registration if "@" in self.access_registration else self.access_registration
-            return reg_link if raw else '<div class="access_button no_link"><a href="%s">Register here</a>for livestream access</div>' % reg_link
+            return reg_link if raw else '<div class="access_button no_link"><a href="%s">Register here</a> for livestream access</div>' % reg_link
         else:  # should never happen
             return ""
 
