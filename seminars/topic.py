@@ -170,7 +170,7 @@ class TopicDAG(object):
     def filter_link(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None, disabled=False):
         padding = ' class="fknowl"' if topic_id is None else ''
         return "<td>%s</td><td%s>%s</td>" % (
-            self._toggle(parent_id, topic_id, cookie, duplicate_ctr, disabled),
+            self._toggle(parent_id, topic_id, cookie, duplicate_ctr, disabled=disabled),
             padding,
             self._link(parent_id, topic_id, counts, duplicate_ctr),
         )
@@ -182,7 +182,7 @@ class TopicDAG(object):
   <table><tr>{1}</tr></table>
 </div>
 </div>""".format(
-            cols, self.filter_link(parent_id, topic_id, counts, cookie, duplicate_ctr, disabled)
+            cols, self.filter_link(parent_id, topic_id, counts, cookie, duplicate_ctr, disabled=disabled)
         )
 
     def filter_pane(self, parent_id="root", topic_id=None, counts={}, cookie=None, duplicate_ctr=None, visible=False, disabled=False):
@@ -191,9 +191,11 @@ class TopicDAG(object):
         if topic_id is None:
             tid = "topic"
             topics = self.subjects
+            disable_children = False
         else:
             tid = topic_id
             topics = self.by_id[tid].children
+            disable_children = disabled or cookie[tid] != 0
         if duplicate_ctr is None:
             duplicate_ctr = Counter()
         cols = num_columns([topic.name for topic in topics])
@@ -204,7 +206,7 @@ class TopicDAG(object):
             link = self.link_pair(tid, topic.id, counts, cols, cookie, duplicate_ctr, disabled=disabled)
             divs.append(link)
             if topic.children:
-                filter_pane = self.filter_pane(tid, topic.id, counts, cookie, duplicate_ctr, disabled=disabled or cookie[tid] != 0)
+                filter_pane = self.filter_pane(tid, topic.id, counts, cookie, duplicate_ctr, disabled=disable_children)
                 delay.append(filter_pane)
             if i % cols == 0 or i == len(topics):
                 divs.extend(delay)
