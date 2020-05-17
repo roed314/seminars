@@ -50,7 +50,6 @@
     {{ calendar_block("talk", talk) }}
     {% endif %}
     
-    {{ talk.show_password_hint() | safe }} 
 
     <div align="right">
         <b>{{ talk.show_time_and_duration() | safe }}</b><br>
@@ -59,7 +58,7 @@
             Lecture held in {{ talk.room }}.
           {% endif %}
           {% if not talk.deleted %}
-            {{ talk.show_live_link() | safe }}
+            {{ talk.show_password_hint() | safe }} {{ talk.show_live_link() | safe }}
           {% endif %}
         {% endif %}
     </div>

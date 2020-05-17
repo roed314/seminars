@@ -385,6 +385,8 @@ i.fa.close:hover {
 
 .password_hint {
     display: inline-block;
+    font-weight: 110%;
+    font-size: 80%;
 }
 
 .talk-header-container {
