@@ -156,6 +156,7 @@ class WebTalk(object):
 
     def register_user(self):
         rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(current_user.id)}
+        print("checking registration for %s"%rec)
         if db.talk_registrations.count(rec):
             return False
         reg = rec
