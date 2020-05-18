@@ -372,18 +372,21 @@ class WebTalk(object):
                 return link
             if not link:
                 return '<div class=access_button no_link">Livestream link not yet posted by organizers.</div>'
-            note = " (view only)" if link != self.live_link else ""
-            if reg and link == self.live_link:
+            if link != self.live_link:
+                if self.is_starting_soon():
+                    return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Watch livestream <i class="play filter-white"></i></a></b></div>' % link
+                else:
+                    return '<div class="access_button is_link"> View-only livestream access <a href="%s">available</a></div>' % link
+            if reg:
                 link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
                 if self.is_starting_soon():
-                    return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Instantly register and join livestream <i class="play filter-white"></i> %s</a></b></div>' % link
+                    return '<div class="access_button is_link starting_soon"><b> <a href="%s">Instantly register and join livestream <i class="play filter-white"></i> </a></b></div>' % link
                 else:
-                    return '<div class="access_button is_link"> <a href="%s">Instantly register/a> for livestream access</div>' % link
+                    return '<div class="access_button is_link"> <a href="%s">Instantly register</a> for livestream access</div>' % link
             if self.is_starting_soon():
-                return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Join livestream <i class="play filter-white"></i> %s</a></b></div>' % (
-                    link, note)
+                return '<div class="access_button is_link starting_soon"><b> <a href="%s">Join livestream <i class="play filter-white"></i> </a></b></div>' % link
             else:
-                return '<div class="access_button is_link"> Livestream access <a href="%s">available%s</a></div>' % (link, note)
+                return '<div class="access_button is_link"> %sLivestream access <a href="%s">available%s</a></div>' % link
 
         if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
             return showit(self, raw=raw)
@@ -411,7 +414,7 @@ class WebTalk(object):
                 return "" if raw else '<div class="access_button no_link">Registration link missing, please <a href="%s">contact an organizer</a>.</div>' % (
                     url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
             reg_link = "mailto:" + self.access_registration if "@" in self.access_registration else self.access_registration
-            return reg_link if raw else '<div class="access_button no_link"><a href="%s">Register here</a> for livestream access</div>' % reg_link
+            return reg_link if raw else '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % reg_link
         else:  # should never happen
             return ""
 
