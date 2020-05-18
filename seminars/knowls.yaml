@@ -196,13 +196,13 @@ access_control:
     <li><b>open access</b>: The link will be visible to all at all times.</li>
     <li><b>time restricted</b>: The link will be visible only within a set time window before the talk starts.</li>
     <li><b>password rescricted</b>: The link will be visible to all at all times but requires a password for which a hint is given.</li>
-    <li><b>user login</b>: Only logged in users will be shown the link.</li>
+    <li><b>user login</b>: Only logged in users with confirmed eamil addresses will be shown the link.</li>
     <li><b>automatic registration</b>: Logged in users may access the link only after agreeing to allowing their name and email to be recorded.
         A list of all automatically registered users for each talk will be shown to organizers on the View talk page.</li>
     <li><b>manual registration</b>: No link is available on researchseminars.org.
         If this option is chosen you must provide a URL or email address where visitors can register to receive an email providing access information.</li>
     </ul>
-    The access control setting for a series is inherited by by all talks in the series.
+    The access control setting for a series is inherited by all talks in the series.
 access_time:
   title: Access time
   contents: |
