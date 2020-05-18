@@ -371,7 +371,7 @@ class WebTalk(object):
         if self.is_starting_soon():
             return '<div class="access_button is_link view_only"><b> <a href="%s">Watch livestream <i class="play filter-white"></i></a></b></div>' % link
         else:
-            return '<div class="access_button is_link view_only">View-only livestream access <a href="%s">available</a></div>' % link
+            return '<div class="access_button is_link">View-only livestream access <a href="%s">available</a></div>' % link
 
     def show_live_link(self, user=current_user, raw=False):
         now = datetime.now(pytz.utc)
