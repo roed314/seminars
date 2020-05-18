@@ -32,7 +32,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
           {% endif %}
         </td>
       </tr><tr>
-        <td>{% if talk.room %} <br>Lecture held in {{ talk.room }}. {% endif %}</td>
+        <td align:top;>{% if talk.room %} <br>Lecture held in {{ talk.room }}. {% endif %}</td>
         <td>{% if talk.live_link %} {{ talk.show_stream_link() | safe }} {% endif %}</td>
       </tr>
     </table>
