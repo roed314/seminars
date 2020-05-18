@@ -6,10 +6,8 @@ from seminars import db
 from seminars.create import create
 from seminars.utils import (
     adapt_datetime,
-    clean_language,
-    clean_subjects,
     clean_topics,
-    flash_warning,
+    flash_warnmsg,
     format_errmsg,
     format_input_errmsg,
     localize_time,
@@ -51,6 +49,7 @@ from seminars.institution import (
     institution_types,
     institutions,
 )
+from seminars.language import languages
 from seminars.lock import get_lock
 from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from lmfdb.utils import flash_error
@@ -162,9 +161,6 @@ def edit_seminar():
     manage = "Manage" if current_user.is_organizer else "Create"
     if new:
         errmsgs = []
-        subjects = clean_subjects(data.get("subjects"))
-        if not subjects:
-            errmsgs.append("Please select at least one subject.")
         seminar.name = data.get("name", "")
         if not seminar.name:
             errmsgs.append("Series name is required.")
@@ -173,19 +169,16 @@ def edit_seminar():
         if errmsgs:
             return show_input_errors(errmsgs)
         seminar.is_conference = process_user_input(data.get("is_conference"), "is_conference", "boolean", False)
-        seminar.subjects = subjects
         seminar.institutions = clean_institutions(data.get("institutions"))
         if seminar.institutions:
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
         if not notsimilar:
             query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
             similar = [s for s in seminars_search(query)]
-            # When checking for simialr series, don't require an exact match on subjects/institutions
-            # match anything with institutions not set or with an institution in common, and only require a subject in common
+            # When checking for similar series, don't require an exact match on institutions
+            # match anything with institutions not set or with an institution in common
             if seminar.institutions:
                 similar = [s for s in similar if not s.institutions or set(seminar.institutions).intersection(set(s.institutions))]
-            if seminar.subjects:
-                similar = [s for s in similar if set(seminar.subjects).intersection(set(s.subjects))]
             if similar:
                 return render_template(
                     "show_similar_seminars.html",
@@ -457,7 +450,7 @@ def save_seminar():
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
 
-def process_save_seminar(seminar, raw_data, warn=flash_warning, format_error=format_errmsg, format_input_error=format_input_errmsg, update_organizers=True):
+def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg, update_organizers=True):
     errmsgs = []
     shortname = raw_data["shortname"]
 
@@ -511,11 +504,8 @@ def process_save_seminar(seminar, raw_data, warn=flash_warning, format_error=for
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
     if not data["topics"]:
-        warn("This series has no topics selected; set topics for the series here, or set topics for each new talk individually.")
-    data["language"] = clean_language(data.get("language"))
-    data["subjects"] = clean_subjects(data.get("subjects"))
-    if not data["subjects"]:
-        errmsgs.append(format_error("Please select at least one subject."))
+        errmsgs.append("Please select at least one topic.")
+    data["language"] = languages.clean(data.get("language"))
     if not data["timezone"] and data["institutions"]:
         # Set time zone from institution
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
@@ -714,9 +704,9 @@ def save_institution():
                     continue
                 if not userdata["homepage"]:
                     if current_user.email == userdata["email"]:
-                        flash_warning("Your email address will become public if you do not set your homepage in your user profile.")
+                        flash_warnmsg("Your email address will become public if you do not set your homepage in your user profile.")
                     else:
-                        flash_warning(
+                        flash_warnmsg(
                             "The email address %s of maintainer %s will be publicly visible.<br>%s",
                             userdata["email"],
                             userdata["name"],
@@ -768,7 +758,7 @@ def edit_talk():
         from seminars.utils import top_menu
 
         menu = top_menu()
-        menu[2] = (url_for("create.index"), "", "Manage")
+        menu[1] = (url_for("create.index"), "", "Manage")
         extras = {"top_menu": menu}
     else:
         extras = {}
@@ -837,7 +827,7 @@ def save_talk():
         edit_kwds.pop("token", None)
     return redirect(url_for(".edit_talk", **edit_kwds), 302)
 
-def process_save_talk(talk, raw_data, warn=flash_warning, format_error=format_errmsg, format_input_error=format_input_errmsg):
+def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg):
     errmsgs = []
     data = {
         "seminar_id": talk.seminar_id,
@@ -880,17 +870,14 @@ def process_save_talk(talk, raw_data, warn=flash_warning, format_error=format_er
         errmsgs.append("Talks must have both a start and end time.")
     if data["title"].upper() == "TBA":
         data["title"] = ""
-        flash_warning("TBA title left blank (it will appear as TBA)")
+        flash_warnmsg("TBA title left blank (it will appear as TBA)")
     data["topics"] = clean_topics(data.get("topics"))
-    data["language"] = clean_language(data.get("language"))
-    data["subjects"] = clean_subjects(data.get("subjects"))
-    if not data["subjects"]:
-        errmsgs.append("Please select at least one subject.")
+    if not data["topics"]:
+        errmsgs.append("Please select at least one topic.")
+    data["language"] = languages.clean(data.get("language"))
 
     if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
         warn("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
-    if not data["topics"]:
-        warn("This talk has no topics, so it will be visible only to users disabling their topics filter.")
     return data, errmsgs
 
 def layout_schedule(seminar, data):
@@ -905,7 +892,7 @@ def layout_schedule(seminar, data):
             try:
                 return process_user_input(date, "date", "date", tz)
             except ValueError:
-                flash_warning ("Invalid date %s ignored; please use a format like mmm dd, yyyy or dd-mmm-yyyy or mm/dd/yyyy", date)
+                flash_warnmsg ("Invalid date %s ignored; please use a format like mmm dd, yyyy or dd-mmm-yyyy or mm/dd/yyyy", date)
 
     def slot_start_time(s):
         # put slots with no time specified at the end of the day
@@ -918,7 +905,7 @@ def layout_schedule(seminar, data):
     today = now.date()
     day = timedelta(days=1)
     if seminar.is_conference and (seminar.start_date is None or seminar.end_date is None):
-        flash_warning ("You have not specified the start and end dates of your conference (we chose a date range to layout your schedule).")
+        flash_warnmsg ("You have not specified the start and end dates of your conference (we chose a date range to layout your schedule).")
     if seminar.is_conference and not seminar.per_day:
         seminar.per_day = 4
     begin = seminar.start_date if begin is None and seminar.is_conference else begin
@@ -1004,7 +991,7 @@ def edit_seminar_schedule():
     if resp is not None:
         return resp
     if not seminar.topics:
-        flash_warning(
+        flash_warnmsg(
             "This series has no topics selected; set the series' topics on the Edit series page, or set topics for each new talk individually."
         )
     schedule = layout_schedule(seminar, data)
@@ -1057,14 +1044,14 @@ def save_seminar_schedule():
         if not speaker:
             if not warned and any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols):
                 warned = True
-                flash_warning("Talks are saved only if you specify a speaker.")
+                flash_warnmsg("Talks are saved only if you specify a speaker.")
             elif (
                 not warned
                 and seminar_ctr
                 and not any(raw_data.get("%s%s" % (col, i), "").strip() for col in optional_cols)
             ):
                 warned = True
-                flash_warning("To delete an existing talk, click Details and then click delete on the Edit talk page.")
+                flash_warnmsg("To delete an existing talk, click Details and then click delete on the Edit talk page.")
             continue
         date = start_time = end_time = None
         dateval = raw_data.get("date%s" % i).strip()
@@ -1088,12 +1075,12 @@ def save_seminar_schedule():
             return show_input_errors(errmsgs)
 
         if daytimes_early(interval):
-            flash_warning(
+            flash_warnmsg(
                 "Talk for speaker %s includes early AM hours; please correct if this is not intended (use 24-hour time format).",
                 speaker,
             )
         elif daytimes_long(interval) > 8 * 60:
-            flash_warning("Time s %s is longer than 8 hours; please correct if this is not intended.", speaker),
+            flash_warnmsg("Time s %s is longer than 8 hours; please correct if this is not intended.", speaker),
 
         if seminar_ctr:
             # existing talk

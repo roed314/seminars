@@ -4,18 +4,19 @@ from seminars.talk import talks_search, talks_lucky, talks_lookup
 from seminars.utils import (
     Toggle,
     ics_file,
-    languages_dict,
-    restricted_topics as user_topics,
-    subject_dict,
-    subject_pairs,
     topdomain,
-    topics,
     maxlength,
+    adapt_datetime,
+    date_and_daytime_to_time,
+    date_and_daytimes_to_times,
+    process_user_input
 )
+from seminars.topic import topic_dag
+from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, date_sorted
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
@@ -24,12 +25,15 @@ from collections import Counter
 from dateutil.parser import parse
 
 from lmfdb.utils import (
-    BasicSpacer,
-    SearchArray,
-    SelectBox,
-    TextBox,
     flash_error,
     to_dict,
+)
+from lmfdb.utils.search_boxes import (
+    SearchArray,
+    SearchBox,
+    SelectBox,
+    SearchButton,
+    TextBox,
 )
 
 from lmfdb.utils.search_parsing import collapse_ors
@@ -40,12 +44,6 @@ def get_now():
     return datetime.now(pytz.UTC)
 
 
-def parse_subject(info, query):
-    subject = info.get("subject")
-    if subject:
-        query["subjects"] = {"$contains": subject}
-
-
 def parse_topic(info, query):
     # of the talk
     topic = info.get("topic")
@@ -54,6 +52,9 @@ def parse_topic(info, query):
         if "_" not in topic:
             topic = "math_" + topic
         query["topics"] = {"$or": [{"$contains": topic}, {"$contains": topic[5:]}]}
+    # FIXME: temporary measure during addition of physics
+    elif topdomain() == "mathseminars.org":
+        query["topic"] = {"$contains": "math"}
 
 
 def parse_institution_sem(info, query):
@@ -128,9 +129,20 @@ def parse_daterange(info, query, time=True):
         if sub_query:
             query["start_time" if time else "start_date"] = sub_query
 
+def parse_recent_edit(info, query):
+    recent = info.get("recent", "").strip()
+    if recent:
+        try:
+            recent = float(recent)
+        except Exception as e:
+            flash_error("Could not parse recent edit input %s.  Error: " + str(e), recent)
+        else:
+            recent = datetime.now() - timedelta(hours=recent)
+            query["edited_at"] = {"$gte": recent}
+
 def parse_video(info, query):
     v = info.get("video")
-    if v == "yes":
+    if v == "1":
         query["video_link"] = {"$ne": ''}
 
 
@@ -141,19 +153,9 @@ def parse_language(info, query):
 
 
 def talks_parser(info, query):
-    parse_subject(info, query)
     parse_topic(info, query)
     parse_institution_talk(info, query)
     #parse_venue(info, query)
-    parse_substring(info, query, "keywords",
-                    ["title",
-                     "abstract",
-                     "speaker",
-                     "speaker_affiliation",
-                     "seminar_id",
-                     "comments",
-                     "speaker_homepage",
-                     "paper_link"])
     parse_access(info, query)
 
     parse_substring(info, query, "speaker", ["speaker"])
@@ -162,32 +164,27 @@ def talks_parser(info, query):
     parse_video(info, query)
     parse_language(info, query)
     parse_daterange(info, query, time=True)
+    parse_recent_edit(info, query)
     query["display"] = True
     # TODO: remove this temporary measure allowing hidden to be None
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     # These are necessary but not succificient conditions to display the talk
     # Also need that the seminar has visibility 2.
 
-    # FIXME: temporary measure during addition of physics
-    if topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
-
-
-def seminars_parser(info, query, org_query={}, conference=False):
-    parse_subject(info, query)
+def seminars_parser(info, query, org_query={}, org_keywords=False, conference=False):
     parse_topic(info, query)
     parse_institution_sem(info, query)
     #parse_venue(info, query)
-    parse_substring(info, query, "keywords",
-                    ["name",
-                     "description",
-                     "homepage",
-                     "shortname",
-                     "comments"])
-    org_cols = ["name", "name", "full_name", "homepage"] #FIXME: remove full_name
+    org_cols = ["name", "homepage"]
     if current_user.is_subject_admin(None):
         org_cols.append("email")
     parse_substring(info, org_query, "organizer", org_cols)
+    if org_keywords:
+        parse_substring(info, org_query, "keywords", org_cols)
+    else:
+        parse_substring(info, query,
+            "keywords", ["name", "description", "homepage", "shortname", "comments"]
+        )
     parse_access(info, query)
     parse_language(info, query)
     if conference:
@@ -197,10 +194,6 @@ def seminars_parser(info, query, org_query={}, conference=False):
     query["display"] = True
     query["visibility"] = 2
 
-    # FIXME: temporary measure during addition of physics
-    if topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
-
 
 def institutions_shortnames():
     return sorted(
@@ -208,25 +201,58 @@ def institutions_shortnames():
     )
 
 
-textwidth = 400
+textwidth = 300
 
+class PushForCookies(SearchButton):
+    def __init__(self, value, description, disabled=False, **kwds):
+        self.disabled = disabled
+        SearchButton.__init__(self, value, description, **kwds)
+    def _input(self, info):
+        onclick = " onclick='pushForCookies(); return false;'"
+        disabled = ' disabled="disabled"' if self.disabled else ""
+        btext = "<button type='submit' name='search_type' value='{val}' style='width: {width}px;'{onclick}{disabled}>{desc}</button>"
+        return btext.format(
+            width=self.width,
+            val=self.value,
+            desc=self.description,
+            onclick=onclick,
+            disabled=disabled,
+        )
 
-class TalkSearchArray(SearchArray):
-    noun = "talk"
-    plural_noun = "talks"
+class ComboBox(TextBox):
+    def __init__(self, name, label, spantext, spanextras="", **kwds):
+        TextBox.__init__(self, name, label, **kwds)
+        self.spantext = spantext
+        self.spanextras = spanextras
+    def _input(self, info):
+        inp = TextBox._input(self, info)
+        span = '<span{extras}>{text}</span>'.format(extras=self.spanextras, text=self.spantext)
+        return inp + span
 
-    def __init__(self):
-        ## subjects
-        subject = SelectBox(name="subject", label="Subject", options=[("", "")] + subject_pairs())
-        ## topics
-        topic = SelectBox(name="topic", label="Topic", options=[("", "")] + user_topics())
+class SemSearchArray(SearchArray):
+    def main_table(self, info=None):
+        return self._print_table(self.array, info, layout_type="horizontal")
 
+    def hidden(self, info):
+        return []  # [("talk_start", "talk_start")]
+
+    def buttons(self, info=None):
+        active_search = info and any(info.get(elt.name) for row in self.array for elt in row)
+        if active_search:
+            button = PushForCookies("reload", "Applied", disabled=True)
+        else:
+            button = PushForCookies("reload", "Apply")
+        return self._print_table([[button]], info, layout_type="vertical")
+
+class TalkSearchArray(SemSearchArray):
+    def __init__(self, past=False):
         ## pick institution where it is held
         institution = SelectBox(
             name="institution",
             label="Institution",
             options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
+            width=textwidth+10, # select boxes need 10px more than text areas
         )
 
         venue = SelectBox(
@@ -239,42 +265,15 @@ class TalkSearchArray(SearchArray):
         )
         assert venue
 
-        ## keywords for seminar or talk
-        keywords = TextBox(
-            name="keywords",
-            label="Anywhere",
-            colspan=(1, 2, 1),
-            width=textwidth,
-        )
-        ## type of access
-        access = SelectBox(
-            name="access",
-            label="Access",
-            options=[
-                ("", ""),
-                ("open", "Any visitor can view link"),
-                ("users", "Any logged-in user can view link"),
-            ],
-        )
-        ## number of results to display
-        # count = TextBox(name="talk_count", label="Results to display", example=50, example_value=True)
-
         speaker = TextBox(
             name="speaker",
             label="Speaker",
-            colspan=(1, 2, 1),
             width=textwidth,
+            extra=['style="width:300px; margin-right:64px;"'],
         )
         affiliation = TextBox(
             name="affiliation",
             label="Affiliation",
-            colspan=(1, 2, 1),
-            width=textwidth,
-        )
-        title = TextBox(
-            name="title",
-            label="Title",
-            colspan=(1, 2, 1),
             width=textwidth,
         )
         date = TextBox(
@@ -283,61 +282,43 @@ class TalkSearchArray(SearchArray):
             label="Date",
             example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
-            colspan=(1, 2, 1),
+            example_span=False,
+            width=textwidth,
+            extra=['autocomplete="off"'],
+        )
+        time = TextBox(
+            name="timerange",
+            label="Time",
+            example="8:00 - 18:00",
+            example_span=False,
             width=textwidth,
         )
-        lang_dict = languages_dict()
-        language = SelectBox(
-            name="language",
-            label="Language",
-            options=[("", ""), ("en", "English")]
-            + [
-                (code, lang_dict[code])
-                for code in sorted(db.talks.distinct("language"))
-                if code != "en"
-            ],
+        recent = ComboBox(
+            name="recent",
+            label="Edited within",
+            spantext="hours",
+            spanextras=' style="margin-left:5px;"',
+            example="168",
+            example_span=False,
+            width=50,
         )
+
         video = Toggle(name="video", label="Has video")
         self.array = [
-            [subject, keywords],
-            [topic, title],
-            [institution, speaker],
-            [language, affiliation],
-            [access, date],
-            [video]
-            # [venue],
-            # [count],
+            [institution, video if past else recent],
+            [speaker, affiliation],
+            [date, time],
         ]
 
-    def main_table(self, info=None):
-        return self._print_table(self.array, info, layout_type="horizontal")
-
-    def search_types(self, info):
-        return [
-            ("talks", "Search talks"),
-            BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
-        ]
-
-    def hidden(self, info):
-        return []  # [("talk_start", "talk_start")]
-
-
-class SemSearchArray(SearchArray):
-    noun = "series"
-    plural_noun = "series"
-
-    def __init__(self, conference=False):
-        ## subjects
-        subject = SelectBox(name="subject", label="Subject", options=[("", "")] + subject_pairs())
-        ## topics
-        topic = SelectBox(name="topic", label="Topic", options=[("", "")] + user_topics())
-
+class SeriesSearchArray(SemSearchArray):
+    def __init__(self, conference=False, past=False):
         ## pick institution where it is held
         institution = SelectBox(
             name="institution",
             label="Institution",
             options=[("", ""), ("None", "No institution",),]
             + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
+            width=textwidth+10, # select boxes need 10px more than text areas
         )
 
         venue = SelectBox(
@@ -350,37 +331,6 @@ class SemSearchArray(SearchArray):
         )
         assert venue
 
-        ## keywords for seminar or talk
-        keywords = TextBox(name="keywords", label="Anywhere", width=textwidth,)
-        ## type of access
-        access = SelectBox(
-            name="access",
-            label="Access",
-            options=[
-                ("", ""),
-                ("open", "Any visitor can view link"),
-                ("users", "Any logged-in user can view link"),
-            ],
-        )
-        lang_dict = languages_dict()
-        language = SelectBox(
-            name="language",
-            label="Language",
-            options=[("", ""), ("en", "English")]
-            + [
-                (code, lang_dict[code])
-                for code in sorted(db.talks.distinct("language"))
-                if code != "en"
-            ],
-        )
-        ## number of results to display
-        # count = TextBox(name="seminar_count", label="Results to display", example=50, example_value=True)
-
-        name = TextBox(
-            name="name",
-            label="Name",
-            width=textwidth,
-        )
         organizer = TextBox(
             name="organizer",
             label="Organizer",
@@ -392,31 +342,18 @@ class SemSearchArray(SearchArray):
             label="Date",
             example=datetime.now(current_user.tz).strftime("%B %d, %Y -"),
             example_value=True,
-            colspan=(1, 2, 1),
             width=textwidth,
+            extra=['autocomplete="off"'],
         )
         self.array = [
-            [subject, keywords],
-            [topic, name],
-            [institution, organizer],
-            [language, ],
-            [access, date] if conference else [access],
+            [institution],
+            [organizer],
         ]
+        if conference:
+            self.array.append([date])
 
         assert conference in [True, False]
         self.conference = conference
-
-    def main_table(self, info=None):
-        return self._print_table(self.array, info, layout_type="horizontal")
-
-    def search_types(self, info):
-        return [
-            ("seminars", "Search " + ("conferences" if self.conference else "seminar series")),
-            BasicSpacer("Times in %s" % (current_user.show_timezone("browse"))),
-        ]
-
-    def hidden(self, info):
-        return []
 
 @app.route("/")
 def index():
@@ -438,47 +375,33 @@ def past_index():
 def past_conf_index():
     return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
-def by_subject(subject):
-    subject = subject.lower()
-    if subject not in subject_dict():
-        return abort(404, "Subject %s not found" % subject)
-    return lambda: _talks_index({"subjects": {"$contains": subject}})
-
-def by_topic(subject, topic):
-    full_topic = subject + "_" + topic
-    return lambda: _talks_index({"topics": {"$contains": full_topic}})
-
-# We don't want to intercept other routes by doing @app.route("/<subject>") etc.
-for subject in subject_dict():
-    app.add_url_rule("/%s/" % subject, "by_subject_%s" % subject, by_subject(subject))
-for ab, name, subject in topics():
-    app.add_url_rule("/%s/%s/" % (subject, ab.replace("_", ".")), "by_topic_%s_%s" % (subject, ab), by_topic(subject, ab))
+def read_search_cookie(search_array):
+    info = {}
+    for row in search_array.array:
+        for box in row:
+            if isinstance(box, SearchBox):
+                info[box.name] = request.cookies.get("search_" + box.name, "")
+    return info
 
 def _get_counters(objects):
     topic_counts = Counter()
     language_counts = Counter()
-    subject_counts = Counter()
     for object in objects:
         if object.topics:
             for topic in object.topics:
                 topic_counts[topic] += 1
-        if object.subjects:
-            for subject in object.subjects:
-                subject_counts[subject] += 1
         language_counts[object.language] += 1
-    lang_dict = languages_dict()
-    languages = [(code, lang_dict[code]) for code in language_counts]
-    languages.sort(key=lambda x: (-language_counts[x[0]], x[1]))
-    return {"topic_counts": topic_counts, "language_counts": language_counts, "subject_counts": subject_counts, "languages": languages}
+    langs = [(code, languages.show(code)) for code in language_counts]
+    langs.sort(key=lambda x: (-language_counts[x[0]], x[1]))
+    return {"topic_counts": topic_counts, "language_counts": language_counts}
 
 def _get_row_attributes(objects):
-    filtered_subjects = set(request.cookies.get('subjects', '').split(','))
-    filter_subject = request.cookies.get('filter_subject', '0') != '0'
-    filtered_topics = set(request.cookies.get('topics', '').split(','))
-    filter_topic = request.cookies.get('filter_topic', '0') != '0'
+    filtered_topics = topic_dag.filtered_topics()
+    filter_topic = request.cookies.get('filter_topic', '-1') == '1'
     filtered_languages = set(request.cookies.get('languages', '').split(','))
-    filter_language = request.cookies.get('filter_language', '0') != '0'
-    filter_calendar = request.cookies.get('filter_calendar', '0') != '0'
+    filter_language = request.cookies.get('filter_language', '-1') == '1'
+    filter_calendar = request.cookies.get('filter_calendar', '-1') == '1'
+    filter_more = request.cookies.get('filter_more', '-1') == '1'
     def filter_classes(obj):
         filtered = False
         classes = ['talk']
@@ -493,16 +416,6 @@ def _get_row_attributes(objects):
             if filter_topic:
                 filtered = True
 
-        subject_filtered = True
-        for subject in obj.subjects:
-            classes.append("subject-" + subject)
-            if subject in filtered_subjects:
-                subject_filtered = False
-        if subject_filtered:
-            classes.append('subject-filtered')
-            if filter_subject:
-                filtered = True
-
         classes.append("lang-" + obj.language)
         if obj.language not in filtered_languages:
             classes.append("language-filtered")
@@ -511,6 +424,10 @@ def _get_row_attributes(objects):
         if not obj.is_subscribed():
             classes.append("calendar-filtered")
             if filter_calendar:
+                filtered = True
+        if not obj.more:
+            classes.append("more-filtered")
+            if filter_more:
                 filtered = True
         return classes, filtered
 
@@ -536,17 +453,24 @@ def _get_row_attributes(objects):
 
 def _talks_index(query={}, sort=None, subsection=None, past=False):
     # Eventually want some kind of cutoff on which talks are included.
+    search_array = TalkSearchArray(past=past)
+    info = to_dict(read_search_cookie(search_array), search_array=search_array)
+    info.update(request.args)
     query = dict(query)
-    subs = subject_pairs()
-    hide_filters = []
-    if "subjects" in query:
-        subject = query["subjects"]["$contains"]
-        hide_filters = ["subject"]
-        subs = ((subject, subject.capitalize()),)
-    elif "topics" in query:
-        hide_filters = ["subject", "topic"]
-    elif topdomain() == "mathseminars.org":
-        query["subjects"] = ["math"]
+    parse_substring(info, query, "keywords",
+                    ["title",
+                     "abstract",
+                     "speaker",
+                     "speaker_affiliation",
+                     "seminar_id",
+                     "comments",
+                     "speaker_homepage",
+                     "paper_link"])
+    more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
+    # Note that talks_parser ignores the "time" field at the moment; see below for workaround
+    talks_parser(info, more)
+    if topdomain() == "mathseminars.org":
+        query["topics"] = {"$contains": "math"}
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
@@ -557,25 +481,65 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
         query["end_time"] = {"$gte": datetime.now()}
         if sort is None:
             sort = ["start_time", "seminar_id"]
-    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars()))
+    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
+    # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
+    timerange = info.get("timerange", "").strip()
+    if timerange:
+        tz = current_user.tz
+        try:
+            timerange = process_user_input(timerange, col="search", typ="daytimes")
+        except ValueError:
+            try:
+                onetime = process_user_input(timerange, col="search", typ="daytime")
+            except ValueError:
+                flash_error("Invalid time range input: %s", timerange)
+            else:
+                for talk in talks:
+                    if talk.more:
+                        talkstart = adapt_datetime(talk.start_time, tz)
+                        t = date_and_daytime_to_time(talkstart.date(), onetime, tz)
+                        talk.more = (t == talkstart)
+        else:
+            for talk in talks:
+                if talk.more:
+                    talkstart = adapt_datetime(talk.start_time, tz)
+                    talkend = adapt_datetime(talk.end_time, tz)
+                    t0, t1 = date_and_daytimes_to_times(talkstart.date(), timerange, tz)
+                    talk.more = (t0 <= talkstart) and (talkend <= t1)
     counters = _get_counters(talks)
     row_attributes = _get_row_attributes(talks)
-    return render_template(
+    response = make_response(render_template(
         "browse_talks.html",
         title="Browse talks",
-        hide_filters=hide_filters,
-        subjects=subs,
         section="Browse",
+        info=info,
         subsection=subsection,
         talk_row_attributes=zip(talks, row_attributes),
         past=past,
         **counters
-    )
+    ))
+    if request.cookies.get("topics", ""):
+        # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
+        # For now we set the max_age to 30 years
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
+        response.set_cookie("topics", "", max_age=0)
+    return response
 
 def _series_index(query, sort=None, subsection=None, conference=True, past=False):
+    search_array = SeriesSearchArray(conference=conference, past=past)
+    info = to_dict(read_search_cookie(search_array), search_array=search_array)
+    info.update(request.args)
     query = dict(query)
+    parse_substring(info, query, "keywords",
+                    ["name",
+                     "description",
+                     "homepage",
+                     "shortname",
+                     "comments"])
+    more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
+    seminars_parser(info, more)
     query["display"] = True
     query["visibility"] = 2
     if conference:
@@ -593,23 +557,29 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     if sort is None: # not conferences
         # We don't currently call this case in the past, but if we add it we probably
         # need a last_talk_sorted that sorts by end time of last talk in reverse order
-        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers()))
+        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers(), more=more))
     else:
-        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers()))
+        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers(), more=more))
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
     title = "Browse conferences" if conference else "Browse seminar series"
-    return render_template(
+    response = make_response(render_template(
         "browse_series.html",
         title=title,
-        hide_filters=[],
-        subjects=subject_pairs(),
         section="Browse",
         subsection=subsection,
+        info=info,
         series_row_attributes=zip(series, row_attributes),
         is_conference=conference,
+        past=past,
         **counters
-    )
+    ))
+    if request.cookies.get("topics", ""):
+        # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
+        # For now we set the max_age to 30 years
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
+        response.set_cookie("topics", "", max_age=0)
+    return response
 
 @app.route("/search/seminars")
 def search_seminars():
@@ -621,7 +591,7 @@ def search_conferences():
     return _search_series(conference=True)
 
 def _search_series(conference=False):
-    info = to_dict(request.args, search_array=SemSearchArray(conference=conference))
+    info = to_dict(request.args, search_array=SeriesSearchArray(conference=conference))
     if "search_type" not in info:
         info["seminar_online"] = True
         info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
@@ -635,15 +605,13 @@ def _search_series(conference=False):
         seminar_start = info["seminar_start"] = 0
     seminar_query, org_query = {"is_conference": conference}, {}
     seminars_parser(info, seminar_query, org_query, conference=conference)
-    # Ideally we would do the following with a single join query, but the backend doesn't support joins yet.
-    # Instead, we use a function that returns a dictionary of all next talks as a function of seminar id.
-    # One downside of this approach is that we have to retrieve ALL seminars, which we're currently doing anyway.
-    # The second downside is that we need to do two queries.
-    if conference:
-        sort = ["start_date", "end_date", "name"]
-        info["results"] = seminars_search(seminar_query, organizer_dict=all_organizers(org_query), sort=sort)
-    else:
-        info["results"] = next_talk_sorted(seminars_search(seminar_query, organizer_dict=all_organizers(org_query)))
+    res = [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
+    # process query again with keywords applied to seminar_organizers rather than seminars
+    if "keywords" in info:
+        seminar_query, org_query = {"is_conference": conference}, {}
+        seminars_parser(info, seminar_query, org_query, org_keywords=True, conference=conference)
+        res += [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
+    info["results"] = date_sorted(res) if conference else next_talk_sorted(res)
     subsection = "conferences" if conference else "seminars"
     title = "Search " + ("conferences" if conference else "seminar series")
     return render_template(
@@ -955,12 +923,12 @@ def faq():
 def ams():
     seminars = next_talk_sorted(
         seminars_search(
-            query={"subjects": {'$contains': "math"}},
+            query={"topics": {'$contains': "math"}},
             organizer_dict=all_organizers()
         )
     )
     from collections import defaultdict
-    math_topics = {elt['subject'] + '_' + elt['abbreviation'] : elt['name'].capitalize() for elt in db.topics.search() if elt['subject'] == 'math'}
+    math_topics = {rec["topic_id"]: rec["name"].capitalize() for rec in db.new_topics.search({"topic_id":{"$in":list(db.new_topics.lookup("math", "children"))}})}
     seminars_dict = defaultdict(list)
     for sem in seminars:
         for topic in sem.topics:

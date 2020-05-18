@@ -36,6 +36,7 @@ from seminars.utils import (
     timestamp,
     timezones,
     topdomain,
+    flash_infomsg,
 )
 
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
@@ -190,7 +191,7 @@ def set_info():
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data.get("name"):
-        errmsgs.append(format_errmsg('Name cannot be left blank.  See the User behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
+        errmsgs.append(format_errmsg('Name cannot be left blank.  See the user behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
     if errmsgs:
         return show_input_errors(errmsgs)        
     for k in data.keys():
@@ -245,12 +246,12 @@ def register():
             return make_response(render_template("register.html", title="Register", email=email))
 
         if len(pw1) < 8:
-            flash_error("Oops, password too short. Minimum 8 characters please!")
+            flash_error("Oops, password too short.  Minimum 8 characters, please!")
             return make_response(render_template("register.html", title="Register", email=email))
 
         password = pw1
         if userdb.user_exists(email=email):
-            flash_error("Sorry, email '%s' is already registered!", email)
+            flash_error("The email address '%s' is already registered!", email)
             return make_response(render_template("register.html", title="Register", email=email))
 
         newuser = userdb.new_user(email=email, password=password,)
@@ -268,7 +269,7 @@ def change_password():
     email = current_user.email
     pw_old = request.form["oldpwd"]
     if not current_user.check_password(pw_old):
-        flash_error("Ooops, old password is wrong!")
+        flash_error("Oops, old password is wrong!")
         return redirect(url_for(".info"))
 
     pw1 = request.form["password1"]
@@ -278,7 +279,7 @@ def change_password():
         return redirect(url_for(".info"))
 
     if len(pw1) < 8:
-        flash_error("Oops, password too short. Minimum 8 characters please!")
+        flash_error("Oops, password too short.  Minimum 8 characters, please!")
         return redirect(url_for(".info"))
 
     userdb.change_password(email, pw1)
@@ -290,7 +291,7 @@ def change_password():
 @login_required
 def logout():
     logout_user()
-    flask.flash(Markup("You are logged out now. Have a nice day!"))
+    flask.flash(Markup("You are now logged out.  Have a nice day!"))
     return redirect(url_for(".info"))
 
 @login_page.route("/permanently_deleteme")
@@ -320,7 +321,7 @@ def loginas(emailorid):
     if user.id:
         logout_user()
         login_user(user)
-        flask.flash(Markup("Using your super powers, you are now logged in as %s" % (user.email)))
+        flask.flash(Markup("Using your superpowers, you are now logged in as %s" % (user.email)))
         return redirect(url_for(".info"))
     else:
         return "No user matches the email/id provided."
@@ -344,7 +345,7 @@ def send_confirmation_email(email):
         import sys
 
         flash_error(
-            'Unable to send email confirmation link, please contact <a href="mailto:researchseminars@math.mit.edu">researchseminars@math.mit.edu</a> directly to confirm your email'
+            'Unable to send email confirmation link; please contact <a href="mailto:researchseminars@math.mit.edu">researchseminars@math.mit.edu</a> directly to confirm your email.'
         )
         app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
         return False
@@ -368,7 +369,7 @@ def confirm_email(token):
         else:
             current_user.email_confirmed = True
             current_user.save()
-            flask.flash("You have confirmed your email. Thanks!", "success")
+            flask.flash("Thank you for confirming your email!", "success")
     return redirect(url_for(".info"))
 
 
@@ -395,7 +396,7 @@ def reset_password():
         email = request.form["email"]
         if userdb.user_exists(email):
             send_reset_password(email)
-        flask.flash(Markup("Check your mailbox for instructions on how to reset your password"))
+        flask.flash(Markup("Check your inbox for instructions on how to reset your password."))
         return redirect(url_for(".info"))
 
 
@@ -420,11 +421,11 @@ def reset_password_wtoken(token):
             return redirect(url_for(".reset_password_wtoken", token=token))
 
         if len(pw1) < 8:
-            flash_error("Oops, password too short. Minimum 8 characters please!")
+            flash_error("Oops, password too short.  Minimum 8 characters, please!")
             return redirect(url_for(".reset_password_wtoken", token=token))
 
         userdb.change_password(email, pw1)
-        flask.flash(Markup("Your password has been changed. Please login with your new password."))
+        flask.flash(Markup("Your password has been changed.  Please login with your new password."))
         return redirect(url_for(".info"))
 
 
@@ -443,7 +444,8 @@ def get_endorsing_link():
     rec = userdb.lookup(email, ["name", "creator", "email_confirmed"])
     if rec is None or not rec["email_confirmed"]:  # No account or email unconfirmed
         if db.preendorsed_users.count({'email':email}):
-            endorsing_link = "<p>{0} has already been pre-endorsed.</p>".format(email)
+            flash_infomsg("The email address %s has already been pre-endorsed.", email)
+            return redirect(url_for(".info"))
         else:
             db.preendorsed_users.insert_many([{"email": email, "endorser": current_user._uid}])
             to_send = """Hello,
@@ -473,7 +475,7 @@ def get_endorsing_link():
             }
             endorsing_link = """
     <p>
-    When {email} registers and confirms their email they will be able to create content.</br>
+    When the person with email address {email} registers and confirms the address, that person will be able to create content.</br>
     <button onClick="window.open('mailto:{email}?{msg}')">
     Send email
     </button> to let them know.
@@ -481,10 +483,16 @@ def get_endorsing_link():
     """.format(
                 email=email, msg=urlencode(data, quote_via=quote)
             )
+        flash_infomsg("""
+            When the person with email address %s registers and confirms the address, that person will be able to create content.<br>
+            Click the "Send email" button below to let them know.""",email)
+        session["endorsing link"] = endorsing_link
+        return redirect(url_for(".info"))
     else:
         target_name = rec["name"]
         if rec["creator"]:
-            endorsing_link = "<p>{target_name} is already able to create content.</p>".format(target_name=target_name)
+            flash_infomsg("%s is already able to create content.", target_name)
+            return redirect(url_for(".info"))
         else:
             welcome = "Hello" if not target_name else ("Dear " + target_name)
             to_send = """{welcome},<br>
@@ -503,12 +511,9 @@ Thanks for using {topdomain}!
             subject = "Endorsement to create content on " + topdomain()
             send_email(email, subject, to_send)
             userdb.make_creator(email, int(current_user.id))
-            endorsing_link = "<p>{target_name} is now able to create content.</p> ".format(
-                target_name=target_name if target_name else email
-            )
-    session["endorsing link"] = endorsing_link
-    return redirect(url_for(".info"))
-
+            flash_infomsg("%s is now able to create content.", target_name if target_name else email)
+            return redirect(url_for(".info"))
+    raise Exception("The function get_endorsing_link did not return a value")
 
 def generate_endorsement_token(endorser, email):
     rec = [int(endorser.id), email]
@@ -583,7 +588,7 @@ def user_ics_file(token):
             uid = read_token(token, "ics", key="vVjYyCM99DtirZqMaGMrle")
         user = SeminarsUser(uid=int(uid))
         if not user.email_confirmed:
-            return flask.abort(404, "The email has not yet been confirmed!")
+            return flask.abort(404, "The email address has not yet been confirmed!")
     except Exception:
         return flask.abort(404, "Invalid link")
 

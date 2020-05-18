@@ -177,6 +177,10 @@
     self.addCSS("https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.css");
 
 
+    self.addCSS("{{ url_for('static', filename='fontawesome/css/all.min.css', _external=True, _scheme=scheme) }}");
+
+
+
     self.addJS("{{ url_for('static', filename='katex-custom.js', _external=True, _scheme=scheme) }}",
                {"onload":
                 function() {
@@ -231,7 +235,7 @@
       return;
 
     if (opts && opts.hasOwnProperty('addCSS') && opts['addCSS']) {
-      this.addCSS("{{ url_for('css', _external=True, _scheme=scheme) }}");
+      this.addCSS("{{ url_for('static', filename='embed_seminar.css', _external=True, _scheme=scheme) }}");
     };
 
     // addKatex is idempotent
