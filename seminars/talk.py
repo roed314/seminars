@@ -404,6 +404,8 @@ class WebTalk(object):
         elif self.access_control == 2:
             return showit(self, raw=raw)
         elif self.access_control in [3,4]:
+            if raw:
+                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
             if user.is_anonymous:
                 link = url_for("user.info", next=url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
                 return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access</b></div>' % link
@@ -415,6 +417,8 @@ class WebTalk(object):
             # If there is a view-only link, show that rather than an external registration link
             if self.stream_link:
                 return showit(self, raw=raw)
+            if raw:
+                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
             if not self.access_registration:
                 # This should never happen, registration link is required, but just in case...
                 return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</a></div>' % link
@@ -445,7 +449,7 @@ Thank you,
                 link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
             else:
                 link = self.access_registration
-            return link if raw else '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
+            return '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
         else:  # should never happen
             return ""
 
