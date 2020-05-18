@@ -425,7 +425,7 @@ I am interested in attending the talk
     {talk}
 by {speaker} in the series
     {series}
-listed at https://{domain}/{url}.
+listed at https://{domain}{url}.
 
 Thank you,
 
