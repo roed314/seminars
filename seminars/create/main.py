@@ -754,7 +754,7 @@ def edit_talk():
         from seminars.utils import top_menu
 
         menu = top_menu()
-        menu[2] = (url_for("create.index"), "", "Manage")
+        menu[1] = (url_for("create.index"), "", "Manage")
         extras = {"top_menu": menu}
     else:
         extras = {}
