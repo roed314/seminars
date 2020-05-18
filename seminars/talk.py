@@ -356,7 +356,7 @@ class WebTalk(object):
         return ans
 
     def show_password_hint(self):
-        if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint, self.is_starting_soon()]):
+        if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint]):
             return '<div class="password_hint">(Password hint: %s)</div>' % self.access_hint
         else:
             return ""
@@ -395,6 +395,7 @@ class WebTalk(object):
             return showit(self, raw=raw)
         elif self.access_control in [3,4]:
             if user.is_anonymous:
+                # TODO link to login page
                 return '<div class="access_button no_link">To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % url_for("user.info")
             elif not user.email_confirmed:
                 return '<div class="access_button no_link">To see access link, please confirm your email.</div>'
