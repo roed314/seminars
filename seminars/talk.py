@@ -422,14 +422,18 @@ class WebTalk(object):
                 body = """Dear organizers,
 
 I am interested in attending the talk
+
     {talk}
-by {speaker} in the series
+
+by {speaker}, in the series
+
     {series}
+
 listed at https://{domain}{url}.
 
 Thank you,
 
-    {user}
+{user}
 """.format(
                     talk = self.title,
                     speaker = self.speaker,
