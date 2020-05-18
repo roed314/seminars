@@ -453,7 +453,8 @@ i.fa.close:hover {
 }
 
 .starting_soon.view_only.access_button.is_link a {
-    color: #88f !important;
+    border: 2px solid red ! important;
+    background: orchid;
 }
 
 .view_only a:hover {
