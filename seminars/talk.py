@@ -397,7 +397,7 @@ class WebTalk(object):
                 return '<div class="access_button is_link"> Livestream access <a href="%s">available</a></div>' % link
 
         if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
-            return show_link(self, usser=user, raw=raw)
+            return show_link(self, user=user, raw=raw)
         elif self.access_control == 1:
             show_link_time = self.start_time - timedelta(minutes=self.access_time)
             if show_link_time <= now:
