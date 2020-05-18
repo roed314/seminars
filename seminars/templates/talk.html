@@ -22,20 +22,21 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
     <b>{{ talk.show_time_and_duration() | safe }}</b>
   {% else %}
     <table style="left-margin:0px;">
-    <tr>
-      <td style="left-margin:0px;"><b>{{ talk.show_time_and_duration() | safe }}</b></td>
-      <td>
-        {% if talk.live_link %}
-          {{ talk.show_live_link() | safe }} {{ talk.show_password_hint() | safe }}
-        {% else %}
-          {{ talk.show_stream_link() | safe }}
-        {% endif %}
-      </td>
-    </tr><tr>
-      <td>{% if talk.room %} <br>Lecture held in {{ talk.room }}. {% endif %}</td>
-      <td>{% if talk.live_link %} {{ talk.show_stream_link() | safe }} {% endif %}</td>
-    </tr>
-  </table>
+      <tr>
+        <td style="left-margin:0px;"><b>{{ talk.show_time_and_duration() | safe }}</b></td>
+        <td>
+          {% if talk.live_link %}
+            {{ talk.show_live_link() | safe }} {{ talk.show_password_hint() | safe }}
+          {% else %}
+            {{ talk.show_stream_link() | safe }}
+          {% endif %}
+        </td>
+      </tr><tr>
+        <td>{% if talk.room %} <br>Lecture held in {{ talk.room }}. {% endif %}</td>
+        <td>{% if talk.live_link %} {{ talk.show_stream_link() | safe }} {% endif %}</td>
+      </tr>
+    </table>
+  {% endif %}
 
   <div style="clear:both;"></div>
 
