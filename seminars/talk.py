@@ -420,21 +420,21 @@ class WebTalk(object):
             if "@" in self.access_registration:
                 body = """Dear organizers,
 
-                    I am interested in attending the talk
-                        {talk}
-                    by {speaker} in the series
-                        {series}
-                    listed on researchseminars.org at {url}.
+I am interested in attending the talk
+    {talk}
+by {speaker} in the series
+    {series}
+listed at https://researchseminars.org/{url}.
 
-                    Thank you,
+Thank you,
 
-                    {user}
-                    """.format(
-                        talk = self.title,
-                        speaker = self.speaker,
-                        series = self.seminar.name,
-                        url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
-                        user = current_user.name)
+    {user}
+""".format(
+                    talk = self.title,
+                    speaker = self.speaker,
+                    series = self.seminar.name,
+                    url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
+                    user = current_user.name)
                 msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
                 link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
             else:
