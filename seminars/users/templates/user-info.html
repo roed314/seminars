@@ -2,6 +2,7 @@
 {% block content %}
 
 {% if not user.is_authenticated %}
+
   <h1>You are not logged in</h1>
 
   <div style="margin-bottom: 20px">New user?
@@ -21,8 +22,10 @@
       <tr><td /><td><button name="submit" type="submit">Login</button></td></tr>
     </table>
   </form>
+
 {% else %}
-<h1>Welcome, {{ user.name }} (<a href="{{ url_for(".logout") }}">logout</a>)</h1>
+
+  <h1>Welcome, {{ user.name }} (<a href="{{ url_for(".logout") }}">logout</a>)</h1>
   <h3> Favorite series </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
@@ -54,54 +57,54 @@
   </table>
   </div>
   {%  if not user.email_confirmed  %}
-  <p>
-    Please confirm your email to get access to your personalized calendar.
-  </p>
+    <p>Please confirm your email to get access to your personalized calendar.</p>
   {% else %}
     {{ calendar_block('favorites', user) }}
   {% endif %}
 
   {% if user.is_creator %}
-  <h2>Adding content</h2>
-  <p>
-    To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
-  </p>
-  <h3>API</h3>
-  <p>
-    It is also possible to add (and query) content using the API and scripts.  See the <a href="{{ url_for('api.help') }}">API documentation</a> for more details.
-  </p>
-  <form action="{{url_for('.reset_api_token')}}">
-    <table>
-      <tr>
-        <td>{{ KNOWL('api_token') }}</td>
-        <td>
-          <input type="text" id="api_token" value="{{current_user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
-          <a><i class="clippy" onclick="copySourceOfId('api_token')"></i></a>
-          <button type="submit">Reset</button>
-        </td>
-      </tr>
-    </table>
-  </form>
-  <h2>Endorse someone to add content</h2>
+    <h2>Adding content</h2>
+    <p>
+      To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
+    </p>
+    <h3>API</h3>
+    <p>
+      It is also possible to add (and query) content using the API and scripts.  See the <a href="{{ url_for('api.help') }}">API documentation</a> for more details.
+    </p>
+    <form action="{{url_for('.reset_api_token')}}">
+      <table>
+        <tr>
+          <td>{{ KNOWL('api_token') }}</td>
+          <td>
+            <input type="text" id="api_token" value="{{current_user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
+            <a><i class="clippy" onclick="copySourceOfId('api_token')"></i></a>
+            <button type="submit">Reset</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+    <h2>Endorse someone to add content</h2>
 
     <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
-    <table>
-      <tr>
-        <td style="width:75px;">
-          Email
-        </td>
-        <td>
-          <input name="email" size="30" tabindex="1" required />
-        </td>
-        <td>
-          <button type="submit" tabindex="2">Endorse</button>
-        </td>
-      </tr>
-    </table>
+      <table>
+        <tr>
+          <td style="width:75px;">
+            Email
+          </td>
+          <td>
+            <input name="email" size="30" tabindex="1" required />
+          </td>
+          <td>
+            <button type="submit" tabindex="2">Endorse</button>
+          </td>
+        </tr>
+      </table>
     </form>
     {{ session.pop('endorsing link', '') | safe }}
   {% endif %}
+
   <h2>Edit my details</h2>
+
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
       <tr>
@@ -163,60 +166,58 @@
   <h2>Change password</h2>
 
   <form action="{{ url_for('.change_password') }}" method="POST" name="changepassword">
-   <table>
-    <tr>
-     <td>Old password</td>
-     <td><input name="oldpwd" type="password" style="width:260px;" required /></td>
-     <td class="forminfo" />Don't use a password that you use elsewhere!</td>
-     <tr><td>New password</td>
-         <td><input id="pw1" name="password1" type="password" style="width:260px;" required /></td>
-         <td class="forminfo" id="pw1status" style="color: {{color.red}};"></td></tr>
-     </tr>
-     <tr><td>New password (repeat)</td>
-         <td><input id="pw2" name="password2" type="password" style="width:260px;" required /></td>
-         <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td></tr>
-    <tr>
-     <tr><td colspan="2" class="spacing" /></tr>
-     <tr><td/>
-         <td><button name="submit" type="submit">Change Password</button></td>
-    </tr>
-   </table>
+    <table>
+      <tr>
+         <td>Old password</td>
+         <td><input name="oldpwd" type="password" style="width:260px;" required /></td>
+         <td class="forminfo" />Don't use a password you use elsewhere!</td>
+      </tr>
+      <tr>
+        <td>New password</td>
+        <td><input id="pw1" name="password1" type="password" style="width:260px;" required></td>
+        <td class="forminfo" id="pw1status" style="color: {{color.red}};"></td>
+      </tr>
+      <tr>
+        <td>New password (repeat)</td>
+        <td><input id="pw2" name="password2" type="password" style="width:260px;" required></td>
+        <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td>
+      </tr>
+      <tr><td colspan="2" class="spacing"></td></tr>
+      <tr><td/><td><button name="submit" type="submit">Change Password</button></td></tr>
+    </table>
   </form>
 
   <h2>Delete account</h2>
 
-<p> Deleting your account will remove all personal information about you from our database (your favorites, the "details" above, etc.), though talks and series you've created will remain.</p>
+  <p> Deleting your account will remove all personal information about you from our database (your favorites, the "details" above, etc.), though talks and series you've created will remain.</p>
 
-<p><a href="{{ url_for('user.permanently_deleteme') }}" onclick="return confirm('Are you sure you want to PERMANENTLY delete your account?');">Permanently delete account</a></p>
+  <p><a href="{{ url_for('user.permanently_deleteme') }}" onclick="return confirm('Are you sure you want to PERMANENTLY delete your account?');">Permanently delete account</a></p>
 
-
-{# this script constructs a url and shows it as a link, just for testing #}
-<script type="text/javascript">
-  document.addEventListener("DOMContentLoaded", function() {
-    function makelink() {
-      var url = $("#url").val();
-      if (url.substring(0,7) != "http://" && url.substring(0,8) != "https://") {
-        url = "http://" + url;
+  {# this script constructs a url and shows it as a link, just for testing #}
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+      function makelink() {
+        var url = $("#url").val();
+        if (url.substring(0,7) != "http://" && url.substring(0,8) != "https://") {
+          url = "http://" + url;
+        }
+        $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
       }
-      $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
-    }
 
-    $(function() {
-      $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
+      $(function() {
+        $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
+      });
+
+      makelink();
+
+      /* this tells the user if the passwords match */
+      $(function () {
+        $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+        $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+        checkpw();
+      });
     });
+  </script>
+{% endif %}
 
-    makelink();
-
-    /* this tells the user if the passwords match */
-    $(function () {
-      $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-      $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-      checkpw();
-    })
-  })
-</script>
-
-{%endif%}
 {% endblock %}
-
-

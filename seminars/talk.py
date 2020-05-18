@@ -13,6 +13,9 @@ from seminars.utils import (
     adapt_datetime,
     make_links,
     sanitized_table,
+    killattr,
+    how_long,
+    topdomain,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -69,6 +72,7 @@ class WebTalk(object):
                 elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
                     # carry over from seminar, but not comments
                     setattr(self, key, getattr(seminar, key) if key != "comments" else "")
+                    print("talk inherited %s = %s from seminar"%(key,getattr(self,key)))
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
@@ -112,6 +116,20 @@ class WebTalk(object):
         """
         if self.hidden is None:
             self.hidden = False
+        if self.online and self.access_control is None:
+            self.access_control = 0 if self.access == 'open' else self.access_control
+            self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
+            if self.live_link and "comments" in self.live_link:
+                self.live_link = ""
+                if self.seminar.homepage:
+                    self.access_control = 5
+                    self.access_registration = self.seminar.homepage
+        if self.online and self.live_link and "comments" in self.live_link:
+            self.live_link = ""
+        # remove columns we plan to drop
+        for attr in ["subject", "visibility"]:
+            killattr(self, attr)
+
         # Port old subjects and topics to the new topic scheme
         if getattr(self, "subjects", []):
             def update_topic(topic):
@@ -169,6 +187,31 @@ class WebTalk(object):
             data["edited_by"] = -1
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
+
+    def user_is_registered(self, user=current_user):
+        if current_user.is_anonymous:
+            return False
+        rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(user.id)}
+        return True if db.talk_registrations.count(rec) else False
+
+    def register_user(self, user=current_user):
+        rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(user.id)}
+        if db.talk_registrations.count(rec):
+            return False
+        reg = rec
+        reg["registration_time"] = datetime.now(tz=pytz.UTC)
+        return db.talk_registrations.upsert(rec,reg)
+
+    def registered_users(self):
+        """ returns a list of tuples (name, affiliation, homepage, email, registration_time) in reverse order by registration time """
+        # FIXME: Should we use IdentifierWrapper here?
+        query = """
+            SELECT users.name, users.homepage, users.affiliation, talk_registrations.registration_time
+            FROM talk_registrations INNER JOIN users ON users.id = talk_registrations.user_id
+            WHERE talk_registrations.seminar_id = '%s' AND talk_registrations.seminar_ctr = %d
+            ORDER BY talk_registrations.registration_time DESC
+        """
+        return list(db._execute(SQL(query % (self.seminar_id, self.seminar_ctr))))
 
     @classmethod
     def _editable_time(cls, t):
@@ -230,13 +273,6 @@ class WebTalk(object):
         start = self.start_time
         end = self.end_time
         now = datetime.now(pytz.utc)
-        delta = timedelta
-        minute = delta(minutes=1)
-        hour = delta(hours=1)
-        day = delta(days=1)
-        week = delta(weeks=1)
-        month = delta(days=30.4)
-        year = delta(days=365)
         newtz = None if adapt else self.tz
 
         def ans(rmk):
@@ -250,37 +286,11 @@ class WebTalk(object):
         if start <= now <= end:
             return ans("ongoing")
         elif now < start:
-            until = start - now
-            if until < minute:
-                return ans("starts in less than a minute")
-            elif until < 90 * minute:
-                return ans("starts in %s minutes" % (round(until / minute)))
-            elif until < 36 * hour:
-                return ans("starts in %s hours" % (round(until / hour)))
-            elif until < 11 * day:
-                return ans("%s days from now" % (round(until / day)))
-            elif until < 7 * week:
-                return ans("%s weeks from now" % (round(until / week)))
-            elif until < 2 * year:
-                return ans("%s months from now" % (round(until / month)))
-            else:
-                return ans("%s years from now" % (round(until / year)))
+            delta = start - now
+            return ans("starts in " + how_long(delta)) if delta < timedelta(hours=36) else ans(how_long(delta) + " from now")
         else:
-            ago = now - end
-            if ago < minute:
-                return ans("ended less than a minute ago")
-            elif ago < 90 * minute:
-                return ans("ended %s minutes ago" % (round(ago / minute)))
-            elif ago < 36 * hour:
-                return ans("ended %s hours ago" % (round(ago / hour)))
-            elif ago < 11 * day:
-                return ans("%s days ago" % (round(ago / day)))
-            elif ago < 7 * week:
-                return ans("%s weeks ago" % (round(ago / week)))
-            elif ago < 2 * year:
-                return ans("%s months ago" % (round(ago / month)))
-            else:
-                return ans("%s years ago" % (round(ago / year)))
+            delta = now - end
+            return ans("ended " + how_long(delta) + " ago") if delta < timedelta(hours=36) else ans(how_long(delta) + " ago")
 
     def show_title(self, visibility_info=False):
         title = self.title if self.title else "TBA"
@@ -351,39 +361,100 @@ class WebTalk(object):
             ans += " as part of %s" % (self.show_seminar(external=external))
         return ans
 
-    def show_live_link(self, user=current_user, raw=False):
-        if not self.live_link:
-            return ""
-        if raw:
-            success = self.live_link
+    def show_password_hint(self):
+        if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint]):
+            return '<div class="password_hint">(Password hint: %s)</div>' % self.access_hint
         else:
-            if self.live_link.startswith("http"):
+            return ""
+
+    def show_live_link(self, user=current_user, raw=False):
+        now = datetime.now(pytz.utc)
+        if self.deleted or not self.online or now > self.end_time:
+            return ""
+
+        def showit(self, user=current_user, raw=False):
+            link = self.live_link if self.live_link else self.stream_link
+            if not link:
+                return '' if raw else '<div class=access_button no_link">Livestream link not yet posted by organizers</div>'
+            if link != self.live_link:
+                if raw:
+                    return link
                 if self.is_starting_soon():
-                    success = '<div class="access_button is_link starting_soon"><b> <a href="%s"> Livestream access <i class="play filter-white"></i> </a></b></div>' % self.live_link
+                    return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Watch livestream <i class="play filter-white"></i></a></b></div>' % link
                 else:
-                    success = '<div class="access_button is_link">Livestream access <a href="%s">available</a></div>' % self.live_link
+                    return '<div class="access_button is_link"> View-only livestream access <a href="%s">available</a></div>' % link
+            if self.access_control == 4 and not self.user_is_registered(user):
+                link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
+                if raw:
+                    return link
+                if self.is_starting_soon():
+                    return '<div class="access_button is_link starting_soon"><b> <a href="%s">Instantly register and join livestream <i class="play filter-white"></i> </a></b></div>' % link
+                else:
+                    return '<div class="access_button is_link"> <a href="%s">Instantly register</a> for livestream access</div>' % link
+            if raw:
+                return link
+            if self.is_starting_soon():
+                return '<div class="access_button is_link starting_soon"><b> <a href="%s">Join livestream <i class="play filter-white"></i> </a></b></div>' % link
             else:
-                if self.is_starting_soon():
-                    success = '<div class="access_button no_link starting_soon"><b>Livestream access: %s </b></div>' % self.live_link
-                else:
-                    success = '<div class="access_button no_link">Livestream access: %s</div>' % self.live_link
-        if self.access == "open":
-            return success
-        elif self.access == "users":
+                return '<div class="access_button is_link"> Livestream access <a href="%s">available</a></div>' % link
+
+        if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
+            return showit(self, raw=raw)
+        elif self.access_control == 1:
+            show_link_time = self.start_time - timedelta(minutes=self.access_time)
+            if show_link_time <= now:
+                return showit(self, raw=raw)
+            else:
+                return "" if raw else '<div class="access_button no_link">Livestream access available in %s</div>' % how_long(show_link_time-now)
+        elif self.access_control == 2:
+            return showit(self, raw=raw)
+        elif self.access_control in [3,4]:
+            if raw:
+                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
             if user.is_anonymous:
-                return '<div class="access_button no_link">To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % (
-                    url_for("user.info")
-                )
+                link = url_for("user.info", next=url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+                return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access</b></div>' % link
             elif not user.email_confirmed:
-                return '<div class="access_button no_link">To see access link, please confirm your email.</div>'
+                return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
             else:
-                return success
-        elif self.access == "endorsed":
-            if user.is_creator:
-                return success
+                return showit(self, raw=raw)
+        elif self.access_control == 5:
+            # If there is a view-only link, show that rather than an external registration link
+            if self.stream_link:
+                return showit(self, raw=raw)
+            if raw:
+                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
+            if not self.access_registration:
+                # This should never happen, registration link is required, but just in case...
+                return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</a></div>' % link
+            if "@" in self.access_registration:
+                body = """Dear organizers,
+
+I am interested in attending the talk
+
+    {talk}
+
+by {speaker}, in the series
+
+    {series}
+
+listed at https://{domain}{url}.
+
+Thank you,
+
+{user}
+""".format(
+                    talk = self.title,
+                    speaker = self.speaker,
+                    series = self.seminar.name,
+                    domain = topdomain(),
+                    url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
+                    user = current_user.name)
+                msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
+                link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
             else:
-                # TODO: add link to an explanation of endorsement
-                return '<div class="access_button no_link">To see access link, you must be endorsed by another user.</div>'
+                link = self.access_registration
+            return '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
         else:  # should never happen
             return ""
 

@@ -32,6 +32,37 @@ import urllib.parse
 
 combine = datetime.combine
 
+access_control_options = [
+    (0, 'open access'),
+    (1, 'time restricted'),
+    (2, 'password restricted'),
+    (3, 'user login'),
+    (4, 'automatic registration'),
+    (5, 'manual registration'),
+]
+
+access_time_options = [
+    (15, '15 minutes before talk'),
+    (60, '1 hour before talk'),
+    (480, '8 hours before talk'),
+    (1440, '24 hours before talk'),
+    (2880, '48 hours before talk'),
+    (10080, '1 week before talk'),
+    (20160, '2 weeks before talk'),
+]
+
+frequency_options = [
+    (0, 'no fixed schedule'),
+    (7, 'weekly'),
+    (14, 'biweekly'),
+    (21, 'triweekly'),
+]
+
+visibility_options = [
+    (2, 'public'),
+    (1, 'unlisted'),
+    (0, 'private'),
+]
 
 class WebSeminar(object):
     def __init__(
@@ -58,7 +89,10 @@ class WebSeminar(object):
             self.shortname = shortname
             self.display = user.is_creator
             self.online = True  # default
-            self.access = "open"  # default
+            self.access = "open"  # default FIXME: remove once we switch to access_control
+            self.access_control = 0 # default is public
+            self.access_time = None
+            self.edited_by = current_user.id
             self.visibility = 2 # public by default, once display is set to True
             self.is_conference = False  # seminar by default
             self.frequency = 7
@@ -79,8 +113,6 @@ class WebSeminar(object):
                 elif typ == "timestamp with time zone[]":
                     setattr(self, key, [])
                 elif typ == "date":
-                    setattr(self, key, None)
-                elif typ == "bigint":
                     setattr(self, key, None)
                 else:
                     critical(
@@ -187,6 +219,16 @@ class WebSeminar(object):
         self.time_slots = self.time_slots[0:n]
         s = self.description
         self.description = s[0].upper() + s[1:] if s else ""
+        if self.online and self.access_control is None:
+            self.access_control = 0 if self.access == 'open' else self.access_control
+            self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
+            if self.live_link and "comments" in self.live_link:
+                self.live_link = ""
+                if self.homepage:
+                    self.access_control = 5
+                    self.access_registration = self.homepage
+        if self.online and self.live_link and "comments" in self.live_link:
+            self.live_link = ""
         # Port old subjects and topics to the new topic scheme
         if getattr(self, "subjects", []):
             def update_topic(topic):
@@ -346,6 +388,22 @@ class WebSeminar(object):
             return self.description
         else:
             return ""
+
+    def show_visibility(self):
+        options = [r[0] for r in visibility_options]
+        return visibility_options[options.index(self.visibility)][1] if self.visibility in options else ''
+
+    def show_frequency(self):
+        options = [r[0] for r in frequency_options]
+        return frequency_options[options.index(self.frequency)][1] if self.frequency in options else ''
+
+    def show_access_control(self):
+        options = [r[0] for r in access_control_options]
+        return access_control_options[options.index(self.access_control)][1] if self.access_control in options else ''
+
+    def show_access_time(self):
+        options = [r[0] for r in access_control_options]
+        return access_time_options[options.index(self.access_time)][1] if self.access_time in options else ''
 
     def is_subscribed(self):
         if current_user.is_anonymous:
