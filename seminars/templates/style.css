@@ -452,13 +452,8 @@ i.fa.close:hover {
     background: #fff !important;
 }
 
-.starting_soon.view_only.access_button.is_link a {
-    background: orchid !important;
-}
-
-.view_only a:hover {
-    background: inherit;
-    color: #88f;
+.view_only.access_button.is_link a {
+    background: orchid;
 }
 
 .password_hint {

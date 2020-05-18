@@ -369,7 +369,7 @@ class WebTalk(object):
         if raw:
             return link
         if self.is_starting_soon():
-            return '<div class="access_button is_link starting_soon view_only"><b> <a href="%s">Watch livestream <i class="play filter-white"></i></a></b></div>' % link
+            return '<div class="access_button is_link view_only"><b> <a href="%s">Watch livestream <i class="play filter-white"></i></a></b></div>' % link
         else:
             return '<div class="access_button is_link view_only">View-only livestream access <a href="%s">available</a></div>' % link
 
