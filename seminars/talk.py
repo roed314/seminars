@@ -433,7 +433,7 @@ class WebTalk(object):
                         talk = self.title,
                         speaker = self.speaker,
                         series = self.seminar.name,
-                        talkul = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
+                        url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
                         user = current_user.name)
                 msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
                 link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
