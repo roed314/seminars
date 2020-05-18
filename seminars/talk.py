@@ -418,8 +418,6 @@ class WebTalk(object):
                 return show_link(self, user=user, raw=raw)
         elif self.access_control == 5:
             # If there is a view-only link, show that rather than an external registration link
-            if self.stream_link:
-                return show_link(self, user=user, raw=raw)
             if raw:
                 return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
             if not self.access_registration:
