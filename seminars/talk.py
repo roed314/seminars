@@ -288,11 +288,11 @@ class WebTalk(object):
             elif self.hidden:
                 title += " (private)"
             elif self.seminar.visibility == 0:
-                title += " (seminar private)"
+                title += " (series private)"
             elif self.seminar.visibility == 1:
-                title += " (seminar unlisted)"
-            elif self.online:
-                title += " (online)"
+                title += " (series unlisted)"
+            #elif self.online:
+            #    title += " (online)"
         return title
 
     def show_link_title(self):
