@@ -452,8 +452,7 @@ i.fa.close:hover {
     background: #fff !important;
 }
 
-.starting_soon.view_only a:hover {
-    background: inherit;
+.starting_soon.view_only.access_button.is_link a {
     color: #88f !important;
 }
 
