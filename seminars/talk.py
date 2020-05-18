@@ -396,9 +396,9 @@ class WebTalk(object):
         elif self.access_control in [3,4]:
             if user.is_anonymous:
                 # TODO link to login page
-                return '<div class="access_button no_link">To see access link, please <a href="%s">log in</a> (anti-spam measure).</b></div>' % url_for("user.info")
+                return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access.</b></div>' % url_for("user.info", next=url_for(url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)))
             elif not user.email_confirmed:
-                return '<div class="access_button no_link">To see access link, please confirm your email.</div>'
+                return '<div class="access_button no_link">Please confirm your email address for livestream access.</div>'
             else:
                 return showit(self, raw=raw, reg=(self.access_control==4))
         elif self.access_control == 5:
