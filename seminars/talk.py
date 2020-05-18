@@ -492,7 +492,8 @@ Thank you,
         return (self.start_time - timedelta(minutes=15) <= now < self.end_time)
 
     def is_over(self):
-        return (self.start_time - timedelta(minutes=30) < self.end_time)
+        now = datetime.now(pytz.utc)
+        return (now - timedelta(minutes=30) < self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:
