@@ -751,10 +751,19 @@ def sanitized_table(name):
         raise APIError({"code": "update_prohibited"}, 500)
     def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
         raise APIError({"code": "insert_prohibited"}, 500)
+    # We remove the raw argument from search and lucky keywords since these allow the execution of arbitrary SQL
+    def search(self, *args, **kwds):
+        kwds.pop("raw", None)
+        return PostgresSearchTable.search(self, *args, **kwds)
+    def lucky(self, *args, **kwds):
+        kwds.pop("raw", None)
+        return PostgresSearchTable.lucky(self, *args, **kwds)
     from seminars import count
     table = PostgresSearchTable(db, *cur.fetchone())
     table.update = update.__get__(table)
     table.count = count.__get__(table)
+    table.search = search.__get__(table)
+    table.lucky = lucky.__get__(table)
     table.insert_many = insert_many.__get__(table)
     table.search_cols = [col for col in table.search_cols if col in whitelisted_cols]
     table.col_type = {col: typ for (col, typ) in table.col_type.items() if col in whitelisted_cols}
