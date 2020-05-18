@@ -431,7 +431,7 @@ i.fa.close:hover {
 .starting_soon.access_button.is_link{
     border: none;
     border-radius: 4px;
-    background: crimson !important;
+    background: #EC143C !important;
     padding-top: 6px;
     width: 143px;
     text-align: center;
