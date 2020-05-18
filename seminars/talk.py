@@ -363,7 +363,7 @@ class WebTalk(object):
             return ""
 
     def show_stream_link(self, user=current_user, raw=False):
-        if any([self.deleted, not self.online, not self.stream_link, datetime.now(pytz.utc) > self.end_time]):
+        if any([self.deleted, not self.online, not self.stream_link, datetime.now(pytz.utc) > self.end_time + 30]):
             return ""
         link = self.stream_link
         if raw:
@@ -375,7 +375,7 @@ class WebTalk(object):
 
     def show_live_link(self, user=current_user, raw=False):
         now = datetime.now(pytz.utc)
-        if any([self.deleted, not self.online, not self.live_link, now > self.end_time]):
+        if any([self.deleted, not self.online, not self.live_link, now > self.end_time + 30]):
             return ""
         link = self.live_link
 
@@ -452,6 +452,7 @@ Thank you,
                 link = self.access_registration
             return '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
         else:  # should never happen
+            print("badness!")
             return ""
 
     def show_paper_link(self):
