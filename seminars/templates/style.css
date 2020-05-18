@@ -445,7 +445,7 @@ i.fa.close:hover {
 .view_only.access_button.is_link a {
     border: none;
     border-radius: 4px;
-    background: white !important;
+    background: #000080 !important;
 }
 
 .view_only.access_button.is_link a {
