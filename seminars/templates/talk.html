@@ -25,15 +25,16 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
       <tr>
         <td style="left-margin:0px;" nowrap><b>{{ talk.show_time_and_duration() | safe }}</b></td>
         <td nowrap>
-          {% if talk.live_link %}
-            {{ talk.show_live_link() | safe }} {{ talk.show_password_hint() | safe }}
+          {% set live_link = talk.show_live_link() %}
+          {% if live_link %}
+            {{ live_link | safe }} {{ talk.show_password_hint() | safe }}
           {% else %}
             {{ talk.show_stream_link() | safe }}
           {% endif %}
         </td>
       </tr><tr>
         <td>{% if talk.room %} Lecture held in {{ talk.room }}. {% endif %}</td>
-        <td>{% if talk.live_link %} {{ talk.show_stream_link() | safe }} {% endif %}</td>
+        <td>{% if live_link %} {{ talk.show_stream_link() | safe }} {% endif %}</td>
       </tr>
     </table>
   {% endif %}

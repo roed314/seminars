@@ -433,7 +433,7 @@ i.fa.close:hover {
     border-radius: 4px;
     background: #F1143C !important;
     padding-top: 6px;
-    width: 143px;
+    min-width: 143px;
     text-align: center;
 }
 
@@ -450,7 +450,7 @@ i.fa.close:hover {
     border-radius: 4px;
     background: #1E90F0; !important;
     padding-top: 6px;
-    width: 143px;
+    min-width: 143px;
     text-align: center;
 }
 

@@ -52,9 +52,12 @@
             Lecture held in {{ talk.room }}.
           {% endif %}
           {% if not talk.deleted %}
-            {{ talk.show_stream_link() | safe }}
-            {% if talk.access_hint and talk.stream_link and talk.live_link %}<br> {% endif %}
-            {{ talk.show_password_hint() | safe }} {{ talk.show_live_link() | safe }}
+            {% set stream_link = talk.show_stream_link() %}
+            {% set live_link = talk.show_live_link() %}
+            {% set hint = talk.show_password_hint() %}
+            {{ stream_link | safe }}
+            {% if stream_link and live_link and hint %}<br> {% endif %}
+            {{ hint | safe }} {{ live_link | safe }}
           {% endif %}
         {% endif %}
     </div>
