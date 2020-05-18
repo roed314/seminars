@@ -53,6 +53,7 @@
           {% endif %}
           {% if not talk.deleted %}
             {{ talk.show_stream_link() | safe }}
+            {% if talk.access_hint and talk.stream_link and talk.live_link %}<br> {% endif %}
             {{ talk.show_password_hint() | safe }} {{ talk.show_live_link() | safe }}
           {% endif %}
         {% endif %}
