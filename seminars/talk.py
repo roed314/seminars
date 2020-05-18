@@ -371,8 +371,7 @@ class WebTalk(object):
             if raw:
                 return link
             if not link:
-                return '<div class=access_button no_link">Livestream link not yet posted by organizers.</div>' % (
-                    url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+                return '<div class=access_button no_link">Livestream link not yet posted by organizers.</div>'
             note = " (view only)" if link != self.live_link else ""
             if reg and link == self.live_link:
                 link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
