@@ -1,3 +1,71 @@
+filter:
+  title: Filter
+  contents: |
+    Each filter toggle in the top row <i>restricts</i> the event list.
+    The events displayed are those in the <i>intersection</i> 
+    of the subsets defined by the activated filters and the search box.
+    <ul>
+        <li><b>topic:</b> 
+            Clicking the word <u>topic</u> above
+            activates the topic filter and opens the topic menu.
+            Initially no topics are selected, so no events are displayed,
+            but as you add topics, events matching that topic will appear.
+            Many toggles for adding topics are 3-way: 
+            clicking anywhere in the toggle cycles between 
+            <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right).  
+            When a submenu for a centered toggle is open, 
+            subtopics are displayed; initially none are selected, 
+            but you can click their toggles to add them.
+            Click <u>topic</u> again to close the topic menu 
+            and all its submenus.
+            Toggling the topic filter off and on now switches between 
+            displaying all events vs. 
+            only events in the union of your selected topics.</li>
+        <li><b>language:</b> 
+            Click <u>language</u> to restrict to 
+            events in the languages you understand.</li>
+        <li><b>saved:</b> 
+            After you have <a href="user/info">registered</a>, 
+            clicking the toggle labeled <u>saved</u> will restrict the list 
+            to talks and series you have saved as favorites.</li>
+        <li><b>more:</b>
+            Click <u>more</u> to open a box with additional filters; 
+            these take effect when you click the Apply button 
+            inside the box.</li>
+    <li><b>search:</b>
+            If text is entered in the search box, 
+            then once you hit <kbd>return</kbd> or click the magnifying glass, 
+            an event will be listed only if one of its attributes
+            matches the text.
+            Clicking the x inside the search box clears the text
+            and removes the restriction.</li>
+    </ul>
+    <table>
+    <tr>
+      <td>
+        <a style="margin-left: 50px" href="info">Introduction to the site</a>
+      </td>
+      <td>
+        <a style="margin-left: 50px" href="faq">Detailed help</a>
+      </td>
+    </tr>
+    </table>
+    <p style="text-align:right;">To close this box, 
+    click the blue word <u>Filter</u> above.</p>
+saved:
+  title: saved
+  contents: |
+    Setting this filter restricts the list to events 
+    you have saved as favorites.
+saved_ad:
+  title: saved
+  contents: |
+    Only registered users can apply this filter.
+    If you <a href="user/register">register</a>, 
+    you will be able to save talks and series, 
+    export them to an external calendar app 
+    (e.g., Google Calendar, iCal, or Outlook), 
+    and use this filter to restrict the list below to your saved favorites.
 institution_shortname:
   title: Identifier
   contents: |
@@ -185,71 +253,77 @@ room:
 online:
   title: Online
   contents: |
-    If your event can be attended online, indicate that here.
+    If your event <i>can</i> be attended online, indicate that here.
     Events that have a physical presence <i>and</i> can also be viewed online
     should enter the location in Room and set the Online option to yes.
 access_control:
   title: Access control
   contents: |
-    For online talks and series this determines how access to the live link is controlled.  The following options are available:
+    For online talks and series, this determines how access to the interactive livestream link is controlled.
     <ul>
-    <li><b>open access</b>: The link will be visible to all at all times.</li>
-    <li><b>time restricted</b>: The link will be visible only within a set time window before the talk starts.</li>
-    <li><b>password rescricted</b>: The link will be visible to all at all times but requires a password for which a hint is given.</li>
-    <li><b>user login</b>: Only logged in users with confirmed eamil addresses will be shown the link.</li>
-    <li><b>automatic registration</b>: Only logged in users with confirmed eamil addresses may access the link.
-        A list of all automatically registered users for each talk will be shown to organizers on the View talk page.</li>
+    <li><b>open</b>: The link is visible to all at all times.</li>
+    <li><b>time-restricted</b>: The link will be visible only within a set time window before the talk starts.</li>
+    <li><b>password-restricted</b>: The link is visible to all at all times but requires a password for which a hint is given.</li>
+    <li><b>login required</b>: Only logged-in users with confirmed email addresses are shown the link.</li>
+    <li><b>instant registration</b>: Logged-in users with confirmed email addresses may instantly register to access the link.  
+        A list of all users registered for each talk is visible to organizers on the View talk page.</li>
     <li><b>manual registration</b>: No link is available on researchseminars.org.
-        If this option is chosen you must provide a URL or email address where visitors can register to receive an email providing access information.</li>
+        You must provide a URL or email address through which visitors can obtain access information.</li>
     </ul>
-    The access control setting for a series is inherited by all talks in the series.
+    The access control setting for a series is inherited by new talks in the series.
 access_time:
   title: Access time
   contents: |
-    For online events using time restricted access control this determines when the live meeting link will become publicly visible.
+    The interactive livestream link will be publicly visible after the specified time.
 access_hint:
   title: Password hint
   contents: |
-    Online events using password restricted access control must provides a hint that
-    will allow users knowledgable in the subject to determine the password.
-    This hint will become visible shortly before the talk starts and remain visible until it ends.
-    <br><br>
-    If you do not wish to provide a password hint you should choose the manual
-    registration and email the password to registered participants.
+    This hint should allow users knowledgeable in the subject 
+    to determine the password.
+    If you do not wish to provide a password hint, 
+    you can change the access control to manual registration 
+    and email the password to registered participants.
 access_registration:
   title: Registration link
   contents: |
-    Online events with manual registration must provide a URL or email address that visitors can use to register for the event.
-    All registered users should be emailed the live meeting link and any password that is required.
+    If you want users to visit an external website for instructions 
+    to obtain an interactive livestream link, 
+    enter the URL of that website.
+    If you want users to send an email 
+    to obtain an interactive livestream link,
+    enter the email address.
+    It is then the organizers' responsibility to ensure 
+    that the livestream link and any required password 
+    are emailed to those users.
 live_link:
   title: Interactive livestream
   contents: |
-    Events taking place online may list a URL that provides interactive
-    access to the event (e.g. a Zoom meeting link), either in the series properties 
-    (if the URL is the same for all talks in the series)
-    on in each talk's properties
-    (if each talk has a different interactive livestream).
-    If the series' live meeting link is set, new talks in the series inherit it.
-    <br><br>
+    This should be the URL that users will visit 
+    to <i>join</i> an ongoing talk
+    (e.g., the URL for a Zoom meeting).
+    If the URL is the same for all talks in the series,
+    set the URL in the series properties,
+    and new talks in the series will inherit it.
+    If the URL is different for each talk, set it for each talk individually.
     The visibility of this URL depends on access control settings.
 stream_link:
   title: View-only livestream
   contents: |
-    Events taking place online may list a URL that allows visitors to
-    view the event without the possiblity of interaction (e.g. on YouTube),
-    either in the series properties 
-    (if the URL is the same for all talks in the series)
-    on in each talk's properties
-    (if each talk has a different view-only livestream).
-    If the series' live streaming link is set, new talks in the series inherit it.
-    <br><br>
-    This URL will be visiable to all visitors.
+    This should be the URL that users will visit 
+    to <i>watch</i> an ongoing talk
+    without the possiblity of interaction (e.g., on YouTube).
+    If the URL is the same for all talks in the series,
+    set the URL in the series properties,
+    and new talks in the series will inherit it.
+    If the URL is different for each talk, set it for each talk individually.
+    This URL is visible to all.
 comments:
   title: Comments
   contents: |
     Use the comments field to display additional information on the series page,
-    especially details on how to find the room or access the live meeting link.
-    On a talk page, both the talk comments and the series comments are displayed,
+    especially details on how to find the room.
+    On a talk page, both the talk comments and the series comments 
+    are displayed,
     so talk-specific comments should not be entered here.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
     You may also use HTML hyperlinks and TeX symbols.
@@ -264,9 +338,9 @@ talk_comments:
   contents: |
     The talk page will display both the talk comments and the series comments,
     so here enter only additional information specific to this talk,
-    such as how to find the room or access the live meeting link if
-    these instructions change from talk to talk.
-    Any token beginning with "http://" or "https://" will automatically appear as a link.
+    such as how to find the room if this changes from talk to talk.
+    Any token beginning with "http://" or "https://" 
+    will automatically appear as a link.
     You may also use HTML hyperlinks and TeX symbols.
 organizer_name:
   title: Name
@@ -407,71 +481,3 @@ export:
   title: Export
   contents: |
     The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> allow you to export your favorite series and talks to your chosen calendar app.  Later, if talks are added to those series, your calendar will automatically be updated.<br><br>  Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. Furthermore, some may take even longer for the initial sync. A workaround is to copy the URL of the <i>ICS file</i> link and add it manually to your calendar app.
-filter:
-  title: Filter
-  contents: |
-    Each filter toggle in the top row <i>restricts</i> the event list.
-    The events displayed are those in the <i>intersection</i> 
-    of the subsets defined by the activated filters and the search box.
-    <ul>
-        <li><b>topic:</b> 
-            Clicking the word <u>topic</u> above
-            activates the topic filter and opens the topic menu.
-            Initially no topics are selected, so no events are displayed,
-            but as you add topics, events matching that topic will appear.
-            Many toggles for adding topics are 3-way: 
-            clicking anywhere in the toggle cycles between 
-            <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right).  
-            When a submenu for a centered toggle is open, 
-            subtopics are displayed; initially none are selected, 
-            but you can click their toggles to add them.
-            Click <u>topic</u> again to close the topic menu 
-            and all its submenus.
-            Toggling the topic filter off and on now switches between 
-            displaying all events vs. 
-            only events in the union of your selected topics.</li>
-        <li><b>language:</b> 
-            Click <u>language</u> to restrict to 
-            events in the languages you understand.</li>
-        <li><b>saved:</b> 
-            After you have <a href="user/info">registered</a>, 
-            clicking the toggle labeled <u>saved</u> will restrict the list 
-            to talks and series you have saved as favorites.</li>
-        <li><b>more:</b>
-            Click <u>more</u> to open a box with additional filters; 
-            these take effect when you click the Apply button 
-            inside the box.</li>
-    <li><b>search:</b>
-            If text is entered in the search box, 
-            then once you hit <kbd>return</kbd> or click the magnifying glass, 
-            an event will be listed only if one of its attributes
-            matches the text.
-            Clicking the x inside the search box clears the text
-            and removes the restriction.</li>
-    </ul>
-    <table>
-    <tr>
-      <td>
-        <a style="margin-left: 50px" href="info">Introduction to the site</a>
-      </td>
-      <td>
-        <a style="margin-left: 50px" href="faq">Detailed help</a>
-      </td>
-    </tr>
-    </table>
-    <p style="text-align:right;">To close this box, 
-    click the blue word <u>Filter</u> above.</p>
-saved:
-  title: saved
-  contents: |
-    Setting this filter restricts the list to events 
-    you have saved as favorites.
-saved_ad:
-  title: saved
-  contents: |
-    Only registered users can apply this filter.
-    If you <a href="user/register">register</a>, 
-    you will be able to save talks and series, 
-    export them to an external calendar app 
-    (e.g., Google Calendar, iCal, or Outlook), 
-    and use this filter to restrict the list below to your saved favorites.

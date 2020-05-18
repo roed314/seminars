@@ -32,11 +32,11 @@ import urllib.parse
 combine = datetime.combine
 
 access_control_options = [
-    (0, 'open access'),
-    (1, 'time restricted'),
-    (2, 'password restricted'),
-    (3, 'user login'),
-    (4, 'automatic registration'),
+    (0, 'open'),
+    (1, 'time-restricted'),
+    (2, 'password-restricted'),
+    (3, 'login required'),
+    (4, 'instant registration'),
     (5, 'manual registration'),
 ]
 
