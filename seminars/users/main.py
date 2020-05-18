@@ -472,7 +472,7 @@ def get_endorsing_link():
             }
             endorsing_link = """
     <p>
-    When the person with email address {email} registers and confirms the address, that person will be able to create content.</br>
+    The person {email} will be able to create content after registering and confirming the email address.</br>
     <button onClick="window.open('mailto:{email}?{msg}')">
     Send email
     </button> to let them know.
@@ -481,8 +481,7 @@ def get_endorsing_link():
                 email=email, msg=urlencode(data, quote_via=quote)
             )
         flash_infomsg("""
-            When the person with email address %s registers and confirms the address, that person will be able to create content.<br>
-            Click the "Send email" button below to let them know.""",email)
+            The person %s will be able to create content after registering and confirming the email address.  Click the "Send email" button below to let them know.""",email)
         session["endorsing link"] = endorsing_link
         return redirect(url_for(".info"))
     else:
