@@ -10,7 +10,7 @@
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
-  <button class="save" type="submit" value="save" onclick="unsaved = false;" style="float: right;">Save all changes</button>
+  <button class="save" type="submit" value="save" onclick="unsaved = false;" style="float: right;">Save changes</button>
 
   <h3>Speaker details and talk content</h3>
 
@@ -252,8 +252,8 @@
   </table>
   <div style="height:4px;"></div>
   <table><tr>
-      <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">Save all changes</button></td>
-      <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">Cancel all changes</button></td>
+      <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">Save changes</button></td>
+      <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">Cancel changes</button></td>
       {% if talk.user_can_delete() %}
       <td><button class="delete" type="submit" name="submit" value="delete" onclick="unsaved = false;">Delete talk</button></td>
       {% endif %}
