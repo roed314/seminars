@@ -386,7 +386,7 @@ class WebTalk(object):
             if self.is_starting_soon():
                 return '<div class="access_button is_link starting_soon"><b> <a href="%s">Join livestream <i class="play filter-white"></i> </a></b></div>' % link
             else:
-                return '<div class="access_button is_link"> %sLivestream access <a href="%s">available</a></div>' % link
+                return '<div class="access_button is_link"> Livestream access <a href="%s">available</a></div>' % link
 
         if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
             return showit(self, raw=raw)
