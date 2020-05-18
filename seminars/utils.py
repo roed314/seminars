@@ -258,12 +258,10 @@ def is_nighttime(t):
     return 1 <= t.hour < 6
 
 
-def sanity_check_times(start_time, end_time, warn=None):
+def sanity_check_times(start_time, end_time, warn=flash_warnmsg):
     """
     Flashes warnings if time range seems suspsicious.  Note that end_time is (by definition) greater than start_time
     """
-    if warn is None:
-        warn = flash_warnmsg
     if start_time is None or end_time is None:
         # Users are allowed to not fill in a time
         return
