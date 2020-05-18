@@ -433,6 +433,7 @@ i.fa.close:hover {
     border-radius: 4px;
     background: red !important;
     width: 143px;
+    text-align: center;
 }
 
 .starting_soon.access_button.is_link a {
@@ -448,6 +449,7 @@ i.fa.close:hover {
     border-radius: 4px;
     background: deepskyblue !important;
     width: 143px;
+    text-align: center;
 }
 
 .view_only.access_button.is_link a {
