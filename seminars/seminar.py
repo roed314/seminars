@@ -329,8 +329,8 @@ class WebSeminar(object):
             return " (private)"
         elif self.visibility == 1:
             return " (unlisted)"
-        elif self.online:
-            return " (online)"
+        #elif self.online:
+        #    return " (online)"
         else:
             return ""
 
