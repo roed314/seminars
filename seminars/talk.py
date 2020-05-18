@@ -357,7 +357,7 @@ class WebTalk(object):
 
     def show_password_hint(self):
         if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint, self.is_starting_soon()]):
-            return '<div class="password_hint">(Hint: %s)</div>' % self.access_hint
+            return '<div class="password_hint">(Password hint: %s)</div>' % self.access_hint
         else:
             return ""
 
