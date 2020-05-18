@@ -23,7 +23,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
       {% if talk.room %}
         <br>Lecture held in {{ talk.room }}.
       {% endif %}
-      {{ talk.show_live_link() | safe }} {{ talk.show_password_hint() | safe }}
+      {{ talk.show_live_link() | safe }} {{ talk.show_password_hint() | safe }} {{ talk.show_stream_link() | safe }}
     {% endif %}
 
   <div style="clear:both;"></div>
