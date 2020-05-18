@@ -416,7 +416,7 @@ i.fa.close:hover {
 
 .access_button {
     display: inline-block;
-    margin: 2px 2px 4px 4px;
+    margin: 0px 0px 6px 2px;
     padding: 3px 7px;
     display: inline-block;
     background: white;
