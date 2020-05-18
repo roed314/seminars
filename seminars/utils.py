@@ -37,6 +37,7 @@ dash_re = re.compile(r'[\u002D\u058A\u05BE\u1400\u1806\u2010-\u2015\u2E17\u2E1A\
 # Bounds on input field lengths
 MAX_SHORTNAME_LEN = 32
 MAX_DESCRIPTION_LEN = 64
+MAX_HINT_LEN = 64
 MAX_NAME_LEN = 100
 MAX_TITLE_LEN = 256
 MAX_EMAIL_LEN = 256
@@ -48,6 +49,8 @@ MAX_ORGANIZERS = 10
 
 maxlength = {
     'abstract' : MAX_TEXT_LEN,
+    'access_hint' : MAX_HINT_LEN,
+    'access_registration' : MAX_URL_LEN,
     'aliases' : MAX_NAME_LEN,
     'city' : MAX_NAME_LEN,
     'comments' : MAX_TEXT_LEN,
@@ -73,6 +76,25 @@ maxlength = {
     'weekdays' : MAX_SLOTS,
 }
 
+def how_long(delta):
+    minute = timedelta(minutes=1)
+    if delta < minute:
+        return "less than a minute"
+    if delta < 90 * minute:
+        return "%s minutes" % round(delta / minute)
+    if delta < 36 * 60 * minute:
+        return "%s hours" % round(delta / (60*minute))
+    day = timedelta(days=1)
+    if delta < 11 * day:
+        return "%s days" % round(delta / day)
+    if delta < 7 * 7 * day:
+        return "%s weeks" % round(delta / (7*day))
+    year = timedelta(days=365.25)
+    if delta < 2 * year:
+        return "%s months" % round(delta / timedelta(days=30.4))
+    return "%s years" % round(delta / year)
+
+
 def killattr(obj,attr):
     if hasattr(obj,attr):
         delattr(obj,attr)
@@ -83,12 +105,21 @@ def topdomain():
     return ".".join(urlparse(request.url).netloc.split(".")[-2:])
 
 
-def validate_url(x):
+def valid_url(x):
     if not (x.startswith("http://") or x.startswith("https://")):
         return False
     try:
         result = urlparse(x)
         return all([result.scheme, result.netloc])
+    except:
+        return False
+
+def valid_email(x):
+    if not "@" in x:
+        return False
+    try:
+        result = validate_email(x)
+        return True if result else False
     except:
         return False
 
@@ -173,13 +204,9 @@ def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
     tokens = re.split(r"(\s+)", x)
     for i in range(len(tokens)):
-        if validate_url(tokens[i]):
-            tokens[i] = '<a href="%s">%s</a>' % (
-                tokens[i],
-                tokens[i][tokens[i].index("//") + 2 :],
-            )
-    return "".join(tokens)
-
+        if valid_url(tokens[i]):
+            tokens[i] = '<a href="%s">%s</a>'%(tokens[i], tokens[i][tokens[i].index("//")+2:])
+    return ''.join(tokens)
 
 def naive_utcoffset(tz):
     if isinstance(tz, str):
@@ -524,9 +551,7 @@ def process_user_input(inp, col, typ, tz=None):
         assert tz is not None
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
-        if not validate_url(inp) and not (
-            col == "live_link" and (inp == "see comments" or inp == "See comments")
-        ):
+        if not valid_url(inp):
             raise ValueError("Invalid URL")
         return inp
     elif col.endswith("email") and typ == "text":

@@ -862,6 +862,34 @@ def show_talk(seminar_id, talkid):
         kwds["section"] = "Manage"
     return render_template("talk.html", **kwds)
 
+
+@app.route("/register/talk/<seminar_id>/<int:talkid>/")
+def register_for_talk(seminar_id, talkid):
+    from flask import flash
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
+    if talk is None:
+        return abort(404, "Talk not found")
+    # If registration isn't required just send them to the talk page
+    # where the user will see an appropriate livestream link
+    if talk.access_control != 4:
+        return redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
+    if current_user.is_anonymous:
+        return redirect(url_for("user.info", next=url_for("register_for_talk", seminar_id=seminar_id, talkid=talkid)))
+    if not current_user.email_confirmed:
+        flash_error("You need to confirm your email before you can register.")
+        return redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
+    if not talk.live_link:
+        return abort(404, "Livestream link for talk not found")
+    if talk.register_user():
+        flash("You have been registered, enjoy the talk!")
+    else:
+        flash("Previous registration confirmed, enjoy the talk!")
+    if talk.is_starting_soon():
+        return redirect(talk.live_link)
+    else:
+        return redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
+
+
 # We allow async queries for title knowls
 @app.route("/knowl/talk/<series_id>/<int:series_ctr>")
 def title_knowl(series_id, series_ctr, **kwds):

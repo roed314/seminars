@@ -186,34 +186,69 @@ online:
   title: Online
   contents: |
     If your event can be attended online, indicate that here.
-    Events that have a physical presence <i>and</i> are livestreamed
+    Events that have a physical presence <i>and</i> can also be viewed online
     should enter the location in Room and set the Online option to yes.
-live_link:
-  title: Livestream link
+access_control:
+  title: Access control
   contents: |
-    Events taking place online should list the livestream's URL,
+    For online talks and series this determines how access to the live link is controlled.  The following options are available:
+    <ul>
+    <li><b>open access</b>: The link will be visible to all at all times.</li>
+    <li><b>time restricted</b>: The link will be visible only within a set time window before the talk starts.</li>
+    <li><b>password rescricted</b>: The link will be visible to all at all times but requires a password for which a hint is given.</li>
+    <li><b>user login</b>: Only logged in users with confirmed eamil addresses will be shown the link.</li>
+    <li><b>automatic registration</b>: Only logged in users with confirmed eamil addresses may access the link.
+        A list of all automatically registered users for each talk will be shown to organizers on the View talk page.</li>
+    <li><b>manual registration</b>: No link is available on researchseminars.org.
+        If this option is chosen you must provide a URL or email address where visitors can register to receive an email providing access information.</li>
+    </ul>
+    The access control setting for a series is inherited by all talks in the series.
+access_time:
+  title: Access time
+  contents: |
+    For online events using time restricted access control this determines when the live meeting link will become publicly visible.
+access_hint:
+  title: Password hint
+  contents: |
+    Online events using password restricted access control must provides a hint that
+    will allow users knowledgable in the subject to determine the password.
+    This hint will become visible shortly before the talk starts and remain visible until it ends.
+    <br><br>
+    If you do not wish to provide a password hint you should choose the manual
+    registration and email the password to registered participants.
+access_registration:
+  title: Registration link
+  contents: |
+    Online events with manual registration must provide a URL or email address that visitors can use to register for the event.
+    All registered users should be emailed the live meeting link and any password that is required.
+live_link:
+  title: Interactive livestream
+  contents: |
+    Events taking place online may list a URL that provides interactive
+    access to the event (e.g. a Zoom meeting link), either in the series properties 
+    (if the URL is the same for all talks in the series)
+    on in each talk's properties
+    (if each talk has a different interactive livestream).
+    If the series' live meeting link is set, new talks in the series inherit it.
+    <br><br>
+    The visibility of this URL depends on access control settings.
+stream_link:
+  title: View-only livestream
+  contents: |
+    Events taking place online may list a URL that allows visitors to
+    view the event without the possiblity of interaction (e.g. on YouTube),
     either in the series properties 
     (if the URL is the same for all talks in the series)
     on in each talk's properties
-    (if each talk has a different livestream URL).
-    If further instructions are required 
-    (e.g., password, password hint, 
-    or additional procedure for obtaining the URL or password information),
-    then enter "See comments" here and leave the instructions 
-    in the Comments box below.
-    If the series' livestream link is set, new talks in the series inherit it.
-access:
-  title: Access
-  contents: |
-    For talks and series with a livestream link, this determines whether the link will be shown to everyone,
-    only to users logged in,
-    or only to endorsed users.
-    If the livestream link is not specified, this setting is ignored.
+    (if each talk has a different view-only livestream).
+    If the series' live streaming link is set, new talks in the series inherit it.
+    <br><br>
+    This URL will be visiable to all visitors.
 comments:
   title: Comments
   contents: |
     Use the comments field to display additional information on the series page,
-    especially details on how to find the room or access the livestreaming link.
+    especially details on how to find the room or access the live meeting link.
     On a talk page, both the talk comments and the series comments are displayed,
     so talk-specific comments should not be entered here.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
@@ -229,7 +264,7 @@ talk_comments:
   contents: |
     The talk page will display both the talk comments and the series comments,
     so here enter only additional information specific to this talk,
-    such as how to find the room or access the livestreaming link if
+    such as how to find the room or access the live meeting link if
     these instructions change from talk to talk.
     Any token beginning with "http://" or "https://" will automatically appear as a link.
     You may also use HTML hyperlinks and TeX symbols.
