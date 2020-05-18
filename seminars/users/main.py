@@ -191,7 +191,7 @@ def set_info():
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data.get("name"):
-        errmsgs.append(format_errmsg('Name cannot be left blank.  See the User behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
+        errmsgs.append(format_errmsg('Name cannot be left blank.  See the user behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
     if errmsgs:
         return show_input_errors(errmsgs)        
     for k in data.keys():
@@ -230,9 +230,7 @@ def housekeeping(fn):
 
 @login_page.route("/register/", methods=["GET", "POST"])
 def register():
-    if request.method == "GET":
-        return render_template("register.html", title="Register", email="")
-    elif request.method == "POST":
+    if request.method == "POST":
         email = request.form["email"]
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
@@ -246,12 +244,12 @@ def register():
             return make_response(render_template("register.html", title="Register", email=email))
 
         if len(pw1) < 8:
-            flash_error("Oops, password too short. Minimum 8 characters please!")
+            flash_error("Oops, password too short.  Minimum 8 characters, please!")
             return make_response(render_template("register.html", title="Register", email=email))
 
         password = pw1
         if userdb.user_exists(email=email):
-            flash_error("Sorry, email '%s' is already registered!", email)
+            flash_error("The email address '%s' is already registered!", email)
             return make_response(render_template("register.html", title="Register", email=email))
 
         newuser = userdb.new_user(email=email, password=password,)
@@ -261,6 +259,7 @@ def register():
         flask.flash(Markup("Hello! Congratulations, you are a new user!"))
         logger.info("new user: '%s' - '%s'" % (newuser.get_id(), newuser.email))
         return redirect(url_for(".info"))
+    return render_template("register.html", title="Register", email="")
 
 
 @login_page.route("/change_password", methods=["POST"])
@@ -269,7 +268,7 @@ def change_password():
     email = current_user.email
     pw_old = request.form["oldpwd"]
     if not current_user.check_password(pw_old):
-        flash_error("Ooops, old password is wrong!")
+        flash_error("Oops, old password is wrong!")
         return redirect(url_for(".info"))
 
     pw1 = request.form["password1"]
@@ -279,7 +278,7 @@ def change_password():
         return redirect(url_for(".info"))
 
     if len(pw1) < 8:
-        flash_error("Oops, password too short. Minimum 8 characters please!")
+        flash_error("Oops, password too short.  Minimum 8 characters, please!")
         return redirect(url_for(".info"))
 
     userdb.change_password(email, pw1)
@@ -291,7 +290,7 @@ def change_password():
 @login_required
 def logout():
     logout_user()
-    flask.flash(Markup("You are logged out now. Have a nice day!"))
+    flask.flash(Markup("You are now logged out.  Have a nice day!"))
     return redirect(url_for(".info"))
 
 @login_page.route("/permanently_deleteme")
@@ -321,7 +320,7 @@ def loginas(emailorid):
     if user.id:
         logout_user()
         login_user(user)
-        flask.flash(Markup("Using your super powers, you are now logged in as %s" % (user.email)))
+        flask.flash(Markup("Using your superpowers, you are now logged in as %s" % (user.email)))
         return redirect(url_for(".info"))
     else:
         return "No user matches the email/id provided."
@@ -345,7 +344,7 @@ def send_confirmation_email(email):
         import sys
 
         flash_error(
-            'Unable to send email confirmation link, please contact <a href="mailto:researchseminars@math.mit.edu">researchseminars@math.mit.edu</a> directly to confirm your email'
+            'Unable to send email confirmation link; please contact <a href="mailto:researchseminars@math.mit.edu">researchseminars@math.mit.edu</a> directly to confirm your email.'
         )
         app.logger.error("%s unable to send email to %s due to error: %s" % (timestamp(), email, sys.exc_info()[0]))
         return False
@@ -369,7 +368,7 @@ def confirm_email(token):
         else:
             current_user.email_confirmed = True
             current_user.save()
-            flask.flash("You have confirmed your email. Thanks!", "success")
+            flask.flash("Thank you for confirming your email!", "success")
     return redirect(url_for(".info"))
 
 
@@ -390,14 +389,13 @@ def send_reset_password(email):
 
 @login_page.route("/reset_password", methods=["GET", "POST"])
 def reset_password():
-    if request.method == "GET":
-        return render_template("reset_password_ask_email.html", title="Forgot Password",)
-    elif request.method == "POST":
+    if request.method == "POST":
         email = request.form["email"]
         if userdb.user_exists(email):
             send_reset_password(email)
-        flask.flash(Markup("Check your mailbox for instructions on how to reset your password"))
+        flask.flash(Markup("Check your inbox for instructions on how to reset your password."))
         return redirect(url_for(".info"))
+    return render_template("reset_password_ask_email.html", title="Forgot Password",)
 
 
 @login_page.route("/reset/<token>", methods=["GET", "POST"])
@@ -411,9 +409,7 @@ def reset_password_wtoken(token):
     if not userdb.user_exists(email):
         flash_error("The link is invalid or has expired.")
         return redirect(url_for(".info"))
-    if request.method == "GET":
-        return render_template("reset_password_wtoken.html", title="Reset password", token=token)
-    elif request.method == "POST":
+    if request.method == "POST":
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
         if pw1 != pw2:
@@ -421,12 +417,13 @@ def reset_password_wtoken(token):
             return redirect(url_for(".reset_password_wtoken", token=token))
 
         if len(pw1) < 8:
-            flash_error("Oops, password too short. Minimum 8 characters please!")
+            flash_error("Oops, password too short.  Minimum 8 characters, please!")
             return redirect(url_for(".reset_password_wtoken", token=token))
 
         userdb.change_password(email, pw1)
-        flask.flash(Markup("Your password has been changed. Please login with your new password."))
+        flask.flash(Markup("Your password has been changed.  Please login with your new password."))
         return redirect(url_for(".info"))
+    return render_template("reset_password_wtoken.html", title="Reset password", token=token)
 
 
 # endorsement
@@ -475,7 +472,7 @@ def get_endorsing_link():
             }
             endorsing_link = """
     <p>
-    When {email} registers and confirms their email they will be able to create content.</br>
+    The person {email} will be able to create content after registering and confirming the email address.</br>
     <button onClick="window.open('mailto:{email}?{msg}')">
     Send email
     </button> to let them know.
@@ -484,8 +481,7 @@ def get_endorsing_link():
                 email=email, msg=urlencode(data, quote_via=quote)
             )
         flash_infomsg("""
-            When the person with email address %s registers and confirms their email they will be able to create content.<br>
-            Click the "Send email" button below to let them know.""",email)
+            The person %s will be able to create content after registering and confirming the email address.  Click the "Send email" button below to let them know.""",email)
         session["endorsing link"] = endorsing_link
         return redirect(url_for(".info"))
     else:
@@ -588,7 +584,7 @@ def user_ics_file(token):
             uid = read_token(token, "ics", key="vVjYyCM99DtirZqMaGMrle")
         user = SeminarsUser(uid=int(uid))
         if not user.email_confirmed:
-            return flask.abort(404, "The email has not yet been confirmed!")
+            return flask.abort(404, "The email address has not yet been confirmed!")
     except Exception:
         return flask.abort(404, "Invalid link")
 
