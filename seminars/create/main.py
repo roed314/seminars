@@ -149,6 +149,9 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
         deleted_talks.append(talk)
     deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
+    api_series = [seminar for seminar in seminars_search({"by_api": True, "display": False}, sort=[("edited_at", -1)])
+    api_talks = talks_search({"by_api": True, "display": False}, sort=[("edited_at", -1)])
+
     manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "create_index.html",

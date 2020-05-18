@@ -89,6 +89,7 @@ class WebSeminar(object):
             self.shortname = shortname
             self.display = user.is_creator
             self.online = True  # default
+            self.by_api = False # reset by API code if needed
             self.access = "open"  # default FIXME: remove once we switch to access_control
             self.access_control = 0 # default is public
             self.access_time = None

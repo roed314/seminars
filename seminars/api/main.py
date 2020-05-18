@@ -268,6 +268,7 @@ def save_series(version=0, user=None):
     if series.new or new_version != series:
         # Series saved by the API are not displayed until user approves
         new_version.display = False
+        new_version.by_api = True
         new_version.save(user)
     else:
         raise APIError({"code": "no_changes",
@@ -331,6 +332,7 @@ def save_talk(version=0, user=None):
     if talk.new or new_version != talk:
         # Talks saved by the API are not displayed until user approves
         new_version.display = False
+        new_version.by_api = True
         new_version.save(user)
     else:
         raise APIError({"code": "no_changes",

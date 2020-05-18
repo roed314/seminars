@@ -65,6 +65,7 @@ class WebTalk(object):
             self.token = secrets.token_hex(8)
             self.display = seminar.display
             self.online = getattr(seminar, "online", bool(seminar.live_link))
+            self.by_api = False # reset by API code if needed
             self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
