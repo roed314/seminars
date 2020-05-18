@@ -481,3 +481,16 @@ export:
   title: Export
   contents: |
     The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> allow you to export your favorite series and talks to your chosen calendar app.  Later, if talks are added to those series, your calendar will automatically be updated.<br><br>  Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. Furthermore, some may take even longer for the initial sync. A workaround is to copy the URL of the <i>ICS file</i> link and add it manually to your calendar app.
+ids:
+  title: IDs
+  contents: |
+    These are the identifiers that refer to a unique person, 
+    such as an ORCID or (for mathematicians) an MR Author ID.   
+    To add a new one for you,
+    select the type of ID from the dropdown menu, 
+    enter the ID number or text in the input box,
+    and press "Update details".
+    To add more than one, repeat.
+    To add a type of ID not among the current possibilities,
+    please visit the <a href="user/info">Contact</a> page 
+    to send an email requesting that the type be added.
