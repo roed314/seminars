@@ -424,7 +424,7 @@ I am interested in attending the talk
     {talk}
 by {speaker} in the series
     {series}
-listed at https://researchseminars.org/{url}.
+listed at https://{domain}/{url}.
 
 Thank you,
 
@@ -433,6 +433,7 @@ Thank you,
                     talk = self.title,
                     speaker = self.speaker,
                     series = self.seminar.name,
+                    domain = topdomain(),
                     url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
                     user = current_user.name)
                 msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
