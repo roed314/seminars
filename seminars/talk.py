@@ -10,11 +10,11 @@ from seminars.utils import (
     count_distinct,
     max_distinct,
     adapt_datetime,
-    toggle,
     make_links,
-    topic_dict,
-    languages_dict,
 )
+from seminars.language import languages
+from seminars.toggle import toggle
+from seminars.topic import topic_dag
 from seminars.seminar import WebSeminar, can_edit_seminar
 from lmfdb.utils import flash_error
 from markupsafe import Markup
@@ -23,6 +23,7 @@ import urllib.parse
 from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
+from psycopg2.sql import Placeholder
 
 class WebTalk(object):
     def __init__(
@@ -81,9 +82,6 @@ class WebTalk(object):
                     data["start_time"] = adapt_datetime(data["start_time"], tz)
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
-            # transition to topics including the subject
-            if data.get("topics"):
-                data["topics"] = [(topic if "_" in topic else "math_" + topic) for topic in data["topics"]]
             self.__dict__.update(data)
         self.cleanse()
 
@@ -112,6 +110,34 @@ class WebTalk(object):
         """
         if self.hidden is None:
             self.hidden = False
+        # Port old subjects and topics to the new topic scheme
+        if getattr(self, "subjects", []):
+            def update_topic(topic):
+                if topic in ["math", "physics", "bio"]:
+                    return [topic]
+                if topic in ["math_mp", "mp", "physics_math-ph"]:
+                    return ["math", "physics", "math-ph"]
+                if len(topic) == 2:
+                    return ["math", "math_" + topic.upper()]
+                if topic.startswith("math_"):
+                    return ["math", "math_" + topic[5:].upper()]
+                if topic.startswith("bio_bio_"):
+                    return ["bio", "bio_" + topic[8:].upper()]
+                assert topic.startswith("physics_")
+                topic = topic[8:]
+                if topic.startswith("nlin_"):
+                    return ["physics", "nlin", topic]
+                if topic.startswith("cond-mat_"):
+                    return ["physics", "cond-mat", topic]
+                if topic.startswith("nucl-"):
+                    return ["physics", "nucl-ph", topic]
+                if topic.startswith("hep-"):
+                    return ["physics", "hep", topic]
+                if topic.startswith("astro-ph_"):
+                    return ["physics", "astro-ph", topic]
+                return ["physics", topic]
+            self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
+        self.subjects = []
 
     def visible(self):
         """
@@ -262,11 +288,11 @@ class WebTalk(object):
             elif self.hidden:
                 title += " (private)"
             elif self.seminar.visibility == 0:
-                title += " (seminar private)"
+                title += " (series private)"
             elif self.seminar.visibility == 1:
-                title += " (seminar unlisted)"
-            elif self.online:
-                title += " (online)"
+                title += " (series unlisted)"
+            #elif self.online:
+            #    title += " (online)"
         return title
 
     def show_link_title(self):
@@ -291,14 +317,11 @@ class WebTalk(object):
 
     def show_lang_topics(self):
         if self.language and self.language != "en":
-            ldict = languages_dict()
-            language = '<span class="language_label">%s</span>' % ldict.get(self.language, "Unknown language")
+            language = '<span class="language_label">%s</span>' % languages.show(self.language)
         else:
             language = ""
         if self.topics:
-            subjects = set(topic.split("_", 1)[0] for topic in self.topics)
-            tdict = topic_dict(include_subj=(len(subjects) > 1))
-            return language + "".join('<span class="topic_label">%s</span>' % tdict[topic] for topic in self.topics)
+            return language + "".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
         else:
             return language
 
@@ -457,9 +480,12 @@ class WebTalk(object):
         if current_user.is_anonymous:
             return ""
 
-        value = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
+        name = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
         return toggle(
-            tglid="tlg" + value, value=value, checked=self.is_subscribed(), classes="subscribe"
+            tglid="tlg" + name.replace('/','--'),
+            name=name,
+            value=1 if self.is_subscribed() else -1,
+            classes="subscribe"
         )
 
     def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
@@ -564,10 +590,10 @@ def talks_header(include_seminar=True, include_slides=False, include_video=False
         cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
     cols.append((' class="title"', "Title"))
-    if include_slides:
-        cols.append(("", ""))
-    if include_video:
-        cols.append(("", ""))
+    if include_slides and include_video:
+        cols.append((' colspan="2"', "Content"))
+    elif include_video or include_slides:
+        cols.append(("", "Content"))
     if include_subscribe:
         if current_user.is_anonymous:
             cols.append(("", ""))
@@ -645,27 +671,32 @@ _maxer = SQL(
 )
 
 
-def _construct(seminar_dict, objects=True):
+def _construct(seminar_dict, objects=True, more=False):
     def object_construct(rec):
         if not isinstance(rec, dict):
             return rec
         else:
-            return WebTalk(
+            if more:
+                moreval = rec.pop("more")
+            talk = WebTalk(
                 rec["seminar_id"],
                 rec["seminar_ctr"],
                 seminar=seminar_dict.get(rec["seminar_id"]),
                 data=rec,
             )
+            if more:
+                talk.more = moreval
+            return talk
     def default_construct(rec):
         return rec
 
     return object_construct if objects else default_construct
 
 
-def _iterator(seminar_dict, objects=True):
+def _iterator(seminar_dict, objects=True, more=False):
     def object_iterator(cur, search_cols, extra_cols, projection):
         for rec in db.talks._search_iterator(cur, search_cols, extra_cols, projection):
-            yield _construct(seminar_dict)(rec)
+            yield _construct(seminar_dict, more=more)(rec)
 
     return object_iterator if objects else db.talks._search_iterator
 
@@ -692,7 +723,14 @@ def talks_search(*args, **kwds):
     """
     seminar_dict = kwds.pop("seminar_dict", {})
     objects = kwds.pop("objects", True)
-    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects), *args, **kwds)
+    more = kwds.get("more", False)
+    if more is not False: # might empty dictionary
+        more, moreval = db.talks._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+        kwds["more"] = more = (more, moreval)
+    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects, more=more), *args, **kwds)
 
 
 def talks_lucky(*args, **kwds):

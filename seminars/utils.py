@@ -15,13 +15,21 @@ from psycopg2.sql import SQL
 from seminars import db
 from six import string_types
 from urllib.parse import urlparse, urlencode
-import iso639
 import pytz
 import re
+from .toggle import toggle
 
-weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+weekdays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-daytime_re_string = r'\d{1,4}|\d{1,2}:\d\d|'
+daytime_re_string = r"\d{1,4}|\d{1,2}:\d\d|"
 daytime_re = re.compile(daytime_re_string)
 dash_re = re.compile(r'[\u002D\u058A\u05BE\u1400\u1806\u2010-\u2015\u2E17\u2E1A\u2E3A\u2E3B\u2E40\u301C\u3030\u30A0\uFE31\uFE32\uFE58\uFE63\uFF0D]')
 
@@ -35,7 +43,7 @@ MAX_EMAIL_LEN = 256
 MAX_URL_LEN = 256
 MAX_TEXT_LEN = 8192
 MAX_SLOTS = 12 # Must be a multiple of 3
-MAX_SPEAKERS = 8 
+MAX_SPEAKERS = 8
 MAX_ORGANIZERS = 10
 
 maxlength = {
@@ -72,7 +80,8 @@ def killattr(obj,attr):
 def topdomain():
     # return 'mathseminars.org'
     # return 'researchseminars.org'
-    return '.'.join(urlparse(request.url).netloc.split('.')[-2:])
+    return ".".join(urlparse(request.url).netloc.split(".")[-2:])
+
 
 def validate_url(x):
     if not (x.startswith("http://") or x.startswith("https://")):
@@ -96,25 +105,28 @@ def validate_daytime(s):
         return None
     if len(s) <= 2:
         h, m = int(s), 0
-    elif not ':' in s:
+    elif not ":" in s:
         h, m = int(s[:-2]), int(s[-2:])
     else:
-        t = s.split(':')
+        t = s.split(":")
         h, m = int(t[0]), int(t[1])
-    return "%02d:%02d"%(h,m) if (0 <= h < 24) and (0 <= m <= 59) else None
+    return "%02d:%02d" % (h, m) if (0 <= h < 24) and (0 <= m <= 59) else None
+
 
 def validate_daytimes(s):
     t = s.split('-')
     if len(t) != 2:
-        return None;
-    start, end = validate_daytime(t[0]), validate_daytime(t[1])
+        return None
+    start, end = validate_daytime(t[0].strip()), validate_daytime(t[1].strip())
     if start is None or end is None:
         return None
-    return start + '-' + end
+    return start + "-" + end
+
 
 def daytime_minutes(s):
-    t = s.split(':')
-    return 60*int(t[0])+int(t[1])
+    t = s.split(":")
+    return 60 * int(t[0]) + int(t[1])
+
 
 def daytimes_start_minutes(s):
     return daytime_minutes(s.split('-')[0])
@@ -126,37 +138,48 @@ def weekstart(date, tz):
     t = midnight(date,tz)
     return t - timedelta(days=1)*t.weekday()
 
+def date_and_daytime_to_time(date, s, tz):
+    d = localize_time(datetime.combine(date, maketime()), tz)
+    m = timedelta(minutes=1)
+    return d + m * daytime_minutes(s)
+
 def date_and_daytimes_to_times(date, s, tz):
     d = localize_time(datetime.combine(date, maketime()), tz)
     m = timedelta(minutes=1)
-    t = s.split('-')
-    start = d + m*daytime_minutes(t[0])
-    end = d + m*daytime_minutes(t[1])
+    t = s.split("-")
+    start = d + m * daytime_minutes(t[0])
+    end = d + m * daytime_minutes(t[1])
     if end < start:
         end += timedelta(days=1)
     return start, end
 
+
 def daytimes_early(s):
-    t = s.split('-')
+    t = s.split("-")
     start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
-    return start > end or start < 6*60
+    return start > end or start < 6 * 60
+
 
 def daytimes_minutes(s):
     t = s.split('-')
     start, end = daytime_minutes(t[0]), daytime_minutes(t[1])
-    len = end - start if end > start else 24*60-start + end
-    return len    
+    length = end - start if end > start else 24*60-start + end
+    return length
 
 def daytimes_long(s):
     return daytimes_minutes(s) > 8*60
 
 def make_links(x):
     """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
-    tokens = re.split(r'(\s+)',x)
+    tokens = re.split(r"(\s+)", x)
     for i in range(len(tokens)):
         if validate_url(tokens[i]):
-            tokens[i] = '<a href="%s">%s</a>'%(tokens[i], tokens[i][tokens[i].index("//")+2:])
-    return ''.join(tokens)
+            tokens[i] = '<a href="%s">%s</a>' % (
+                tokens[i],
+                tokens[i][tokens[i].index("//") + 2 :],
+            )
+    return "".join(tokens)
+
 
 def naive_utcoffset(tz):
     if isinstance(tz, str):
@@ -164,7 +187,10 @@ def naive_utcoffset(tz):
     for h in range(10):
         try:
             return tz.utcoffset(datetime.now() + timedelta(hours=h))
-        except (pytz.exceptions.NonExistentTimeError, pytz.exceptions.AmbiguousTimeError):
+        except (
+            pytz.exceptions.NonExistentTimeError,
+            pytz.exceptions.AmbiguousTimeError,
+        ):
             pass
 
 
@@ -198,7 +224,9 @@ def pretty_timezone(tz, dest="selecter"):
             return "{} (UTC {})".format(tz, diff)
 
 
-timezones = [(v, pretty_timezone(v)) for v in sorted(pytz.common_timezones, key=naive_utcoffset)]
+timezones = [
+    (v, pretty_timezone(v)) for v in sorted(pytz.common_timezones, key=naive_utcoffset)
+]
 
 
 def is_nighttime(t):
@@ -207,23 +235,6 @@ def is_nighttime(t):
     # These are times that might be mixed up by using a 24 hour clock
     return 1 <= t.hour < 6
 
-
-def simplify_language_name(name):
-    name = name.split(";")[0]
-    if "(" in name:
-        name = name[: name.find("(") - 1]
-    return name
-
-@lru_cache(maxsize=None)
-def languages_dict():
-    return {lang["iso639_1"]: simplify_language_name(lang["name"]) for lang in iso639.data if lang["iso639_1"]}
-
-
-def clean_language(inp):
-    if inp not in languages_dict():
-        return "en"
-    else:
-        return inp
 
 def sanity_check_times(start_time, end_time):
     """
@@ -253,7 +264,7 @@ def top_menu():
         manage = "Create"
     return [
         (url_for("index"), "", "Browse"),
-        (url_for("search_seminars"), "", "Search"),
+        #(url_for("search_seminars"), "", "Search"),
         (url_for("create.index"), "", manage),
         (url_for("info"), "", "Info"),
         (url_for("user.info"), "", account),
@@ -267,61 +278,20 @@ def allowed_shortname(shortname):
     return bool(shortname_re.match(shortname))
 
 
-# Note the caching: if you add a topic you have to restart the server
-@lru_cache(maxsize=None)
-def topics():
-    return sorted(
-        ((rec["abbreviation"], rec["name"], rec["subject"]) for rec in db.topics.search({}, ["abbreviation", "name", "subject"])),
-        key=lambda x: (x[2].lower(), x[1].lower()),
-    )
 
-# A temporary measure in case talks/seminars with physics topics are visible (they might be crosslisted with math)
-@lru_cache(maxsize=None)
-def physics_topic_dict():
-    return dict([(rec["subject"] + "_" + rec["abbreviation"], rec["name"]) for rec in db.topics.search()])
-
-def restricted_topics(talk_or_seminar=None):
-    if topdomain() == 'mathseminars.org':
-        if talk_or_seminar is None or talk_or_seminar.subjects is None:
-            subjects = []
-        else:
-            subjects = talk_or_seminar.subjects
-        return [('math_' + ab, name) for (ab, name, subj) in topics() if subj == "math" or subj in subjects]
-    else:
-        return user_topics(talk_or_seminar)
-
-def user_topics(talk_or_seminar=None):
-    subjects = []
-    if talk_or_seminar is not None:
-        subjects = sorted(set(subjects + talk_or_seminar.subjects))
-    if len(subjects) == 1:
-        subject = subjects[0]
-        return [(subj + '_' + ab, name) for (ab, name, subj) in topics() if subj == subject]
-    if len(subjects) == 0:
-        # Show all subjects rather than none
-        subjects = [subj for (subj, name) in subject_pairs()]
-    return [(subj + '_' + ab, subj.capitalize() + ': ' + name) for (ab, name, subj) in topics() if subj in subjects]
 
 @lru_cache(maxsize=None)
 def subject_pairs():
     return sorted(
-        [(rec["subject_id"], rec["name"]) for rec in db.subjects.search({},["subject_id","name"])],
+        [
+            (rec["subject_id"], rec["name"])
+            for rec in db.subjects.search({}, ["subject_id", "name"])
+        ],
         key=lambda x: x[1].lower(),
     )
 
-@lru_cache(maxsize=None)
-def subject_dict():
-    return dict(subject_pairs())
-
-@lru_cache(maxsize=None)
-def topic_dict(include_subj=True):
-    if include_subj:
-        return {subj + "_" + ab: subj.capitalize() + ": " + name for (ab, name, subj) in topics()}
-    else:
-        return {subj + "_" + ab: name for (ab, name, subj) in topics()}
-
-
 def clean_topics(inp):
+    from .topic import topic_dag # avoiding circular import
     if inp is None:
         return []
     if isinstance(inp, str):
@@ -333,23 +303,10 @@ def clean_topics(inp):
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in topic_dict()]
+        inp = [elt for elt in inp if elt in topic_dag.by_id]
+        inp.sort()
     return inp
 
-def clean_subjects(inp):
-    if inp is None:
-        return []
-    if isinstance(inp, str):
-        inp = inp.strip()
-        if inp and inp[0] == "[" and inp[-1] == "]":
-            inp = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
-            if inp == [""]: # was an empty array
-                return []
-        else:
-            inp = [inp]
-    if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in subject_dict()]
-    return inp
 
 def count_distinct(table, counter, query={}, include_deleted=False):
     query = dict(query)
@@ -388,6 +345,7 @@ def search_distinct(
     sort=None,
     info=None,
     include_deleted=False,
+    more=False,
 ):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -408,19 +366,31 @@ def search_distinct(
         query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
-    cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     tbl = IdentifierWrapper(table.search_table)
     nres = count_distinct(table, counter, query)
     if limit is None:
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
+    if more:
+        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more[0]])
+        extra_cols = extra_cols + ("more",)
+        values = more[1] + values
+    else:
+        cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
     cur = table._execute(
         fselecter,
         values,
         buffered=(limit is None),
-        slow_note=(table.search_table, "analyze", query, repr(projection), limit, offset),
+        slow_note=(
+            table.search_table,
+            "analyze",
+            query,
+            repr(projection),
+            limit,
+            offset,
+        ),
     )
     results = iterator(cur, search_cols, extra_cols, projection)
     if limit is None:
@@ -436,7 +406,18 @@ def search_distinct(
             offset -= (1 + (offset - nres) / limit) * limit
             if offset < 0:
                 offset = 0
-            return search_distinct(table, selecter, counter, iterator, query, projection, limit, offset, sort, info)
+            return search_distinct(
+                table,
+                selecter,
+                counter,
+                iterator,
+                query,
+                projection,
+                limit,
+                offset,
+                sort,
+                info,
+            )
         info["query"] = dict(query)
         info["number"] = nres
         info["count"] = limit
@@ -445,7 +426,16 @@ def search_distinct(
     return list(results)
 
 
-def lucky_distinct(table, selecter, construct, query={}, projection=2, offset=0, sort=[], include_deleted=False):
+def lucky_distinct(
+    table,
+    selecter,
+    construct,
+    query={},
+    projection=2,
+    offset=0,
+    sort=[],
+    include_deleted=False,
+):
     query = dict(query)
     if not include_deleted:
         query["deleted"] = {"$or": [False, {"$exists": False}]}
@@ -534,7 +524,9 @@ def process_user_input(inp, col, typ, tz=None):
         assert tz is not None
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
-        if not validate_url(inp) and not (col == "live_link" and (inp == "see comments" or inp == "See comments")):
+        if not validate_url(inp) and not (
+            col == "live_link" and (inp == "see comments" or inp == "See comments")
+        ):
             raise ValueError("Invalid URL")
         return inp
     elif col.endswith("email") and typ == "text":
@@ -546,6 +538,7 @@ def process_user_input(inp, col, typ, tz=None):
         res = validate_daytime(inp)
         if res is None:
             raise ValueError("Invalid time of day, expected format is hh:mm")
+        return res
     elif typ == "daytimes":
         inp = cleanse_dashes(inp)
         res = validate_daytimes(inp)
@@ -590,15 +583,31 @@ def process_user_input(inp, col, typ, tz=None):
 
 
 def format_errmsg(errmsg, *args):
-    return Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)))
+    return Markup(
+        "Error: "
+        + (
+            errmsg
+            % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)
+        )
+    )
 
 
 def format_input_errmsg(err, inp, col):
-    return format_errmsg('Unable to process input %s for property %s: {0}'.format(err), '"' + str(inp) + '"', col)
+    return format_errmsg(
+        "Unable to process input %s for property %s: {0}".format(err),
+        '"' + str(inp) + '"',
+        col,
+    )
 
 
 def format_warning(warnmsg, *args):
-    return Markup("Warning: " + (warnmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)))
+    return Markup(
+        "Warning: "
+        + (
+            warnmsg
+            % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)
+        )
+    )
 
 
 def flash_warnmsg(warnmsg, *args):
@@ -620,24 +629,12 @@ def show_input_errors(errmsgs):
     return render_template("inputerror.html", messages=errmsgs)
 
 
-def toggle(tglid, value, checked=False, classes="", onchange="", name=""):
-    if classes:
-        classes += " "
-    return """
-<input type="checkbox" class="{classes}tgl tgl-light" value="{value}" id="{tglid}" onchange="{onchange}" name="{name}" {checked}>
-<label class="tgl-btn" for="{tglid}"></label>
-""".format(
-        tglid=tglid, value=value, checked="checked" if checked else "", classes=classes, onchange=onchange, name=name,
-    )
-
-
 class Toggle(SearchBox):
     def _input(self, info=None):
         main = toggle(
             tglid="toggle_%s" % self.name,
             name=self.name,
-            value="yes",
-            checked=info is not None and info.get(self.name, False),
+            value=int(info.get(self.name, -1)),
         )
         return '<span style="display: inline-block">%s</span>' % (main,)
 
@@ -655,7 +652,27 @@ def ics_file(talks, filename, user=current_user):
     bIO = BytesIO()
     bIO.write(cal.to_ical())
     bIO.seek(0)
-    return send_file(bIO, attachment_filename=filename, as_attachment=True, add_etags=False)
+    return send_file(
+        bIO, attachment_filename=filename, as_attachment=True, add_etags=False
+    )
+
+def num_columns(labels):
+    if not labels:
+        return 1
+    mlen = max(len(label) for label in labels)
+    # The following are guesses that haven't been tuned much.
+    if mlen > 50:
+        return 1
+    elif mlen > 34:
+        return 2
+    elif mlen > 20:
+        return 3
+    elif mlen > 16:
+        return 4
+    elif mlen > 10:
+        return 5
+    else:
+        return 6
 
 def url_for_with_args(name, args, **kwargs):
     query = ('?' + urlencode(args)) if args else ''

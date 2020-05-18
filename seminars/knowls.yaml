@@ -62,7 +62,7 @@ seminar_id:
 seminar_name:
   title: Name
   contents: |
-    This is the full name of the series, to appear on the browse and search pages.
+    This is the full name of the series, to appear on the Browse page.
     It can be changed at any time.
     Like Wikipedia, our site uses <a href="https://en.wikipedia.org/wiki/Letter_case#Sentence_case">sentence case</a>
     for titles:
@@ -70,20 +70,17 @@ seminar_name:
 seminar_description:
   title: Short description
   contents: |
-    A short desciption of your series that will be displayed in our search pages
-    along with the name and institutions.
-    Here you might indicate, for example, whether the series is a research seminar series or a learning seminar series.
+    The short description of your seminar series will appear with 
+    the name and institutions when seminar series are displayed 
+    on the Browse page.
+    Here you might indicate, for example, whether the series is 
+    a research seminar series or a learning seminar series.
     The short desription can be at most 50 characters long.
 seminar_homepage:
   title: Homepage
   contents: |
     The external homepage of your series, if one exists.
     This should be a URL beginning with "http".
-subjects:
-  title: Subjects
-  contents: |
-    You need to associate one or more subjects to a series.
-    The list of subjects can be changed at any time.
 institutions:
   title: Institutions
   contents: |
@@ -92,9 +89,10 @@ institutions:
 topics:
   title: Topics
   contents: |
-    You may associate zero or more topics to a series or talk.
-    Each topic corresponds to an arXiv subject class;
+    You need to associate one or more topics to a series or talk.
+    In math and physics, topics correspond to an arXiv subject class;
     for example, <i>number theory</i> corresponds to <a href="https://arxiv.org/list/math.NT/recent">math.NT</a>.
+    In other areas, topics may be drawn from other classification schemes.
     New talks inherit the topics of the series to which they belong;
     these can then be modified for a particular talk if desired.
     Changing the topics of a series has no impact on existing talks.
@@ -356,9 +354,10 @@ visibility:
   title: Visibility
   contents: |
     <i>Public</i>: Any user can see the series and its talks.<br>
-    <i>Unlisted</i>: The series and its talks are not listed on the Browse or Search pages,
+    <i>Unlisted</i>: The series and its talks are not listed on the Browse page,
                       but you can share their links with anyone.<br>
-    <i>Private</i>: Only your co-organizers can see the series and its talks.<br><br>
+    <i>Private</i>: Only your co-organizers can see 
+                      the series and its talks.<br><br>
     You must be endorsed in order for your series to be visible to anyone else;
     your setting here will become active once you get endorsed.
 hidden:
@@ -376,27 +375,68 @@ export:
 filter:
   title: Filter
   contents: |
-    <p>Each filter restricts the talk list,
-    and the talks displayed are those in the <i>intersection</i> of the subsets defined by the activated filters.</p>
-    <p>Start by clicking the word <u>subject</u> above, which sets the subject filter and opens the subject menu.
-    Initially no subjects are selected, so the activation of the subject filter means that no talks are displayed,
-    but each time you click on a subject to add it, talks in that subject will appear.
-    Click <u>subject</u> again to close the subject menu.
-    Toggling the subject filter off and on now switches between displaying all talks vs. only talks in your selected subjects.</p>
-    <p>Next click <u>topic</u> to restrict to selected topics within each subject,
-    and click <u>language</u> to restrict to talks in the languages you understand.
-    If all the filters are turned on, then a talk must satisfy all the criteria in order to be displayed.</p>
-    <p><i>Example:</i> Suppose that the subject filter is activated and physics is not a selected subject.
-      If you open the topics menu and select optics (a topic within physics), then no optics talks will appear,
-      because the subject filter is hiding <i>all</i> physics talks.</p>
+    Each filter toggle in the top row <i>restricts</i> the event list.
+    The events displayed are those in the <i>intersection</i> 
+    of the subsets defined by the activated filters and the search box.
+    <ul>
+        <li><b>topic:</b> 
+            Clicking the word <u>topic</u> above
+            activates the topic filter and opens the topic menu.
+            Initially no topics are selected, so no events are displayed,
+            but as you add topics, events matching that topic will appear.
+            Many toggles for adding topics are 3-way: 
+            clicking anywhere in the toggle cycles between 
+            <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right).  
+            When a submenu for a centered toggle is open, 
+            subtopics are displayed; initially none are selected, 
+            but you can click their toggles to add them.
+            Click <u>topic</u> again to close the topic menu 
+            and all its submenus.
+            Toggling the topic filter off and on now switches between 
+            displaying all events vs. 
+            only events in the union of your selected topics.</li>
+        <li><b>language:</b> 
+            Click <u>language</u> to restrict to 
+            events in the languages you understand.</li>
+        <li><b>saved:</b> 
+            After you have <a href="user/info">registered</a>, 
+            clicking the toggle labeled <u>saved</u> will restrict the list 
+            to talks and series you have saved as favorites.</li>
+        <li><b>more:</b>
+            Click <u>more</u> to open a box with additional filters; 
+            these take effect when you click the Apply button 
+            inside the box.</li>
+    <li><b>search:</b>
+            If text is entered in the search box, 
+            then once you hit <kbd>return</kbd> or click the magnifying glass, 
+            an event will be listed only if one of its attributes
+            matches the text.
+            Clicking the x inside the search box clears the text
+            and removes the restriction.</li>
+    </ul>
     <table>
     <tr>
       <td>
         <a style="margin-left: 50px" href="info">Introduction to the site</a>
       </td>
       <td>
-        <a style="margin-left: 50px" href="faq">More help</a>
+        <a style="margin-left: 50px" href="faq">Detailed help</a>
       </td>
     </tr>
     </table>
-    <p style="text-align:right;">To close this box, click the blue word <u>Filter</u> above.</p>
+    <p style="text-align:right;">To close this box, 
+    click the blue word <u>Filter</u> above.</p>
+saved:
+  title: saved
+  contents: |
+    Setting this filter restricts the list to events 
+    you have saved as favorites.
+saved_ad:
+  title: saved
+  contents: |
+    Only registered users can apply this filter.
+    If you <a href="user/register">register</a>, 
+    you will be able to save talks and series, 
+    export them to an external calendar app 
+    (e.g., Google Calendar, iCal, or Outlook), 
+    and use this filter to restrict the list below to your saved favorites.

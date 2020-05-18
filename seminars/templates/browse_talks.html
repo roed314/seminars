@@ -1,15 +1,11 @@
 {% extends 'browse.html' %}
 
 {% block browsing %}
+<input type="hidden" name="past" value="{{ past }}">
 
-<br>
-<table id="timezone-table">
-   <tr>
-    <td style="padding-right: 2em;">
-      Times in {{ user.show_timezone("browse") }}
-    </td>
-   </tr>
-</table>
+<div id="timezone-table" style="padding: 10px 4px 0px 4px;">
+  Times in {{ user.show_timezone("browse") }}
+</div>
 
 <table id="browse-talks" class="talk-table ntdata">
   <thead>
@@ -20,7 +16,7 @@
     {% endif %}
   </thead>
   <tbody>
-    {% for talk, row_attributes  in talk_row_attributes %}
+    {% for talk, row_attributes in talk_row_attributes %}
     <tr {{ row_attributes | safe }} >
       {% if past %}
       {{ talk.oneline(include_slides=True, include_video=True, include_subscribe=False) | safe }}

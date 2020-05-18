@@ -111,7 +111,7 @@ live_link           | text        | URL for online meeting link (e.g. Zoom), may
 online              | boolean     | True if talk can be viewed online (copied from seminar), note that both online and room may be set
 paper_link          | text        | URL providing link to a paper the talk is about
 room                | text        | physical location of the talk [inherited]
-seminar_ctr         | int         | unique identifier for this talk among the talks in this series
+seminar_ctr         | integer     | unique identifier for this talk among the talks in this series
 seminar_id          | text        | seminars.shortname of series containing this talk (every talk belongs to some series)
 slides_link         | text        | URL providing link to slides for the talk
 speaker             | text        | full name of the speaker (required) [to be replaced by speakers]

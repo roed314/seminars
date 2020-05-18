@@ -1,6 +1,15 @@
 {% extends 'browse.html' %}
 
 {% block browsing %}
+<input type="hidden" name="past" value="{{ past }}">
+
+<div id="timezone-table" style="padding: 10px 4px 0px 4px;">
+{% if not is_conference %}
+Times in {{ user.show_timezone("browse") }}
+{% else %}
+Dates in conference time zone
+{% endif %}
+</div>
 
 <table id="browse-confs" class="conf-table ntdata">
   <thead>
@@ -18,12 +27,6 @@
       {% else %}
       {{ series.oneline() | safe }}
       {% endif %}
-    </tr>
-    {% endfor %}
-    {% for conf in conferences %}
-    {# filter_topic, filter_suject, filter_language #}
-    <tr class="talk {% for topic in talk.topics %} topic-{{topic}} {% endfor %} subject-filtered {% for subject in talk.subjects %} subject-{{subject}} {% endfor %} lang-{{ talk.language }} language-filtered {%if not talk.is_subscribed()-%} calendar-filtered{%- endif%}">
-      {{ talk.oneline() | safe }}
     </tr>
     {% endfor %}
   </tbody>

@@ -2,6 +2,7 @@ email_validator
 html2text
 python-dateutil
 Flask-Mail
+flask_cors
 itsdangerous
 icalendar
 iso639

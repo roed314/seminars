@@ -7,7 +7,6 @@
   <input type="hidden" name="seminar_ctr" value="{{ talk.seminar_ctr | blanknone }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if talk.new else 'no' }}"/>
   <input type="hidden" name="token" value="{{ talk.token }}"/>
-  <input type="hidden" name="subjects" value="{{ talk.subjects  | safe }}" />
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
   <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
@@ -15,11 +14,11 @@
 
   <h3>Speaker info and talk content</h3>
 
-{% if talk.seminar.user_can_edit() %}
+  {% if talk.seminar.user_can_edit() %}
   {{ talk.send_speaker_link() | safe }}
-{% endif %}
+  {% endif %}
 
-    <table>
+  <table>
     <tr>
       <td style="width:150px">{{ KNOWL("speaker") }}</td>
       <td><input name="speaker" value="{{ talk.speaker | blanknone }}" style="width:600px;" maxlength="{{ maxlength['speaker'] }}" placeholder="Firstname Lastname"/></td>
@@ -43,17 +42,14 @@
       <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" maxlength="{{ maxlength['title'] }}" placeholder="Leave blank if TBA.  $\TeX$ symbols are OK here." /></td>
       <td class="forminfo" />Capitalize first word and proper nouns only.  Leave blank if TBA.</td>
     </tr>
-    {% if topdomain != "mathseminars.org" %} {# FIXME: temporary measure during addition of physics #}
-    <tr>
-      <td>{{ ASTKNOWL("subjects") }}</td>
-      <td><span id="subject_selector" style="width:610px;"></span></td>
-      <td class="forminfo">Select at least one subject</td>
-    <tr>
-    {% endif %}
     <tr>
       <td>{{ KNOWL("topics") }}</td>
+      <td><span class="topicDAG" id="topicDAG_selector"></span></td>
+    </tr>
+    <tr>
+      <td></td>
       <td>
-        <span id="topic_selector" style="width:610px;"></span>
+        <div class="topicDAG"></div>
       </td>
     </tr>
     <tr>
@@ -70,10 +66,10 @@
       <td>{{ KNOWL("slide_link") }}</td>
       <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['slides_link'] }}"placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
     </tr>
-  <tr>
-    <td>{{ KNOWL("abstract") }}</td>
-    <td style="align:right;"><a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a></td>
-  </tr>
+    <tr>
+      <td>{{ KNOWL("abstract") }}</td>
+      <td style="align:right;"><a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a></td>
+    </tr>
   </table>
   <table>
     <tr>
@@ -83,28 +79,28 @@
     </tr>
   </table>
 
-<hr style="width:800px;">
+  <hr style="width:800px;">
 
-<div id="view-wrapper" class="knowl" style="width:670px;">
-  <div id="view-preview">
-    <h2 id="view-title"></h2>
-    <div id="view-abstract"></div>
+  <div id="view-wrapper" class="knowl" style="width:670px;">
+    <div id="view-preview">
+      <h2 id="view-title"></h2>
+      <div id="view-abstract"></div>
+    </div>
   </div>
-</div>
 
   <hr style="width:800px;">
 
-<h3>Time</h3>
+  <h3>Time</h3>
 
   <table>
-{#
+    {#
     <tr>
       <td style="width:150px;">{% if talk.seminar.is_conference %} {{ KNOWL("conference") }} {% else %} {{ KNOWL("seminar") }} {% endif %}</td>
       <td>
         <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>
       </td>
     </tr>
- #}
+    #}
 
     {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
@@ -120,14 +116,14 @@
     </tr>
     <tr>
       <td>{{ ASTKNOWL("talk_start_time") }}</td>
-      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" /></td>
+      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" required/></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("talk_end_time") }}</td>
-      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" /></td>
+      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" required/></td>
     </tr>
 
- {% else %}
+    {% else %}
     {# non-organizers cannot edit the following attributes #}
     <input type="hidden" name="timezone" value="{{ talk.timezone }}" />
     <input type="hidden" name="start_time" value="{{ talk.editable_start_time() }}" />
@@ -144,11 +140,11 @@
     </tr>
     {% endif %}
     {% endif %} {# attributes non-organizers can edit #}
-</table>
+  </table>
 
-<h3>Venue and access links</h3>
+  <h3>Venue and access links</h3>
 
-<table>
+  <table>
     {# only seminar organizers can edit the following attributes #}
     {% if talk.seminar.user_can_edit() %}
     <tr>
@@ -184,7 +180,7 @@
         </select>
       </td>
     </tr>
-     <tr>
+    <tr>
       <td>{{ KNOWL("video_link") }}</td>
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['video_link'] }}"placeholder="https://www.youtube.com/watch?v=abc123"></td>
     </tr>
@@ -208,106 +204,65 @@
     {% endif %} {# attributes non-organizers can edit #}
   </table>
 
-<h3>Comments</h3>
+  <h3>Comments</h3>
 
-<table>
+  <table>
     <tr>
       <td colspan="2">{{ KNOWL("talk_comments") }}</td>
     </tr>
     <tr>
       <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Talk-specific livestream access instructions?  Notes about the speaker?  HTML and $\TeX$ are OK here.  Both the talk comments and the series comments below will appear on the talk's page.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
-</table>
-<br>
-<table>
-      <tr>
-        <td colspan="2">{{ KNOWL("series_comments") }}</td>
-      </tr>
-  {% if talk.seminar.comments %}
-      <tr><td colspan="2" style="width:770px;">{{ talk.seminar.show_comments() | safe }}<td></tr>
+  </table>
+  <br>
+  <table>
+    <tr>
+      <td colspan="2">{{ KNOWL("series_comments") }}</td>
+    </tr>
+    {% if talk.seminar.comments %}
+    <tr><td colspan="2" style="width:770px;">{{ talk.seminar.show_comments() | safe }}<td></tr>
     {% else %}
-      <tr><td colspan="2" class="forminfo">None set<br><br></td></tr>
+    <tr><td colspan="2" class="forminfo">None set<br><br></td></tr>
     {% endif %}
-</table>
-<div style="height:4px;"></div>
-<table><tr>
-  <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">Save all changes</button></td>
-  <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">Cancel all changes</button></td>
-  {% if talk.user_can_delete() %}
-  <td><button class="delete" type="submit" name="submit" value="delete" onclick="unsaved = false;">Delete talk</button></td>
-  {% endif %}
-</tr></table>
+  </table>
+  <div style="height:4px;"></div>
+  <table><tr>
+      <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">Save all changes</button></td>
+      <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">Cancel all changes</button></td>
+      {% if talk.user_can_delete() %}
+      <td><button class="delete" type="submit" name="submit" value="delete" onclick="unsaved = false;">Delete talk</button></td>
+      {% endif %}
+    </tr></table>
 </form>
 
 <script defer type="text/javascript" src="{{ url_for('static', filename='talk_edit.js') }}"></script>
 <script type="text/javascript">
 
-/* topic and inst selector */
-const topicOptions = [
-  {% for ab, topic in user_topics(talk) %}
-  {
-    label: `{{ topic | safe}}`,
-    value: `{{ ab }}`,
-  },
-  {% endfor %}
-];
+  /* topics and language selector */
 
-const langOptions = [
-  {% for code, name in languages_dict.items() %}
-  {
-    label: `{{ name | safe}}`,
-    value: `{{ code }}`,
-  },
-  {% endfor %}
-];
+  {{ languages.js_options() | safe }}
 
-const subjOptions = [
-  {% for sid, name in subjects %}
-  {
-    label: `{{ name }}`,
-    value: `{{ sid }}`,
-  },
-  {% endfor %}
-];
+  const json_tree = {{ topic_dag.json(talk.topics) | safe }};
 
-document.addEventListener("DOMContentLoaded", function() {
-  /* prevent accidental closing of browser window */
-  {{ prevent_unsaved() }}
+  document.addEventListener("DOMContentLoaded", function() {
+    /* prevent accidental closing of browser window */
+    {{ prevent_unsaved() }}
 
-  /* register keyhandlers */
-  $(function() {
-    $("#inp_title").keyup(delay_refresh);
-    $("#inp_abstract").keyup(delay_refresh);
-    refresh_preview();
-  });
-
-  makeTopicSelector(
-    topicOptions,
-    {% if talk.new or not talk.topics %}[]{% else %}{{ talk.topics | safe }}{% endif %},
-  );
-
-  makeLanguageSelector(
-    langOptions,
-    "{{ talk.language }}");
-
-  makeSubjectSelector(
-    subjOptions,
-    {{ talk.subjects | safe }});
-
-  $('input[name="subjects"]').change(
-    function (){
-      if( $(this).val() == '[]') {
-      $("#subject_selector").notify(
-      "Please select at least one subject",
-        {className: "error", position: "right"})
-      } else {
-      $("#topic_selector").notify(
-      "Save your changes to load new topics options",
-        {className: "info", position: "right"})
-      }
+    /* register keyhandlers */
+    $(function() {
+      $("#inp_title").keyup(delay_refresh);
+      $("#inp_abstract").keyup(delay_refresh);
+      refresh_preview();
     });
 
-});
+    makeTopicsTree(json_tree);
+
+    makeLanguageSelector(
+      langOptions,
+      "{{ talk.language }}");
+
+
+  });
 </script>
 
 {% endblock %}
