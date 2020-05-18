@@ -442,6 +442,16 @@ i.fa.close:hover {
     background: inherit;
 }
 
+.view_only.access_button.is_link a {
+    border: none;
+    border-radius: 4px;
+    background: orchid;
+}
+
+.view_only a:hover {
+    background: inherit;
+}
+
 .access_button.no_link {
     border: 2px solid black;
     background: #fff;
@@ -450,10 +460,6 @@ i.fa.close:hover {
 .starting_soon.access_button.no_link {
     border: 2px solid red !important;
     background: #fff !important;
-}
-
-.view_only.access_button.is_link a {
-    background: orchid;
 }
 
 .password_hint {
