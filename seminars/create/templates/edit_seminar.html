@@ -31,7 +31,7 @@
       <tr>
         <td>{{ ASTKNOWL("seminar_name") }}</td>
         <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" maxlength="{{ maxlength['name'] }}" required /></td>
-        <td class="forminfo" />Capitalize only the first word and proper nouns.</td>
+        <td class="forminfo">Capitalize only the first word and proper nouns.</td>
       </tr>
       <tr>
         <td>{{ KNOWL("seminar_description") }}</td>
@@ -66,7 +66,7 @@
             {% endfor %}
           </select>
         </td>
-        <td class="forminfo" />Be sure to set this correctly.</td>
+        <td class="forminfo">Be sure to set this correctly.</td>
       </tr>
       <tr>
         <td>{{ASTKNOWL("visibility")}}</td>
@@ -98,7 +98,7 @@
     <tr>
       <td>{{ KNOWL("periodicity") }}</td>
       <td>
-        <select id="frequency" name="frequency" style="width:610px;" />
+        <select id="frequency" name="frequency" style="width:610px;">
           {% for opt in options["frequency"] %}
             <option value="{{opt[0]}}" {% if seminar.frequency == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -129,7 +129,7 @@
           </select>
         </td>
         <td style="padding-left:1px; margin-left:0px; padding-right:29px;">
-          <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; {{hide}}" placeholder="15:00-16:00"/>
+          <input id="time_slot{{3*i+j}}" name="time_slot{{3*i+j}}" value="{{ seminar.time_slots[3*i+j] }}" style="width:90px; {{hide}}" placeholder="15:00-16:00" />
         </td>
         {% endfor %}
       {% endfor %}
@@ -138,7 +138,7 @@
   {% endif %}
     <tr>
       <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
-      <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"/></td>
+      <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"></td>
       <td class="forminfo">Leave blank if online only.</td>
     </tr>
     <tr>
@@ -153,7 +153,7 @@
     <tr class="online access_control">
       <td>{{ ASTKNOWL("access_control") }}</td>
       <td>
-        <select id="access_control" name="access_control" style="width:610px;" onchange="showaccess();" />
+        <select id="access_control" name="access_control" style="width:610px;" onchange="showaccess();">
           {% for opt in options["access_control"] %}
             <option value="{{opt[0]}}" {% if seminar.access_control == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -163,7 +163,7 @@
     <tr class="online access_time">
       <td>{{ ASTKNOWL("access_time") }}</td>
       <td>
-        <select name="access_time" style="width:610px;" />
+        <select name="access_time" style="width:610px;">
           {% for opt in options["access_time"] %}
             <option value="{{opt[0]}}" {% if seminar.access_time == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -186,12 +186,12 @@
     </tr>
     <tr class="online live_link">
       <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/..., https://bluejeans.com/j/..., https://www.google.meet/..."/></td>
+      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/..., https://bluejeans.com/j/..., https://www.google.meet/..."></td>
       <td class="forminfo">Leave blank if talk-specific.</td>
     </tr>
     <tr class="online stream_link">
       <td>{{ KNOWL("stream_link") }}</td>
-      <td><input name="stream_link" value="{{ seminar.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="e.g., https://www.youtube.com/watch?v=..."/></td>
+      <td><input name="stream_link" value="{{ seminar.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="e.g., https://www.youtube.com/watch?v=..."></td>
       <td class="forminfo">Leave blank if talk-specific.</td>
     </tr>
     <tr>
@@ -243,8 +243,8 @@
         <td><input class="org_name" name="org_name{{i}}" style="width:180px;" maxlength="{{ maxlength['name'] }}" /></td>
         <td><input class="org_homepage" name="org_homepage{{i}}" style="width:220px;" maxlength="{{ maxlength['hoempage'] }}"/></td>
         <td><input class="org_email" name="org_email{{i}}" style="width:220px;" maxlength="{{ maxlength['email'] }}" /></td>
-        <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes" /></td>
-        <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes" /></td>
+        <td align="center"><input type="checkbox" name="org_curator{{i}}" value="yes"></td>
+        <td align="center"><input type="checkbox" name="org_display{{i}}" value="yes"></td>
       {% endif %}
     </tr>
     {% endfor %}
