@@ -374,7 +374,6 @@ class WebTalk(object):
             return '<div class="access_button is_link">View-only livestream access <a href="%s">available</a></div>' % link
 
     def show_live_link(self, user=current_user, raw=False):
-        print("show_live_link")
         now = datetime.now(pytz.utc)
         if any([self.deleted, not self.online, not self.live_link, now > self.end_time]):
             return ""
@@ -397,7 +396,6 @@ class WebTalk(object):
             else:
                 return '<div class="access_button is_link"> Livestream access <a href="%s">available</a></div>' % link
 
-        print('access_control = '+talk.access_control)
         if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
             return show_link(self, user=user, raw=raw)
         elif self.access_control == 1:
@@ -452,10 +450,8 @@ Thank you,
                 link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
             else:
                 link = self.access_registration
-            print('link = ' + link)
             return '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
         else:  # should never happen
-            print("badness!")
             return ""
 
     def show_paper_link(self):
