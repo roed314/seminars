@@ -869,9 +869,15 @@ def register_for_talk(seminar_id, talkid):
     talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
-    if not talk.user_can_register():
-        flash_error("You must be logged in to a confirmed account in order to register.")
-        return redirect(url_for("index"))
+    # If registration isn't required just send them to the talk page
+    # where the user will see an appropriate livestream link
+    if talk.access_control != 4:
+        return redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
+    if current_user.is_anonymous:
+        return redirect(url_for("user.info", next=url_for("register_for_talk", seminar_id=seminar_id, talkid=talkid)))
+    if not current_user.email_confirmed:
+        flash_error("You need to confirm your email before you can register.")
+        return redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
     if not talk.live_link:
         return abort(404, "Livestream link for talk not found")
     if talk.register_user():
@@ -882,7 +888,6 @@ def register_for_talk(seminar_id, talkid):
         return redirect(talk.live_link)
     else:
         return redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
-
 
 
 # We allow async queries for title knowls

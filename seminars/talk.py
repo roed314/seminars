@@ -182,18 +182,18 @@ class WebTalk(object):
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
-    def user_can_register(self):
-        return current_user.email_confirmed
+    def user_is_registered(self, user=current_user):
+        if current_user.is_anonymous:
+            return False
+        rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(user.id)}
+        return True if db.talk_registrations.count(rec) else False
 
-    def register_user(self):
-        rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(current_user.id)}
-        print("checking registration for %s"%rec)
+    def register_user(self, user=current_user):
+        rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(user.id)}
         if db.talk_registrations.count(rec):
-            print("count = %s" % db.talk_registrations.count(rec))
             return False
         reg = rec
         reg["registration_time"] = datetime.now(tz=pytz.UTC)
-        print(reg)
         return db.talk_registrations.upsert(rec,reg)
 
     def registered_users(self):
@@ -366,7 +366,7 @@ class WebTalk(object):
         if self.deleted or not self.online or now > self.end_time:
             return ""
 
-        def showit(self, raw=False, reg=False):
+        def showit(self, user=current_user, raw=False):
             link = self.live_link if self.live_link else self.stream_link
             if not link:
                 return '' if raw else '<div class=access_button no_link">Livestream link not yet posted by organizers</div>'
@@ -377,7 +377,7 @@ class WebTalk(object):
                     return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Watch livestream <i class="play filter-white"></i></a></b></div>' % link
                 else:
                     return '<div class="access_button is_link"> View-only livestream access <a href="%s">available</a></div>' % link
-            if reg:
+            if self.acess_control == 4 and not self.user_is_registered(user):
                 link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
                 if raw:
                     return link
@@ -385,6 +385,8 @@ class WebTalk(object):
                     return '<div class="access_button is_link starting_soon"><b> <a href="%s">Instantly register and join livestream <i class="play filter-white"></i> </a></b></div>' % link
                 else:
                     return '<div class="access_button is_link"> <a href="%s">Instantly register</a> for livestream access</div>' % link
+            if raw:
+                return link
             if self.is_starting_soon():
                 return '<div class="access_button is_link starting_soon"><b> <a href="%s">Join livestream <i class="play filter-white"></i> </a></b></div>' % link
             else:
@@ -401,29 +403,42 @@ class WebTalk(object):
         elif self.access_control == 2:
             return showit(self, raw=raw)
         elif self.access_control in [3,4]:
-            if raw:
-                return "" #TODO: We could reutrn a login link with next set to live link here
             if user.is_anonymous:
                 link = url_for("user.info", next=url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
                 return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access</b></div>' % link
             elif not user.email_confirmed:
                 return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
             else:
-                return showit(self, raw=raw, reg=(self.access_control==4))
+                return showit(self, raw=raw)
         elif self.access_control == 5:
-            # If there is a view-only link, show that rather thank an external registration link
+            # If there is a view-only link, show that rather than an external registration link
             if self.stream_link:
                 return showit(self, raw=raw)
             if not self.access_registration:
                 # This should never happen, registration link is required, but just in case...
-                link = url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
                 return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</a></div>' % link
             if "@" in self.access_registration:
-                # TDOO: add template email body
-                link = "mailto:" + self.access_registration
+                body = """Dear organizers,
+
+                    I am interested in attending the talk
+                        {talk}
+                    by {speakername} in the series
+                        {series}
+                    listed on researchseminars.org at {url}.
+
+                    Thank you,
+
+                    {user}
+                    """.format(
+                        talk = self.title,
+                        series = self.seminar.name,
+                        talkul = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
+                        user = current_user.name)
+                msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
+                link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
             else:
                 link = self.access_registration
-            return reg_link if raw else '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
+            return link if raw else '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
         else:  # should never happen
             return ""
 
