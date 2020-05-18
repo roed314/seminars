@@ -371,7 +371,7 @@ class WebTalk(object):
             if raw:
                 return link
             if not link:
-                return '<div class=access_button no_link">Livestream link not yet posted by organizers.</div>'
+                return '<div class=access_button no_link">Livestream link not yet posted by organizers</div>'
             if link != self.live_link:
                 if self.is_starting_soon():
                     return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Watch livestream <i class="play filter-white"></i></a></b></div>' % link
@@ -401,9 +401,9 @@ class WebTalk(object):
         elif self.access_control in [3,4]:
             if user.is_anonymous:
                 # TODO link to login page
-                return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access.</b></div>' % url_for("user.info", next=url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
+                return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access</b></div>' % url_for("user.info", next=url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
             elif not user.email_confirmed:
-                return '<div class="access_button no_link">Please confirm your email address for livestream access.</div>'
+                return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
             else:
                 return showit(self, raw=raw, reg=(self.access_control==4))
         elif self.access_control == 5:
@@ -411,7 +411,7 @@ class WebTalk(object):
                 return showit(self, raw=raw)
             if not self.access_registration:
                 # This should never happen, registration link is required
-                return "" if raw else '<div class="access_button no_link">Registration link missing, please <a href="%s">contact an organizer</a>.</div>' % (
+                return "" if raw else '<div class="access_button no_link">Registration link missing, please <a href="%s">contact an organizer</a></div>' % (
                     url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
             reg_link = "mailto:" + self.access_registration if "@" in self.access_registration else self.access_registration
             return reg_link if raw else '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % reg_link
