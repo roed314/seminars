@@ -230,9 +230,7 @@ def housekeeping(fn):
 
 @login_page.route("/register/", methods=["GET", "POST"])
 def register():
-    if request.method == "GET":
-        return render_template("register.html", title="Register", email="")
-    elif request.method == "POST":
+    if request.method == "POST":
         email = request.form["email"]
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
@@ -261,6 +259,7 @@ def register():
         flask.flash(Markup("Hello! Congratulations, you are a new user!"))
         logger.info("new user: '%s' - '%s'" % (newuser.get_id(), newuser.email))
         return redirect(url_for(".info"))
+    return render_template("register.html", title="Register", email="")
 
 
 @login_page.route("/change_password", methods=["POST"])
@@ -390,14 +389,13 @@ def send_reset_password(email):
 
 @login_page.route("/reset_password", methods=["GET", "POST"])
 def reset_password():
-    if request.method == "GET":
-        return render_template("reset_password_ask_email.html", title="Forgot Password",)
-    elif request.method == "POST":
+    if request.method == "POST":
         email = request.form["email"]
         if userdb.user_exists(email):
             send_reset_password(email)
         flask.flash(Markup("Check your mailbox for instructions on how to reset your password"))
         return redirect(url_for(".info"))
+    return render_template("reset_password_ask_email.html", title="Forgot Password",)
 
 
 @login_page.route("/reset/<token>", methods=["GET", "POST"])
@@ -411,9 +409,7 @@ def reset_password_wtoken(token):
     if not userdb.user_exists(email):
         flash_error("The link is invalid or has expired.")
         return redirect(url_for(".info"))
-    if request.method == "GET":
-        return render_template("reset_password_wtoken.html", title="Reset password", token=token)
-    elif request.method == "POST":
+    if request.method == "POST":
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
         if pw1 != pw2:
@@ -427,6 +423,7 @@ def reset_password_wtoken(token):
         userdb.change_password(email, pw1)
         flask.flash(Markup("Your password has been changed. Please login with your new password."))
         return redirect(url_for(".info"))
+    return render_template("reset_password_wtoken.html", title="Reset password", token=token)
 
 
 # endorsement
