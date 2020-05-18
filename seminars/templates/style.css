@@ -452,6 +452,16 @@ i.fa.close:hover {
     background: #fff !important;
 }
 
+.starting_soon.view_only a:hover {
+    background: inherit;
+    color: #88f !important;
+}
+
+.view_only a:hover {
+    background: inherit;
+    color: #88f;
+}
+
 .password_hint {
     display: inline-block;
     font-weight: 120%;
