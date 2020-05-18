@@ -1,12 +1,13 @@
 
-from flask import jsonify, request
+import pytz
+from flask import jsonify, request, render_template
 from seminars import db
 from seminars.app import app
 from seminars.api import api_page
 from seminars.seminar import WebSeminar, seminars_lookup, seminars_search
 from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser
-from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, APIError, MAX_SLOTS, MAX_ORGANIZERS
+from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, adapt_datetime, APIError, MAX_SLOTS, MAX_ORGANIZERS
 from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
 
@@ -20,25 +21,72 @@ def version_error(version):
     return APIError({"code": "invalid_version",
                      "description": "Unknown API version: %s" % version}, 400)
 
+def get_request_json():
+    try:
+        return request.get_json()
+    except Exception as err:
+        raise APIError({"code": "json_parse_error",
+                        "description": "could not parse json",
+                        "error": str(err)}, 400)
+
+def _get_col(col, raw_data, activity):
+    val = raw_data.get(col)
+    if val is None:
+        raise APIError({"code": "unspecified_%s" % col,
+                        "description": "You must specify %s when %s" % (col, activity)}, 400)
+    return val
+
 @app.errorhandler(APIError)
 def handle_api_error(err):
     response = jsonify(err.error)
     response.status_code = err.status
     return response
 
-@api_page.route("/<int:version>/search_series", methods=["GET", "POST"])
-def search_series(version):
+@api_page.route("/help")
+def help():
+    return render_template("api_help.html", title="API", section="Info")
+
+@api_page.route("/<int:version>/lookup/series", methods=["GET", "POST"])
+def lookup_series(version=0):
     if version != 0:
         raise version_error(version)
     if request.method == "POST":
-        try:
-            raw_data = request.get_json()
-        except Exception as err:
-            raise APIError({"code": "json_parse_error",
-                            "description": "could not parse json",
-                            "error": str(err)}, 400)
+        raw_data = get_request_json()
+    else:
+        raw_data = dict(request.args)
+    series_id = _get_col("series_id", raw_data, "looking up a series")
+    result = seminars_lookup(series_id, objects=False, sanitized=True)
+    tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
+    # TODO: adapt the times, support daterange, sort
+    talks = talks_search({"seminar_id": series_id}, sanitized=True, objects=False)
+    return jsonify({"code": "success",
+                    "properties": result,
+                    "talks": talks})
+
+@api_page.route("/<int:version>/lookup/series", methods=["GET", "POST"])
+def lookup_talk(version=0):
+    if version != 0:
+        raise version_error(version)
+    if request.method == "POST":
+        raw_data = get_request_json()
+    else:
+        raw_data = dict(request.args)
+    series_id = get_series_id("series_id", raw_data, "looking up a talk")
+    series_ctr = get_series_ctr("series_ctr", raw_data, "looking up a talk")
+    result = talks_lookup(series_id, series_ctr, objects=False, sanitized=True)
+    tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
+    # TODO: adapt the times, support daterange
+    return jsonify({"code": "success",
+                    "properties": result})
+
+@api_page.route("/<int:version>/search/series", methods=["GET", "POST"])
+def search_series(version=0):
+    if version != 0:
+        raise version_error(version)
+    if request.method == "POST":
+        raw_data = get_request_json()
         query = raw_data.pop("query", {})
-        tz = raw_data.pop("tz", "UTC")
+        tz = raw_data.pop("timezone", "UTC")
     else:
         query = dict(request.args)
         tz = current_user.tz # Is this the right choice?
@@ -47,6 +95,7 @@ def search_series(version):
                 query[col] = process_user_input(val, col, db.seminars.col_type[col], tz)
             else:
                 raise APIError({"code": "unknown_column",
+                                "col": col,
                                 "description": "%s not a column of seminars" % col}, 400)
         raw_data = {}
     query["visibility"] = 2
@@ -57,12 +106,11 @@ def search_series(version):
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
                         "error": str(err)}, 400)
-    results = [sanitize_output(rec) for rec in results]
     return jsonify({"code": "success",
                     "results": results})
 
-@api_page.route("/<int:version>/search_talks", methods=["GET", "POST"])
-def search_talks(version):
+@api_page.route("/<int:version>/search/talks", methods=["GET", "POST"])
+def search_talks(version=0):
     if version != 0:
         raise version_error(version)
     if request.method == "POST":
@@ -77,7 +125,7 @@ def search_talks(version):
         projection = 1
         raw_data = {}
     query["hidden"] = False
-    visible_series = set(seminars_search({"visibility": 2}, "seminar_id"))
+    visible_series = set(seminars_search({"visibility": 2}, "shortname"))
     # TODO: Need to check visibility on the seminar
     try:
         results = talks_search(query, projection, objects=False, **raw_data)
@@ -85,7 +133,7 @@ def search_talks(version):
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
                         "error": str(err)}, 400)
-    results = [sanitize_output(rec) for rec in results if rec["seminar_id"] in visible_series]
+    results = [rec for rec in results if rec["seminar_id"] in visible_series]
     return jsonify({"code": "success",
                     "results": results})
 
@@ -122,7 +170,7 @@ def test_api(version, user):
 
 @api_page.route("/<int:version>/save/series/", methods=["POST"])
 @api_auth_required
-def save_series(version, user):
+def save_series(version=0, user=None):
     if version != 0:
         raise version_error(version)
     try:
@@ -238,7 +286,7 @@ def save_series(version, user):
 
 @api_page.route("/<int:version>/save/talk/", methods=["POST"])
 @api_auth_required
-def save_talk(version, user):
+def save_talk(version=0, user=None):
     if version != 0:
         raise APIError({"code": "invalid_version",
                         "description": "Unknown API version: %s" % version}, 400)

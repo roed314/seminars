@@ -685,15 +685,21 @@ def seminars_lucky(*args, **kwds):
     """
     organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
-    return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("seminars")
+    else:
+        table = db.seminars
+    return lucky_distinct(table, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, objects=True):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, sanitized=False, objects=True):
     return seminars_lucky(
         {label_col: shortname},
         projection=projection,
         organizer_dict=organizer_dict,
         include_deleted=include_deleted,
+        sanitized=sanitized,
         objects=objects,
     )
 

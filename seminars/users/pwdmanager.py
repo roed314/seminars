@@ -17,6 +17,7 @@ from lmfdb.logger import critical
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
+import secrets
 from .main import logger
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
@@ -175,6 +176,11 @@ class PostgresUserTable(PostgresSearchTable):
             db.seminar_organizers.delete({"email": ilike_query(email)})
             db.talks.update({"speaker_email": ilike_query(email)}, {"speaker_email": ""})
             self.update({"id": uid}, {key: None for key in self.search_cols}, restat=False)
+
+    def reset_api_token(self, uid):
+        new_token = secrets.token_urlsafe(32)
+        self.update({"id": int(uid)}, {"api_token": new_token}, restat=False)
+        return new_token
 
 userdb = PostgresUserTable()
 
@@ -342,7 +348,10 @@ class SeminarsUser(UserMixin):
 
     @property
     def api_token(self):
-        return self._data.get("api_token")
+        token = self._data.get("api_token")
+        if token is None:
+            token = userdb.reset_api_token(self._uid)
+        return token
 
     @property
     def ics(self):
@@ -563,6 +572,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
 
     def get_id(self):
         return
+
+    @property
+    def api_token(self):
+        return None
 
     @property
     def email(self):

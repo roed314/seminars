@@ -608,9 +608,6 @@ def format_warning(warnmsg, *args):
 def flash_warnmsg(warnmsg, *args):
     flash(format_warning(warnmsg, *args), "warning")
 
-def flash_warning(warnmsg, *args):
-    flash(format_warning(warnmsg, *args), "error")
-
 def format_infomsg(infomsg, *args):
     return Markup(infomsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
 

@@ -429,6 +429,12 @@ def reset_password_wtoken(token):
         return redirect(url_for(".info"))
 
 
+@login_page.route("/reset_api_token")
+@creator_required
+def reset_api_token():
+    userdb.reset_api_token(current_user._uid)
+    return redirect(url_for(".info"))
+
 # endorsement
 
 

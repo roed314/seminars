@@ -440,3 +440,12 @@ saved_ad:
     export them to an external calendar app 
     (e.g., Google Calendar, iCal, or Outlook), 
     and use this filter to restrict the list below to your saved favorites.
+api_token:
+  title: API token
+  contents: |
+    You can use this token to update talks and seminars using the API.
+    You should protect this key as you would a password, since it provides
+    access to your account.
+    If you have reason to suspect that it has been compromised, you can use
+    the reset link to change it and obtain a new key (the old one will
+    immediately cease functioning).

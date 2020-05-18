@@ -1,4 +1,5 @@
-import pytz, random
+import pytz
+import secrets
 from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
@@ -58,7 +59,7 @@ class WebTalk(object):
         if self.new:
             self.seminar_id = seminar_id
             self.seminar_ctr = None
-            self.token = "%016x" % random.randrange(16 ** 16)
+            self.token = secrets.token_hex(8)
             self.display = seminar.display
             self.online = getattr(seminar, "online", bool(seminar.live_link))
             self.timezone = seminar.timezone
@@ -745,14 +746,20 @@ def talks_lucky(*args, **kwds):
     """
     seminar_dict = kwds.pop("seminar_dict", {})
     objects = kwds.pop("objects", True)
-    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("talks")
+    else:
+        table = db.talks
+    return lucky_distinct(table, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, objects=True):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, sanitized=False, objects=True):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
         include_deleted=include_deleted,
+        sanitized=sanitized,
         objects=objects,
     )
