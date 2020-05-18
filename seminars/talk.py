@@ -377,7 +377,7 @@ class WebTalk(object):
                     return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Watch livestream <i class="play filter-white"></i></a></b></div>' % link
                 else:
                     return '<div class="access_button is_link"> View-only livestream access <a href="%s">available</a></div>' % link
-            if self.acess_control == 4 and not self.user_is_registered(user):
+            if self.access_control == 4 and not self.user_is_registered(user):
                 link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
                 if raw:
                     return link
@@ -422,7 +422,7 @@ class WebTalk(object):
 
                     I am interested in attending the talk
                         {talk}
-                    by {speakername} in the series
+                    by {speaker} in the series
                         {series}
                     listed on researchseminars.org at {url}.
 
@@ -431,6 +431,7 @@ class WebTalk(object):
                     {user}
                     """.format(
                         talk = self.title,
+                        speaker = self.speaker,
                         series = self.seminar.name,
                         talkul = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
                         user = current_user.name)
