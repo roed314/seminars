@@ -87,8 +87,6 @@ def search_series(version=0):
         raw_data = get_request_json()
         query = raw_data.pop("query", {})
         tz = raw_data.pop("timezone", "UTC")
-        # remove raw keyword since it's a security threat for series_search
-        raw_data.pop("raw", None)
     else:
         query = dict(request.args)
         tz = current_user.tz # Is this the right choice?
@@ -122,8 +120,6 @@ def search_talks(version=0):
             raw_data = None
         query = raw_data.pop("query", {})
         projection = raw_data.pop("projection", 1)
-        # remove raw keyword since it's a security threat for talks_search
-        raw_data.pop("raw", None)
     else:
         query = dict(request.args)
         projection = 1
@@ -184,8 +180,6 @@ def save_series(version=0, user=None):
     if not isinstance(raw_data, dict):
         raise APIError({"code": "invalid_json",
                         "description": "request must contain a json dictionary"}, 400)
-    # remove raw keyword since it's a security threat
-    raw_data.pop("raw", None)
     # Temporary measure while we rename shortname
     series_id = raw_data.pop("series_id", None)
     raw_data["shortname"] = series_id
@@ -297,8 +291,6 @@ def save_talk(version=0, user=None):
         raise APIError({"code": "invalid_version",
                         "description": "Unknown API version: %s" % version}, 400)
     raw_data = request.get_json()
-    # remove raw keyword since it's a security threat
-    raw_data.pop("raw", None)
     # Temporary measure while we rename seminar_id
     series_id = raw_data.pop("series_id", None)
     raw_data["seminar_id"] = series_id
