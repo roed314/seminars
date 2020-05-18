@@ -115,9 +115,9 @@ class WebTalk(object):
             self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
             if "comments" in self.live_link:
                 self.live_link = ""
-                if self.homepage:
+                if self.seminar.homepage:
                     self.access_control = 5
-                    self.access_registration = self.homepage
+                    self.access_registration = self.seminar.homepage
         if self.online and self.live_link and "comments" in self.live_link:
             self.live_link = ""
         # remove columns we plan to drop
