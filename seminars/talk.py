@@ -360,7 +360,7 @@ class WebTalk(object):
 
     def show_password_hint(self):
         if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint]):
-            return '<div class="password_hint">(Password: %s)</div>' % self.access_hint
+            return '<div class="access_hint">(Password: %s)</div>' % self.access_hint
         else:
             return ""
 
@@ -642,7 +642,7 @@ Email link to speaker
             link = self.show_live_link(user=user, raw=True)
             if link.startswith("http"):
                 desc += "Interactive livestream: %s\n" % link
-                if self.access_control == 2 and self.password_hint:
+                if self.access_control == 2 and self.access_hint:
                     desc += "Password hint: %s\n" % self.access_hint
                 event.add("url", link)
         if self.stream_link:

@@ -472,7 +472,7 @@ i.fa.close:hover {
     background: #fff !important;
 }
 
-.password_hint {
+.access_hint {
     display: inline-block;
     font-weight: 120%;
     font-size: 90%;
