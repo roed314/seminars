@@ -78,7 +78,7 @@
   <table>
     <tr>
       <td colspan="2">
-        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" maxlength="{{ maxlength['abstract'] }}" placeholder="$\TeX$ symbols are OK here.  This is joint work with Leonhard Euler.  Livestream instructions go not here, but in the Livestream link,  Talk comments, or Series comments below.">{{talk.abstract | blanknone }}</textarea>
+        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" maxlength="{{ maxlength['abstract'] }}" placeholder="$\TeX$ symbols are OK here.  This is joint work with Leonhard Euler.  Livestream instructions do not go here!">{{talk.abstract | blanknone }}</textarea>
       </td>
     </tr>
   </table>
@@ -198,11 +198,11 @@
     </tr>
     <tr class="online live_link">
       <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/..., https://bluejeans.com/j/..., https://www.google.meet/..."/></td>
+      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="https://zoom.us/j/... or https://bluejeans.com/j/... or https://www.google.meet/..."/></td>
     </tr>
     <tr class="online stream_link">
       <td>{{ KNOWL("stream_link") }}</td>
-      <td><input name="stream_link" value="{{ talk.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="e.g., https://www.youtube.com/watch?v=..."/></td>
+      <td><input name="stream_link" value="{{ talk.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="https://www.youtube.com/watch?v=..."/></td>
     </tr>
     {% else %}
     {# attributes non-organizers cannot edit #}
@@ -236,7 +236,7 @@
       <td colspan="2">{{ KNOWL("talk_comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Talk-specific livestream access instructions?  Notes about the speaker?  HTML and $\TeX$ are OK here.  Both the talk comments and the series comments below will appear on the talk's page.">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Directions to the room?  Notes about the speaker?  Livestream instructions do not go here!  HTML and $\TeX$ are OK here.  Both the talk comments and the series comments below will appear on the talk's page.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
   </table>
   <br>

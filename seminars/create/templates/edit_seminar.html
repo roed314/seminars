@@ -35,7 +35,7 @@
       </tr>
       <tr>
         <td>{{ KNOWL("seminar_description") }}</td>
-        <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" maxlength="{{ maxlength['description'] }}" placeholder="research seminar" /></td>
+        <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" maxlength="{{ maxlength['description'] }}" placeholder="Research seminar" /></td>
       </tr>
       <tr>
         <td>{{ KNOWL("seminar_homepage") }}</td>
@@ -186,19 +186,19 @@
     </tr>
     <tr class="online live_link">
       <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/..., https://bluejeans.com/j/..., https://www.google.meet/..."></td>
+      <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="https://zoom.us/j/... or https://bluejeans.com/j/... or https://www.google.meet/..."></td>
       <td class="forminfo">Leave blank if talk-specific.</td>
     </tr>
     <tr class="online stream_link">
       <td>{{ KNOWL("stream_link") }}</td>
-      <td><input name="stream_link" value="{{ seminar.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="e.g., https://www.youtube.com/watch?v=..."></td>
+      <td><input name="stream_link" value="{{ seminar.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="https://www.youtube.com/watch?v=..."></td>
       <td class="forminfo">Leave blank if talk-specific.</td>
     </tr>
     <tr>
       <td colspan="2" style="padding-top: 10px">{{ KNOWL("comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Further instructions for obtaining livestream links?  Directions to the room?  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="6" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Directions to the room?  Livestream instructions do not go here!  HTML and $\TeX$ symbols are OK here.">{{ seminar.comments | blanknone }}</textarea></td>
     </tr>
   </table>
   <h3>Organizers</h3>
