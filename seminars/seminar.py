@@ -719,15 +719,11 @@ def seminars_search(*args, **kwds):
 
     Doesn't support split_ors or raw.  Always computes count.
     """
-    organizer_dict = kwds.pop("organizer_dict", {})
+    if "organizer_dict" in kwds:
+        organizer_dict = kwds.pop("organizer_dict")
+    else:
+        organizer_dict = all_organizers()
     objects = kwds.pop("objects", True)
-    more = kwds.get("more", False)
-    if more is not False: # might empty dictionary
-        more, moreval = db.seminars._parse_dict(more)
-        if more is None:
-            more = Placeholder()
-            moreval = [True]
-        kwds["more"] = more = (more, moreval)
     sanitized = kwds.pop("sanitized", False)
     if sanitized:
         table = sanitized_table("seminars")
@@ -780,7 +776,7 @@ def all_seminars():
     """
     return {
         seminar.shortname: seminar
-        for seminar in seminars_search({}, organizer_dict=all_organizers())
+        for seminar in seminars_search({}, organizer_dict=all_organizers(), prequery={"display": True})
     }
 
 def next_talks(query=None):

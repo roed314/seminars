@@ -1,12 +1,13 @@
 
 import pytz
-from flask import jsonify, request, render_template
+from flask import jsonify, request, render_template, redirect, url_for
 from seminars import db
 from seminars.app import app
 from seminars.api import api_page
 from seminars.seminar import WebSeminar, seminars_lookup, seminars_search
 from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser
+from seminars.users.main import creator_required
 from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, adapt_datetime, APIError, MAX_SLOTS, MAX_ORGANIZERS
 from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
@@ -46,6 +47,25 @@ def handle_api_error(err):
 def help():
     return render_template("api_help.html", title="API", section="Info")
 
+# Unlike most routes in this module, this one requires a live user to be logged in
+@api_page.route("/review/", methods=["POST"])
+@creator_required
+def review_api():
+    decision = request.form.get("submit")
+    series = set()
+    for series_id in db.seminar_organizers.search({"email": ilike_query(current_user.email)}, "seminar_id"):
+        series.add(series_id)
+    for series_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname"):
+        series.add(series_id)
+    if decision == "approve":
+        db.seminars.update({"shortname": {"$in": series}, "by_api": True}, {"display": True}, restat=False)
+        db.talks.update({"seminar_id": {"$in": series}, "by_api": True}, {"display": True}, restat=False)
+    else:
+        db.seminars.delete({"shortname": {"$in": series}, "by_api": True, "display": False}, restat=False)
+        db.talks.delete({"seminar_id": {"$in": series}, "by_api": True, "display": False}, restat=False)
+
+    return redirect(url_for("create.index"))
+
 @api_page.route("/<int:version>/lookup/series", methods=["GET", "POST"])
 def lookup_series(version=0):
     if version != 0:
@@ -58,7 +78,7 @@ def lookup_series(version=0):
     result = seminars_lookup(series_id, objects=False, sanitized=True)
     tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
     # TODO: adapt the times, support daterange, sort
-    talks = talks_search({"seminar_id": series_id}, sanitized=True, objects=False)
+    talks = talks_search({"seminar_id": series_id}, sanitized=True, objects=False, prequery={"display": True})
     return jsonify({"code": "success",
                     "properties": result,
                     "talks": talks})
@@ -258,13 +278,13 @@ def save_series(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    data, organizer_data, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers)
+    data, organizers, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers)
     if errmsgs:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
                         "errors": errmsgs}, 400)
     else:
-        new_version = WebSeminar(series_id, data=data, organizer_data=organizer_data)
+        new_version = WebSeminar(series_id, data=data, organizers=organizers)
     if series.new or new_version != series:
         # Series saved by the API are not displayed until user approves
         new_version.display = False

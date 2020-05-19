@@ -71,7 +71,7 @@ def parse_institution_talk(info, query):
         sub_query = {}
         # one day we will do joins
         parse_institution_sem(info, sub_query)
-        sem_shortnames = list(seminars_search(sub_query, "shortname"))
+        sem_shortnames = list(seminars_search(sub_query, "shortname", prequery={"display": True}))
         query["seminar_id"] = {"$in": sem_shortnames}
 
 
@@ -471,7 +471,6 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     talks_parser(info, more)
     if topdomain() == "mathseminars.org":
         query["topics"] = {"$contains": "math"}
-    query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
         query["end_time"] = {"$lt": datetime.now()}
@@ -481,7 +480,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
         query["end_time"] = {"$gte": datetime.now()}
         if sort is None:
             sort = ["start_time", "seminar_id"]
-    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
+    talks = list(talks_search(query, prequery={"display": True}, sort=sort, seminar_dict=all_seminars(), more=more))
     # Filtering on display and hidden isn't sufficient since the seminar could be private
     talks = [talk for talk in talks if talk.searchable()]
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
@@ -540,7 +539,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
                      "comments"])
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more)
-    query["display"] = True
     query["visibility"] = 2
     if conference:
         # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.  Ignore the possibility that the user/conference is in Kiribati.
@@ -557,9 +555,9 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     if sort is None: # not conferences
         # We don't currently call this case in the past, but if we add it we probably
         # need a last_talk_sorted that sorts by end time of last talk in reverse order
-        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers(), more=more))
+        series = next_talk_sorted(seminars_search(query, prequery={"display":True}, organizer_dict=all_organizers(), more=more))
     else:
-        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers(), more=more))
+        series = list(seminars_search(query, prequery={"display":True}, sort=sort, organizer_dict=all_organizers(), more=more))
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
     title = "Browse conferences" if conference else "Browse seminar series"
@@ -912,7 +910,7 @@ def show_institution(shortname):
         query["display"] = True
     events = list(
         seminars_search(
-            query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
+            query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(), prequery={"display": True},
         )
     )
     seminars = [S for S in events if not S.is_conference]
@@ -952,7 +950,8 @@ def ams():
     seminars = next_talk_sorted(
         seminars_search(
             query={"topics": {'$contains': "math"}},
-            organizer_dict=all_organizers()
+            organizer_dict=all_organizers(),
+            prequery={"display": True},
         )
     )
     from collections import defaultdict

@@ -752,6 +752,12 @@ button.delete {
     font-weight: 300;
     background-color: white;
 }
+button.reject {
+    vertical-align: text-bottom;
+    color: white;
+    background-color: red;
+    border: 2px solid black;
+}
 
 button.savedelete {
     vertical-align: text-bottom;

@@ -797,13 +797,6 @@ def talks_search(*args, **kwds):
     """
     seminar_dict = kwds.pop("seminar_dict", {})
     objects = kwds.pop("objects", True)
-    more = kwds.get("more", False)
-    if more is not False: # might empty dictionary
-        more, moreval = db.talks._parse_dict(more)
-        if more is None:
-            more = Placeholder()
-            moreval = [True]
-        kwds["more"] = more = (more, moreval)
     sanitized = kwds.pop("sanitized", False)
     if sanitized:
         table = sanitized_table("talks")

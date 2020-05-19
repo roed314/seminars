@@ -149,8 +149,12 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
         deleted_talks.append(talk)
     deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
-    api_series = [seminar for seminar in seminars_search({"by_api": True, "display": False}, sort=[("edited_at", -1)])
-    api_talks = talks_search({"by_api": True, "display": False}, sort=[("edited_at", -1)])
+    if current_user.is_creator:
+        api_series = [series for (series, role) in seminars + conferences if series.by_api and not series.display]
+        api_series.sort(key = lambda S: S.edited_at, reverse=True)
+        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, role) in seminars + conferences]}}, sort=[("edited_at", -1)]))
+    else:
+        api_series = api_talks = []
 
     manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
@@ -159,6 +163,8 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
         conferences=conferences,
         deleted_seminars=deleted_seminars,
         deleted_talks=deleted_talks,
+        api_series=api_series,
+        api_talks=api_talks,
         institution_known=institution_known,
         institutions=institutions(),
         maxlength=maxlength,
@@ -199,7 +205,7 @@ def edit_seminar():
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
         if not notsimilar:
             query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
-            similar = [s for s in seminars_search(query)]
+            similar = list(seminars_search(query, prequery={"display":True}))
             # When checking for similar series, don't require an exact match on institutions
             # match anything with institutions not set or with an institution in common
             if seminar.institutions:

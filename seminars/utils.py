@@ -258,21 +258,6 @@ def is_nighttime(t):
     return 1 <= t.hour < 6
 
 
-def sanity_check_times(start_time, end_time, warn=flash_warnmsg):
-    """
-    Flashes warnings if time range seems suspsicious.  Note that end_time is (by definition) greater than start_time
-    """
-    if start_time is None or end_time is None:
-        # Users are allowed to not fill in a time
-        return
-    if start_time > end_time:
-        end_time = end_time + timedelta(days=1)
-    if start_time + timedelta(hours=8) < end_time:
-        warn("Time range exceeds 8 hours, please update if that was unintended.")
-    if is_nighttime(start_time) or is_nighttime(end_time):
-        warn("Time range includes morning hours before 6am. Please update using 24-hour notation, or specify am/pm, if that was unintentional.")
-
-
 def top_menu():
     if current_user.is_authenticated:
         account = "Account"
@@ -366,6 +351,7 @@ def search_distinct(
     info=None,
     include_deleted=False,
     more=False,
+    prequery={},
 ):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -392,10 +378,22 @@ def search_distinct(
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
-    if more:
-        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more[0]])
+    if prequery:
+        # We filter the records before finding the most recent (normal queries filter after finding the most recent)
+        # This is mainly used for setting display=False or display=True
+        # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
+        pqstr, pqvalues = table._parse_dict(prequery)
+        if pqstr is not None:
+            tbl = tbl + SQL(" WHERE {0}").format(pqstr)
+            values = pqvalues + values
+    if more is not False: # might empty dictionary
+        more, moreval = table._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more])
         extra_cols = extra_cols + ("more",)
-        values = more[1] + values
+        values = moreval + values
     else:
         cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
@@ -644,6 +642,21 @@ def show_input_errors(errmsgs):
     for msg in errmsgs:
         flash(msg, "error")
     return render_template("inputerror.html", messages=errmsgs)
+
+
+def sanity_check_times(start_time, end_time, warn=flash_warnmsg):
+    """
+    Flashes warnings if time range seems suspsicious.  Note that end_time is (by definition) greater than start_time
+    """
+    if start_time is None or end_time is None:
+        # Users are allowed to not fill in a time
+        return
+    if start_time > end_time:
+        end_time = end_time + timedelta(days=1)
+    if start_time + timedelta(hours=8) < end_time:
+        warn("Time range exceeds 8 hours, please update if that was unintended.")
+    if is_nighttime(start_time) or is_nighttime(end_time):
+        warn("Time range includes morning hours before 6am. Please update using 24-hour notation, or specify am/pm, if that was unintentional.")
 
 
 class Toggle(SearchBox):

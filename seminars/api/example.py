@@ -7,8 +7,8 @@ from requests import post
 with open("apitoken.txt") as tokenfile:
     apitoken = tokenfile.read().strip()
 
-url = "http://localhost:37778/api/1/save/seminar/"
-payload = {"shortname": "testmath", "live_link": "https://zoom.us/j/456789"}
+url = "http://localhost:37778/api/0/save/series/"
+payload = {"series_id": "TestSeries", "live_link": "https://zoom.us/j/456789"}
 
-r = post(url, json=payload, headers={"authorization": "roed@mit.edu %s" % apitoken})
-print(r)
+#r = post(url, json=payload, headers={"authorization": "roed@mit.edu %s" % apitoken})
+#print(r)
