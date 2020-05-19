@@ -18,13 +18,26 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 {% endif %}
 
 <div class="talk-body">
+  {% if talk.is_past() %}
     <b>{{ talk.show_time_and_duration() | safe }}</b>
-    {% if not talk.is_past() %}
-      {% if talk.room %}
-        <br>Lecture held in {{ talk.room }}.
-      {% endif %}
-      {{ talk.show_live_link() | safe }}
-    {% endif %}
+  {% else %}
+    <table style="left-margin:0px;">
+      <tr>
+        <td style="left-margin:0px;" nowrap><b>{{ talk.show_time_and_duration() | safe }}</b></td>
+        <td nowrap>
+          {% set live_link = talk.show_live_link() %}
+          {% if live_link %}
+            {{ live_link | safe }} {{ talk.show_password_hint() | safe }}
+          {% else %}
+            {{ talk.show_stream_link() | safe }}
+          {% endif %}
+        </td>
+      </tr><tr>
+        <td>{% if talk.room %} Lecture held in {{ talk.room }}. {% endif %}</td>
+        <td>{% if live_link %} {{ talk.show_stream_link() | safe }} {% endif %}</td>
+      </tr>
+    </table>
+  {% endif %}
 
   <div style="clear:both;"></div>
 
@@ -84,5 +97,22 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
 </div>
 
 {{ calendar_block('talk', talk) }}
+
+{% if talk.online and talk.access_control == 4 and user.email in talk.seminar.editors() or user.is_subject_admin(talk) %}
+<br>
+<div>
+<table>
+<tr><th colspan="3" style="align: center;"><u>Users registered for this talk</u></th></tr>
+<tr><th>Name</th><th>Affiliation</th><th>Registration</th></tr>
+{% for name, homepage, affiliation, time in talk.registered_users() %}
+  <tr>
+    <td>{% if homepage %}<a href="{{homepage}}">{{name}}</a>{% else %} {{name}} {% endif %}</td>
+    <td>{{ affiliation }}</td>
+    <td>{{ time.strftime("%a %b %-d, %H:%M") }}</td>
+  </tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
 
 {% endblock %}
