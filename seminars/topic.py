@@ -192,10 +192,12 @@ class TopicDAG(object):
             tid = "topic"
             topics = self.subjects
             disable_children = False
+            divhelp = '<p style="margin-left: 10px;">Click a 3-way toggle <i>twice</i> to select all subtopics; click on "Filter" for more details.</p>'
         else:
             tid = topic_id
             topics = self.by_id[tid].children
             disable_children = disabled or cookie[tid] != 0
+            divhelp = ''
         if duplicate_ctr is None:
             duplicate_ctr = Counter()
         cols = num_columns([topic.name for topic in topics])
@@ -213,13 +215,15 @@ class TopicDAG(object):
                 delay = []
         return """
 <div id="{0}--{1}--{2}-pane" class="filter-menu {0}-subpane" style="display:{4};">
+{5}
 {3}
 </div>""".format(
             parent_id,
             tid,
             duplicate_ctr[tid],
             "\n".join(divs),
-            "block" if visible else "none"
+            "block" if visible else "none",
+            divhelp,
        )
 
     def json(self, selected=[]):
