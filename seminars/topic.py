@@ -93,7 +93,7 @@ class TopicDAG(object):
                     topics.append(sub)
                 if elt in self.by_id:
                     topics.append(elt)
-        return ",".join("%s:1"%elt for elt in topics)
+        return ",".join("%s:1" % elt for elt in topics)
 
     def read_cookie(self):
         res = defaultdict(lambda:-1)
@@ -118,6 +118,7 @@ class TopicDAG(object):
                 except ValueError:
                     pass
         res[None] = 1 if request.cookies.get('filter_topic', '-1') == '1' else -1
+        print(res)
         return res
 
     def _link(self, parent_id="root", topic_id=None, counts={}, duplicate_ctr=None):
