@@ -118,7 +118,6 @@ class TopicDAG(object):
                 except ValueError:
                     pass
         res[None] = 1 if request.cookies.get('filter_topic', '-1') == '1' else -1
-        print(res)
         return res
 
     def _link(self, parent_id="root", topic_id=None, counts={}, duplicate_ctr=None):
