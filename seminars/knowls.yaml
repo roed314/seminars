@@ -481,6 +481,50 @@ export:
   title: Export
   contents: |
     The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> allow you to export your favorite series and talks to your chosen calendar app.  Later, if talks are added to those series, your calendar will automatically be updated.<br><br>  Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. Furthermore, some may take even longer for the initial sync. A workaround is to copy the URL of the <i>ICS file</i> link and add it manually to your calendar app.
+export_series:
+  title: Export
+  contents: |
+    The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> 
+    allow you to export this series as a calendar to your chosen calendar app.  
+    Later, if talks are added to the series, 
+    your calendar will automatically be updated.  
+    Registered users can instead 
+    select favorite series and talks on the Browse page 
+    and export them all as a single calendar on the Account page.
+    <br><br>  
+    Some calendar services sync external calendars only every 
+    <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. 
+    Furthermore, some may take even longer for the initial sync. 
+    A workaround is to copy the URL of the <i>ICS file</i> link 
+    and add it manually to your calendar app.
+export_talk:
+  title: Export
+  contents: |
+    The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> 
+    allow you to export this talk as a calendar to your chosen calendar app.  
+    Registered users can instead 
+    select favorite series and talks on the Browse page 
+    and export them all as a single calendar on the Account page.
+    <br><br>  
+    Some calendar services sync external calendars only every 
+    <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. 
+    Furthermore, some may take even longer for the initial sync. 
+    A workaround is to copy the URL of the <i>ICS file</i> link 
+    and add it manually to your calendar app.
+export_favorites:
+  title: Export
+  contents: |
+    The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> 
+    allow you to export your favorite series and talks 
+    to your chosen calendar app.  
+    Later, if talks are added to those series, 
+    your calendar will automatically be updated.
+    <br><br>  
+    Some calendar services sync external calendars only every 
+    <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. 
+    Furthermore, some may take even longer for the initial sync. 
+    A workaround is to copy the URL of the <i>ICS file</i> link 
+    and add it manually to your calendar app.
 ids:
   title: IDs
   contents: |
