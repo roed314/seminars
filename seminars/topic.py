@@ -93,7 +93,7 @@ class TopicDAG(object):
                     topics.append(sub)
                 if elt in self.by_id:
                     topics.append(elt)
-        return ",".join("%s:1"%elt for elt in topics)
+        return ",".join("%s:1" % elt for elt in topics)
 
     def read_cookie(self):
         res = defaultdict(lambda:-1)
