@@ -12,7 +12,9 @@ filter:
             but as you add topics, events matching that topic will appear.
             Many toggles for adding topics are 3-way: 
             clicking anywhere in the toggle cycles between 
-            <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right).  
+            <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right); 
+            for example, to see all Mathematics topics, 
+            you need to click the Mathematics toggle <i>TWICE</i>!
             When a submenu for a centered toggle is open, 
             subtopics are displayed; initially none are selected, 
             but you can click their toggles to add them.
