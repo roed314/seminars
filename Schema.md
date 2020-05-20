@@ -71,6 +71,7 @@ homepage            | text        | link to external homepage (if any)
 institutions        | text[]      | list of institutions.shortname values for the institutions associated to this seminar
 is_conference       | boolean     | True for conferences, False for seminar_series; per_day, start_date, end_date are specific to conferences; frequency, weekdays, time_slots are specific to seminar_series
 language            | text        | language abbreviation taken from language selector, required [inherited]
+level               | smallint    | 0 = research seminar, 1 = colloquium, 2 = learning seminar, 3 = advanced learning seminar, 4 = undergraduate seminar, 5 = general public [inherited]
 live_link           | text        | URL for online meeting link (e.g. Zoom) if fixed, may be set to "see comments" (once access_control is in place, "see comments" should no longer be necessary) [inherited]
 name                | text        |
 online              | boolean     | True if talks in the seminar can be viewed online [inherited]
@@ -107,6 +108,7 @@ edited_by           | bigint      | users.id of user who created this version
 end_time            | timestamptz | 
 hidden              | boolean     | if True, the talk will be visible only on the Edit schedule page for the seminar (independent of display)
 language            | text        | language abbreviation taken from language selector, required [inherited]
+level               | smallint    | 0 = research seminar, 1 = colloquium, 2 = learning seminar, 3 = advanced learning seminar, 4 = undergraduate seminar, 5 = general public [inherited]
 live_link           | text        | URL for online meeting link (e.g. Zoom), may be set to "see comments" (once access_control is in place, "see comments" should no longer be necessary) [inherited]
 online              | boolean     | True if talk can be viewed online (copied from seminar), note that both online and room may be set
 paper_link          | text        | URL providing link to a paper the talk is about
