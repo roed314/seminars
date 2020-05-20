@@ -19,6 +19,7 @@ from flask_cors import CORS
 
 from lmfdb.logger import logger_file_handler
 from seminars.utils import (
+    domain,
     top_menu,
     topdomain,
     url_for_with_args,
