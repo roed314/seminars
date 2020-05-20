@@ -309,7 +309,7 @@ function toggleTopicDAG_core(togid) {
     // Update other toggles in other parts of the tree that have the same id
     setOtherToggles(topic, toggleval);
     if (toggleval == 0) {
-        $("input.tgl.sub_" + topic).removeClass("disabled");
+        $("#" + togid + "-pane " + "input.tgl.sub_" + topic).removeClass("disabled");
         $("#" + togid + "-pane " + "a.sub_"+topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).removeClass("not_toggleable");
         var pane = $("#"+togid+"-pane");
         var is_visible = pane.is(":visible");
