@@ -620,10 +620,10 @@ def save_seminar():
     if seminar.new or new_version != seminar:
         new_version.save()
         if new:
-            flash("Series %s successfully!  Now visit the Edit schedule tab to add talks." % edittype)
+            flash("Series created successfully! Now visit the Edit schedule tab to add talks.")
         else:
             flash("Series details updated.")
-            
+
     elif seminar.organizers == new_version.organizers:
         flash("No changes made to series.")
     if seminar.new or seminar.organizers != new_version.organizers:
