@@ -265,7 +265,7 @@ access_control:
     <ul>
     <li><b>open</b>: The link is visible to all at all times.</li>
     <li><b>time-restricted</b>: The link will be visible only within a set time window before the talk starts.</li>
-    <li><b>password-restricted</b>: The link is visible to all at all times but requires a password for which a hint is given.</li>
+    <li><b>password-protected</b>: The link is visible to all at all times but requires a password.  Either the password itself or a hint for it must be given.</li>
     <li><b>login required</b>: Only logged-in users with confirmed email addresses are shown the link.</li>
     <li><b>instant registration</b>: Logged-in users with confirmed email addresses may instantly register to access the link.  
         A list of all users registered for each talk is visible to organizers on the View talk page.</li>

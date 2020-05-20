@@ -34,7 +34,7 @@ combine = datetime.combine
 access_control_options = [
     (0, 'open'),
     (1, 'time-restricted'),
-    (2, 'password-restricted'),
+    (2, 'password-protected'),
     (3, 'login required'),
     (4, 'instant registration'),
     (5, 'manual registration'),

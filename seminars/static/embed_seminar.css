@@ -133,13 +133,14 @@ div.embedded_schedule table.ntdata > tr:first-child table.ntdata > tbody > tr:fi
 }
 
 div.embedded_schedule *[knowl] {
-    border-bottom: 1px dotted var(--link-color);
+    border-bottom: 1px dotted var(--link-hover-color);
     cursor: pointer;
     border-radius: 0;
     margin: 3px 0 0 0;
 }
 
-div.embedded_schedule *[knowl]:hover, *[knowl].active {
+div.embedded_schedule *[knowl]:hover,
+div.embedded_schedule *[knowl].active {
     border-bottom: 2px solid var(--link-color);
     background: var(--link-hover-background);
     color: var(--link-color);
@@ -178,7 +179,8 @@ div.embedded_schedule  .talk-view {
   text-align: right;
 }
 
-div.embedded_schedule div > *[knowl], p > *[knowl] {
+div.embedded_schedule div > *[knowl],
+div.embedded_schedule p > *[knowl] {
     position: relative;
 }
 

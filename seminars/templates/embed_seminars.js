@@ -139,7 +139,7 @@
       };
     };
 
-    head.appendChild(link);
+    head.insertBefore(link, head.firstChild);
   }
 
   SeminarEmbedder.prototype.addJS = function(src, opts) {
