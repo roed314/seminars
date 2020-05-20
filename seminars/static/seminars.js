@@ -302,7 +302,7 @@ function toggleLanguage(togid) {
 
 
 function toggleTopicDAG_core(togid) {
-    var previous = Array.from(new Set($('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") )));
+    var previous = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
     var topic = topicFromTriple(togid);
     var toggleval = _val(togid);
     setTopicCookie(topic, toggleval);
@@ -345,6 +345,7 @@ function toggleTopicDAG_core(togid) {
             previous = previous.concat([topic]);
         //   to_hide.push(topic);
         }
+        previous = Array.from(new Set(previous));
     }
     var now = Array.from( new Set($('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") )));
     var to_hide = previous.filter(x => !now.includes(x) );
