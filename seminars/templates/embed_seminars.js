@@ -43,7 +43,8 @@
     if (!shortname)
       return;
 
-    var fetchURL  = "{{ url_for('show_seminar_bare', shortname='_SHORTNAME_', _external=True, _scheme=scheme) }}".replace('_SHORTNAME_', shortname) ;
+    var fetchURL  = "{{ url_for('show_seminar_bare', shortname='_SHORTNAME_', _external=True, _scheme=scheme) }}".replace('_SHORTNAME_', shortname);
+
 
     var daterange = target.getAttribute('daterange');
 
@@ -62,6 +63,11 @@
     if (target.hasAttribute('sitefooter')) {
       fetchURL += "&site_footer=";
     };
+
+    var timezone = target.getAttribute('timezone');
+    if ( timezone ) {
+      fetchURL += "&timezone=" + timezone;
+    }
 
     var xhr = new XMLHttpRequest();
     xhr.responseType = "document";

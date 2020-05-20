@@ -749,11 +749,18 @@ def show_seminar_bare(shortname):
         if seminar is None or not seminar.visible():
             return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
+    timezone = seminar.tz
+    if 'timezone' in request.args:
+        try:
+            timezone = pytz.timezone(request.args.get("timezone"))
+        except pytz.UnknownTimeZoneError:
+            pass
     resp = make_response(render_template("seminar_bare.html",
                                          title=seminar.name, talks=talks,
                                          seminar=seminar,
                                          _external=( '_external' in request.args ),
-                                         site_footer=( 'site_footer' in request.args ),))
+                                         site_footer=( 'site_footer' in request.args ),
+                                         timezone=timezone))
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
