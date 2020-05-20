@@ -719,11 +719,14 @@ def seminars_search(*args, **kwds):
 
     Doesn't support split_ors or raw.  Always computes count.
     """
+    objects = kwds.pop("objects", True)
+    col_projection = (len(args) > 1 and isinstance(args[1], str) or "projection" in kwds and isinstance(kwds["projection"], str))
     if "organizer_dict" in kwds:
         organizer_dict = kwds.pop("organizer_dict")
-    else:
+    elif objects and not col_projection:
         organizer_dict = all_organizers()
-    objects = kwds.pop("objects", True)
+    else:
+        organizer_dict = {} # unused in this case
     sanitized = kwds.pop("sanitized", False)
     if sanitized:
         table = sanitized_table("seminars")
