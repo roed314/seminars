@@ -27,6 +27,7 @@ from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
 from psycopg2.sql import Placeholder
+import re
 
 class WebTalk(object):
     def __init__(
