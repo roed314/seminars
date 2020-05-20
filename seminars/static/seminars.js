@@ -127,6 +127,7 @@ function getTopicCookie(topic) {
     }
     return 0;
 }
+/*
 function getTopicCookieWithValue(value) {
     value = value.toString();
     var cur_items = getCookie("topics_dict").split(",").filter(elt => ! elt.startsWith(":"));
@@ -139,6 +140,7 @@ function getTopicCookieWithValue(value) {
     }
     return with_value;
 }
+*/
 function _val(id) {
     var toggle = $('#'+id);
     return parseInt(toggle.attr('data-chosen'));
@@ -307,7 +309,7 @@ function toggleTopicDAG_core(togid) {
     // Update other toggles in other parts of the tree that have the same id
     setOtherToggles(topic, toggleval);
     if (toggleval == 0) {
-        $("input.tgl.sub_" + topic).removeClass("disabled");
+        $("#" + togid + "-pane " + "input.tgl.sub_" + topic).removeClass("disabled");
         $("#" + togid + "-pane " + "a.sub_"+topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).removeClass("not_toggleable");
         var pane = $("#"+togid+"-pane");
         var is_visible = pane.is(":visible");
@@ -343,8 +345,9 @@ function toggleTopicDAG_core(togid) {
             previous = previous.concat([topic]);
         //   to_hide.push(topic);
         }
+        previous = Array.from(new Set(previous));
     }
-    var now = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
+    var now = Array.from( new Set($('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") )));
     var to_hide = previous.filter(x => !now.includes(x) );
     // We cannot take the difference to figure out to_show
     // if previous = [math, math-ph], and now = [math-ph],
@@ -355,7 +358,10 @@ function toggleTopicDAG_core(togid) {
     console.log("to_show ", to_show);
     console.log("to_hide ", to_hide);
     if (to_hide.length > 0) {
-        var talks = $(".talk.topic-" + topic);
+        var talks = $();
+        for (let i=0; i < to_hide.length; i++) {
+            talks = talks.add(".talk.topic-" + to_hide[i]);
+        }
         var cur_topics = to_show; //getTopicCookieWithValue(1);
         for (let i=0; i<cur_topics.length; i++) {
             talks = talks.not(".topic-" + cur_topics[i]);
