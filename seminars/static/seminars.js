@@ -302,7 +302,7 @@ function toggleLanguage(togid) {
 
 
 function toggleTopicDAG_core(togid) {
-    var previous = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
+    var previous = Array.from(new Set($('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") )));
     var topic = topicFromTriple(togid);
     var toggleval = _val(togid);
     setTopicCookie(topic, toggleval);
@@ -346,7 +346,7 @@ function toggleTopicDAG_core(togid) {
         //   to_hide.push(topic);
         }
     }
-    var now = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
+    var now = Array.from( new Set($('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") )));
     var to_hide = previous.filter(x => !now.includes(x) );
     // We cannot take the difference to figure out to_show
     // if previous = [math, math-ph], and now = [math-ph],
