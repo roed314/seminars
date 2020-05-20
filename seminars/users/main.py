@@ -170,7 +170,6 @@ def info():
         title=title,
         section=section,
         timezones=timezones,
-        user=current_user,
         session=session,
     )
 

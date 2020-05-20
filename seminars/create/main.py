@@ -475,7 +475,9 @@ def save_seminar():
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
 
-def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg, update_organizers=True):
+def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg, update_organizers=True, user=None):
+    if user is None:
+        user = current_user
     errmsgs = []
     shortname = raw_data["shortname"]
 
@@ -483,8 +485,8 @@ def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=for
     if seminar.new:
         data = {
             "shortname": shortname,
-            "display": current_user.is_creator,
-            "owner": current_user.email,
+            "display": user.is_creator,
+            "owner": user.email,
         }
     else:
         data = {
@@ -887,7 +889,7 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
             continue
         # For the API, we want to carry over unspecified columns from the previous data
         if col not in raw_data:
-            data[col] = getattr(seminar, col, None)
+            data[col] = getattr(talk, col, None)
             continue
         typ = db.talks.col_type[col]
         try:

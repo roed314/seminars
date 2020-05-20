@@ -308,9 +308,15 @@ def clean_topics(inp):
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in topic_dag.by_id]
-        inp.sort()
-    return inp
+        filled = set(elt for elt in inp if elt in topic_dag.by_id)
+        size = 0
+        while len(filled) != size:
+            size = len(filled)
+            for elt in set(filled):
+                for supertopic in topic_dag.by_id[elt].parents:
+                    filled.add(supertopic.id)
+        return sorted(filled)
+    return []
 
 
 def count_distinct(table, counter, query={}, include_deleted=False):
@@ -386,14 +392,10 @@ def search_distinct(
         if pqstr is not None:
             tbl = tbl + SQL(" WHERE {0}").format(pqstr)
             values = pqvalues + values
-    if more is not False: # might empty dictionary
-        more, moreval = table._parse_dict(more)
-        if more is None:
-            more = Placeholder()
-            moreval = [True]
-        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more])
+    if more:
+        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more[0]])
         extra_cols = extra_cols + ("more",)
-        values = moreval + values
+        values = more[1] + values
     else:
         cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
@@ -533,9 +535,9 @@ def process_user_input(inp, col, typ, tz=None):
     - ''col'' -- column name (names ending in ''link'', ''page'', ''time'', ''email'' get special handling
     - ``typ`` -- a Postgres type, as a string
     """
-    if inp:
+    if inp and isinstance(inp, str):
         inp = inp.strip()
-    if not inp:
+    if inp == "":
         return False if typ == "boolean" else ("" if typ == "text" else None)
     if col in maxlength and len(inp) > maxlength[col]:
         raise ValueError("Input exceeds maximum length permitted")
@@ -578,9 +580,9 @@ def process_user_input(inp, col, typ, tz=None):
     elif typ == "date":
         return parse_time(inp).date()
     elif typ == "boolean":
-        if inp in ["yes", "true", "y", "t"]:
+        if inp in ["yes", "true", "y", "t", True]:
             return True
-        elif inp in ["no", "false", "n", "f"]:
+        elif inp in ["no", "false", "n", "f", False]:
             return False
         raise ValueError("Invalid boolean")
     elif typ == "text":
@@ -591,7 +593,9 @@ def process_user_input(inp, col, typ, tz=None):
     elif typ in ["int", "smallint", "bigint", "integer"]:
         return int(inp)
     elif typ == "text[]":
-        if inp:
+        if inp == "":
+            return []
+        elif isinstance(inp, str):
             if inp[0] == "[" and inp[-1] == "]":
                 res = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
                 if res == [""]:  # was an empty array
@@ -601,8 +605,10 @@ def process_user_input(inp, col, typ, tz=None):
             else:
                 # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
                 return [inp]
+        elif isinstance(inp, Iterable):
+            return [str(x) for x in inp]
         else:
-            return []
+            raise ValueError("Unrecognized input")
     else:
         raise ValueError("Unrecognized type %s" % typ)
 
@@ -678,7 +684,8 @@ class Toggle(SearchBox):
         return '<span style="display: inline-block">%s</span>' % (main,)
 
 
-def ics_file(talks, filename, user=current_user):
+def ics_file(talks, filename, user=None):
+    if user is None: user = current_user
     cal = Calendar()
     cal.add("VERSION", "2.0")
     cal.add("PRODID", topdomain())

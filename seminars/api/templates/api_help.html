@@ -1,10 +1,20 @@
 {% extends 'homepage.html' %}
+{% block extra_head %}
+<link href="{{ url_for('.pyhighcss') }}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+
 {% block content %}
 
 <p>
   The API is currently under development, and will be subject to change without any promise of backward compatibility
   as long as the current version described here is <b>version 0</b>.  We hope to provide a stable interface soon, at which
-  point we will upgrade to <b>version 1</b>.  If you have comments or feature requests, please visit the API <a href="https://github.com/roed314/seminars/issues/96">Github issue</a>.
+  point we will upgrade to <b>version 1</b>.  If you have comments, feature requests or want to be informed of the switch to version 1, please visit the API <a href="https://github.com/roed314/seminars/issues/96">Github issue</a>.
+</p>
+
+<p>
+  The source code for the API is available <a href="https://github.com/roed314/seminars/blob/master/seminars/api/main.py">here</a>.
+  The example code blocks below are written in Python, but you can use any language able to generate and process HTTP requests.
 </p>
 
 <h2>Encoding</h2>
@@ -28,8 +38,20 @@
 <h2>Saving</h2>
 
 <p>
-  To save series or talks to the database, you will need to provide your program with an API key, which can be found on your <a href="{{ url_for('user.info') }}">account page</a>.  You must specify which series or talk you want to update, and can provide values for other columns to change.
+  To save series or talks to the database, you will need to provide your program with an API key, which can be found on your <a href="{{ url_for('user.info') }}">account page</a>.  If you use <a href="https://git-scm.com/">git</a>, we highly recommend storing your API key in a separate file that you add to your <a href="https://git-scm.com/docs/gitignore">gitignore</a> so that it isn't accidentally included in a public repository.
 </p>
+
+{{ code_examples["authorization"] | safe }}
+
+<p>
+  You can create a new series as follows.  Note that organizers cannot be changed through the API, but you are able to specify them at the moment of creation.  The example includes a minimal set of attributes, but you can of course include more from the schema described below.
+</p>
+
+{{ code_examples["create_seminar_series"] | safe }}
+
+<p>
+  When you create a new series, the 
+ You must specify which series or talk you want to update, and can provide values for other columns to change.
 
 <h3>Approval</h3>
 
@@ -48,5 +70,13 @@
 <p>
   Queries are constructed from dictionaries, where each key gives a constraint for that column.  By default, values are treated as an equality constraint.  To get other conditions, the value is also taken to be a dictionary with keys special codes starting with a `$` symbol.  For example, use {"topics": {"$contains": "math_NT"}, "abstract": {"$ilike": "%p-adic%"}} to search for a talk with number theory as a topic and having an abstract that contains the string "p-adic".  Documentation for the query language will be added here.  For now, see <a href="https://github.com/LMFDB/lmfdb/blob/master/lmfdb/backend/searchtable.py#L132">the source code</a> for the special keys available.
 </p>
+
+<h2>Topics</h2>
+
+<p>
+  To specify topics you will need to know the identifier we use for them.  We provide a URL that provides the full topic graph (note that it is not a tree: mathematical physics is a subtopic of both mathematics and physics).
+</p>
+
+{{ code_examples["topics"] | safe }}
 
 {% endblock %}

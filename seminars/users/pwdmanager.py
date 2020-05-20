@@ -6,7 +6,7 @@ import bcrypt
 import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
-from seminars.seminar import WebSeminar, seminars_search, next_talk_sorted
+from seminars.seminar import WebSeminar, seminars_search, seminars_lucky, next_talk_sorted
 from seminars.talk import WebTalk
 from seminars.utils import pretty_timezone
 from lmfdb.backend.searchtable import PostgresSearchTable
@@ -124,8 +124,6 @@ class PostgresUserTable(PostgresSearchTable):
             # Update all of this user's created seminars and talks
             db.seminars.update({"owner": ilike_query(email)}, {"display": True})
             # Could do this with a join...
-            from seminars.seminar import seminars_search
-
             for sem in seminars_search({"owner": ilike_query(email)}, "shortname"):
                 db.talks.update({"seminar_id": sem}, {"display": True}, restat=False)
 
@@ -228,10 +226,9 @@ class SeminarsUser(UserMixin):
                 return True
             # try to endorse if the user is the organizer of some seminar
             if self._organizer:
-                shortname = db.seminar_organizers.lucky(
-                    {"email": ilike_query(self.email)}, "seminar_id"
-                )
-                for owner in seminars_search({"shortname": shortname}, "owner"):
+                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, "seminar_id")
+                owner = seminars_lucky({"shortname": shortname, "display": True}, "owner")
+                if owner:
                     owner = userdb.lookup(owner, ["creator", "id"])
                     if owner and owner.get("creator"):
                         self.endorser = owner["id"]  # must set endorser first

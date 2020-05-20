@@ -178,24 +178,27 @@ class WebTalk(object):
         """
         return self.display and not self.hidden and self.seminar.searchable()
 
-    def save(self):
+    def save(self, user=None):
+        if user is None: user = current_user
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
         try:
-            data["edited_by"] = int(current_user.id)
+            data["edited_by"] = int(user.id)
         except (ValueError, AttributeError):
             # Talks can be edited by anonymous users with a token, with no id
             data["edited_by"] = -1
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
-    def user_is_registered(self, user=current_user):
-        if current_user.is_anonymous:
+    def user_is_registered(self, user=None):
+        if user is None: user = current_user
+        if user.is_anonymous:
             return False
         rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(user.id)}
         return True if db.talk_registrations.count(rec) else False
 
-    def register_user(self, user=current_user):
+    def register_user(self, user=None):
+        if user is None: user = current_user
         rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(user.id)}
         if db.talk_registrations.count(rec):
             return False
@@ -368,12 +371,14 @@ class WebTalk(object):
         else:
             return ""
 
-    def show_live_link(self, user=current_user, raw=False):
+    def show_live_link(self, user=None, raw=False):
+        if user is None: user = current_user
         now = datetime.now(pytz.utc)
         if self.deleted or not self.online or now > self.end_time:
             return ""
 
-        def showit(self, user=current_user, raw=False):
+        def showit(self, user=None, raw=False):
+            if user is None: user = current_user
             link = self.live_link if self.live_link else self.stream_link
             if not link:
                 return '' if raw else '<div class=access_button no_link">Livestream link not yet posted by organizers</div>'
@@ -450,7 +455,7 @@ Thank you,
                     series = self.seminar.name,
                     domain = topdomain(),
                     url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
-                    user = current_user.name)
+                    user = user.name)
                 msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
                 link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
             else:
@@ -802,6 +807,13 @@ def talks_search(*args, **kwds):
         table = sanitized_table("talks")
     else:
         table = db.talks
+    more = kwds.get("more", False)
+    if more is not False: # might empty dictionary
+        more, moreval = table._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+        kwds["more"] = more, moreval
     return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects, more=more), *args, **kwds)
 
 

@@ -125,10 +125,10 @@
     {# non-organizers can edit the following attributes #}
     <tr>
       <td colspan="2">
-        {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != current_user.timezone %} in your time zone, {{ current_user.timezone.replace("_", " ") }}.{% endif %}
+        {{ talk.show_time_and_duration() | safe }}{% if talk.timezone != user.timezone %} in your time zone, {{ user.timezone.replace("_", " ") }}.{% endif %}
       </td>
     </tr>
-    {% if (not talk.online or talk.room) and talk.timezone != current_user.timezone %}
+    {% if (not talk.online or talk.room) and talk.timezone != user.timezone %}
     <tr>
       <td colspan="2">{{ talk.show_time_and_duration(adapt=False) | safe }} in talk time zone, {{ talk.timezone.replace("_", " ") }}.</td>
     </tr>

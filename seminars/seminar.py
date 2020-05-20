@@ -93,7 +93,7 @@ class WebSeminar(object):
             self.access = "open"  # default FIXME: remove once we switch to access_control
             self.access_control = 0 # default is public
             self.access_time = None
-            self.edited_by = current_user.id
+            self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
             self.is_conference = False  # seminar by default
             self.frequency = 7
@@ -729,6 +729,13 @@ def seminars_search(*args, **kwds):
         table = sanitized_table("seminars")
     else:
         table = db.seminars
+    more = kwds.get("more", False)
+    if more is not False: # might empty dictionary
+        more, moreval = table._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+        more = more, moreval
     return search_distinct(
         table, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
     )

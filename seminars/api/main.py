@@ -1,6 +1,6 @@
 
 import pytz
-from flask import jsonify, request, render_template, redirect, url_for
+from flask import jsonify, request, render_template, redirect, url_for, make_response, current_app
 from seminars import db
 from seminars.app import app
 from seminars.api import api_page
@@ -9,8 +9,14 @@ from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser
 from seminars.users.main import creator_required
 from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, adapt_datetime, APIError, MAX_SLOTS, MAX_ORGANIZERS
+from seminars.topic import topic_dag
 from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
+
+import inspect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
 
 def format_error(msg, *args):
     return msg % args
@@ -43,9 +49,31 @@ def handle_api_error(err):
     response.status_code = err.status
     return response
 
+@api_page.route("/pyhighlight.css")
+def pyhighcss():
+    response = make_response(HtmlFormatter().get_style_defs('.highlight'))
+    response.headers["Content-type"] = "text/css"
+    if current_app.debug:
+        response.headers["Cache-Control"] = "no-cache, no-store"
+    else:
+        response.headers["Cache-Control"] = "public, max-age=600"
+    return response
+
 @api_page.route("/help")
 def help():
-    return render_template("api_help.html", title="API", section="Info")
+    code_examples = {}
+    from . import example
+    from types import FunctionType
+    code_examples = {name: highlight(inspect.getsource(func), PythonLexer(), HtmlFormatter())
+                     for (name, func) in example.__dict__.items()
+                     if isinstance(func, FunctionType)}
+    print(code_examples)
+    return render_template(
+        "api_help.html",
+        title="API",
+        section="Info",
+        code_examples=code_examples,
+    )
 
 # Unlike most routes in this module, this one requires a live user to be logged in
 @api_page.route("/review/", methods=["POST"])
@@ -65,6 +93,14 @@ def review_api():
         db.talks.delete({"seminar_id": {"$in": series}, "by_api": True, "display": False}, restat=False)
 
     return redirect(url_for("create.index"))
+
+# This static route allows access to the topic graph
+@api_page.route("/<int:version>/topics")
+def topics(version=0):
+    if version != 0:
+        raise version_error(version)
+    topics = {rec["topic_id"]: {"name": rec["name"], "children": rec["children"]} for rec in db.new_topics.search()}
+    return jsonify(topics)
 
 @api_page.route("/<int:version>/lookup/series", methods=["GET", "POST"])
 def lookup_series(version=0):

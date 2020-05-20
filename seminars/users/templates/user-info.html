@@ -76,7 +76,7 @@
         <tr>
           <td>{{ KNOWL('api_token') }}</td>
           <td>
-            <input type="text" id="api_token" value="{{current_user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
+            <input type="text" id="api_token" value="{{user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
             <a><i class="clippy" onclick="copySourceOfId('api_token')"></i></a>
             <button type="submit">Reset</button>
           </td>
