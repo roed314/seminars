@@ -88,8 +88,8 @@ def review_api():
         series.add(series_id)
     series = list(series)
     if decision == "approve":
-        db.seminars.update({"shortname": {"$in": series}, "by_api": True}, {"display": True}, restat=False)
-        db.talks.update({"seminar_id": {"$in": series}, "by_api": True}, {"display": True}, restat=False)
+        db.seminars.update({"shortname": {"$in": series}, "by_api": True, "display": False}, {"display": True}, restat=False)
+        db.talks.update({"seminar_id": {"$in": series}, "by_api": True, "display": False}, {"display": True}, restat=False)
     else:
         db.seminars.delete({"shortname": {"$in": series}, "by_api": True, "display": False}, restat=False)
         db.talks.delete({"seminar_id": {"$in": series}, "by_api": True, "display": False}, restat=False)
