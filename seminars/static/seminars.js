@@ -94,16 +94,17 @@ function removeFromCookie(item, cookie) {
     return cur_items;
 }
 function setTopicCookie(topic, value) {
-    console.log("setTopicCookie", topic, value);
+  console.log("setTopicCookie", topic, value);
+  if( topic != "" ) {
     var cookie = getCookie("topics_dict");
     if (cookie == null || cookie == "") {
         var cur_items = [];
     } else {
-        var cur_items = cookie.split(",");
+        var cur_items = cookie.split(",").filter(elt => ! elt.startsWith(":"));
     }
     var new_item = topic + ":" + value.toString();
     var found = false;
-    for (let i=0;i<cur_items.length;i++) {
+    for (let i=0; i < cur_items.length; i++) {
         if (cur_items[i].startsWith(topic + ":")) {
             cur_items[i] = new_item
             found = true;
@@ -113,29 +114,33 @@ function setTopicCookie(topic, value) {
     if (!found) {
         cur_items.push(new_item);
     }
-    console.log(cur_items.join(","));
+    console.log("cur_items", cur_items);
     setCookie("topics_dict", cur_items.join(","));
+  }
 }
 function getTopicCookie(topic) {
     var cur_items = getCookie("topics_dict").split(",");
-    for (let i=0; i<cur_items.length; i++) {
+    for (let i=0; i < cur_items.length; i++) {
         if (cur_items[i].startsWith(topic + ":")) {
             return parseInt(cur_items[i].substring(topic.length+1));
         }
     }
     return 0;
 }
+/*
 function getTopicCookieWithValue(value) {
     value = value.toString();
-    var cur_items = getCookie("topics_dict").split(",");
+    var cur_items = getCookie("topics_dict").split(",").filter(elt => ! elt.startsWith(":"));
+    console.log("cur_items", cur_items);
     var with_value = [];
     for (var i=0; i<cur_items.length; i++) {
         if (cur_items[i].endsWith(":" + value)) {
-            with_value.push(cur_items[i].substring(0, value.length+1));
+            with_value.push(cur_items[i].split(':')[0]);
         }
     }
     return with_value;
 }
+*/
 function _val(id) {
     var toggle = $('#'+id);
     return parseInt(toggle.attr('data-chosen'));
@@ -196,7 +201,7 @@ function reviseCookies() {
     }
     if (getCookie("topics_dict") == null) {
         cur_topics = getCookie("topics");
-        if (cur_topics == null) {
+        if (cur_topics == null || cur_topics == "") {
             setCookie("topics_dict", "");
         } else {
             cur_topics = cur_topics.split(",");
@@ -206,8 +211,8 @@ function reviseCookies() {
             } else {
                 cur_subjects = cur_subjects.split(",");
             }
-            cur_topics = cur_subjects.concat(cur_topics);
-            cur_topics = cur_topics.map((top) => { return top + ":1" });
+            cur_topics = cur_subjects.concat(cur_topics).filter(elt => elt != "");
+            cur_topics = cur_topics.map( function(top) { return top + ":1" });
             setCookie("topics_dict", cur_topics.join(","));
             eraseCookie("topics");
         }
@@ -304,7 +309,7 @@ function toggleTopicDAG_core(togid) {
     // Update other toggles in other parts of the tree that have the same id
     setOtherToggles(topic, toggleval);
     if (toggleval == 0) {
-        $("input.tgl.sub_" + topic).removeClass("disabled");
+        $("#" + togid + "-pane " + "input.tgl.sub_" + topic).removeClass("disabled");
         $("#" + togid + "-pane " + "a.sub_"+topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).removeClass("not_toggleable");
         var pane = $("#"+togid+"-pane");
         var is_visible = pane.is(":visible");
@@ -340,8 +345,9 @@ function toggleTopicDAG_core(togid) {
             previous = previous.concat([topic]);
         //   to_hide.push(topic);
         }
+        previous = Array.from(new Set(previous));
     }
-    var now = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
+    var now = Array.from( new Set($('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") )));
     var to_hide = previous.filter(x => !now.includes(x) );
     // We cannot take the difference to figure out to_show
     // if previous = [math, math-ph], and now = [math-ph],
@@ -352,20 +358,22 @@ function toggleTopicDAG_core(togid) {
     console.log("to_show ", to_show);
     console.log("to_hide ", to_hide);
     if (to_hide.length > 0) {
-        var talks = $(".talk.topic-" + topic);
-        var cur_topics = getTopicCookieWithValue(1);
+        var talks = $();
+        for (let i=0; i < to_hide.length; i++) {
+            talks = talks.add(".talk.topic-" + to_hide[i]);
+        }
+        var cur_topics = to_show; //getTopicCookieWithValue(1);
         for (let i=0; i<cur_topics.length; i++) {
             talks = talks.not(".topic-" + cur_topics[i]);
         }
         talks.addClass("topic-filtered");
         if (topicFiltering()) {
             talks.hide();
-            apply_striping();
         }
     }
     if (to_show.length > 0) {
         var talks = $();
-        for (let i=0; i<to_show.length; i++) {
+        for (let i=0; i < to_show.length; i++) {
             talks = talks.add(".talk.topic-filtered.topic-" + to_show[i]);
         }
         talks.removeClass("topic-filtered");
@@ -373,8 +381,10 @@ function toggleTopicDAG_core(togid) {
             // elements may be filtered by other criteria
             talks = talksToShow(talks);
             talks.show();
-            apply_striping();
         }
+    }
+    if (topicFiltering() && (to_show.length  + to_show.length) > 0) {
+      apply_striping();
     }
 
 }
