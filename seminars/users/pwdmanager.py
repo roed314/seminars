@@ -351,6 +351,14 @@ class SeminarsUser(UserMixin):
         return token
 
     @property
+    def api_access(self):
+        if not self.is_creator:
+            return 0
+        if self.is_admin:
+            return 1
+        return self._data.get("api_access", 0)
+
+    @property
     def ics(self):
         return generate_token(self.id, "ics")
 
@@ -573,6 +581,10 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     @property
     def api_token(self):
         return None
+
+    @property
+    def api_access(self):
+        return 0
 
     @property
     def email(self):

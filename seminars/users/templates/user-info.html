@@ -67,22 +67,24 @@
     <p>
       To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
     </p>
-    <h3>API</h3>
-    <p>
-      It is also possible to add (and query) content using the API and scripts.  See the <a href="{{ url_for('api.help') }}">API documentation</a> for more details.
-    </p>
-    <form action="{{url_for('.reset_api_token')}}">
-      <table>
-        <tr>
-          <td>{{ KNOWL('api_token') }}</td>
-          <td>
-            <input type="text" id="api_token" value="{{user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
-            <a><i class="clippy" onclick="copySourceOfId('api_token')"></i></a>
-            <button type="submit">Reset</button>
-          </td>
-        </tr>
-      </table>
-    </form>
+    {% if user.api_access > 0 %}
+      <h3>API</h3>
+      <p>
+        It is also possible to add (and query) content using the API and scripts.  See the <a href="{{ url_for('api.help') }}">API documentation</a> for more details.
+      </p>
+      <form action="{{url_for('.reset_api_token')}}">
+        <table>
+          <tr>
+            <td>{{ KNOWL('api_token') }}</td>
+            <td>
+              <input type="text" id="api_token" value="{{user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
+              <a><i class="clippy" onclick="copySourceOfId('api_token')"></i></a>
+              <button type="submit">Reset</button>
+            </td>
+          </tr>
+        </table>
+      </form>
+    {% endif %}
     <h2>Endorse someone to add content</h2>
 
     <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">

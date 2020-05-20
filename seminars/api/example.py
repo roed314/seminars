@@ -21,10 +21,10 @@ def create_seminar_series():
                "visibility": 1, # 0=private, 1=unlisted, 2=public
                "access_control": 0, # 0=open, see schema for more
                "slots": ["Mon 15:00-16:00"],
-               "organizers": [{"name": "David Roe",
-                               "email": "roed@mit.edu",
-                               "homepage": "https://math.mit.edu/~roed/",
-                               "curator": False,
+               "organizers": [{"name": "Example User",
+                               "email": "user@example.org",
+                               "homepage": "https://example.org/~user/",
+                               "curator": False, # curators are not responsible for scientific content
                                "display": True}]}
     r = post(url, json=payload, headers={"authorization": authorization()})
     J = r.json()
@@ -53,10 +53,10 @@ def create_conference():
                "access_control": 0, # 0=open, see schema for more
                "start_date": "June 20, 2020", # we use Python's dateutil.parser
                "end_date": "June 23, 2020",
-               "organizers": [{"name": "David Roe",
-                               "email": "roed@mit.edu",
-                               "homepage": "https://math.mit.edu/~roed/",
-                               "curator": False,
+               "organizers": [{"name": "Example User",
+                               "email": "user@example.org",
+                               "homepage": "https://example.org/~user/",
+                               "curator": False, # curators are not responsible for scientific content
                                "display": True}]}
     r = post(url, json=payload, headers={"authorization": authorization()})
     J = r.json()
