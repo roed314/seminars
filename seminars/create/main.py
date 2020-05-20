@@ -99,13 +99,15 @@ def index():
         role_key = {"organizer": 0, "curator": 1, "creator": 3}
         return (role_key[elt[1]], elt[0].name)
 
-    for rec in db.seminar_organizers.search({"email": ilike_query(current_user.email)}, ["seminar_id", "curator"]):
+    for rec in db.seminar_organizers.search({"email": ilike_query(current_user.email)}):
         seminar_id = rec["seminar_id"]
         role = "curator" if rec["curator"] else "organizer"
         # don't waste time loading deleted talks
-        if not seminars_lookup(seminar_id, projection="shortname", objects=False):
+        # We don't need the full list of organizers, so we save time by using the found record
+        orgproxy = {seminar_id: [rec]}
+        seminar = seminars_lookup(seminar_id, organizer_dict=orgproxy, prequery=False)
+        if seminar is None:
             continue
-        seminar = WebSeminar(seminar_id)
         pair = (seminar, role)
         if seminar.is_conference:
             conferences[seminar_id] = pair

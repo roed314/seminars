@@ -1,12 +1,13 @@
 
 import pytz
 from flask import jsonify, request, render_template, redirect, url_for, make_response, current_app
+from flask_login import current_user
 from seminars import db
 from seminars.app import app
 from seminars.api import api_page
 from seminars.seminar import WebSeminar, seminars_lookup, seminars_search
 from seminars.talk import WebTalk, talks_lookup, talks_search
-from seminars.users.pwdmanager import SeminarsUser
+from seminars.users.pwdmanager import SeminarsUser, ilike_query
 from seminars.users.main import creator_required
 from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, adapt_datetime, APIError, MAX_SLOTS, MAX_ORGANIZERS
 from seminars.topic import topic_dag
@@ -85,12 +86,17 @@ def review_api():
         series.add(series_id)
     for series_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", prequery={}):
         series.add(series_id)
+    series = list(series)
     if decision == "approve":
         db.seminars.update({"shortname": {"$in": series}, "by_api": True}, {"display": True}, restat=False)
         db.talks.update({"seminar_id": {"$in": series}, "by_api": True}, {"display": True}, restat=False)
     else:
         db.seminars.delete({"shortname": {"$in": series}, "by_api": True, "display": False}, restat=False)
         db.talks.delete({"seminar_id": {"$in": series}, "by_api": True, "display": False}, restat=False)
+        # Need to check whether new seminars might have been completely deleted
+        for series_id in series:
+            if db.seminars.lookup(series_id, prequery={}, include_deleted=True) is None:
+                db.seminar_organizers.delete({"seminar_id": series_id})
 
     return redirect(url_for("create.index"))
 
@@ -99,8 +105,18 @@ def review_api():
 def topics(version=0):
     if version != 0:
         raise version_error(version)
-    topics = {rec["topic_id"]: {"name": rec["name"], "children": rec["children"]} for rec in db.new_topics.search()}
+    topics = {rec["topic_id"]: {"name": rec["name"], "children": rec["children"]}
+              for rec in db.new_topics.search()}
     return jsonify(topics)
+
+# This static route allows access to a list of all institutions
+@api_page.route("/<int:version>/institutions")
+def institutions(version=0):
+    if version != 0:
+        raise version_error(version)
+    institutions = {rec["shortname"]: {key: rec[key] for key in ["name", "city", "timezone", "type", "homepage"]}
+                    for rec in db.institutions.search()}
+    return jsonify(institutions)
 
 @api_page.route("/<int:version>/lookup/series", methods=["GET", "POST"])
 def lookup_series(version=0):
@@ -320,7 +336,7 @@ def save_series(version=0, user=None):
                         "description": "Error in processing input",
                         "errors": errmsgs})
     else:
-        new_version = WebSeminar(series_id, data=data, organizers=organizers)
+        new_version = WebSeminar(series_id, data=data, organizers=organizers, user=user)
     if series.new or new_version != series:
         # Series saved by the API are not displayed until user approves
         new_version.display = False

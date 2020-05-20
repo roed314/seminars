@@ -50,8 +50,22 @@
 {{ code_examples["create_seminar_series"] | safe }}
 
 <p>
-  When you create a new series, the 
- You must specify which series or talk you want to update, and can provide values for other columns to change.
+  Most of the fields are the same for conferences, but you provide start and end dates rather than time slots.
+</p>
+
+{{ code_examples["create_conference"] | safe }}
+
+<p>
+  To edit a series, you only need to provide the fields that you want to change.  Note that it is not possible to edit organizers through the API.
+</p>
+
+{{ code_examples["edit_series"] | safe }}
+
+<p>
+  You can create and edit talks similarly.  Each talk has an integer counter which is assigned to it.  When you're created a new talk
+</p>
+
+{{ code_examples["create_talk"] | safe }}
 
 <h3>Approval</h3>
 
@@ -78,5 +92,13 @@
 </p>
 
 {{ code_examples["topics"] | safe }}
+
+<h2>Institutions</h2>
+
+<p>
+  Similarly, you can find the identifier for institutions using the following URL (we don't provide a search interface because they don't change much).
+</p>
+
+{{ code_examples["institutions"] | safe }}
 
 {% endblock %}
