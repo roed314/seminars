@@ -624,10 +624,9 @@ Email link to speaker
         event = Event()
         #FIXME: code to remove hrefs from speaker name is a temporary hack to be
         # removed once we support multiple speakers
-        print(self.speaker)
         if "href=" in self.speaker:
             tokens = re.split(r'>([a-zA-Z ]*)', self.speaker)
-            speaker = ', '.join([tokens[i] for i in range(1,len(tokens),2)])
+            speaker = ', '.join([tokens[i] for i in range(1,len(tokens),2) if tokens[i].strip()])
         else:
             speaker = self.speaker
         event.add("summary", speaker)
