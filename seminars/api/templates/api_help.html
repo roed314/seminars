@@ -9,7 +9,7 @@
 <p>
   The API is currently under development, and will be subject to change without any promise of backward compatibility
   as long as the current version described here is <b>version 0</b>.  We hope to provide a stable interface soon, at which
-  point we will upgrade to <b>version 1</b>.  If you have comments, feature requests or want to be informed of the switch to version 1, please visit the API <a href="https://github.com/roed314/seminars/issues/96">Github issue</a>.
+  point we will upgrade to <b>version 1</b>.  If you have comments or feature requests or if you want to be informed of the switch to version 1, please visit the API <a href="https://github.com/roed314/seminars/issues/96">Github issue</a>.
 </p>
 
 <p>
@@ -38,7 +38,7 @@
 <h2>Saving</h2>
 
 <p>
-  To save series or talks to the database, you will need to provide your program with an API key, which can be found on your <a href="{{ url_for('user.info') }}">account page</a>.  If you use <a href="https://git-scm.com/">git</a>, we highly recommend storing your API key in a separate file that you add to your <a href="https://git-scm.com/docs/gitignore">gitignore</a> so that it isn't accidentally included in a public repository.
+  To save series or talks to the database, you need to provide your program with an API key, which can be found on your <a href="{{ url_for('user.info') }}">account page</a>.  If you use <a href="https://git-scm.com/">git</a>, we highly recommend storing your API key in a separate file that you add to your <a href="https://git-scm.com/docs/gitignore">gitignore</a> so that it isn't accidentally included in a public repository.
 </p>
 
 {{ code_examples["authorization"] | safe }}
@@ -56,7 +56,7 @@
 {{ code_examples["create_conference"] | safe }}
 
 <p>
-  To edit a series, you only need to provide the fields that you want to change.  Note that it is not possible to edit organizers through the API.
+  To edit a series, you need to provide only the fields that you want to change.  Note that it is not possible to edit organizers through the API.
 </p>
 
 {{ code_examples["edit_series"] | safe }}
@@ -70,7 +70,7 @@
 <h3>Approval</h3>
 
 <p>
-  After updating series using the API, you must manually approve the changes by logging in and visiting your <a href="{{ url_for('create.index') }}">Manage</a> page.  This measure is intended to prevent errors in your scripts from showing up on the live site, and to guard against unauthorized updates if you lose your API key.  If this approval is a burden for your intended use case, please <a href="{{ url_for('contact') }}">contact</a> us to discuss its removal.
+  After updating series using the API, you must manually approve the changes by logging in and visiting your <a href="{{ url_for('create.index') }}">Manage</a> page.  This measure is intended to prevent errors in your scripts from showing up on the live site, and to guard against unauthorized updates if you lose your API key.  If this approval is a burden for your intended use, please <a href="{{ url_for('contact') }}">contact</a> us to discuss its removal.
 </p>
 
 <h2>Schema</h2>
@@ -82,13 +82,13 @@
 <h2>Query language</h2>
 
 <p>
-  Queries are constructed from dictionaries, where each key gives a constraint for that column.  By default, values are treated as an equality constraint.  To get other conditions, the value is also taken to be a dictionary with keys special codes starting with a `$` symbol.  For example, use {"topics": {"$contains": "math_NT"}, "abstract": {"$ilike": "%p-adic%"}} to search for a talk with number theory as a topic and having an abstract that contains the string "p-adic".  Documentation for the query language will be added here.  For now, see <a href="https://github.com/LMFDB/lmfdb/blob/master/lmfdb/backend/searchtable.py#L132">the source code</a> for the special keys available.
+  Queries are constructed from dictionaries, where each key gives a constraint for that column.  By default, each value is treated as an equality constraint.  To get other conditions, the value is also taken to be a dictionary with keys special codes starting with a `$` symbol.  For example, use {"topics": {"$contains": "math_NT"}, "abstract": {"$ilike": "%p-adic%"}} to search for a talk having number theory as a topic and having an abstract that contains the string "p-adic".  Documentation for the query language will be added here.  For now, see <a href="https://github.com/LMFDB/lmfdb/blob/master/lmfdb/backend/searchtable.py#L132">the source code</a> for the special keys available.
 </p>
 
 <h2>Topics</h2>
 
 <p>
-  To specify topics you will need to know the identifier we use for them.  We provide a URL that provides the full topic graph (note that it is not a tree: mathematical physics is a subtopic of both mathematics and physics).
+  To specify topics, you need to know our identifiers for them.  We provide a URL that provides the full topic graph (note that it is not a tree: for instance, mathematical physics is a subtopic of both mathematics and physics).
 </p>
 
 {{ code_examples["topics"] | safe }}
@@ -96,7 +96,7 @@
 <h2>Institutions</h2>
 
 <p>
-  Similarly, you can find the identifier for institutions using the following URL (we don't provide a search interface because they don't change much).
+  Similarly, our identifiers for institutions are listed at the following URL (we don't provide a search interface, because they don't change much).
 </p>
 
 {{ code_examples["institutions"] | safe }}
