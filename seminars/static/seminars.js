@@ -114,7 +114,7 @@ function setTopicCookie(topic, value) {
     if (!found) {
         cur_items.push(new_item);
     }
-    console.log(cur_items.join(","));
+    console.log("cur_items", cur_items);
     setCookie("topics_dict", cur_items.join(","));
   }
 }
@@ -130,11 +130,11 @@ function getTopicCookie(topic) {
 function getTopicCookieWithValue(value) {
     value = value.toString();
     var cur_items = getCookie("topics_dict").split(",").filter(elt => ! elt.startsWith(":"));
-    console.log("cur_items :" + cur_items);
+    console.log("cur_items", cur_items);
     var with_value = [];
     for (var i=0; i<cur_items.length; i++) {
         if (cur_items[i].endsWith(":" + value)) {
-            with_value.push(cur_items[i].substring(0, value.length+1));
+            with_value.push(cur_items[i].split(':')[0]);
         }
     }
     return with_value;
