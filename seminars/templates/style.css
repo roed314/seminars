@@ -669,7 +669,7 @@ table.ntdata td.date, td.timerange {
     text-align: right;
 }
 table.ntdata td.weekday {
-    text-align: right;
+    text-align: center;
     padding-right: 2px;
 }
 
