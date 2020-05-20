@@ -1,5 +1,4 @@
 
-import pytz
 from flask import jsonify, request, render_template, redirect, url_for, make_response, current_app
 from flask_login import current_user
 from seminars import db
@@ -9,8 +8,7 @@ from seminars.seminar import WebSeminar, seminars_lookup, seminars_search
 from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser, ilike_query
 from seminars.users.main import creator_required
-from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, adapt_datetime, APIError, MAX_SLOTS, MAX_ORGANIZERS
-from seminars.topic import topic_dag
+from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, APIError, MAX_SLOTS, MAX_ORGANIZERS
 from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
 
@@ -128,7 +126,7 @@ def lookup_series(version=0):
         raw_data = dict(request.args)
     series_id = _get_col("series_id", raw_data, "looking up a series")
     result = seminars_lookup(series_id, objects=False, sanitized=True)
-    tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
+    # tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
     # TODO: adapt the times, support daterange, sort
     talks = talks_search({"seminar_id": series_id}, sanitized=True, objects=False)
     return jsonify({"code": "success",
@@ -143,10 +141,10 @@ def lookup_talk(version=0):
         raw_data = get_request_json()
     else:
         raw_data = dict(request.args)
-    series_id = get_series_id("series_id", raw_data, "looking up a talk")
-    series_ctr = get_series_ctr("series_ctr", raw_data, "looking up a talk")
+    series_id = _get_col("series_id", raw_data, "looking up a talk")
+    series_ctr = _get_col("series_ctr", raw_data, "looking up a talk")
     result = talks_lookup(series_id, series_ctr, objects=False, sanitized=True)
-    tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
+    # tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
     # TODO: adapt the times, support daterange
     return jsonify({"code": "success",
                     "properties": result})

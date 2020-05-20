@@ -23,7 +23,6 @@ from seminars.utils import (
     date_and_daytimes_to_times,
     maxlength,
     similar_urls,
-    format_warning,
     MAX_ORGANIZERS,
     valid_url,
     valid_email,

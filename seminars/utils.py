@@ -17,7 +17,6 @@ from six import string_types
 from urllib.parse import urlparse, urlencode
 import pytz
 import re
-from psycopg2.sql import SQL
 from lmfdb.backend.searchtable import PostgresSearchTable
 from .toggle import toggle
 

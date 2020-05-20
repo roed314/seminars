@@ -373,7 +373,7 @@ class WebTalk(object):
             return ""
 
     def show_stream_link(self, raw=False):
-         if any([self.deleted, not self.online, not self.stream_link, self.is_really_over()]):
+        if any([self.deleted, not self.online, not self.stream_link, self.is_really_over()]):
             return ""
         link = self.stream_link
         if raw:

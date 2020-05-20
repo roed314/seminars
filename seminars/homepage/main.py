@@ -859,7 +859,7 @@ def show_talk(seminar_id, talkid):
         # There may be a non-API version of the seminar that can be shown
         talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
         if talk is None or not talk.visible():
-            flash_error("You do not have permission to view %s/%s", seminar_id, talk_id)
+            flash_error("You do not have permission to view %s/%s", seminar_id, talkid)
             return redirect(url_for("semseries_index"))
     kwds = dict(
         title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token
