@@ -95,7 +95,7 @@ def review_api():
         db.talks.delete({"seminar_id": {"$in": series}, "by_api": True, "display": False}, restat=False)
         # Need to check whether new seminars might have been completely deleted
         for series_id in series:
-            if db.seminars.lookup(series_id, prequery={}, include_deleted=True) is None:
+            if db.seminars.lookup(series_id) is None:
                 db.seminar_organizers.delete({"seminar_id": series_id})
 
     return redirect(url_for("create.index"))
