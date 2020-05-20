@@ -35,12 +35,12 @@
     <tr>
       <td>{{ KNOWL("speaker_homepage") }}</td>
       <td><input name="speaker_homepage" value="{{ talk.speaker_homepage | blanknone }}" style="width:600px;" maxlength="{{ maxlength['speaker_homepage'] }}"placeholder="https://upan.edu/~someone"/></td>
-      <td class="forminfo" />Please set if available.</td>
+      <td class="forminfo">Please set if available.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("title") }}</td>
       <td><input name="title" id="inp_title" value="{{ talk.title | blanknone }}" style="width:600px;" maxlength="{{ maxlength['title'] }}" placeholder="Leave blank if TBA.  $\TeX$ symbols are OK here." /></td>
-      <td class="forminfo" />Capitalize first word and proper nouns only.  Leave blank if TBA.</td>
+      <td class="forminfo">Capitalize first word and proper nouns only.  Leave blank if TBA.</td>
     </tr>
     <tr>
       <td>{{ KNOWL("topics") }}</td>
@@ -60,15 +60,15 @@
     </tr>
     <tr>
       <td>{{ KNOWL("paper_link") }}</td>
-      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['paper_link'] }}" placeholder="https://arxiv.org/abs/9999.99999"/></td>
+      <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['paper_link'] }}" placeholder="https://arxiv.org/abs/9999.99999" /></td>
     </tr>
     <tr>
       <td>{{ KNOWL("slide_link") }}</td>
-      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['slides_link'] }}"placeholder="https://upan.edu/~someone/myslides.pdf"/></td>
+      <td><input name="slides_link" value="{{ talk.slides_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['slides_link'] }}"placeholder="https://upan.edu/~someone/myslides.pdf" /></td>
     </tr>
     <tr>
       <td>{{ KNOWL("video_link") }}</td>
-      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['video_link'] }}"placeholder="https://www.youtube.com/watch?v=abc123"></td>
+      <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['video_link'] }}"placeholder="https://www.youtube.com/watch?v=abc123" /></td>
      </tr>
      <tr>
       <td>{{ KNOWL("abstract") }}</td>
@@ -78,7 +78,7 @@
   <table>
     <tr>
       <td colspan="2">
-        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" maxlength="{{ maxlength['abstract'] }}" placeholder="$\TeX$ symbols are OK here.  This is joint work with Leonhard Euler.  Livestream instructions go not here, but in the Livestream link,  Talk comments, or Series comments below.">{{talk.abstract | blanknone }}</textarea>
+        <textarea cols="89" rows="10" style="width:770px;"  name="abstract" id="inp_abstract" maxlength="{{ maxlength['abstract'] }}" placeholder="$\TeX$ symbols are OK here.  This is joint work with Leonhard Euler.  Livestream instructions do not go here!">{{talk.abstract | blanknone }}</textarea>
       </td>
     </tr>
   </table>
@@ -110,11 +110,11 @@
     </tr>
     <tr>
       <td>{{ ASTKNOWL("talk_start_time") }}</td>
-      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" required/></td>
+      <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" required /></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("talk_end_time") }}</td>
-      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" required/></td>
+      <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" required /></td>
     </tr>
 
     {% else %}
@@ -175,7 +175,7 @@
     <tr class="online access_time">
       <td>{{ ASTKNOWL("access_time") }}</td>
       <td>
-        <select name="access_time" style="width:610px;" />
+        <select name="access_time" style="width:610px;">
           {% for opt in options["access_time"] %}
             <option value="{{opt[0]}}" {% if talk.access_time == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -186,23 +186,23 @@
     <tr class="online access_hint">
       <td>{{ ASTKNOWL("access_hint") }}</td>
       <td>
-        <input name="access_hint" value="{{ talk.access_hint | blanknone }}" style="width:600px;" maxlength={{ maxlength['access_hint'] }}" placeholder="The order of the Weyl group of $E_8$ (TeX is OK here)" />
+        <input name="access_hint" value="{{ talk.access_hint | blanknone }}" style="width:600px;" maxlength="{{ maxlength['access_hint'] }}" placeholder="The order of the Weyl group of $E_8$ (TeX is OK here)" />
       </td>
     </tr>
     <tr>
     <tr class="online access_registration">
       <td>{{ ASTKNOWL("access_registration") }}</td>
       <td>
-        <input name="access_registration" value="{{ talk.access_registration | blanknone }}" style="width:600px;" maxlength={{ maxlength['access_registration'] }}" placeholder="theorganizer@upan.edu or https://docs.google.com/forms/d/e/xxx/viewform?usp=sf_link" />
+        <input name="access_registration" value="{{ talk.access_registration | blanknone }}" style="width:600px;" maxlength="{{ maxlength['access_registration'] }}" placeholder="theorganizer@upan.edu or https://docs.google.com/forms/d/e/xxx/viewform?usp=sf_link" />
       </td>
     </tr>
     <tr class="online live_link">
       <td>{{ KNOWL("live_link") }}</td>
-      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="e.g., https://zoom.us/j/..., https://bluejeans.com/j/..., https://www.google.meet/..."/></td>
+      <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="https://zoom.us/j/... or https://bluejeans.com/j/... or https://www.google.meet/..."/></td>
     </tr>
     <tr class="online stream_link">
       <td>{{ KNOWL("stream_link") }}</td>
-      <td><input name="stream_link" value="{{ talk.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="e.g., https://www.youtube.com/watch?v=..."/></td>
+      <td><input name="stream_link" value="{{ talk.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="https://www.youtube.com/watch?v=..."/></td>
     </tr>
     {% else %}
     {# attributes non-organizers cannot edit #}
@@ -236,7 +236,7 @@
       <td colspan="2">{{ KNOWL("talk_comments") }}</td>
     </tr>
     <tr>
-      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Talk-specific livestream access instructions?  Notes about the speaker?  HTML and $\TeX$ are OK here.  Both the talk comments and the series comments below will appear on the talk's page.">{{ talk.comments | blanknone }}</textarea></td>
+      <td colspan="2"><textarea cols="89" rows="4" style="width:770px;" name="comments" maxlength="{{ maxlength['comments'] }}" placeholder="Directions to the room?  Notes about the speaker?  Livestream instructions do not go here!  HTML and $\TeX$ are OK here.  Both the talk comments and the series comments below will appear on the talk's page.">{{ talk.comments | blanknone }}</textarea></td>
     </tr>
   </table>
   <br>

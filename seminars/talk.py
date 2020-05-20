@@ -29,6 +29,7 @@ from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
 from psycopg2.sql import Placeholder
+import re
 
 class WebTalk(object):
     def __init__(
@@ -367,53 +368,56 @@ class WebTalk(object):
 
     def show_password_hint(self):
         if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint]):
-            return '<div class="password_hint">(Password hint: %s)</div>' % self.access_hint
+            return '<div class="access_button_hint">(Password: %s)</div>' % self.access_hint
         else:
             return ""
+
+    def show_stream_link(self, raw=False):
+         if any([self.deleted, not self.online, not self.stream_link, self.is_really_over()]):
+            return ""
+        link = self.stream_link
+        if raw:
+            return link
+        if self.is_starting_soon():
+            return '<div class="access_button is_link view_only"><b> <a href="%s">Watch livestream <i class="play filter-white"></i></a></b></div>' % link
+        else:
+            return '<div class="access_button is_link">View-only livestream access <a href="%s">available</a></div>' % link
 
     def show_live_link(self, user=None, raw=False):
         if user is None: user = current_user
         now = datetime.now(pytz.utc)
-        if self.deleted or not self.online or now > self.end_time:
+        if any([self.deleted, not self.online, self.is_really_over()]):
             return ""
+        link = self.live_link
 
-        def showit(self, user=None, raw=False):
+        def show_link(self, user=None, raw=False):
             if user is None: user = current_user
-            link = self.live_link if self.live_link else self.stream_link
+            link = self.live_link
+            if raw:
+                return link if link else ''
             if not link:
-                return '' if raw else '<div class=access_button no_link">Livestream link not yet posted by organizers</div>'
-            if link != self.live_link:
-                if raw:
-                    return link
-                if self.is_starting_soon():
-                    return '<div class="access_button is_link starting_soon"><b> <a href="%s"> Watch livestream <i class="play filter-white"></i></a></b></div>' % link
-                else:
-                    return '<div class="access_button is_link"> View-only livestream access <a href="%s">available</a></div>' % link
+                return '<div class=access_button no_link">Livestream link not yet posted by organizers</div>'
             if self.access_control == 4 and not self.user_is_registered(user):
                 link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
-                if raw:
-                    return link
                 if self.is_starting_soon():
                     return '<div class="access_button is_link starting_soon"><b> <a href="%s">Instantly register and join livestream <i class="play filter-white"></i> </a></b></div>' % link
                 else:
                     return '<div class="access_button is_link"> <a href="%s">Instantly register</a> for livestream access</div>' % link
-            if raw:
-                return link
             if self.is_starting_soon():
                 return '<div class="access_button is_link starting_soon"><b> <a href="%s">Join livestream <i class="play filter-white"></i> </a></b></div>' % link
             else:
                 return '<div class="access_button is_link"> Livestream access <a href="%s">available</a></div>' % link
 
         if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
-            return showit(self, raw=raw)
+            return show_link(self, user=user, raw=raw)
         elif self.access_control == 1:
             show_link_time = self.start_time - timedelta(minutes=self.access_time)
             if show_link_time <= now:
-                return showit(self, raw=raw)
+                return show_link(self, user=user, raw=raw)
             else:
                 return "" if raw else '<div class="access_button no_link">Livestream access available in %s</div>' % how_long(show_link_time-now)
         elif self.access_control == 2:
-            return showit(self, raw=raw)
+            return show_link(self, user=user, raw=raw)
         elif self.access_control in [3,4]:
             if raw:
                 return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
@@ -423,11 +427,9 @@ class WebTalk(object):
             elif not user.email_confirmed:
                 return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
             else:
-                return showit(self, raw=raw)
+                return show_link(self, user=user, raw=raw)
         elif self.access_control == 5:
             # If there is a view-only link, show that rather than an external registration link
-            if self.stream_link:
-                return showit(self, raw=raw)
             if raw:
                 return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
             if not self.access_registration:
@@ -462,6 +464,7 @@ Thank you,
                 link = self.access_registration
             return '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
         else:  # should never happen
+            print("badness!")
             return ""
 
     def show_paper_link(self):
@@ -499,6 +502,10 @@ Thank you,
     def is_starting_soon(self):
         now = datetime.now(pytz.utc)
         return (self.start_time - timedelta(minutes=15) <= now < self.end_time)
+
+    def is_really_over(self):
+        now = datetime.now(pytz.utc)
+        return (now - timedelta(minutes=30) > self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:
@@ -568,7 +575,7 @@ Thank you,
         )
 
     def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
-        t, now, e = adapt_datetime(self.start_time), adapt_datetime(datetime.now()), adapt_datetime(self.end_time)
+        t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if t < now < e:
             datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
         else:
@@ -627,7 +634,14 @@ Email link to speaker
 
     def event(self, user):
         event = Event()
-        event.add("summary", self.speaker)
+        #FIXME: code to remove hrefs from speaker name is a temporary hack to be
+        # removed once we support multiple speakers
+        if "href=" in self.speaker:
+            tokens = re.split(r'>([a-zA-Z ]*)', self.speaker)
+            speaker = ', '.join([tokens[i] for i in range(1,len(tokens),2) if tokens[i].strip()])
+        else:
+            speaker = self.speaker
+        event.add("summary", speaker)
         event.add("dtstart", adapt_datetime(self.start_time, pytz.UTC))
         event.add("dtend", adapt_datetime(self.end_time, pytz.UTC))
         desc = ""
@@ -635,7 +649,7 @@ Email link to speaker
         if self.title:
             desc += "Title: %s\n" % (self.title)
         # Speaker and seminar
-        desc += "by %s" % (self.speaker)
+        desc += "by %s" % (speaker)
         if self.speaker_affiliation:
             desc += " (%s)" % (self.speaker_affiliation)
         if self.seminar.name:
@@ -644,7 +658,14 @@ Email link to speaker
         if self.live_link:
             link = self.show_live_link(user=user, raw=True)
             if link.startswith("http"):
-                desc += "Access: %s\n" % (link)
+                desc += "Interactive livestream: %s\n" % link
+                if self.access_control == 2 and self.access_hint:
+                    desc += "Password hint: %s\n" % self.access_hint
+                event.add("url", link)
+        if self.stream_link:
+            link = self.show_stream_link(user=user, raw=True)
+            if link.startswith("http"):
+                desc += "View-only livestream: %s\n" % link
                 event.add("url", link)
         if self.room:
             desc += "Lecture held in %s.\n" % self.room
@@ -653,7 +674,7 @@ Email link to speaker
         else:
             desc += "Abstract: TBA\n"
         if self.comments:
-            desc += "\n%s\n" % (self.comments)
+            desc += "\n%s\n" % self.comments
 
         event.add("description", desc)
         if self.room:

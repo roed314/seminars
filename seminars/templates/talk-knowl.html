@@ -20,36 +20,30 @@
     {% endif %}
 
     {% if talk.language != "en" or talk.topics %}
-      <p>
-        {{talk.show_lang_topics() | safe}}
-      </p>
+      <p>{{ talk.show_lang_topics() | safe }}</p>
     {% endif %}
 
     {% if talk.paper_link or talk.slides_link or talk.video_link %}
-    <p>{{talk.show_content_links() | safe}}</p>
+      <p>{{ talk.show_content_links() | safe }}</p>
     {% endif %}
 
     {% if talk.comments and talk.comments != talk.seminar.comments %}
-    {{talk.show_comments(prefix="<b>Comments: </b>") | safe}}
+      {{ talk.show_comments(prefix="<b>Comments: </b>") | safe }}
     {% endif %}
 
     <hr>
 
-    <p>
-      <b>{{ talk.show_seminar(external=_external) | safe }} </b>
-    </p>
+    <p><b>{{ talk.show_seminar(external=_external) | safe }}</b></p>
 
     {% if talk.seminar.comments %}
-
-    {{talk.seminar.show_comments(prefix="<b>Series comments: </b>") | safe}}
+      {{talk.seminar.show_comments(prefix="<b>Series comments: </b>") | safe}}
     {% endif %}
 
     <hr>
 
     {% if not talk.deleted %}
     {{ calendar_block("talk", talk) }}
-    {% endif %}
-    
+    {% endif %}  
 
     <div align="right">
         <b>{{ talk.show_time_and_duration() | safe }}</b><br>
@@ -58,7 +52,12 @@
             Lecture held in {{ talk.room }}.
           {% endif %}
           {% if not talk.deleted %}
-            {{ talk.show_password_hint() | safe }} {{ talk.show_live_link() | safe }}
+            {% set stream_link = talk.show_stream_link() %}
+            {% set live_link = talk.show_live_link() %}
+            {% set hint = talk.show_password_hint() %}
+            {{ stream_link | safe }}
+            {% if stream_link and live_link and hint %}<br> {% endif %}
+            {{ hint | safe }} {{ live_link | safe }}
           {% endif %}
         {% endif %}
     </div>

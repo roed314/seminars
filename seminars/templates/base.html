@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="description" content="{{meta_description|striptags}}"/>
     {% if titletag %}
-      <title>{{ topdomain }} - {{ titletag|striptags }}</title>
+      <title>{{ domain }} - {{ titletag|striptags }}</title>
     {% else %}
-      <title>{{ topdomain }}{% if title %} - {{ title|striptags }}{% endif %}  </title>
+      <title>{{ domain }}{% if title %} - {{ title|striptags }}{% endif %}  </title>
     {% endif %}
   <script>
   if (navigator.cookieEnabled) {

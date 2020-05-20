@@ -870,7 +870,7 @@ def show_talk(seminar_id, talkid):
         from seminars.utils import top_menu
 
         menu = top_menu()
-        menu[2] = (url_for("create.index"), "", "Manage")
+        menu[1] = (url_for("create.index"), "", "Manage")
         kwds["top_menu"] = menu
     elif (
         current_user.is_subject_admin(talk)

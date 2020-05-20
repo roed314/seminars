@@ -94,11 +94,12 @@ def killattr(obj,attr):
     if hasattr(obj,attr):
         delattr(obj,attr)
 
-def topdomain():
-    # return 'mathseminars.org'
-    # return 'researchseminars.org'
-    return ".".join(urlparse(request.url).netloc.split(".")[-2:])
 
+def domain():
+    return urlparse(request.url).netloc
+
+def topdomain():
+    return ".".join(domain().split(".")[-2:])
 
 def valid_url(x):
     if not (x.startswith("http://") or x.startswith("https://")):
