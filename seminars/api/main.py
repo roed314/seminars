@@ -325,7 +325,10 @@ def save_series(version=0, user=None):
                             "errors": ["organizers must be a list of dictionaries (max length %s) with keys %s" % (MAX_ORGANIZERS, ", ".join(db.seminar_organizers.search_cols))]})
         for i, OD in enumerate(organizers):
             for col in db.seminar_organizers.search_cols:
-                raw_data["org_%s%s" % (col, i)] = OD.get(col, "")
+                default = True if col == "display" else ""
+                raw_data["org_%s%s" % (col, i)] = OD.get(col, default)
+            # We store curator in the database but ask for organizer from the API
+            raw_data["org_curator%s" % i] = not OD.get("organizer", True)
 
     warnings = []
     def warn(msg, *args):
