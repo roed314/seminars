@@ -669,7 +669,7 @@ table.ntdata td.date, td.timerange {
     text-align: right;
 }
 table.ntdata td.weekday {
-    text-align: left;
+    text-align: center;
     padding-right: 2px;
 }
 
@@ -771,6 +771,12 @@ button.delete {
     color: red;
     font-weight: 300;
     background-color: white;
+}
+button.reject {
+    vertical-align: text-bottom;
+    color: white;
+    background-color: red;
+    border: 2px solid black;
 }
 
 button.savedelete {

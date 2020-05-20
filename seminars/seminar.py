@@ -14,6 +14,7 @@ from seminars.utils import (
     show_input_errors,
     weekdays,
     killattr,
+    sanitized_table,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
@@ -65,8 +66,10 @@ visibility_options = [
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False
+        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False,  user=None,
     ):
+        if user is None:
+            user = current_user
         if data is None and not editing:
             data = seminars_lookup(shortname, include_deleted=deleted)
             if data is None:
@@ -79,23 +82,24 @@ class WebSeminar(object):
             if data.get("institutions") is None:
                 data["institutions"] = []
             if data.get("timezone") is None:
-                data["timesone"] = str(current_user.tz)
+                data["timesone"] = str(user.tz)
         self.new = data is None
         self.deleted = False
         if self.new:
             self.shortname = shortname
-            self.display = current_user.is_creator
+            self.display = user.is_creator
             self.online = True  # default
+            self.by_api = False # reset by API code if needed
             self.access = "open"  # default FIXME: remove once we switch to access_control
             self.access_control = 0 # default is public
             self.access_time = None
-            self.edited_by = current_user.id
+            self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
             self.is_conference = False  # seminar by default
             self.frequency = 7
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
-            self.timezone = str(current_user.tz)
+            self.timezone = str(user.tz)
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -120,9 +124,9 @@ class WebSeminar(object):
                 organizers = [
                     {
                         "seminar_id": self.shortname,
-                        "email": current_user.email,
-                        "homepage": current_user.homepage,
-                        "name": current_user.name,
+                        "email": user.email,
+                        "homepage": user.homepage,
+                        "name": user.name,
                         "order": 0,
                         "curator": False,
                         "display": True,
@@ -258,14 +262,16 @@ class WebSeminar(object):
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, attr)
 
-    def visible(self):
+    def visible(self, user=None):
         """
         Whether this seminar should be shown to the current user
         """
-        return (self.owner == current_user.email or
-                current_user.is_subject_admin(self) or
+        if user is None:
+            user = current_user
+        return (self.owner == user.email or
+                user.is_subject_admin(self) or
                 # TODO: remove temporary measure of allowing visibility None
-                self.display and (self.visibility is None or self.visibility > 0 or current_user.email in self.editors()))
+                self.display and (self.visibility is None or self.visibility > 0 or user.email in self.editors()))
 
     def searchable(self):
         """
@@ -274,10 +280,12 @@ class WebSeminar(object):
         # TODO: remove temporary measure of allowing visibility None
         return self.display and (self.visibility is None or self.visibility > 1)
 
-    def save(self):
+    def save(self, user=None):
+        if user is None:
+            user = current_user
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
         assert data.get("shortname")
-        data["edited_by"] = int(current_user.id)
+        data["edited_by"] = int(user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
 
@@ -490,22 +498,26 @@ class WebSeminar(object):
             self.owner.lower()
         ]
 
-    def user_can_delete(self):
+    def user_can_delete(self, user=None):
         # Check whether the current user can delete the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_subject_admin(self) or (
-            current_user.email_confirmed and current_user.email.lower() == self.owner.lower()
+        if user is None:
+            user = current_user
+        return user.is_subject_admin(self) or (
+            user.email_confirmed and user.email.lower() == self.owner.lower()
         )
 
-    def user_can_edit(self):
+    def user_can_edit(self, user=None):
         # Check whether the current user can edit the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_subject_admin(self) or (
-            current_user.email_confirmed and current_user.email.lower() in self.editors()
+        if user is None:
+            user = current_user
+        return user.is_subject_admin(self) or (
+            user.email_confirmed and user.email.lower() in self.editors()
         )
 
     def _show_editors(self, label, curators=False):
@@ -707,17 +719,28 @@ def seminars_search(*args, **kwds):
 
     Doesn't support split_ors or raw.  Always computes count.
     """
-    organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
+    col_projection = (len(args) > 1 and isinstance(args[1], str) or "projection" in kwds and isinstance(kwds["projection"], str))
+    if "organizer_dict" in kwds:
+        organizer_dict = kwds.pop("organizer_dict")
+    elif objects and not col_projection:
+        organizer_dict = all_organizers()
+    else:
+        organizer_dict = {} # unused in this case
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("seminars")
+    else:
+        table = db.seminars
     more = kwds.get("more", False)
     if more is not False: # might empty dictionary
-        more, moreval = db.seminars._parse_dict(more)
+        more, moreval = table._parse_dict(more)
         if more is None:
             more = Placeholder()
             moreval = [True]
-        kwds["more"] = more = (more, moreval)
+        more = more, moreval
     return search_distinct(
-        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
+        table, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
     )
 
 
@@ -727,16 +750,23 @@ def seminars_lucky(*args, **kwds):
     """
     organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
-    return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("seminars")
+    else:
+        table = db.seminars
+    return lucky_distinct(table, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, objects=True):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
     return seminars_lucky(
         {label_col: shortname},
         projection=projection,
         organizer_dict=organizer_dict,
         include_deleted=include_deleted,
+        sanitized=sanitized,
         objects=objects,
+        prequery=prequery,
     )
 
 
