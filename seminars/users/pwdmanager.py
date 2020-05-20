@@ -231,9 +231,7 @@ class SeminarsUser(UserMixin):
                 shortname = db.seminar_organizers.lucky(
                     {"email": ilike_query(self.email)}, "seminar_id"
                 )
-                # The prequery here is important so that a user who acquires an API key isn't able to escalate priviliges
-                # without getting an endorsed user to Accept a new seminar
-                for owner in seminars_search({"shortname": shortname}, "owner", prequery={"display": True}):
+                for owner in seminars_search({"shortname": shortname}, "owner"):
                     owner = userdb.lookup(owner, ["creator", "id"])
                     if owner and owner.get("creator"):
                         self.endorser = owner["id"]  # must set endorser first

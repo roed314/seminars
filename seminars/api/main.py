@@ -20,7 +20,7 @@ def format_input_error(err, inp, col):
 
 def version_error(version):
     return APIError({"code": "invalid_version",
-                     "description": "Unknown API version: %s" % version}, 400)
+                     "description": "Unknown API version: %s" % version})
 
 def get_request_json():
     try:
@@ -28,13 +28,13 @@ def get_request_json():
     except Exception as err:
         raise APIError({"code": "json_parse_error",
                         "description": "could not parse json",
-                        "error": str(err)}, 400)
+                        "error": str(err)})
 
 def _get_col(col, raw_data, activity):
     val = raw_data.get(col)
     if val is None:
         raise APIError({"code": "unspecified_%s" % col,
-                        "description": "You must specify %s when %s" % (col, activity)}, 400)
+                        "description": "You must specify %s when %s" % (col, activity)})
     return val
 
 @app.errorhandler(APIError)
@@ -55,7 +55,7 @@ def review_api():
     series = set()
     for series_id in db.seminar_organizers.search({"email": ilike_query(current_user.email)}, "seminar_id"):
         series.add(series_id)
-    for series_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname"):
+    for series_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", prequery={}):
         series.add(series_id)
     if decision == "approve":
         db.seminars.update({"shortname": {"$in": series}, "by_api": True}, {"display": True}, restat=False)
@@ -78,7 +78,7 @@ def lookup_series(version=0):
     result = seminars_lookup(series_id, objects=False, sanitized=True)
     tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
     # TODO: adapt the times, support daterange, sort
-    talks = talks_search({"seminar_id": series_id}, sanitized=True, objects=False, prequery={"display": True})
+    talks = talks_search({"seminar_id": series_id}, sanitized=True, objects=False)
     return jsonify({"code": "success",
                     "properties": result,
                     "talks": talks})
@@ -116,7 +116,7 @@ def search_series(version=0):
             else:
                 raise APIError({"code": "unknown_column",
                                 "col": col,
-                                "description": "%s not a column of seminars" % col}, 400)
+                                "description": "%s not a column of seminars" % col})
         raw_data = {}
     query["visibility"] = 2
     # TODO: encode the times....
@@ -125,7 +125,7 @@ def search_series(version=0):
     except Exception as err:
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
-                        "error": str(err)}, 400)
+                        "error": str(err)})
     return jsonify({"code": "success",
                     "results": results})
 
@@ -152,7 +152,7 @@ def search_talks(version=0):
     except Exception as err:
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
-                        "error": str(err)}, 400)
+                        "error": str(err)})
     results = [rec for rec in results if rec["seminar_id"] in visible_series]
     return jsonify({"code": "success",
                     "results": results})
@@ -199,22 +199,22 @@ def save_series(version=0, user=None):
         raw_data = None
     if not isinstance(raw_data, dict):
         raise APIError({"code": "invalid_json",
-                        "description": "request must contain a json dictionary"}, 400)
+                        "description": "request must contain a json dictionary"})
     # Temporary measure while we rename shortname
     series_id = raw_data.pop("series_id", None)
     raw_data["shortname"] = series_id
     if series_id is None:
         raise APIError({"code": "unspecified_series_id",
-                        "description": "You must specify series_id when saving a series"}, 400)
+                        "description": "You must specify series_id when saving a series"})
     series = seminars_lookup(series_id, include_deleted=True)
     if series is None:
         # Creating new series
         if not allowed_shortname(series_id) or len(series_id) < 3 or len(series_id) > 32:
             raise APIError({"code": "invalid_series_id",
-                           "description": "The identifier must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores."}, 400)
+                           "description": "The identifier must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores."})
         if "organizers" not in raw_data:
             raise APIError({"code": "organizers_required",
-                            "description": "You must specify organizers when creating new series"}, 400)
+                            "description": "You must specify organizers when creating new series"})
         update_organizers = True
         series = WebSeminar(series_id, data=None, editing=True, user=user)
     else:
@@ -224,17 +224,17 @@ def save_series(version=0, user=None):
                             "description": "You do not have permission to edit %s." % series_id}, 401)
         if series.deleted:
             raise APIError({"code": "norevive",
-                            "description": "You cannot revive a series through the API"}, 400)
+                            "description": "You cannot revive a series through the API"})
         if "organizers" in raw_data:
             raise APIError({"code": "organizers_prohibited",
-                            "description": "You may not specify organizers when editing series"}, 400)
+                            "description": "You may not specify organizers when editing series"})
         update_organizers = False
     # Check that there aren't extraneous keys (which might be misspelled)
     extra_keys = [key for key in raw_data if key not in db.seminars.search_cols + ["slots", "organizers"]]
     if extra_keys:
         raise APIError({"code": "extra_keys",
                         "description": "Unrecognized keys",
-                        "errors": extra_keys}, 400)
+                        "errors": extra_keys})
     # Time slots/weekdays and organizers are handled differently by the processing code
     # We want to allow them to be unspecified (in which case we fall back on the current value)
     # and for an API call it's also more convenient to specify them using a list
@@ -245,7 +245,7 @@ def save_series(version=0, user=None):
     if not isinstance(slots, list) or len(slots) > MAX_SLOTS or not all(isinstance(slot, str) for slot in slots):
         raise APIError({"code": "processing_error",
                         "description": "Error in processing slots",
-                        "errors": ["slots must be a list of strings of length at most %s" % MAX_SLOTS]}, 400)
+                        "errors": ["slots must be a list of strings of length at most %s" % MAX_SLOTS]})
     for i, slot in enumerate(slots):
         day, time = slot.split(None, 1)
         try:
@@ -253,7 +253,7 @@ def save_series(version=0, user=None):
         except ValueError:
             raise APIError({"code": "processing_error",
                             "description": "Error in processing slots",
-                            "errors": ["slots must start with a three letter day-of-week"]}, 400)
+                            "errors": ["slots must start with a three letter day-of-week"]})
         raw_data["weekday%s"%i] = str(day)
         raw_data["time_slot%s"%i] = time
     for i in range(len(slots), MAX_SLOTS):
@@ -282,7 +282,7 @@ def save_series(version=0, user=None):
     if errmsgs:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
-                        "errors": errmsgs}, 400)
+                        "errors": errmsgs})
     else:
         new_version = WebSeminar(series_id, data=data, organizers=organizers)
     if series.new or new_version != series:
@@ -292,7 +292,7 @@ def save_series(version=0, user=None):
         new_version.save(user)
     else:
         raise APIError({"code": "no_changes",
-                        "description": "No changes detected"}, 400)
+                        "description": "No changes detected"})
     if series.new:
         new_version.save_organizers()
     edittype = "created" if series.new else "edited"
@@ -310,18 +310,18 @@ def save_series(version=0, user=None):
 def save_talk(version=0, user=None):
     if version != 0:
         raise APIError({"code": "invalid_version",
-                        "description": "Unknown API version: %s" % version}, 400)
+                        "description": "Unknown API version: %s" % version})
     raw_data = request.get_json()
     # Temporary measure while we rename seminar_id
     series_id = raw_data.pop("series_id", None)
     raw_data["seminar_id"] = series_id
     if series_id is None:
         raise APIError({"code": "unspecified_series_id",
-                        "description": "You must specify series_id when saving a talk"}, 400)
+                        "description": "You must specify series_id when saving a talk"})
     series = seminars_lookup(series_id)
     if series is None:
         raise APIError({"code": "no_series",
-                        "description": "The series %s does not exist (or is deleted)" % series_id}, 400)
+                        "description": "The series %s does not exist (or is deleted)" % series_id})
     else:
         # Make sure user has permission to edit
         if not series.user_can_edit(user):
@@ -337,7 +337,7 @@ def save_talk(version=0, user=None):
         talk = talks_lookup(series_id, series_ctr)
         if talk is None:
             raise APIError({"code": "no_talk",
-                            "description": "The talk %s/%s does not exist (or is deleted)" % (series_id, series_ctr)}, 400)
+                            "description": "The talk %s/%s does not exist (or is deleted)" % (series_id, series_ctr)})
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
@@ -345,7 +345,7 @@ def save_talk(version=0, user=None):
     if errmsgs:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
-                        "errors": errmsgs}, 400)
+                        "errors": errmsgs})
     else:
         new_version = WebTalk(talk.seminar_id, data=data)
     sanity_check_times(new_version.start_time, new_version.end_time)
@@ -356,7 +356,7 @@ def save_talk(version=0, user=None):
         new_version.save(user)
     else:
         raise APIError({"code": "no_changes",
-                        "description": "No changes detected"}, 400)
+                        "description": "No changes detected"})
     edittype = "created" if talk.new else "edited"
     if warnings:
         response = jsonify({"code": "warning",

@@ -819,7 +819,7 @@ def talks_lucky(*args, **kwds):
     return lucky_distinct(table, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, sanitized=False, objects=True):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
@@ -827,4 +827,5 @@ def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include
         include_deleted=include_deleted,
         sanitized=sanitized,
         objects=objects,
+        prequery=prequery,
     )

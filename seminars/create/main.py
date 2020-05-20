@@ -27,6 +27,7 @@ from seminars.utils import (
     MAX_ORGANIZERS,
     valid_url,
     valid_email,
+    APIError,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -111,7 +112,8 @@ def index():
         else:
             seminars[seminar_id] = pair
     role = "creator"
-    for seminar_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_deleted=True):
+    # We use prequery to include display False
+    for seminar_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", prequery={}, include_deleted=True):
         if seminar_id not in seminars and seminar_id not in conferences:
             seminar = WebSeminar(seminar_id, deleted=True)  # allow deleted
             pair = (seminar, role)
@@ -152,7 +154,7 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
     if current_user.is_creator:
         api_series = [series for (series, role) in seminars + conferences if series.by_api and not series.display]
         api_series.sort(key = lambda S: S.edited_at, reverse=True)
-        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, role) in seminars + conferences]}}, sort=[("edited_at", -1)]))
+        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, role) in seminars + conferences]}}, sort=[("edited_at", -1)], prequery={}))
     else:
         api_series = api_talks = []
 
@@ -205,7 +207,7 @@ def edit_seminar():
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
         if not notsimilar:
             query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
-            similar = list(seminars_search(query, prequery={"display":True}))
+            similar = list(seminars_search(query))
             # When checking for similar series, don't require an exact match on institutions
             # match anything with institutions not set or with an institution in common
             if seminar.institutions:
@@ -932,6 +934,9 @@ def layout_schedule(seminar, data):
         where talk is a WebTalk or none.  Picks default dates if none specified
     """
     tz = seminar.tz
+    if seminar.by_api and not seminar.display:
+        # edit_seminar_schedule will redirect back to Manage page
+        raise APIError
 
     def parse_date(key):
         date = data.get(key)
@@ -973,7 +978,9 @@ def layout_schedule(seminar, data):
     midnight_begin = midnight(begin, tz)
     midnight_end = midnight(end, tz)
     query = {"$gte": midnight_begin, "$lt": midnight_end + day}
-    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]))
+    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]), prequery=False)
+    if any(talk.by_api and not talk.display for talk in talks):
+        raise APIError
     slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]
     if seminar.is_conference:
         per_day = seminar.per_day if seminar.per_day else 4
@@ -1041,7 +1048,11 @@ def edit_seminar_schedule():
         flash_warnmsg(
             "This series has no topics selected; set the series' topics on the Edit series page, or set topics for each new talk individually."
         )
-    schedule = layout_schedule(seminar, data)
+    try:
+        schedule = layout_schedule(seminar, data)
+    except APIError:
+        flash_error("You must approve or reject the changes made using the API before editing the schedule.")
+        return redirect(url_for(".index"))
     return render_template(
         "edit_seminar_schedule.html",
         seminar=seminar,

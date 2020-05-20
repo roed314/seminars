@@ -351,7 +351,7 @@ def search_distinct(
     info=None,
     include_deleted=False,
     more=False,
-    prequery={},
+    prequery={"display": True},
 ):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -453,6 +453,7 @@ def lucky_distinct(
     offset=0,
     sort=[],
     include_deleted=False,
+    prequery={"display": True},
 ):
     query = dict(query)
     if not include_deleted:
@@ -462,6 +463,14 @@ def lucky_distinct(
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
     tbl = table._get_table_clause(extra_cols)
+    if prequery:
+        # We filter the records before finding the most recent (normal queries filter after finding the most recent)
+        # This is mainly used for setting display=False or display=True
+        # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
+        pqstr, pqvalues = table._parse_dict(prequery)
+        if pqstr is not None:
+            tbl = tbl + SQL(" WHERE {0}").format(pqstr)
+            values = pqvalues + values
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
     cur = table._execute(fselecter, values)
     if cur.rowcount > 0:
@@ -748,7 +757,7 @@ whitelisted_cols = [
 ]
 
 class APIError(Exception):
-    def __init__(self, error, status):
+    def __init__(self, error={}, status=400):
         self.error = error
         self.status = status
 
@@ -759,9 +768,9 @@ def sanitized_table(name):
         "has_extras, stats_valid, total, include_nones FROM meta_tables WHERE name=%s"
     ), [name])
     def update(self, query, changes, resort=False, restat=False, commit=True):
-        raise APIError({"code": "update_prohibited"}, 500)
+        raise APIError({"code": "update_prohibited"})
     def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
-        raise APIError({"code": "insert_prohibited"}, 500)
+        raise APIError({"code": "insert_prohibited"})
     # We remove the raw argument from search and lucky keywords since these allow the execution of arbitrary SQL
     def search(self, *args, **kwds):
         kwds.pop("raw", None)

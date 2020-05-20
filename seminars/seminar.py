@@ -748,7 +748,7 @@ def seminars_lucky(*args, **kwds):
     return lucky_distinct(table, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, sanitized=False, objects=True):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
     return seminars_lucky(
         {label_col: shortname},
         projection=projection,
@@ -756,6 +756,7 @@ def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_di
         include_deleted=include_deleted,
         sanitized=sanitized,
         objects=objects,
+        prequery=prequery,
     )
 
 
@@ -776,7 +777,7 @@ def all_seminars():
     """
     return {
         seminar.shortname: seminar
-        for seminar in seminars_search({}, organizer_dict=all_organizers(), prequery={"display": True})
+        for seminar in seminars_search({}, organizer_dict=all_organizers())
     }
 
 def next_talks(query=None):
