@@ -622,7 +622,15 @@ Email link to speaker
 
     def event(self, user):
         event = Event()
-        event.add("summary", self.speaker)
+        #FIXME: code to remove hrefs from speaker name is a temporary hack to be
+        # removed once we support multiple speakers
+        if "href=" in self.speaker:
+            tokens = re.split(r'>([a-zA-Z ]*)', self.speaker)
+            speaker = ', '.join([tokens[i] for i in range(1,len(tokens),2)])
+            print(speaker)
+        else:
+            speaker = self.speaker
+        event.add("summary", speaker)
         event.add("dtstart", adapt_datetime(self.start_time, pytz.UTC))
         event.add("dtend", adapt_datetime(self.end_time, pytz.UTC))
         desc = ""
@@ -630,7 +638,7 @@ Email link to speaker
         if self.title:
             desc += "Title: %s\n" % (self.title)
         # Speaker and seminar
-        desc += "by %s" % (self.speaker)
+        desc += "by %s" % (speaker)
         if self.speaker_affiliation:
             desc += " (%s)" % (self.speaker_affiliation)
         if self.seminar.name:
