@@ -27,6 +27,7 @@ from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
 from psycopg2.sql import Placeholder
+import re
 
 class WebTalk(object):
     def __init__(
@@ -360,7 +361,7 @@ class WebTalk(object):
 
     def show_password_hint(self):
         if all([not self.deleted, self.online, self.access_control==2, self.live_link, self.access_hint]):
-            return '<div class="access_hint">(Password: %s)</div>' % self.access_hint
+            return '<div class="access_button_hint">(Password: %s)</div>' % self.access_hint
         else:
             return ""
 
@@ -624,7 +625,14 @@ Email link to speaker
 
     def event(self, user):
         event = Event()
-        event.add("summary", self.speaker)
+        #FIXME: code to remove hrefs from speaker name is a temporary hack to be
+        # removed once we support multiple speakers
+        if "href=" in self.speaker:
+            tokens = re.split(r'>([a-zA-Z ]*)', self.speaker)
+            speaker = ', '.join([tokens[i] for i in range(1,len(tokens),2) if tokens[i].strip()])
+        else:
+            speaker = self.speaker
+        event.add("summary", speaker)
         event.add("dtstart", adapt_datetime(self.start_time, pytz.UTC))
         event.add("dtend", adapt_datetime(self.end_time, pytz.UTC))
         desc = ""
@@ -632,7 +640,7 @@ Email link to speaker
         if self.title:
             desc += "Title: %s\n" % (self.title)
         # Speaker and seminar
-        desc += "by %s" % (self.speaker)
+        desc += "by %s" % (speaker)
         if self.speaker_affiliation:
             desc += " (%s)" % (self.speaker_affiliation)
         if self.seminar.name:
