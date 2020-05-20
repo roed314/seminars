@@ -55,7 +55,7 @@ mail = Mail(app)
 
 
 # Enable cross origin for fonts
-CORS(app, resources={r"/fontawesome/webfonts/*": {"origins": "*"}})
+CORS(app, resources={r"/fontawesome/webfonts/*": {"origins": "*"}, r"/api/*": {"origins": "*"}})
 
 ############################
 # App attribute functions  #

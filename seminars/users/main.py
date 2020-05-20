@@ -170,7 +170,6 @@ def info():
         title=title,
         section=section,
         timezones=timezones,
-        user=current_user,
         session=session,
     )
 
@@ -425,6 +424,12 @@ def reset_password_wtoken(token):
         return redirect(url_for(".info"))
     return render_template("reset_password_wtoken.html", title="Reset password", token=token)
 
+
+@login_page.route("/reset_api_token")
+@creator_required
+def reset_api_token():
+    userdb.reset_api_token(current_user._uid)
+    return redirect(url_for(".info"))
 
 # endorsement
 

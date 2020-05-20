@@ -540,3 +540,12 @@ ids:
     To add a type of ID not among the current possibilities,
     please visit the <a href="user/info">Contact</a> page 
     to send an email requesting that the type be added.
+api_token:
+  title: API token
+  contents: |
+    You can use this token to update talks and seminars using the API.
+    You should protect this key as you would a password, since it provides
+    access to your account.
+    If you have reason to suspect that it has been compromised, you can use
+    the reset link to change it and obtain a new key (the old one will
+    immediately cease functioning).
