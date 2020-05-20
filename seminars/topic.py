@@ -191,12 +191,11 @@ class TopicDAG(object):
         if topic_id is None:
             tid = "topic"
             topics = self.subjects
-            disable_children = False
             divhelp = '<p style="margin-left: 10px;">Click a 3-way toggle <i>twice</i> to select all subtopics; click on "Filter" for more details.</p>'
         else:
             tid = topic_id
             topics = self.by_id[tid].children
-            disable_children = disabled or cookie[tid] != 0
+            disabled = disabled or cookie[tid] != 0
             divhelp = ''
         if duplicate_ctr is None:
             duplicate_ctr = Counter()
@@ -208,7 +207,7 @@ class TopicDAG(object):
             link = self.link_pair(tid, topic.id, counts, cols, cookie, duplicate_ctr, disabled=disabled)
             divs.append(link)
             if topic.children:
-                filter_pane = self.filter_pane(tid, topic.id, counts, cookie, duplicate_ctr, disabled=disable_children)
+                filter_pane = self.filter_pane(tid, topic.id, counts, cookie, duplicate_ctr, disabled=disabled)
                 delay.append(filter_pane)
             if i % cols == 0 or i == len(topics):
                 divs.extend(delay)
