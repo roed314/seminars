@@ -127,6 +127,7 @@ function getTopicCookie(topic) {
     }
     return 0;
 }
+/*
 function getTopicCookieWithValue(value) {
     value = value.toString();
     var cur_items = getCookie("topics_dict").split(",").filter(elt => ! elt.startsWith(":"));
@@ -139,6 +140,7 @@ function getTopicCookieWithValue(value) {
     }
     return with_value;
 }
+*/
 function _val(id) {
     var toggle = $('#'+id);
     return parseInt(toggle.attr('data-chosen'));
@@ -355,7 +357,10 @@ function toggleTopicDAG_core(togid) {
     console.log("to_show ", to_show);
     console.log("to_hide ", to_hide);
     if (to_hide.length > 0) {
-        var talks = $(".talk.topic-" + topic);
+        var talks = $();
+        for (let i=0; i < to_hide.length; i++) {
+            talks = talks.add(".talk.topic-" + to_hide[i]);
+        }
         var cur_topics = to_show; //getTopicCookieWithValue(1);
         for (let i=0; i<cur_topics.length; i++) {
             talks = talks.not(".topic-" + cur_topics[i]);
