@@ -16,7 +16,6 @@ from seminars.utils import (
     short_weekdays,
     show_input_errors,
     timezones,
-    weekdays,
     midnight,
     daytime_minutes,
     daytimes_early,
@@ -25,12 +24,19 @@ from seminars.utils import (
     maxlength,
     similar_urls,
     format_warning,
+    valid_url,
+    valid_email,
+    MAX_ORGANIZERS,
 )
 from seminars.seminar import (
     WebSeminar,
     can_edit_seminar,
     seminars_lookup,
     seminars_search,
+    access_control_options,
+    access_time_options,
+    frequency_options,
+    visibility_options,
 )
 from seminars.talk import (
     WebTalk,
@@ -61,6 +67,23 @@ import pytz
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 
+def seminar_options():
+    return {
+        'institution': institutions(),
+        'timezone' : timezones,
+        'weekday' : short_weekdays,
+        'access_control' : access_control_options,
+        'access_time' : access_time_options,
+        'frequency' : frequency_options,
+        'visibility' : visibility_options,
+    }
+
+def talk_options():
+    return {
+        'timezone' : timezones,
+        'access_control' : access_control_options,
+        'access_time' : access_time_options,
+    }
 
 @create.route("manage/")
 @email_confirmed_required
@@ -195,9 +218,7 @@ def edit_seminar():
         title=title,
         section=manage,
         subsection="editsem",
-        institutions=institutions(),
-        short_weekdays=short_weekdays,
-        timezones=timezones,
+        options=seminar_options(),
         maxlength=maxlength,
         lock=lock,
     )
@@ -221,9 +242,7 @@ def delete_seminar(shortname):
             title="Edit series",
             section=manage,
             subsection="editsem",
-            institutions=institutions(),
-            weekdays=weekdays,
-            timezones=timezones,
+            options=seminar_options(),
             maxlength=maxlength,
             lock=lock,
         )
@@ -333,8 +352,7 @@ def delete_talk(seminar_id, seminar_ctr):
             title="Edit talk",
             section="Manage",
             subsection="edittalk",
-            institutions=institutions(),
-            timezones=timezones,
+            options=talk_options(),
             maxlength=maxlength,
         )
 
@@ -403,9 +421,6 @@ def permdelete_talk(seminar_id, seminar_ctr):
     if not talk.user_can_delete():
         flash_error("You do not have permission to permanently delete this talk.")
         return redirect(url_for(".index"), 302)
-    if not talk.deleted:
-        flash_error("You must delete talk %s/%s first.", seminar_id, seminar_ctr)
-        return redirect(url_for(".edit_talk", seminar_id=seminar_id, seminar_ctr=seminar_ctr), 302)
     else:
         db.talks.delete({"seminar_id": seminar_id, "seminar_ctr": seminar_ctr})
         flash("Talk %s/%s has been permanently deleted." % (seminar_id, seminar_ctr))
@@ -520,9 +535,19 @@ def save_seminar():
     else:
         data["weekdays"] = []
         data["time_slots"] = []
+
+    if data["online"]:
+        if data["access_control"] == 2 and not data["access_hint"]:
+            errmsgs.append("You must provide a password hint.")
+        if data["access_control"] == 5:
+            if not data["access_registration"]:
+                errmsgs.append("You must provide a registration link or contact email.")
+            elif not valid_url(data["access_registration"]) and not valid_email(data["access_registration"]):
+                errmsgs.append(format_errmsg("Registration link %s must be a valid URL or email address", data["access_registration"]))
+
     organizers = []
     contact_count = 0
-    for i in range(10):
+    for i in range(MAX_ORGANIZERS):
         D = {"seminar_id": seminar.shortname}
         for col in db.seminar_organizers.search_cols:
             if col in D:
@@ -781,8 +806,7 @@ def edit_talk():
         title=title,
         section="Manage",
         subsection="edittalk",
-        institutions=institutions(),
-        timezones=timezones,
+        options=talk_options(),
         maxlength=maxlength,
         token=token,
         **extras
@@ -828,8 +852,6 @@ def save_talk():
             val = raw_data.get(col, "")
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
-            if col == "access" and data[col] not in ["open", "users", "endorsed"]:
-                errmsgs.append(format_errmsg("Access type %s invalid", data[col]))
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
     if not data["speaker"]:
@@ -843,6 +865,15 @@ def save_talk():
     if not data["topics"]:
         errmsgs.append("Please select at least one topic.")
     data["language"] = languages.clean(data.get("language"))
+
+    if data["online"]:
+        if data["access_control"] == 2 and not data["access_hint"]:
+            errmsgs.append("You must provide a password hint.")
+        if data["access_control"] == 5:
+            if not data["access_registration"]:
+                errmsgs.append("You must provide a registration link or contact email.")
+            elif not valid_url(data["access_registration"]) and not valid_email(data["access_registration"]):
+                errmsgs.append(format_errmsg("Registration link %s must be a valid URL or email address", data["access_registration"]))
 
     # Don't try to create new_version using invalid input
     if errmsgs:

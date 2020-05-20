@@ -94,16 +94,17 @@ function removeFromCookie(item, cookie) {
     return cur_items;
 }
 function setTopicCookie(topic, value) {
-    console.log("setTopicCookie", topic, value);
+  console.log("setTopicCookie", topic, value);
+  if( topic != "" ) {
     var cookie = getCookie("topics_dict");
     if (cookie == null || cookie == "") {
         var cur_items = [];
     } else {
-        var cur_items = cookie.split(",");
+        var cur_items = cookie.split(",").filter(elt => ! elt.startsWith(":"));
     }
     var new_item = topic + ":" + value.toString();
     var found = false;
-    for (let i=0;i<cur_items.length;i++) {
+    for (let i=0; i < cur_items.length; i++) {
         if (cur_items[i].startsWith(topic + ":")) {
             cur_items[i] = new_item
             found = true;
@@ -115,10 +116,11 @@ function setTopicCookie(topic, value) {
     }
     console.log(cur_items.join(","));
     setCookie("topics_dict", cur_items.join(","));
+  }
 }
 function getTopicCookie(topic) {
     var cur_items = getCookie("topics_dict").split(",");
-    for (let i=0; i<cur_items.length; i++) {
+    for (let i=0; i < cur_items.length; i++) {
         if (cur_items[i].startsWith(topic + ":")) {
             return parseInt(cur_items[i].substring(topic.length+1));
         }
@@ -127,7 +129,8 @@ function getTopicCookie(topic) {
 }
 function getTopicCookieWithValue(value) {
     value = value.toString();
-    var cur_items = getCookie("topics_dict").split(",");
+    var cur_items = getCookie("topics_dict").split(",").filter(elt => ! elt.startsWith(":"));
+    console.log("cur_items :" + cur_items);
     var with_value = [];
     for (var i=0; i<cur_items.length; i++) {
         if (cur_items[i].endsWith(":" + value)) {
@@ -196,7 +199,7 @@ function reviseCookies() {
     }
     if (getCookie("topics_dict") == null) {
         cur_topics = getCookie("topics");
-        if (cur_topics == null) {
+        if (cur_topics == null || cur_topics == "") {
             setCookie("topics_dict", "");
         } else {
             cur_topics = cur_topics.split(",");
@@ -206,8 +209,8 @@ function reviseCookies() {
             } else {
                 cur_subjects = cur_subjects.split(",");
             }
-            cur_topics = cur_subjects.concat(cur_topics);
-            cur_topics = cur_topics.map((top) => { return top + ":1" });
+            cur_topics = cur_subjects.concat(cur_topics).filter(elt => elt != "");
+            cur_topics = cur_topics.map( function(top) { return top + ":1" });
             setCookie("topics_dict", cur_topics.join(","));
             eraseCookie("topics");
         }
