@@ -144,6 +144,7 @@ def ctx_proc_userdata():
     data["talks_header"] = talks_header
     data["series_header"] = series_header
     data["static_knowl"] = static_knowl
+    data["domain"] = domain()
     data["topdomain"] = topdomain()
     data["toggle"] = toggle
     data["toggle3way"] = toggle3way
