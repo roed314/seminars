@@ -91,7 +91,7 @@ class WebSeminar(object):
             self.online = True  # default
             self.by_api = False # reset by API code if needed
             self.access = "open"  # default FIXME: remove once we switch to access_control
-            self.access_control = 0 # default is public
+            self.access_control = 4 # default is instant registration
             self.access_time = None
             self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
