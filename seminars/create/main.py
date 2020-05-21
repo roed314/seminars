@@ -77,7 +77,7 @@ def seminar_options():
         'access_time' : access_time_options,
         'frequency' : frequency_options,
         'visibility' : visibility_options,
-        'level' : level_options,
+        'audience' : audience_options,
     }
 
 def talk_options():
