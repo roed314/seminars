@@ -481,18 +481,18 @@ level:
   contents: |
     Series and talks may be distinguished by their target audience as follows:
     <ul>
-      <li><b>Toipic researchers</b>:
+      <li><b>Researchers</b>:
           researchers in a particular topic or subtopic.</li>
-      <li><b>Subject reserchers and students</b>:
-          academic audience in a subject area (a colloquium, for example).</li>
-      <li><b>Topic learners</b>:
-          students and researchers interested in learning the details of a particular result or subtopic (a learning seminar for example).</li>
-      <li><b>Advanced topic learners</b>:
-          students and researchers interested in learning the details of a particular result or subtopic that requires significant background in the topic.</li>
-      <li><b>Undergraduate seminar</b>:
+      <li><b>Subject area audience</b>:
+          academic audience within a department or subject area (a colloquium, for example).</li>
+      <li><b>Learners</b>:
+          researchers and students interested in learning the details of a particular result or subtopic (a learning seminar for example).</li>
+      <li><b>Advanced learners</b>:
+          researchers interested in learning the details of a particular result or subtopic that requires significant background in the topic.</li>
+      <li><b>Undergraduates</b>:
           primarily undergraduates.</li>
       <li><b>General audience</b>:
-          academic audience and members of the public with an academic interest (a public lecture, for example).</li>
+          general academic audience and members of the public with an academic interest (a public lecture, for example).</li>
     </ul>
 hidden:
   title: Hide

@@ -64,8 +64,8 @@ visibility_options = [
 ]
 
 level_options = [
-    (0, "topic researchers"),
-    (1, "subject researchers and students"),
+    (0, "researchers"),
+    (1, "subject area audience"),
     (2, "topic learners"),
     (3, "advanced topic learners"),
     (4, "undergraduate students"),
