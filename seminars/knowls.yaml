@@ -481,17 +481,17 @@ audience:
   contents: |
     Series and talks may be distinguished by their target audience as follows:
     <ul>
-      <li><b>Topic researchers</b>:
+      <li><b>researchers</b>:
           researchers in a particular topic or subtopic.</li>
-      <li><b>Colloquium audience/b>:
+      <li><b>colloquium audience/b>:
           academic audience within a department or subject area.</li>
-      <li><b>Topic learners</b>:
+      <li><b>learners</b>:
           researchers and students interested in learning the details of a particular result or subtopic.</li>
-      <li><b>Advanced topic learners</b>:
+      <li><b>advanced learners</b>:
           researchers interested in learning the details of a particular result or subtopic that requires significant background in the topic.</li>
-      <li><b>Undergraduates</b>:
+      <li><b>undergraduates</b>:
           undergraduate students.</li>
-      <li><b>General audience</b>:
+      <li><b>general audience</b>:
           general academic audience and members of the public with an academic interest.</li>
     </ul>
 hidden:
