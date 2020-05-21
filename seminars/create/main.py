@@ -988,7 +988,7 @@ def layout_schedule(seminar, data):
     midnight_begin = midnight(begin, tz)
     midnight_end = midnight(end, tz)
     query = {"$gte": midnight_begin, "$lt": midnight_end + day}
-    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]), prequery=False)
+    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"], prequery=False))
     if any(talk.by_api and not talk.display for talk in talks):
         raise APIError
     slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]
