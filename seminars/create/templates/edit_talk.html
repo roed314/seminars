@@ -59,6 +59,16 @@
       </td>
     </tr>
     <tr>
+      <td>{{ ASTKNOWL("level") }}</td>
+      <td>
+        <select name="level" style="width:610px;">
+          {% for opt in options["level"] %}
+            <option value="{{opt[0]}}" {% if seminar.level == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
       <td>{{ KNOWL("paper_link") }}</td>
       <td><input name="paper_link" value="{{ talk.paper_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['paper_link'] }}" placeholder="https://arxiv.org/abs/9999.99999" /></td>
     </tr>

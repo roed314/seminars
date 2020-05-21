@@ -160,6 +160,8 @@ class WebTalk(object):
                 return ["physics", topic]
             self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
         self.subjects = []
+        if self.level is None:
+            self.level = 0
 
     def visible(self):
         """
