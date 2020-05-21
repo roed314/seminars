@@ -54,8 +54,18 @@
         <td><div class="topicDAG"></div></td>
       </tr>
       <tr>
-        <td>{{ ASTKNOWL("language","Language") }}</td>
+        <td>{{ ASTKNOWL("language") }}</td>
         <td><span id="language_selector" style="width:600px;"></span></td>
+      </tr>
+      <tr>
+        <td>{{ ASTKNOWL("level") }}</td>
+        <td>
+          <select name="level" style="width:610px;">
+            {% for opt in options["level"] %}
+              <option value="{{opt[0]}}" {% if seminar.level == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
+            {% endfor %}
+          </select>
+        </td>
       </tr>
       <tr>
         <td>{{ ASTKNOWL("timezone") }}</td>

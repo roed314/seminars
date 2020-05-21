@@ -64,6 +64,15 @@ visibility_options = [
     (0, 'private'),
 ]
 
+level_options = [
+    (0, "research seminar"),
+    (1, "colloquium"),
+    (2, "learning seminar"),
+    (3, "advanced learning seminar"),
+    (4, "undergraduate seminar"),
+    (5, "general public"),
+]
+
 class WebSeminar(object):
     def __init__(
         self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False,  user=None,
@@ -95,6 +104,7 @@ class WebSeminar(object):
             self.access_time = None
             self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
+            self.level = 0 # default is research seminar
             self.is_conference = False  # seminar by default
             self.frequency = 7
             self.per_day = 1
@@ -261,6 +271,8 @@ class WebSeminar(object):
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, attr)
+        if self.level is None:
+            self.level = 0
 
     def visible(self, user=None):
         """
