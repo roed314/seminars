@@ -30,8 +30,9 @@ def search_series_get():
         print("There are %s series in the US/Pacific time zone" % len(results))
 
 def search_series_post():
-    from requests import post
     url = "https://researchseminars.org/api/0/search/series"
+    #FIXME: pyflakes is not happy because url is not referenced
+    #FIXME: not clear what is supposed to happen here, if anything...
 
 def authorization():
     # We suggest keeping your api token in a separate file and adding it to your .gitignore
