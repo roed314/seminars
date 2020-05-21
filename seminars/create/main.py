@@ -153,9 +153,9 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
     deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
     if current_user.is_creator:
-        api_series = [series for (series, role) in seminars + conferences if series.by_api and not series.display]
+        api_series = [series for (series, r) in seminars + conferences if series.by_api and not series.display]
         api_series.sort(key = lambda S: S.edited_at, reverse=True)
-        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, role) in seminars + conferences]}}, sort=[("edited_at", -1)], prequery={}))
+        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, r) in seminars + conferences]}}, sort=[("edited_at", -1)], prequery={}))
     else:
         api_series = api_talks = []
 
