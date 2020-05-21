@@ -32,6 +32,7 @@ def search_series_get():
 def search_series_post():
     url = "https://researchseminars.org/api/0/search/series"
     #FIXME: pyflakes is not happy because url is not referenced
+    assert url
     #FIXME: not clear what is supposed to happen here, if anything...
 
 def authorization():
