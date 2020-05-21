@@ -486,13 +486,13 @@ level:
       <li><b>Subject area audience</b>:
           academic audience within a department or subject area (a colloquium, for example).</li>
       <li><b>Learners</b>:
-          researchers and students interested in learning the details of a particular result or subtopic (a learning seminar for example).</li>
+          researchers and students interested in learning the details of a particular result or subtopic.</li>
       <li><b>Advanced learners</b>:
           researchers interested in learning the details of a particular result or subtopic that requires significant background in the topic.</li>
       <li><b>Undergraduates</b>:
-          primarily undergraduates.</li>
+          undergraduate students.</li>
       <li><b>General audience</b>:
-          general academic audience and members of the public with an academic interest (a public lecture, for example).</li>
+          general academic audience and members of the public with an academic interest.</li>
     </ul>
 hidden:
   title: Hide
