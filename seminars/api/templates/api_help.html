@@ -26,13 +26,27 @@
 <h2>Lookup</h2>
 
 <p>
-  To get public information on a specific series use {{ url_for('api.lookup_series', version=0) }}; for a talk use {{ url_for('api.lookup_talk', version=0) }}.
+  You can get public information on a specific series or talk.
 </p>
+
+{{ code_examples["lookup_talk"] | safe }}
+
+<p>
+  When you look up a series, the result includes a list of talks.  Soon, you will be able to specify a date range for those talks.
+</p>
+
+{{ code_examples["lookup_series"] | safe }}
 
 <h2>Searching</h2>
 
 <p>
-  To search for series satisfying certain attributes, use {{ url_for('api.search_series', version=0) }} or {{ url_for('api.search_talks', version=0) }}.  If you use the GET method, you can specify a simple query directly in the URL, giving values of attribute according to the schema table below.  If you use the POST method, you can provide more complicated queries by passing in a json query object using the query language described below.
+  You can search for series satisfying certain attributes.  If you use the GET method, you can specify a simple query directly in the URL, giving values of attribute according to the schema table below.
+</p>
+
+{{ code_examples["search_series_get"] | safe }}
+
+<p>
+  If you use the POST method, you can provide more complicated queries by passing in a json query object using the query language described below.
 </p>
 
 <h2>Saving</h2>

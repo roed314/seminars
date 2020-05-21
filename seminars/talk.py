@@ -374,7 +374,7 @@ class WebTalk(object):
         else:
             return ""
 
-    def show_stream_link(self, raw=False):
+    def show_stream_link(self, user=None, raw=False):
         if any([self.deleted, not self.online, not self.stream_link, self.is_really_over()]):
             return ""
         link = self.stream_link
@@ -778,7 +778,7 @@ def _construct(seminar_dict, objects=True, more=False):
         if not isinstance(rec, dict):
             return rec
         else:
-            if more:
+            if more is not False:
                 moreval = rec.pop("more")
             talk = WebTalk(
                 rec["seminar_id"],
@@ -786,7 +786,7 @@ def _construct(seminar_dict, objects=True, more=False):
                 seminar=seminar_dict.get(rec["seminar_id"]),
                 data=rec,
             )
-            if more:
+            if more is not False:
                 talk.more = moreval
             return talk
     def default_construct(rec):
@@ -831,12 +831,6 @@ def talks_search(*args, **kwds):
     else:
         table = db.talks
     more = kwds.get("more", False)
-    if more is not False: # might empty dictionary
-        more, moreval = table._parse_dict(more)
-        if more is None:
-            more = Placeholder()
-            moreval = [True]
-        kwds["more"] = more, moreval
     return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects, more=more), *args, **kwds)
 
 

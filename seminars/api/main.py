@@ -1,5 +1,5 @@
 
-from flask import jsonify, request, render_template, redirect, url_for, make_response, current_app
+from flask import jsonify, request, render_template, redirect, url_for, make_response, current_app, Response
 from flask_login import current_user
 from seminars import db
 from seminars.app import app
@@ -13,6 +13,7 @@ from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
 
 import inspect
+import json
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
@@ -34,6 +35,16 @@ def get_request_json():
         raise APIError({"code": "json_parse_error",
                         "description": "could not parse json",
                         "error": str(err)})
+
+def str_jsonify(result, callback=False):
+    if callback:
+        return Response(
+            "{}({})".format(str(callback), json.dumps(result, default=str)),
+            mimetype="application/javascript",
+        )
+    else:
+        return Response(json.dumps(result, default=str), mimetype="application/json")
+
 
 def _get_col(col, raw_data, activity):
     val = raw_data.get(col)
@@ -125,15 +136,22 @@ def lookup_series(version=0):
     else:
         raw_data = dict(request.args)
     series_id = _get_col("series_id", raw_data, "looking up a series")
-    result = seminars_lookup(series_id, objects=False, sanitized=True)
+    try:
+        result = seminars_lookup(series_id, objects=False, sanitized=True)
+    except Exception as err:
+        raise APIError({"code": "lookup_error",
+                        "description": "an error occurred looking up the series",
+                        "error": str(err)})
+    talks = list(talks_search({"seminar_id": series_id}, sort=["start_time"], sanitized=True, objects=False))
     # tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
     # TODO: adapt the times, support daterange, sort
-    talks = talks_search({"seminar_id": series_id}, sanitized=True, objects=False)
-    return jsonify({"code": "success",
-                    "properties": result,
-                    "talks": talks})
+    ans = {"code": "success", "properties": result, "talks": talks}
+    callback = raw_data.get("callback", False)
+    return str_jsonify(ans, callback)
 
-@api_page.route("/<int:version>/lookup/series", methods=["GET", "POST"])
+# There should be a route for looking up your own seminars/talks and seeing all columns
+
+@api_page.route("/<int:version>/lookup/talk", methods=["GET", "POST"])
 def lookup_talk(version=0):
     if version != 0:
         raise version_error(version)
@@ -144,10 +162,11 @@ def lookup_talk(version=0):
     series_id = _get_col("series_id", raw_data, "looking up a talk")
     series_ctr = _get_col("series_ctr", raw_data, "looking up a talk")
     result = talks_lookup(series_id, series_ctr, objects=False, sanitized=True)
+    ans = {"code": "success", "properties": result}
+    callback = raw_data.get("callback", False)
+    return str_jsonify(ans, callback)
     # tz = pytz.timezone(raw_data.get("timezone", result.get("timezone", "UTC")))
     # TODO: adapt the times, support daterange
-    return jsonify({"code": "success",
-                    "properties": result})
 
 @api_page.route("/<int:version>/search/series", methods=["GET", "POST"])
 def search_series(version=0):
@@ -171,13 +190,14 @@ def search_series(version=0):
     query["visibility"] = 2
     # TODO: encode the times....
     try:
-        results = seminars_search(query, objects=False, sanitized=True, **raw_data)
+        results = list(seminars_search(query, objects=False, sanitized=True, **raw_data))
     except Exception as err:
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
                         "error": str(err)})
-    return jsonify({"code": "success",
-                    "results": results})
+    ans = {"code": "success", "results": results}
+    callback = raw_data.get("callback", False)
+    return str_jsonify(ans, callback)
 
 @api_page.route("/<int:version>/search/talks", methods=["GET", "POST"])
 def search_talks(version=0):
@@ -204,8 +224,9 @@ def search_talks(version=0):
                         "description": "error in executing search",
                         "error": str(err)})
     results = [rec for rec in results if rec["seminar_id"] in visible_series]
-    return jsonify({"code": "success",
-                    "results": results})
+    ans = {"code": "success", "results": results}
+    callback = raw_data.get("callback", False)
+    return str_jsonify(ans, callback)
 
 def api_auth_required(fn):
     # Note that this wrapper will pass the user as a keyword argument to the wrapped function

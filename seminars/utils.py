@@ -392,10 +392,15 @@ def search_distinct(
         if pqstr is not None:
             tbl = tbl + SQL(" WHERE {0}").format(pqstr)
             values = pqvalues + values
-    if more:
-        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more[0]])
+    if more is not False: # might empty dictionary
+        more, moreval = table._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+
+        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more])
         extra_cols = extra_cols + ("more",)
-        values = more[1] + values
+        values = moreval + values
     else:
         cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
@@ -727,8 +732,12 @@ def url_for_with_args(name, args, **kwargs):
 # For API calls, we only allow certain columns, both because of deprecated parts of the schema and for privacy/security
 whitelisted_cols = [
     "abstract",
-    "access",
+    "access_control",
+    "access_time",
+    "access_hint",
+    "access_registration",
     "comments",
+    "deleted",
     "description",
     "display",
     "edited_at",
@@ -760,7 +769,8 @@ whitelisted_cols = [
     "timezone",
     "title",
     "topics",
-    "video_link"
+    "video_link",
+    "visibility",
 ]
 
 class APIError(Exception):

@@ -691,12 +691,12 @@ def _construct(organizer_dict, objects=True, more=False):
         if not isinstance(rec, dict):
             return rec
         else:
-            if more:
+            if more is not False:
                 moreval = rec.pop("more")
             seminar = WebSeminar(
                 rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec
             )
-            if more:
+            if more is not False:
                 seminar.more = moreval
             return seminar
     def default_construct(rec):
@@ -745,12 +745,6 @@ def seminars_search(*args, **kwds):
     else:
         table = db.seminars
     more = kwds.get("more", False)
-    if more is not False: # might empty dictionary
-        more, moreval = table._parse_dict(more)
-        if more is None:
-            more = Placeholder()
-            moreval = [True]
-        kwds["more"] = more, moreval
     return search_distinct(
         table, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
     )

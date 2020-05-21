@@ -1,5 +1,38 @@
 
 
+def lookup_series():
+    from requests import get
+    url = "https://researchseminars.org/api/0/lookup/series?series_id=MITNT"
+    r = get(url)
+    if r.status_code == 200:
+        J = r.json()
+        props = J["properties"]
+        talks = J["talks"]
+        print("There are %s talks in the %s" % (len(talks), props["name"]))
+
+def lookup_talk():
+    from requests import get
+    url = "https://researchseminars.org/api/0/lookup/series?series_id=MathOnlineHostingEvents&series_ctr=1"
+    r = get(url)
+    if r.status_code == 200:
+        J = r.json()
+        props = J["properties"]
+        print("%s occurred at %s" % (props["title"], props["start_time"]))
+
+def search_series_get():
+    from requests import get
+    # Note that America/Los_Angeles is considered different than US/Pacific
+    url = "https://researchseminars.org/api/0/search/series?timezone=US/Pacific"
+    r = get(url)
+    if r.status_code == 200:
+        J = r.json()
+        results = J["properties"]["results"]
+        print("There are %s series in the US/Pacific time zone" % len(results))
+
+def search_series_post():
+    from requests import post
+    url = "https://researchseminars.org/api/0/search/series"
+
 def authorization():
     # We suggest keeping your api token in a separate file and adding it to your .gitignore
     # so that you don't accidentlly commit it to your repository
