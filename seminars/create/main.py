@@ -37,7 +37,7 @@ from seminars.seminar import (
     access_time_options,
     frequency_options,
     visibility_options,
-    level_options,
+    audience_options,
 )
 from seminars.talk import (
     WebTalk,
@@ -85,7 +85,7 @@ def talk_options():
         'timezone' : timezones,
         'access_control' : access_control_options,
         'access_time' : access_time_options,
-        'level' : level_options,
+        'audience' : audience_options,
     }
 
 @create.route("manage/")
