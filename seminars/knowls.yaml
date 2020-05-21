@@ -45,10 +45,10 @@ filter:
     <table>
     <tr>
       <td>
-        <a style="margin-left: 50px" href="info">Introduction to the site</a>
+        <a style="margin-left: 50px" href="info" target="_blank">Introduction to the site</a>
       </td>
       <td>
-        <a style="margin-left: 50px" href="faq">Detailed help</a>
+        <a style="margin-left: 50px" href="faq" target="_blank">Detailed help</a>
       </td>
     </tr>
     </table>
