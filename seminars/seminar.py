@@ -247,6 +247,8 @@ class WebSeminar(object):
                     return [topic]
                 if topic in ["math_mp", "mp", "physics_math-ph"]:
                     return ["math", "physics", "math-ph"]
+                if topic == "math_na":
+                    return ["math", "cs", "math_NA"]
                 if len(topic) == 2:
                     return ["math", "math_" + topic.upper()]
                 if topic.startswith("math_"):
