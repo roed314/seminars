@@ -65,12 +65,12 @@ visibility_options = [
 ]
 
 level_options = [
-    (0, "research seminar"),
-    (1, "colloquium"),
-    (2, "learning seminar"),
-    (3, "advanced learning seminar"),
-    (4, "undergraduate seminar"),
-    (5, "general public"),
+    (0, "topic researchers"),
+    (1, "subject researchers and students"),
+    (2, "topic learners"),
+    (3, "advanced topic learners"),
+    (4, "undergraduate students"),
+    (5, "general audience"),
 ]
 
 class WebSeminar(object):
