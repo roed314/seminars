@@ -15,6 +15,7 @@ from psycopg2.sql import SQL
 from seminars import db
 from six import string_types
 from urllib.parse import urlparse, urlencode
+from psycopg2.sql import Placeholder
 import pytz
 import re
 from lmfdb.backend.searchtable import PostgresSearchTable

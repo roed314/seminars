@@ -26,7 +26,6 @@ import pytz
 from collections import defaultdict
 from datetime import datetime
 from lmfdb.logger import critical
-from psycopg2.sql import Placeholder
 
 import urllib.parse
 
@@ -65,12 +64,12 @@ visibility_options = [
 ]
 
 level_options = [
-    (0, "research seminar"),
-    (1, "colloquium"),
-    (2, "learning seminar"),
-    (3, "advanced learning seminar"),
-    (4, "undergraduate seminar"),
-    (5, "general public"),
+    (0, "researchers"),
+    (1, "subject area audience"),
+    (2, "topic learners"),
+    (3, "advanced topic learners"),
+    (4, "undergraduate students"),
+    (5, "general audience"),
 ]
 
 class WebSeminar(object):
