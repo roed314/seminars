@@ -540,6 +540,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more)
     query["visibility"] = 2
+    print(info, more)
     if conference:
         # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.  Ignore the possibility that the user/conference is in Kiribati.
         recent = datetime.now().date() - timedelta(days=1)
