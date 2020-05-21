@@ -37,7 +37,7 @@ from seminars.seminar import (
     access_time_options,
     frequency_options,
     visibility_options,
-    level_options,
+    audience_options,
 )
 from seminars.talk import (
     WebTalk,
