@@ -31,6 +31,10 @@ from lmfdb.logger import critical
 from datetime import datetime, timedelta
 import re
 
+# the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
+# text strings that may contain delimited lists (which should all have the same length, empty items are OK)
+SPEAKER_DELIMETER = '&'
+
 class WebTalk(object):
     def __init__(
         self,
@@ -352,18 +356,18 @@ class WebTalk(object):
     def show_seminar(self, external=False):
         return self.seminar.show_name(external=external)
 
-    # speaker fields may be |-delimited lists (we cannot use commas or semicolons!)
+    # speaker fields may be SPEAKER_DELIMITER delimited lists (we cannot use commas or semicolons!)
     def show_speaker(self, raw=False, affiliation=True):
         # As part of a list
-        speakers = [s.strip() for s in self.speaker.split('|')]
+        speakers = [s.strip() for s in self.speaker.split(SPEAKER_DELIMITER)]
         print(speakers)
         if not speakers:
             return ''
-        homepages = [s.strip() for s in self.speaker_homepage.split('|')]
+        homepages = [s.strip() for s in self.speaker_homepage.split(SPEAKER_DELIMITER)]
         for i in range(len(speakers)-len(homepages)):
             homepages.append('')
         print(homepages)
-        affiliations = [s.strip() for s in self.speaker_affiliation.split('|')] if affiliation else []
+        affiliations = [s.strip() for s in self.speaker_affiliation.split(SPEAKER_DELIMITER)] if affiliation else []
         for i in range(len(speakers)-len(affiliations)):
             affiliations.append('')
         print(affiliations)
@@ -637,7 +641,7 @@ Thank you,
             % (self.show_speaker(raw=True), self.speaker_link(), current_user.name),
             "subject": "%s: title and abstract" % self.seminar.name,
         }
-        email_to = ';'.join(self.speaker_email.split('|')) if self.speaker_email else ""
+        email_to = ';'.join(self.speaker_email.split(SPEAKER_DELIMETER)) if self.speaker_email else ""
         return """
 <p>
  To let someone edit this page, send them this link:
