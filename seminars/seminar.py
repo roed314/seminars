@@ -659,7 +659,7 @@ class WebSeminar(object):
 def series_header(
     conference=False,
     include_institutions=True,
-    iinclude_datetime=True,
+    include_datetime=True,
     include_topics=True,
     include_audience=False,
     include_subscribe=True
