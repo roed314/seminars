@@ -11,8 +11,7 @@
         <thead>
           <tr>
             {% if is_conference %}
-nclude_audience/
-            {{ series_header(conference=True, include_description=False, include_topics=True) | safe }}
+            {{ series_header(conference=True, include_audience=False, include_topics=True) | safe }}
             {% else %}
             {{ series_header() | safe }}
             {% endif %}
@@ -21,8 +20,7 @@ nclude_audience/
         {% for seminar in info.results %}
         <tr>
           {% if is_conference %}
-nclude_audience/
-          {{ seminar.oneline(conference=True, include_description=False, include_topics=True) | safe }}
+          {{ seminar.oneline(conference=True, include_audience=False, include_topics=True) | safe }}
           {% else %}
           {{ seminar.oneline() | safe }}
           {% endif %}

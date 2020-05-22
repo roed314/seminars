@@ -86,6 +86,7 @@ def help():
     code_examples = {name: highlight(inspect.getsource(func), PythonLexer(), HtmlFormatter())
                      for (name, func) in example.__dict__.items()
                      if isinstance(func, FunctionType)}
+    #FIXME: sanitized_series_cols and sanitized_talks_cols are not defined, the line below will fail
     cols = {"series_sanitized": sorted(sanitized_table('seminars').search_cols),
             "talks_sanitized": sorted(sanitized_table('talks').search_cols),
             "series_other": sorted(col for col in db.seminars.search_cols if col not in sanitized_series_cols),

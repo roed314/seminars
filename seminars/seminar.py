@@ -823,7 +823,7 @@ SELECT DISTINCT ON (seminar_id) {0} FROM
         ans[rec["seminar_id"]] = rec["start_time"]
     return ans
 
-def next_talk_sorted(results):
+def next_talk_sorted(results, reverse=False):
     """
     Sort a list of WebSeminars by when their next talk is (and add the next_talk_time attribute to each seminar).
 
@@ -837,15 +837,23 @@ def next_talk_sorted(results):
     for R in results:
         if R.next_talk_time.replace(tzinfo=None) == datetime.max:
             R.next_talk_time = None
+    if reverse:
+        results.reverse()
     return results
 
-def date_sorted(results):
+def date_sorted(results, reverse=False):
     """
     Sort a list of WebSeminars that are conferencs by start_date, end_date, name
 
     Returns the sorted list.
     """
-    return sorted(results, key=lambda res: [res.start_date, res.end_date, res.name])
+    if reverse:
+        return sorted(results, key=lambda res: [res.end_date, res.start_date, res.name], reverse=True)
+    else:
+        return sorted(results, key=lambda res: [res.start_date, res.end_date, res.name])
+
+def series_sorted(results, conference=False, reverse=False):
+    return date_sorted(results, reverse=reverse) if conference else next_talk_sorted(results, reverse=reverse)
 
 def next_talk(shortname):
     """
