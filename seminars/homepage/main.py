@@ -227,7 +227,7 @@ class DoubleToggle(Toggle):
         left_toggle = Toggle._input(self, info)
         right_label = self.otoggle._label(info)
         right_toggle = self.otoggle._input(info)
-        return left_toggle + '<div style="display:inline-block;width:%spx;"></div>' % self.gap + '<div style="padding-left:4px;padding-right:4px;display:inline-block;">%s</div>' % (right_label) + right_toggle
+        return '<table><tr><td style="padding-left: 0px;">' + left_toggle + '<td style="padding-left: 2em;">%s</td><td>%s</td>' % (right_label, right_toggle) + '</td></tr></table>'
 
 class PushForCookies(SearchButton):
     def __init__(self, value, description, disabled=False, **kwds):
