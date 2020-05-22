@@ -64,10 +64,10 @@ visibility_options = [
 ]
 
 audience_options = [
-    (0, "researchers"),
-    (1, "colloquium audience"),
-    (2, "learners"),
-    (3, "advanced learners"),
+    (0, "researchers in topic"),
+    (1, "researchers in discipline"),
+    (2, "advanced learners"),
+    (3, "learners"),
     (4, "undergraduates"),
     (5, "general audience"),
 ]
