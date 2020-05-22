@@ -120,54 +120,7 @@ class WebTalk(object):
         This functon is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        if self.hidden is None:
-            self.hidden = False
-        if self.online and self.access_control is None:
-            self.access_control = 0 if self.access == 'open' else self.access_control
-            self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
-            if self.live_link and "comments" in self.live_link:
-                self.live_link = ""
-                if self.seminar.homepage:
-                    self.access_control = 5
-                    self.access_registration = self.seminar.homepage
-        if self.online and self.live_link and "comments" in self.live_link:
-            self.live_link = ""
-        # remove columns we plan to drop
-        for attr in ["subject", "visibility"]:
-            killattr(self, attr)
-
-        # Port old subjects and topics to the new topic scheme
-        if getattr(self, "subjects", []):
-            def update_topic(topic):
-                if topic in ["math", "physics", "bio"]:
-                    return [topic]
-                if topic in ["math_mp", "mp", "physics_math-ph"]:
-                    return ["math", "physics", "math-ph"]
-                if topic == "math_na":
-                    return ["math", "cs", "math_NA"]
-                if len(topic) == 2:
-                    return ["math", "math_" + topic.upper()]
-                if topic.startswith("math_"):
-                    return ["math", "math_" + topic[5:].upper()]
-                if topic.startswith("bio_bio_"):
-                    return ["bio", "bio_" + topic[8:].upper()]
-                assert topic.startswith("physics_")
-                topic = topic[8:]
-                if topic.startswith("nlin_"):
-                    return ["physics", "nlin", topic]
-                if topic.startswith("cond-mat_"):
-                    return ["physics", "cond-mat", topic]
-                if topic.startswith("nucl-"):
-                    return ["physics", "nucl-ph", topic]
-                if topic.startswith("hep-"):
-                    return ["physics", "hep", topic]
-                if topic.startswith("astro-ph_"):
-                    return ["physics", "astro-ph", topic]
-                return ["physics", topic]
-            self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
-        self.subjects = []
-        if self.audience is None:
-            self.audience = 0 # default is researchers
+        pass
 
     def visible(self):
         """
