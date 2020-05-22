@@ -80,7 +80,7 @@ def comma_list(items):
     elif len(items) == 2:
         return items[0] + " and " + items[1]
     else:
-        return ', '.join(itmes[:-1]) + ', and ' + items[-1]
+        return ', '.join(items[:-1]) + ', and ' + items[-1]
 
 def how_long(delta):
     minute = timedelta(minutes=1)

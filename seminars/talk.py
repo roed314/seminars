@@ -367,7 +367,7 @@ class WebTalk(object):
         for i in range(len(speakers)):
             item = '<a href="%s">%s</a>' % (homepages[i],speakers[i]) if homepages[i] and not raw else speakers[i]
             item += (" (%s)" % affiliations[i]) if affiliations[i] else ''
-        return comma_list(itmes)
+        return comma_list(items)
 
     def show_speaker_and_seminar(self, external=False):
         # On homepage
