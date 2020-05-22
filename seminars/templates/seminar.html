@@ -37,7 +37,7 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% endif %}
 <tr>
   <td style="padding:0px;">Audience:</td>
-  <td>{{ options["audience"][seminar.audience] }}</td>
+  <td>{{ seminar.show_audience() | safe }}</td>
 </tr>
 {% if seminar.is_conference %}
 <tr>
