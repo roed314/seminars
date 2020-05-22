@@ -501,7 +501,7 @@ class WebSeminar(object):
         cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes,homepage_link=True if self.deleted else False)))
         if include_institutions:
             cols.append(('class="institutions"', self.show_institutions()))
-        if include_audience:
+        if iuclude_audience:
             cols.append(('class="audience"', self.show_audience()))
         if include_topics:
             cols.append(('class="topics"', self.show_topics()))
