@@ -363,14 +363,11 @@ class WebTalk(object):
         affiliations = self.speaker_affiliation.split(';') if affiliation else []
         for i in range(len(speakers)-len(affiliations)):
             affiliations.append('')
-        print(speakers)
-        print(homepages)
-        print(affiliations)
         items = []
         for i in range(len(speakers)):
             item = '<a href="%s">%s</a>' % (homepages[i],speakers[i]) if homepages[i] and not raw else speakers[i]
             item += (" (%s)" % affiliations[i]) if affiliations[i] else ''
-        print(items)
+            items.append(item)
         return comma_list(items)
 
     def show_speaker_and_seminar(self, external=False):
