@@ -669,7 +669,7 @@ table.ntdata td.date, td.timerange {
     text-align: right;
 }
 table.ntdata td.weekday {
-    text-align: left;
+    text-align: center;
     padding-right: 2px;
 }
 
@@ -704,7 +704,7 @@ table.ntdata td.enddate {
 
 table.ntdata td.seriesname {
     text-align: left;
-    min-width: 240px;
+    min-width: 300px;
 }
 
 table.ntdata td.institutions {
@@ -718,15 +718,16 @@ table ntdata td.subscribe {
 }
 
 table.ntdata td.speaker {
-    min-width: 120px;
+    min-width: 150px;
 }
 
 table.ntdata td.talktitle {
     min-width: 300px;
 }
 
-table.ntdata td.description {
-    min-width: 240px;
+table.ntdata td.audience {
+    white-space:nowrap;
+    min-width: 150px;
 }
 
 .talk-table td:nth-child(6) {
@@ -771,6 +772,12 @@ button.delete {
     color: red;
     font-weight: 300;
     background-color: white;
+}
+button.reject {
+    vertical-align: text-bottom;
+    color: white;
+    background-color: red;
+    border: 2px solid black;
 }
 
 button.savedelete {

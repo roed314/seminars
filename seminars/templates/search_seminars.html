@@ -10,20 +10,12 @@
       <table class='ntdata'>
         <thead>
           <tr>
-            {% if is_conference %}
-            {{ series_header(conference=True, include_description=False, include_topics=True) | safe }}
-            {% else %}
             {{ series_header() | safe }}
-            {% endif %}
           </tr>
         </thead>
         {% for seminar in info.results %}
         <tr>
-          {% if is_conference %}
-          {{ seminar.oneline(conference=True, include_description=False, include_topics=True) | safe }}
-          {% else %}
           {{ seminar.oneline() | safe }}
-          {% endif %}
         </tr>
         {% endfor %}
       </table>

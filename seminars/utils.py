@@ -15,19 +15,14 @@ from psycopg2.sql import SQL
 from seminars import db
 from six import string_types
 from urllib.parse import urlparse, urlencode
+from psycopg2.sql import Placeholder
 import pytz
 import re
+from lmfdb.backend.searchtable import PostgresSearchTable
 from .toggle import toggle
 
-weekdays = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-]
+
+weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 daytime_re_string = r"\d{1,4}|\d{1,2}:\d\d|"
 daytime_re = re.compile(daytime_re_string)
@@ -264,23 +259,6 @@ def is_nighttime(t):
     return 1 <= t.hour < 6
 
 
-def sanity_check_times(start_time, end_time):
-    """
-    Flashes warnings if time range seems suspsicious.  Note that end_time is (by definition) greater than start_time
-    """
-    if start_time is None or end_time is None:
-        # Users are allowed to not fill in a time
-        return
-    if start_time > end_time:
-        end_time = end_time + timedelta(days=1)
-    if start_time + timedelta(hours=8) < end_time:
-        flash_warnmsg("Time range exceeds 8 hours, please update if that was unintended.")
-    if is_nighttime(start_time) or is_nighttime(end_time):
-        flash_warnmsg(
-            "Time range includes monring hours before 6am. Please update using 24-hour notation, or specify am/pm, if that was unintentional."
-        )
-
-
 def top_menu():
     if current_user.is_authenticated:
         account = "Account"
@@ -331,9 +309,15 @@ def clean_topics(inp):
         else:
             inp = [inp]
     if isinstance(inp, Iterable):
-        inp = [elt for elt in inp if elt in topic_dag.by_id]
-        inp.sort()
-    return inp
+        filled = set(elt for elt in inp if elt in topic_dag.by_id)
+        size = 0
+        while len(filled) != size:
+            size = len(filled)
+            for elt in set(filled):
+                for supertopic in topic_dag.by_id[elt].parents:
+                    filled.add(supertopic.id)
+        return sorted(filled)
+    return []
 
 
 def count_distinct(table, counter, query={}, include_deleted=False):
@@ -374,6 +358,7 @@ def search_distinct(
     info=None,
     include_deleted=False,
     more=False,
+    prequery={"display": True},
 ):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -400,10 +385,23 @@ def search_distinct(
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
-    if more:
-        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more[0]])
+    if prequery:
+        # We filter the records before finding the most recent (normal queries filter after finding the most recent)
+        # This is mainly used for setting display=False or display=True
+        # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
+        pqstr, pqvalues = table._parse_dict(prequery)
+        if pqstr is not None:
+            tbl = tbl + SQL(" WHERE {0}").format(pqstr)
+            values = pqvalues + values
+    if more is not False: # might empty dictionary
+        more, moreval = table._parse_dict(more)
+        if more is None:
+            more = Placeholder()
+            moreval = [True]
+
+        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more])
         extra_cols = extra_cols + ("more",)
-        values = more[1] + values
+        values = moreval + values
     else:
         cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
@@ -463,6 +461,7 @@ def lucky_distinct(
     offset=0,
     sort=[],
     include_deleted=False,
+    prequery={"display": True},
 ):
     query = dict(query)
     if not include_deleted:
@@ -472,6 +471,14 @@ def lucky_distinct(
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
     tbl = table._get_table_clause(extra_cols)
+    if prequery:
+        # We filter the records before finding the most recent (normal queries filter after finding the most recent)
+        # This is mainly used for setting display=False or display=True
+        # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
+        pqstr, pqvalues = table._parse_dict(prequery)
+        if pqstr is not None:
+            tbl = tbl + SQL(" WHERE {0}").format(pqstr)
+            values = pqvalues + values
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
     cur = table._execute(fselecter, values)
     if cur.rowcount > 0:
@@ -534,9 +541,9 @@ def process_user_input(inp, col, typ, tz=None):
     - ''col'' -- column name (names ending in ''link'', ''page'', ''time'', ''email'' get special handling
     - ``typ`` -- a Postgres type, as a string
     """
-    if inp:
+    if inp and isinstance(inp, str):
         inp = inp.strip()
-    if not inp:
+    if inp == "":
         return False if typ == "boolean" else ("" if typ == "text" else None)
     if col in maxlength and len(inp) > maxlength[col]:
         raise ValueError("Input exceeds maximum length permitted")
@@ -579,9 +586,9 @@ def process_user_input(inp, col, typ, tz=None):
     elif typ == "date":
         return parse_time(inp).date()
     elif typ == "boolean":
-        if inp in ["yes", "true", "y", "t"]:
+        if inp in ["yes", "true", "y", "t", True]:
             return True
-        elif inp in ["no", "false", "n", "f"]:
+        elif inp in ["no", "false", "n", "f", False]:
             return False
         raise ValueError("Invalid boolean")
     elif typ == "text":
@@ -592,7 +599,9 @@ def process_user_input(inp, col, typ, tz=None):
     elif typ in ["int", "smallint", "bigint", "integer"]:
         return int(inp)
     elif typ == "text[]":
-        if inp:
+        if inp == "":
+            return []
+        elif isinstance(inp, str):
             if inp[0] == "[" and inp[-1] == "]":
                 res = [elt.strip().strip("'") for elt in inp[1:-1].split(",")]
                 if res == [""]:  # was an empty array
@@ -602,8 +611,10 @@ def process_user_input(inp, col, typ, tz=None):
             else:
                 # Temporary measure until we incorporate https://www.npmjs.com/package/select-pure (demo: https://www.cssscript.com/demo/multi-select-autocomplete-selectpure/)
                 return [inp]
+        elif isinstance(inp, Iterable):
+            return [str(x) for x in inp]
         else:
-            return []
+            raise ValueError("Unrecognized input")
     else:
         raise ValueError("Unrecognized type %s" % typ)
 
@@ -639,7 +650,6 @@ def format_warning(warnmsg, *args):
 def flash_warnmsg(warnmsg, *args):
     flash(format_warning(warnmsg, *args), "warning")
 
-
 def format_infomsg(infomsg, *args):
     return Markup(infomsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
 
@@ -655,6 +665,21 @@ def show_input_errors(errmsgs):
     return render_template("inputerror.html", messages=errmsgs)
 
 
+def sanity_check_times(start_time, end_time, warn=flash_warnmsg):
+    """
+    Flashes warnings if time range seems suspsicious.  Note that end_time is (by definition) greater than start_time
+    """
+    if start_time is None or end_time is None:
+        # Users are allowed to not fill in a time
+        return
+    if start_time > end_time:
+        end_time = end_time + timedelta(days=1)
+    if start_time + timedelta(hours=8) < end_time:
+        warn("Time range exceeds 8 hours, please update if that was unintended.")
+    if is_nighttime(start_time) or is_nighttime(end_time):
+        warn("Time range includes morning hours before 6am. Please update using 24-hour notation, or specify am/pm, if that was unintentional.")
+
+
 class Toggle(SearchBox):
     def _input(self, info=None):
         main = toggle(
@@ -665,7 +690,8 @@ class Toggle(SearchBox):
         return '<span style="display: inline-block">%s</span>' % (main,)
 
 
-def ics_file(talks, filename, user=current_user):
+def ics_file(talks, filename, user=None):
+    if user is None: user = current_user
     cal = Calendar()
     cal.add("VERSION", "2.0")
     cal.add("PRODID", topdomain())
@@ -703,3 +729,81 @@ def num_columns(labels):
 def url_for_with_args(name, args, **kwargs):
     query = ('?' + urlencode(args)) if args else ''
     return url_for(name, **kwargs) + query
+
+# For API calls, we only allow certain columns, both because of deprecated parts of the schema and for privacy/security
+whitelisted_cols = [
+    "abstract",
+    "access_control",
+    "access_time",
+    "access_hint",
+    "access_registration",
+    "comments",
+    "deleted",
+    "description",
+    "display",
+    "edited_at",
+    "end_date",
+    "end_time",
+    "frequency",
+    "homepage",
+    "institutions",
+    "is_conference",
+    "language",
+    #"live_link", # maybe allow searching on this once access control refined
+    "name",
+    "online",
+    "paper_link",
+    "per_day",
+    "room",
+    "seminar_ctr",
+    "seminar_id",
+    "shortname",
+    "slides_link",
+    "speaker",
+    "speaker_affiliation",
+    "speaker_email",
+    "speaker_homepage",
+    "start_date",
+    "start_time",
+    "stream_link",
+    "time_slots",
+    "timezone",
+    "title",
+    "topics",
+    "video_link",
+    "visibility",
+]
+
+class APIError(Exception):
+    def __init__(self, error={}, status=400):
+        self.error = error
+        self.status = status
+
+@lru_cache(maxsize=None)
+def sanitized_table(name):
+    cur = db._execute(SQL(
+        "SELECT name, label_col, sort, count_cutoff, id_ordered, out_of_order, "
+        "has_extras, stats_valid, total, include_nones FROM meta_tables WHERE name=%s"
+    ), [name])
+    def update(self, query, changes, resort=False, restat=False, commit=True):
+        raise APIError({"code": "update_prohibited"})
+    def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
+        raise APIError({"code": "insert_prohibited"})
+    # We remove the raw argument from search and lucky keywords since these allow the execution of arbitrary SQL
+    def search(self, *args, **kwds):
+        kwds.pop("raw", None)
+        return PostgresSearchTable.search(self, *args, **kwds)
+    def lucky(self, *args, **kwds):
+        kwds.pop("raw", None)
+        return PostgresSearchTable.lucky(self, *args, **kwds)
+    from seminars import count
+    table = PostgresSearchTable(db, *cur.fetchone())
+    table.update = update.__get__(table)
+    table.count = count.__get__(table)
+    table.search = search.__get__(table)
+    table.lucky = lucky.__get__(table)
+    table.insert_many = insert_many.__get__(table)
+    table.search_cols = [col for col in table.search_cols if col in whitelisted_cols]
+    table.col_type = {col: typ for (col, typ) in table.col_type.items() if col in whitelisted_cols}
+    return table
+

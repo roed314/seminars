@@ -53,22 +53,6 @@
     </header>
   </div>
 
-{% elif section == "Search" %}
-  <div id="search-submenu">
-    <header class="inner">
-      <div class="submenu-inner">
-        <div class="submenu-nav{% if subsection == 'seminars' %} submenu-active{% endif %}">
-          <a href="{{ url_for_with_args('search_seminars', request.args) }}">Seminar series</a>
-        </div>
-        <div class="submenu-nav{% if subsection == 'conferences' %} submenu-active{% endif %}">
-          <a href="{{ url_for_with_args('search_conferences', request.args) }}">Conferences</a>
-        </div>
-        <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
-          <a href="{{ url_for_with_args('search_talks', request.args) }}">Talks</a>
-        </div>
-      </div>
-    </header>
-  </div>
 {% elif section in ["Manage", "Create"] %}
   <div id="manage-submenu">
     <header class="inner">

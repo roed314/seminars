@@ -23,10 +23,10 @@ from seminars.utils import (
     date_and_daytimes_to_times,
     maxlength,
     similar_urls,
-    format_warning,
+    MAX_ORGANIZERS,
     valid_url,
     valid_email,
-    MAX_ORGANIZERS,
+    APIError,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -37,6 +37,7 @@ from seminars.seminar import (
     access_time_options,
     frequency_options,
     visibility_options,
+    audience_options,
 )
 from seminars.talk import (
     WebTalk,
@@ -76,6 +77,7 @@ def seminar_options():
         'access_time' : access_time_options,
         'frequency' : frequency_options,
         'visibility' : visibility_options,
+        'audience' : audience_options,
     }
 
 def talk_options():
@@ -83,6 +85,7 @@ def talk_options():
         'timezone' : timezones,
         'access_control' : access_control_options,
         'access_time' : access_time_options,
+        'audience' : audience_options,
     }
 
 @create.route("manage/")
@@ -98,20 +101,23 @@ def index():
         role_key = {"organizer": 0, "curator": 1, "creator": 3}
         return (role_key[elt[1]], elt[0].name)
 
-    for rec in db.seminar_organizers.search({"email": ilike_query(current_user.email)}, ["seminar_id", "curator"]):
+    for rec in db.seminar_organizers.search({"email": ilike_query(current_user.email)}):
         seminar_id = rec["seminar_id"]
         role = "curator" if rec["curator"] else "organizer"
         # don't waste time loading deleted talks
-        if not seminars_lookup(seminar_id, projection="shortname", objects=False):
+        # We don't need the full list of organizers, so we save time by using the found record
+        orgproxy = {seminar_id: [rec]}
+        seminar = seminars_lookup(seminar_id, organizer_dict=orgproxy, prequery=False)
+        if seminar is None:
             continue
-        seminar = WebSeminar(seminar_id)
         pair = (seminar, role)
         if seminar.is_conference:
             conferences[seminar_id] = pair
         else:
             seminars[seminar_id] = pair
     role = "creator"
-    for seminar_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_deleted=True):
+    # We use prequery to include display False
+    for seminar_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", prequery={}, include_deleted=True):
         if seminar_id not in seminars and seminar_id not in conferences:
             seminar = WebSeminar(seminar_id, deleted=True)  # allow deleted
             pair = (seminar, role)
@@ -149,6 +155,13 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
         deleted_talks.append(talk)
     deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
+    if current_user.is_creator:
+        api_series = [series for (series, r) in seminars + conferences if series.by_api and not series.display]
+        api_series.sort(key = lambda S: S.edited_at, reverse=True)
+        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, r) in seminars + conferences]}}, sort=[("edited_at", -1)], prequery={}))
+    else:
+        api_series = api_talks = []
+
     manage = "Manage" if current_user.is_organizer else "Create"
     return render_template(
         "create_index.html",
@@ -156,6 +169,8 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
         conferences=conferences,
         deleted_seminars=deleted_seminars,
         deleted_talks=deleted_talks,
+        api_series=api_series,
+        api_talks=api_talks,
         institution_known=institution_known,
         institutions=institutions(),
         maxlength=maxlength,
@@ -196,7 +211,7 @@ def edit_seminar():
             seminar.timezone = db.institutions.lookup(seminar.institutions[0], "timezone")
         if not notsimilar:
             query = {'is_conference': seminar.is_conference, 'name': {"$ilike": '%' + seminar.name + '%'}}
-            similar = [s for s in seminars_search(query)]
+            similar = list(seminars_search(query))
             # When checking for similar series, don't require an exact match on institutions
             # match anything with institutions not set or with an institution in common
             if seminar.institutions:
@@ -444,12 +459,40 @@ def save_seminar():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_seminar", shortname=shortname), 302)
 
+    data, organizers, errmsgs = process_save_seminar(seminar, raw_data)
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
+    else: # to make it obvious that these two statements should be together
+        new_version = WebSeminar(shortname, data=data, organizers=organizers)
+
+    if seminar.new or new_version != seminar:
+        new_version.save()
+        if new:
+            flash("Series created successfully! Now visit the Edit schedule tab to add talks.")
+        else:
+            flash("Series details updated.")
+    elif seminar.organizers == new_version.organizers:
+        flash("No changes made to series.")
+    if seminar.new or seminar.organizers != new_version.organizers:
+        new_version.save_organizers()
+        if not seminar.new:
+            flash("Series organizers updated!")
+    return redirect(url_for(".edit_seminar", shortname=shortname), 302)
+
+
+def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg, update_organizers=True, user=None):
+    if user is None:
+        user = current_user
+    errmsgs = []
+    shortname = raw_data["shortname"]
+
     errmsgs = []
     if seminar.new:
         data = {
             "shortname": shortname,
-            "display": current_user.is_creator,
-            "owner": current_user.email,
+            "display": user.is_creator,
+            "owner": user.email,
         }
     else:
         data = {
@@ -458,21 +501,26 @@ def save_seminar():
             "owner": seminar.owner,
         }
     # Have to get time zone first
-    data["timezone"] = tz = raw_data.get("timezone")
+    tz = raw_data.get("timezone", getattr(seminar, "timezone", "UTC"))
+    data["timezone"] = tz
     tz = pytz.timezone(tz)
     for col in db.seminars.search_cols:
         if col in data:
+            continue
+        # For the API, we want to carry over unspecified columns from the previous data
+        if col not in raw_data:
+            data[col] = getattr(seminar, col, None)
             continue
         typ = db.seminars.col_type[col]
         ### Hack to be removed ###
         if col.endswith("time") and typ == "timestamp with time zone":
             typ = "time"
         try:
-            val = raw_data.get(col, "")
+            val = raw_data[col]
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
-            errmsgs.append(format_input_errmsg(err, val, col))
+            errmsgs.append(format_input_error(err, val, col))
     if not data["name"]:
         errmsgs.append("The name cannot be blank.")
     elif len(data["name"]) < 3:
@@ -480,17 +528,14 @@ def save_seminar():
     if data["is_conference"] and data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         errmsgs.append("End date cannot precede start date.")
     if data["per_day"] is not None and data["per_day"] < 1:
-        errmsgs.append(format_input_errmsg("integer must be positive", data["per_day"], "per_day"))
-    if data["is_conference"] and (not data["start_date"] or not data["end_date"]):
+        errmsgs.append(format_input_error("integer must be positive", data["per_day"], "per_day"))
+    if data["is_conference"] and not (data["start_date"] and data["end_date"]):
         errmsgs.append("Please specify the start and end dates of your conference (you can change these later if needed).")
-
     if data["is_conference"] and not data["per_day"]:
         errmsgs.append("Please specify the typical number of talks per day of your conference (a rough guess is fine).")
 
     data["institutions"] = clean_institutions(data.get("institutions"))
     data["topics"] = clean_topics(data.get("topics"))
-    if not data["topics"]:
-        errmsgs.append(format_errmsg("Please select at least one topic."))
     if not data["topics"]:
         errmsgs.append("Please select at least one topic.")
     data["language"] = languages.clean(data.get("language"))
@@ -510,17 +555,17 @@ def save_seminar():
                 val = raw_data.get(col, "")
                 daytimes = process_user_input(val, col, "daytimes", tz)
             except Exception as err:  # should only be ValueError's but let's be cautious
-                errmsgs.append(format_input_errmsg(err, val, col))
+                errmsgs.append(format_input_error(err, val, col))
             if weekday is not None and daytimes is not None:
                 data["weekdays"].append(weekday)
                 data["time_slots"].append(daytimes)
                 if daytimes_early(daytimes):
-                    flash_warnmsg(
+                    warn(
                         "Time slot %s includes early AM hours, please correct if this is not intended (use 24-hour time format).",
                         daytimes,
                     )
                 elif daytimes_long(daytimes):
-                    flash_warnmsg(
+                    warn(
                         "Time slot %s is longer than 8 hours, please correct if this is not intended.",
                         daytimes,
                 )
@@ -546,92 +591,66 @@ def save_seminar():
                 errmsgs.append(format_errmsg("Registration link %s must be a valid URL or email address", data["access_registration"]))
 
     organizers = []
-    contact_count = 0
-    for i in range(MAX_ORGANIZERS):
-        D = {"seminar_id": seminar.shortname}
-        for col in db.seminar_organizers.search_cols:
-            if col in D:
-                continue
-            name = "org_%s%s" % (col, i)
-            typ = db.seminar_organizers.col_type[col]
-            try:
-                val = raw_data.get(name, "")
-                D[col] = None  # make sure col is present even if process_user_input fails
-                D[col] = process_user_input(val, col, typ, tz)
-            except Exception as err:  # should only be ValueError's but let's be cautious
-                errmsgs.append(format_input_errmsg(err, val, col))
-        if D["homepage"] or D["email"] or D["name"]:
-            if not D["name"]:
-                errmsgs.append(format_errmsg("Organizer name cannot be left blank."))
-            D["order"] = len(organizers)
-            # WARNING the header on the template says organizer
-            # but it sets the database column curator, so the
-            # boolean needs to be inverted
-            D["curator"] = not D["curator"]
-            if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
-                flash_warnmsg(
-                    "The email address %s of organizer %s will be publicly visible.<br>%s",
-                    D["email"],
-                    D["name"],
-                    "Set homepage or disable display to prevent this.",
-                )
-            if D["email"]:
-                r = db.users.lookup(D["email"])
-                if r and r["email_confirmed"]:
-                    if D["name"] != r["name"]:
-                        flash_warnmsg(
-                            format_warning(
+    if update_organizers:
+        contact_count = 0
+        for i in range(MAX_ORGANIZERS):
+            D = {"seminar_id": seminar.shortname}
+            for col in db.seminar_organizers.search_cols:
+                if col in D:
+                    continue
+                name = "org_%s%s" % (col, i)
+                typ = db.seminar_organizers.col_type[col]
+                try:
+                    val = raw_data.get(name, "")
+                    D[col] = None  # make sure col is present even if process_user_input fails
+                    D[col] = process_user_input(val, col, typ, tz)
+                except Exception as err:  # should only be ValueError's but let's be cautious
+                    errmsgs.append(format_input_error(err, val, col))
+            if D["homepage"] or D["email"] or D["name"]:
+                if not D["name"]:
+                    errmsgs.append(format_error("Organizer name cannot be left blank."))
+                D["order"] = len(organizers)
+                # WARNING the header on the template says organizer
+                # but it sets the database column curator, so the
+                # boolean needs to be inverted
+                D["curator"] = not D["curator"]
+                if not errmsgs and D["display"] and D["email"] and not D["homepage"]:
+                    warn(
+                        "The email address %s of organizer %s will be publicly visible.<br>%s",
+                        D["email"],
+                        D["name"],
+                        "Set homepage or disable display to prevent this.",
+                    )
+                if D["email"]:
+                    r = db.users.lookup(D["email"])
+                    if r and r["email_confirmed"]:
+                        if D["name"] != r["name"]:
+                            warn(
                                 "Organizer name %s does not match the name %s of the account with email address %s.<br>Please verify that you have spelled the name correctly.",
                                 D["name"],
                                 r["name"],
                                 D["email"],
                             )
-                        )
-                    if D["homepage"] and r["homepage"] and not similar_urls(D["homepage"], r["homepage"]):
-                        flash_warnmsg(
-                            "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
-                            D["homepage"],
-                            r["homepage"],
-                            D["email"],
-                        )
-                    if D["display"]:
-                        contact_count += 1
-            organizers.append(D)
-    if contact_count == 0:
-        errmsgs.append(
-            format_errmsg(
-                "There must be at least one displayed organizer or curator with a %s so that there is a contact for this listing.<br>%s<br>%s",
-                "confirmed email",
-                "This email address will not be visible if homepage is set or display is not checked; it is used only to identify the organizer's account.",
-                "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
+                        if D["homepage"] and r["homepage"] and not similar_urls(D["homepage"], r["homepage"]):
+                            warn(
+                                "The homepage %s does not match the homepage %s of the account with email address %s, please correct if unintended.",
+                                D["homepage"],
+                                r["homepage"],
+                                D["email"],
+                            )
+                        if D["display"]:
+                            contact_count += 1
+                organizers.append(D)
+        if contact_count == 0:
+            errmsgs.append(
+                format_error(
+                    "There must be at least one displayed organizer or curator with a %s so that there is a contact for this listing.<br>%s<br>%s",
+                    "confirmed email",
+                    "This email address will not be visible if homepage is set or display is not checked; it is used only to identify the organizer's account.",
+                    "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
+                )
             )
-        )
-    # Don't try to create new_version using invalid input
-    if errmsgs:
-        return show_input_errors(errmsgs)
-    else:  # to make it obvious that these two statements should be together
-        new_version = WebSeminar(shortname, data=data, organizers=organizers)
-
-    # Warnings
-    if not data["topics"]:
-        flash_warnmsg(
-            "This series has no topics selected; set topics for the series here, or set topics for each new talk individually."
-        )
-    if seminar.new or new_version != seminar:
-        new_version.save()
-        if new:
-            flash("Series created successfully! Now visit the Edit schedule tab to add talks.")
-        else:
-            flash("Series details updated.")
-
-    elif seminar.organizers == new_version.organizers:
-        flash("No changes made to series.")
-    if seminar.new or seminar.organizers != new_version.organizers:
-        new_version.save_organizers()
-        if not seminar.new:
-            flash("Series organizers updated.")
-    return redirect(url_for(".edit_seminar", shortname=shortname), 302)
-
+    return data, organizers, errmsgs
 
 @create.route("edit/institution/", methods=["GET", "POST"])
 @email_confirmed_required
@@ -829,6 +848,30 @@ def save_talk():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
 
+    data, errmsgs = process_save_talk(talk, raw_data)
+    # Don't try to create new_version using invalid input
+    if errmsgs:
+        return show_input_errors(errmsgs)
+    else: # to make it obvious that these two statements should be together
+        new_version = WebTalk(talk.seminar_id, data=data)
+
+    sanity_check_times(new_version.start_time, new_version.end_time)
+    if new_version == talk:
+        flash("No changes made to talk.")
+    else:
+        new_version.save()
+        if talk.new:
+            flash("Talk successfully created!")
+        else:
+            flash("Talk details updated.")
+    edit_kwds = dict(seminar_id=new_version.seminar_id, seminar_ctr=new_version.seminar_ctr)
+    if token:
+        edit_kwds["token"] = token
+    else:
+        edit_kwds.pop("token", None)
+    return redirect(url_for(".edit_talk", **edit_kwds), 302)
+
+def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg):
     errmsgs = []
     data = {
         "seminar_id": talk.seminar_id,
@@ -845,14 +888,20 @@ def save_talk():
     default_tz = talk.seminar.timezone
     if not default_tz:
         default_tz = "UTC"
-    data["timezone"] = tz = raw_data.get("timezone", default_tz)
+    tz = raw_data.get("timezone", getattr(talk, "timezone", default_tz))
+    data["timezone"] = tz
     tz = pytz.timezone(tz)
+
     for col in db.talks.search_cols:
         if col in data:
             continue
+        # For the API, we want to carry over unspecified columns from the previous data
+        if col not in raw_data:
+            data[col] = getattr(talk, col, None)
+            continue
         typ = db.talks.col_type[col]
         try:
-            val = raw_data.get(col, "")
+            val = raw_data[col]
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
@@ -887,34 +936,17 @@ def save_talk():
     # Warnings
     sanity_check_times(new_version.start_time, new_version.end_time)
     if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
-        flash_warnmsg(
-            "Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links."
-        )
-    if not data["topics"]:
-        flash_warnmsg(
-            "This talk has no topics, so it will be visible only to users disabling their topics filter."
-        )
-    if new_version == talk:
-        flash("No changes made to talk.")
-    else:
-        new_version.save()
-        if talk.new:
-            flash("Talk successfully created!")
-        else:
-            flash("Talk details updated.")
-    edit_kwds = dict(seminar_id=new_version.seminar_id, seminar_ctr=new_version.seminar_ctr)
-    if token:
-        edit_kwds["token"] = token
-    else:
-        edit_kwds.pop("token", None)
-    return redirect(url_for(".edit_talk", **edit_kwds), 302)
-
+        warn("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
+    return data, errmsgs
 
 def layout_schedule(seminar, data):
     """ Returns a list of schedule slots in specified date range (date, daytime-interval, talk)
         where talk is a WebTalk or none.  Picks default dates if none specified
     """
     tz = seminar.tz
+    if seminar.by_api and not seminar.display:
+        # edit_seminar_schedule will redirect back to Manage page
+        raise APIError
 
     def parse_date(key):
         date = data.get(key)
@@ -956,7 +988,9 @@ def layout_schedule(seminar, data):
     midnight_begin = midnight(begin, tz)
     midnight_end = midnight(end, tz)
     query = {"$gte": midnight_begin, "$lt": midnight_end + day}
-    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]))
+    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"], prequery=False))
+    if any(talk.by_api and not talk.display for talk in talks):
+        raise APIError
     slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]
     if seminar.is_conference:
         per_day = seminar.per_day if seminar.per_day else 4
@@ -1024,7 +1058,11 @@ def edit_seminar_schedule():
         flash_warnmsg(
             "This series has no topics selected; set the series' topics on the Edit series page, or set topics for each new talk individually."
         )
-    schedule = layout_schedule(seminar, data)
+    try:
+        schedule = layout_schedule(seminar, data)
+    except APIError:
+        flash_error("You must approve or reject the changes made using the API before editing the schedule.")
+        return redirect(url_for(".index"))
     return render_template(
         "edit_seminar_schedule.html",
         seminar=seminar,

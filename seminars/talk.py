@@ -1,4 +1,5 @@
-import pytz, random
+import pytz
+import secrets
 from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
@@ -11,6 +12,7 @@ from seminars.utils import (
     max_distinct,
     adapt_datetime,
     make_links,
+    sanitized_table,
     killattr,
     how_long,
     topdomain,
@@ -18,7 +20,7 @@ from seminars.utils import (
 from seminars.language import languages
 from seminars.toggle import toggle
 from seminars.topic import topic_dag
-from seminars.seminar import WebSeminar, can_edit_seminar
+from seminars.seminar import WebSeminar, can_edit_seminar, audience_options
 from lmfdb.utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
@@ -26,7 +28,6 @@ import urllib.parse
 from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
-from psycopg2.sql import Placeholder
 import re
 
 class WebTalk(object):
@@ -61,7 +62,11 @@ class WebTalk(object):
         if self.new:
             self.seminar_id = seminar_id
             self.seminar_ctr = None
-            self.token = "%016x" % random.randrange(16 ** 16)
+            self.token = secrets.token_hex(8)
+            self.display = seminar.display
+            self.online = getattr(seminar, "online", bool(seminar.live_link))
+            self.by_api = False # reset by API code if needed
+            self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -156,6 +161,8 @@ class WebTalk(object):
                 return ["physics", topic]
             self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
         self.subjects = []
+        if self.audience is None:
+            self.audience = 0 # default is researchers
 
     def visible(self):
         """
@@ -175,24 +182,27 @@ class WebTalk(object):
         """
         return self.display and not self.hidden and self.seminar.searchable()
 
-    def save(self):
+    def save(self, user=None):
+        if user is None: user = current_user
         data = {col: getattr(self, col, None) for col in db.talks.search_cols}
         assert data.get("seminar_id") and data.get("seminar_ctr")
         try:
-            data["edited_by"] = int(current_user.id)
+            data["edited_by"] = int(user.id)
         except (ValueError, AttributeError):
             # Talks can be edited by anonymous users with a token, with no id
             data["edited_by"] = -1
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
-    def user_is_registered(self, user=current_user):
-        if current_user.is_anonymous:
+    def user_is_registered(self, user=None):
+        if user is None: user = current_user
+        if user.is_anonymous:
             return False
         rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(user.id)}
         return True if db.talk_registrations.count(rec) else False
 
-    def register_user(self, user=current_user):
+    def register_user(self, user=None):
+        if user is None: user = current_user
         rec = {'seminar_id': self.seminar_id, 'seminar_ctr': self.seminar_ctr, 'user_id': int(user.id)}
         if db.talk_registrations.count(rec):
             return False
@@ -210,6 +220,9 @@ class WebTalk(object):
             ORDER BY talk_registrations.registration_time DESC
         """
         return list(db._execute(SQL(query % (self.seminar_id, self.seminar_ctr))))
+
+    def show_audience(self):
+        return audience_options[self.audience][1]
 
     @classmethod
     def _editable_time(cls, t):
@@ -365,7 +378,7 @@ class WebTalk(object):
         else:
             return ""
 
-    def show_stream_link(self, user=current_user, raw=False):
+    def show_stream_link(self, user=None, raw=False):
         if any([self.deleted, not self.online, not self.stream_link, self.is_really_over()]):
             return ""
         link = self.stream_link
@@ -376,13 +389,15 @@ class WebTalk(object):
         else:
             return '<div class="access_button is_link">View-only livestream access <a href="%s">available</a></div>' % link
 
-    def show_live_link(self, user=current_user, raw=False):
+    def show_live_link(self, user=None, raw=False):
+        if user is None: user = current_user
         now = datetime.now(pytz.utc)
         if any([self.deleted, not self.online, self.is_really_over()]):
             return ""
         link = self.live_link
 
-        def show_link(self, user=current_user, raw=False):
+        def show_link(self, user=None, raw=False):
+            if user is None: user = current_user
             link = self.live_link
             if raw:
                 return link if link else ''
@@ -448,7 +463,7 @@ Thank you,
                     series = self.seminar.name,
                     domain = topdomain(),
                     url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
-                    user = current_user.name)
+                    user = user.name)
                 msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
                 link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
             else:
@@ -767,7 +782,7 @@ def _construct(seminar_dict, objects=True, more=False):
         if not isinstance(rec, dict):
             return rec
         else:
-            if more:
+            if more is not False:
                 moreval = rec.pop("more")
             talk = WebTalk(
                 rec["seminar_id"],
@@ -775,7 +790,7 @@ def _construct(seminar_dict, objects=True, more=False):
                 seminar=seminar_dict.get(rec["seminar_id"]),
                 data=rec,
             )
-            if more:
+            if more is not False:
                 talk.more = moreval
             return talk
     def default_construct(rec):
@@ -814,14 +829,13 @@ def talks_search(*args, **kwds):
     """
     seminar_dict = kwds.pop("seminar_dict", {})
     objects = kwds.pop("objects", True)
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("talks")
+    else:
+        table = db.talks
     more = kwds.get("more", False)
-    if more is not False: # might empty dictionary
-        more, moreval = db.talks._parse_dict(more)
-        if more is None:
-            more = Placeholder()
-            moreval = [True]
-        kwds["more"] = more = (more, moreval)
-    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects, more=more), *args, **kwds)
+    return search_distinct(table, _selecter, _counter, _iterator(seminar_dict, objects=objects, more=more), *args, **kwds)
 
 
 def talks_lucky(*args, **kwds):
@@ -830,14 +844,21 @@ def talks_lucky(*args, **kwds):
     """
     seminar_dict = kwds.pop("seminar_dict", {})
     objects = kwds.pop("objects", True)
-    return lucky_distinct(db.talks, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("talks")
+    else:
+        table = db.talks
+    return lucky_distinct(table, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, objects=True):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
         include_deleted=include_deleted,
+        sanitized=sanitized,
         objects=objects,
+        prequery=prequery,
     )

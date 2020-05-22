@@ -16,7 +16,7 @@ from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, date_sorted
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
@@ -171,25 +171,21 @@ def talks_parser(info, query):
     # These are necessary but not succificient conditions to display the talk
     # Also need that the seminar has visibility 2.
 
-def seminars_parser(info, query, org_query={}, org_keywords=False, conference=False):
+def series_keyword_columns():
+    return ["name", "homepage", "shortname", "comments"]
+
+def organizers_keyword_columns():
+    return ["name", "homepage", "email"] if current_user.is_subject_admin(None) else ["name", "homepage"]
+
+def seminars_parser(info, query, org_query, conference=False):
     parse_topic(info, query)
     parse_institution_sem(info, query)
     #parse_venue(info, query)
-    org_cols = ["name", "homepage"]
-    if current_user.is_subject_admin(None):
-        org_cols.append("email")
-    parse_substring(info, org_query, "organizer", org_cols)
-    if org_keywords:
-        parse_substring(info, org_query, "keywords", org_cols)
-    else:
-        parse_substring(info, query,
-            "keywords", ["name", "description", "homepage", "shortname", "comments"]
-        )
+    parse_substring(info, org_query, "organizer", organizers_keyword_columns())
     parse_access(info, query)
     parse_language(info, query)
     if conference:
         parse_daterange(info, query, time=False)
-
     parse_substring(info, query, "name", ["name"])
     query["display"] = True
     query["visibility"] = 2
@@ -471,7 +467,6 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     talks_parser(info, more)
     if topdomain() == "mathseminars.org":
         query["topics"] = {"$contains": "math"}
-    query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
         query["end_time"] = {"$lt": datetime.now()}
@@ -532,34 +527,22 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
     query = dict(query)
-    parse_substring(info, query, "keywords",
-                    ["name",
-                     "description",
-                     "homepage",
-                     "shortname",
-                     "comments"])
-    more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
-    seminars_parser(info, more)
-    query["display"] = True
-    query["visibility"] = 2
     if conference:
-        # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.  Ignore the possibility that the user/conference is in Kiribati.
+        # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.
+        # Ignore the possibility that the user/conference is in Kiribati.
         recent = datetime.now().date() - timedelta(days=1)
-        if past:
-            query["end_date"] = {"$lt": recent}
-        else:
-            query["end_date"] = {"$gte": recent}
-        if sort is None:
-            if past:
-                sort = [("end_date", -1), ("start_date", -1), "name"]
-            else:
-                sort = ["start_date", "end_date", "name"]
-    if sort is None: # not conferences
-        # We don't currently call this case in the past, but if we add it we probably
-        # need a last_talk_sorted that sorts by end time of last talk in reverse order
-        series = next_talk_sorted(seminars_search(query, organizer_dict=all_organizers(), more=more))
-    else:
-        series = list(seminars_search(query, sort=sort, organizer_dict=all_organizers(), more=more))
+        query["end_date"] = {"$lt" if past else "$gte": recent}
+    kw_query = query.copy()
+    parse_substring(info, kw_query, "keywords", series_keyword_columns())
+    org_query, more = {}, {}
+    # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
+    seminars_parser(info, more, org_query)
+    query["visibility"] = 2
+    results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), more=more))
+    if info.get("keywords", ""):
+        parse_substring(info, org_query, "keywords", organizers_keyword_columns())
+        results += list(seminars_search(query, organizer_dict=all_organizers(org_query), more=more))
+    series = series_sorted(results, conference=conference, reverse=past)
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
     title = "Browse conferences" if conference else "Browse seminar series"
@@ -580,49 +563,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
         response.set_cookie("topics", "", max_age=0)
     return response
-
-@app.route("/search/seminars")
-def search_seminars():
-    return _search_series(conference=False)
-
-@app.route("/search/conferences")
-def search_conferences():
-    # For now this is basically the same as seminars_search, but they should diverge some (e.g. search on start date)
-    return _search_series(conference=True)
-
-def _search_series(conference=False):
-    info = to_dict(request.args, search_array=SeriesSearchArray(conference=conference))
-    if "search_type" not in info:
-        info["seminar_online"] = True
-        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
-    try:
-        seminar_count = int(info["seminar_count"])
-        seminar_start = int(info["seminar_start"])
-        if seminar_start < 0:
-            seminar_start += (1 - (seminar_start + 1) // seminar_count) * seminar_count
-    except (KeyError, ValueError):
-        seminar_count = info["seminar_count"] = 50
-        seminar_start = info["seminar_start"] = 0
-    seminar_query, org_query = {"is_conference": conference}, {}
-    seminars_parser(info, seminar_query, org_query, conference=conference)
-    res = [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
-    # process query again with keywords applied to seminar_organizers rather than seminars
-    if "keywords" in info:
-        seminar_query, org_query = {"is_conference": conference}, {}
-        seminars_parser(info, seminar_query, org_query, org_keywords=True, conference=conference)
-        res += [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
-    info["results"] = date_sorted(res) if conference else next_talk_sorted(res)
-    subsection = "conferences" if conference else "seminars"
-    title = "Search " + ("conferences" if conference else "seminar series")
-    return render_template(
-        "search_seminars.html",
-        title=title,
-        info=info,
-        section="Search",
-        subsection=subsection,
-        bread=None,
-        is_conference=conference,
-    )
 
 @app.route("/search/talks")
 def search_talks():
@@ -670,12 +610,16 @@ def list_institutions():
 
 @app.route("/seminar/<shortname>")
 def show_seminar(shortname):
-    seminar = seminars_lucky({"shortname": shortname})
+    # We need organizers to be able to see seminars with display=False
+    seminar = seminars_lucky({"shortname": shortname}, prequery={})
     if seminar is None:
         return abort(404, "Seminar not found")
     if not seminar.visible():
-        flash_error("You do not have permission to view %s", seminar.name)
-        return redirect(url_for("search_seminars"), 302)
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            flash_error("You do not have permission to view %s", seminar.name)
+            return redirect(url_for("semseries_index"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
     future = []
@@ -727,9 +671,12 @@ def talks_search_api(shortname, projection=1):
 
 @app.route("/seminar/<shortname>/raw")
 def show_seminar_raw(shortname):
-    seminar = seminars_lucky({"shortname": shortname})
+    seminar = seminars_lucky({"shortname": shortname}, prequery={})
     if seminar is None or not seminar.visible():
-        return abort(404, "Seminar not found")
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
     return render_template(
         "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
@@ -737,23 +684,36 @@ def show_seminar_raw(shortname):
 
 @app.route("/seminar/<shortname>/bare")
 def show_seminar_bare(shortname):
-    seminar = seminars_lucky({"shortname": shortname})
+    seminar = seminars_lucky({"shortname": shortname}, prequery={})
     if seminar is None or not seminar.visible():
-        return abort(404, "Seminar not found")
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            return abort(404, "Seminar not found")
     talks = talks_search_api(shortname)
+    timezone = seminar.tz
+    if 'timezone' in request.args:
+        try:
+            timezone = pytz.timezone(request.args.get("timezone"))
+        except pytz.UnknownTimeZoneError:
+            pass
     resp = make_response(render_template("seminar_bare.html",
                                          title=seminar.name, talks=talks,
                                          seminar=seminar,
                                          _external=( '_external' in request.args ),
-                                         site_footer=( 'site_footer' in request.args ),))
+                                         site_footer=( 'site_footer' in request.args ),
+                                         timezone=timezone))
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
 @app.route("/seminar/<shortname>/json")
 def show_seminar_json(shortname):
-    seminar = seminars_lucky({"shortname": shortname})
+    seminar = seminars_lucky({"shortname": shortname}, prequery={})
     if seminar is None or not seminar.visible():
-        return abort(404, "Seminar not found")
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            return abort(404, "Seminar not found")
     # FIXME
     cols = [
         'speaker',
@@ -814,9 +774,12 @@ def embed_seminar_js():
 
 @app.route("/seminar/<shortname>/ics")
 def ics_seminar_file(shortname):
-    seminar = seminars_lucky({"shortname": shortname})
+    seminar = seminars_lucky({"shortname": shortname}, prequery=False)
     if seminar is None or not seminar.visible():
-        return abort(404, "Seminar not found")
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            return abort(404, "Seminar not found")
 
     return ics_file(
         seminar.talks(),
@@ -838,9 +801,15 @@ def ics_talk_file(seminar_id, talkid):
 @app.route("/talk/<seminar_id>/<int:talkid>/")
 def show_talk(seminar_id, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
-    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid}, prequery={})
     if talk is None:
         return abort(404, "Talk not found")
+    if not talk.visible():
+        # There may be a non-API version of the seminar that can be shown
+        talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
+        if talk is None or not talk.visible():
+            flash_error("You do not have permission to view %s/%s", seminar_id, talkid)
+            return redirect(url_for("semseries_index"))
     kwds = dict(
         title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token
     )
@@ -952,7 +921,7 @@ def ams():
     seminars = next_talk_sorted(
         seminars_search(
             query={"topics": {'$contains': "math"}},
-            organizer_dict=all_organizers()
+            organizer_dict=all_organizers(),
         )
     )
     from collections import defaultdict

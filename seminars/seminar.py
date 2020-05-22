@@ -14,6 +14,7 @@ from seminars.utils import (
     show_input_errors,
     weekdays,
     killattr,
+    sanitized_table,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
@@ -25,7 +26,6 @@ import pytz
 from collections import defaultdict
 from datetime import datetime
 from lmfdb.logger import critical
-from psycopg2.sql import Placeholder
 
 import urllib.parse
 
@@ -63,10 +63,21 @@ visibility_options = [
     (0, 'private'),
 ]
 
+audience_options = [
+    (0, "researchers in topic"),
+    (1, "researchers in discipline"),
+    (2, "advanced learners"),
+    (3, "learners"),
+    (4, "undergraduates"),
+    (5, "general audience"),
+]
+
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False
+        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False,  user=None,
     ):
+        if user is None:
+            user = current_user
         if data is None and not editing:
             data = seminars_lookup(shortname, include_deleted=deleted)
             if data is None:
@@ -79,23 +90,25 @@ class WebSeminar(object):
             if data.get("institutions") is None:
                 data["institutions"] = []
             if data.get("timezone") is None:
-                data["timesone"] = str(current_user.tz)
+                data["timesone"] = str(user.tz)
         self.new = data is None
         self.deleted = False
         if self.new:
             self.shortname = shortname
-            self.display = current_user.is_creator
+            self.display = user.is_creator
             self.online = True  # default
+            self.by_api = False # reset by API code if needed
             self.access = "open"  # default FIXME: remove once we switch to access_control
-            self.access_control = 0 # default is public
+            self.access_control = 4 # default is instant registration
             self.access_time = None
-            self.edited_by = current_user.id
+            self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
+            self.audience = 0 # default is researchers
             self.is_conference = False  # seminar by default
             self.frequency = 7
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
-            self.timezone = str(current_user.tz)
+            self.timezone = str(user.tz)
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -120,9 +133,9 @@ class WebSeminar(object):
                 organizers = [
                     {
                         "seminar_id": self.shortname,
-                        "email": current_user.email,
-                        "homepage": current_user.homepage,
-                        "name": current_user.name,
+                        "email": user.email,
+                        "homepage": user.homepage,
+                        "name": user.name,
                         "order": 0,
                         "curator": False,
                         "display": True,
@@ -259,15 +272,19 @@ class WebSeminar(object):
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, attr)
+        if self.audience is None:
+            self.audience = 0
 
-    def visible(self):
+    def visible(self, user=None):
         """
         Whether this seminar should be shown to the current user
         """
-        return (self.owner == current_user.email or
-                current_user.is_subject_admin(self) or
+        if user is None:
+            user = current_user
+        return (self.owner == user.email or
+                user.is_subject_admin(self) or
                 # TODO: remove temporary measure of allowing visibility None
-                self.display and (self.visibility is None or self.visibility > 0 or current_user.email in self.editors()))
+                self.display and (self.visibility is None or self.visibility > 0 or user.email in self.editors()))
 
     def searchable(self):
         """
@@ -276,10 +293,12 @@ class WebSeminar(object):
         # TODO: remove temporary measure of allowing visibility None
         return self.display and (self.visibility is None or self.visibility > 1)
 
-    def save(self):
+    def save(self, user=None):
+        if user is None:
+            user = current_user
         data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
         assert data.get("shortname")
-        data["edited_by"] = int(current_user.id)
+        data["edited_by"] = int(user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
 
@@ -300,6 +319,9 @@ class WebSeminar(object):
     @property
     def series_type(self):
         return "conference" if self.is_conference else "seminar series"
+
+    def show_audience(self):
+        return audience_options[self.audience][1]
 
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
@@ -454,8 +476,8 @@ class WebSeminar(object):
         conference=False,
         include_institutions=True,
         include_datetime=True,
-        include_description=True,
         include_topics=False,
+        include_audience=False,
         include_subscribe=True,
         show_attributes=False,
     ):
@@ -479,8 +501,8 @@ class WebSeminar(object):
         cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes,homepage_link=True if self.deleted else False)))
         if include_institutions:
             cols.append(('class="institutions"', self.show_institutions()))
-        if include_description:
-            cols.append(('class="description"', self.show_description()))
+        if include_audience:
+            cols.append(('class="audience"', self.show_audience()))
         if include_topics:
             cols.append(('class="topics"', self.show_topics()))
         if include_subscribe:
@@ -492,22 +514,26 @@ class WebSeminar(object):
             self.owner.lower()
         ]
 
-    def user_can_delete(self):
+    def user_can_delete(self, user=None):
         # Check whether the current user can delete the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_subject_admin(self) or (
-            current_user.email_confirmed and current_user.email.lower() == self.owner.lower()
+        if user is None:
+            user = current_user
+        return user.is_subject_admin(self) or (
+            user.email_confirmed and user.email.lower() == self.owner.lower()
         )
 
-    def user_can_edit(self):
+    def user_can_edit(self, user=None):
         # Check whether the current user can edit the seminar
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
-        return current_user.is_subject_admin(self) or (
-            current_user.email_confirmed and current_user.email.lower() in self.editors()
+        if user is None:
+            user = current_user
+        return user.is_subject_admin(self) or (
+            user.email_confirmed and user.email.lower() in self.editors()
         )
 
     def _show_editors(self, label, curators=False):
@@ -631,7 +657,12 @@ class WebSeminar(object):
 
 
 def series_header(
-    conference=False, include_datetime=True, include_institutions=True, include_description=True, include_topics=False, include_subscribe=True
+    conference=False,
+    include_institutions=True,
+    include_datetime=True,
+    include_topics=False,
+    include_audience=False,
+    include_subscribe=True
 ):
     cols = []
     if include_datetime:
@@ -642,8 +673,8 @@ def series_header(
     cols.append(('class="seriesname"', "Name"))
     if include_institutions:
         cols.append(('class="institutions"', "Institutions"))
-    if include_description:
-        cols.append(('class="description"', "Description"))
+    if include_audience:
+        cols.append(('class="audience"', "Audience"))
     if include_topics:
         cols.append(("", "Topics"))
     if include_subscribe:
@@ -669,12 +700,12 @@ def _construct(organizer_dict, objects=True, more=False):
         if not isinstance(rec, dict):
             return rec
         else:
-            if more:
+            if more is not False:
                 moreval = rec.pop("more")
             seminar = WebSeminar(
                 rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec
             )
-            if more:
+            if more is not False:
                 seminar.more = moreval
             return seminar
     def default_construct(rec):
@@ -709,17 +740,22 @@ def seminars_search(*args, **kwds):
 
     Doesn't support split_ors or raw.  Always computes count.
     """
-    organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
+    col_projection = (len(args) > 1 and isinstance(args[1], str) or "projection" in kwds and isinstance(kwds["projection"], str))
+    if "organizer_dict" in kwds:
+        organizer_dict = kwds.pop("organizer_dict")
+    elif objects and not col_projection:
+        organizer_dict = all_organizers()
+    else:
+        organizer_dict = {} # unused in this case
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("seminars")
+    else:
+        table = db.seminars
     more = kwds.get("more", False)
-    if more is not False: # might empty dictionary
-        more, moreval = db.seminars._parse_dict(more)
-        if more is None:
-            more = Placeholder()
-            moreval = [True]
-        kwds["more"] = more = (more, moreval)
     return search_distinct(
-        db.seminars, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
+        table, _selecter, _counter, _iterator(organizer_dict, objects=objects, more=more), *args, **kwds
     )
 
 
@@ -729,16 +765,23 @@ def seminars_lucky(*args, **kwds):
     """
     organizer_dict = kwds.pop("organizer_dict", {})
     objects = kwds.pop("objects", True)
-    return lucky_distinct(db.seminars, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
+    sanitized = kwds.pop("sanitized", False)
+    if sanitized:
+        table = sanitized_table("seminars")
+    else:
+        table = db.seminars
+    return lucky_distinct(table, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, objects=True):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
     return seminars_lucky(
         {label_col: shortname},
         projection=projection,
         organizer_dict=organizer_dict,
         include_deleted=include_deleted,
+        sanitized=sanitized,
         objects=objects,
+        prequery=prequery,
     )
 
 
@@ -785,7 +828,7 @@ SELECT DISTINCT ON (seminar_id) {0} FROM
         ans[rec["seminar_id"]] = rec["start_time"]
     return ans
 
-def next_talk_sorted(results):
+def next_talk_sorted(results, reverse=False):
     """
     Sort a list of WebSeminars by when their next talk is (and add the next_talk_time attribute to each seminar).
 
@@ -799,15 +842,23 @@ def next_talk_sorted(results):
     for R in results:
         if R.next_talk_time.replace(tzinfo=None) == datetime.max:
             R.next_talk_time = None
+    if reverse:
+        results.reverse()
     return results
 
-def date_sorted(results):
+def date_sorted(results, reverse=False):
     """
     Sort a list of WebSeminars that are conferencs by start_date, end_date, name
 
     Returns the sorted list.
     """
-    return sorted(results, key=lambda res: [res.start_date, res.end_date, res.name])
+    if reverse:
+        return sorted(results, key=lambda res: [res.end_date, res.start_date, res.name], reverse=True)
+    else:
+        return sorted(results, key=lambda res: [res.start_date, res.end_date, res.name])
+
+def series_sorted(results, conference=False, reverse=False):
+    return date_sorted(results, reverse=reverse) if conference else next_talk_sorted(results, reverse=reverse)
 
 def next_talk(shortname):
     """
