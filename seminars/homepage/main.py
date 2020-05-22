@@ -619,7 +619,7 @@ def show_seminar(shortname):
         seminar = seminars_lucky({"shortname": shortname})
         if seminar is None or not seminar.visible():
             flash_error("You do not have permission to view %s", seminar.name)
-            return redirect(url_for("search_seminars"), 302)
+            return redirect(url_for("semseries_index"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
     future = []
