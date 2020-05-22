@@ -145,6 +145,21 @@ def parse_video(info, query):
     if v == "1":
         query["video_link"] = {"$ne": ''}
 
+def parse_slides(info, query):
+    v = info.get("slides")
+    if v == "1":
+        query["slides_link"] = {"$ne": ''}
+
+def parse_access(info, query):
+    v = info.get("access")
+    if v == "1":
+        query["access_control"] = {"$ne": 5}
+        query["live_link"] = {"$ne": ""}
+
+def parse_audience(info, query):
+    v = info.get("audience")
+    if v:
+        query["audience"] = int(v)
 
 def parse_language(info, query):
     v = info.get("language")
@@ -162,9 +177,12 @@ def talks_parser(info, query):
     parse_substring(info, query, "affiliation", ["speaker_affiliation"])
     parse_substring(info, query, "title", ["title"])
     parse_video(info, query)
+    parse_slides(info, query)
     parse_language(info, query)
     parse_daterange(info, query, time=True)
     parse_recent_edit(info, query)
+    parse_audience(info, query)
+    parse_access(info, query)
     query["display"] = True
     # TODO: remove this temporary measure allowing hidden to be None
     query["hidden"] = {"$or": [False, {"$exists": False}]}
@@ -187,6 +205,7 @@ def seminars_parser(info, query, org_query, conference=False):
     if conference:
         parse_daterange(info, query, time=False)
     parse_substring(info, query, "name", ["name"])
+    parse_audience(info, query)
     query["display"] = True
     query["visibility"] = 2
 
