@@ -181,19 +181,6 @@
         See the <a href="{{ url_for('api.help') }}">API documentation</a> 
         for details.
       </p>
-      <form action="{{url_for('.reset_api_token')}}">
-        <table>
-          <tr>
-            <td>{{ KNOWL('api_token') }}</td>
-            <td>
-              <input type="text" id="api_token" value="{{user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
-              <a><i class="clippy" onclick="copySourceOfId('api_token')"></i></a>
-              <button type="submit">Reset</button>
-            </td>
-            <td style="min-width: 300px;"></td>
-          </tr>
-        </table>
-      </form>
     {% endif %}
 
   <h2>Delete account</h2>

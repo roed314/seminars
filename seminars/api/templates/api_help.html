@@ -7,12 +7,25 @@
 {% block content %}
 
 <p>
-Our application programming interface (API) allows users to write scripts
-to add content to our site or to search and browse
-without manually navigating the website.
-Access requires the API token on
-the user's <a href="{{ url_for('user.info')}}">Account</a> page.
+  Our application programming interface (API) allows users to write scripts
+  to add content to our site or to search and browse
+  without manually navigating the website.
+  Edit access requires the following API token, though you can search public information without it.
 </p>
+
+<form action="{{url_for('user.reset_api_token')}}">
+  <table>
+    <tr>
+      <td>{{ KNOWL('api_token') }}</td>
+      <td>
+        <input type="text" id="api_token" value="{{user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
+        <a><i class="clippy" onclick="copySourceOfId('api_token')"></i></a>
+        <button type="submit">Reset</button>
+      </td>
+      <td style="min-width: 300px;"></td>
+    </tr>
+  </table>
+</form>
 
 <p>
   The API is currently under development, and will be subject to change without any promise of backward compatibility
