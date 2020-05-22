@@ -532,7 +532,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         # Ignore the possibility that the user/conference is in Kiribati.
         recent = datetime.now().date() - timedelta(days=1)
         query["end_date"] = {"$lt" if past else "$gte": recent}
-    kw_query = query
+    kw_query = query.copy()
     parse_substring(info, kw_query, "keywords", series_keyword_columns())
     org_query, more = {}, {}
     # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
