@@ -13,12 +13,20 @@ Dates in conference time zone
 
 <table id="browse-confs" class="conf-table ntdata">
   <thead>
-    <tr> {{ series_header(conference=is_conference) | safe }} </tr>
+    {% if is_conference %}
+    <tr> {{ series_header(conference=True, include_topics=True)  | safe }} </tr>
+    {% else %}
+    <tr> {{ series_header(conference=False, include_audience=True) | safe }} </tr>
+    {% endif %}
   </thead>
   <tbody>
     {% for series, row_attributes  in series_row_attributes %}
     <tr {{ row_attributes | safe }} >
-      {{ series.oneline(conference=is_conference) | safe }}
+      {% if is_conference %}
+      {{ series.oneline(conference=True, include_topics=True) | safe }}
+      {% else %}
+      {{ series.oneline(conference=False, include_audience=True) | safe }}
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>

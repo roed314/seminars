@@ -476,7 +476,7 @@ class WebSeminar(object):
         conference=False,
         include_institutions=True,
         include_datetime=True,
-        include_topics=True,
+        include_topics=False,
         include_audience=False,
         include_subscribe=True,
         show_attributes=False,
@@ -660,7 +660,7 @@ def series_header(
     conference=False,
     include_institutions=True,
     include_datetime=True,
-    include_topics=True,
+    include_topics=False,
     include_audience=False,
     include_subscribe=True
 ):
