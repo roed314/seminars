@@ -71,6 +71,17 @@ maxlength = {
     'weekdays' : MAX_SLOTS,
 }
 
+def comma_list(items):
+    """ return list of stringe as list in English (e.g. [Bill] = Bill, [Bill, Ted] = Bill and Ted, [Bill, Ted, Jane] = Bill, Ted, and Jane) """
+    if not items:
+        return ''
+    if len(items) == 1:
+        return items[0]
+    elif len(items) == 2:
+        return items[0] + " and " + items[1]
+    else:
+        return ', '.join(itmes[:-1]) + ', and ' + items[-1]
+
 def how_long(delta):
     minute = timedelta(minutes=1)
     if delta < minute:
@@ -89,11 +100,9 @@ def how_long(delta):
         return "%s months" % round(delta / timedelta(days=30.4))
     return "%s years" % round(delta / year)
 
-
 def killattr(obj,attr):
     if hasattr(obj,attr):
         delattr(obj,attr)
-
 
 def domain():
     return urlparse(request.url).netloc
