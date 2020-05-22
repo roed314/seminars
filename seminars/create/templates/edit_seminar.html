@@ -34,10 +34,6 @@
         <td class="forminfo">Capitalize only the first word and proper nouns.</td>
       </tr>
       <tr>
-        <td>{{ KNOWL("seminar_description") }}</td>
-        <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" maxlength="{{ maxlength['description'] }}" placeholder="Research seminar" /></td>
-      </tr>
-      <tr>
         <td>{{ KNOWL("seminar_homepage") }}</td>
         <td><input name="homepage" value="{{ seminar.homepage | blanknone }}" style="width:600px;" maxlength="{{ maxlength['homepage'] }}" placeholder="https://example.org"/></td>
       </tr>
