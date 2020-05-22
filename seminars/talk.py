@@ -33,7 +33,7 @@ import re
 
 # the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
 # text strings that may contain delimited lists (which should all have the same length, empty items are OK)
-SPEAKER_DELIMETER = '&'
+SPEAKER_DELIMETER = '|'
 
 class WebTalk(object):
     def __init__(
