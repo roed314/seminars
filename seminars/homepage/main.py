@@ -150,6 +150,12 @@ def parse_slides(info, query):
     if v == "1":
         query["slides_link"] = {"$ne": ''}
 
+def parse_paper(info, query):
+    v = info.get("paper")
+    print("paper", info)
+    if v == "1":
+        query["paper_link"] = {"$ne": ''}
+
 def parse_access(info, query):
     v = info.get("access")
     if v == "1":
@@ -178,6 +184,7 @@ def talks_parser(info, query):
     parse_substring(info, query, "title", ["title"])
     parse_video(info, query)
     parse_slides(info, query)
+    parse_paper(info, query)
     parse_language(info, query)
     parse_daterange(info, query, time=True)
     parse_recent_edit(info, query)
@@ -218,16 +225,23 @@ def institutions_shortnames():
 
 textwidth = 300
 
-class DoubleToggle(Toggle):
-    def __init__(self, name, label, oname, olabel, gap):
-        Toggle.__init__(self, name, label)
-        self.otoggle = Toggle(oname, olabel)
-        self.gap = gap
+class TripleToggle(Toggle):
+    def __init__(self, lname, llabel, mname, mlabel, rname, rlabel):
+        Toggle.__init__(self, lname, llabel)
+        self.mtoggle = Toggle(mname, mlabel)
+        self.rtoggle = Toggle(rname, rlabel)
     def _input(self, info):
         left_toggle = Toggle._input(self, info)
-        right_label = self.otoggle._label(info)
-        right_toggle = self.otoggle._input(info)
-        return '<table><tr><td style="padding-left: 0px;">' + left_toggle + '<td style="padding-left: 2em;">%s</td><td>%s</td>' % (right_label, right_toggle) + '</td></tr></table>'
+        middle_label = self.mtoggle._label(info)
+        middle_toggle = self.mtoggle._input(info)
+        right_label = self.rtoggle._label(info)
+        right_toggle = self.rtoggle._input(info)
+        return ('<table><tr><td style="padding-left: 0px;">' +
+                left_toggle +
+                '<td style="padding-left: 2em;">%s</td><td>%s</td>' % (middle_label, middle_toggle) +
+                '<td style="padding-left: 2em;">%s</td><td>%s</td>' % (right_label, right_toggle) +
+                '</td></tr></table>'
+        )
 
 class PushForCookies(SearchButton):
     def __init__(self, value, description, disabled=False, **kwds):
@@ -285,8 +299,10 @@ class SemSearchArray(SearchArray):
         self.audience = SelectBox(
             name="audience",
             label="Audience",
-            options=[(str(code), desc) for (code, desc) in audience_options],
+            width=textwidth+10, # select boxes need 10px more than text areas
+            options=[("", "")] + [(str(code), desc) for (code, desc) in audience_options],
         )
+        self.extra_names = []
 
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
@@ -333,15 +349,16 @@ class TalkSearchArray(SemSearchArray):
             example_span=False,
             width=textwidth,
         )
-        slides = Toggle("slides", "Has slides")
+        livestream_available = Toggle("access", "Livestream available")
 
-        videolive = DoubleToggle("video", "Has video", "access", "Livestream available", 10)
+        videoslidespaper = TripleToggle("video", "Has video", "slides", "slides", "paper", "paper")
         self.array = [
             [self.institution, self.audience],
-            [speaker, videolive if past else self.recent],
-            [affiliation, slides],
+            [speaker, videoslidespaper if past else self.recent],
+            [affiliation] if past else [affiliation, livestream_available],
             [date, time],
         ]
+        self.extra_names = ["slides", "paper"]
 
 class SeriesSearchArray(SemSearchArray):
     def __init__(self, conference=False, past=False):
@@ -362,7 +379,7 @@ class SeriesSearchArray(SemSearchArray):
         )
 
         self.array = [
-            [institution, self.audience],
+            [self.institution, self.audience],
             [organizer] if past else [organizer, self.recent],
         ]
         if conference:
@@ -370,6 +387,7 @@ class SeriesSearchArray(SemSearchArray):
 
         assert conference in [True, False]
         self.conference = conference
+        self.extra_names = ["slides", "paper"]
 
 @app.route("/")
 def index():
@@ -395,7 +413,10 @@ def read_search_cookie(search_array):
     info = {}
     for row in search_array.array:
         for box in row:
-            if isinstance(box, SearchBox):
+            if isinstance(box, TripleToggle):
+                for name in [box.name, box.mtoggle.name, box.rtoggle.name]:
+                    info[name] = request.cookies.get("search_" + name, "")
+            elif isinstance(box, SearchBox):
                 info[box.name] = request.cookies.get("search_" + box.name, "")
     return info
 
