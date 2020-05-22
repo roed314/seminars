@@ -59,17 +59,28 @@ maxlength = {
     'room' : MAX_NAME_LEN,
     'shortname' : MAX_SHORTNAME_LEN,
     'slides_link' : MAX_URL_LEN,
-    'speaker': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speaker': MAX_SPEAKERS*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
     'speakers' : MAX_SPEAKERS,
-    'speaker_affiliation': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
-    'speaker_email': MAX_EMAIL_LEN,
-    'speaker_homepage': MAX_URL_LEN,
+    'speaker_affiliation': MAX_SPEAKERS*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speaker_email': MAX_SPEAKERS*MAX_EMAIL_LEN,
+    'speaker_homepage': MAX_SPEAKERS*MAX_URL_LEN,
     'stream_link' : MAX_URL_LEN,
     'time_slots' : MAX_SLOTS,
     'title' : MAX_TITLE_LEN,
     'video_link' : MAX_URL_LEN,
     'weekdays' : MAX_SLOTS,
 }
+
+def comma_list(items):
+    """ return list of stringe as list in English (e.g. [Bill] = Bill, [Bill, Ted] = Bill and Ted, [Bill, Ted, Jane] = Bill, Ted, and Jane) """
+    if not items:
+        return ''
+    if len(items) == 1:
+        return items[0]
+    elif len(items) == 2:
+        return items[0] + " and " + items[1]
+    else:
+        return ', '.join(items[:-1]) + ', and ' + items[-1]
 
 def how_long(delta):
     minute = timedelta(minutes=1)
@@ -89,11 +100,9 @@ def how_long(delta):
         return "%s months" % round(delta / timedelta(days=30.4))
     return "%s years" % round(delta / year)
 
-
 def killattr(obj,attr):
     if hasattr(obj,attr):
         delattr(obj,attr)
-
 
 def domain():
     return urlparse(request.url).netloc

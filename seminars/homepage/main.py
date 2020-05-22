@@ -669,19 +669,6 @@ def talks_search_api(shortname, projection=1):
     talks.sort(key=lambda talk: talk.start_time, reverse=reverse_sort)
     return talks
 
-@app.route("/seminar/<shortname>/raw")
-def show_seminar_raw(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
-    if seminar is None or not seminar.visible():
-        # There may be a non-API version of the seminar that can be shown
-        seminar = seminars_lucky({"shortname": shortname})
-        if seminar is None or not seminar.visible():
-            return abort(404, "Seminar not found")
-    talks = talks_search_api(shortname)
-    return render_template(
-        "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
-    )
-
 @app.route("/seminar/<shortname>/bare")
 def show_seminar_bare(shortname):
     seminar = seminars_lucky({"shortname": shortname}, prequery={})
