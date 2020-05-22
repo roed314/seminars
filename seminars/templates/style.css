@@ -725,8 +725,8 @@ table.ntdata td.talktitle {
     min-width: 300px;
 }
 
-table.ntdata td.description {
-    min-width: 240px;
+table.ntdata td.audience {
+    min-width: 120px;
 }
 
 .talk-table td:nth-child(6) {

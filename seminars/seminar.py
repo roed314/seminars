@@ -476,8 +476,8 @@ class WebSeminar(object):
         conference=False,
         include_institutions=True,
         include_datetime=True,
-        include_description=True,
         include_topics=False,
+        iuclude_audience=True,
         include_subscribe=True,
         show_attributes=False,
     ):
@@ -501,8 +501,8 @@ class WebSeminar(object):
         cols.append(('class="seriesname"', self.show_name(show_attributes=show_attributes,homepage_link=True if self.deleted else False)))
         if include_institutions:
             cols.append(('class="institutions"', self.show_institutions()))
-        if include_description:
-            cols.append(('class="description"', self.show_description()))
+        if include_audience:
+            cols.append(('class="audience"', self.show_audience()))
         if include_topics:
             cols.append(('class="topics"', self.show_topics()))
         if include_subscribe:
@@ -657,7 +657,7 @@ class WebSeminar(object):
 
 
 def series_header(
-    conference=False, include_datetime=True, include_institutions=True, include_description=True, include_topics=False, include_subscribe=True
+    conference=False, include_datetime=True, include_institutions=True, include_audience=True, include_topics=False, include_subscribe=True
 ):
     cols = []
     if include_datetime:
@@ -668,8 +668,8 @@ def series_header(
     cols.append(('class="seriesname"', "Name"))
     if include_institutions:
         cols.append(('class="institutions"', "Institutions"))
-    if include_description:
-        cols.append(('class="description"', "Description"))
+    if include_audience:
+        cols.append(('class="audience"', "Audience"))
     if include_topics:
         cols.append(("", "Topics"))
     if include_subscribe:
