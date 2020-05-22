@@ -16,7 +16,7 @@ from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted, audience_options
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
@@ -199,6 +199,17 @@ def institutions_shortnames():
 
 textwidth = 300
 
+class DoubleToggle(Toggle):
+    def __init__(self, name, label, oname, olabel, gap):
+        Toggle.__init__(self, name, label)
+        self.otoggle = Toggle(oname, olabel)
+        self.gap = gap
+    def _input(self, info):
+        left_toggle = Toggle._input(self, info)
+        right_label = self.otoggle._label(info)
+        right_toggle = self.otoggle._input(info)
+        return left_toggle + '<div style="display:inline-block;width:%spx;"></div>' % self.gap + '<div style="padding-left:4px;padding-right:4px;display:inline-block;">%s</div>' % (right_label) + right_toggle
+
 class PushForCookies(SearchButton):
     def __init__(self, value, description, disabled=False, **kwds):
         self.disabled = disabled
@@ -226,6 +237,38 @@ class ComboBox(TextBox):
         return inp + span
 
 class SemSearchArray(SearchArray):
+    def __init__(self):
+        self.institution = SelectBox(
+            name="institution",
+            label="Institution",
+            options=[("", ""), ("None", "No institution",),]
+            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
+            width=textwidth+10, # select boxes need 10px more than text areas
+        )
+        self.venue = SelectBox(
+            name="venue",
+            label=static_knowl("venue"),
+            options=[("", ""),
+                     ("online", "online"),
+                     ("in-person", "in-person")
+            ]
+        )
+
+        self.recent = ComboBox(
+            name="recent",
+            label="Edited within",
+            spantext="hours",
+            spanextras=' style="margin-left:5px;"',
+            example="168",
+            example_span=False,
+            width=50,
+        )
+        self.audience = SelectBox(
+            name="audience",
+            label="Audience",
+            options=[(str(code), desc) for (code, desc) in audience_options],
+        )
+
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
@@ -242,25 +285,7 @@ class SemSearchArray(SearchArray):
 
 class TalkSearchArray(SemSearchArray):
     def __init__(self, past=False):
-        ## pick institution where it is held
-        institution = SelectBox(
-            name="institution",
-            label="Institution",
-            options=[("", ""), ("None", "No institution",),]
-            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
-            width=textwidth+10, # select boxes need 10px more than text areas
-        )
-
-        venue = SelectBox(
-            name="venue",
-            label=static_knowl("venue"),
-            options=[("", ""),
-                     ("online", "online"),
-                     ("in-person", "in-person")
-                     ]
-        )
-        assert venue
-
+        SemSearchArray.__init__(self)
         speaker = TextBox(
             name="speaker",
             label="Speaker",
@@ -289,44 +314,19 @@ class TalkSearchArray(SemSearchArray):
             example_span=False,
             width=textwidth,
         )
-        recent = ComboBox(
-            name="recent",
-            label="Edited within",
-            spantext="hours",
-            spanextras=' style="margin-left:5px;"',
-            example="168",
-            example_span=False,
-            width=50,
-        )
+        slides = Toggle("slides", "Has slides")
 
-        video = Toggle(name="video", label="Has video")
+        videolive = DoubleToggle("video", "Has video", "access", "Livestream available", 10)
         self.array = [
-            [institution, video if past else recent],
-            [speaker, affiliation],
+            [self.institution, self.audience],
+            [speaker, videolive if past else self.recent],
+            [affiliation, slides],
             [date, time],
         ]
 
 class SeriesSearchArray(SemSearchArray):
     def __init__(self, conference=False, past=False):
-        ## pick institution where it is held
-        institution = SelectBox(
-            name="institution",
-            label="Institution",
-            options=[("", ""), ("None", "No institution",),]
-            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
-            width=textwidth+10, # select boxes need 10px more than text areas
-        )
-
-        venue = SelectBox(
-            name="venue",
-            label=static_knowl("venue"),
-            options=[("", ""),
-                     ("online", "online"),
-                     ("in-person", "in-person")
-                     ]
-        )
-        assert venue
-
+        SemSearchArray.__init__(self)
         organizer = TextBox(
             name="organizer",
             label="Organizer",
@@ -341,9 +341,10 @@ class SeriesSearchArray(SemSearchArray):
             width=textwidth,
             extra=['autocomplete="off"'],
         )
+
         self.array = [
-            [institution],
-            [organizer],
+            [institution, self.audience],
+            [organizer] if past else [organizer, self.recent],
         ]
         if conference:
             self.array.append([date])
