@@ -619,14 +619,17 @@ def save_seminar():
         )
     if seminar.new or new_version != seminar:
         new_version.save()
-        edittype = "created" if new else "edited"
-        flash("Series %s successfully!  Now visit the Edit schedule tab to add talks." % edittype)
+        if new:
+            flash("Series created successfully! Now visit the Edit schedule tab to add talks.")
+        else:
+            flash("Series details updated.")
+
     elif seminar.organizers == new_version.organizers:
         flash("No changes made to series.")
     if seminar.new or seminar.organizers != new_version.organizers:
         new_version.save_organizers()
         if not seminar.new:
-            flash("Series organizers updated!")
+            flash("Series organizers updated.")
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
 
@@ -895,8 +898,10 @@ def save_talk():
         flash("No changes made to talk.")
     else:
         new_version.save()
-        edittype = "created" if talk.new else "edited"
-        flash("Talk successfully %s!" % edittype)
+        if talk.new:
+            flash("Talk successfully created!")
+        else:
+            flash("Talk details updated.")
     edit_kwds = dict(seminar_id=new_version.seminar_id, seminar_ctr=new_version.seminar_ctr)
     if token:
         edit_kwds["token"] = token

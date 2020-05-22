@@ -19,6 +19,7 @@ from flask_cors import CORS
 
 from lmfdb.logger import logger_file_handler
 from seminars.utils import (
+    domain,
     top_menu,
     topdomain,
     url_for_with_args,
@@ -144,6 +145,7 @@ def ctx_proc_userdata():
     data["talks_header"] = talks_header
     data["series_header"] = series_header
     data["static_knowl"] = static_knowl
+    data["domain"] = domain()
     data["topdomain"] = topdomain()
     data["toggle"] = toggle
     data["toggle3way"] = toggle3way
@@ -276,7 +278,7 @@ def contact():
 
 @app.route("/robots.txt")
 def robots_txt():
-    if "mathseminars.org" in request.url_root.lower():
+    if "researchseminars.org" in request.url_root.lower():
         fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "robots.txt")
         if os.path.exists(fn):
             return open(fn).read()
