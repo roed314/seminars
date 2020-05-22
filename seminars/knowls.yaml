@@ -481,9 +481,9 @@ audience:
   contents: |
     Series and talks may be distinguished by their target audience as follows:
     <ul>
-      <li><b>researchers</b>:
+      <li><b>researchers in topic</b>:
           researchers in a particular topic or subtopic.</li>
-      <li><b>colloquium audience</b>:
+      <li><b>researchs in discipline</b>:
           academic audience within a department or subject area.</li>
       <li><b>learners</b>:
           researchers and students interested in learning the details of a particular result or subtopic.</li>
