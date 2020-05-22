@@ -33,7 +33,7 @@ import re
 
 # the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
 # text strings that may contain delimited lists (which should all have the same length, empty items are OK)
-SPEAKER_DELIMETER = '|'
+SPEAKER_DELIMITER = '|'
 
 class WebTalk(object):
     def __init__(
@@ -641,7 +641,7 @@ Thank you,
             % (self.show_speaker(raw=True), self.speaker_link(), current_user.name),
             "subject": "%s: title and abstract" % self.seminar.name,
         }
-        email_to = ';'.join(self.speaker_email.split(SPEAKER_DELIMETER)) if self.speaker_email else ""
+        email_to = ';'.join(self.speaker_email.split(SPEAKER_DELIMITER)) if self.speaker_email else ""
         return """
 <p>
  To let someone edit this page, send them this link:
