@@ -20,7 +20,7 @@ from seminars.utils import (
 from seminars.language import languages
 from seminars.toggle import toggle
 from seminars.topic import topic_dag
-from seminars.seminar import WebSeminar, can_edit_seminar
+from seminars.seminar import WebSeminar, can_edit_seminar, audience_options
 from lmfdb.utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
@@ -220,6 +220,9 @@ class WebTalk(object):
             ORDER BY talk_registrations.registration_time DESC
         """
         return list(db._execute(SQL(query % (self.seminar_id, self.seminar_ctr))))
+
+    def show_audience(self):
+        return audience_options[self.audience][1]
 
     @classmethod
     def _editable_time(cls, t):
