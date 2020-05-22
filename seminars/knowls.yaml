@@ -479,7 +479,7 @@ visibility:
 audience:
   title: Audience
   contents: |
-    The intended audience of the series or talk.
+    Select the intended audience of the series or talk:
     <ul>
       <li><b>researchers in topic</b>:
           researchers in a particular topic within the discipline.</li>
