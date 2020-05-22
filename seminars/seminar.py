@@ -477,7 +477,7 @@ class WebSeminar(object):
         include_institutions=True,
         include_datetime=True,
         include_topics=False,
-        iuclude_audience=True,
+        include_audience=True,
         include_subscribe=True,
         show_attributes=False,
     ):

@@ -8,7 +8,16 @@ from seminars.seminar import WebSeminar, seminars_lookup, seminars_search
 from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser, ilike_query
 from seminars.users.main import creator_required
-from seminars.utils import allowed_shortname, sanity_check_times, short_weekdays, process_user_input, APIError, MAX_SLOTS, MAX_ORGANIZERS
+from seminars.utils import (
+    allowed_shortname,
+    sanity_check_times,
+    short_weekdays,
+    process_user_input,
+    sanitized_table,
+    APIError,
+    MAX_SLOTS,
+    MAX_ORGANIZERS,
+)
 from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
 
@@ -77,7 +86,11 @@ def help():
     code_examples = {name: highlight(inspect.getsource(func), PythonLexer(), HtmlFormatter())
                      for (name, func) in example.__dict__.items()
                      if isinstance(func, FunctionType)}
-    print(code_examples)
+    cols = {"series_sanitized": sorted(sanitized_table('seminars').search_cols),
+            "talks_sanitized": sorted(sanitized_table('talks').search_cols),
+            "series_other": sorted(col for col in db.seminars.search_cols if col not in sanitized_series_cols),
+            "talks_other": sorted(col for col in db.talks.search_cols if col not in sanitized_talks_cols)}
+    
     return render_template(
         "api_help.html",
         title="API",
