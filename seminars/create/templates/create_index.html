@@ -24,11 +24,11 @@
         <h3>Series</h3>
         <table class="ntdata">
           <thead>
-            <tr>{{ series_header(include_institutions=False, include_datetime=False, include_description=False, include_subscribe=False) | safe }}</tr>
+            <tr>{{ series_header(include_institutions=False, include_datetime=False, include_audience=False, include_subscribe=False) | safe }}</tr>
           </thead>
           <tbody>
             {% for series in api_series %}
-              <tr>{{ series.oneline(include_institutions=False, include_datetime=False, include_description=False, include_subscribe=False, show_attributes=True) | safe }}</tr>
+              <tr>{{ series.oneline(include_institutions=False, include_datetime=False, include_audience=False, include_subscribe=False, show_attributes=True) | safe }}</tr>
             {% endfor %}
           </tbody>
         </table>
