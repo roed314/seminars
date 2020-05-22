@@ -479,21 +479,27 @@ visibility:
 audience:
   title: Audience
   contents: |
-    Series and talks may be distinguished by their target audience as follows:
+    Select the intended audience of the series or talk:
     <ul>
       <li><b>researchers in topic</b>:
-          researchers in a particular topic or subtopic.</li>
+          researchers in a particular topic within the discipline.</li>
       <li><b>researchers in discipline</b>:
-          academic audience within a department or subject area.</li>
-      <li><b>learners</b>:
-          researchers and students interested in learning the details of a particular result or subtopic.</li>
+          researchers in the broader discipline 
+          (e.g., all professors in a university department).</li>
       <li><b>advanced learners</b>:
-          researchers interested in learning the details of a particular result or subtopic that requires significant background in the topic.</li>
+          researchers interested in learning details of a subtopic 
+          that requires substantial background in the topic.</li>
+      <li><b>learners</b>:
+          researchers and students interested in learning a subtopic.</li>
       <li><b>undergraduates</b>:
           undergraduate students.</li>
       <li><b>general audience</b>:
-          general academic audience and members of the public with an academic interest.</li>
+          general academic audience and 
+          members of the public with an academic interest.</li>
     </ul>
+    This designation is intended not to exclude participants, 
+    but to suggest what background may be necessary
+    for a participant to be able to benefit from attending.
 hidden:
   title: Hide
   contents: |
