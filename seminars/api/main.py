@@ -434,9 +434,11 @@ def save_talk(version=0, user=None):
     edittype = "created" if talk.new else "edited"
     if warnings:
         response = jsonify({"code": "warning",
+                            "series_ctr": new_version.series_ctr,
                             "description": "series successfully %s, but..." % edittype,
                             "warnings": warnings})
     else:
         response = jsonify({"code": "success",
+                            "series_ctr": new_version.series_ctr,
                             "description": "series successfully %s" % edittype})
     return response

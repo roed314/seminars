@@ -127,9 +127,9 @@ def create_talk():
     code = J.get("code")
     if r.status_code == 200:
         if code == "warning":
-            print("Created with warnings", J["warnings"])
+            print("Created talk with series_ctr=%s, warned with %s" % (J["series_ctr"], J["warnings"]))
         else:
-            print("Created successfully")
+            print("Created talk with series_ctr=%s successfully" % (J["series_ctr"]))
     else:
         print("Creation failed")
         print(J)
