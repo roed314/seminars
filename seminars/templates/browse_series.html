@@ -15,7 +15,7 @@ Dates in conference time zone
   <thead>
     {% if is_conference %}
 nclude_audience/
-    <tr> {{ series_header(conference=True, include_description=False, include_topics=True)  | safe }} </tr>
+    <tr> {{ series_header(conference=True, include_audience=False, include_topics=True)  | safe }} </tr>
     {% else %}
     <tr> {{ series_header() | safe }} </tr>
     {% endif %}
@@ -25,7 +25,7 @@ nclude_audience/
     <tr {{ row_attributes | safe }} >
       {% if is_conference %}
 nclude_audience/
-      {{ series.oneline(conference=True, include_description=False, include_topics=True) | safe }}
+      {{ series.oneline(conference=True, include_audience=False, include_topics=True) | safe }}
       {% else %}
       {{ series.oneline() | safe }}
       {% endif %}
