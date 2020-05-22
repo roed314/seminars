@@ -526,7 +526,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     search_array = SeriesSearchArray(conference=conference, past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
-    kwquery = query = dict(query)
+    kw_query = query = dict(query)
     parse_substring(info, kwquery, "keywords", series_keyword_columns())
     org_query = {}
     more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
@@ -537,8 +537,12 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         # Ignore the possibility that the user/conference is in Kiribati.
         recent = datetime.now().date() - timedelta(days=1)
         query["end_date"] = {"$lt" if past else "$gte": recent}
-    results = list(seminars_search(kwquery, organizer_dict=all_organizers(org_query), more=more))
-    if kwquery != query and not org_query:
+    results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), more=more))
+    print(query)
+    print(kw_query)
+    print(org_query)
+    print(query!=kw_query and not org_query)
+    if kw_query != query and not org_query:
         parse_substring(info, org_query, "keywords", organizers_keyword_columns())
         results += list(seminars_search(query, organizer_dict=all_organizers(org_query), more=more))
     series = series_sorted(results, conference=conference, reverse=past)
