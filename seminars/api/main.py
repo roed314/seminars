@@ -78,7 +78,7 @@ def pyhighcss():
         response.headers["Cache-Control"] = "public, max-age=600"
     return response
 
-@api_page.route("/help")
+@api_page.route("/")
 def help():
     code_examples = {}
     from . import example
@@ -86,16 +86,25 @@ def help():
     code_examples = {name: highlight(inspect.getsource(func), PythonLexer(), HtmlFormatter())
                      for (name, func) in example.__dict__.items()
                      if isinstance(func, FunctionType)}
-    cols = {"series_sanitized": sorted(sanitized_table('seminars').search_cols),
-            "talks_sanitized": sorted(sanitized_table('talks').search_cols),
-            "series_other": sorted(col for col in db.seminars.search_cols if col not in sanitized_series_cols),
-            "talks_other": sorted(col for col in db.talks.search_cols if col not in sanitized_talks_cols)}
-    
+    sems = sanitized_table('seminars')
+    talks = sanitized_table('talks')
+    ss = sorted(sems.search_cols)
+    ts = sorted(talks.search_cols)
+    so = sorted(col for col in db.seminars.search_cols if col not in ss)
+    to = sorted(col for col in db.talks.search_cols if col not in ts)
+    cols = {"series_sanitized": ss,
+            "talks_sanitized": ts,
+            "series_other": so,
+            "talks_other": to}
+    types = dict(sems.col_type)
+    types.update(talks.col_type)
     return render_template(
         "api_help.html",
         title="API",
         section="Info",
         code_examples=code_examples,
+        cols=cols,
+        types=types,
     )
 
 # Unlike most routes in this module, this one requires a live user to be logged in

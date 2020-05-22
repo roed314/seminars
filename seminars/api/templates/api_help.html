@@ -98,8 +98,39 @@ the user's <a href="{{ url_for('user.info')}}">Account</a> page.
 <h2>Schema</h2>
 
 <p>
-  Details on the schema will be added here soon.  For now, see our <a href="https://github.com/roed314/seminars/blob/master/Schema.md">schema documentation on Github</a>.
+  More details on the schema will be added here soon.  For now, see our <a href="https://github.com/roed314/seminars/blob/master/Schema.md">schema documentation on Github</a>.
 </p>
+
+{% for (tbltype, tbl) in [("seminar series and conferences", "series_sanitized"), ("talks", "talks_sanitized")] %}
+  <p>
+    The following columns are available for searching on {{ tbltype }}.
+  </p>
+
+  <table class="ntdata">
+    <thead>
+      <tr>
+        <th>
+          Column
+        </th>
+        <th>
+          Type
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for col in cols[tbl] %}
+        <tr>
+          <td>
+            {{ col }}
+          </td>
+          <td>
+            {{ types[col] }}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
 
 <h2>Query language</h2>
 
