@@ -59,11 +59,11 @@ maxlength = {
     'room' : MAX_NAME_LEN,
     'shortname' : MAX_SHORTNAME_LEN,
     'slides_link' : MAX_URL_LEN,
-    'speaker': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speaker': MAX_SPEAKERS*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
     'speakers' : MAX_SPEAKERS,
-    'speaker_affiliation': 8*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
-    'speaker_email': MAX_EMAIL_LEN,
-    'speaker_homepage': MAX_URL_LEN,
+    'speaker_affiliation': MAX_SPEAKERS*MAX_NAME_LEN, # FIXME once multiple speakers are properly supported
+    'speaker_email': MAX_SPEAKERS*MAX_EMAIL_LEN,
+    'speaker_homepage': MAX_SPEAKERS*MAX_URL_LEN,
     'stream_link' : MAX_URL_LEN,
     'time_slots' : MAX_SLOTS,
     'title' : MAX_TITLE_LEN,
