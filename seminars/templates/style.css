@@ -704,7 +704,7 @@ table.ntdata td.enddate {
 
 table.ntdata td.seriesname {
     text-align: left;
-    min-width: 330px;
+    min-width: 300px;
 }
 
 table.ntdata td.institutions {
@@ -718,7 +718,7 @@ table ntdata td.subscribe {
 }
 
 table.ntdata td.speaker {
-    min-width: 120px;
+    min-width: 150px;
 }
 
 table.ntdata td.talktitle {
