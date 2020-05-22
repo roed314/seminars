@@ -528,7 +528,8 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     info.update(request.args)
     kwquery = query = dict(query)
     parse_substring(info, kwquery, "keywords", series_keyword_columns())
-    org_query = more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
+    org_query = {}
+    more = {} # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more, org_query)
     query["visibility"] = 2
     if conference:
