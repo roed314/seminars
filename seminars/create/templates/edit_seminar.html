@@ -34,10 +34,6 @@
         <td class="forminfo">Capitalize only the first word and proper nouns.</td>
       </tr>
       <tr>
-        <td>{{ KNOWL("seminar_description") }}</td>
-        <td><input name="description" value="{{ seminar.description | blanknone }}" style="width:600px;" maxlength="{{ maxlength['description'] }}" placeholder="Research seminar" /></td>
-      </tr>
-      <tr>
         <td>{{ KNOWL("seminar_homepage") }}</td>
         <td><input name="homepage" value="{{ seminar.homepage | blanknone }}" style="width:600px;" maxlength="{{ maxlength['homepage'] }}" placeholder="https://example.org"/></td>
       </tr>
@@ -58,11 +54,11 @@
         <td><span id="language_selector" style="width:600px;"></span></td>
       </tr>
       <tr>
-        <td>{{ ASTKNOWL("level") }}</td>
+        <td>{{ ASTKNOWL("audience") }}</td>
         <td>
-          <select name="level" style="width:610px;">
-            {% for opt in options["level"] %}
-              <option value="{{opt[0]}}" {% if seminar.level == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
+          <select name="audience" style="width:610px;">
+            {% for opt in options["audience"] %}
+              <option value="{{opt[0]}}" {% if seminar.audience == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
             {% endfor %}
           </select>
         </td>

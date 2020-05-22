@@ -26,7 +26,6 @@ import pytz
 from collections import defaultdict
 from datetime import datetime
 from lmfdb.logger import critical
-from psycopg2.sql import Placeholder
 
 import urllib.parse
 
@@ -64,13 +63,13 @@ visibility_options = [
     (0, 'private'),
 ]
 
-level_options = [
-    (0, "research seminar"),
-    (1, "colloquium"),
-    (2, "learning seminar"),
-    (3, "advanced learning seminar"),
-    (4, "undergraduate seminar"),
-    (5, "general public"),
+audience_options = [
+    (0, "researchers in topic"),
+    (1, "researchers in discipline"),
+    (2, "advanced learners"),
+    (3, "learners"),
+    (4, "undergraduates"),
+    (5, "general audience"),
 ]
 
 class WebSeminar(object):
@@ -104,7 +103,7 @@ class WebSeminar(object):
             self.access_time = None
             self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
-            self.level = 0 # default is research seminar
+            self.audience = 0 # default is researchers
             self.is_conference = False  # seminar by default
             self.frequency = 7
             self.per_day = 1
@@ -273,8 +272,8 @@ class WebSeminar(object):
         # remove columns we plan to drop
         for attr in ["start_time","end_time","start_times","end_times","weekday","archived"]:
             killattr(self, attr)
-        if self.level is None:
-            self.level = 0
+        if self.audience is None:
+            self.audience = 0
 
     def visible(self, user=None):
         """
@@ -320,6 +319,9 @@ class WebSeminar(object):
     @property
     def series_type(self):
         return "conference" if self.is_conference else "seminar series"
+
+    def show_audience(self):
+        return audience_options[self.audience][1]
 
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"

@@ -28,7 +28,6 @@ import urllib.parse
 from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
-from psycopg2.sql import Placeholder
 import re
 
 class WebTalk(object):
@@ -162,8 +161,8 @@ class WebTalk(object):
                 return ["physics", topic]
             self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
         self.subjects = []
-        if self.level is None:
-            self.level = 0
+        if self.audience is None:
+            self.audience = 0 # default is researchers
 
     def visible(self):
         """
@@ -833,7 +832,7 @@ def talks_search(*args, **kwds):
     else:
         table = db.talks
     more = kwds.get("more", False)
-    return search_distinct(db.talks, _selecter, _counter, _iterator(seminar_dict, objects=objects, more=more), *args, **kwds)
+    return search_distinct(table, _selecter, _counter, _iterator(seminar_dict, objects=objects, more=more), *args, **kwds)
 
 
 def talks_lucky(*args, **kwds):
