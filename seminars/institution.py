@@ -52,7 +52,9 @@ def institution_known(institution):
 
 
 class WebInstitution(object):
-    def __init__(self, shortname, data=None, editing=False, showing=False, saving=False):
+    def __init__(self, shortname, data=None, editing=False, showing=False, saving=False, user=None):
+        if user is None:
+            user = current_user
         if data is None and not editing:
             data = db.institutions.lookup(shortname, projection=3)
             if data is None:
@@ -62,7 +64,7 @@ class WebInstitution(object):
             self.shortname = shortname
             self.type = "university"
             self.timezone = "US/Eastern"
-            self.admin = current_user.email
+            self.admin = user.email
             for key, typ in db.institutions.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -91,9 +93,11 @@ class WebInstitution(object):
     def __ne__(self, other):
         return not (self == other)
 
-    def save(self):
+    def save(self, user=None):
+        if user is None:
+            user = current_user
         data = {col: getattr(self, col, None) for col in db.institutions.search_cols}
-        data["edited_by"] = int(current_user.id)
+        data["edited_by"] = int(user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         if self.new:
             db.institutions.insert_many([data])

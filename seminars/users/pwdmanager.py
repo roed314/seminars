@@ -6,7 +6,7 @@ import bcrypt
 import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
-from seminars.seminar import WebSeminar, seminars_search, next_talk_sorted
+from seminars.seminar import WebSeminar, seminars_search, seminars_lucky, next_talk_sorted
 from seminars.talk import WebTalk
 from seminars.utils import pretty_timezone
 from lmfdb.backend.searchtable import PostgresSearchTable
@@ -17,6 +17,7 @@ from lmfdb.logger import critical
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
+import secrets
 from .main import logger
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
@@ -123,8 +124,6 @@ class PostgresUserTable(PostgresSearchTable):
             # Update all of this user's created seminars and talks
             db.seminars.update({"owner": ilike_query(email)}, {"display": True})
             # Could do this with a join...
-            from seminars.seminar import seminars_search
-
             for sem in seminars_search({"owner": ilike_query(email)}, "shortname"):
                 db.talks.update({"seminar_id": sem}, {"display": True}, restat=False)
 
@@ -176,6 +175,11 @@ class PostgresUserTable(PostgresSearchTable):
             db.talks.update({"speaker_email": ilike_query(email)}, {"speaker_email": ""})
             self.update({"id": uid}, {key: None for key in self.search_cols}, restat=False)
 
+    def reset_api_token(self, uid):
+        new_token = secrets.token_urlsafe(32)
+        self.update({"id": int(uid)}, {"api_token": new_token}, restat=False)
+        return new_token
+
 userdb = PostgresUserTable()
 
 
@@ -222,10 +226,9 @@ class SeminarsUser(UserMixin):
                 return True
             # try to endorse if the user is the organizer of some seminar
             if self._organizer:
-                shortname = db.seminar_organizers.lucky(
-                    {"email": ilike_query(self.email)}, "seminar_id"
-                )
-                for owner in seminars_search({"shortname": shortname}, "owner"):
+                shortname = db.seminar_organizers.lucky({"email": ilike_query(self.email)}, "seminar_id")
+                owner = seminars_lucky({"shortname": shortname, "display": True}, "owner")
+                if owner:
                     owner = userdb.lookup(owner, ["creator", "id"])
                     if owner and owner.get("creator"):
                         self.endorser = owner["id"]  # must set endorser first
@@ -339,6 +342,21 @@ class SeminarsUser(UserMixin):
         self._data["location"] = location
         self._dirty = True
 
+
+    @property
+    def api_token(self):
+        token = self._data.get("api_token")
+        if token is None:
+            token = userdb.reset_api_token(self._uid)
+        return token
+
+    @property
+    def api_access(self):
+        if not self.is_creator:
+            return 0
+        if self.is_admin:
+            return 1
+        return self._data.get("api_access", 0)
 
     @property
     def ics(self):
@@ -559,6 +577,14 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
 
     def get_id(self):
         return
+
+    @property
+    def api_token(self):
+        return None
+
+    @property
+    def api_access(self):
+        return 0
 
     @property
     def email(self):

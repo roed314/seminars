@@ -1,0 +1,170 @@
+{% extends 'homepage.html' %}
+{% block extra_head %}
+<link href="{{ url_for('.pyhighcss') }}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+
+{% block content %}
+
+<p>
+  Our application programming interface (API) allows users to write scripts
+  to add content to our site or to search and browse
+  without manually navigating the website.
+  Edit access requires the following API token, though you can search public information without it.
+</p>
+
+<form action="{{url_for('user.reset_api_token')}}">
+  <table>
+    <tr>
+      <td>{{ KNOWL('api_token') }}</td>
+      <td>
+        <input type="text" id="api_token" value="{{user.api_token}}" class="noclick" readonly onclick="this.focus();this.select()"></input>
+        <a><i class="clippy" onclick="copySourceOfId('api_token')"></i></a>
+        <button type="submit">Reset</button>
+      </td>
+      <td style="min-width: 300px;"></td>
+    </tr>
+  </table>
+</form>
+
+<p>
+  The API is currently under development, and will be subject to change without any promise of backward compatibility
+  as long as the current version described here is <b>version 0</b>.  We hope to provide a stable interface soon, at which
+  point we will upgrade to <b>version 1</b>.  If you have comments or feature requests or if you want to be informed of the switch to version 1, please visit the API <a href="https://github.com/roed314/seminars/issues/96">Github issue</a>.
+</p>
+
+<p>
+  The source code for the API is available <a href="https://github.com/roed314/seminars/blob/master/seminars/api/main.py">here</a>.
+  The example code blocks below are written in Python, but you can use any language able to generate and process HTTP requests.
+</p>
+
+<h2>Encoding</h2>
+
+<p>
+  Results are always encoded using json, and requests can be made using either POST or GET (except the save functions, which require POST).
+</p>
+
+<h2>Lookup</h2>
+
+<p>
+  You can get public information on a specific series or talk.
+</p>
+
+{{ code_examples["lookup_talk"] | safe }}
+
+<p>
+  When you look up a series, the result includes a list of talks.  Soon, you will be able to specify a date range for those talks.
+</p>
+
+{{ code_examples["lookup_series"] | safe }}
+
+<h2>Searching</h2>
+
+<p>
+  You can search for series satisfying certain attributes.  If you use the GET method, you can specify a simple query directly in the URL, giving values of attribute according to the schema table below.
+</p>
+
+{{ code_examples["search_series_get"] | safe }}
+
+<p>
+  If you use the POST method, you can provide more complicated queries by passing in a json query object using the query language described below.
+</p>
+
+<h2>Saving</h2>
+
+<p>
+  To save series or talks to the database, you need to provide your program with an API token, which can be found on your <a href="{{ url_for('user.info') }}">account page</a>.  If you use <a href="https://git-scm.com/">git</a>, we highly recommend storing your API token in a separate file that you add to your <a href="https://git-scm.com/docs/gitignore">gitignore</a> so that it isn't accidentally included in a public repository.
+</p>
+
+{{ code_examples["authorization"] | safe }}
+
+<p>
+  You can create a new series as follows.  Note that organizers cannot be changed through the API for existing series, but you must specify them when creating a new one.  The example includes a minimal set of attributes, but you can of course include more from the schema described below.
+</p>
+
+{{ code_examples["create_seminar_series"] | safe }}
+
+<p>
+  Most of the fields are the same for conferences, but you provide start and end dates rather than time slots.
+</p>
+
+{{ code_examples["create_conference"] | safe }}
+
+<p>
+  To edit a series, you need to provide only the fields that you want to change.  Note that it is not possible to edit organizers through the API.
+</p>
+
+{{ code_examples["edit_series"] | safe }}
+
+<p>
+  You can create and edit talks similarly.  Each talk has a number, returned to you when you create it, that you include when editing an existing talk.
+</p>
+
+{{ code_examples["create_talk"] | safe }}
+
+<h3>Approval</h3>
+
+<p>
+  After updating series using the API, you must manually approve the changes by logging in and visiting your <a href="{{ url_for('create.index') }}">Manage</a> page.  This measure is intended to prevent errors in your scripts from showing up on the live site, and to guard against unauthorized updates if you lose your API token.  If this approval is a burden for your intended use, please <a href="{{ url_for('contact') }}">contact</a> us to discuss its removal.
+</p>
+
+<h2>Schema</h2>
+
+<p>
+  More details on the schema will be added here soon.  For now, see our <a href="https://github.com/roed314/seminars/blob/master/Schema.md">schema documentation on Github</a>.
+</p>
+
+{% for (tbltype, tbl) in [("seminar series and conferences", "series_sanitized"), ("talks", "talks_sanitized")] %}
+  <p>
+    The following columns are available for searching on {{ tbltype }}.
+  </p>
+
+  <table class="ntdata">
+    <thead>
+      <tr>
+        <th>
+          Column
+        </th>
+        <th>
+          Type
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for col in cols[tbl] %}
+        <tr>
+          <td>
+            {{ col }}
+          </td>
+          <td>
+            {{ types[col] }}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+
+<h2>Query language</h2>
+
+<p>
+  Queries are constructed from dictionaries, where each key gives a constraint for that column.  By default, each value is treated as an equality constraint.  To get other conditions, the value is also taken to be a dictionary with keys special codes starting with a `$` symbol.  For example, use {"topics": {"$contains": "math_NT"}, "abstract": {"$ilike": "%p-adic%"}} to search for a talk having number theory as a topic and having an abstract that contains the string "p-adic".  Documentation for the query language will be added here.  For now, see <a href="https://github.com/LMFDB/lmfdb/blob/master/lmfdb/backend/searchtable.py#L132">the source code</a> for the special keys available.
+</p>
+
+<h2>Topics</h2>
+
+<p>
+  To specify topics, you need to know our identifiers for them.  We provide a URL that provides the full topic graph (note that it is not a tree: for instance, mathematical physics is a subtopic of both mathematics and physics).
+</p>
+
+{{ code_examples["topics"] | safe }}
+
+<h2>Institutions</h2>
+
+<p>
+  Similarly, our identifiers for institutions are listed at the following URL (we don't provide a search interface, because they don't change much).
+</p>
+
+{{ code_examples["institutions"] | safe }}
+
+{% endblock %}

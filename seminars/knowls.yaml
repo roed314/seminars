@@ -5,42 +5,42 @@ filter:
     The events displayed are those in the <i>intersection</i> 
     of the subsets defined by the activated filters and the search box.
     <ul>
-        <li><b>topic:</b> 
-            Clicking the word <u>topic</u> above
-            activates the topic filter and opens the topic menu.
-            Initially no topics are selected, so no events are displayed,
-            but as you add topics, events matching that topic will appear.
-            Many toggles for adding topics are 3-way: 
-            clicking anywhere in the toggle cycles between 
-            <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right); 
-            for example, to select all Mathematics topics, 
-            you need to click the Mathematics toggle <i>twice</i>!
-            When a submenu for a centered toggle is open, 
-            subtopics are displayed; initially none are selected, 
-            but you can click their toggles to add them.
-            Click <u>topic</u> again to close the topic menu 
-            and all its submenus.
-            Toggling the topic filter off and on now switches between 
-            displaying all events vs. 
-            only events in the union of your selected topics.</li>
-        <li><b>language:</b> 
-            Click <u>language</u> to restrict to 
-            events in the languages you understand.</li>
-        <li><b>saved:</b> 
-            After you have <a href="user/info">registered</a>, 
-            clicking the toggle labeled <u>saved</u> will restrict the list 
-            to talks and series you have saved as favorites.</li>
-        <li><b>more:</b>
-            Click <u>more</u> to open a box with additional filters; 
-            these take effect when you click the Apply button 
-            inside the box.</li>
-    <li><b>search:</b>
-            If text is entered in the search box, 
-            then once you hit <kbd>return</kbd> or click the magnifying glass, 
-            an event will be listed only if one of its attributes
-            matches the text.
-            Clicking the x inside the search box clears the text
-            and removes the restriction.</li>
+      <li><b>topic:</b> 
+          Clicking the word <u>topic</u> above
+          activates the topic filter and opens the topic menu.
+          Initially no topics are selected, so no events are displayed,
+          but as you add topics, events matching that topic will appear.
+          Many toggles for adding topics are 3-way: 
+          clicking anywhere in the toggle cycles between 
+          <i>none</i> (left), <i>some</i> (center), and <i>all</i> (right); 
+          for example, to select all Mathematics topics, 
+          you need to click the Mathematics toggle <i>twice</i>!
+          When a submenu for a centered toggle is open, 
+          subtopics are displayed; initially none are selected, 
+          but you can click their toggles to add them.
+          Click <u>topic</u> again to close the topic menu 
+          and all its submenus.
+          Toggling the topic filter off and on now switches between 
+          displaying all events vs. 
+          only events in the union of your selected topics.</li>
+      <li><b>language:</b> 
+          Click <u>language</u> to restrict to 
+          events in the languages you understand.</li>
+      <li><b>saved:</b> 
+          After you have <a href="user/info">registered</a>, 
+          clicking the toggle labeled <u>saved</u> will restrict the list 
+          to talks and series you have saved as favorites.</li>
+      <li><b>more:</b>
+          Click <u>more</u> to open a box with additional filters; 
+          these take effect when you click the Apply button 
+          inside the box.</li>
+      <li><b>search:</b>
+          If text is entered in the search box, 
+          then once you hit <kbd>return</kbd> or click the magnifying glass, 
+          an event will be listed only if one of its attributes
+          matches the text.
+          Clicking the x inside the search box clears the text
+          and removes the restriction.</li>
     </ul>
     <table>
     <tr>
@@ -464,13 +464,42 @@ venue:
 visibility:
   title: Visibility
   contents: |
-    <i>Public</i>: Any user can see the series and its talks.<br>
-    <i>Unlisted</i>: The series and its talks are not listed on the Browse page,
-                      but you can share their links with anyone.<br>
-    <i>Private</i>: Only your co-organizers can see 
-                      the series and its talks.<br><br>
+    The visibility options for a series include the following:
+    <ul>
+      <li><b>Public</b>:
+          Any user can see the series and its talks.</li>
+      <li><b>Unlisted</b>:
+          The series and its talks are not listed on the Browse page,
+          but you can share their links with anyone.</li>
+      <li><b>Private</b>: Only your co-organizers can see 
+          the series and its talks.</li>
+    </ul
     You must be endorsed in order for your series to be visible to anyone else;
     your setting here will become active once you get endorsed.
+audience:
+  title: Audience
+  contents: |
+    Select the intended audience of the series or talk:
+    <ul>
+      <li><b>researchers in topic</b>:
+          researchers in a particular topic within the discipline.</li>
+      <li><b>researchers in discipline</b>:
+          researchers in the broader discipline 
+          (e.g., all professors in a university department).</li>
+      <li><b>advanced learners</b>:
+          researchers interested in learning details of a subtopic 
+          that requires substantial background in the topic.</li>
+      <li><b>learners</b>:
+          researchers and students interested in learning a subtopic.</li>
+      <li><b>undergraduates</b>:
+          undergraduate students.</li>
+      <li><b>general audience</b>:
+          general academic audience and 
+          members of the public with an academic interest.</li>
+    </ul>
+    This designation is intended not to exclude participants, 
+    but to suggest what background may be necessary
+    for a participant to be able to benefit from attending.
 hidden:
   title: Hide
   contents: |
@@ -540,3 +569,11 @@ ids:
     To add a type of ID not among the current possibilities,
     please visit the <a href="user/info">Contact</a> page 
     to send an email requesting that the type be added.
+api_token:
+  title: API token
+  contents: |
+    Use this token to update talks and seminars via the API.
+    Protect this key as you would a password, since it provides
+    access to your account.
+    If you suspect that it has been compromised, click "Reset" to change it 
+    (the old token will immediately cease functioning).

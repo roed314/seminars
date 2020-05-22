@@ -3,141 +3,188 @@
 {% block content %}
 
 <div class="text_content">
-{% if not user.is_creator %}
-<p>
-  Welcome!  Please feel free to start creating series.  For the moment any content you create will be visible only to you, but once your account has been endorsed, all the series and talks you added will instantly appear on the public browse and search pages.  To get endorsed, visit the <a href="{{ url_for('user.public_users') }}">list of public users</a> and follow the instructions there.
-</p>
-{% else %}
-{% if user.affiliation and not institution_known(user.affiliation) %}
-<p> Your affiliation "<b>{{ user.affiliation }}</b>" does not appear to be on our list of institutions.
-You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a series.  Alternatively, you can create a series now and add an institution to it later.
-{% endif %}
-{% endif %}
+  {% if not user.is_creator %}
+  <p>
+    Welcome!  Please feel free to start creating series.  For the moment any content you create will be visible only to you, but once your account has been endorsed, all the series and talks you added will instantly appear on the public browse and search pages.  To get endorsed, visit the <a href="{{ url_for('user.public_users') }}">list of public users</a> and follow the instructions there.
+  </p>
+  {% else %}
+    {% if user.affiliation and not institution_known(user.affiliation) %}
+      <p>
+        Your affiliation "<b>{{ user.affiliation }}</b>" does not appear to be on our list of institutions.
+        You may want to <a href="{{ url_for('list_institutions') }}">add your institution</a> before creating a series.
+        Alternatively, you can create a series now and add an institution to it later.
+      </p>
+    {% endif %}
+    {% if api_series or api_talks %}
+      <h2>API Review</h2>
+      <p>
+        The following changes were made by a script using your API key, and must be approved before they become visible to others.
+      </p>
+      {% if api_series %}
+        <h3>Series</h3>
+        <table class="ntdata">
+          <thead>
+            <tr>{{ series_header(include_institutions=False, include_datetime=False, include_audience=False, include_subscribe=False) | safe }}</tr>
+          </thead>
+          <tbody>
+            {% for series in api_series %}
+              <tr>{{ series.oneline(include_institutions=False, include_datetime=False, include_audience=False, include_subscribe=False, show_attributes=True) | safe }}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+      {% if api_talks %}
+        <h3>Series</h3>
+        <table class="ntdata">
+          <thead>
+            <tr>{{ talks_header(include_subscribe=False) | safe }}</tr>
+          </thead>
+          <tbody>
+            {% for talk in api_talks %}
+              <tr>{{ talk.oneline(include_subscribe=False) | safe }}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+      <form action="{{ url_for('api.review_api') }}" method="POST">
+        <table>
+          <tr>
+            <td>
+              <button type="submit" class="save" name="submit" value="approve">Approve</button>
+            </td>
+            <td>
+              <button type="submit" class="reject" name="submit" value="reject">Reject</button>
+            </td>
+          </tr>
+        </table>
+      </form>
+    {% endif %}
+  {% endif %}
 
-{% set pair = [('Seminar series you organize', seminars), ('Conferences you organize', conferences)] %}
-{% for title, list in pair %}
-  {% if list %}
-    <h2>{{ title }}</h2>
-    <table class="ntdata">
-    <thead>
-      <th>Name</th>
-      <th colspan="1" style="border-left: solid 1px;text-align: center;">Role</th>
-      <th colspan="2" style="border-left: solid 1px;text-align: center;">Edit</th>
-      <th colspan="1" style="border-left: solid 1px;text-align: center;">View</th>
-    </thead>
-    <tbody>
-      {% for row in list %}
-      {% set elt, role = row  %}
+  {% set pair = [('Seminar series you organize', seminars), ('Conferences you organize', conferences)] %}
+  {% for title, list in pair %}
+    {% if list %}
+      <h2>{{ title }}</h2>
+      <table class="ntdata">
+        <thead>
+          <th>Name</th>
+          <th colspan="1" style="border-left: solid 1px;text-align: center;">Role</th>
+          <th colspan="2" style="border-left: solid 1px;text-align: center;">Edit</th>
+          <th colspan="1" style="border-left: solid 1px;text-align: center;">View</th>
+        </thead>
+        <tbody>
+          {% for row in list %}
+            {% set elt, role = row  %}
+            <tr>
+              <td> {{elt.name + elt.show_attributes()}} </td>
+              <td style="border-left: solid 1px;"> {{role}} </td>
+              <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>schedule</a></td>
+              <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>properties</a></td>
+              <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  {% endfor %}
+
+  <h2 style="margin-top: 40px;">Create a series</h2>
+
+  <form action="{{ url_for('.edit_seminar') }}" method="POST">
+    <input type="hidden" name="new" value="yes"/>
+    <input type="hidden" name="institutions" value=""/>
+    <table id="make_semconf">
       <tr>
-        <td> {{elt.name + elt.show_attributes()}} </td>
-        <td style="border-left: solid 1px;"> {{role}} </td>
-        <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>schedule</a></td>
-        <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>properties</a></td>
-        <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a></td>
+        <td>{{ ASTKNOWL("is_conference") }}</td>
+        <td>
+          <select name="is_conference" style="width:120px;">
+            <option value="yes">conference</option>
+            <option value="no" selected>seminar series</option>
+          </select>
+        </td>
+        <td class="forminfo"><p style="width:230px; margin: 0px;">Click blue captions for more details. Asterisks denote required items.</p></td>
       </tr>
-      {% endfor %}
-    </tbody>
+      <tr>
+        <td>{{ ASTKNOWL("seminar_name") }}</td>
+        <td><input name="name" style="width:500px;" placeholder="Thule topology colloquium series" maxlength="{{ maxlength['name'] }}" required /></td>
+        <td class="forminfo">Capitalize first word and proper nouns.</td>
+      </tr>
+      <tr>
+        <td>{{ ASTKNOWL("seminar_shortname") }}</td>
+        <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="{{ maxlength['shortname'] }}" required /></td>
+        <td class="forminfo">Use 3-32 characters, no spaces.
+      </tr>
+      <tr>
+        <td>{{ KNOWL("institutions") }}</td>
+        <td><span id="institution_selector" style="margin-bottom: 10px;"></span></td>
+        <td class="forminfo">Institutions can also be added later.</td>
+      <tr>
+        <td><button type="submit">Create</button></td>
+        <td class="forminfo">Before clicking Create, please read our <a href="{{ url_for('policies') }}" target="_blank">policies</a>.  You will have a chance to cancel creation after clicking Create.</td>
+      </tr>
     </table>
+  </form>
+  {% if deleted_seminars or deleted_talks %}
+    <p id="show_deleted_stuff"><a href="#">Show deleted items</a></p>
+    <div id="deleted_stuff" style="display:none;">
+      <p><a id="hide_deleted_stuff" href="#">Hide deleted items</a></p>
+      {% if deleted_seminars %}
+        <h2>Deleted series</h2>
+        <table class="ntdata">
+          <thead>
+            <th>Name</th>
+            <th>Revive/Permanently delete</th>
+          </thead>
+          {% for seminar in deleted_seminars %}
+            <tr>
+              <td> {{seminar.name}} (deleted) </td>
+              <td> <a href="{{ url_for('.delete_seminar', shortname=seminar.shortname) }}">Edit</a> </td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+      {% if deleted_talks %}
+      <h2>Deleted talks</h2>
+      <table class="ntdata">
+        <thead>
+          <th>Series</th>
+          <th>Time</th>
+          <th>Speaker</th>
+          <th>Title</th>
+          <th>Revive/Permanently delete</th>
+        </thead>
+        {% for talk in deleted_talks %}
+          <tr>
+            <td> {{talk.seminar.name}}</td>
+            <td> {{talk.show_start_time() | safe}}</td>
+            <td> {{talk.show_speaker(affiliation=False) | safe}}</td>
+            <td> {{talk.show_knowl_title() | safe}}</td>
+            <td> <a href="{{ url_for('.delete_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr) }}">Edit</a> </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
   {% endif %}
-{% endfor %}
-  
-<h2 style="margin-top: 40px;">Create a series</h2>
 
-<form action="{{ url_for('.edit_seminar') }}" method="POST">
-  <input type="hidden" name="new" value="yes"/>
-  <input type="hidden" name="institutions" value=""/>
-  <table id="make_semconf">
-    <tr>
-      <td>{{ ASTKNOWL("is_conference") }}</td>
-      <td>
-        <select name="is_conference" style="width:120px;">
-          <option value="yes">conference</option>
-          <option value="no" selected>seminar series</option>
-        </select>
-      </td>
-      <td class="forminfo"><p style="width:230px; margin: 0px;">Click blue captions for more details. Asterisks denote required items.</p></td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("seminar_name") }}</td>
-      <td><input name="name" style="width:500px;" placeholder="Thule topology colloquium series" maxlength="{{ maxlength['name'] }}" required /></td>
-      <td class="forminfo">Capitalize first word and proper nouns.</td>
-    </tr>
-    <tr>
-      <td>{{ ASTKNOWL("seminar_shortname") }}</td>
-      <td><input name="shortname" style="width:500px;" placeholder="TeaAndTopology" maxlength="{{ maxlength['shortname'] }}" required /></td>
-      <td class="forminfo">Use 3-32 characters, no spaces.
-    </tr>
-    <tr>
-      <td>{{ KNOWL("institutions") }}</td>
-      <td><span id="institution_selector" style="margin-bottom: 10px;"></span></td>
-      <td class="forminfo">Institutions can also be added later.</td>
-    <tr>
-      <td><button type="submit">Create</button></td>
-      <td class="forminfo">Before clicking Create, please read our <a href="{{ url_for('policies') }}" target="_blank">policies</a>.  You will have a chance to cancel creation after clicking Create.</td>
-    </tr>
-  </table>
-</form>
-{% if deleted_seminars or deleted_talks %}
-<p id="show_deleted_stuff"><a href="#">Show deleted items</a></p>
-<div id="deleted_stuff" style="display:none;">
-<p><a id="hide_deleted_stuff" href="#">Hide deleted items</a></p>
-  {% if deleted_seminars %}
-  <h2>Deleted series</h2>
-  <table class="ntdata">
-    <thead>
-      <th>Name</th>
-      <th>Revive/Permanently delete</th>
-    </thead>
-    {% for seminar in deleted_seminars %}
-    <tr>
-      <td> {{seminar.name}} (deleted) </td>
-      <td> <a href="{{ url_for('.delete_seminar', shortname=seminar.shortname) }}">Edit</a> </td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
-  {% if deleted_talks %}
-  <h2>Deleted talks</h2>
-  <table class="ntdata">
-    <thead>
-      <th>Series</th>
-      <th>Time</th>
-      <th>Speaker</th>
-      <th>Title</th>
-      <th>Revive/Permanently delete</th>
-    </thead>
-    {% for talk in deleted_talks %}
-    <tr>
-      <td> {{talk.seminar.name}}</td>
-      <td> {{talk.show_start_time() | safe}}</td>
-      <td> {{talk.show_speaker(affiliation=False) | safe}}</td>
-      <td> {{talk.show_knowl_title() | safe}}</td>
-      <td> <a href="{{ url_for('.delete_talk', seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr) }}">Edit</a> </td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
-</div>
+  <script type="text/javascript">
+    document.getElementById('show_deleted_stuff').addEventListener('click',
+      function(e) {
+        e.preventDefault();
+        $('#show_deleted_stuff').hide();
+        $('#hide_deleted_stuff').show();
+        $('#deleted_stuff').show();
+        return false;
+      });
 
-<script type="text/javascript">
-document.getElementById('show_deleted_stuff').addEventListener('click',
-  function(e) {
-    e.preventDefault();
-    $('#show_deleted_stuff').hide();
-    $('#hide_deleted_stuff').show();
-    $('#deleted_stuff').show();
-    return false;
-  });
-
-document.getElementById('hide_deleted_stuff').addEventListener('click',
-  function(e) {
-    e.preventDefault();
-    $('#deleted_stuff').hide();
-    $('#hide_deleted_stuff').hide();
-    $('#show_deleted_stuff').show();
-    return false;
-  });
-</script>
+    document.getElementById('hide_deleted_stuff').addEventListener('click',
+      function(e) {
+        e.preventDefault();
+        $('#deleted_stuff').hide();
+        $('#hide_deleted_stuff').hide();
+        $('#show_deleted_stuff').show();
+        return false;
+      });
+  </script>
 
 {% endif %}
 </div>

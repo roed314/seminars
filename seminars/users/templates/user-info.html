@@ -25,7 +25,7 @@
 
 {% else %}
 
-  <h1>Welcome, {{ user.name }} (<a href="{{ url_for(".logout") }}">logout</a>)</h1>
+  <h1>Welcome, {{ user.name }} <div style="float: right; margin-right: 50px"><a href="{{ url_for(".logout") }}">Logout</a></div></h1>
   <h3> Favorite series </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
@@ -64,7 +64,10 @@
 
   {% if user.is_creator %}
     <h2>Adding content</h2>
-    <p>To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.</p>
+    <p>
+      To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
+    </p>
+
     <h2>Endorse someone to add content</h2>
 
     <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
@@ -168,6 +171,17 @@
       <tr><td/><td><button name="submit" type="submit">Change Password</button></td></tr>
     </table>
   </form>
+  {% if user.is_creator and user.api_access > 0 %}
+      <h2>Adding content through API</h2>
+      <p>
+        Users who wish to write scripts to add content to our site
+        or to retrieve content automatically 
+        may do so via our application programming interface (API),
+        using the token below.
+        See the <a href="{{ url_for('api.help') }}">API documentation</a> 
+        for details.
+      </p>
+    {% endif %}
 
   <h2>Delete account</h2>
 
