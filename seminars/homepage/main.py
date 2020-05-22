@@ -538,10 +538,8 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         recent = datetime.now().date() - timedelta(days=1)
         query["end_date"] = {"$lt" if past else "$gte": recent}
     results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), more=more))
-    print(query)
-    print(kw_query)
-    print(org_query)
-    print(query!=kw_query and not org_query)
+    print(query==kw_query)
+    print(not org_query)
     if kw_query != query and not org_query:
         parse_substring(info, org_query, "keywords", organizers_keyword_columns())
         results += list(seminars_search(query, organizer_dict=all_organizers(org_query), more=more))
