@@ -7,6 +7,14 @@
 {% block content %}
 
 <p>
+Our application programming interface (API) allows users to write scripts
+to add content to our site or to retrieve content from it
+without manually navigating through the website.
+Access requires the API token on 
+the user's <a href="{{ url_for('user.info')}}">Account</a> page.
+</p>
+
+<p>
   The API is currently under development, and will be subject to change without any promise of backward compatibility
   as long as the current version described here is <b>version 0</b>.  We hope to provide a stable interface soon, at which
   point we will upgrade to <b>version 1</b>.  If you have comments or feature requests or if you want to be informed of the switch to version 1, please visit the API <a href="https://github.com/roed314/seminars/issues/96">Github issue</a>.
@@ -76,7 +84,7 @@
 {{ code_examples["edit_series"] | safe }}
 
 <p>
-  You can create and edit talks similarly.  Each talk has an integer counter which is assigned to it.  You should provide this counter if and only if you're editing an existing talk.  When creating a talk, the value of the counter will be returned to you.
+  You can create and edit talks similarly.  Each talk has a number, an integer.  When you create a talk, the talk's number is returned to you.  Provide this number if and only if you're editing an existing talk.  
 </p>
 
 {{ code_examples["create_talk"] | safe }}
