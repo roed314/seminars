@@ -49,7 +49,7 @@ If you are seeking an endorsement, ask someone on <a href="{{ url_for('user.publ
   {% if talk.language != "en" or talk.topics %}
   <p>{{ talk.show_lang_topics() | safe }}</p>
   {% endif %}
-  <p>{{ talk.show_audience() | safe }}</p>
+  <p>Audience: {{ talk.show_audience() | safe }}</p>
 
   {% if talk.paper_link or talk.slides_link or talk.video_link %}
   <p>{{talk.show_content_links() | safe}}</p>
