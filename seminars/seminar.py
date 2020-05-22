@@ -321,7 +321,7 @@ class WebSeminar(object):
         return "conference" if self.is_conference else "seminar series"
 
     def show_audience(self):
-        return audience_options[self.audience]
+        return audience_options[self.audience][1]
 
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
