@@ -14,7 +14,6 @@ Dates in conference time zone
 <table id="browse-confs" class="conf-table ntdata">
   <thead>
     {% if is_conference %}
-nclude_audience/
     <tr> {{ series_header(conference=True, include_audience=False, include_topics=True)  | safe }} </tr>
     {% else %}
     <tr> {{ series_header() | safe }} </tr>
@@ -24,7 +23,6 @@ nclude_audience/
     {% for series, row_attributes  in series_row_attributes %}
     <tr {{ row_attributes | safe }} >
       {% if is_conference %}
-nclude_audience/
       {{ series.oneline(conference=True, include_audience=False, include_topics=True) | safe }}
       {% else %}
       {{ series.oneline() | safe }}
