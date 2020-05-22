@@ -35,6 +35,10 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
   <td>{{seminar.description | safe }}</td>
 </tr>
 {% endif %}
+<tr>
+  <td style="padding:0px;">Audience:</td>
+  <td>{{ seminar.show_audience() | safe }}</td>
+</tr>
 {% if seminar.is_conference %}
 <tr>
   <td style="padding:0px;">Conference date{% if seminar.start_date != seminar.end_date %}s{% endif %}:</td>
