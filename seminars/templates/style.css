@@ -726,6 +726,7 @@ table.ntdata td.talktitle {
 }
 
 table.ntdata td.audience {
+    white-space:nowrap;
     min-width: 150px;
 }
 
