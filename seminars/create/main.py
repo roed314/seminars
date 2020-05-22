@@ -1204,7 +1204,6 @@ def save_seminar_schedule():
                     begin=raw_data.get("begin"),
                     end=raw_data.get("end"),
                     frequency=raw_data.get("frequency"),
-                    weekday=raw_data.get("weekday"),
                 ),
                 302,
             )
