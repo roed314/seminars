@@ -8,9 +8,9 @@
 
 <p>
 Our application programming interface (API) allows users to write scripts
-to add content to our site or to retrieve content from it
-without manually navigating through the website.
-Access requires the API token on 
+to add content to our site or to search and browse
+without manually navigating the website.
+Access requires the API token on
 the user's <a href="{{ url_for('user.info')}}">Account</a> page.
 </p>
 
@@ -60,7 +60,7 @@ the user's <a href="{{ url_for('user.info')}}">Account</a> page.
 <h2>Saving</h2>
 
 <p>
-  To save series or talks to the database, you need to provide your program with an API key, which can be found on your <a href="{{ url_for('user.info') }}">account page</a>.  If you use <a href="https://git-scm.com/">git</a>, we highly recommend storing your API key in a separate file that you add to your <a href="https://git-scm.com/docs/gitignore">gitignore</a> so that it isn't accidentally included in a public repository.
+  To save series or talks to the database, you need to provide your program with an API token, which can be found on your <a href="{{ url_for('user.info') }}">account page</a>.  If you use <a href="https://git-scm.com/">git</a>, we highly recommend storing your API token in a separate file that you add to your <a href="https://git-scm.com/docs/gitignore">gitignore</a> so that it isn't accidentally included in a public repository.
 </p>
 
 {{ code_examples["authorization"] | safe }}
@@ -84,7 +84,7 @@ the user's <a href="{{ url_for('user.info')}}">Account</a> page.
 {{ code_examples["edit_series"] | safe }}
 
 <p>
-  You can create and edit talks similarly.  Each talk has a number, an integer.  When you create a talk, the talk's number is returned to you.  Provide this number if and only if you're editing an existing talk.  
+  You can create and edit talks similarly.  Each talk has a number, returned to you when you create it, that you include when editing an existing talk.
 </p>
 
 {{ code_examples["create_talk"] | safe }}
@@ -92,7 +92,7 @@ the user's <a href="{{ url_for('user.info')}}">Account</a> page.
 <h3>Approval</h3>
 
 <p>
-  After updating series using the API, you must manually approve the changes by logging in and visiting your <a href="{{ url_for('create.index') }}">Manage</a> page.  This measure is intended to prevent errors in your scripts from showing up on the live site, and to guard against unauthorized updates if you lose your API key.  If this approval is a burden for your intended use, please <a href="{{ url_for('contact') }}">contact</a> us to discuss its removal.
+  After updating series using the API, you must manually approve the changes by logging in and visiting your <a href="{{ url_for('create.index') }}">Manage</a> page.  This measure is intended to prevent errors in your scripts from showing up on the live site, and to guard against unauthorized updates if you lose your API token.  If this approval is a burden for your intended use, please <a href="{{ url_for('contact') }}">contact</a> us to discuss its removal.
 </p>
 
 <h2>Schema</h2>
