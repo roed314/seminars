@@ -171,7 +171,7 @@
       <tr><td/><td><button name="submit" type="submit">Change Password</button></td></tr>
     </table>
   </form>
-  {% if user.is_creator and user.api_access > 0 %}
+  {% if user.is_creator and user.api_access %}
       <h2>Adding content through API</h2>
       <p>
         Users who wish to write scripts to add content to our site
