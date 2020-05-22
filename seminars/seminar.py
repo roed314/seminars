@@ -477,7 +477,7 @@ class WebSeminar(object):
         include_institutions=True,
         include_datetime=True,
         include_topics=False,
-        include_audience=True,
+        include_audience=False,
         include_subscribe=True,
         show_attributes=False,
     ):
@@ -657,7 +657,12 @@ class WebSeminar(object):
 
 
 def series_header(
-    conference=False, include_datetime=True, include_institutions=True, include_audience=True, include_topics=False, include_subscribe=True
+    conference=False,
+    include_institutions=True,
+    include_datetime=True,
+    include_topics=False,
+    include_audience=False,
+    include_subscribe=True
 ):
     cols = []
     if include_datetime:

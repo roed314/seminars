@@ -564,52 +564,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         response.set_cookie("topics", "", max_age=0)
     return response
 
-#FIXME: we should remove this route
-@app.route("/search/seminars")
-def search_seminars():
-    return _search_series(conference=False)
-
-#FIXME: we should remove this route
-@app.route("/search/conferences")
-def search_conferences():
-    # For now this is basically the same as seminars_search, but they should diverge some (e.g. search on start date)
-    return _search_series(conference=True)
-
-#FIXME: we should remove this, it is inaccessible and doesn't currently work correctly
-def _search_series(conference=False):
-    info = to_dict(request.args, search_array=SeriesSearchArray(conference=conference))
-    if "search_type" not in info:
-        info["seminar_online"] = True
-        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -"))
-    try:
-        seminar_count = int(info["seminar_count"])
-        seminar_start = int(info["seminar_start"])
-        if seminar_start < 0:
-            seminar_start += (1 - (seminar_start + 1) // seminar_count) * seminar_count
-    except (KeyError, ValueError):
-        seminar_count = info["seminar_count"] = 50
-        seminar_start = info["seminar_start"] = 0
-    seminar_query, org_query = {"is_conference": conference}, {}
-    seminars_parser(info, seminar_query, org_query, conference=conference)
-    res = [s for s in seminars_search(seminar_query, organizer_dict=all_organizers(org_query))]
-    # process query again with keywords applied to seminar_organizers rather than seminars
-    if "keywords" in info:
-        seminar_query, org_query = {"is_conference": conference}, {}
-        seminars_parser(info, seminar_query, org_query, org_keywords=True, conference=conference)
-        res += list(seminars_search(seminar_query, organizer_dict=all_organizers(org_query)))
-    info["results"] = series_sorted(res, conference=conference)
-    subsection = "conferences" if conference else "seminars"
-    title = "Search " + ("conferences" if conference else "seminar series")
-    return render_template(
-        "search_seminars.html",
-        title=title,
-        info=info,
-        section="Search",
-        subsection=subsection,
-        bread=None,
-        is_conference=conference,
-    )
-
 @app.route("/search/talks")
 def search_talks():
     info = to_dict(
