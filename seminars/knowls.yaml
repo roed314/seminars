@@ -263,16 +263,32 @@ access_control:
   contents: |
     For online talks and series, this determines how access to the interactive livestream link is controlled.
     <ul>
-    <li><b>open</b>: The link is visible to all at all times.</li>
-    <li><b>time-restricted</b>: The link will be visible only within a set time window before the talk starts.</li>
-    <li><b>password-protected</b>: The link is visible to all at all times but requires a password.  Either the password itself or a hint for it must be given.</li>
-    <li><b>login required</b>: Only logged-in users with confirmed email addresses are shown the link.</li>
-    <li><b>instant registration</b>: Logged-in users with confirmed email addresses may instantly register to access the link.  
-        A list of all users registered for each talk is visible to organizers on the View talk page.</li>
-    <li><b>manual registration</b>: No link is available on researchseminars.org.
-        You must provide a URL or email address through which visitors can obtain access information.</li>
+    <li><b>open</b>: The link is visible to all at all times.  
+        (Organizers selecting this option are advised to use 
+        their livestreaming application's security features, 
+        such as using a waiting room, 
+        allowing only hosts and co-hosts to share screen, 
+        disabling private chat, 
+        having co-organizers on hand who can remove attendees if necessary, 
+        etc.)</li>
+    <li><b>time-restricted</b>: The link will be visible only 
+        within a set time window before the talk starts.</li>
+    <li><b>password-protected</b>: The link is visible to all at all times 
+        but requires a password.  Either the password itself or a hint for it 
+        must be given.</li>
+    <li><b>login required</b>: Only logged-in users 
+        with confirmed email addresses are shown the link.</li>
+    <li><b>instant registration</b>: Logged-in users with 
+        confirmed email addresses may instantly register to access the link.  
+        A list of all users registered for each talk is visible 
+        to organizers on the View talk page.</li>
+    <li><b>manual registration</b>: 
+        No link is available on researchseminars.org.
+        You must provide a URL or email address through which 
+        visitors can obtain access information.</li>
     </ul>
-    The access control setting for a series is inherited by new talks in the series.
+    The access control setting for a series is inherited 
+    by new talks in the series.
 access_time:
   title: Access time
   contents: |
