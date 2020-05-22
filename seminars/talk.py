@@ -360,7 +360,7 @@ class WebTalk(object):
         homepages = self.speaker_homepage.split(';')
         for i in range(len(speakers)-len(homepages)):
             homepages.append('')
-        affiliations = self.speaker_affiliation.split(';') if affiliation else ''
+        affiliations = self.speaker_affiliation.split(';') if affiliation else []
         for i in range(len(speakers)-len(affiliations)):
             affiliations.append('')
         items = []
