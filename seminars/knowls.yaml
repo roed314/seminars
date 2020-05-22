@@ -484,18 +484,21 @@ audience:
       <li><b>researchers in topic</b>:
           researchers in a particular topic within the discipline.</li>
       <li><b>researchers in discipline</b>:
-          researchers in the broader discipline.</li>
+          researchers in the broader discipline 
+          (e.g., all professors in a university department).</li>
       <li><b>advanced learners</b>:
-          researchers interested in learning details of a subtopic that requires substantial background in the topic.</li>
+          researchers interested in learning details of a subtopic 
+          that requires substantial background in the topic.</li>
       <li><b>learners</b>:
           researchers and students interested in learning a subtopic.</li>
       <li><b>undergraduates</b>:
           undergraduate students.</li>
       <li><b>general audience</b>:
-          general academic audience and members of the public with an academic interest.</li>
+          general academic audience and 
+          members of the public with an academic interest.</li>
     </ul>
-    This designation is intended not to <i>exclude</i> participants, 
-    but to convey what background is likely necessary
+    This designation is intended not to exclude participants, 
+    but to convey roughly what background may be necessary
     for a participant to be able to benefit from attending.
 hidden:
   title: Hide
