@@ -538,7 +538,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more, org_query)
     query["visibility"] = 2
-    if conference:
     results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), more=more))
     if info.get("keywords", ""):
         parse_substring(info, org_query, "keywords", organizers_keyword_columns())
