@@ -174,7 +174,12 @@
   {% if user.is_creator and user.api_access > 0 %}
       <h2>Adding content through API</h2>
       <p>
-        It is also possible to add (and query) content using the API and scripts.  See the <a href="{{ url_for('api.help') }}">API documentation</a> for more details.
+        Users who wish to write scripts to add content to our site
+        or to retrieve content automatically 
+        may do via our application programming interface (API),
+        using the token below.
+        See the <a href="{{ url_for('api.help') }}">API documentation</a> 
+        for details.
       </p>
       <form action="{{url_for('.reset_api_token')}}">
         <table>
