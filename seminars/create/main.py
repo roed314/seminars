@@ -893,11 +893,14 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
     tz = pytz.timezone(tz)
 
     for col in db.talks.search_cols:
+        print("processing  column "+ col)
         if col in data:
+            print("in data")
             continue
         # For the API, we want to carry over unspecified columns from the previous data
         if col not in raw_data:
             data[col] = getattr(talk, col, None)
+            print("set to None!")
             continue
         typ = db.talks.col_type[col]
         try:
@@ -906,6 +909,7 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
+        print("value =" + str(data[col]))
     if not data["speaker"]:
         errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
     if data["start_time"] is None or data["end_time"] is None:
