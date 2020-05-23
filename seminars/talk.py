@@ -356,10 +356,10 @@ class WebTalk(object):
         speakers = [s.strip() for s in self.speaker.split(SPEAKER_DELIMITER)]
         if not speakers:
             return ''
-        homepages = [s.strip() for s in self.speaker_homepage.split(SPEAKER_DELIMITER)]
+        homepages = [s.strip() for s in self.speaker_homepage.split(SPEAKER_DELIMITER)] if self.speaker_homepage else []
         for i in range(len(speakers)-len(homepages)):
             homepages.append('')
-        affiliations = [s.strip() for s in self.speaker_affiliation.split(SPEAKER_DELIMITER)] if affiliation else []
+        affiliations = [s.strip() for s in self.speaker_affiliation.split(SPEAKER_DELIMITER)] if affiliation and self.speaker_affiliation else []
         for i in range(len(speakers)-len(affiliations)):
             affiliations.append('')
         items = []
