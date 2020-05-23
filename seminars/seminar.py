@@ -96,12 +96,21 @@ optional_seminar_text_columns = [
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False,  user=None,
+        self,
+        shortname,
+        data=None,
+        organizers=None,
+        editing=False,
+        showing=False,
+        saving=False,
+        deleted=False,
+        user=None,
+        prequery={},
     ):
         if user is None:
             user = current_user
         if data is None and not editing:
-            data = seminars_lookup(shortname, include_deleted=deleted)
+            data = seminars_lookup(shortname, include_deleted=deleted, prequery=prequery)
             if data is None:
                 raise ValueError("Seminar %s does not exist" % shortname)
             data = dict(data.__dict__)

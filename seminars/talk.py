@@ -93,9 +93,10 @@ class WebTalk(object):
         showing=False,
         saving=False,
         deleted=False,
+        prequery={}
     ):
         if data is None and not editing:
-            data = talks_lookup(seminar_id, seminar_ctr, include_deleted=deleted)
+            data = talks_lookup(seminar_id, seminar_ctr, include_deleted=deleted, prequery=prequery)
             if data is None:
                 raise ValueError("Talk %s/%s does not exist" % (seminar_id, seminar_ctr))
             data = dict(data.__dict__)
