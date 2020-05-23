@@ -332,7 +332,12 @@ class WebSeminar(object):
 
     def show_topics(self):
         if self.topics:
-            return " ".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
+            # Don't die just because there is a data issue in the topics/topic-dag
+            try:
+                return " ".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
+            except Exception as err:
+                log_error("Hit exception %s in show_topics for series %s" % (err,self.shortname))
+                return ""
         else:
             return ""
 
