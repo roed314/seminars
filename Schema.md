@@ -59,6 +59,7 @@ access_control      | smallint    | live_link access control: 0=open  1=time, 2=
 access_time         | integer     | number of minutes before talks.start_time that talks.live_link is shown if access_control=1, null otherwise [inherited]
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
 access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inhertied]
+audience            | smallint    | 0 = researchers in topic, 1 = researchers in discipline, 2 = advanced learners, 3 = learners, 4 = undergraudates, 5 = general public [inherited]
 comments            | text        |
 deleted             | boolean     | True if seminar has been deleted (it can still be revived)
 description         | text        | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
@@ -71,7 +72,7 @@ homepage            | text        | link to external homepage (if any)
 institutions        | text[]      | list of institutions.shortname values for the institutions associated to this seminar
 is_conference       | boolean     | True for conferences, False for seminar_series; per_day, start_date, end_date are specific to conferences; frequency, weekdays, time_slots are specific to seminar_series
 language            | text        | language abbreviation taken from language selector, required [inherited]
-level               | smallint    | 0 = research seminar, 1 = colloquium, 2 = learning seminar, 3 = advanced learning seminar, 4 = undergraduate seminar, 5 = general public [inherited]
+seminar, 4 = undergraduate seminar, 5 = general public [inherited]
 live_link           | text        | URL for online meeting link (e.g. Zoom) if fixed, may be set to "see comments" (once access_control is in place, "see comments" should no longer be necessary) [inherited]
 name                | text        |
 online              | boolean     | True if talks in the seminar can be viewed online [inherited]
@@ -99,6 +100,7 @@ access_control      | smallint    | live_link access control: 0=open  1=time, 2=
 access_time         | integer     | number of minutes before talk start time live_link is shown if access_control=1, null otherwise [inherited]
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
 access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inhertied]
+audience            | smallint    | 0 = researchers in topic, 1 = researchers in discipline, 2 = advanced learners, 3 = learners, 4 = undergraudates, 5 = general public [inherited]
 comments            | text        | talk specific comments to be displayed in addition to seminar comments
 deleted             | boolean     | indicates talk has been deleted (but can still be revived)
 deleted_with_seminar| boolean     | indicates talk was deleted when seminar was deleted (will be automatically revived if/when seminar is revived)
@@ -108,8 +110,8 @@ edited_by           | bigint      | users.id of user who created this version
 end_time            | timestamptz | 
 hidden              | boolean     | if True, the talk will be visible only on the Edit schedule page for the seminar (independent of display)
 language            | text        | language abbreviation taken from language selector, required [inherited]
-level               | smallint    | 0 = research seminar, 1 = colloquium, 2 = learning seminar, 3 = advanced learning seminar, 4 = undergraduate seminar, 5 = general public [inherited]
-live_link           | text        | URL for online meeting link (e.g. Zoom), may be set to "see comments" (once access_control is in place, "see comments" should no longer be necessary) [inherited]
+seminar, 4 = undergraduate seminar, 5 = general public [inherited]
+live_link           | text        | URL for online meeting link (e.g. Zoom) [inherited]
 online              | boolean     | True if talk can be viewed online (copied from seminar), note that both online and room may be set
 paper_link          | text        | URL providing link to a paper the talk is about
 room                | text        | physical location of the talk [inherited]
