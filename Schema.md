@@ -72,7 +72,6 @@ homepage            | text        | link to external homepage (if any)
 institutions        | text[]      | list of institutions.shortname values for the institutions associated to this seminar
 is_conference       | boolean     | True for conferences, False for seminar_series; per_day, start_date, end_date are specific to conferences; frequency, weekdays, time_slots are specific to seminar_series
 language            | text        | language abbreviation taken from language selector, required [inherited]
-seminar, 4 = undergraduate seminar, 5 = general public [inherited]
 live_link           | text        | URL for online meeting link (e.g. Zoom) if fixed, may be set to "see comments" (once access_control is in place, "see comments" should no longer be necessary) [inherited]
 name                | text        |
 online              | boolean     | True if talks in the seminar can be viewed online [inherited]
