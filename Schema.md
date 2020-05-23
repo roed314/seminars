@@ -54,7 +54,6 @@ type      | text        | university, institute, other, taken from selector
 Column              | Type        | Notes
 --------------------|-------------|------
 id                  | bigint      | auto
-access              | text        | "endorsed", "open", "users" [to be replaced by access_control] [inherited]
 access_control      | smallint    | live_link access control: 0=open  1=time, 2=password, 3=users, 4=internal reg., 5=external reg., null if not online [inherited]
 access_time         | integer     | number of minutes before talks.start_time that talks.live_link is shown if access_control=1, null otherwise [inherited]
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
@@ -93,7 +92,6 @@ Column              | Type        | Notes
 --------------------|-------------|------
 id                  | bigint      | auto
 abstract            | text        | may contain latex
-access              | text        | "endorsed", "open", "users" [to be replaced by access_control] [inherited]
 access_control      | smallint    | live_link access control: 0=open  1=time, 2=password, 3=users, 4=internal reg, 5=external reg., null if not online [inherited]
 access_time         | integer     | number of minutes before talk start time live_link is shown if access_control=1, null otherwise [inherited]
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
