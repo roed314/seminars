@@ -856,40 +856,35 @@ def can_edit_seminar(shortname, new):
     if not allowed_shortname(shortname) or len(shortname) < 3 or len(shortname) > 32:
         errmsgs.append(
             format_errmsg(
-                "The identifier '%s' must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores.", shortname
+                "Series identifier '%s' must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores.", shortname
             )
         )
         return show_input_errors(errmsgs), None
-    seminar = seminars_lookup(shortname, include_deleted=True)
+    seminar = seminars_lookup(shortname, include_deleted=True, prequery={})
     # Check if seminar exists
     if new != (seminar is None):
         if seminar is not None and seminar.deleted:
-            errmsgs.append(
-                format_errmsg(
-                    "Identifier %s is reserved by a seminar that has been deleted",
-                    shortname)
-            )
+            errmsgs.append(format_errmsg("Identifier %s is reserved by a series that has been deleted", shortname))
         else:
-            errmsgs.append(
-                format_errmsg(
-                    "Identifier %s " + ("already exists" if new else "does not exist"),
-                    shortname
-                )
-            )
+            if not seminar:
+                flash_error("No series with identifier %s exists" % shortname)
+                return redirect(url_for("create.index"), 302), None
+            else:
+                errmsgs.append(format_errmsg("Identifier %s is already in use by another series", shortname))
         return show_input_errors(errmsgs), None
     if seminar is not None and seminar.deleted:
-        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302), None
+        return redirect(url_for("create.delete_seminar", shortname=shortname), 302), None
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(
-            "You do not have permission to edit seminar %s. Please create an account and contact the seminar organizers.",
+            "You do not have permission to edit series %s. Please create an account and contact the seminar organizers.",
             shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 302), None
     # Make sure user has permission to edit
     if not new and not seminar.user_can_edit():
         flash_error(
-            "You do not have permission to edit seminar %s. Please contact the seminar organizers.",
+            "You do not have permission to edit series %s. Please contact the seminar organizers.",
             shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 302), None

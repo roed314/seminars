@@ -763,26 +763,21 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             flash_error("Invalid talk id")
             return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
     if seminar_ctr != "":
-        talk = talks_lookup(seminar_id, seminar_ctr)
+        talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True, prequery={})
         if talk is None:
             flash_error("Talk does not exist")
             return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
+        if talk.deleted:
+            flash_error("Talk has been deleted, but you can revive it (use Show deleted items below)")
+            return redirect(url_for("create.index", shortname=seminar_id), 302), None
         if token:
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
-                return (
-                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
-                    None,
-                )
+                return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
         else:
             if not talk.user_can_edit():
-                flash_error(
-                    "You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr)
-                )
-                return (
-                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
-                    None,
-                )
+                flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
+                return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
         if resp is not None:
