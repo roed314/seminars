@@ -78,6 +78,7 @@ class WebTalk(object):
         saving=False,
         deleted=False,
     ):
+        print("call to WebTalk with editing = %s and data = " %(editing, data))
         if data is None and not editing:
             data = talks_lookup(seminar_id, seminar_ctr, include_deleted=deleted)
             if data is None:
