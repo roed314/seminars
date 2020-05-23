@@ -33,6 +33,7 @@ import re
 
 required_talk_columns = [
     "audience",
+    "by_api",
     "display",
     "end_time",
     "online",
@@ -90,12 +91,11 @@ class WebTalk(object):
         data=None,
         seminar=None,
         editing=False,
-        showing=False,
-        saving=False,
-        deleted=False,
+        include_deleted=False,
+        include_pending=False,
     ):
         if data is None and not editing:
-            data = talks_lookup(seminar_id, seminar_ctr, include_deleted=deleted)
+            data = talks_lookup(seminar_id, seminar_ctr, include_deleted=include_deleted, include_pending=include_pending)
             if data is None:
                 raise ValueError("Talk %s/%s does not exist" % (seminar_id, seminar_ctr))
             data = dict(data.__dict__)
@@ -105,12 +105,11 @@ class WebTalk(object):
             if data.get("topics") is None:
                 data["topics"] = []
         if data and data.get("deleted"):
-            deleted = True
+            include_deleted = True
         if seminar is None:
-            seminar = WebSeminar(seminar_id, deleted=deleted)
+            seminar = WebSeminar(seminar_id, include_deleted=include_deleted)
         self.seminar = seminar
         self.new = data is None
-        self.deleted=False #FIXME: why is this here
         if self.new:
             self.seminar_id = seminar_id
             self.seminar_ctr = None
@@ -763,26 +762,21 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             flash_error("Invalid talk id")
             return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
     if seminar_ctr != "":
-        talk = talks_lookup(seminar_id, seminar_ctr)
+        talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True)
         if talk is None:
             flash_error("Talk does not exist")
             return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
+        if talk.deleted:
+            flash_error("Talk has been deleted, but you can revive it (use Show deleted items below)")
+            return redirect(url_for("create.index", shortname=seminar_id), 302), None
         if token:
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
-                return (
-                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
-                    None,
-                )
+                return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
         else:
             if not talk.user_can_edit():
-                flash_error(
-                    "You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr)
-                )
-                return (
-                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
-                    None,
-                )
+                flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
+                return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
         if resp is not None:
@@ -884,13 +878,13 @@ def talks_lucky(*args, **kwds):
     return lucky_distinct(table, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, include_pending=False, sanitized=False, objects=True):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
         include_deleted=include_deleted,
+        include_pending=include_pending,
         sanitized=sanitized,
         objects=objects,
-        prequery=prequery,
     )

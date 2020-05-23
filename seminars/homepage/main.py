@@ -495,6 +495,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     talks_parser(info, more)
     if topdomain() == "mathseminars.org":
         query["topics"] = {"$contains": "math"}
+    query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
         query["end_time"] = {"$lt": datetime.now()}
@@ -560,16 +561,19 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         # Ignore the possibility that the user/conference is in Kiribati.
         recent = datetime.now().date() - timedelta(days=1)
         query["end_date"] = {"$lt" if past else "$gte": recent}
+    query["visibility"] = 2 # only show public talks
+    query["display"] = True # don't show talks created by users who have not been endorsed
     kw_query = query.copy()
     parse_substring(info, kw_query, "keywords", series_keyword_columns())
     org_query, more = {}, {}
     # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more, org_query)
-    query["visibility"] = 2
     results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), more=more))
     if info.get("keywords", ""):
         parse_substring(info, org_query, "keywords", organizers_keyword_columns())
         results += list(seminars_search(query, organizer_dict=all_organizers(org_query), more=more))
+        unique = {s.shortname:s for s in results}
+        results = [unique[key] for key in unique]
     series = series_sorted(results, conference=conference, reverse=past)
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
@@ -592,36 +596,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         response.set_cookie("topics", "", max_age=0)
     return response
 
-@app.route("/search/talks")
-def search_talks():
-    info = to_dict(
-        request.args, search_array=TalkSearchArray()
-    )
-    if "search_type" not in info:
-        info["talk_online"] = True
-        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
-        )
-    try:
-        talk_count = int(info["talk_count"])
-        talk_start = int(info["talk_start"])
-        if talk_start < 0:
-            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
-    except (KeyError, ValueError):
-        talk_count = info["talk_count"] = 50
-        talk_start = info["talk_start"] = 0
-    talk_query = {}
-    talks_parser(info, talk_query)
-    talks = talks_search(
-        talk_query, sort=["start_time", "speaker"], seminar_dict=all_seminars()
-    )  # limit=talk_count, offset=talk_start
-    # The talk query isn't sufficient since we don't do a join so don't have access to whether the seminar is private
-    talks = [talk for talk in talks if talk.searchable()]
-    info["results"] = talks
-    return render_template(
-        "search_talks.html", title="Search talks", info=info, section="Search", subsection="talks", bread=None,
-    )
-
-
 @app.route("/institutions/")
 def list_institutions():
     section = "Manage" if current_user.is_creator else None
@@ -639,7 +613,7 @@ def list_institutions():
 @app.route("/seminar/<shortname>")
 def show_seminar(shortname):
     # We need organizers to be able to see seminars with display=False
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
         return abort(404, "Seminar not found")
     if not seminar.visible():
@@ -699,7 +673,7 @@ def talks_search_api(shortname, projection=1):
 
 @app.route("/seminar/<shortname>/bare")
 def show_seminar_bare(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -723,7 +697,7 @@ def show_seminar_bare(shortname):
 
 @app.route("/seminar/<shortname>/json")
 def show_seminar_json(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -789,7 +763,7 @@ def embed_seminar_js():
 
 @app.route("/seminar/<shortname>/ics")
 def ics_seminar_file(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery=False)
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -816,7 +790,7 @@ def ics_talk_file(seminar_id, talkid):
 @app.route("/talk/<seminar_id>/<int:talkid>/")
 def show_talk(seminar_id, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
-    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid}, prequery={})
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
     if not talk.visible():

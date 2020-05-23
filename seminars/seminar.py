@@ -73,6 +73,7 @@ audience_options = [
 
 required_seminar_columns = [
     "audience",
+    "by_api",
     "display",
     "is_conference",
     "language",
@@ -96,12 +97,19 @@ optional_seminar_text_columns = [
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False,  user=None,
+        self,
+        shortname,
+        data=None,
+        organizers=None,
+        editing=False,
+        include_deleted=False,
+        include_pending=False,
+        user=None,
     ):
         if user is None:
             user = current_user
         if data is None and not editing:
-            data = seminars_lookup(shortname, include_deleted=deleted)
+            data = seminars_lookup(shortname, include_deleted=include_deleted, include_pending=include_pending)
             if data is None:
                 raise ValueError("Seminar %s does not exist" % shortname)
             data = dict(data.__dict__)
@@ -674,9 +682,7 @@ def _construct(organizer_dict, objects=True, more=False):
         else:
             if more is not False:
                 moreval = rec.pop("more")
-            seminar = WebSeminar(
-                rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec
-            )
+            seminar = WebSeminar(rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec)
             if more is not False:
                 seminar.more = moreval
             return seminar
@@ -745,15 +751,15 @@ def seminars_lucky(*args, **kwds):
     return lucky_distinct(table, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, include_pending=False, sanitized=False, objects=True):
     return seminars_lucky(
         {label_col: shortname},
         projection=projection,
         organizer_dict=organizer_dict,
         include_deleted=include_deleted,
+        include_pending=include_pending,
         sanitized=sanitized,
         objects=objects,
-        prequery=prequery,
     )
 
 
@@ -856,7 +862,7 @@ def can_edit_seminar(shortname, new):
     if not allowed_shortname(shortname) or len(shortname) < 3 or len(shortname) > 32:
         errmsgs.append(
             format_errmsg(
-                "The identifier '%s' must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores.", shortname
+                "Series identifier '%s' must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores.", shortname
             )
         )
         return show_input_errors(errmsgs), None
@@ -864,32 +870,27 @@ def can_edit_seminar(shortname, new):
     # Check if seminar exists
     if new != (seminar is None):
         if seminar is not None and seminar.deleted:
-            errmsgs.append(
-                format_errmsg(
-                    "Identifier %s is reserved by a seminar that has been deleted",
-                    shortname)
-            )
+            errmsgs.append(format_errmsg("Identifier %s is reserved by a series that has been deleted", shortname))
         else:
-            errmsgs.append(
-                format_errmsg(
-                    "Identifier %s " + ("already exists" if new else "does not exist"),
-                    shortname
-                )
-            )
+            if not seminar:
+                flash_error("No series with identifier %s exists" % shortname)
+                return redirect(url_for("create.index"), 302), None
+            else:
+                errmsgs.append(format_errmsg("Identifier %s is already in use by another series", shortname))
         return show_input_errors(errmsgs), None
     if seminar is not None and seminar.deleted:
-        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302), None
+        return redirect(url_for("create.delete_seminar", shortname=shortname), 302), None
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(
-            "You do not have permission to edit seminar %s. Please create an account and contact the seminar organizers.",
+            "You do not have permission to edit series %s. Please create an account and contact the seminar organizers.",
             shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 302), None
     # Make sure user has permission to edit
     if not new and not seminar.user_can_edit():
         flash_error(
-            "You do not have permission to edit seminar %s. Please contact the seminar organizers.",
+            "You do not have permission to edit series %s. Please contact the seminar organizers.",
             shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 302), None
