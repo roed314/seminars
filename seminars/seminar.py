@@ -52,8 +52,8 @@ access_time_options = [
 frequency_options = [
     (0, 'no fixed schedule'),
     (7, 'weekly'),
-    (14, 'two weeks'),
-    (21, 'three weeks'),
+    (14, 'every other week'),
+    (21, 'every third week'),
 ]
 
 visibility_options = [
