@@ -255,7 +255,6 @@
     </tr>
     {% endfor %}
   </table>
-  <br>
   <table><tr>
     <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">{{ ('Create ' + seminar.series_type) if seminar.new else 'Save changes' }}</button></td>
     <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">{{ 'Cancel creation' if seminar.new else 'Cancel changes' }}</button></td>
