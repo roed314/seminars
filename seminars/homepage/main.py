@@ -495,6 +495,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     talks_parser(info, more)
     if topdomain() == "mathseminars.org":
         query["topics"] = {"$contains": "math"}
+    query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
         query["end_time"] = {"$lt": datetime.now()}
@@ -560,12 +561,13 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         # Ignore the possibility that the user/conference is in Kiribati.
         recent = datetime.now().date() - timedelta(days=1)
         query["end_date"] = {"$lt" if past else "$gte": recent}
+    query["visibility"] = 2 # only show public talks
+    query["display"] = True # don't show talks created by users who have not been endorsed
     kw_query = query.copy()
     parse_substring(info, kw_query, "keywords", series_keyword_columns())
     org_query, more = {}, {}
     # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more, org_query)
-    query["visibility"] = 2
     results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), more=more))
     if info.get("keywords", ""):
         parse_substring(info, org_query, "keywords", organizers_keyword_columns())
@@ -593,36 +595,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
         response.set_cookie("topics", "", max_age=0)
     return response
-
-@app.route("/search/talks")
-def search_talks():
-    info = to_dict(
-        request.args, search_array=TalkSearchArray()
-    )
-    if "search_type" not in info:
-        info["talk_online"] = True
-        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
-        )
-    try:
-        talk_count = int(info["talk_count"])
-        talk_start = int(info["talk_start"])
-        if talk_start < 0:
-            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
-    except (KeyError, ValueError):
-        talk_count = info["talk_count"] = 50
-        talk_start = info["talk_start"] = 0
-    talk_query = {}
-    talks_parser(info, talk_query)
-    talks = talks_search(
-        talk_query, sort=["start_time", "speaker"], seminar_dict=all_seminars()
-    )  # limit=talk_count, offset=talk_start
-    # The talk query isn't sufficient since we don't do a join so don't have access to whether the seminar is private
-    talks = [talk for talk in talks if talk.searchable()]
-    info["results"] = talks
-    return render_template(
-        "search_talks.html", title="Search talks", info=info, section="Search", subsection="talks", bread=None,
-    )
-
 
 @app.route("/institutions/")
 def list_institutions():
