@@ -187,7 +187,7 @@ class WebSeminar(object):
                 if getattr(self, col) is None:
                     critical("column %s is None for conference %s" % (col, self.shortname))
         else:
-            for col in ["frequency", "weekday", "time_slots"]:
+            for col in ["frequency", "weekdays", "time_slots"]:
                 if getattr(self, col) is None:
                     critical("column %s is None for seminar series %s" % (col, self.shortname))
         if self.online:
