@@ -362,7 +362,11 @@ class WebTalk(object):
         else:
             language = ""
         if self.topics:
-            return language + "".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
+            try:
+                return language + "".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
+            except Exception as err:
+                log_error("Hit exception %s in show_lang_topics for talk %s/%d" % (err, self.seminar_id, self.seminar_ctr))
+                return language
         else:
             return language
 
