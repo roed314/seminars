@@ -14,6 +14,7 @@ from seminars.utils import (
     show_input_errors,
     weekdays,
     sanitized_table,
+    log_error,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
@@ -178,32 +179,30 @@ class WebSeminar(object):
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        from seminars.app import app
-
-        app.logger.error("test message")
+        log_error("test message")
         for col in required_seminar_columns:
             if getattr(self, col) is None:
-                critical("column %s is None for series %s" % (col, self.shortname))
+                log_error("column %s is None for series %s" % (col, self.shortname))
         if self.is_conference:
             for col in ["start_date", "end_date", "per_day"]:
                 if getattr(self, col) is None:
-                    critical("column %s is None for conference %s" % (col, self.shortname))
+                    log_error("column %s is None for conference %s" % (col, self.shortname))
         else:
             for col in ["frequency", "weekdays", "time_slots"]:
                 if getattr(self, col) is None:
-                    critical("column %s is None for seminar series %s" % (col, self.shortname))
+                    log_error("column %s is None for seminar series %s" % (col, self.shortname))
         if self.online:
             if self.access_control is None:
-                critical("access_control is None for online series %s" % self.shortname)
+                log_error("access_control is None for online series %s" % self.shortname)
             elif self.access_control == 1:
                 if self.access_time is None:
-                    critical("access_time is None for online series %s with access_control == 1" % self.shortname)
+                    log_error("access_time is None for online series %s with access_control == 1" % self.shortname)
             elif self.access_control == 2:
                 if self.access_hint is None:
-                    critical("access_hint is None for online series %s with access_control == 2" % self.shortname)
+                    log_error("access_hint is None for online series %s with access_control == 2" % self.shortname)
             elif self.access_control == 5:
                 if self.access_registration is None:
-                    critical("access_registration is None for online series %s with access_control == 5" % self.shortname)
+                    log_error("access_registration is None for online series %s with access_control == 5" % self.shortname)
         pass
 
     def visible(self, user=None):
