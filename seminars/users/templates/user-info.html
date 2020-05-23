@@ -68,7 +68,7 @@
     <h2>Adding content</h2>
     <p>
       To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
-    {% if user.is_creator and user.api_access and user.api_access > 0 %}
+    {% if user.is_creator and user.api_access %}
         Users who wish to write scripts to add content to our site
         or to retrieve content automatically 
         may do so via our application programming interface (API);
