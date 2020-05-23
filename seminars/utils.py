@@ -236,7 +236,7 @@ def log_error(msg):
     import traceback
     try:
         raise RuntimeError()
-    except Exception as err:
+    except Exception:
         app.logger.error(timestamp() + " ERROR logged: " + traceback.format_stack()[-2][:-1])
         app.logger.error(timestamp() + " ERROR message:  " + msg)
 

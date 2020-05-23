@@ -25,7 +25,6 @@ from psycopg2.sql import SQL
 import pytz
 from collections import defaultdict
 from datetime import datetime
-from lmfdb.logger import critical
 
 import urllib.parse
 
@@ -137,6 +136,8 @@ class WebSeminar(object):
                 elif typ == "date":
                     setattr(self, key, None)
                 else:
+                    from lmfdb.logger import critical
+                    # don't write these to the flasklog
                     critical("Need to update seminar code to account for schema change key=%s" % key)
                     setattr(self, key, None)
             if organizers is None:
@@ -179,7 +180,6 @@ class WebSeminar(object):
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        log_error("test message")
         for col in required_seminar_columns:
             if getattr(self, col) is None:
                 log_error("column %s is None for series %s" % (col, self.shortname))

@@ -16,6 +16,7 @@ from seminars.utils import (
     how_long,
     topdomain,
     comma_list,
+    log_error,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -29,6 +30,22 @@ from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
 import re
+
+required_talk_columns = [
+    "audience",
+    "display",
+    "end_time",
+    "online",
+    "language",
+    "name",
+    "seminar_id",
+    "seminar_ctr",
+    "start_time",
+    "timezone",
+    "topics",
+]
+
+
 
 # the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
 # text strings that may contain delimited lists (which should all have the same length, empty items are OK)
@@ -67,12 +84,13 @@ class WebTalk(object):
             self.seminar_id = seminar_id
             self.seminar_ctr = None
             self.token = secrets.token_hex(8)
-            self.display = seminar.display
+            self.access_hint = seminar.access_hint
             self.online = getattr(seminar, "online", bool(seminar.live_link))
             self.by_api = False # reset by API code if needed
             self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
+                    print("skipping col %s" % key)
                     continue
                 elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
                     # carry over from seminar, but not comments
@@ -116,9 +134,12 @@ class WebTalk(object):
 
     def cleanse(self):
         """
-        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
+        for col in required_talk_columns:
+            if getattr(self, col) is None:
+                log_error("column %s is None for talk %s/%s" % (col, self.seminar_id, self.seminar_ctr))
         pass
 
     def visible(self):
@@ -434,7 +455,7 @@ Thank you,
                 link = self.access_registration
             return '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
         else:  # should never happen
-            print("badness!")
+            log_error("invalid or unknown access control value %s for talk %s/%s" % (self.access_control, self.seminar_id, self.seminar_ctr))
             return ""
 
     def show_paper_link(self):
