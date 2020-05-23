@@ -107,7 +107,7 @@ def index():
         # don't waste time loading deleted talks
         # We don't need the full list of organizers, so we save time by using the found record
         orgproxy = {seminar_id: [rec]}
-        seminar = seminars_lookup(seminar_id, organizer_dict=orgproxy, prequery=False)
+        seminar = seminars_lookup(seminar_id, organizer_dict=orgproxy)
         if seminar is None:
             continue
         pair = (seminar, role)
@@ -116,10 +116,9 @@ def index():
         else:
             seminars[seminar_id] = pair
     role = "creator"
-    # We use prequery to include display False
-    for seminar_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", prequery={}, include_deleted=True):
+    for seminar_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_deleted=True, include_pending=True):
         if seminar_id not in seminars and seminar_id not in conferences:
-            seminar = WebSeminar(seminar_id, deleted=True)  # allow deleted
+            seminar = WebSeminar(seminar_id, include_deleted=True)  # allow deleted
             pair = (seminar, role)
             if seminar.deleted:
                 deleted_seminars.append(seminar)
@@ -151,14 +150,14 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
         ),
         [ilike_escape(current_user.email), ilike_escape(current_user.email), True, False],
     ):
-        talk = WebTalk(seminar_id, seminar_ctr, deleted=True)
+        talk = WebTalk(seminar_id, seminar_ctr, include_deleted=True)
         deleted_talks.append(talk)
     deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
     if current_user.is_creator:
         api_series = [series for (series, r) in seminars + conferences if series.by_api and not series.display]
         api_series.sort(key = lambda S: S.edited_at, reverse=True)
-        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, r) in seminars + conferences]}}, sort=[("edited_at", -1)], prequery={}))
+        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, r) in seminars + conferences]}}, sort=[("edited_at", -1)], include_pending=True))
     else:
         api_series = api_talks = []
 
@@ -243,7 +242,7 @@ def edit_seminar():
 @email_confirmed_required
 def delete_seminar(shortname):
     try:
-        seminar = WebSeminar(shortname, deleted=True)
+        seminar = WebSeminar(shortname, include_deleted=True)
     except ValueError as err:
         flash_error(str(err))
         return redirect(url_for(".index"), 302)
@@ -342,7 +341,7 @@ def permdelete_seminar(shortname):
 @email_confirmed_required
 def delete_talk(seminar_id, seminar_ctr):
     try:
-        talk = WebTalk(seminar_id, seminar_ctr, deleted=True)
+        talk = WebTalk(seminar_id, seminar_ctr, include_deleted=True)
     except ValueError as err:
         flash_error(str(err))
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
@@ -976,7 +975,7 @@ def layout_schedule(seminar, data):
     midnight_begin = midnight(begin, tz)
     midnight_end = midnight(end, tz)
     query = {"$gte": midnight_begin, "$lt": midnight_end + day}
-    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"], prequery=False))
+    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]))
     if any(talk.by_api and not talk.display for talk in talks):
         raise APIError
     slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]

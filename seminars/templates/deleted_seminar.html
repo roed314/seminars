@@ -2,7 +2,6 @@
 
 {% block content %}
 
-
 {% if user.is_subject_admin(seminar) or seminar.owner == user.email %}
 
 <form action="{{ url_for('.delete_seminar',  shortname=shortname) }}" method="POST">
@@ -46,7 +45,6 @@
 {% else %}
     <p>You do not have permission to delete this {{seminar.series_type}}.</p>
 {% endif %}
-
 
 {% endif %}
 

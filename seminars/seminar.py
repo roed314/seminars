@@ -96,12 +96,19 @@ optional_seminar_text_columns = [
 
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False,  user=None,
+        self,
+        shortname,
+        data=None,
+        organizers=None,
+        editing=False,
+        include_deleted=False,
+        include_pending=False,
+        user=None,
     ):
         if user is None:
             user = current_user
         if data is None and not editing:
-            data = seminars_lookup(shortname, include_deleted=deleted)
+            data = seminars_lookup(shortname, include_deleted=include_deleted, include_pending=include_pending)
             if data is None:
                 raise ValueError("Seminar %s does not exist" % shortname)
             data = dict(data.__dict__)
@@ -674,9 +681,7 @@ def _construct(organizer_dict, objects=True, more=False):
         else:
             if more is not False:
                 moreval = rec.pop("more")
-            seminar = WebSeminar(
-                rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec
-            )
+            seminar = WebSeminar(rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec)
             if more is not False:
                 seminar.more = moreval
             return seminar
@@ -745,15 +750,15 @@ def seminars_lucky(*args, **kwds):
     return lucky_distinct(table, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, include_pending=False, sanitized=False, objects=True):
     return seminars_lucky(
         {label_col: shortname},
         projection=projection,
         organizer_dict=organizer_dict,
         include_deleted=include_deleted,
+        include_pending=include_pending,
         sanitized=sanitized,
         objects=objects,
-        prequery=prequery,
     )
 
 
@@ -860,7 +865,7 @@ def can_edit_seminar(shortname, new):
             )
         )
         return show_input_errors(errmsgs), None
-    seminar = seminars_lookup(shortname, include_deleted=True, prequery={})
+    seminar = seminars_lookup(shortname, include_deleted=True)
     # Check if seminar exists
     if new != (seminar is None):
         if seminar is not None and seminar.deleted:

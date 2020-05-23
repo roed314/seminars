@@ -639,7 +639,7 @@ def list_institutions():
 @app.route("/seminar/<shortname>")
 def show_seminar(shortname):
     # We need organizers to be able to see seminars with display=False
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
         return abort(404, "Seminar not found")
     if not seminar.visible():
@@ -699,7 +699,7 @@ def talks_search_api(shortname, projection=1):
 
 @app.route("/seminar/<shortname>/bare")
 def show_seminar_bare(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -723,7 +723,7 @@ def show_seminar_bare(shortname):
 
 @app.route("/seminar/<shortname>/json")
 def show_seminar_json(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -789,7 +789,7 @@ def embed_seminar_js():
 
 @app.route("/seminar/<shortname>/ics")
 def ics_seminar_file(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery=False)
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -816,7 +816,7 @@ def ics_talk_file(seminar_id, talkid):
 @app.route("/talk/<seminar_id>/<int:talkid>/")
 def show_talk(seminar_id, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
-    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid}, prequery={})
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
     if not talk.visible():
