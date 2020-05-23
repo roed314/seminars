@@ -150,7 +150,7 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
         ),
         [ilike_escape(current_user.email), ilike_escape(current_user.email), True, False],
     ):
-        talk = WebTalk(seminar_id, seminar_ctr, includ_deleted=True)
+        talk = WebTalk(seminar_id, seminar_ctr, include_deleted=True)
         deleted_talks.append(talk)
     deleted_talks.sort(key=lambda talk: (talk.seminar.name, talk.start_time))
 
