@@ -570,6 +570,8 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     if info.get("keywords", ""):
         parse_substring(info, org_query, "keywords", organizers_keyword_columns())
         results += list(seminars_search(query, organizer_dict=all_organizers(org_query), more=more))
+        unique = {s.shortname:s for s in results}
+        results = [unique[key] for key in unique]
     series = series_sorted(results, conference=conference, reverse=past)
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
