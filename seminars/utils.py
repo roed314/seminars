@@ -237,8 +237,8 @@ def log_error(msg):
     try:
         raise RuntimeError()
     except Exception as err:
-        app.logger.error('\n'.join(traceback.format_stack()))
-        app.logger.error(timestamp() + " seminars application logged error: " + msg)
+        app.logger.error(timestamp() + " ERROR logged: " + traceback.format_stack()[-2])
+        app.logger.error(timestamp() + " ERROR message:  " + msg)
 
 def pretty_timezone(tz, dest="selecter"):
     foo = int(naive_utcoffset(tz).total_seconds())
