@@ -187,10 +187,14 @@ class WebSeminar(object):
                     sts = False
                     log_error("column %s is None for conference %s" % (col, self.shortname))
         else:
-            for col in ["frequency", "weekdays", "time_slots"]:
-                if getattr(self, col) is None:
-                    sts = False
-                    log_error("column %s is None for seminar series %s" % (col, self.shortname))
+            if gettatr(self, "frequency") is None:
+                sts = False
+                log_error("column frequency is None for seminar series %s" % self.shortname)
+            elif self.frequency:
+                for col in ["weekdays", "time_slots"]:
+                    if getattr(self, col) is None:
+                        sts = False
+                        log_error("column %s is None for seminar series %s" % (col, self.shortname))
         if self.online:
             if self.access_control is None:
                 sts = False
