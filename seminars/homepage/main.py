@@ -16,7 +16,7 @@ from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted, audience_options
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
@@ -95,15 +95,6 @@ def parse_substring(info, query, field, qfields, start="%", end="%"):
         )
 
 
-def parse_access(info, query):
-    # we want exact matches
-    access = info.get("access")
-    if access == "open":
-        query["access"] = "open"
-    elif access == "users":
-        query["access"] = {"$or": ["open", "users"]}
-
-
 def parse_daterange(info, query, time=True):
     tz = current_user.tz
     date = info.get("daterange")
@@ -145,6 +136,26 @@ def parse_video(info, query):
     if v == "1":
         query["video_link"] = {"$ne": ''}
 
+def parse_slides(info, query):
+    v = info.get("slides")
+    if v == "1":
+        query["slides_link"] = {"$ne": ''}
+
+def parse_paper(info, query):
+    v = info.get("paper")
+    if v == "1":
+        query["paper_link"] = {"$ne": ''}
+
+def parse_access(info, query):
+    v = info.get("access")
+    if v == "1":
+        query["access_control"] = {"$ne": 5}
+        query["live_link"] = {"$ne": ""}
+
+def parse_audience(info, query):
+    v = info.get("audience")
+    if v:
+        query["audience"] = int(v)
 
 def parse_language(info, query):
     v = info.get("language")
@@ -162,9 +173,13 @@ def talks_parser(info, query):
     parse_substring(info, query, "affiliation", ["speaker_affiliation"])
     parse_substring(info, query, "title", ["title"])
     parse_video(info, query)
+    parse_slides(info, query)
+    parse_paper(info, query)
     parse_language(info, query)
     parse_daterange(info, query, time=True)
     parse_recent_edit(info, query)
+    parse_audience(info, query)
+    parse_access(info, query)
     query["display"] = True
     # TODO: remove this temporary measure allowing hidden to be None
     query["hidden"] = {"$or": [False, {"$exists": False}]}
@@ -187,6 +202,7 @@ def seminars_parser(info, query, org_query, conference=False):
     if conference:
         parse_daterange(info, query, time=False)
     parse_substring(info, query, "name", ["name"])
+    parse_audience(info, query)
     query["display"] = True
     query["visibility"] = 2
 
@@ -198,6 +214,24 @@ def institutions_shortnames():
 
 
 textwidth = 300
+
+class TripleToggle(Toggle):
+    def __init__(self, lname, llabel, mname, mlabel, rname, rlabel):
+        Toggle.__init__(self, lname, llabel)
+        self.mtoggle = Toggle(mname, mlabel)
+        self.rtoggle = Toggle(rname, rlabel)
+    def _input(self, info):
+        left_toggle = Toggle._input(self, info)
+        middle_label = self.mtoggle._label(info)
+        middle_toggle = self.mtoggle._input(info)
+        right_label = self.rtoggle._label(info)
+        right_toggle = self.rtoggle._input(info)
+        return ('<table><tr><td style="padding-left: 0px;">' +
+                left_toggle +
+                '<td style="padding-left: 2em;">%s</td><td>%s</td>' % (middle_label, middle_toggle) +
+                '<td style="padding-left: 2em;">%s</td><td>%s</td>' % (right_label, right_toggle) +
+                '</td></tr></table>'
+        )
 
 class PushForCookies(SearchButton):
     def __init__(self, value, description, disabled=False, **kwds):
@@ -226,6 +260,39 @@ class ComboBox(TextBox):
         return inp + span
 
 class SemSearchArray(SearchArray):
+    def __init__(self):
+        self.institution = SelectBox(
+            name="institution",
+            label="Institution",
+            options=[("", ""), ("None", "No institution",),]
+            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
+            width=textwidth+10, # select boxes need 10px more than text areas
+        )
+        self.venue = SelectBox(
+            name="venue",
+            label=static_knowl("venue"),
+            options=[("", ""),
+                     ("online", "online"),
+                     ("in-person", "in-person")
+            ]
+        )
+
+        self.recent = ComboBox(
+            name="recent",
+            label="Edited within",
+            spantext="hours",
+            spanextras=' style="margin-left:5px;"',
+            example="168",
+            example_span=False,
+            width=50,
+        )
+        self.audience = SelectBox(
+            name="audience",
+            label="Audience",
+            width=textwidth+10, # select boxes need 10px more than text areas
+            options=[("", "")] + [(str(code), desc) for (code, desc) in audience_options],
+        )
+
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
@@ -242,25 +309,7 @@ class SemSearchArray(SearchArray):
 
 class TalkSearchArray(SemSearchArray):
     def __init__(self, past=False):
-        ## pick institution where it is held
-        institution = SelectBox(
-            name="institution",
-            label="Institution",
-            options=[("", ""), ("None", "No institution",),]
-            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
-            width=textwidth+10, # select boxes need 10px more than text areas
-        )
-
-        venue = SelectBox(
-            name="venue",
-            label=static_knowl("venue"),
-            options=[("", ""),
-                     ("online", "online"),
-                     ("in-person", "in-person")
-                     ]
-        )
-        assert venue
-
+        SemSearchArray.__init__(self)
         speaker = TextBox(
             name="speaker",
             label="Speaker",
@@ -289,44 +338,19 @@ class TalkSearchArray(SemSearchArray):
             example_span=False,
             width=textwidth,
         )
-        recent = ComboBox(
-            name="recent",
-            label="Edited within",
-            spantext="hours",
-            spanextras=' style="margin-left:5px;"',
-            example="168",
-            example_span=False,
-            width=50,
-        )
+        livestream_available = Toggle("access", "Livestream available")
 
-        video = Toggle(name="video", label="Has video")
+        videoslidespaper = TripleToggle("video", "Has video", "slides", "slides", "paper", "paper")
         self.array = [
-            [institution, video if past else recent],
-            [speaker, affiliation],
+            [self.institution, self.audience],
+            [speaker, videoslidespaper if past else self.recent],
+            [affiliation] if past else [affiliation, livestream_available],
             [date, time],
         ]
 
 class SeriesSearchArray(SemSearchArray):
     def __init__(self, conference=False, past=False):
-        ## pick institution where it is held
-        institution = SelectBox(
-            name="institution",
-            label="Institution",
-            options=[("", ""), ("None", "No institution",),]
-            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
-            width=textwidth+10, # select boxes need 10px more than text areas
-        )
-
-        venue = SelectBox(
-            name="venue",
-            label=static_knowl("venue"),
-            options=[("", ""),
-                     ("online", "online"),
-                     ("in-person", "in-person")
-                     ]
-        )
-        assert venue
-
+        SemSearchArray.__init__(self)
         organizer = TextBox(
             name="organizer",
             label="Organizer",
@@ -341,9 +365,10 @@ class SeriesSearchArray(SemSearchArray):
             width=textwidth,
             extra=['autocomplete="off"'],
         )
+
         self.array = [
-            [institution],
-            [organizer],
+            [self.institution, self.audience],
+            [organizer] if past else [organizer, self.recent],
         ]
         if conference:
             self.array.append([date])
@@ -375,7 +400,10 @@ def read_search_cookie(search_array):
     info = {}
     for row in search_array.array:
         for box in row:
-            if isinstance(box, SearchBox):
+            if isinstance(box, TripleToggle):
+                for name in [box.name, box.mtoggle.name, box.rtoggle.name]:
+                    info[name] = request.cookies.get("search_" + name, "")
+            elif isinstance(box, SearchBox):
                 info[box.name] = request.cookies.get("search_" + box.name, "")
     return info
 

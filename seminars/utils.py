@@ -71,6 +71,7 @@ maxlength = {
     'weekdays' : MAX_SLOTS,
 }
 
+
 def comma_list(items):
     """ return list of stringe as list in English (e.g. [Bill] = Bill, [Bill, Ted] = Bill and Ted, [Bill, Ted, Jane] = Bill, Ted, and Jane) """
     if not items:
@@ -229,6 +230,15 @@ def naive_utcoffset(tz):
 def timestamp():
     return "[%s UTC]" % datetime.now(tz=pytz.UTC).strftime("%Y-%m-%d %H:%M:%S")
 
+
+def log_error(msg):
+    from seminars.app import app
+    import traceback
+    try:
+        raise RuntimeError()
+    except Exception:
+        app.logger.error(timestamp() + " ERROR logged: " + traceback.format_stack()[-2][:-1])
+        app.logger.error(timestamp() + " ERROR message:  " + msg)
 
 def pretty_timezone(tz, dest="selecter"):
     foo = int(naive_utcoffset(tz).total_seconds())

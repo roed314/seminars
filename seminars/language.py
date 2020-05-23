@@ -52,7 +52,6 @@ class Languages(object):
             code = "language"
             onchange = 'toggleFilters(this.id);'
             value = 1 if request.cookies.get('filter_language', '-1') == '1' else -1
-            print("filter_language", value)
         else:
             onchange = 'toggleLanguage(this.id);'
             value = 1 if code in request.cookies.get("languages", "").split(",") else -1
