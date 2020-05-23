@@ -81,7 +81,6 @@ room                | text        | physical location of the conference, if any 
 shortname           | text        | Unique identifier assigned by owner, used in urls, cannot be changed (would break links)
 start_date          | date        | start date of the conference, null for seminar_series
 stream_link         | text        | URL for non-interactive livestream (e.g. YouTube), not yet used [inherited]
-subjects            | text[]      | [to be removed once we switch to new topics design]
 timezone            | text        | time zone code, e.g. "America/New York"
 time_slots          | text[]      | list of time slots for seminar series with frequency != 0, null for conferences.  Each entry is a daytime interval of the form "HH:MM-HH:MM"; if end time is less than start time the interval extends to the next day.  All of relative to the timezone of the seminar.
 topics              | text[]      | list of topics.abbreviation for each topic associated ot the seminar [inherited]
@@ -103,7 +102,7 @@ audience            | smallint    | 0 = researchers in topic, 1 = researchers in
 comments            | text        | talk specific comments to be displayed in addition to seminar comments
 deleted             | boolean     | indicates talk has been deleted (but can still be revived)
 deleted_with_seminar| boolean     | indicates talk was deleted when seminar was deleted (will be automatically revived if/when seminar is revived)
-display             | boolean     | whether to display publicly (set if creator is True for the user who created the seminar).  Also used by API
+display             | boolean     | whether to display publicly (set if creator is True for the user who created the seminar).  Also used by API [inherited]
 edited_at           | timestamptz | timestamp of this version
 edited_by           | bigint      | users.id of user who created this version
 end_time            | timestamptz | 
@@ -122,7 +121,6 @@ speaker_affiliation | text        | free text, it need not be present in the ins
 speaker_homepage    | text        | URL of the homepage for the speaker (speaker's name will be anchor for this link) [to be replaced by speaker_homepages]
 start_time          | timestamptz | 
 stream_link         | text        | URL for non-interactive livestream (e.g. YouTube), not yet used [inherited]
-subjects            | text[]      | [to be removed when we switsh to new topics]
 timezone            | text        | time zone, e.g. "America/New York" (not necessarily the same as the tz in start_time, but related) (copied from semianr)
 title               | text        | may contain latex, will be shown as TBA if left blank
 token               | text        | used to give permission for speaker to edit
