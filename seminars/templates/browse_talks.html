@@ -10,7 +10,7 @@
 <table id="browse-talks" class="talk-table ntdata">
   <thead>
     {% if past %}
-    <tr> {{ talks_header(include_slides=True, include_video=True, include_subscribe=False) | safe }} </tr>
+    <tr> {{ talks_header(include_content=True, include_subscribe=False) | safe }} </tr>
     {% else %}
     <tr> {{ talks_header()  | safe }} </tr>
     {% endif %}
@@ -19,7 +19,7 @@
     {% for talk, row_attributes in talk_row_attributes %}
     <tr {{ row_attributes | safe }} >
       {% if past %}
-      {{ talk.oneline(include_slides=True, include_video=True, include_subscribe=False) | safe }}
+      {{ talk.oneline(include_content=True, include_subscribe=False) | safe }}
       {% else %}
       {{ talk.oneline() | safe }}
       {% endif %}

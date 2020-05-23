@@ -693,7 +693,7 @@ $(document).ready(function () {
             $("input[name=keywords]").val("");
         });
     $('#more-filter-menu input,#more-filter-menu select').on(
-        "input",
+        "input change",
         function (e) {
             setMoreButton();
         });

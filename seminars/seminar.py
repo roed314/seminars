@@ -13,7 +13,6 @@ from seminars.utils import (
     search_distinct,
     show_input_errors,
     weekdays,
-    killattr,
     sanitized_table,
 )
 from seminars.topic import topic_dag
@@ -143,13 +142,6 @@ class WebSeminar(object):
                     }
                 ]
         else:
-            # The output from psycopg2 seems to always be given in the server's time zone
-            if data.get("timezone"):
-                tz = pytz.timezone(data["timezone"])
-                if data.get("start_time"):
-                    data["start_time"] = adapt_datetime(data["start_time"], tz)
-                if data.get("end_time"):
-                    data["end_time"] = adapt_datetime(data["end_time"], tz)
             self.__dict__.update(data)
         if organizers is None:
             organizers = list(

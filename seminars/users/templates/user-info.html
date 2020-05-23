@@ -66,6 +66,13 @@
     <h2>Adding content</h2>
     <p>
       To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
+    {% if user.is_creator and user.api_access > 0 %}
+        Users who wish to write scripts to add content to our site
+        or to retrieve content automatically 
+        may do so via our application programming interface (API);
+        see the <a href="{{ url_for('api.help') }}">API documentation</a> 
+        for details.
+    {% endif %}
     </p>
 
     <h2>Endorse someone to add content</h2>
@@ -171,16 +178,6 @@
       <tr><td/><td><button name="submit" type="submit">Change Password</button></td></tr>
     </table>
   </form>
-  {% if user.is_creator and user.api_access %}
-      <h2>Adding content through API</h2>
-      <p>
-        Users who wish to write scripts to add content to our site
-        or to retrieve content automatically 
-        may do so via our application programming interface (API).
-        See the <a href="{{ url_for('api.help') }}">API documentation</a> 
-        for details.
-      </p>
-    {% endif %}
 
   <h2>Delete account</h2>
 
