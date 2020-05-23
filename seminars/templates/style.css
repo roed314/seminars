@@ -755,7 +755,6 @@ button.textbottom {
 
 button.save, button.cancel, button.delete, button.savedelete, button.reject {
     vertical-align: text-bottom;
-    margin-top: -5px;
 }
 
 button.cancel, button.cancelcolors {
