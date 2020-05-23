@@ -90,13 +90,11 @@ class WebTalk(object):
         data=None,
         seminar=None,
         editing=False,
-        showing=False,
-        saving=False,
-        deleted=False,
-        prequery={}
+        include_deleted=False,
+        include_pending=False,
     ):
         if data is None and not editing:
-            data = talks_lookup(seminar_id, seminar_ctr, include_deleted=deleted, prequery=prequery)
+            data = talks_lookup(seminar_id, seminar_ctr, include_deleted=include_deleted, include_pending=include_pending)
             if data is None:
                 raise ValueError("Talk %s/%s does not exist" % (seminar_id, seminar_ctr))
             data = dict(data.__dict__)
@@ -106,9 +104,9 @@ class WebTalk(object):
             if data.get("topics") is None:
                 data["topics"] = []
         if data and data.get("deleted"):
-            deleted = True
+            include_deleted = True
         if seminar is None:
-            seminar = WebSeminar(seminar_id, deleted=deleted)
+            seminar = WebSeminar(seminar_id, include_deleted=include_deleted)
         self.seminar = seminar
         self.new = data is None
         if self.new:
@@ -763,7 +761,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             flash_error("Invalid talk id")
             return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
     if seminar_ctr != "":
-        talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True, prequery={})
+        talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True)
         if talk is None:
             flash_error("Talk does not exist")
             return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
@@ -879,13 +877,13 @@ def talks_lucky(*args, **kwds):
     return lucky_distinct(table, _selecter, _construct(seminar_dict, objects=objects), *args, **kwds)
 
 
-def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
+def talks_lookup(seminar_id, seminar_ctr, projection=3, seminar_dict={}, include_deleted=False, include_pending=False, sanitized=False, objects=True):
     return talks_lucky(
         {"seminar_id": seminar_id, "seminar_ctr": seminar_ctr},
         projection=projection,
         seminar_dict=seminar_dict,
         include_deleted=include_deleted,
+        include_pending=include_pending,
         sanitized=sanitized,
         objects=objects,
-        prequery=prequery,
     )
