@@ -860,7 +860,7 @@ def can_edit_seminar(shortname, new):
             )
         )
         return show_input_errors(errmsgs), None
-    seminar = seminars_lookup(shortname, include_deleted=True)
+    seminar = seminars_lookup(shortname, include_deleted=True, prequery={})
     # Check if seminar exists
     if new != (seminar is None):
         if seminar is not None and seminar.deleted:
