@@ -87,7 +87,6 @@ class PostgresUserTable(PostgresSearchTable):
         for col in ["name", "affiliation", "homepage", "timezone"]:
             kwargs[col] = tz = kwargs.get(col, "")
         assert tz == "" or tz in all_timezones
-        kwargs["location"] = None
         kwargs["created"] = datetime.now(UTC)
         self.insert_many([kwargs], restat=False)
         newuser = SeminarsUser(email=email)
