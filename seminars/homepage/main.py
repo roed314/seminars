@@ -302,7 +302,6 @@ class SemSearchArray(SearchArray):
             width=textwidth+10, # select boxes need 10px more than text areas
             options=[("", "")] + [(str(code), desc) for (code, desc) in audience_options],
         )
-        self.extra_names = []
 
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
@@ -358,7 +357,6 @@ class TalkSearchArray(SemSearchArray):
             [affiliation] if past else [affiliation, livestream_available],
             [date, time],
         ]
-        self.extra_names = ["slides", "paper"]
 
 class SeriesSearchArray(SemSearchArray):
     def __init__(self, conference=False, past=False):
@@ -387,7 +385,6 @@ class SeriesSearchArray(SemSearchArray):
 
         assert conference in [True, False]
         self.conference = conference
-        self.extra_names = ["slides", "paper"]
 
 @app.route("/")
 def index():
