@@ -16,6 +16,7 @@ from seminars.utils import (
     how_long,
     topdomain,
     comma_list,
+    log_error,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -29,6 +30,53 @@ from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
 import re
+
+required_talk_columns = [
+    "audience",
+    "display",
+    "end_time",
+    "online",
+    "language",
+    "seminar_id",
+    "seminar_ctr",
+    "start_time",
+    "timezone",
+    "topics",
+]
+
+inherited_talk_columns = [
+    "access_control",
+    "access_time",
+    "access_hint",
+    "access_registration",
+    "audience",
+    "display",
+    "language",
+    "live_link",
+    "online",
+    "room",
+    "stream_link",
+    "timezone",
+    "topics",
+]
+
+optional_talk_text_columns = [
+    "abstract",
+    "access_hint",
+    "access_registration",
+    "comments",
+    "live_link",
+    "room",
+    "paper_link",
+    "slides_link",
+    "speaker",
+    "speaker_affiliation",
+    "speaker_email",
+    "speaker_homepage",
+    "stream_link",
+    "title",
+    "video_link",
+]
 
 # the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
 # text strings that may contain delimited lists (which should all have the same length, empty items are OK)
@@ -62,28 +110,29 @@ class WebTalk(object):
             seminar = WebSeminar(seminar_id, deleted=deleted)
         self.seminar = seminar
         self.new = data is None
-        self.deleted=False
+        self.deleted=False #FIXME: why is this here
         if self.new:
             self.seminar_id = seminar_id
             self.seminar_ctr = None
             self.token = secrets.token_hex(8)
-            self.display = seminar.display
-            self.online = getattr(seminar, "online", bool(seminar.live_link))
             self.by_api = False # reset by API code if needed
             self.timezone = seminar.timezone
+            self.deleted = False
+            self.deleted_with_seminar = False
+            self.hidden = False
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
-                elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
-                    # carry over from seminar, but not comments
-                    setattr(self, key, getattr(seminar, key) if key != "comments" else "")
-                    print("talk inherited %s = %s from seminar"%(key,getattr(self,key)))
+                if key in inherited_talk_columns:
+                    setattr(self, key, getattr(seminar, key))
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
                     setattr(self, key, [])
                 else:
-                    critical("Need to update talk code to account for schema change key=%s" % key)
+                    # don't complain about columns we know are going to be set later
+                    if not key in ["edited_by", "edited_at", "start_time", "end_time"]:
+                        critical("Need to update talk code to account for schema change key=%s" % key)
                     setattr(self, key, None)
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
@@ -94,7 +143,7 @@ class WebTalk(object):
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
             self.__dict__.update(data)
-        self.cleanse()
+            self.cleanse()
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
@@ -114,12 +163,23 @@ class WebTalk(object):
     def __ne__(self, other):
         return not (self == other)
 
+    def validate(self):
+        sts = True
+        for col in required_talk_columns:
+            if getattr(self, col) is None:
+                sts = False
+                log_error("column %s is None for talk %s/%s" % (col, self.seminar_id, self.seminar_ctr))
+        return sts
+
     def cleanse(self):
         """
-        This functon is used to ensure backward compatibility across changes to the schema and/or validation
+        This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        pass
+        for col in optional_talk_text_columns:
+            if getattr(self, col) is None:
+                setattr(self, col, "")
+        self.validate()
 
     def visible(self):
         """
@@ -149,6 +209,7 @@ class WebTalk(object):
             # Talks can be edited by anonymous users with a token, with no id
             data["edited_by"] = -1
         data["edited_at"] = datetime.now(tz=pytz.UTC)
+        self.validate()
         db.talks.insert_many([data])
 
     def save_admin(self):
@@ -319,23 +380,19 @@ class WebTalk(object):
     def show_speaker(self, raw=False, affiliation=True):
         # As part of a list
         speakers = [s.strip() for s in self.speaker.split(SPEAKER_DELIMITER)]
-        print(speakers)
         if not speakers:
             return ''
         homepages = [s.strip() for s in self.speaker_homepage.split(SPEAKER_DELIMITER)]
         for i in range(len(speakers)-len(homepages)):
             homepages.append('')
-        print(homepages)
         affiliations = [s.strip() for s in self.speaker_affiliation.split(SPEAKER_DELIMITER)] if affiliation else []
         for i in range(len(speakers)-len(affiliations)):
             affiliations.append('')
-        print(affiliations)
         items = []
         for i in range(len(speakers)):
             item = '<a href="%s">%s</a>' % (homepages[i],speakers[i]) if homepages[i] and not raw else speakers[i]
             item += (" (%s)" % affiliations[i]) if affiliations[i] else ''
             items.append(item)
-        print(items)
         return comma_list(items)
 
     def show_speaker_and_seminar(self, external=False):
@@ -445,7 +502,7 @@ Thank you,
                 link = self.access_registration
             return '<div class="access_button no_link"><a href="%s">Register</a> for livestream access</div>' % link
         else:  # should never happen
-            print("badness!")
+            log_error("invalid or unknown access control value %s for talk %s/%s" % (self.access_control, self.seminar_id, self.seminar_ctr))
             return ""
 
     def show_paper_link(self):

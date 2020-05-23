@@ -1196,7 +1196,7 @@ button {
 
 select, select option{
     background: {{color.select_background}};
-    font-size: 110%;
+    font-size: 100%;
     height: 30px;
 }
 

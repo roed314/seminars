@@ -14,6 +14,7 @@ from seminars.utils import (
     show_input_errors,
     weekdays,
     sanitized_table,
+    log_error,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
@@ -24,7 +25,6 @@ from psycopg2.sql import SQL
 import pytz
 from collections import defaultdict
 from datetime import datetime
-from lmfdb.logger import critical
 
 import urllib.parse
 
@@ -52,8 +52,8 @@ access_time_options = [
 frequency_options = [
     (0, 'no fixed schedule'),
     (7, 'weekly'),
-    (14, 'biweekly'),
-    (21, 'triweekly'),
+    (14, 'two weeks'),
+    (21, 'three weeks'),
 ]
 
 visibility_options = [
@@ -70,6 +70,29 @@ audience_options = [
     (4, "undergraduates"),
     (5, "general audience"),
 ]
+
+required_seminar_columns = [
+    "audience",
+    "display",
+    "is_conference",
+    "language",
+    "name",
+    "online",
+    "shortname",
+    "visibility",
+    "timezone",
+    "topics",
+]
+
+optional_seminar_text_columns = [
+    "access_hint",
+    "access_registration",
+    "comments",
+    "homepage",
+    "live_link",
+    "room",
+]
+
 
 class WebSeminar(object):
     def __init__(
@@ -97,9 +120,7 @@ class WebSeminar(object):
             self.display = user.is_creator
             self.online = True  # default
             self.by_api = False # reset by API code if needed
-            self.access = "open"  # default FIXME: remove once we switch to access_control
             self.access_control = 4 # default is instant registration
-            self.access_time = None
             self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
             self.audience = 0 # default is researchers
@@ -108,6 +129,7 @@ class WebSeminar(object):
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
             self.timezone = str(user.tz)
+            self.language = 'en' # default is English
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -124,9 +146,9 @@ class WebSeminar(object):
                 elif typ == "date":
                     setattr(self, key, None)
                 else:
-                    critical(
-                        "Need to update seminar code to account for schema change key=%s" % key
-                    )
+                    from lmfdb.logger import critical
+                    # don't write these to the flasklog
+                    critical("Need to update seminar code to account for schema change key=%s" % key)
                     setattr(self, key, None)
             if organizers is None:
                 organizers = [
@@ -163,12 +185,53 @@ class WebSeminar(object):
     def __ne__(self, other):
         return not (self == other)
 
+    def validate(self):
+        sts = True
+        for col in required_seminar_columns:
+            if getattr(self, col) is None:
+                sts = False
+                log_error("column %s is None for series %s" % (col, self.shortname))
+        if self.is_conference:
+            for col in ["start_date", "end_date", "per_day"]:
+                if getattr(self, col) is None:
+                    sts = False
+                    log_error("column %s is None for conference %s" % (col, self.shortname))
+        else:
+            if getattr(self, "frequency") is None:
+                sts = False
+                log_error("column frequency is None for seminar series %s" % self.shortname)
+            elif self.frequency:
+                for col in ["weekdays", "time_slots"]:
+                    if getattr(self, col) is None:
+                        sts = False
+                        log_error("column %s is None for seminar series %s" % (col, self.shortname))
+        if self.online:
+            if self.access_control is None:
+                sts = False
+                log_error("access_control is None for online series %s" % self.shortname)
+            elif self.access_control == 1:
+                if self.access_time is None:
+                    sts = False
+                    log_error("access_time is None for online series %s with access_control == 1" % self.shortname)
+            elif self.access_control == 2:
+                if self.access_hint is None:
+                    sts = False
+                    log_error("access_hint is None for online series %s with access_control == 2" % self.shortname)
+            elif self.access_control == 5:
+                if self.access_registration is None:
+                    sts = False
+                    log_error("access_registration is None for online series %s with access_control == 5" % self.shortname)
+        return sts        
+
     def cleanse(self):
         """
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        pass
+        for col in optional_seminar_text_columns:
+            if getattr(self, col) is None:
+                setattr(self, col, "")
+        self.validate()
 
     def visible(self, user=None):
         """
@@ -195,6 +258,7 @@ class WebSeminar(object):
         assert data.get("shortname")
         data["edited_by"] = int(user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
+        self.validate()
         db.seminars.insert_many([data])
 
 
