@@ -643,7 +643,6 @@ def show_seminar(shortname):
     if seminar is None:
         return abort(404, "Seminar not found")
     if not seminar.visible():
-        print("not visible")
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
         if seminar is None or not seminar.visible():
