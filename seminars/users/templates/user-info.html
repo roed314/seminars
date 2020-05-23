@@ -18,8 +18,10 @@
           <td><input name="password" type="password" /></td>
           <td> (<a href="{{ url_for('.reset_password') }}">Forgot password?</a>) </td>
       </tr>
-      <tr><td class="spacing" colspan="2"/></tr>
-      <tr><td /><td><button name="submit" type="submit">Login</button></td></tr>
+      <tr>
+        <td></td>
+        <td><button class="save" name="submit" type="submit">Login</button></td>
+      </tr>
     </table>
   </form>
 
@@ -143,13 +145,9 @@
           </select>
         </td>
       </tr>
-
-
-      <tr><td colspan="3" class="spacing" /></tr>
       <tr>
-        <td/><td colspan="2">
-          <button type="submit" tabindex="5">Update details</button>
-        </td>
+        <td></td>
+        <td colspan="2"><button class="save" type="submit" tabindex="5">Update details</button></td>
       </tr>
 
     </table>
@@ -174,8 +172,10 @@
         <td><input id="pw2" name="password2" type="password" style="width:260px;" required></td>
         <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td>
       </tr>
-      <tr><td colspan="2" class="spacing"></td></tr>
-      <tr><td/><td><button name="submit" type="submit">Change Password</button></td></tr>
+      <tr>
+        <td></td>
+        <td><button class="save" name="submit" type="submit">Change Password</button></td>
+      </tr>
     </table>
   </form>
 
