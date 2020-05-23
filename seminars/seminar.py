@@ -178,8 +178,8 @@ class WebSeminar(object):
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        import app
-        
+        from seminars.app import app
+
         app.logger.error("test message")
         for col in required_seminar_columns:
             if getattr(self, col) is None:
