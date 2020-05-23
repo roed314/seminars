@@ -60,8 +60,6 @@ inherited_talk_columns = [
     "topics",
 ]
 
-
-
 # the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
 # text strings that may contain delimited lists (which should all have the same length, empty items are OK)
 SPEAKER_DELIMITER = '|'
@@ -96,10 +94,6 @@ class WebTalk(object):
         self.new = data is None
         self.deleted=False #FIXME: why is this here
         if self.new:
-            if editing:
-                import traceback
-                print("creating empty talk")
-                print(traceback.format_stack())
             self.seminar_id = seminar_id
             self.seminar_ctr = None
             self.token = secrets.token_hex(8)
@@ -109,8 +103,9 @@ class WebTalk(object):
             self.timezone = seminar.timezone
             self.deleted = False
             self.deleted_with_seminar = False
+            self.hidden = False
             for key, typ in db.talks.col_type.items():
-                if key in ["id", "edited_by", "edited_at"] or hasattr(self, key):
+                if key in ["id", "edited_by", "edited_at", "start_time", "end_time"] or hasattr(self, key):
                     continue
                 if key in inherited_talk_columns:
                     setattr(self, key, getattr(seminar, key))
@@ -150,14 +145,20 @@ class WebTalk(object):
     def __ne__(self, other):
         return not (self == other)
 
+    def validate(self):
+        sts = True
+        for col in required_talk_columns:
+            if getattr(self, col) is None:
+                sts = False
+                log_error("column %s is None for talk %s/%s" % (col, self.seminar_id, self.seminar_ctr))
+        return sts
+
     def cleanse(self):
         """
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        for col in required_talk_columns:
-            if getattr(self, col) is None:
-                log_error("column %s is None for talk %s/%s" % (col, self.seminar_id, self.seminar_ctr))
+        self.validate()
         pass
 
     def visible(self):
@@ -188,6 +189,7 @@ class WebTalk(object):
             # Talks can be edited by anonymous users with a token, with no id
             data["edited_by"] = -1
         data["edited_at"] = datetime.now(tz=pytz.UTC)
+        self.validate()
         db.talks.insert_many([data])
 
     def user_is_registered(self, user=None):
