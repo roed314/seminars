@@ -853,7 +853,6 @@ def save_talk():
     if errmsgs:
         return show_input_errors(errmsgs)
     else: # to make it obvious that these two statements should be together
-        print("Creating new talk with data = " + str(data))
         new_version = WebTalk(talk.seminar_id, data=data)
 
     sanity_check_times(new_version.start_time, new_version.end_time)
