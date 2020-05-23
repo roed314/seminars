@@ -102,6 +102,7 @@ class WebSeminar(object):
             user = current_user
         if data is None and not editing:
             data = seminars_lookup(shortname, include_deleted=deleted)
+            print(data)
             if data is None:
                 raise ValueError("Seminar %s does not exist" % shortname)
             data = dict(data.__dict__)
