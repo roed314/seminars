@@ -16,6 +16,7 @@ from seminars.utils import (
     killattr,
     how_long,
     topdomain,
+    comma_list,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -29,6 +30,10 @@ from icalendar import Event
 from lmfdb.logger import critical
 from datetime import datetime, timedelta
 import re
+
+# the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
+# text strings that may contain delimited lists (which should all have the same length, empty items are OK)
+SPEAKER_DELIMITER = '|'
 
 class WebTalk(object):
     def __init__(
@@ -96,7 +101,7 @@ class WebTalk(object):
         title = self.title if self.title else "TBA"
         return "%s (%s) - %s, %s" % (
             title,
-            self.speaker,
+            self.show_speaker(raw=True),
             self.show_date(),
             self.show_start_time(self.timezone),
         )
@@ -115,54 +120,7 @@ class WebTalk(object):
         This functon is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        if self.hidden is None:
-            self.hidden = False
-        if self.online and self.access_control is None:
-            self.access_control = 0 if self.access == 'open' else self.access_control
-            self.access_control = 3 if self.access in ['users', 'endorsed'] else self.access_control
-            if self.live_link and "comments" in self.live_link:
-                self.live_link = ""
-                if self.seminar.homepage:
-                    self.access_control = 5
-                    self.access_registration = self.seminar.homepage
-        if self.online and self.live_link and "comments" in self.live_link:
-            self.live_link = ""
-        # remove columns we plan to drop
-        for attr in ["subject", "visibility"]:
-            killattr(self, attr)
-
-        # Port old subjects and topics to the new topic scheme
-        if getattr(self, "subjects", []):
-            def update_topic(topic):
-                if topic in ["math", "physics", "bio"]:
-                    return [topic]
-                if topic in ["math_mp", "mp", "physics_math-ph"]:
-                    return ["math", "physics", "math-ph"]
-                if topic == "math_na":
-                    return ["math", "cs", "math_NA"]
-                if len(topic) == 2:
-                    return ["math", "math_" + topic.upper()]
-                if topic.startswith("math_"):
-                    return ["math", "math_" + topic[5:].upper()]
-                if topic.startswith("bio_bio_"):
-                    return ["bio", "bio_" + topic[8:].upper()]
-                assert topic.startswith("physics_")
-                topic = topic[8:]
-                if topic.startswith("nlin_"):
-                    return ["physics", "nlin", topic]
-                if topic.startswith("cond-mat_"):
-                    return ["physics", "cond-mat", topic]
-                if topic.startswith("nucl-"):
-                    return ["physics", "nucl-ph", topic]
-                if topic.startswith("hep-"):
-                    return ["physics", "hep", topic]
-                if topic.startswith("astro-ph_"):
-                    return ["physics", "astro-ph", topic]
-                return ["physics", topic]
-            self.topics = sorted(set(sum([update_topic(topic) for topic in self.subjects + self.topics], [])))
-        self.subjects = []
-        if self.audience is None:
-            self.audience = 0 # default is researchers
+        pass
 
     def visible(self):
         """
@@ -351,17 +309,28 @@ class WebTalk(object):
     def show_seminar(self, external=False):
         return self.seminar.show_name(external=external)
 
-    def show_speaker(self, affiliation=True):
+    # speaker fields may be SPEAKER_DELIMITER delimited lists (we cannot use commas or semicolons!)
+    def show_speaker(self, raw=False, affiliation=True):
         # As part of a list
-        ans = ""
-        if self.speaker:
-            if self.speaker_homepage:
-                ans += '<a href="%s">%s</a>' % (self.speaker_homepage, self.speaker)
-            else:
-                ans += self.speaker
-            if affiliation and self.speaker_affiliation:
-                ans += " (%s)" % (self.speaker_affiliation)
-        return ans
+        speakers = [s.strip() for s in self.speaker.split(SPEAKER_DELIMITER)]
+        print(speakers)
+        if not speakers:
+            return ''
+        homepages = [s.strip() for s in self.speaker_homepage.split(SPEAKER_DELIMITER)]
+        for i in range(len(speakers)-len(homepages)):
+            homepages.append('')
+        print(homepages)
+        affiliations = [s.strip() for s in self.speaker_affiliation.split(SPEAKER_DELIMITER)] if affiliation else []
+        for i in range(len(speakers)-len(affiliations)):
+            affiliations.append('')
+        print(affiliations)
+        items = []
+        for i in range(len(speakers)):
+            item = '<a href="%s">%s</a>' % (homepages[i],speakers[i]) if homepages[i] and not raw else speakers[i]
+            item += (" (%s)" % affiliations[i]) if affiliations[i] else ''
+            items.append(item)
+        print(items)
+        return comma_list(items)
 
     def show_speaker_and_seminar(self, external=False):
         # On homepage
@@ -459,7 +428,7 @@ Thank you,
 {user}
 """.format(
                     talk = self.title,
-                    speaker = self.speaker,
+                    speaker = self.show_speaker(raw=True),
                     series = self.seminar.name,
                     domain = topdomain(),
                     url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
@@ -542,7 +511,7 @@ Thank you,
             and (
                 current_user.email.lower() in self.seminar.editors()
                 or (self.speaker_email and current_user.email and
-                    current_user.email.lower() == self.speaker_email.lower())
+                    current_user.email.lower() in self.speaker_email.lower())
             )
         )
 
@@ -622,10 +591,10 @@ Thank you,
         """
         data = {
             "body": "Dear %s,\n\nYou can edit your upcoming talk using the following link:\n%s\n\nBest,\n%s"
-            % (self.speaker, self.speaker_link(), current_user.name),
+            % (self.show_speaker(raw=True), self.speaker_link(), current_user.name),
             "subject": "%s: title and abstract" % self.seminar.name,
         }
-        email_to = self.speaker_email if self.speaker_email else ""
+        email_to = ';'.join(self.speaker_email.split(SPEAKER_DELIMITER)) if self.speaker_email else ""
         return """
 <p>
  To let someone edit this page, send them this link:
@@ -646,7 +615,7 @@ Email link to speaker
             tokens = re.split(r'>([a-zA-Z ]*)', self.speaker)
             speaker = ', '.join([tokens[i] for i in range(1,len(tokens),2) if tokens[i].strip()])
         else:
-            speaker = self.speaker
+            speaker = self.show_speaker(raw=True)
         event.add("summary", speaker)
         event.add("dtstart", adapt_datetime(self.start_time, pytz.UTC))
         event.add("dtend", adapt_datetime(self.end_time, pytz.UTC))
@@ -656,8 +625,6 @@ Email link to speaker
             desc += "Title: %s\n" % (self.title)
         # Speaker and seminar
         desc += "by %s" % (speaker)
-        if self.speaker_affiliation:
-            desc += " (%s)" % (self.speaker_affiliation)
         if self.seminar.name:
             desc += " as part of %s" % (self.seminar.name)
         desc += "\n\n"

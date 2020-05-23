@@ -669,19 +669,6 @@ def talks_search_api(shortname, projection=1):
     talks.sort(key=lambda talk: talk.start_time, reverse=reverse_sort)
     return talks
 
-@app.route("/seminar/<shortname>/raw")
-def show_seminar_raw(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
-    if seminar is None or not seminar.visible():
-        # There may be a non-API version of the seminar that can be shown
-        seminar = seminars_lucky({"shortname": shortname})
-        if seminar is None or not seminar.visible():
-            return abort(404, "Seminar not found")
-    talks = talks_search_api(shortname)
-    return render_template(
-        "seminar_raw.html", title=seminar.name, talks=talks, seminar=seminar
-    )
-
 @app.route("/seminar/<shortname>/bare")
 def show_seminar_bare(shortname):
     seminar = seminars_lucky({"shortname": shortname}, prequery={})
@@ -879,11 +866,7 @@ def show_institution(shortname):
     query = {"institutions": {"$contains": shortname}}
     if not current_user.is_admin:
         query["display"] = True
-    events = list(
-        seminars_search(
-            query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
-        )
-    )
+    events = next_talk_sorted(list(seminars_search(query, organizer_dict=all_organizers())))
     seminars = [S for S in events if not S.is_conference]
     conferences = [S for S in events if S.is_conference]
     conferences.sort(key=lambda S: (S.start_date, S.name))
