@@ -1164,7 +1164,7 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
 input, textarea, #topicDAG_selector {
   border: 2px solid {{color.input_border}};
   font-size: 100%;
-  padding: 5px;
+  padding: 6px;
   border-radius: 5px;
 }
 
