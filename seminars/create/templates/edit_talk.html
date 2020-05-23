@@ -8,7 +8,7 @@
   <input type="hidden" name="new" value="{{ 'yes' if talk.new else 'no' }}"/>
   <input type="hidden" name="token" value="{{ talk.token }}"/>
   <input type="hidden" name="topics" value="{{ talk.topics | safe }}"/>
-  <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
+  <input type="hidden" name="language" value="{{ talk.language  | safe }}"/>
   This talk is part of <a href="{{ url_for('show_seminar', shortname=talk.seminar_id) }}">{{ seminar.name | blanknone }}</a>.
   <button class="save" type="submit" value="save" onclick="unsaved = false;" style="float: right;">Save changes</button>
 
@@ -63,7 +63,7 @@
       <td>
         <select name="audience" style="width:610px;">
           {% for opt in options["audience"] %}
-            <option value="{{opt[0]}}" {% if seminar.audience == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
+            <option value="{{opt[0]}}" {% if talk.audience == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
         </select>
       </td>
