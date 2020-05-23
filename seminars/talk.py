@@ -37,7 +37,6 @@ required_talk_columns = [
     "end_time",
     "online",
     "language",
-    "name",
     "seminar_id",
     "seminar_ctr",
     "start_time",
