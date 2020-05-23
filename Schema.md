@@ -110,7 +110,6 @@ edited_by           | bigint      | users.id of user who created this version
 end_time            | timestamptz | 
 hidden              | boolean     | if True, the talk will be visible only on the Edit schedule page for the seminar (independent of display)
 language            | text        | language abbreviation taken from language selector, required [inherited]
-seminar, 4 = undergraduate seminar, 5 = general public [inherited]
 live_link           | text        | URL for online meeting link (e.g. Zoom) [inherited]
 online              | boolean     | True if talk can be viewed online (copied from seminar), note that both online and room may be set
 paper_link          | text        | URL providing link to a paper the talk is about
