@@ -766,19 +766,11 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
         if token:
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
-                return (
-                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
-                    None,
-                )
-        else:
+                return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
+       else:
             if not talk.user_can_edit():
-                flash_error(
-                    "You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr)
-                )
-                return (
-                    redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302),
-                    None,
-                )
+                flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
+                return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
         if resp is not None:

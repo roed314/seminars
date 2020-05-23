@@ -297,18 +297,6 @@ def delete_seminar(shortname):
         section="Manage",
     )
 
-
-@create.route("deleted/seminar/<shortname>")
-@email_confirmed_required
-def deleted_seminar(shortname):
-    try:
-        seminar = WebSeminar(shortname, deleted=True)
-    except ValueError as err:
-        flash_error(str(err))
-        return redirect(url_for(".index"), 302)
-    return render_template("deleted_seminar.html", seminar=seminar, title="Deleted")
-
-
 @create.route("revive/seminar/<shortname>")
 @email_confirmed_required
 def revive_seminar(shortname):
