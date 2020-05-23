@@ -44,6 +44,22 @@ required_talk_columns = [
     "topics",
 ]
 
+inherited_talk_columns = [
+    "access_control",
+    "access_time",
+    "access_hint",
+    "access_registration",
+    "audience",
+    "display",
+    "language",
+    "live_link",
+    "online",
+    "room",
+    "stream_link",
+    "timezone",
+    "topics",
+]
+
 
 
 # the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
@@ -90,10 +106,8 @@ class WebTalk(object):
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
-                elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
-                    # carry over from seminar, but not comments
-                    setattr(self, key, getattr(seminar, key) if key != "comments" else "")
-                    print("talk inherited %s = %s from seminar"%(key,getattr(self,key)))
+                if key in inherited_talk_columns:
+                    settattr(self, key, getattr(seminar, key))
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
