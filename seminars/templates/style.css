@@ -1163,8 +1163,8 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
 
 input, textarea, #topicDAG_selector {
   border: 2px solid {{color.input_border}};
-  font-size: 100%;
-  padding: 6px;
+  font-size: 110%;
+  padding: 3px;
   border-radius: 5px;
 }
 
@@ -1196,8 +1196,8 @@ button {
 
 select, select option{
     background: {{color.select_background}};
-    font-size: 110%;
-    height: 30px;
+    font-size: 100%;
+    height: 31px;
 }
 
 body.knowl form button,
