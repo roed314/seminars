@@ -78,7 +78,6 @@ class WebTalk(object):
         saving=False,
         deleted=False,
     ):
-        print("call to WebTalk with editing = %s and data = %s" %(editing, data))
         if data is None and not editing:
             data = talks_lookup(seminar_id, seminar_ctr, include_deleted=deleted)
             if data is None:
@@ -97,6 +96,10 @@ class WebTalk(object):
         self.new = data is None
         self.deleted=False #FIXME: why is this here
         if self.new:
+            if editing:
+                import traceback
+                print("creating empty talk")
+                print(traceback.format_stack())
             self.seminar_id = seminar_id
             self.seminar_ctr = None
             self.token = secrets.token_hex(8)
