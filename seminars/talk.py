@@ -33,6 +33,7 @@ import re
 
 required_talk_columns = [
     "audience",
+    "by_api",
     "display",
     "end_time",
     "online",

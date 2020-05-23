@@ -73,6 +73,7 @@ audience_options = [
 
 required_seminar_columns = [
     "audience",
+    "by_api",
     "display",
     "is_conference",
     "language",
