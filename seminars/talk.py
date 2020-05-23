@@ -110,7 +110,6 @@ class WebTalk(object):
             seminar = WebSeminar(seminar_id, deleted=deleted)
         self.seminar = seminar
         self.new = data is None
-        self.deleted=False #FIXME: why is this here
         if self.new:
             self.seminar_id = seminar_id
             self.seminar_ctr = None
