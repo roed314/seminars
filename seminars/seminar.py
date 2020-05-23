@@ -13,7 +13,6 @@ from seminars.utils import (
     search_distinct,
     show_input_errors,
     weekdays,
-    killattr,
     sanitized_table,
 )
 from seminars.topic import topic_dag

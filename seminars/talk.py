@@ -13,7 +13,6 @@ from seminars.utils import (
     adapt_datetime,
     make_links,
     sanitized_table,
-    killattr,
     how_long,
     topdomain,
     comma_list,
