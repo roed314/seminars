@@ -89,7 +89,6 @@ class WebTalk(object):
             self.timezone = seminar.timezone
             for key, typ in db.talks.col_type.items():
                 if key == "id" or hasattr(self, key):
-                    print("skipping col %s" % key)
                     continue
                 elif db.seminars.col_type.get(key) == typ and getattr(seminar, key, None):
                     # carry over from seminar, but not comments
