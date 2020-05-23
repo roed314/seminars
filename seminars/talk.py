@@ -94,7 +94,7 @@ class WebTalk(object):
             seminar = WebSeminar(seminar_id, deleted=deleted)
         self.seminar = seminar
         self.new = data is None
-        self.deleted=False
+        self.deleted=False #FIXME: why is this here
         if self.new:
             self.seminar_id = seminar_id
             self.seminar_ctr = None
@@ -103,8 +103,10 @@ class WebTalk(object):
             self.online = getattr(seminar, "online", bool(seminar.live_link))
             self.by_api = False # reset by API code if needed
             self.timezone = seminar.timezone
+            self.deleted = False
+            self.deleted_with_seminar = False
             for key, typ in db.talks.col_type.items():
-                if key == "id" or hasattr(self, key):
+                if key in ["id", "edited_by", "edited_at"] or hasattr(self, key):
                     continue
                 if key in inherited_talk_columns:
                     setattr(self, key, getattr(seminar, key))
