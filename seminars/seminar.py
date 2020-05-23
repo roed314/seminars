@@ -175,35 +175,46 @@ class WebSeminar(object):
     def __ne__(self, other):
         return not (self == other)
 
+    def validate(self):
+        sts = True
+        for col in required_seminar_columns:
+            if getattr(self, col) is None:
+                sts = False
+                log_error("column %s is None for series %s" % (col, self.shortname))
+        if self.is_conference:
+            for col in ["start_date", "end_date", "per_day"]:
+                if getattr(self, col) is None:
+                    sts = False
+                    log_error("column %s is None for conference %s" % (col, self.shortname))
+        else:
+            for col in ["frequency", "weekdays", "time_slots"]:
+                if getattr(self, col) is None:
+                    sts = False
+                    log_error("column %s is None for seminar series %s" % (col, self.shortname))
+        if self.online:
+            if self.access_control is None:
+                sts = False
+                log_error("access_control is None for online series %s" % self.shortname)
+            elif self.access_control == 1:
+                if self.access_time is None:
+                    sts = False
+                    log_error("access_time is None for online series %s with access_control == 1" % self.shortname)
+            elif self.access_control == 2:
+                if self.access_hint is None:
+                    sts = False
+                    log_error("access_hint is None for online series %s with access_control == 2" % self.shortname)
+            elif self.access_control == 5:
+                if self.access_registration is None:
+                    sts = False
+                    log_error("access_registration is None for online series %s with access_control == 5" % self.shortname)
+    return sts        
+
     def cleanse(self):
         """
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        for col in required_seminar_columns:
-            if getattr(self, col) is None:
-                log_error("column %s is None for series %s" % (col, self.shortname))
-        if self.is_conference:
-            for col in ["start_date", "end_date", "per_day"]:
-                if getattr(self, col) is None:
-                    log_error("column %s is None for conference %s" % (col, self.shortname))
-        else:
-            for col in ["frequency", "weekdays", "time_slots"]:
-                if getattr(self, col) is None:
-                    log_error("column %s is None for seminar series %s" % (col, self.shortname))
-        if self.online:
-            if self.access_control is None:
-                log_error("access_control is None for online series %s" % self.shortname)
-            elif self.access_control == 1:
-                if self.access_time is None:
-                    log_error("access_time is None for online series %s with access_control == 1" % self.shortname)
-            elif self.access_control == 2:
-                if self.access_hint is None:
-                    log_error("access_hint is None for online series %s with access_control == 2" % self.shortname)
-            elif self.access_control == 5:
-                if self.access_registration is None:
-                    log_error("access_registration is None for online series %s with access_control == 5" % self.shortname)
-        pass
+        self.validate()
 
     def visible(self, user=None):
         """
@@ -230,6 +241,7 @@ class WebSeminar(object):
         assert data.get("shortname")
         data["edited_by"] = int(user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
+        self.validate()
         db.seminars.insert_many([data])
 
     def save_organizers(self):

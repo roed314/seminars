@@ -105,7 +105,7 @@ class WebTalk(object):
             self.deleted_with_seminar = False
             self.hidden = False
             for key, typ in db.talks.col_type.items():
-                if key in ["id", "edited_by", "edited_at", "start_time", "end_time"] or hasattr(self, key):
+                if key == "id" or hasattr(self, key):
                     continue
                 if key in inherited_talk_columns:
                     setattr(self, key, getattr(seminar, key))
@@ -114,7 +114,9 @@ class WebTalk(object):
                 elif typ == "text[]":
                     setattr(self, key, [])
                 else:
-                    critical("Need to update talk code to account for schema change key=%s" % key)
+                    # don't complain about columns we know are going to be set later
+                    if not key in ["edited_by", "edited_at", "start_time", "end_time"]:
+                        critical("Need to update talk code to account for schema change key=%s" % key)
                     setattr(self, key, None)
         else:
             # The output from psycopg2 seems to always be given in the server's time zone
@@ -125,7 +127,7 @@ class WebTalk(object):
                 if data.get("end_time"):
                     data["end_time"] = adapt_datetime(data["end_time"], tz)
             self.__dict__.update(data)
-        self.cleanse()
+            self.cleanse()
 
     def __repr__(self):
         title = self.title if self.title else "TBA"
@@ -159,7 +161,6 @@ class WebTalk(object):
         This is the only place where columns we plan to drop should be referenced 
         """
         self.validate()
-        pass
 
     def visible(self):
         """
