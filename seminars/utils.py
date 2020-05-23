@@ -236,7 +236,7 @@ def log_error(msg):
     import traceback, sys
     try:
         raise RuntimeError()
-    except Exception, err:
+    except Exception as err:
         app.logger.error(traceback.format_exception_only(sys.exc_info()[0]), err)
         app.logger.error(timestamp() + " seminars application logged error: " + msg)
 
