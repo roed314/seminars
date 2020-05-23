@@ -151,6 +151,13 @@ class WebTalk(object):
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.talks.insert_many([data])
 
+    def save_admin(self):
+        # Like save, but doesn't change edited_at
+        data = {col: getattr(self, col, None) for col in db.talks.search_cols}
+        assert data.get("seminar_id") and data.get("seminar_ctr")
+        data["edited_by"] = 0
+        db.talks.insert_many([data])
+
     def user_is_registered(self, user=None):
         if user is None: user = current_user
         if user.is_anonymous:

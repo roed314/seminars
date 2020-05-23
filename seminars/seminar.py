@@ -197,6 +197,14 @@ class WebSeminar(object):
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         db.seminars.insert_many([data])
 
+
+    def save_admin(self):
+        # Like save, but doesn't change edited_at
+        data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
+        assert data.get("shortname")
+        data["edited_by"] = 0
+        db.seminars.insert_many([data])
+
     def save_organizers(self):
         # Need to allow for deleting organizers, so we delete them all then add them back
         with DelayCommit(db):
