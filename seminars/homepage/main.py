@@ -143,7 +143,6 @@ def parse_slides(info, query):
 
 def parse_paper(info, query):
     v = info.get("paper")
-    print("paper", info)
     if v == "1":
         query["paper_link"] = {"$ne": ''}
 
