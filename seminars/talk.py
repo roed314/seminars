@@ -60,6 +60,24 @@ inherited_talk_columns = [
     "topics",
 ]
 
+optional_talk_text_columns = [
+    "abstract",
+    "access_hint",
+    "access_registration",
+    "comments",
+    "live_link",
+    "room",
+    "paper_link",
+    "slides_link",
+    "speaker",
+    "speaker_affiliation",
+    "speaker_email",
+    "speaker_homepage",
+    "stream_link",
+    "title",
+    "video_link",
+]
+
 # the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
 # text strings that may contain delimited lists (which should all have the same length, empty items are OK)
 SPEAKER_DELIMITER = '|'
@@ -97,8 +115,6 @@ class WebTalk(object):
             self.seminar_id = seminar_id
             self.seminar_ctr = None
             self.token = secrets.token_hex(8)
-            self.access_hint = seminar.access_hint
-            self.online = getattr(seminar, "online", bool(seminar.live_link))
             self.by_api = False # reset by API code if needed
             self.timezone = seminar.timezone
             self.deleted = False
@@ -160,6 +176,9 @@ class WebTalk(object):
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
+        for col in optional_talk_text_columns:
+            if getattr(self, col) is None:
+                setattr(self, col, "")
         self.validate()
 
     def visible(self):
@@ -356,10 +375,10 @@ class WebTalk(object):
         speakers = [s.strip() for s in self.speaker.split(SPEAKER_DELIMITER)]
         if not speakers:
             return ''
-        homepages = [s.strip() for s in self.speaker_homepage.split(SPEAKER_DELIMITER)] if self.speaker_homepage else []
+        homepages = [s.strip() for s in self.speaker_homepage.split(SPEAKER_DELIMITER)]
         for i in range(len(speakers)-len(homepages)):
             homepages.append('')
-        affiliations = [s.strip() for s in self.speaker_affiliation.split(SPEAKER_DELIMITER)] if affiliation and self.speaker_affiliation else []
+        affiliations = [s.strip() for s in self.speaker_affiliation.split(SPEAKER_DELIMITER)] if affiliation else []
         for i in range(len(speakers)-len(affiliations)):
             affiliations.append('')
         items = []

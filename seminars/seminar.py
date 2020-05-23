@@ -84,6 +84,16 @@ required_seminar_columns = [
     "topics",
 ]
 
+optional_seminar_text_columns = [
+    "access_hint",
+    "access_registration",
+    "comments",
+    "homepage",
+    "live_link",
+    "room",
+]
+
+
 class WebSeminar(object):
     def __init__(
         self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False,  user=None,
@@ -218,6 +228,9 @@ class WebSeminar(object):
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
+        for col in optional_seminar_text_columns:
+            if getattr(self, col) is None:
+                setattr(self, col, "")
         self.validate()
 
     def visible(self, user=None):
