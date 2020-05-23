@@ -95,15 +95,6 @@ def parse_substring(info, query, field, qfields, start="%", end="%"):
         )
 
 
-def parse_access(info, query):
-    # we want exact matches
-    access = info.get("access")
-    if access == "open":
-        query["access"] = "open"
-    elif access == "users":
-        query["access"] = {"$or": ["open", "users"]}
-
-
 def parse_daterange(info, query, time=True):
     tz = current_user.tz
     date = info.get("daterange")
