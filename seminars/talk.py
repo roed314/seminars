@@ -107,7 +107,7 @@ class WebTalk(object):
                 if key == "id" or hasattr(self, key):
                     continue
                 if key in inherited_talk_columns:
-                    settattr(self, key, getattr(seminar, key))
+                    setattr(self, key, getattr(seminar, key))
                 elif typ == "text":
                     setattr(self, key, "")
                 elif typ == "text[]":
