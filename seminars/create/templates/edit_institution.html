@@ -46,7 +46,6 @@
       <td><input name="admin" value="{{ institution.admin }}" style="width:500px;" maxlength="{{ maxlength['admin'] }}"/></td>
     </tr>
   </table>
-  <br>
   <table><tr>
   <td><button class="save" type="submit" name="submit" value="save" onclick="unsaved = false;">{{ 'Create institution' if institution.new else 'Save changes' }}</button></td>
   <td><button class="cancel" type="submit" name="submit" value="cancel" onclick="unsaved = false;">{{ 'Cancel creation' if institution.new else 'Cancel changes' }}</button></td>
