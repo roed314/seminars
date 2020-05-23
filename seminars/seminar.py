@@ -52,8 +52,8 @@ access_time_options = [
 frequency_options = [
     (0, 'no fixed schedule'),
     (7, 'weekly'),
-    (14, 'biweekly'),
-    (21, 'triweekly'),
+    (14, 'two weeks'),
+    (21, 'three weeks'),
 ]
 
 visibility_options = [
@@ -69,6 +69,19 @@ audience_options = [
     (3, "learners"),
     (4, "undergraduates"),
     (5, "general audience"),
+]
+
+required_seminar_columns = [
+    "audience",
+    "display",
+    "is_conference",
+    "language",
+    "name",
+    "online",
+    "shortname",
+    "visibility",
+    "timezone",
+    "topics",
 ]
 
 class WebSeminar(object):
@@ -97,9 +110,7 @@ class WebSeminar(object):
             self.display = user.is_creator
             self.online = True  # default
             self.by_api = False # reset by API code if needed
-            self.access = "open"  # default FIXME: remove once we switch to access_control
             self.access_control = 4 # default is instant registration
-            self.access_time = None
             self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
             self.audience = 0 # default is researchers
@@ -108,6 +119,7 @@ class WebSeminar(object):
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
             self.timezone = str(user.tz)
+            self.language = 'en' # default is English
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -124,9 +136,7 @@ class WebSeminar(object):
                 elif typ == "date":
                     setattr(self, key, None)
                 else:
-                    critical(
-                        "Need to update seminar code to account for schema change key=%s" % key
-                    )
+                    critical("Need to update seminar code to account for schema change key=%s" % key)
                     setattr(self, key, None)
             if organizers is None:
                 organizers = [
@@ -168,6 +178,30 @@ class WebSeminar(object):
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
+        critical("test message")
+        for col in required_seminar_columns:
+            if getattr(self, col) is None:
+                critical("column %s is None for series %s" % (col, self.shortname))
+        if self.is_conference:
+            for col in ["start_date", "end_date", "per_day"]:
+                if getattr(self, col) is None:
+                    critical("column %s is None for conference %s" % (col, self.shortname))
+        else:
+            for col in ["frequency", "weekday", "time_slots"]:
+                if getattr(self, col) is None:
+                    critical("column %s is None for seminar series %s" % (col, self.shortname))
+        if self.online:
+            if self.access_control is None:
+                critical("access_control is None for online series %s" % self.shortname)
+            elif self.access_control == 1:
+                if self.access_time is None:
+                    critical("access_time is None for online series %s with access_control == 1" % self.shortname)
+            elif self.access_control == 2:
+                if self.access_hint is None:
+                    critical("access_hint is None for online series %s with access_control == 2" % self.shortname)
+            elif self.access_control == 5:
+                if self.access_registration is None:
+                    critical("access_registration is None for online series %s with access_control == 5" % self.shortname)
         pass
 
     def visible(self, user=None):
