@@ -548,7 +548,7 @@ Thank you,
             classes="subscribe"
         )
 
-    def oneline(self, include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, tz=None, _external=False):
+    def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
         t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if t < now < e:
             datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
@@ -559,10 +559,10 @@ Thank you,
             cols.append(('class="seriesname"', self.show_seminar()))
         cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
         cols.append(('class="talktitle"', self.show_knowl_title(_external=_external)))
-        if include_slides:
+        if include_content:
             cols.append(('', self.show_slides_link()))
-        if include_video:
             cols.append(('', self.show_video_link()))
+            cols.append(('', self.show_paper_link()))
         if include_subscribe:
             cols.append(('class="subscribe"', self.show_subscribe()))
         #cols.append(('style="display: none;"', self.show_link_title()))
@@ -655,17 +655,15 @@ Email link to speaker
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
 
-def talks_header(include_seminar=True, include_slides=False, include_video=False, include_subscribe=True, datetime_header="Your time"):
+def talks_header(include_seminar=True, include_content=False, include_subscribe=True, datetime_header="Your time"):
     cols = []
     cols.append((' colspan="3" class="yourtime"', datetime_header))
     if include_seminar:
         cols.append((' class="seminar"', "Series"))
     cols.append((' class="speaker"', "Speaker"))
     cols.append((' class="title"', "Title"))
-    if include_slides and include_video:
-        cols.append((' colspan="2"', "Content"))
-    elif include_video or include_slides:
-        cols.append(("", "Content"))
+    if include_content:
+        cols.append((' colspan="3"', "Content"))
     if include_subscribe:
         if current_user.is_anonymous:
             cols.append(("", ""))

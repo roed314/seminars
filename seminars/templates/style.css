@@ -1195,7 +1195,9 @@ button {
 }
 
 select, select option{
-   background: {{color.select_background}};
+    background: {{color.select_background}};
+    font-size: 110%;
+    height: 30px;
 }
 
 body.knowl form button,
