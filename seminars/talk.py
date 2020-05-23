@@ -212,13 +212,6 @@ class WebTalk(object):
         self.validate()
         db.talks.insert_many([data])
 
-    def save_admin(self):
-        # Like save, but doesn't change edited_at
-        data = {col: getattr(self, col, None) for col in db.talks.search_cols}
-        assert data.get("seminar_id") and data.get("seminar_ctr")
-        data["edited_by"] = 0
-        db.talks.insert_many([data])
-
     def user_is_registered(self, user=None):
         if user is None: user = current_user
         if user.is_anonymous:
@@ -763,10 +756,13 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             flash_error("Invalid talk id")
             return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
     if seminar_ctr != "":
-        talk = talks_lookup(seminar_id, seminar_ctr)
+        talk = talks_lookup(seminar_id, seminar_ctr, include_deleted=True, prequery={})
         if talk is None:
             flash_error("Talk does not exist")
             return redirect(url_for("show_seminar", shortname=seminar_id), 302), None
+        if talk.deleted:
+            flash_error("Talk has been deleted, but you can revive it (use Show deleted items below)")
+            return redirect(url_for("create.index", shortname=seminar_id), 302), None
         if token:
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
