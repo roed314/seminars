@@ -866,11 +866,7 @@ def show_institution(shortname):
     query = {"institutions": {"$contains": shortname}}
     if not current_user.is_admin:
         query["display"] = True
-    events = list(
-        seminars_search(
-            query, sort=["weekday", "start_time", "name"], organizer_dict=all_organizers(),
-        )
-    )
+    events = next_talk_sorted(list(seminars_search(query, organizer_dict=all_organizers())))
     seminars = [S for S in events if not S.is_conference]
     conferences = [S for S in events if S.is_conference]
     conferences.sort(key=lambda S: (S.start_date, S.name))
