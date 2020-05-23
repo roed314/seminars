@@ -13,7 +13,6 @@ Column                | Type        |  Notes
 id                    | bigint      | auto
 password              | text        | hashed password with bcrypt
 email                 | text        | this will act as username
-email_confirm_code    | text        | code emailed to user allowing them to confirm
 email_confirmed       | boolean     | if the email has been confirmed
 admin                 | boolean     | whether the user has admin privileges
 creator               | boolean     | can create seminars which are displayed
@@ -23,11 +22,12 @@ affiliation           | text        | university or other institution
 homepage              | text        | user's website
 created               | timestamptz | when account was created
 endorser              | integer     | userid of another user who endorses this one
-location              | earth       | for future use
 timezone              | text        | time zone code, e.g. "US/Eastern"
 seminar_subscriptions | text[]      | set of short names of seminars that the user is subscribed to
 talks_subscriptions   | json        | dict as {shorname : list of counters}
+api_access            | smallint    | 0 = no access, 1 access
 api_token             | text        | a string that grants access to the account through the api
+(disabled) location              | earth       | for future use
 
 
 ## Institutions, seminars and talks
@@ -43,11 +43,11 @@ deleted   | text        | set if institution has been deleted (may still be revi
 edited_at | timestamptz | timestamp of this version
 edited_by | bigint      | users.id of user who created this version
 homepage  | text        | URL of homepage for the institution
-location  | earth       | geolocation, not yet used
 name      | text        | name displayed for the institution (anchor for homepage link)
 shortname | text        | Assigned by admin on creation, used in urls, globally unique, cannot be changed (would break links)
 timezone  | text        | time zone code, e.g. "US/Eastern"
 type      | text        | university, institute, other, taken from selector
+(disabled) location  | earth       | geolocation, not yet used
 
 `seminars`: seminars and conferences.  A coherent sequence of talks.  Columns marked [inherited] are copied into each talk that is part of the seminar and can then be customized for individual talks.
 
