@@ -753,35 +753,28 @@ button.textbottom {
     margin-left: 20px;
 }
 
-button.save {
+button.save, button.cancel, button.delete, button.savedelete, button.reject {
     vertical-align: text-bottom;
+    top: -6px;
 }
 
-button.cancel {
-    vertical-align: text-bottom;
-    color: blue;
-    background-color: white;
-}
-button.cancelcolors{
+button.cancel, button.cancelcolors {
     color: blue;
     background-color: white;
 }
 
 button.delete {
-    vertical-align: text-bottom;
     color: red;
     font-weight: 300;
     background-color: white;
 }
 button.reject {
-    vertical-align: text-bottom;
     color: white;
     background-color: red;
     border: 2px solid black;
 }
 
 button.savedelete {
-    vertical-align: text-bottom;
     color: white;
     background-color: #D00000;
 }
