@@ -187,7 +187,7 @@ class WebSeminar(object):
                     sts = False
                     log_error("column %s is None for conference %s" % (col, self.shortname))
         else:
-            if gettatr(self, "frequency") is None:
+            if getatr(self, "frequency") is None:
                 sts = False
                 log_error("column frequency is None for seminar series %s" % self.shortname)
             elif self.frequency:
