@@ -42,16 +42,16 @@ the <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
   </table>
 </form>
 
-
 <script type="text/javascript">
-// this tells the user if the passwords match
-$(function () {
-  $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-  $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-  checkpw();
-})
+document.addEventListener("DOMContentLoaded", function() {
+  /* this tells the user if the passwords match */
+  $(function () {
+    $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+    $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+    checkpw();
+  });
+});
 </script>
-
 
 {% endblock %}
 
