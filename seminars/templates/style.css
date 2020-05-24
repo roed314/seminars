@@ -834,7 +834,14 @@ div.submenu-nav, div.toggler-nav {
 div.submenu-nav {
     margin: 0px 4px 0px 4px;
 }
-
+button.submenu-nav {
+  background: none!important;
+  border: none;
+  padding: 0!important;
+}
+button.submenu-nav.hover {
+  background: {{color.header_backgroun}}!important;
+}
 div.toggler-nav {
     margin: 0px 10px 0px 10px;
 }
