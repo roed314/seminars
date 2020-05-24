@@ -380,15 +380,15 @@ class SeriesSearchArray(SemSearchArray):
 def index():
     data = request.args if request.method == "GET" else request.form
     if data.get("submit"):
-        x = request.args["submit"].split(':')
+        x = data.pop("submit").split(:)
         subsection=x[0]
         print("subsection: " + subsection)
         keywords = ':'.join(x[1:])
         print("keywords: "+ keywords)
         if subsection == "conferences":
-            return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords)
+            return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords, conference=True)
         elif subsection == "semseries":
-            return _series_index({"is_conference": False}, subsection=subsection, keywords=keywords)
+            return _series_index({"is_conference": False}, subsection=subsection, keywords=keywords, conference=False)
         elif subsection == "past_talks":
             return _talks_index(subsection=subsection, past=True, keywords=keywords)
         elif subsection == "past_conferences":
