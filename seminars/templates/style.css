@@ -260,6 +260,7 @@ header.shortinner {
   min-width: 1000px;
 }
 
+/* button thata apeears as simply a text caption */
 .menutab-button {
   background: none;
   color: inherit;
