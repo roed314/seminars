@@ -848,8 +848,8 @@ button.submenu-nav {
   border-radius: 0;
 }
 form button.submenu-nav.hover {
-  background: {{color.header_background}};
-  border: none;
+  background: {{color.header_background}}!important;
+  border: none!important;
 }
 div.toggler-nav {
     margin: 0px 10px 0px 10px;
