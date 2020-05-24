@@ -843,6 +843,7 @@ div.submenu-nav button {
   text-decoration: none;
   font-family: sans-serif;
   font-weight: normal;
+  font-size: inherit;
   cursor: pointer;
   min-width: 0;
   border-radius: 0;
