@@ -567,7 +567,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
         response.set_cookie("topics", "", max_age=0)
     return response
 
-def _series_index(query, sort=None, subsection=None, conference=True, past=False, keytext=""):
+def _series_index(query, sort=None, subsection=None, conference=True, past=False, keywords=""):
     search_array = SeriesSearchArray(conference=conference, past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
