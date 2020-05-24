@@ -574,7 +574,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
     row_attributes = _get_row_attributes(talks)
     response = make_response(render_template(
         "browse_talks.html",
-        title="Browse talks",
+        title="Browse past talks" if past else "Browse talks",
         section="Browse",
         info=info,
         subsection=subsection,
@@ -617,10 +617,9 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     series = series_sorted(results, conference=conference, reverse=past)
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
-    title = "Browse conferences" if conference else "Browse seminar series"
     response = make_response(render_template(
         "browse_series.html",
-        title=title,
+        title="Browse " + ("past " if past else "") + "conferences" if conference else "serminar series"
         section="Browse",
         subsection=subsection,
         info=info,
