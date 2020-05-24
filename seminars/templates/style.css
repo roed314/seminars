@@ -835,21 +835,21 @@ div.submenu-nav {
     margin: 0px 4px 0px 4px;
 }
 div.submenu-nav button {
-  background: none!important;
-  margin: -8px 0px -8px 0px!important;
+  background: none;
+  margin: -8px 0px -8px 0px;
   border: none;
   padding: 8px 16px 8px 16px;
-  color: {{color.header_background }};
   font-family: inherit;
   font-weight: inherit;
   font-size: inherit;
   cursor: inherit;
   min-width: 0;
   border-radius: 0;
+  color: {{color.header_background }};
 }
 div.submenu-nav button:hover {
-  background: {{ color.a_background_hover }}!important;
   border: none;
+  background: {{ color.a_background_hover }}!important;
 }
 div.toggler-nav {
     margin: 0px 10px 0px 10px;
