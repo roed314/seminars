@@ -380,7 +380,7 @@ class SeriesSearchArray(SemSearchArray):
 def index():
     data = request.args if request.method == "GET" else request.form
     if data.get("submit"):
-        x = data.pop("submit").split(':')
+        x = data["submit"].split(':')
         subsection=x[0]
         print("subsection: " + subsection)
         keywords = ':'.join(x[1:])
