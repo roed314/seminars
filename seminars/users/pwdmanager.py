@@ -8,7 +8,7 @@ from seminars import db
 from seminars.tokens import generate_token
 from seminars.seminar import WebSeminar, seminars_search, seminars_lucky, next_talk_sorted
 from seminars.talk import WebTalk
-from seminars.utils import pretty_timezone
+from seminars.utils import pretty_timezone, log_error
 from lmfdb.backend.searchtable import PostgresSearchTable
 from lmfdb.utils import flash_error
 from flask import flash
@@ -80,14 +80,21 @@ class PostgresUserTable(PostgresSearchTable):
         if "endorser" not in kwargs:
             kwargs["endorser"] = None
             kwargs["admin"] = kwargs["creator"] = False
+        if "subject_admin" not in kwargs:
+            kwargs["subject_admin"] = None
         for col in ["email_confirmed", "admin", "creator"]:
             kwargs[col] = kwargs.get(col, False)
         kwargs["talk_subscriptions"] = kwargs.get("talk_subscriptions", {})
         kwargs["seminar_subscriptions"] = kwargs.get("seminar_subscriptions", [])
         for col in ["name", "affiliation", "homepage", "timezone"]:
-            kwargs[col] = tz = kwargs.get(col, "")
+            kwargs[col] = kwargs.get(col, "")
+        tz = kwargs.get("timezone", "")
         assert tz == "" or tz in all_timezones
+        kwargs["api_access"] = kwargs.get("api_access", 0)
+        kwargs["api_token"] = kwargs.get("api_token", secrets.token_urlsafe(32))
         kwargs["created"] = datetime.now(UTC)
+        if sorted(list(kwargs) + ['id']) != sorted(self.col_type):
+            log_error("Columns for user creation do not match, %s != %s" % (sorted(list(kwargs) + ['id']), sorted(self.col_type)))
         self.insert_many([kwargs], restat=False)
         newuser = SeminarsUser(email=email)
         return newuser
@@ -332,14 +339,14 @@ class SeminarsUser(UserMixin):
         self._data["endorser"] = endorser
         self._dirty = True
 
-    @property
-    def location(self):
-        return self._data.get("location", "")
+    # @property
+    # def location(self):
+    #     return self._data.get("location", "")
 
-    @location.setter
-    def location(self, location):
-        self._data["location"] = location
-        self._dirty = True
+    # @location.setter
+    # def location(self, location):
+    #     self._data["location"] = location
+    #     self._dirty = True
 
 
     @property

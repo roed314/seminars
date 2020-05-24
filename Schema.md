@@ -13,7 +13,6 @@ Column                | Type        |  Notes
 id                    | bigint      | auto
 password              | text        | hashed password with bcrypt
 email                 | text        | this will act as username
-email_confirm_code    | text        | code emailed to user allowing them to confirm
 email_confirmed       | boolean     | if the email has been confirmed
 admin                 | boolean     | whether the user has admin privileges
 creator               | boolean     | can create seminars which are displayed
@@ -23,11 +22,12 @@ affiliation           | text        | university or other institution
 homepage              | text        | user's website
 created               | timestamptz | when account was created
 endorser              | integer     | userid of another user who endorses this one
-location              | earth       | for future use
 timezone              | text        | time zone code, e.g. "US/Eastern"
 seminar_subscriptions | text[]      | set of short names of seminars that the user is subscribed to
 talks_subscriptions   | json        | dict as {shorname : list of counters}
+api_access            | smallint    | 0 = no access, 1 access
 api_token             | text        | a string that grants access to the account through the api
+(disabled) location              | earth       | for future use
 
 
 ## Institutions, seminars and talks
@@ -43,22 +43,22 @@ deleted   | text        | set if institution has been deleted (may still be revi
 edited_at | timestamptz | timestamp of this version
 edited_by | bigint      | users.id of user who created this version
 homepage  | text        | URL of homepage for the institution
-location  | earth       | geolocation, not yet used
 name      | text        | name displayed for the institution (anchor for homepage link)
 shortname | text        | Assigned by admin on creation, used in urls, globally unique, cannot be changed (would break links)
 timezone  | text        | time zone code, e.g. "US/Eastern"
 type      | text        | university, institute, other, taken from selector
+(disabled) location  | earth       | geolocation, not yet used
 
 `seminars`: seminars and conferences.  A coherent sequence of talks.  Columns marked [inherited] are copied into each talk that is part of the seminar and can then be customized for individual talks.
 
 Column              | Type        | Notes
 --------------------|-------------|------
 id                  | bigint      | auto
-access              | text        | "endorsed", "open", "users" [to be replaced by access_control] [inherited]
 access_control      | smallint    | live_link access control: 0=open  1=time, 2=password, 3=users, 4=internal reg., 5=external reg., null if not online [inherited]
 access_time         | integer     | number of minutes before talks.start_time that talks.live_link is shown if access_control=1, null otherwise [inherited]
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
 access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inhertied]
+audience            | smallint    | 0 = researchers in topic, 1 = researchers in discipline, 2 = advanced learners, 3 = learners, 4 = undergraudates, 5 = general public [inherited]
 comments            | text        |
 deleted             | boolean     | True if seminar has been deleted (it can still be revived)
 description         | text        | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
@@ -71,7 +71,6 @@ homepage            | text        | link to external homepage (if any)
 institutions        | text[]      | list of institutions.shortname values for the institutions associated to this seminar
 is_conference       | boolean     | True for conferences, False for seminar_series; per_day, start_date, end_date are specific to conferences; frequency, weekdays, time_slots are specific to seminar_series
 language            | text        | language abbreviation taken from language selector, required [inherited]
-level               | smallint    | 0 = research seminar, 1 = colloquium, 2 = learning seminar, 3 = advanced learning seminar, 4 = undergraduate seminar, 5 = general public [inherited]
 live_link           | text        | URL for online meeting link (e.g. Zoom) if fixed, may be set to "see comments" (once access_control is in place, "see comments" should no longer be necessary) [inherited]
 name                | text        |
 online              | boolean     | True if talks in the seminar can be viewed online [inherited]
@@ -81,7 +80,6 @@ room                | text        | physical location of the conference, if any 
 shortname           | text        | Unique identifier assigned by owner, used in urls, cannot be changed (would break links)
 start_date          | date        | start date of the conference, null for seminar_series
 stream_link         | text        | URL for non-interactive livestream (e.g. YouTube), not yet used [inherited]
-subjects            | text[]      | [to be removed once we switch to new topics design]
 timezone            | text        | time zone code, e.g. "America/New York"
 time_slots          | text[]      | list of time slots for seminar series with frequency != 0, null for conferences.  Each entry is a daytime interval of the form "HH:MM-HH:MM"; if end time is less than start time the interval extends to the next day.  All of relative to the timezone of the seminar.
 topics              | text[]      | list of topics.abbreviation for each topic associated ot the seminar [inherited]
@@ -94,22 +92,21 @@ Column              | Type        | Notes
 --------------------|-------------|------
 id                  | bigint      | auto
 abstract            | text        | may contain latex
-access              | text        | "endorsed", "open", "users" [to be replaced by access_control] [inherited]
 access_control      | smallint    | live_link access control: 0=open  1=time, 2=password, 3=users, 4=internal reg, 5=external reg., null if not online [inherited]
 access_time         | integer     | number of minutes before talk start time live_link is shown if access_control=1, null otherwise [inherited]
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
 access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inhertied]
+audience            | smallint    | 0 = researchers in topic, 1 = researchers in discipline, 2 = advanced learners, 3 = learners, 4 = undergraudates, 5 = general public [inherited]
 comments            | text        | talk specific comments to be displayed in addition to seminar comments
 deleted             | boolean     | indicates talk has been deleted (but can still be revived)
 deleted_with_seminar| boolean     | indicates talk was deleted when seminar was deleted (will be automatically revived if/when seminar is revived)
-display             | boolean     | whether to display publicly (set if creator is True for the user who created the seminar).  Also used by API
+display             | boolean     | whether to display publicly (set if creator is True for the user who created the seminar).  Also used by API [inherited]
 edited_at           | timestamptz | timestamp of this version
 edited_by           | bigint      | users.id of user who created this version
 end_time            | timestamptz | 
 hidden              | boolean     | if True, the talk will be visible only on the Edit schedule page for the seminar (independent of display)
 language            | text        | language abbreviation taken from language selector, required [inherited]
-level               | smallint    | 0 = research seminar, 1 = colloquium, 2 = learning seminar, 3 = advanced learning seminar, 4 = undergraduate seminar, 5 = general public [inherited]
-live_link           | text        | URL for online meeting link (e.g. Zoom), may be set to "see comments" (once access_control is in place, "see comments" should no longer be necessary) [inherited]
+live_link           | text        | URL for online meeting link (e.g. Zoom) [inherited]
 online              | boolean     | True if talk can be viewed online (copied from seminar), note that both online and room may be set
 paper_link          | text        | URL providing link to a paper the talk is about
 room                | text        | physical location of the talk [inherited]
@@ -122,7 +119,6 @@ speaker_affiliation | text        | free text, it need not be present in the ins
 speaker_homepage    | text        | URL of the homepage for the speaker (speaker's name will be anchor for this link) [to be replaced by speaker_homepages]
 start_time          | timestamptz | 
 stream_link         | text        | URL for non-interactive livestream (e.g. YouTube), not yet used [inherited]
-subjects            | text[]      | [to be removed when we switsh to new topics]
 timezone            | text        | time zone, e.g. "America/New York" (not necessarily the same as the tz in start_time, but related) (copied from semianr)
 title               | text        | may contain latex, will be shown as TBA if left blank
 token               | text        | used to give permission for speaker to edit

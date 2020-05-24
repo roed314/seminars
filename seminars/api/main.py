@@ -1,4 +1,3 @@
-
 from flask import jsonify, request, render_template, redirect, url_for, make_response, current_app, Response
 from flask_login import current_user
 from seminars import db
@@ -115,7 +114,7 @@ def review_api():
     series = set()
     for series_id in db.seminar_organizers.search({"email": ilike_query(current_user.email)}, "seminar_id"):
         series.add(series_id)
-    for series_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", prequery={}):
+    for series_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_pending=True):
         series.add(series_id)
     series = list(series)
     if decision == "approve":

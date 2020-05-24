@@ -14,6 +14,7 @@ from seminars.utils import (
     show_input_errors,
     weekdays,
     sanitized_table,
+    log_error,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
@@ -24,7 +25,6 @@ from psycopg2.sql import SQL
 import pytz
 from collections import defaultdict
 from datetime import datetime
-from lmfdb.logger import critical
 
 import urllib.parse
 
@@ -52,8 +52,8 @@ access_time_options = [
 frequency_options = [
     (0, 'no fixed schedule'),
     (7, 'weekly'),
-    (14, 'biweekly'),
-    (21, 'triweekly'),
+    (14, 'every other week'),
+    (21, 'every third week'),
 ]
 
 visibility_options = [
@@ -71,14 +71,45 @@ audience_options = [
     (5, "general audience"),
 ]
 
+required_seminar_columns = [
+    "audience",
+    "by_api",
+    "display",
+    "is_conference",
+    "language",
+    "name",
+    "online",
+    "shortname",
+    "visibility",
+    "timezone",
+    "topics",
+]
+
+optional_seminar_text_columns = [
+    "access_hint",
+    "access_registration",
+    "comments",
+    "homepage",
+    "live_link",
+    "room",
+]
+
+
 class WebSeminar(object):
     def __init__(
-        self, shortname, data=None, organizers=None, editing=False, showing=False, saving=False, deleted=False,  user=None,
+        self,
+        shortname,
+        data=None,
+        organizers=None,
+        editing=False,
+        include_deleted=False,
+        include_pending=False,
+        user=None,
     ):
         if user is None:
             user = current_user
         if data is None and not editing:
-            data = seminars_lookup(shortname, include_deleted=deleted)
+            data = seminars_lookup(shortname, include_deleted=include_deleted, include_pending=include_pending)
             if data is None:
                 raise ValueError("Seminar %s does not exist" % shortname)
             data = dict(data.__dict__)
@@ -97,9 +128,7 @@ class WebSeminar(object):
             self.display = user.is_creator
             self.online = True  # default
             self.by_api = False # reset by API code if needed
-            self.access = "open"  # default FIXME: remove once we switch to access_control
             self.access_control = 4 # default is instant registration
-            self.access_time = None
             self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
             self.audience = 0 # default is researchers
@@ -108,6 +137,7 @@ class WebSeminar(object):
             self.per_day = 1
             self.weekday = self.start_time = self.end_time = None
             self.timezone = str(user.tz)
+            self.language = 'en' # default is English
             for key, typ in db.seminars.col_type.items():
                 if key == "id" or hasattr(self, key):
                     continue
@@ -124,9 +154,9 @@ class WebSeminar(object):
                 elif typ == "date":
                     setattr(self, key, None)
                 else:
-                    critical(
-                        "Need to update seminar code to account for schema change key=%s" % key
-                    )
+                    from lmfdb.logger import critical
+                    # don't write these to the flasklog
+                    critical("Need to update seminar code to account for schema change key=%s" % key)
                     setattr(self, key, None)
             if organizers is None:
                 organizers = [
@@ -163,12 +193,56 @@ class WebSeminar(object):
     def __ne__(self, other):
         return not (self == other)
 
+    def validate(self):
+        sts = True
+        for col in required_seminar_columns:
+            if getattr(self, col) is None:
+                sts = False
+                log_error("column %s is None for series %s" % (col, self.shortname))
+        if self.is_conference:
+            for col in ["start_date", "end_date", "per_day"]:
+                if getattr(self, col) is None:
+                    sts = False
+                    log_error("column %s is None for conference %s" % (col, self.shortname))
+        else:
+            if getattr(self, "frequency") is None:
+                sts = False
+                log_error("column frequency is None for seminar series %s" % self.shortname)
+            elif self.frequency:
+                for col in ["weekdays", "time_slots"]:
+                    if getattr(self, col) is None:
+                        sts = False
+                        log_error("column %s is None for seminar series %s" % (col, self.shortname))
+        if self.online:
+            if self.access_control is None:
+                sts = False
+                log_error("access_control is None for online series %s" % self.shortname)
+            elif self.access_control == 1:
+                if self.access_time is None:
+                    sts = False
+                    log_error("access_time is None for online series %s with access_control == 1" % self.shortname)
+            elif self.access_control == 2:
+                if self.access_hint is None:
+                    sts = False
+                    log_error("access_hint is None for online series %s with access_control == 2" % self.shortname)
+            elif self.access_control == 5:
+                if self.access_registration is None:
+                    sts = False
+                    log_error("access_registration is None for online series %s with access_control == 5" % self.shortname)
+        if not self.topics:
+            sts = False
+            log_error("No topics set for series %s" % self.shortname)
+        return sts        
+
     def cleanse(self):
         """
         This function is used to ensure backward compatibility across changes to the schema and/or validation
         This is the only place where columns we plan to drop should be referenced 
         """
-        pass
+        for col in optional_seminar_text_columns:
+            if getattr(self, col) is None:
+                setattr(self, col, "")
+        self.validate()
 
     def visible(self, user=None):
         """
@@ -195,6 +269,15 @@ class WebSeminar(object):
         assert data.get("shortname")
         data["edited_by"] = int(user.id)
         data["edited_at"] = datetime.now(tz=pytz.UTC)
+        self.validate()
+        db.seminars.insert_many([data])
+
+
+    def save_admin(self):
+        # Like save, but doesn't change edited_at
+        data = {col: getattr(self, col, None) for col in db.seminars.search_cols}
+        assert data.get("shortname")
+        data["edited_by"] = 0
         db.seminars.insert_many([data])
 
     def save_organizers(self):
@@ -260,7 +343,12 @@ class WebSeminar(object):
 
     def show_topics(self):
         if self.topics:
-            return " ".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
+            # Don't die just because there is a data issue in the topics/topic-dag
+            try:
+                return " ".join('<span class="topic_label">%s</span>' % topic for topic in topic_dag.leaves(self.topics))
+            except Exception as err:
+                log_error("Hit exception %s in show_topics for series %s" % (err,self.shortname))
+                return ""
         else:
             return ""
 
@@ -597,9 +685,7 @@ def _construct(organizer_dict, objects=True, more=False):
         else:
             if more is not False:
                 moreval = rec.pop("more")
-            seminar = WebSeminar(
-                rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec
-            )
+            seminar = WebSeminar(rec["shortname"], organizers=organizer_dict.get(rec["shortname"]), data=rec)
             if more is not False:
                 seminar.more = moreval
             return seminar
@@ -668,15 +754,15 @@ def seminars_lucky(*args, **kwds):
     return lucky_distinct(table, _selecter, _construct(organizer_dict, objects=objects), *args, **kwds)
 
 
-def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, sanitized=False, objects=True, prequery={"display": True}):
+def seminars_lookup(shortname, projection=3, label_col="shortname", organizer_dict={}, include_deleted=False, include_pending=False, sanitized=False, objects=True):
     return seminars_lucky(
         {label_col: shortname},
         projection=projection,
         organizer_dict=organizer_dict,
         include_deleted=include_deleted,
+        include_pending=include_pending,
         sanitized=sanitized,
         objects=objects,
-        prequery=prequery,
     )
 
 
@@ -779,7 +865,7 @@ def can_edit_seminar(shortname, new):
     if not allowed_shortname(shortname) or len(shortname) < 3 or len(shortname) > 32:
         errmsgs.append(
             format_errmsg(
-                "The identifier '%s' must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores.", shortname
+                "Series identifier '%s' must be 3 to 32 characters in length and can include only letters, numbers, hyphens and underscores.", shortname
             )
         )
         return show_input_errors(errmsgs), None
@@ -787,32 +873,27 @@ def can_edit_seminar(shortname, new):
     # Check if seminar exists
     if new != (seminar is None):
         if seminar is not None and seminar.deleted:
-            errmsgs.append(
-                format_errmsg(
-                    "Identifier %s is reserved by a seminar that has been deleted",
-                    shortname)
-            )
+            errmsgs.append(format_errmsg("Identifier %s is reserved by a series that has been deleted", shortname))
         else:
-            errmsgs.append(
-                format_errmsg(
-                    "Identifier %s " + ("already exists" if new else "does not exist"),
-                    shortname
-                )
-            )
+            if not seminar:
+                flash_error("No series with identifier %s exists" % shortname)
+                return redirect(url_for("create.index"), 302), None
+            else:
+                errmsgs.append(format_errmsg("Identifier %s is already in use by another series", shortname))
         return show_input_errors(errmsgs), None
     if seminar is not None and seminar.deleted:
-        return redirect(url_for("create.deleted_seminar", shortname=shortname), 302), None
+        return redirect(url_for("create.delete_seminar", shortname=shortname), 302), None
     # can happen via talks, which don't check for logged in in order to support tokens
     if current_user.is_anonymous:
         flash_error(
-            "You do not have permission to edit seminar %s. Please create an account and contact the seminar organizers.",
+            "You do not have permission to edit series %s. Please create an account and contact the seminar organizers.",
             shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 302), None
     # Make sure user has permission to edit
     if not new and not seminar.user_can_edit():
         flash_error(
-            "You do not have permission to edit seminar %s. Please contact the seminar organizers.",
+            "You do not have permission to edit series %s. Please contact the seminar organizers.",
             shortname
         )
         return redirect(url_for("show_seminar", shortname=shortname), 302), None

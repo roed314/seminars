@@ -71,6 +71,7 @@ maxlength = {
     'weekdays' : MAX_SLOTS,
 }
 
+
 def comma_list(items):
     """ return list of stringe as list in English (e.g. [Bill] = Bill, [Bill, Ted] = Bill and Ted, [Bill, Ted, Jane] = Bill, Ted, and Jane) """
     if not items:
@@ -230,6 +231,15 @@ def timestamp():
     return "[%s UTC]" % datetime.now(tz=pytz.UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
+def log_error(msg):
+    from seminars.app import app
+    import traceback
+    try:
+        raise RuntimeError()
+    except Exception:
+        app.logger.error(timestamp() + " ERROR logged at: " + traceback.format_stack()[-2].split('\n')[0])
+        app.logger.error(timestamp() + " ERROR message is:  " + msg)
+
 def pretty_timezone(tz, dest="selecter"):
     foo = int(naive_utcoffset(tz).total_seconds())
     hours, remainder = divmod(abs(foo), 3600)
@@ -366,8 +376,8 @@ def search_distinct(
     sort=None,
     info=None,
     include_deleted=False,
+    include_pending=False,
     more=False,
-    prequery={"display": True},
 ):
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
@@ -394,6 +404,7 @@ def search_distinct(
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
+    prequery = {'$or': [{'display': True}, {'by_api': False}]} if include_pending else {}
     if prequery:
         # We filter the records before finding the most recent (normal queries filter after finding the most recent)
         # This is mainly used for setting display=False or display=True
@@ -470,7 +481,7 @@ def lucky_distinct(
     offset=0,
     sort=[],
     include_deleted=False,
-    prequery={"display": True},
+    include_pending=False,
 ):
     query = dict(query)
     if not include_deleted:
@@ -480,6 +491,7 @@ def lucky_distinct(
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
     tbl = table._get_table_clause(extra_cols)
+    prequery = {'$or': [{'display': True}, {'by_api': False}]} if include_pending else {}
     if prequery:
         # We filter the records before finding the most recent (normal queries filter after finding the most recent)
         # This is mainly used for setting display=False or display=True

@@ -10,6 +10,10 @@
   Our application programming interface (API) allows users to write scripts
   to add content to our site or to search and browse
   without manually navigating the website.
+{% if not user.api_access %}
+  Edit access requires an API token (email us to enable this), though you can search public information without it.
+</p>
+{% else %}
   Edit access requires the following API token, though you can search public information without it.
 </p>
 
@@ -26,6 +30,8 @@
     </tr>
   </table>
 </form>
+
+{% endif %}
 
 <p>
   The API is currently under development, and will be subject to change without any promise of backward compatibility

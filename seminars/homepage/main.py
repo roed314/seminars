@@ -16,7 +16,7 @@ from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted
+from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted, audience_options
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
@@ -95,15 +95,6 @@ def parse_substring(info, query, field, qfields, start="%", end="%"):
         )
 
 
-def parse_access(info, query):
-    # we want exact matches
-    access = info.get("access")
-    if access == "open":
-        query["access"] = "open"
-    elif access == "users":
-        query["access"] = {"$or": ["open", "users"]}
-
-
 def parse_daterange(info, query, time=True):
     tz = current_user.tz
     date = info.get("daterange")
@@ -145,6 +136,26 @@ def parse_video(info, query):
     if v == "1":
         query["video_link"] = {"$ne": ''}
 
+def parse_slides(info, query):
+    v = info.get("slides")
+    if v == "1":
+        query["slides_link"] = {"$ne": ''}
+
+def parse_paper(info, query):
+    v = info.get("paper")
+    if v == "1":
+        query["paper_link"] = {"$ne": ''}
+
+def parse_access(info, query):
+    v = info.get("access")
+    if v == "1":
+        query["access_control"] = {"$ne": 5}
+        query["live_link"] = {"$ne": ""}
+
+def parse_audience(info, query):
+    v = info.get("audience")
+    if v:
+        query["audience"] = int(v)
 
 def parse_language(info, query):
     v = info.get("language")
@@ -162,9 +173,13 @@ def talks_parser(info, query):
     parse_substring(info, query, "affiliation", ["speaker_affiliation"])
     parse_substring(info, query, "title", ["title"])
     parse_video(info, query)
+    parse_slides(info, query)
+    parse_paper(info, query)
     parse_language(info, query)
     parse_daterange(info, query, time=True)
     parse_recent_edit(info, query)
+    parse_audience(info, query)
+    parse_access(info, query)
     query["display"] = True
     # TODO: remove this temporary measure allowing hidden to be None
     query["hidden"] = {"$or": [False, {"$exists": False}]}
@@ -187,6 +202,7 @@ def seminars_parser(info, query, org_query, conference=False):
     if conference:
         parse_daterange(info, query, time=False)
     parse_substring(info, query, "name", ["name"])
+    parse_audience(info, query)
     query["display"] = True
     query["visibility"] = 2
 
@@ -198,6 +214,24 @@ def institutions_shortnames():
 
 
 textwidth = 300
+
+class TripleToggle(Toggle):
+    def __init__(self, lname, llabel, mname, mlabel, rname, rlabel):
+        Toggle.__init__(self, lname, llabel)
+        self.mtoggle = Toggle(mname, mlabel)
+        self.rtoggle = Toggle(rname, rlabel)
+    def _input(self, info):
+        left_toggle = Toggle._input(self, info)
+        middle_label = self.mtoggle._label(info)
+        middle_toggle = self.mtoggle._input(info)
+        right_label = self.rtoggle._label(info)
+        right_toggle = self.rtoggle._input(info)
+        return ('<table><tr><td style="padding-left: 0px;">' +
+                left_toggle +
+                '<td style="padding-left: 2em;">%s</td><td>%s</td>' % (middle_label, middle_toggle) +
+                '<td style="padding-left: 2em;">%s</td><td>%s</td>' % (right_label, right_toggle) +
+                '</td></tr></table>'
+        )
 
 class PushForCookies(SearchButton):
     def __init__(self, value, description, disabled=False, **kwds):
@@ -226,6 +260,39 @@ class ComboBox(TextBox):
         return inp + span
 
 class SemSearchArray(SearchArray):
+    def __init__(self):
+        self.institution = SelectBox(
+            name="institution",
+            label="Institution",
+            options=[("", ""), ("None", "No institution",),]
+            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
+            width=textwidth+10, # select boxes need 10px more than text areas
+        )
+        self.venue = SelectBox(
+            name="venue",
+            label=static_knowl("venue"),
+            options=[("", ""),
+                     ("online", "online"),
+                     ("in-person", "in-person")
+            ]
+        )
+
+        self.recent = ComboBox(
+            name="recent",
+            label="Edited within",
+            spantext="hours",
+            spanextras=' style="margin-left:5px;"',
+            example="168",
+            example_span=False,
+            width=50,
+        )
+        self.audience = SelectBox(
+            name="audience",
+            label="Audience",
+            width=textwidth+10, # select boxes need 10px more than text areas
+            options=[("", "")] + [(str(code), desc) for (code, desc) in audience_options],
+        )
+
     def main_table(self, info=None):
         return self._print_table(self.array, info, layout_type="horizontal")
 
@@ -242,25 +309,7 @@ class SemSearchArray(SearchArray):
 
 class TalkSearchArray(SemSearchArray):
     def __init__(self, past=False):
-        ## pick institution where it is held
-        institution = SelectBox(
-            name="institution",
-            label="Institution",
-            options=[("", ""), ("None", "No institution",),]
-            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
-            width=textwidth+10, # select boxes need 10px more than text areas
-        )
-
-        venue = SelectBox(
-            name="venue",
-            label=static_knowl("venue"),
-            options=[("", ""),
-                     ("online", "online"),
-                     ("in-person", "in-person")
-                     ]
-        )
-        assert venue
-
+        SemSearchArray.__init__(self)
         speaker = TextBox(
             name="speaker",
             label="Speaker",
@@ -289,44 +338,19 @@ class TalkSearchArray(SemSearchArray):
             example_span=False,
             width=textwidth,
         )
-        recent = ComboBox(
-            name="recent",
-            label="Edited within",
-            spantext="hours",
-            spanextras=' style="margin-left:5px;"',
-            example="168",
-            example_span=False,
-            width=50,
-        )
+        livestream_available = Toggle("access", "Livestream available")
 
-        video = Toggle(name="video", label="Has video")
+        videoslidespaper = TripleToggle("video", "Has video", "slides", "slides", "paper", "paper")
         self.array = [
-            [institution, video if past else recent],
-            [speaker, affiliation],
+            [self.institution, self.audience],
+            [speaker, videoslidespaper if past else self.recent],
+            [affiliation] if past else [affiliation, livestream_available],
             [date, time],
         ]
 
 class SeriesSearchArray(SemSearchArray):
     def __init__(self, conference=False, past=False):
-        ## pick institution where it is held
-        institution = SelectBox(
-            name="institution",
-            label="Institution",
-            options=[("", ""), ("None", "No institution",),]
-            + [(elt["shortname"], elt["name"]) for elt in institutions_shortnames()],
-            width=textwidth+10, # select boxes need 10px more than text areas
-        )
-
-        venue = SelectBox(
-            name="venue",
-            label=static_knowl("venue"),
-            options=[("", ""),
-                     ("online", "online"),
-                     ("in-person", "in-person")
-                     ]
-        )
-        assert venue
-
+        SemSearchArray.__init__(self)
         organizer = TextBox(
             name="organizer",
             label="Organizer",
@@ -341,9 +365,10 @@ class SeriesSearchArray(SemSearchArray):
             width=textwidth,
             extra=['autocomplete="off"'],
         )
+
         self.array = [
-            [institution],
-            [organizer],
+            [self.institution, self.audience],
+            [organizer] if past else [organizer, self.recent],
         ]
         if conference:
             self.array.append([date])
@@ -375,7 +400,10 @@ def read_search_cookie(search_array):
     info = {}
     for row in search_array.array:
         for box in row:
-            if isinstance(box, SearchBox):
+            if isinstance(box, TripleToggle):
+                for name in [box.name, box.mtoggle.name, box.rtoggle.name]:
+                    info[name] = request.cookies.get("search_" + name, "")
+            elif isinstance(box, SearchBox):
                 info[box.name] = request.cookies.get("search_" + box.name, "")
     return info
 
@@ -467,6 +495,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     talks_parser(info, more)
     if topdomain() == "mathseminars.org":
         query["topics"] = {"$contains": "math"}
+    query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
         query["end_time"] = {"$lt": datetime.now()}
@@ -532,16 +561,19 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         # Ignore the possibility that the user/conference is in Kiribati.
         recent = datetime.now().date() - timedelta(days=1)
         query["end_date"] = {"$lt" if past else "$gte": recent}
+    query["visibility"] = 2 # only show public talks
+    query["display"] = True # don't show talks created by users who have not been endorsed
     kw_query = query.copy()
     parse_substring(info, kw_query, "keywords", series_keyword_columns())
     org_query, more = {}, {}
     # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more, org_query)
-    query["visibility"] = 2
     results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), more=more))
     if info.get("keywords", ""):
         parse_substring(info, org_query, "keywords", organizers_keyword_columns())
         results += list(seminars_search(query, organizer_dict=all_organizers(org_query), more=more))
+        unique = {s.shortname:s for s in results}
+        results = [unique[key] for key in unique]
     series = series_sorted(results, conference=conference, reverse=past)
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
@@ -564,36 +596,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         response.set_cookie("topics", "", max_age=0)
     return response
 
-@app.route("/search/talks")
-def search_talks():
-    info = to_dict(
-        request.args, search_array=TalkSearchArray()
-    )
-    if "search_type" not in info:
-        info["talk_online"] = True
-        info["daterange"] = info.get("daterange", datetime.now(current_user.tz).strftime("%B %d, %Y -")
-        )
-    try:
-        talk_count = int(info["talk_count"])
-        talk_start = int(info["talk_start"])
-        if talk_start < 0:
-            talk_start += (1 - (talk_start + 1) // talk_count) * talk_count
-    except (KeyError, ValueError):
-        talk_count = info["talk_count"] = 50
-        talk_start = info["talk_start"] = 0
-    talk_query = {}
-    talks_parser(info, talk_query)
-    talks = talks_search(
-        talk_query, sort=["start_time", "speaker"], seminar_dict=all_seminars()
-    )  # limit=talk_count, offset=talk_start
-    # The talk query isn't sufficient since we don't do a join so don't have access to whether the seminar is private
-    talks = [talk for talk in talks if talk.searchable()]
-    info["results"] = talks
-    return render_template(
-        "search_talks.html", title="Search talks", info=info, section="Search", subsection="talks", bread=None,
-    )
-
-
 @app.route("/institutions/")
 def list_institutions():
     section = "Manage" if current_user.is_creator else None
@@ -611,7 +613,7 @@ def list_institutions():
 @app.route("/seminar/<shortname>")
 def show_seminar(shortname):
     # We need organizers to be able to see seminars with display=False
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None:
         return abort(404, "Seminar not found")
     if not seminar.visible():
@@ -671,7 +673,7 @@ def talks_search_api(shortname, projection=1):
 
 @app.route("/seminar/<shortname>/bare")
 def show_seminar_bare(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -695,7 +697,7 @@ def show_seminar_bare(shortname):
 
 @app.route("/seminar/<shortname>/json")
 def show_seminar_json(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery={})
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -761,7 +763,7 @@ def embed_seminar_js():
 
 @app.route("/seminar/<shortname>/ics")
 def ics_seminar_file(shortname):
-    seminar = seminars_lucky({"shortname": shortname}, prequery=False)
+    seminar = seminars_lucky({"shortname": shortname})
     if seminar is None or not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
         seminar = seminars_lucky({"shortname": shortname})
@@ -788,7 +790,7 @@ def ics_talk_file(seminar_id, talkid):
 @app.route("/talk/<seminar_id>/<int:talkid>/")
 def show_talk(seminar_id, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
-    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid}, prequery={})
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
     if talk is None:
         return abort(404, "Talk not found")
     if not talk.visible():

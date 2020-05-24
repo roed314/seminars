@@ -18,8 +18,10 @@
           <td><input name="password" type="password" /></td>
           <td> (<a href="{{ url_for('.reset_password') }}">Forgot password?</a>) </td>
       </tr>
-      <tr><td class="spacing" colspan="2"/></tr>
-      <tr><td /><td><button name="submit" type="submit">Login</button></td></tr>
+      <tr>
+        <td></td>
+        <td><button class="save" name="submit" type="submit">Login</button></td>
+      </tr>
     </table>
   </form>
 
@@ -66,6 +68,13 @@
     <h2>Adding content</h2>
     <p>
       To add content or manage the series that you organize, use the <a href="{{ url_for('create.index') }}">Manage</a> tab in the top menu.
+    {% if user.is_creator and user.api_access %}
+        Users who wish to write scripts to add content to our site
+        or to retrieve content automatically 
+        may do so via our application programming interface (API);
+        see the <a href="{{ url_for('api.help') }}">API documentation</a> 
+        for details.
+    {% endif %}
     </p>
 
     <h2>Endorse someone to add content</h2>
@@ -136,13 +145,9 @@
           </select>
         </td>
       </tr>
-
-
-      <tr><td colspan="3" class="spacing" /></tr>
       <tr>
-        <td/><td colspan="2">
-          <button type="submit" tabindex="5">Update details</button>
-        </td>
+        <td></td>
+        <td colspan="2"><button class="save" type="submit" tabindex="5">Update details</button></td>
       </tr>
 
     </table>
@@ -167,20 +172,12 @@
         <td><input id="pw2" name="password2" type="password" style="width:260px;" required></td>
         <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td>
       </tr>
-      <tr><td colspan="2" class="spacing"></td></tr>
-      <tr><td/><td><button name="submit" type="submit">Change Password</button></td></tr>
+      <tr>
+        <td></td>
+        <td><button class="save" name="submit" type="submit">Change Password</button></td>
+      </tr>
     </table>
   </form>
-  {% if user.is_creator and user.api_access %}
-      <h2>Adding content through API</h2>
-      <p>
-        Users who wish to write scripts to add content to our site
-        or to retrieve content automatically 
-        may do so via our application programming interface (API).
-        See the <a href="{{ url_for('api.help') }}">API documentation</a> 
-        for details.
-      </p>
-    {% endif %}
 
   <h2>Delete account</h2>
 

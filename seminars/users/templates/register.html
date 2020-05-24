@@ -23,9 +23,9 @@ the <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
       <td>Email:</td>
       <td><input name="email" size="30" value="{{ email }}" /></td>
       <td colspan="2" class="forminfo">By default, not visible to others.</td></tr>
-    <tr>
-      <td colspan="2" class="spacing" /></tr>
-    <tr><td colspan="2" class="forminfo" />Don't use a password that you use elsewhere!</tr>
+    <tr
+      ><td style="height: 20px; vertical-align: middle;" colspan="2" class="forminfo">Don't use a password that you use elsewhere!</td>
+    </tr>
     <tr>
       <td>Password:</td>
       <td><input id="pw1" name="password1" type="password" size="30"/></td>
@@ -36,28 +36,22 @@ the <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
       <td><input id="pw2" name="password2" type="password" size="30"/></td>
       <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td></tr>
     </tr>
-
-    <tr>
-      <td colspan="2" class="spacing" /></tr>
-    <tr>
       <td></td>
-      <td>
-      <button name="submit" type="submit">Register</button>
-      </td>
+      <td><button class="save" name="submit" type="submit">Register</button></td>
     </tr>
   </table>
 </form>
 
-
 <script type="text/javascript">
-// this tells the user if the passwords match
-$(function () {
-  $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-  $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-  checkpw();
-})
+document.addEventListener("DOMContentLoaded", function() {
+  /* this tells the user if the passwords match */
+  $(function () {
+    $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+    $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+    checkpw();
+  });
+});
 </script>
-
 
 {% endblock %}
 

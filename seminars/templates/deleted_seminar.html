@@ -2,7 +2,6 @@
 
 {% block content %}
 
-
 {% if user.is_subject_admin(seminar) or seminar.owner == user.email %}
 
 <form action="{{ url_for('.delete_seminar',  shortname=shortname) }}" method="POST">
@@ -16,7 +15,6 @@
     <b>This cannot be undone</b>.
     </p>
 {% endif %}
-<br>
 <table><tr>
 {% if seminar.deleted %}
         <td><button class="save" type="submit" name="submit" value="revive">Revive series</button></td>
@@ -27,7 +25,6 @@
     <td><button class="savedelete" type="submit" name="submit" value="permdelete">Permanently delete series</button></td>
 {% endif %}
 </tr></table>
-<br>
 <h2>{{ seminar.show_name(plain=True) | safe }}</h2>
 
 {% if talks %}
@@ -48,7 +45,6 @@
 {% else %}
     <p>You do not have permission to delete this {{seminar.series_type}}.</p>
 {% endif %}
-
 
 {% endif %}
 
