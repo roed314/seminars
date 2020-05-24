@@ -23,6 +23,7 @@
     <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
     <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
     <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
+    <button class="save" type="submit" value="save" onclick="unsaved = false;" style="float: right;">Save changes</button>
     <table style="min-width:750px;">
       <tr>
         <td style="min-width:150px;">{{ KNOWL("seminar_id") }}</td>
