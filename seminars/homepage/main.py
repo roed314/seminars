@@ -376,10 +376,22 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
 def index():
-    if request.method == "POST":
-        print(str(dict(request.form)))
+    if request.method == "GET" and requst.args.get("submit"):
+        x = split(request.args["submit"],':')
+        subsection=x[0]
+        print("subsection: "+subsection)
+        keywords=':'.join(x[1:])
+        print("keywords: "+subsection)
+        if subsection="conferences":
+            return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords)
+        elif subsection="semseries":
+            return _series_index({"is_conference": False}, subsection=subsection, keywords=keywords)
+        elif subsection="past_talks":
+            return _talks_index(subsection=subsection, past=True, keywords=keywords)
+        else:
+            return _talks_index(subsection=subsection, keywords=keywords)
     return _talks_index(subsection="talks")
 
 @app.route("/conferences")
