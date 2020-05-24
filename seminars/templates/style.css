@@ -834,10 +834,10 @@ div.submenu-nav, div.toggler-nav {
 div.submenu-nav {
     margin: 0px 4px 0px 4px;
 }
-button.submenu-nav {
+div.submenu-nav button {
   background: none!important;
   border: none;
-  padding: 0px;
+  padding: 8px 16px 8px 16px;
   color: {{color.header_background }};
   text-decoration: none;
   font-family: sans-serif;
@@ -847,9 +847,7 @@ button.submenu-nav {
   min-width: 0;
   border-radius: 0;
 }
-form button.submenu-nav:hover {
-  padding: 8px 16px 8px 16px;
-  margin: 0px!important;
+div.submenu-nav button:hover {
   background: {{ color.a_background_hover }}!important;
   border: none;
 }
