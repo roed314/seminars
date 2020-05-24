@@ -916,7 +916,7 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
 
     # Don't try to create new_version using invalid input
     if errmsgs:
-        return show_input_errors(errmsgs)
+        return data. errmsgs
     else:  # to make it obvious that these two statements should be together
         new_version = WebTalk(talk.seminar_id, data=data)
 
