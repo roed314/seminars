@@ -837,7 +837,7 @@ div.submenu-nav {
 button.submenu-nav {
   background: none!important;
   border: none;
-  padding: 8px;
+  padding: 0px;
   color: {{color.header_background }};
   text-decoration: none;
   font-family: sans-serif;
