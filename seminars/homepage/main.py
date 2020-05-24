@@ -9,7 +9,8 @@ from seminars.utils import (
     adapt_datetime,
     date_and_daytime_to_time,
     date_and_daytimes_to_times,
-    process_user_input
+    process_user_input,
+    url_for_with_args,
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
@@ -383,6 +384,7 @@ def index():
         x = data["submit"].strip().split(' ')
         subsection=x[0]
         keywords = ' '.join(x[1:])
+        return redirect(url_for_with_args(subsection+"_index", {'keywords': keywords}))
         if subsection == "conferences":
             if keywords:
                 return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords, conference=True)
