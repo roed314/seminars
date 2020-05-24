@@ -35,19 +35,19 @@
     <header class="inner">
       <div class="submenu-inner">
         <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
-          <a href="{{ url_for('index') }}">Talks</a>
+          <a href="{{ url_for_with_args('index', request.args) }}">Talks</a>
         </div>
         <div class="submenu-nav{% if subsection == 'conferences' %} submenu-active{% endif %}">
-          <a href="{{ url_for('conf_index') }}">Conferences</a>
+          <a href="{{ url_for_with_args('conf_index', request.args) }}">Conferences</a>
         </div>
         <div class="submenu-nav{% if subsection == 'semseries' %} submenu-active{% endif %}">
-          <a href="{{ url_for('semseries_index') }}">Seminar series</a>
+          <a href="{{ url_for_with_args('semseries_index', request.args) }}">Seminar series</a>
         </div>
         <div class="submenu-nav{% if subsection == 'past_talks' %} submenu-active{% endif %}">
-          <a href="{{ url_for('past_index') }}">Past talks</a>
+          <a href="{{ url_for_with_args('past_index', request.args) }}">Past talks</a>
         </div>
         <div class="submenu-nav{% if subsection == 'past_conferences' %} submenu-active{% endif %}">
-          <a href="{{ url_for('past_conf_index') }}">Past conferences</a>
+          <a href="{{ url_for_with_args('past_conf_index', request.args) }}">Past conferences</a>
         </div>
       </div>
     </header>
