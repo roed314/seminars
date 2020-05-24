@@ -229,6 +229,9 @@ class WebSeminar(object):
                 if self.access_registration is None:
                     sts = False
                     log_error("access_registration is None for online series %s with access_control == 5" % self.shortname)
+        if not self.topics:
+            sts = False
+            log_error("No topics set for series %s" % self.shortname)
         return sts        
 
     def cleanse(self):
