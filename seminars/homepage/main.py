@@ -376,9 +376,10 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == "GET" and request.args.get("submit"):
+    data = reqeust.args if request.method == "GET" else request.form
+    if data.get("submit"):
         x = request.args["submit"].split(':')
         subsection=x[0]
         print("subsection: " + subsection)
