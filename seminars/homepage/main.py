@@ -381,9 +381,9 @@ def index():
     if request.method == "GET" and request.args.get("submit"):
         x = request.args["submit"].split(':')
         subsection=x[0]
-        print("subsection: "+subsection)
+        print("subsection: " + subsection)
         keywords = ':'.join(x[1:])
-        print("keywords: "+subsection)
+        print("keywords: "+ keywords)
         if subsection == "conferences":
             return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords)
         elif subsection == "semseries":
