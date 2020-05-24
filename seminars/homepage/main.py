@@ -377,39 +377,13 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
 def index():
-    data = request.args if request.method == "GET" else request.form
-    if data.get("submit"):
-        x = data["submit"].strip().split(' ')
+    if request.args.get("submit"):
+        x = request.args["submit"].strip().split(' ')
         subsection=x[0]
         keywords = ' '.join(x[1:])
         return redirect(url_for_with_args(subsection+"_index", {'keywords': keywords}))
-        if subsection == "conferences":
-            if keywords:
-                return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords, conference=True)
-            else:
-                return redirect(url_for("conferences_index"))
-        elif subsection == "seminar_series":
-            if keywords:
-                return _series_index({"is_conference": False}, subsection=subsection, keywords=keywords, conference=False)
-            else:
-                return redirect(url_for("seminar_series_index"))
-        elif subsection == "past_talks":
-            if keywords:
-                return _talks_index(subsection=subsection, past=True, keywords=keywords)
-            else:
-                return redirect(url_for("past_talks_index"))
-        elif subsection == "past_conferences":
-            if keywords:
-                return _series_index({"is_conference": True}, subsection=subsection, past=True, keywords=keywords, conference=True)
-            else:
-                return redirect(url_for("past_conferences_index"))
-        else:
-            if keywords:
-                return _talks_index(subsection=subsection, keywords=keywords)
-            else:
-                return redirect(url_for("talks_index"))
     return _talks_index(subsection="talks")
 
 @app.route("/talks")
