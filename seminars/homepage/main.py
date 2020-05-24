@@ -382,13 +382,13 @@ def index():
         x = split(request.args["submit"],':')
         subsection=x[0]
         print("subsection: "+subsection)
-        keywords=':'.join(x[1:])
+        keywords = ':'.join(x[1:])
         print("keywords: "+subsection)
-        if subsection="conferences":
+        if subsection == "conferences":
             return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords)
-        elif subsection="semseries":
+        elif subsection == "semseries":
             return _series_index({"is_conference": False}, subsection=subsection, keywords=keywords)
-        elif subsection="past_talks":
+        elif subsection == "past_talks":
             return _talks_index(subsection=subsection, past=True, keywords=keywords)
         else:
             return _talks_index(subsection=subsection, keywords=keywords)
@@ -489,11 +489,13 @@ def _get_row_attributes(objects):
     return attributes
 
 
-def _talks_index(query={}, sort=None, subsection=None, past=False):
+def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
     # Eventually want some kind of cutoff on which talks are included.
     search_array = TalkSearchArray(past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
+    if keywords:
+        info["keywords"] = keywords
     query = dict(query)
     parse_substring(info, query, "keywords",
                     ["title",
@@ -565,10 +567,12 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
         response.set_cookie("topics", "", max_age=0)
     return response
 
-def _series_index(query, sort=None, subsection=None, conference=True, past=False):
+def _series_index(query, sort=None, subsection=None, conference=True, past=False, keytext=""):
     search_array = SeriesSearchArray(conference=conference, past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
+    if keywords:
+        info["keywords"] = keywords
     query = dict(query)
     if conference:
         # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.
@@ -597,6 +601,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         title=title,
         section="Browse",
         subsection=subsection,
+        keytext=keytext,
         info=info,
         series_row_attributes=zip(series, row_attributes),
         is_conference=conference,
