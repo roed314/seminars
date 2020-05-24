@@ -31,11 +31,12 @@
 </div>
 
 {% if section == "Browse" %}
+ <form id="browseform" action="{{ url_for('index') }}" method="POST">
   <div id="browse-submenu">
     <header class="inner">
       <div class="submenu-inner">
         <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
-          <script>function talksubmit(){document.getElementById("talktab").value = "talks " + document.getElementById("keywords"); return false; }</script>
+          <script>function talksubmit(){document.getElementById("talktab").value = "talks " + document.getElementById("keywords"); console.log(document.getElementById("talktab").value); return false; }</script>
           <button type="sumbit" id="talktab" onclick="talksubmit()" value="talks ">
           <!-- <a href="{{ url_for_with_args('index', request.args) }}">Talks</a> -->
         </div>
@@ -54,6 +55,7 @@
       </div>
     </header>
   </div>
+</form>
 
 {% elif section in ["Manage", "Create"] %}
   <div id="manage-submenu">
