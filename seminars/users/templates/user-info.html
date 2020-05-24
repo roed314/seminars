@@ -27,7 +27,7 @@
 
 {% else %}
   <form name="logout", action="{{ url_for('.logout') }}" method="POST">
-  <h1>Welcome, {{ user.name }} <div style="float: right; margin-right: 50px"><td><button class="save" name="submit" type="submit">Logout</button></td>
+  <h2>Welcome, {{ user.name }}</h2> <div style="float: right; margin-right: 50px"><td><button class="save" name="submit" type="submit">Logout</button></td>
 </div></h1>
   <h3> Favorite series </h3>
   <div style="margin-left: 1em;">
