@@ -390,6 +390,8 @@ def index():
             return _series_index({"is_conference": False}, subsection=subsection, keywords=keywords)
         elif subsection == "past_talks":
             return _talks_index(subsection=subsection, past=True, keywords=keywords)
+        elif subsection == "past_conferences":
+            return _series_index({"is_conference": True}, subsection=subsection, past=True, keywords=keywords)
         else:
             return _talks_index(subsection=subsection, keywords=keywords)
     return _talks_index(subsection="talks")
