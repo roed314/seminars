@@ -386,31 +386,50 @@ def index():
         keywords = ' '.join(x[1:])
         print("keywords: "+ keywords)
         if subsection == "conferences":
-            return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords, conference=True)
-        elif subsection == "semseries":
-            return _series_index({"is_conference": False}, subsection=subsection, keywords=keywords, conference=False)
+            if keywords:
+                return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords, conference=True)
+            else:
+                return redirect(url_for("conferences_index"))
+        elif subsection == "seminar_series":
+            if keywords:
+                return _series_index({"is_conference": False}, subsection=subsection, keywords=keywords, conference=False)
+            else:
+                return redirect(url_for("seminar_series_index"))
         elif subsection == "past_talks":
-            return _talks_index(subsection=subsection, past=True, keywords=keywords)
+            if keywords:
+                return _talks_index(subsection=subsection, past=True, keywords=keywords)
+            else:
+                return redirect(url_for("past_talks_index"))
         elif subsection == "past_conferences":
-            return _series_index({"is_conference": True}, subsection=subsection, past=True, keywords=keywords, conference=True)
+            if keywords:
+                return _series_index({"is_conference": True}, subsection=subsection, past=True, keywords=keywords, conference=True)
+            else:
+                return redirect(url_for("past_conferences_index"))
         else:
-            return _talks_index(subsection=subsection, keywords=keywords)
+            if keywords:
+                return _talks_index(subsection=subsection, keywords=keywords)
+            else:
+                return redirect(url_for("talks_index"))
     return _talks_index(subsection="talks")
 
+@app.route("/talks")
+def talks_index():
+    return _talks_index(subsection="talks", past=True)
+
 @app.route("/conferences")
-def conf_index():
+def conferences_index():
     return _series_index({"is_conference": True}, subsection="conferences", conference=True)
 
 @app.route("/seminar_series")
-def semseries_index():
-    return _series_index({"is_conference": False}, subsection="semseries", conference=False)
+def seminar_series_index():
+    return _series_index({"is_conference": False}, subsection="seminar_series", conference=False)
 
-@app.route("/past")
-def past_index():
+@app.route("/past_talks")
+def past_talks_index():
     return _talks_index(subsection="past_talks", past=True)
 
 @app.route("/past_conferences")
-def past_conf_index():
+def past_conferences_index():
     return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
 def read_search_cookie(search_array):
@@ -642,7 +661,7 @@ def show_seminar(shortname):
         seminar = seminars_lucky({"shortname": shortname})
         if seminar is None or not seminar.visible():
             flash_error("You do not have permission to view %s", seminar.name)
-            return redirect(url_for("semseries_index"), 302)
+            return redirect(url_for("seminar_series_index"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
     future = []
@@ -819,7 +838,7 @@ def show_talk(seminar_id, talkid):
         talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
         if talk is None or not talk.visible():
             flash_error("You do not have permission to view %s/%s", seminar_id, talkid)
-            return redirect(url_for("semseries_index"))
+            return redirect(url_for("seminar_series_index"))
     kwds = dict(
         title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token
     )
