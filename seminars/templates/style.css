@@ -837,7 +837,7 @@ div.submenu-nav {
 button.submenu-nav {
   background: none!important;
   border: none;
-  padding: 8px 16px 8px 16px;
+  padding: 8px;
   color: {{color.header_background }};
   text-decoration: none;
   font-family: sans-serif;
@@ -848,6 +848,7 @@ button.submenu-nav {
   border-radius: 0;
 }
 form button.submenu-nav:hover {
+  padding: 8px 16px 8px 16px;
   background: {{ color.a_background_hover }}!important;
   border: none;
 }
