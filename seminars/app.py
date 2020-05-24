@@ -288,7 +288,7 @@ def robots_txt():
 # geeky pages have humans.txt
 @app.route("/humans.txt")
 def humans_txt():
-    return render_template("acknowledgment.html", title="Acknowledgments")
+    return render_template("acknowledgments.html", title="Acknowledgments")
 
 
 def routes():
