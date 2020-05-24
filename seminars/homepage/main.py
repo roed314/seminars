@@ -572,6 +572,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
                     talk.more = (t0 <= talkstart) and (talkend <= t1)
     counters = _get_counters(talks)
     row_attributes = _get_row_attributes(talks)
+    print("past = " + str(past))
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse past talks" if past else "Browse talks",
