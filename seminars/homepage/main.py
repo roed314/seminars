@@ -383,7 +383,7 @@ def index():
         x = request.args["submit"].strip().split(' ')
         subsection=x[0]
         keywords = ' '.join(x[1:])
-        return redirect(url_for_with_args(subsection+"_index", {'keywords': keywords}))
+        return redirect(url_for_with_args(subsection+"_index", {'keywords': keywords} if keywords else {}))
     return _talks_index(subsection="talks")
 
 @app.route("/talks")
