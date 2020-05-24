@@ -26,8 +26,9 @@
   </form>
 
 {% else %}
-
-  <h1>Welcome, {{ user.name }} <div style="float: right; margin-right: 50px"><a href="{{ url_for(".logout") }}">Logout</a></div></h1>
+  <form name="logout", action="{{ url_for('.logout') }}" method="POST">
+  <h1>Welcome, {{ user.name }} <div style="float: right; margin-right: 50px"><td><button class="save" name="submit" type="submit">Logout</button></td>
+</div></h1>
   <h3> Favorite series </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
@@ -174,7 +175,7 @@
       </tr>
       <tr>
         <td></td>
-        <td><button class="save" name="submit" type="submit">Change Password</button></td>
+        <td><button class="save" name="submit" type="submit">Change password</button></td>
       </tr>
     </table>
   </form>
