@@ -847,7 +847,7 @@ button.submenu-nav {
   min-width: 0;
   border-radius: 0;
 }
-form button..submenu-nav:hover {
+form button.submenu-nav:hover {
   background: {{ color.a_background_hover }}!important;
   border: none;
 }
