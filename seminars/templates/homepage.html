@@ -35,23 +35,21 @@
   <div id="browse-submenu">
     <header class="inner">
       <div class="submenu-inner">
+       <script>function mysubmit(tab){document.getElementById(tab).value = tab + ":" + $('input[name="keywords"]')[0].value; return false; }</script>
         <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
-          <script>function mysubmit(tab){document.getElementById(tab).value = tab + ":" + $('input[name="keywords"]')[0].value; return false; }</script>
           <button type="submit" name="submit" onclick="mysubmit('talks')" id="talks">Talks</button>
-          <!-- <a href="{{ url_for_with_args('index', request.args) }}">Talks</a> -->
         </div>
         <div class="submenu-nav{% if subsection == 'conferences' %} submenu-active{% endif %}">
           <button type="submit" name="submit" onclick="mysubmit('conferences')" id="conferences">Conferences</button>
-          <!--<a href="{{ url_for_with_args('conf_index', request.args) }}">Conferences</a>-->
         </div>
         <div class="submenu-nav{% if subsection == 'semseries' %} submenu-active{% endif %}">
-          <a href="{{ url_for_with_args('semseries_index', request.args) }}">Seminar series</a>
+          <button type="submit" name="submit" onclick="mysubmit('semseries')" id="conferences">Seminar series</button>
         </div>
         <div class="submenu-nav{% if subsection == 'past_talks' %} submenu-active{% endif %}">
-          <a href="{{ url_for_with_args('past_index', request.args) }}">Past talks</a>
+          <button type="submit" name="submit" onclick="mysubmit('past_talks')" id="conferences">Past talks</button>
         </div>
         <div class="submenu-nav{% if subsection == 'past_conferences' %} submenu-active{% endif %}">
-          <a href="{{ url_for_with_args('past_conf_index', request.args) }}">Past conferences</a>
+          <button type="submit" name="submit" onclick="mysubmit('past_conferences')" id="conferences">Past conferences</button>
         </div>
       </div>
     </header>
