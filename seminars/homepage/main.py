@@ -376,8 +376,10 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
+    if request.method == "POST":
+        print(request.form)
     return _talks_index(subsection="talks")
 
 @app.route("/conferences")
