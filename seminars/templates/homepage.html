@@ -35,7 +35,7 @@
     <header class="inner">
       <div class="submenu-inner">
         <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
-          <script>function talksubmit(){document.getElement_ById("talktab").value = "talks " + document.getElementById("keywords"); return False; }</script>
+          <script>function talksubmit(){document.getElementById("talktab").value = "talks " + document.getElementById("keywords"); return False; }</script>
           <button type="sumbit" id="talktab" onclick="talksubmit()" value="talks ">
           <!-- <a href="{{ url_for_with_args('index', request.args) }}">Talks</a> -->
         </div>
