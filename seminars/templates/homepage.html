@@ -35,7 +35,7 @@
   <div id="browse-submenu">
     <header class="inner">
       <div class="submenu-inner">
-       <script>function mysubmit(s, section){document.getElementById(s+"_button").value = s + ":" + $('input[name="keywords"]')[0].value; return false; }</script>
+       <script>function mysubmit(s, section){document.getElementById(s+"_button").value = s + " " + $('input[name="keywords"]')[0].value; return false; }</script>
         <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
           <button type="submit" name="submit" onclick="mysubmit('talks')" id="talks_button">Talks</button>
         </div>
