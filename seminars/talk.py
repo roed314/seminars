@@ -168,6 +168,9 @@ class WebTalk(object):
             if getattr(self, col) is None:
                 sts = False
                 log_error("column %s is None for talk %s/%s" % (col, self.seminar_id, self.seminar_ctr))
+        if not self.topics:
+            sts = False
+            log_error("No topics set for talk %s/%s" % (self.seminar_id, self.seminar_ctr))            
         return sts
 
     def cleanse(self):
