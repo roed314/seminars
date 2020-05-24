@@ -834,11 +834,28 @@ div.submenu-nav, div.toggler-nav {
 div.submenu-nav {
     margin: 0px 4px 0px 4px;
 }
+div.submenu-nav button {
+  background: none;
+  margin: -8px 0px;
+  border: none;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  cursor: inherit;
+  min-width: 0;
+  border-radius: 0;
+  color: {{color.header_background }};
+}
+div.submenu-nav button:hover {
+  border: none;
+  background: {{ color.a_background_hover }}!important;
+}
 div.toggler-nav {
-    margin: 0px 10px 0px 10px;
+    margin: 0px 10px;
 }
 div.submenu-nav a, div.toggler-nav a {
-    padding: 8px 16px 8px 16px;
+    padding: 8px 16px;
     color: {{color.header_background }};
 }
 div.submenu-active, div.toggler-active {
