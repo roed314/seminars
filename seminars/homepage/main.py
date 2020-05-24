@@ -382,9 +382,7 @@ def index():
     if data.get("submit"):
         x = data["submit"].strip().split(' ')
         subsection=x[0]
-        print("subsection: " + subsection)
         keywords = ' '.join(x[1:])
-        print("keywords: "+ keywords)
         if subsection == "conferences":
             if keywords:
                 return _series_index({"is_conference": True}, subsection=subsection, keywords=keywords, conference=True)
@@ -414,7 +412,7 @@ def index():
 
 @app.route("/talks")
 def talks_index():
-    return _talks_index(subsection="talks", past=True)
+    return _talks_index(subsection="talks")
 
 @app.route("/conferences")
 def conferences_index():
@@ -572,7 +570,6 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
                     talk.more = (t0 <= talkstart) and (talkend <= t1)
     counters = _get_counters(talks)
     row_attributes = _get_row_attributes(talks)
-    print("past = " + str(past))
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse past talks" if past else "Browse talks",
