@@ -269,7 +269,7 @@ header.shortinner {
   font: inherit;
   cursor: pointer;
   outline: inherit;
-  pointer-events: none;
+  pointer-events: inherit;
 }
 
 body.knowl #header {
