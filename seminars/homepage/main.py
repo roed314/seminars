@@ -601,7 +601,6 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         title=title,
         section="Browse",
         subsection=subsection,
-        keytext=keytext,
         info=info,
         series_row_attributes=zip(series, row_attributes),
         is_conference=conference,
