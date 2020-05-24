@@ -260,6 +260,16 @@ header.shortinner {
   min-width: 1000px;
 }
 
+.menutab-button {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
 body.knowl #header {
   background: {{ color.knowl_l }};
   box-shadow: 0px 5px 5px {{color.knowl_shadow}};
