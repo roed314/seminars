@@ -37,7 +37,7 @@
               <div id="search-form-wrap">
                 <form>
                   <div>
-                    <input type="text" class="search keywords" value="{{info.get('keywords', '')}}" />
+                    <input type="text" id="keywords" name="keywords" class="search keywords" value="{{info.get('keywords', '')}}" />
                   </div>
                   <button type="submit" class="search inactive"></button>
                   <button type="submit" class="cancel-search{% if not info.get('keywords', '') %} inactive{% endif %}" onclick="clearSearch();"></button>
