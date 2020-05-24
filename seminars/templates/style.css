@@ -847,9 +847,9 @@ button.submenu-nav {
   min-width: 0;
   border-radius: 0;
 }
-form button.submenu-nav.hover {
-  background: {{color.header_background}}!important;
-  border: none!important;
+form button..submenu-nav:hover {
+  background: {{ color.a_background_hover }}!important;
+  border: none;
 }
 div.toggler-nav {
     margin: 0px 10px 0px 10px;
@@ -870,7 +870,7 @@ button.aslink {
   border: none;
   padding: 0!important;
   /*input has OS specific font-family*/
-  color: inherit;/* {{color.col_link}};*/
+  color: {{color.col_link}};
   text-decoration: none;
   font-family: sans-serif;
   font-weight: normal;
