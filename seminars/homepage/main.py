@@ -378,7 +378,7 @@ class SeriesSearchArray(SemSearchArray):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    data = reqeust.args if request.method == "GET" else request.form
+    data = request.args if request.method == "GET" else request.form
     if data.get("submit"):
         x = request.args["submit"].split(':')
         subsection=x[0]
