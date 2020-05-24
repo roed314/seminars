@@ -758,7 +758,12 @@ button.save, button.cancel, button.delete, button.savedelete, button.reject {
     margin-top: 10px;
 }
 
-button.cancel, button.cancelcolors {
+button.side-save, button.side-cancel {
+    vertical-align: text-bottom;
+    margin-top: 0px;
+}
+
+button.cancel, cutton.side-cancel, button.cancelcolors {
     color: blue;
     background-color: white;
 }
