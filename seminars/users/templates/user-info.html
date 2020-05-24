@@ -26,8 +26,9 @@
   </form>
 
 {% else %}
-  <form name="logout", action="{{ url_for('.logout') }}" method="POST">
+  <form action="{{ url_for('.logout') }}" method="POST" name="logout">
   <h2>Welcome, {{ user.name }} <div style="float: right; margin-right: 50px"><button name="submit" type="submit">Logout</button></div></h2>
+  </form>
   <h3> Favorite series </h3>
   <div style="margin-left: 1em;">
   <table class='ntdata'>
@@ -79,7 +80,7 @@
 
     <h2>Endorse someone to add content</h2>
 
-    <form action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
+    <form name="endorse" action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
       <table>
         <tr>
           <td style="width:75px;">
