@@ -619,7 +619,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     row_attributes = _get_row_attributes(series)
     response = make_response(render_template(
         "browse_series.html",
-        title="Browse " + ("past " if past else "") + "conferences" if conference else "serminar series"
+        title="Browse " + ("past " if past else "") + "conferences" if conference else "serminar series",
         section="Browse",
         subsection=subsection,
         info=info,
