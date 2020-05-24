@@ -840,11 +840,10 @@ div.submenu-nav button {
   border: none;
   padding: 8px 16px 8px 16px;
   color: {{color.header_background }};
-  text-decoration: none;
-  font-family: sans-serif;
-  font-weight: normal;
+  font-family: inherit;
+  font-weight: inherit;
   font-size: inherit;
-  cursor: pointer;
+  cursor: inherit;
   min-width: 0;
   border-radius: 0;
 }
