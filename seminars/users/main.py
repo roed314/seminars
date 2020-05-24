@@ -285,7 +285,7 @@ def change_password():
     return redirect(url_for(".info"))
 
 
-@login_page.route("/logout")
+@login_page.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()
