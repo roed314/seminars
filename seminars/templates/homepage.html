@@ -35,21 +35,21 @@
   <div id="browse-submenu">
     <header class="inner">
       <div class="submenu-inner">
-       <script>function mysubmit(tab){document.getElementById(tab).value = tab + ":" + $('input[name="keywords"]')[0].value; return false; }</script>
+       <script>function mysubmit(s, section){document.getElementById(s+"_button").value = s + ":" + $('input[name="keywords"]')[0].value; return false; }</script>
         <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
-          <button type="submit" name="submit" onclick="mysubmit('talks')" id="talks">Talks</button>
+          <button type="submit" name="submit" onclick="mysubmit('talks')" id="talks_button">Talks</button>
         </div>
         <div class="submenu-nav{% if subsection == 'conferences' %} submenu-active{% endif %}">
-          <button type="submit" name="submit" onclick="mysubmit('conferences')" id="conferences">Conferences</button>
+          <button type="submit" name="submit" onclick="mysubmit('conferences')" id="conferences_button">Conferences</button>
         </div>
         <div class="submenu-nav{% if subsection == 'semseries' %} submenu-active{% endif %}">
-          <button type="submit" name="submit" onclick="mysubmit('semseries')" id="semseries">Seminar series</button>
+          <button type="submit" name="submit" onclick="mysubmit('semseries')" id="semseries_button">Seminar series</button>
         </div>
         <div class="submenu-nav{% if subsection == 'past_talks' %} submenu-active{% endif %}">
-          <button type="submit" name="submit" onclick="mysubmit('talks')" id="banana">Past talks</button>
+          <button type="submit" name="submit" onclick="mysubmit('past_talks')" id="past_talks_button">Past talks</button>
         </div>
         <div class="submenu-nav{% if subsection == 'past_conferences' %} submenu-active{% endif %}">
-          <button type="submit" name="submit" onclick="mysubmit('past_conferences')" id="past_conferences">Past conferences</button>
+          <button type="submit" name="submit" onclick="mysubmit('past_conferences')" id="past_conferences_button">Past conferences</button>
         </div>
       </div>
     </header>
