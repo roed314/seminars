@@ -379,7 +379,7 @@ class SeriesSearchArray(SemSearchArray):
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        print(request.form)
+        print(request.form.get("submit"))
     return _talks_index(subsection="talks")
 
 @app.route("/conferences")
