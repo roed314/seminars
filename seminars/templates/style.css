@@ -870,7 +870,7 @@ button.aslink {
   border: none;
   padding: 0!important;
   /*input has OS specific font-family*/
-  color: {{color.col_link}};
+  color: inherit;/* {{color.col_link}};*/
   text-decoration: none;
   font-family: sans-serif;
   font-weight: normal;

@@ -37,7 +37,7 @@
       <div class="submenu-inner">
         <div class="submenu-nav{% if subsection == 'talks' %} submenu-active{% endif %}">
           <script>function talksubmit(){document.getElementById("talktab").value = "talks " + $('input[name="keywords"]')[0].value; return false; }</script>
-          <button type="submit" class="submenu-nav" name="submit" onclick="talksubmit()" id="talktab" value="talks ">Talks</button>
+          <button type="submit" class="aslink" name="submit" onclick="talksubmit()" id="talktab" value="talks ">Talks</button>
           <!-- <a href="{{ url_for_with_args('index', request.args) }}">Talks</a> -->
         </div>
         <div class="submenu-nav{% if subsection == 'conferences' %} submenu-active{% endif %}">
