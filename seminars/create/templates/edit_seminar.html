@@ -101,7 +101,7 @@
       <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1" required /></td>
     </tr>
   {% else %}
-    <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
+    <input id="num_slots" name="num_slots" style="display:none;" value="{{ seminar.time_slots|length }}">
     <tr>
       <td>{{ KNOWL("periodicity") }}</td>
       <td>
@@ -306,8 +306,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     function addslot(e) {
       e.preventDefault();
-      var n = parseInt(document.getElementById('slots').value)+1;
-      document.getElementById('slots').value = '' + n;
+      var n = parseInt(document.getElementById('num_slots').value)+1;
+      document.getElementById('num_slots').value = '' + n;
       if ( n <= 3 ) {
         document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
         document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
@@ -320,8 +320,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     function removeslot(e) {
       e.preventDefault();
-      var n = parseInt(document.getElementById('slots').value)-1;
-      document.getElementById('slots').value = '' + n;
+      var n = parseInt(document.getElementById('num_slots').value)-1;
+      document.getElementById('num_slots').value = '' + n;
       document.getElementById('weekday'+n).value = '';
       document.getElementById('time_slot'+n).value ='';
       if ( n < 3 ) {
@@ -335,8 +335,8 @@ document.addEventListener("DOMContentLoaded", function() {
       return true;
     }
     function showslots() {
-      var n = parseInt(document.getElementById('slots').value);
-      if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+      var n = parseInt(document.getElementById('num_slots').value);
+      if ( n <= 0 ) document.getElementById('num_slots').value = '' + (n=1);
       for ( var i = 0 ; i < n ; i++ ) {
         if ( i < 3 ) {
           document.getElementById('weekday'+i).style.visibility = 'visible';
