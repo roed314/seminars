@@ -113,7 +113,7 @@
       </td>
     </tr>
     </table>
-    <table class='times' {% if not seminar.frequency %} style="display:none;"{% else %} style="min-wdith:750px;"{% endif %}>
+    <table class='times' {% if not seminar.frequency %} style="display:none;"{% else %} style="min-width:750px;"{% endif %}>
       {% for i in range(maxlength["time_slots"]//3) %}
         <tr>
           {% if i == 0 %}
@@ -141,7 +141,7 @@
         {% endfor %}
       {% endfor %}
     </table>
-    <table style="min-wdith:750px;">
+    <table style="min-width:750px;">
   {% endif %}
     <tr>
       <td style="width:150px; padding-top: 20px;">{{ KNOWL("room") }}</td>
