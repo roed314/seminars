@@ -898,7 +898,7 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
         errmsgs.append("Talks must have both a start and end time.")
     if data["title"].upper() == "TBA":
         data["title"] = ""
-        flash_warnmsg("TBA title left blank (it will appear as TBA)")
+        flash_warnmsg("TBA title was converted to blank!  (Blank titles are automatically displayed as TBA on publicly viewable pages.)")
     data["topics"] = clean_topics(data.get("topics"))
     if not data["topics"]:
         errmsgs.append("Please select at least one topic.")
