@@ -27,7 +27,7 @@
       <tr>
         <td style="min-width:150px;">{{ KNOWL("seminar_id") }}</td>
         <td> {{ seminar.shortname }}</td>
-<!--        <td align="center"><button type="submit" value="save" onclick="unsaved = false;" style="margin:0px 0px 10px 30px;">Save changes</button></td>-->
+        <td align="center"><button type="submit" value="save" onclick="unsaved = false;" style="margin:0px 0px 10px 30px;">Save changes</button></td>
       </tr>
       <tr>
         <td>{{ ASTKNOWL("seminar_name") }}</td>
@@ -144,9 +144,9 @@
     <table style="min-wdith:750px;">
   {% endif %}
     <tr>
-      <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
-      <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"></td>
-      <td class="forminfo">Leave blank if online only.</td>
+      <td style="width:150px; padding-top: 20px;">{{ KNOWL("room") }}</td>
+      <td style="padding-top: 20px;"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"></td>
+      <td class="forminfo" style="padding-top: 20px;">Leave blank if online only.</td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("online") }}</td>
