@@ -531,6 +531,7 @@ def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=for
         data["timezone"] = WebInstitution(data["institutions"][0]).timezone
     if not data["is_conference"] and data["frequency"]:
         n = int(raw_data.get("num_slots"))
+        data["weekdays"], data["time_slots"] = [], []
         for i in range(n):
             weekday = daytimes = None
             try:
