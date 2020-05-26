@@ -72,6 +72,10 @@ maxlength = {
 }
 
 
+def tba_like(s):
+    x = s.replace(' ','').replace('.','').lower()
+    return x in ["tba", "tbd", "tobeannounced", "tobedetermined", "unknown", "notknown", "notyetknown"]
+
 def comma_list(items):
     """ return list of stringe as list in English (e.g. [Bill] = Bill, [Bill, Ted] = Bill and Ted, [Bill, Ted, Jane] = Bill, Ted, and Jane) """
     if not items:
