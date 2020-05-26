@@ -27,6 +27,8 @@ from seminars.utils import (
     valid_url,
     valid_email,
     APIError,
+    tba_like,
+    flash_infomsg,
 )
 from seminars.seminar import (
     WebSeminar,
@@ -67,6 +69,7 @@ from dateutil.parser import parse as parse_time
 import pytz
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
+TBA_CONVERSION_MESSAGE = 'To be announced title converted to a blank title that will be shown as "TBA" on all publicly visible pages.'
 
 def seminar_options():
     return {
@@ -898,9 +901,9 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
         errmsgs.append("Speaker name cannot be blank -- use TBA if speaker not chosen.")
     if data["start_time"] is None or data["end_time"] is None:
         errmsgs.append("Talks must have both a start and end time.")
-    if data["title"].upper() == "TBA":
+    if tba_like(data["title"]):
         data["title"] = ""
-        flash_warnmsg("TBA title was converted to blank!  (Blank titles are automatically displayed as TBA on publicly viewable pages.)")
+        flash_infomsg(TBA_CONVERSION_MESSAGE)
     data["topics"] = clean_topics(data.get("topics"))
     if not data["topics"]:
         errmsgs.append("Please select at least one topic.")
@@ -1163,6 +1166,10 @@ def save_seminar_schedule():
         # Don't try to create new_version using invalid input
         if errmsgs:
             return show_input_errors(errmsgs)
+
+        if tba_like(data["title"]):
+            data["title"] = ""
+            flash_infomsg(TBA_CONVERSION_MESSAGE)
 
         if seminar_ctr:
             new_version = WebTalk(talk.seminar_id, data=data)
