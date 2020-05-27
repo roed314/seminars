@@ -26,7 +26,8 @@
     <table style="min-width:750px;">
       <tr>
         <td style="min-width:150px;">{{ KNOWL("seminar_id") }}</td>
-        <td>{{ seminar.shortname }}</td>
+        <td> {{ seminar.shortname }}</td>
+        <td align="center"><button type="submit" value="save" onclick="unsaved = false;" style="margin:0px 0px 10px 30px;">Save changes</button></td>
       </tr>
       <tr>
         <td>{{ ASTKNOWL("seminar_name") }}</td>
@@ -100,7 +101,7 @@
       <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1" required /></td>
     </tr>
   {% else %}
-    <input id="slots" style="display:none;" value="{{ seminar.time_slots|length }}">
+    <input id="num_slots" name="num_slots" style="display:none;" value="{{ seminar.time_slots|length }}">
     <tr>
       <td>{{ KNOWL("periodicity") }}</td>
       <td>
@@ -112,7 +113,7 @@
       </td>
     </tr>
     </table>
-    <table class='times' {% if not seminar.frequency %} style="display:none;"{% else %} style="min-wdith:750px;"{% endif %}>
+    <table class='times' {% if not seminar.frequency %} style="display:none;"{% else %} style="min-width:750px;"{% endif %}>
       {% for i in range(maxlength["time_slots"]//3) %}
         <tr>
           {% if i == 0 %}
@@ -140,12 +141,12 @@
         {% endfor %}
       {% endfor %}
     </table>
-    <table style="min-wdith:750px;">
+    <table style="min-width:750px;">
   {% endif %}
     <tr>
-      <td style="width:150px; padding-top: 20px">{{ KNOWL("room") }}</td>
-      <td style="padding-top: 20px"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"></td>
-      <td class="forminfo">Leave blank if online only.</td>
+      <td style="width:150px; padding-top: 20px;">{{ KNOWL("room") }}</td>
+      <td style="padding-top: 20px;"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"></td>
+      <td class="forminfo" style="padding-top: 20px;">Leave blank if online only.</td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("online") }}</td>
@@ -305,8 +306,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     function addslot(e) {
       e.preventDefault();
-      var n = parseInt(document.getElementById('slots').value)+1;
-      document.getElementById('slots').value = '' + n;
+      var n = parseInt(document.getElementById('num_slots').value)+1;
+      document.getElementById('num_slots').value = '' + n;
       if ( n <= 3 ) {
         document.getElementById('weekday'+(n-1)).style.visibility = 'visible';
         document.getElementById('time_slot'+(n-1)).style.visibility = 'visible';
@@ -319,8 +320,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     function removeslot(e) {
       e.preventDefault();
-      var n = parseInt(document.getElementById('slots').value)-1;
-      document.getElementById('slots').value = '' + n;
+      var n = parseInt(document.getElementById('num_slots').value)-1;
+      document.getElementById('num_slots').value = '' + n;
       document.getElementById('weekday'+n).value = '';
       document.getElementById('time_slot'+n).value ='';
       if ( n < 3 ) {
@@ -334,8 +335,8 @@ document.addEventListener("DOMContentLoaded", function() {
       return true;
     }
     function showslots() {
-      var n = parseInt(document.getElementById('slots').value);
-      if ( n <= 0 ) document.getElementById('slots').value = '' + (n=1);
+      var n = parseInt(document.getElementById('num_slots').value);
+      if ( n <= 0 ) document.getElementById('num_slots').value = '' + (n=1);
       for ( var i = 0 ; i < n ; i++ ) {
         if ( i < 3 ) {
           document.getElementById('weekday'+i).style.visibility = 'visible';

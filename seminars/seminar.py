@@ -168,7 +168,6 @@ class WebSeminar(object):
                         "order": 0,
                         "curator": False,
                         "display": True,
-                        "contact": True,
                     }
                 ]
         else:
@@ -242,7 +241,8 @@ class WebSeminar(object):
         for col in optional_seminar_text_columns:
             if getattr(self, col) is None:
                 setattr(self, col, "")
-        self.validate()
+        if not  self.new:
+            self.validate()
 
     def visible(self, user=None):
         """

@@ -9,7 +9,8 @@ from seminars.utils import (
     adapt_datetime,
     date_and_daytime_to_time,
     date_and_daytimes_to_times,
-    process_user_input
+    process_user_input,
+    url_for_with_args,
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
@@ -376,24 +377,33 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def index():
+    if request.args.get("submit"):
+        x = request.args["submit"].strip().split(' ')
+        subsection=x[0]
+        keywords = ' '.join(x[1:])
+        return redirect(url_for_with_args(subsection+"_index", {'keywords': keywords} if keywords else {}))
+    return _talks_index(subsection="talks")
+
+@app.route("/talks")
+def talks_index():
     return _talks_index(subsection="talks")
 
 @app.route("/conferences")
-def conf_index():
+def conferences_index():
     return _series_index({"is_conference": True}, subsection="conferences", conference=True)
 
 @app.route("/seminar_series")
-def semseries_index():
-    return _series_index({"is_conference": False}, subsection="semseries", conference=False)
+def seminar_series_index():
+    return _series_index({"is_conference": False}, subsection="seminar_series", conference=False)
 
-@app.route("/past")
-def past_index():
+@app.route("/past_talks")
+def past_talks_index():
     return _talks_index(subsection="past_talks", past=True)
 
 @app.route("/past_conferences")
-def past_conf_index():
+def past_conferences_index():
     return _series_index({"is_conference": True}, subsection="past_conferences", conference=True, past=True)
 
 def read_search_cookie(search_array):
@@ -475,11 +485,13 @@ def _get_row_attributes(objects):
     return attributes
 
 
-def _talks_index(query={}, sort=None, subsection=None, past=False):
+def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
     # Eventually want some kind of cutoff on which talks are included.
     search_array = TalkSearchArray(past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
+    if keywords:
+        info["keywords"] = keywords
     query = dict(query)
     parse_substring(info, query, "keywords",
                     ["title",
@@ -536,7 +548,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
     row_attributes = _get_row_attributes(talks)
     response = make_response(render_template(
         "browse_talks.html",
-        title="Browse talks",
+        title="Browse past talks" if past else "Browse talks",
         section="Browse",
         info=info,
         subsection=subsection,
@@ -551,10 +563,12 @@ def _talks_index(query={}, sort=None, subsection=None, past=False):
         response.set_cookie("topics", "", max_age=0)
     return response
 
-def _series_index(query, sort=None, subsection=None, conference=True, past=False):
+def _series_index(query, sort=None, subsection=None, conference=True, past=False, keywords=""):
     search_array = SeriesSearchArray(conference=conference, past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
+    if keywords:
+        info["keywords"] = keywords
     query = dict(query)
     if conference:
         # Be permissive on end-date since we don't want to miss ongoing conferences, and we could have time zone differences.
@@ -577,10 +591,9 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     series = series_sorted(results, conference=conference, reverse=past)
     counters = _get_counters(series)
     row_attributes = _get_row_attributes(series)
-    title = "Browse conferences" if conference else "Browse seminar series"
     response = make_response(render_template(
         "browse_series.html",
-        title=title,
+        title="Browse " + ("past " if past else "") + ("conferences" if conference else "seminar series"),
         section="Browse",
         subsection=subsection,
         info=info,
@@ -621,7 +634,7 @@ def show_seminar(shortname):
         seminar = seminars_lucky({"shortname": shortname})
         if seminar is None or not seminar.visible():
             flash_error("You do not have permission to view %s", seminar.name)
-            return redirect(url_for("semseries_index"), 302)
+            return redirect(url_for("seminar_series_index"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
     future = []
@@ -798,7 +811,7 @@ def show_talk(seminar_id, talkid):
         talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
         if talk is None or not talk.visible():
             flash_error("You do not have permission to view %s/%s", seminar_id, talkid)
-            return redirect(url_for("semseries_index"))
+            return redirect(url_for("seminar_series_index"))
     kwds = dict(
         title="View talk", talk=talk, seminar=talk.seminar, subsection="viewtalk", token=token
     )
