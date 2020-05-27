@@ -307,11 +307,11 @@ class WebTalk(object):
             format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
             return adapt_datetime(self.start_time, newtz=tz).strftime(format)
 
-    def show_time_and_duration(self, adapt=True):
+    def show_time_and_duration(self, adapt=True, tz=None):
         start = self.start_time
         end = self.end_time
         now = datetime.now(pytz.utc)
-        newtz = None if adapt else self.tz
+        newtz = tz if adapt else self.tz
 
         def ans(rmk):
             return "%s-%s (%s)" % (
@@ -351,11 +351,11 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self, _external=False, preload=False):
+    def show_knowl_title(self, _external=False, preload=False, tz=None):
         if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
-                content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external)),
+                content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
             return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
@@ -628,7 +628,7 @@ Thank you,
         if include_seminar:
             cols.append(('class="seriesname"', self.show_seminar()))
         cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
-        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external)))
+        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external, tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))

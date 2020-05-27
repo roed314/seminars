@@ -586,7 +586,7 @@ def user_ics_file(token):
             uid = read_token(token, "ics")
         except BadSignature:
             # old key
-            uid = read_token(token, "ics", key="vVjYyCM99DtirZqMaGMrle")
+            return flask.abort(404, "Invalid link")
         user = SeminarsUser(uid=int(uid))
         if not user.email_confirmed:
             return flask.abort(404, "The email address has not yet been confirmed!")

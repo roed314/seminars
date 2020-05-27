@@ -868,7 +868,8 @@ def title_knowl(series_id, series_ctr, **kwds):
     if talk is None:
         return render_template("404_content.html"), 404
     else:
-        return render_template("talk-knowl.html", talk=talk)
+        # tz = None, uses the users timezone
+        return render_template("talk-knowl.html", talk=talk, tz=None)
 
 
 @app.route("/institution/<shortname>/")
