@@ -1,5 +1,4 @@
 {%- from "macros.html" import calendar_block, KNOWL with context -%}
-
 <div class="talk-body">
   <div class="talk-header-container">
       <div class="talk-title">
@@ -43,10 +42,10 @@
 
     {% if not talk.deleted %}
     {{ calendar_block("talk", talk) }}
-    {% endif %}  
+    {% endif %}
 
     <div align="right">
-        <b>{{ talk.show_time_and_duration() | safe }}</b><br>
+        <b>{{ talk.show_time_and_duration(tz=tz) | safe }}</b><br>
         {% if not talk.is_past() %}
           {% set room = talk.room %}
           {% if room %}
