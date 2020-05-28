@@ -908,6 +908,7 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
     if not data["topics"]:
         errmsgs.append("Please select at least one topic.")
     data["language"] = languages.clean(data.get("language"))
+    print data["chat_link"]
 
     if data["online"]:
         if data["access_control"] == 2 and not data["access_hint"]:

@@ -81,8 +81,8 @@
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['video_link'] }}"placeholder="https://www.youtube.com/watch?v=abc123" /></td>
     </tr>
     <tr>
-      <td>{{ KNOWL("chat_link") }}</td>
-      <td><input name="chat_link" value="{{ seminar.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https/researchseminars.zulipchat.com/#narrow/stream/seriesid/"></td>
+      <td>{{ KNOWL("chat_link", "Chat link") }}</td>
+      <td><input name="chat_link" value="{{ talk.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https/researchseminars.zulipchat.com/#narrow/stream/seriesid/"></td>
     </tr>
     <tr>
       <td>{{ KNOWL("abstract") }}</td>
