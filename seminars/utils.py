@@ -47,6 +47,7 @@ maxlength = {
     'access_hint' : MAX_HINT_LEN,
     'access_registration' : MAX_URL_LEN,
     'aliases' : MAX_NAME_LEN,
+    'chat_link' : MAX_URL_LEN,
     'city' : MAX_NAME_LEN,
     'comments' : MAX_TEXT_LEN,
     'description' : MAX_DESCRIPTION_LEN,
