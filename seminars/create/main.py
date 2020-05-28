@@ -307,7 +307,7 @@ def revive_seminar(shortname):
     if seminar is None:
         flash_error("Series %s does not exist (it may have been deleted permanently).", shortname)
         return redirect(url_for(".index"), 302)
-    if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
+    if not current_user.is_subject_admin(seminar) and seminar.owner != current_user.email:
         flash_error("You do not have permission to revive %s %s.", seminar.series_type, shortname)
         return redirect(url_for(".index"), 302)
     if not seminar.deleted:
@@ -330,7 +330,7 @@ def permdelete_seminar(shortname):
     if seminar is None:
         flash_error("%s %s not found (it may have already been permanently deleted).", seminar.series_type.capitalize(), shortname)
         return redirect(url_for(".index"), 302)
-    if not current_user.is_subject_admin(seminar) and seminar.owner != current_user:
+    if not current_user.is_subject_admin(seminar) and seminar.owner != current_user.email:
         flash_error("Only the owner of the %s %s can permanently delete it.", seminar.series_type, shortname)
         return redirect(url_for(".index"), 302)
     db.seminars.delete({"shortname": shortname})
