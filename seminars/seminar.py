@@ -88,6 +88,7 @@ required_seminar_columns = [
 optional_seminar_text_columns = [
     "access_hint",
     "access_registration",
+    "chat_link",
     "comments",
     "homepage",
     "live_link",

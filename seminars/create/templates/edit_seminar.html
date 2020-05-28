@@ -31,7 +31,7 @@
       </tr>
       <tr>
         <td>{{ ASTKNOWL("seminar_name") }}</td>
-        <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" maxlength="{{ maxlength['name'] }}" required /></td>
+        <td><input size="40" name="name" value="{{ seminar.name | blanknone }}" style="width:600px;" maxlength="{{ maxlength['name'] }}" /></td>
         <td class="forminfo">Capitalize only the first word and proper nouns.</td>
       </tr>
       <tr>
@@ -89,16 +89,16 @@
     <tr>
       <td style="padding-top: 20px">{{ ASTKNOWL("start_date") }}</td>
       <td style="padding-top: 20px">
-        <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" required />
+        <input name="start_date" style="width:600px;" value="{{ seminar.show_input_date(seminar.start_date) }}" style="width:600px;" placeholder="2020-01-27" />
       </td>
     </tr>
     <tr>
       <td> {{ ASTKNOWL("end_date") }}</td>
-      <td><input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" required /></td>
+      <td><input name="end_date" value="{{ seminar.show_input_date(seminar.end_date) }}" style="width:600px;" placeholder="2020-01-31" /></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("per_day") }}</td>
-      <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1" required /></td>
+      <td><input name="per_day" value="{{ seminar.per_day | blanknone }}" style="width:600px;" placeholder="1" /></td>
     </tr>
   {% else %}
     <input id="num_slots" name="num_slots" style="display:none;" value="{{ seminar.time_slots|length }}">
@@ -147,6 +147,10 @@
       <td style="width:150px; padding-top: 20px;">{{ KNOWL("room") }}</td>
       <td style="padding-top: 20px;"><input name="room" value="{{ seminar.room | blanknone }}" style="width:600px;" maxlength="{{ maxlength['room'] }}" placeholder="Room 2-190 in the Simons building"></td>
       <td class="forminfo" style="padding-top: 20px;">Leave blank if online only.</td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("chat_link") }}</td>
+      <td><input name="chat_link" value="{{ seminar.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https/researchseminars.zulipchat.com/#narrow/stream/seriesid"></td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("online") }}</td>
