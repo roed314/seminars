@@ -51,6 +51,7 @@ inherited_talk_columns = [
     "access_hint",
     "access_registration",
     "audience",
+    "chat_link",
     "display",
     "language",
     "live_link",
@@ -65,6 +66,7 @@ optional_talk_text_columns = [
     "abstract",
     "access_hint",
     "access_registration",
+    "chat_link",
     "comments",
     "live_link",
     "room",
@@ -520,8 +522,11 @@ Thank you,
     def show_video_link(self):
         return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
 
+    def show_chat_link(self):
+        return '<a href="%s">chat</a>'%(self.chat_link) if self.chat_link else ""
+
     def show_content_links(self):
-        return '( ' + ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link()])) + ' )'
+        return '( ' + ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link(), self.show_chat_link()])) + ' )'
 
     @property
     def ics_link(self):
