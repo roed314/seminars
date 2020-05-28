@@ -222,7 +222,7 @@
     <input type="hidden" name="access_control" value="{{ talk.access_control }}" />
     <input type="hidden" name="access_time" value="{{ talk.access_time }}" />
     <input type="hidden" name="access_hint" value="{{ talk.access_hint | blanknone }}" />
-    <input type="hidden" name="access_registration" value="{{ talk.access_control | blanknone }}" />
+    <input type="hidden" name="access_registration" value="{{ talk.access_registration | blanknone }}" />
     <input type="hidden" name="live_link" value="{{ talk.live_link | blanknone }}" />
     <input type="hidden" name="stream_link" value="{{ talk.stream_link | blanknone }}" />
     {# attributes non-organizers can edit #}
