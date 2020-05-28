@@ -500,7 +500,9 @@ visibility:
 audience:
   title: Audience
   contents: |
-    Select the intended audience of the series or talk:
+    The options below are roughly ordered from most specialized to broadest.
+    Select the <i>broadest</i> option that matches the intended audience 
+    of the series or talk:
     <ul>
       <li><b>researchers in topic</b>:
           researchers in a particular topic within the discipline.</li>
