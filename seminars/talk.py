@@ -526,7 +526,8 @@ Thank you,
         return '<a href="%s">chat</a>'%(self.chat_link) if self.chat_link else ""
 
     def show_content_links(self):
-        return '( ' + ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link(), self.show_chat_link()])) + ' )'
+        s = ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link(), self.show_chat_link()])) 
+        return '(' + s + ')' if s else ''
 
     @property
     def ics_link(self):
