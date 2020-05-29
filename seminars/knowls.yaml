@@ -252,6 +252,10 @@ room:
     Changing the room of a series has no impact on previously created talks.
     <br><br>
     Instructions to help visitors find the room should be entered in the Comments box (you can include a link to a campus map, for example).
+chat_link:
+  title: Chat stream
+  contents: |
+    The URL for a chat stream or other online discussion forum associated to the talk or series (this might link to a Zulip stream or topic, a Slack channel, or a Discord channel, for example).
 online:
   title: Online
   contents: |

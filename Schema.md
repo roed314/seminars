@@ -1,6 +1,6 @@
 # Schema
 
-This file provides documentation on the underlying schema; try to keep it up to date if you make changes.  Note that there is also some additional infrastructure imported from the LMFDB (counts and stats tables, which we don't use; we have a separate knowls database with the same infrastructure)
+This file provides documentation on the underlying schema; try to keep it up to date if you make changes.  Note that there is also some additional infrastructure imported from the LMFDB (counts and stats tables, which we don't use; we have a separate knowls database with the same infrastructure).  Except for id (always first), columns are sorted by name (please maintain this).
 
 ## Users
 
@@ -11,23 +11,22 @@ Note that we've adapted the LMFDB's model, so we don't use `lmfdb.backend.search
 Column                | Type        |  Notes
 ----------------------|-------------|-------
 id                    | bigint      | auto
-password              | text        | hashed password with bcrypt
-email                 | text        | this will act as username
-email_confirmed       | boolean     | if the email has been confirmed
 admin                 | boolean     | whether the user has admin privileges
-creator               | boolean     | can create seminars which are displayed
-subject_admin         | text        | topic_id for a topic that this user has admin privileges for
-name                  | text        | user's name
 affiliation           | text        | university or other institution
-homepage              | text        | user's website
-created               | timestamptz | when account was created
-endorser              | integer     | userid of another user who endorses this one
-timezone              | text        | time zone code, e.g. "US/Eastern"
-seminar_subscriptions | text[]      | set of short names of seminars that the user is subscribed to
-talks_subscriptions   | json        | dict as {shorname : list of counters}
 api_access            | smallint    | 0 = no access, 1 access
 api_token             | text        | a string that grants access to the account through the api
-(disabled) location              | earth       | for future use
+created               | timestamptz | when account was created
+creator               | boolean     | can create seminars which are displayed
+email                 | text        | this will act as username
+email_confirmed       | boolean     | if the email has been confirmed
+endorser              | integer     | userid of another user who endorses this one
+homepage              | text        | user's website
+name                  | text        | user's name
+password              | text        | hashed password with bcrypt
+seminar_subscriptions | text[]      | set of short names of seminars that the user is subscribed to
+subject_admin         | text        | topic_id for a topic that this user has admin privileges for
+talks_subscriptions   | json        | dict as {shorname : list of counters}
+timezone              | text        | time zone code, e.g. "US/Eastern"
 
 
 ## Institutions, seminars and talks
@@ -47,7 +46,6 @@ name      | text        | name displayed for the institution (anchor for homepag
 shortname | text        | Assigned by admin on creation, used in urls, globally unique, cannot be changed (would break links)
 timezone  | text        | time zone code, e.g. "US/Eastern"
 type      | text        | university, institute, other, taken from selector
-(disabled) location  | earth       | geolocation, not yet used
 
 `seminars`: seminars and conferences.  A coherent sequence of talks.  Columns marked [inherited] are copied into each talk that is part of the seminar and can then be customized for individual talks.
 
@@ -59,6 +57,7 @@ access_time         | integer     | number of minutes before talks.start_time th
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
 access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inhertied]
 audience            | smallint    | 0 = researchers in topic, 1 = researchers in discipline, 2 = advanced learners, 3 = learners, 4 = undergraudates, 5 = general public [inherited]
+chat_link           | text        | URL linking to chat stream for the series (e.g. Zulip, Slack, Discord, ...)
 comments            | text        |
 deleted             | boolean     | True if seminar has been deleted (it can still be revived)
 description         | text        | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
@@ -97,6 +96,7 @@ access_time         | integer     | number of minutes before talk start time liv
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
 access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inhertied]
 audience            | smallint    | 0 = researchers in topic, 1 = researchers in discipline, 2 = advanced learners, 3 = learners, 4 = undergraudates, 5 = general public [inherited]
+chat_link           | text        | URL linking to chat stream for the talk (e.g. Zulip, Slack, Discord, ...)
 comments            | text        | talk specific comments to be displayed in addition to seminar comments
 deleted             | boolean     | indicates talk has been deleted (but can still be revived)
 deleted_with_seminar| boolean     | indicates talk was deleted when seminar was deleted (will be automatically revived if/when seminar is revived)
