@@ -59,6 +59,7 @@ def create_seminar_series():
                                "email": "user@example.org",
                                "homepage": "https://example.org/~user/",
                                "organizer": True, # False for curators, who are not responsible for scientific content
+                               "order": 0,
                                "display": True}]} # True by default
     r = post(url, json=payload, headers={"authorization": authorization()})
     J = r.json()
@@ -89,6 +90,7 @@ def create_conference():
                "organizers": [{"name": "Example User",
                                "email": "user@example.org",
                                "homepage": "https://example.org/~user/",
+                               "order": 0,
                                "organizer": True, # False for curators, who are not responsible for scientific content
                                "display": True}]}
     r = post(url, json=payload, headers={"authorization": authorization()})
@@ -122,7 +124,7 @@ def edit_series():
 
 def create_talk():
     from requests import post
-    url = "https://researchseminars.org/api/0/save/series/"
+    url = "https://researchseminars.org/api/0/save/talk/"
     payload = {"series_id": "test_conf"} # TODO: add more
     r = post(url, json=payload, headers={"authorization": authorization()})
     J = r.json()
