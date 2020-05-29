@@ -355,14 +355,17 @@ def save_series(version=0, user=None):
         # We require specifying the organizers of a new seminar and don't allow updates,
         # so we don't need to get anything from the seminar object
         organizers = raw_data.get("organizers", [])
+        fixed_cols = list(db.seminar_organizers.search_cols)
+        i = fixed_cols.index("curator")
+        fixed_cols[i] = "organizer"
         if not (isinstance(organizers, list) and
                 len(organizers) <= MAX_ORGANIZERS and
                 all(isinstance(OD, dict) and
-                    all(key in db.seminar_organizers.search_cols for key in OD)
+                    all(key in fixed_cols for key in OD)
                     for OD in organizers)):
             raise APIError({"code": "processing_error",
                             "description": "Error in processing organizers",
-                            "errors": ["organizers must be a list of dictionaries (max length %s) with keys %s" % (MAX_ORGANIZERS, ", ".join(db.seminar_organizers.search_cols))]})
+                            "errors": ["organizers must be a list of dictionaries (max length %s) with keys %s" % (MAX_ORGANIZERS, ", ".join(fixed_cols))]})
         for i, OD in enumerate(organizers):
             for col in db.seminar_organizers.search_cols:
                 default = True if col == "display" else ""
