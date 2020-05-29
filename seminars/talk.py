@@ -527,7 +527,7 @@ Thank you,
 
     def show_content_links(self):
         s = ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link(), self.show_chat_link()])) 
-        return '(' + s + ')' if s else ''
+        return '( ' + s + ' )' if s else ''
 
     @property
     def ics_link(self):
