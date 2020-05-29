@@ -120,6 +120,8 @@ def topdomain():
     return ".".join(domain().split(".")[-2:])
 
 def valid_url(x):
+    if not x:
+        return True
     if not (x.startswith("http://") or x.startswith("https://")):
         return False
     try:
@@ -591,7 +593,6 @@ def process_user_input(inp, col, typ, tz=None):
         # allow lists of URLs for speakers
         if col.startswith("speaker"):
             urls = [s.strip() for s in inp.split(SPEAKER_DELIMITER)]
-            print(urls)
             if any([not valid_url(x) for x in urls]):
                 raise ValueError("Invalid URL")
             return (' ' + SPEAKER_DELIMITER + ' ').join(urls)
