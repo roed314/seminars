@@ -56,43 +56,26 @@ def clear_private_data(filename, safe_cols, users, sep):
                     Fout.write(_clear(line, all_cols))
     shutil.move(tmpfile, filename)
 
-def write_content_tbl(tbl, query, selecter):
+def write_content_tbl(folder, filename, tbl, query, selecter, sep):
     cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + tbl.search_cols))
     query = SQL(query)
-    sem_tbl = IdentifierWrapper("seminars")
-    selecter = seminar_selecter.format(sem_cols, sem_cols, sem_tbl, sem_query)
-    filename = os.path.join(folder, "seminars.txt")
-    header = "|".join(["id"] + db.seminars.search_cols) + "\n" + "|".join(["bigint"] + [db.seminars.col_type[col] for col in db.seminars.search_cols]) + "\n\n"
-    db.seminars._copy_to_select(selecter, filename, header)
-    safe_cols = ["id"] + [col for col in db.seminars.search_cols if col in whitelisted_cols]
+    tbl = IdentifierWrapper(tbl.search_table)
+    selecter = selecter.format(cols, cols, tbl, query)
+    filename = os.path.join(folder, filename)
+    header = sep.join(["id"] + tbl.search_cols) + "\n" + sep.join(["bigint"] + [tbl.col_type[col] for col in tbl.search_cols]) + "\n\n"
+    tbl._copy_to_select(selecter, filename, header)
+    safe_cols = ["id"] + [col for col in tbl.search_cols if col in whitelisted_cols]
     clear_private_data(filename, safe_cols, users, sep)
-
 
 def export_dev_db(folder, users, sep="|"):
     # We only export the most recent version in case people removed information they didn't want public
 
     # Seminars table
-    write_content_tbl(db.seminars, " WHERE visibility=2 AND deleted=false", seminar_selecter)
+    write_content_tbl(folder, "seminars.txt", db.seminars, " WHERE visibility=2 AND deleted=false", seminar_selecter, sep)
 
     # Talks table
-    talk_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + db.talks.search_cols))
-    talk_query = SQL(" WHERE hidden=false AND deleted=false")
-    talk_tbl = IdentifierWrapper("talks")
-    selecter = talk_selecter.format(talk_cols, talk_cols, talk_tbl, talk_query)
-    filename = os.path.join(folder, "talks.txt")
-    
-    seminars = list(seminars_search({"visibility": 2}, objects=False))
-    seminar_names = set(seminar["shortname"] for seminar in seminars)
-    talks = list(talks_search({"hidden": False}, objects=False))
-    talks = [talk for talk in talks if talk["seminar_id"] in seminar_names]
+    write_content_tbl(folder, "talks.txt", db.talks, " WHERE hidden=false AND deleted=false", talk_selecter, sep)
+    # Also need to remove talks that are part of seminars with visibility < 2
+
     institutions = list(db.institutions.search())
     new_topics = list(db.new_topics.search())
-    data = dict(
-        seminars=seminars,
-        talks=talks,
-        institutions=institutions,
-        new_topics=
-    for tbl, query in [
-            ("talks", {"hidden": False, "deleted": False, "seminar_id": {"$in": visible_series}}),
-            ("seminars", {"visibility": 2, "deleted": False}),
-            ("institutions", "new_topics", "seminar_organizers", "
