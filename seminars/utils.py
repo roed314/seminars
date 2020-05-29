@@ -120,8 +120,6 @@ def topdomain():
     return ".".join(domain().split(".")[-2:])
 
 def valid_url(x):
-    if not x:
-        return True
     if not (x.startswith("http://") or x.startswith("https://")):
         return False
     try:
@@ -593,7 +591,7 @@ def process_user_input(inp, col, typ, tz=None):
         # allow lists of URLs for speakers
         if col.startswith("speaker"):
             urls = [s.strip() for s in inp.split(SPEAKER_DELIMITER)]
-            if any([not valid_url(x) for x in urls]):
+            if any([not valid_url(x) for x in urls if x]):
                 raise ValueError("Invalid URL")
             return (' ' + SPEAKER_DELIMITER + ' ').join(urls)
         if not valid_url(inp):
@@ -603,7 +601,7 @@ def process_user_input(inp, col, typ, tz=None):
         # allow lists of emails for speakers
         if col.startswith("speaker"):
             emails = [s.strip() for s in inp.split(SPEAKER_DELIMITER)]
-            return (' ' + SPEAKER_DELIMITER + ' ').join([validate_email(x)["email"] for x in emails])
+            return (' ' + SPEAKER_DELIMITER + ' ').join([(validate_email(x)["email"] if x else '') for x in emails])
         return validate_email(inp)["email"]
     elif typ == "timestamp with time zone":
         assert tz is not None
