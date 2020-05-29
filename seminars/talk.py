@@ -17,6 +17,7 @@ from seminars.utils import (
     topdomain,
     comma_list,
     log_error,
+    SPEAKER_DELIMITER,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -80,10 +81,6 @@ optional_talk_text_columns = [
     "title",
     "video_link",
 ]
-
-# the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
-# text strings that may contain delimited lists (which should all have the same length, empty items are OK)
-SPEAKER_DELIMITER = '|'
 
 class WebTalk(object):
     def __init__(
