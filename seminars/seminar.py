@@ -79,6 +79,7 @@ required_seminar_columns = [
     "language",
     "name",
     "online",
+    "owner",
     "shortname",
     "visibility",
     "timezone",
