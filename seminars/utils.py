@@ -28,6 +28,9 @@ daytime_re_string = r"\d{1,4}|\d{1,2}:\d\d|"
 daytime_re = re.compile(daytime_re_string)
 dash_re = re.compile(r'[\u002D\u058A\u05BE\u1400\u1806\u2010-\u2015\u2E17\u2E1A\u2E3A\u2E3B\u2E40\u301C\u3030\u30A0\uFE31\uFE32\uFE58\uFE63\uFF0D]')
 
+# the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
+# text strings that may contain delimited lists (which should all have the same length, empty items are OK)
+SPEAKER_DELIMITER = '|'
 
 # Bounds on input field lengths
 MAX_SHORTNAME_LEN = 32
@@ -585,11 +588,21 @@ def process_user_input(inp, col, typ, tz=None):
         assert tz is not None
         return localize_time(t, tz)
     elif (col.endswith("page") or col.endswith("link")) and typ == "text":
+        # allow lists of URLs for speakers
+        if col.startswith("speaker"):
+            urls = [s.strip() for s in inp.split(SPEAKER_DELIMITER)]
+            if any([not valid_url(x) for x in urls if x]):
+                raise ValueError("Invalid URL")
+            return (' ' + SPEAKER_DELIMITER + ' ').join(urls)
         if not valid_url(inp):
             raise ValueError("Invalid URL")
         return inp
     elif col.endswith("email") and typ == "text":
-        return validate_email(inp.strip())["email"]
+        # allow lists of emails for speakers
+        if col.startswith("speaker"):
+            emails = [s.strip() for s in inp.split(SPEAKER_DELIMITER)]
+            return (' ' + SPEAKER_DELIMITER + ' ').join([(validate_email(x)["email"] if x else '') for x in emails])
+        return validate_email(inp)["email"]
     elif typ == "timestamp with time zone":
         assert tz is not None
         return localize_time(parse_time(inp), tz)
