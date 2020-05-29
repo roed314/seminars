@@ -79,6 +79,7 @@ required_seminar_columns = [
     "language",
     "name",
     "online",
+    "owner",
     "shortname",
     "visibility",
     "timezone",
@@ -88,6 +89,7 @@ required_seminar_columns = [
 optional_seminar_text_columns = [
     "access_hint",
     "access_registration",
+    "chat_link",
     "comments",
     "homepage",
     "live_link",
@@ -493,9 +495,10 @@ class WebSeminar(object):
         return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
 
     def editors(self):
-        return [rec["email"].lower() for rec in self.organizers if rec["email"]] + [
-            self.owner.lower()
-        ]
+        emails =  [rec["email"].lower() for rec in self.organizers if rec["email"]]
+        if self.owner:
+            emails += [self.owner.lower()]
+        return emails
 
     def user_can_delete(self, user=None):
         # Check whether the current user can delete the seminar

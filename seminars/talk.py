@@ -17,6 +17,7 @@ from seminars.utils import (
     topdomain,
     comma_list,
     log_error,
+    SPEAKER_DELIMITER,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -51,6 +52,7 @@ inherited_talk_columns = [
     "access_hint",
     "access_registration",
     "audience",
+    "chat_link",
     "display",
     "language",
     "live_link",
@@ -65,6 +67,7 @@ optional_talk_text_columns = [
     "abstract",
     "access_hint",
     "access_registration",
+    "chat_link",
     "comments",
     "live_link",
     "room",
@@ -78,10 +81,6 @@ optional_talk_text_columns = [
     "title",
     "video_link",
 ]
-
-# the columns speaker, speaker_email, speaker_homepage, and speaker_affiliation are
-# text strings that may contain delimited lists (which should all have the same length, empty items are OK)
-SPEAKER_DELIMITER = '|'
 
 class WebTalk(object):
     def __init__(
@@ -520,8 +519,12 @@ Thank you,
     def show_video_link(self):
         return '<a href="%s">video</a>'%(self.video_link) if self.video_link else ""
 
+    def show_chat_link(self):
+        return '<a href="%s">chat</a>'%(self.chat_link) if self.chat_link else ""
+
     def show_content_links(self):
-        return '( ' + ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link()])) + ' )'
+        s = ' | '.join(filter(None,[self.show_paper_link(), self.show_slides_link(), self.show_video_link(), self.show_chat_link()])) 
+        return '( ' + s + ' )' if s else ''
 
     @property
     def ics_link(self):
