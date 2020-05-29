@@ -373,7 +373,7 @@ def save_series(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    data, organizers, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers)
+    data, organizers, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers, user=user)
     if errmsgs:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
@@ -436,7 +436,7 @@ def save_talk(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    data, errmsgs = process_save_talk(talk, raw_data, warn, format_error, format_input_error)
+    data, errmsgs = process_save_talk(talk, raw_data, warn, format_error, format_input_error) # doesn't currently use the user
     if errmsgs:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
