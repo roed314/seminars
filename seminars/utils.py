@@ -412,7 +412,7 @@ def search_distinct(
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
-    prequery = {'$or': [{'display': True}, {'by_api': False}]} if include_pending else {}
+    prequery = {} if include_pending else {'$or': [{'display': True}, {'by_api': False}]}
     if prequery:
         # We filter the records before finding the most recent (normal queries filter after finding the most recent)
         # This is mainly used for setting display=False or display=True
@@ -499,7 +499,7 @@ def lucky_distinct(
     cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
     tbl = table._get_table_clause(extra_cols)
-    prequery = {'$or': [{'display': True}, {'by_api': False}]} if include_pending else {}
+    prequery = {} if include_pending else {'$or': [{'display': True}, {'by_api': False}]}
     if prequery:
         # We filter the records before finding the most recent (normal queries filter after finding the most recent)
         # This is mainly used for setting display=False or display=True
