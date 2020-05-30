@@ -29,13 +29,6 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% endif %}
 
 <table style="border-collapse:separate; border-spacing: 0px 10px;">
-{% set description = seminar.show_description() %}
-{% if description %}
-<tr>
-  <td style="padding:0px;">Description:</td>
-  <td>{{ description | safe }}</td>
-</tr>
-{% endif %}
 <tr>
   <td style="padding:0px;">Audience:</td>
   <td>{{ seminar.show_audience() | safe }}</td>
