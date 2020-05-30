@@ -63,8 +63,8 @@ visibility_options = [
 ]
 
 audience_options = [
-    (0, "researchers in topic"),
-    (1, "researchers in discipline"),
+    (0, "researchers in the topic"),
+    (1, "researchers in the discipline"),
     (2, "advanced learners"),
     (3, "learners"),
     (4, "undergraduates"),
@@ -301,7 +301,7 @@ class WebSeminar(object):
         return "conference" if self.is_conference else "seminar series"
 
     def show_audience(self):
-        return audience_options[self.audience][1]
+        return audience_options[self.audience][1].capitalize()
 
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
