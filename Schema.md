@@ -60,7 +60,6 @@ audience            | smallint    | 0 = researchers in topic, 1 = researchers in
 chat_link           | text        | URL linking to chat stream for the series (e.g. Zulip, Slack, Discord, ...)
 comments            | text        |
 deleted             | boolean     | True if seminar has been deleted (it can still be revived)
-description         | text        | shown in search results and on seminar homepage, e.g. research seminar, conference, learning seminar
 display             | boolean     | shown on browse/search pages; will be set once the owner has creator privileges.  Also used by API.
 edited_at           | timestamptz | timestamp of this version
 edited_by           | bigint      | users.id of user who created this version

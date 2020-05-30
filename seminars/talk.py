@@ -313,8 +313,9 @@ class WebTalk(object):
         newtz = tz if adapt else self.tz
 
         def ans(rmk):
+            format = "%a %b %-d, %H:%M" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y, %H:%M"
             return "%s-%s (%s)" % (
-                adapt_datetime(start, newtz=newtz).strftime("%a %b %-d, %H:%M"),
+                adapt_datetime(start, newtz=newtz).strftime(format),
                 adapt_datetime(end, newtz=newtz).strftime("%H:%M"),
                 rmk,
             )
