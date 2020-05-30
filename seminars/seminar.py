@@ -15,6 +15,7 @@ from seminars.utils import (
     weekdays,
     sanitized_table,
     log_error,
+    killattr,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
@@ -453,7 +454,7 @@ class WebSeminar(object):
     def show_comments(self, prefix=""):
         if self.comments:
             comments = self.comments.split("\n")[1:] if self.comments.startswith("Description:") else self.comments
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + self.comments).split("\n\n"))
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + comments).split("\n\n"))
         else:
             return ""
 
