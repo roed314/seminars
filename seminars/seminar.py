@@ -246,7 +246,7 @@ class WebSeminar(object):
                 setattr(self, col, "")
         if hasattr(self, "description") and self.description:
             if not self.comments.startswith("Description:"):
-                self.comments = "Description: " + self.description + "\n" + self.comments
+                self.comments = "Description: " + self.description + "\n\n" + self.comments
             killattr(self, "description")
 
         if not  self.new:
@@ -453,7 +453,7 @@ class WebSeminar(object):
 
     def show_comments(self, prefix=""):
         if self.comments:
-            comments = '\n'.join(self.comments.split("\n")[1:]) if self.comments.startswith("Description:") else self.comments
+            comments = '\n'.join(self.comments.split("\n")[1:]).strip() if self.comments.startswith("Description:") else self.comments
             return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + comments).split("\n\n"))
         else:
             return ""
