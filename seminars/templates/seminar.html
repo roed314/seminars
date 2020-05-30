@@ -29,10 +29,11 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% endif %}
 
 <table style="border-collapse:separate; border-spacing: 0px 10px;">
-{% if seminar.description %}
+{% set description = seminar.show_description() %}
+{% if description %}
 <tr>
   <td style="padding:0px;">Description:</td>
-  <td>{{seminar.description | safe }}</td>
+  <td>{{ description | safe }}</td>
 </tr>
 {% endif %}
 <tr>

@@ -15,6 +15,7 @@ from seminars.utils import (
     weekdays,
     sanitized_table,
     log_error,
+    killattr,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
@@ -63,8 +64,8 @@ visibility_options = [
 ]
 
 audience_options = [
-    (0, "researchers in topic"),
-    (1, "researchers in discipline"),
+    (0, "researchers in the topic"),
+    (1, "researchers in the discipline"),
     (2, "advanced learners"),
     (3, "learners"),
     (4, "undergraduates"),
@@ -243,6 +244,11 @@ class WebSeminar(object):
         for col in optional_seminar_text_columns:
             if getattr(self, col) is None:
                 setattr(self, col, "")
+        if hasattr(self, "description") and self.description:
+            if not self.comments.startswith("Description:"):
+                self.comments = "Description: " + self.description + "\n\n" + self.comments
+            killattr(self, "description")
+
         if not  self.new:
             self.validate()
 
@@ -301,7 +307,7 @@ class WebSeminar(object):
         return "conference" if self.is_conference else "seminar series"
 
     def show_audience(self):
-        return audience_options[self.audience][1]
+        return audience_options[self.audience][1].capitalize()
 
     def _show_date(self, d):
         format = "%a %b %-d" if d.year == datetime.now(self.tz).year else "%d-%b-%Y"
@@ -386,8 +392,8 @@ class WebSeminar(object):
             return ""
 
     def show_description(self):
-        if self.description:
-            return self.description
+        if self.comments.startswith("Description:"):
+            return self.comments.split('\n')[0][12:].strip()
         else:
             return ""
 
@@ -447,7 +453,8 @@ class WebSeminar(object):
 
     def show_comments(self, prefix=""):
         if self.comments:
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + self.comments).split("\n\n"))
+            comments = '\n'.join(self.comments.split("\n")[1:]).strip() if self.comments.startswith("Description:") else self.comments
+            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + comments).split("\n\n"))
         else:
             return ""
 
