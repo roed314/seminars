@@ -392,10 +392,11 @@ class WebSeminar(object):
             return ""
 
     def show_description(self):
-        if self.comments.startswith("Description:"):
-            return self.comments.split('\n')[0][12:].strip()
-        else:
-            return ""
+        return ""
+        # if self.comments.startswith("Description:"):
+            # return self.comments.split('\n')[0][12:].strip()
+        # else:
+            # return ""
 
     def show_visibility(self):
         options = [r[0] for r in visibility_options]
@@ -453,7 +454,7 @@ class WebSeminar(object):
 
     def show_comments(self, prefix=""):
         if self.comments:
-            comments = '\n'.join(self.comments.split("\n")[1:]).strip() if self.comments.startswith("Description:") else self.comments
+            comments = self.comments # '\n'.join(self.comments.split("\n")[1:]).strip() if self.comments.startswith("Description:") else self.comments
             return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + comments).split("\n\n"))
         else:
             return ""
