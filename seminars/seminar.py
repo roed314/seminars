@@ -243,6 +243,11 @@ class WebSeminar(object):
         for col in optional_seminar_text_columns:
             if getattr(self, col) is None:
                 setattr(self, col, "")
+        if hasattr(self, "description") and self.description:
+            if not self.comments.startswith("Description:"):
+                self.comments = "Description: " + self.description + "\n" + self.comments
+            killattr(self.description)
+
         if not  self.new:
             self.validate()
 
@@ -386,8 +391,8 @@ class WebSeminar(object):
             return ""
 
     def show_description(self):
-        if self.description:
-            return self.description
+        if self.comments.startswith("Description:"):
+            return self.comments.split('\n')[0][12:].strip()
         else:
             return ""
 
@@ -447,6 +452,7 @@ class WebSeminar(object):
 
     def show_comments(self, prefix=""):
         if self.comments:
+            comments = self.comments.split("\n")[1:] if self.comments.startswith("Description:") else self.comments
             return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + self.comments).split("\n\n"))
         else:
             return ""
