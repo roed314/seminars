@@ -247,7 +247,7 @@ class WebSeminar(object):
         if hasattr(self, "description") and self.description:
             if not self.comments.startswith("Description:"):
                 self.comments = "Description: " + self.description + "\n" + self.comments
-            killattr(self.description)
+            killattr(self, "description")
 
         if not  self.new:
             self.validate()
