@@ -15,7 +15,6 @@ from seminars.utils import (
     weekdays,
     sanitized_table,
     log_error,
-    killattr,
 )
 from seminars.topic import topic_dag
 from seminars.toggle import toggle
