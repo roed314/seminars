@@ -244,10 +244,6 @@ class WebSeminar(object):
         for col in optional_seminar_text_columns:
             if getattr(self, col) is None:
                 setattr(self, col, "")
-        if hasattr(self, "description") and self.description:
-            if not self.comments.startswith("Description:"):
-                self.comments = "Description: " + self.description + "\n\n" + self.comments
-            killattr(self, "description")
 
         if not  self.new:
             self.validate()
@@ -391,13 +387,6 @@ class WebSeminar(object):
         else:
             return ""
 
-    def show_description(self):
-        return ""
-        # if self.comments.startswith("Description:"):
-            # return self.comments.split('\n')[0][12:].strip()
-        # else:
-            # return ""
-
     def show_visibility(self):
         options = [r[0] for r in visibility_options]
         return visibility_options[options.index(self.visibility)][1] if self.visibility in options else ''
@@ -453,11 +442,7 @@ class WebSeminar(object):
             return ""
 
     def show_comments(self, prefix=""):
-        if self.comments:
-            comments = self.comments # '\n'.join(self.comments.split("\n")[1:]).strip() if self.comments.startswith("Description:") else self.comments
-            return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + comments).split("\n\n"))
-        else:
-            return ""
+        return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + self.comments).split("\n\n"))
 
     def show_knowl_embed(self, daterange, uniqstr='0'):
         return r'<a knowl="dynamic_show" kwargs="{content}">Embed this schedule</a>'.format(
