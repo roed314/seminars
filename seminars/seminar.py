@@ -454,6 +454,7 @@ class WebSeminar(object):
     def show_comments(self, prefix=""):
         if self.comments:
             comments = '\n'.join(self.comments.split("\n")[1:]).strip() if self.comments.startswith("Description:") else self.comments
+            print("comments: " + comments)
             return "\n".join("<p>%s</p>\n" % (elt) for elt in make_links(prefix + comments).split("\n\n"))
         else:
             return ""
