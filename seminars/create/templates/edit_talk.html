@@ -81,10 +81,6 @@
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['video_link'] }}"placeholder="https://www.youtube.com/watch?v=abc123" /></td>
     </tr>
     <tr>
-      <td>{{ KNOWL("chat_link", "Chat link") }}</td>
-      <td><input name="chat_link" value="{{ talk.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https://researchseminars.zulipchat.com/#narrow/stream/seriesid/"></td>
-    </tr>
-    <tr>
       <td>{{ KNOWL("abstract") }}</td>
       <td style="align:right;"><a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a></td>
     </tr>
@@ -213,6 +209,10 @@
     <tr class="online live_link">
       <td>{{ KNOWL("live_link") }}</td>
       <td><input name="live_link" value="{{ talk.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="https://zoom.us/j/... or https://bluejeans.com/j/... or https://www.google.meet/..."/></td>
+    </tr>
+    <tr>
+      <td>{{ KNOWL("chat_link", "Chat link") }}</td>
+      <td><input name="chat_link" value="{{ talk.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https://researchseminars.zulipchat.com/#narrow/stream/seriesid/"></td>
     </tr>
     <tr class="online stream_link">
       <td>{{ KNOWL("stream_link") }}</td>
