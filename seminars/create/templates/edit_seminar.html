@@ -149,10 +149,6 @@
       <td class="forminfo" style="padding-top: 20px;">Leave blank if online only.</td>
     </tr>
     <tr>
-      <td>{{ KNOWL("chat_link") }}</td>
-      <td><input name="chat_link" value="{{ seminar.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https://researchseminars.zulipchat.com/#narrow/stream/seriesid"></td>
-    </tr>
-    <tr>
       <td>{{ ASTKNOWL("online") }}</td>
       <td>
         <select id="online" name="online" style="width:610px;">
@@ -199,6 +195,10 @@
       <td>{{ KNOWL("live_link") }}</td>
       <td><input name="live_link" value="{{ seminar.live_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['live_link'] }}" placeholder="https://zoom.us/j/... or https://bluejeans.com/j/... or https://www.google.meet/..."></td>
       <td class="forminfo">Leave blank if talk-specific.</td>
+    </tr>
+    <tr class="online chat_link">
+      <td>{{ KNOWL("chat_link") }}</td>
+      <td><input name="chat_link" value="{{ seminar.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https://researchseminars.zulipchat.com/#narrow/stream/seriesid"></td>
     </tr>
     <tr class="online stream_link">
       <td>{{ KNOWL("stream_link") }}</td>
@@ -363,6 +363,7 @@ document.addEventListener("DOMContentLoaded", function() {
     $('tr.online').hide();
     if ( document.getElementById('online').value == "no" ) return false;
     $('tr.access_control').show();
+    $('tr.chat_link').show();
     $('tr.stream_link').show();
     n = parseInt(document.getElementById('access_control').value);
     switch(n) {
