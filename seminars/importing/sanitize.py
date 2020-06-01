@@ -4,7 +4,7 @@ import os, random, string, secrets, shutil
 from lmfdb.backend.utils import IdentifierWrapper
 from psycopg2.sql import SQL
 from seminars import db
-from seminars.seminar import _selecter as seminar_selecter
+from seminars.seminar import seminars_search, _selecter as seminar_selecter
 from seminars.talk import _selecter as talk_selecter
 from seminars.utils import whitelisted_cols
 from functools import lru_cache
@@ -20,14 +20,22 @@ def make_random(col, current, users):
             return "https://mit.zoom.us/j/1234"
         else:
             return ""
-    if col == "owner":
-        if current in users:
+    if col in ["owner", "email", "admin"]:
+        # admin is used as an email in institutions and as a bool in users
+        if current in ["t", "f", r"\N"] or current in users:
             return current
         else:
             return mask_email(current)
     if col == "edited_by":
         # Just throw away edited by info, since it's not currently used
         return "0"
+    if col in ["hidden", "password", "affiliation", "admin", "creator", "email_confirmed", "created", "endorser", "seminar_subscriptions", "talk_subscriptions", "subject_admin", "api_access", "order", "curator", "topic_id", "children", "city", "type"]:
+        # We already selected only those rows with hidden=False
+        # Data in the user table is only recorded for requested users, so we keep their data (including bchashed passwords)
+        # Data in the seminar_organizers table is only kept when display is True, so the remainder of the information is public (aside from obfuscated emails)
+        # Data in the new_topics table is public
+        # Data in the institutions table is public (aside from obfuscated emails)
+        return current
     if col == "token":
         return secrets.token_hex(8)
     if col == "api_token":
@@ -39,7 +47,7 @@ def clear_private_data(filename, safe_cols, approve_row, users, sep):
     if os.path.exists(tmpfile):
         raise RuntimeError("Tempfile %s already exists" % tmpfile)
     def _clear(line, all_cols):
-        data = line.strip().split(sep)
+        data = line.strip("\n").split(sep)
         assert len(data) == len(all_cols)
         by_col = dict(zip(all_cols, data))
         if approve_row(by_col):
@@ -69,14 +77,15 @@ def write_content_tbl(folder, filename, tbl, query, selecter, approve_row, users
         selecter = selecter.format(cols, cols, tblname, query)
     filename = os.path.join(folder, filename)
     header = sep.join(["id"] + tbl.search_cols) + "\n" + sep.join(["bigint"] + [tbl.col_type[col] for col in tbl.search_cols]) + "\n\n"
-    tbl._copy_to_select(selecter, filename, header)
+    tbl._copy_to_select(selecter, filename, header, sep=sep)
     safe_cols = ["id"] + [col for col in tbl.search_cols if col in whitelisted_cols]
     clear_private_data(filename, safe_cols, approve_row, users, sep)
 
-def basic_selecter(tbl):
-    return SQL("SELECT {0} FROM {1}").format(
-        SQL(", ").join(map(IdentifierWrapper, ["id"] + db.users.search_cols)),
-        IdentifierWrapper(tbl.search_table)
+def basic_selecter(tbl, query=SQL("")):
+    return SQL("SELECT {0} FROM {1}{2}").format(
+        SQL(", ").join(map(IdentifierWrapper, ["id"] + tbl.search_cols)),
+        IdentifierWrapper(tbl.search_table),
+        query,
     )
 
 def export_dev_db(folder, users, sep="|"):
@@ -103,13 +112,13 @@ def export_dev_db(folder, users, sep="|"):
     institutions_selecter = basic_selecter(db.institutions)
     write_content_tbl(folder, "institutions.txt", db.institutions, "", institutions_selecter, approve_all, users, sep)
 
-    new_topics_selecter = basic_selecter(db.institutions)
+    new_topics_selecter = basic_selecter(db.new_topics)
     write_content_tbl(folder, "new_topics.txt", db.new_topics, "", new_topics_selecter, approve_all, users, sep)
 
     preendorsed_selecter = basic_selecter(db.preendorsed_users)
     write_content_tbl(folder, "preendorsed_users.txt", db.preendorsed_users, "", preendorsed_selecter, approve_none, users, sep)
 
-    organizers_selecter = basic_selecter(db.seminar_organizers)
+    organizers_selecter = basic_selecter(db.seminar_organizers, SQL(" WHERE display=true"))
     write_content_tbl(folder, "seminar_organizers.txt", db.seminar_organizers, "", organizers_selecter, approve_all, users, sep)
 
     registrations_selecter = basic_selecter(db.talk_registrations)

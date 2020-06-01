@@ -764,6 +764,7 @@ whitelisted_cols = [
     "access_registration",
     "audience",
     "by_api",
+    "chat_link",
     "comments",
     "deleted",
     "deleted_with_seminar",
