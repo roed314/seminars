@@ -11,6 +11,8 @@ from functools import lru_cache
 
 @lru_cache(maxsize=None)
 def mask_email(actual):
+    if not actual:
+        return actual
     name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(6))
     return name + "@example.org"
 
@@ -68,18 +70,28 @@ def clear_private_data(filename, safe_cols, approve_row, users, sep):
                     Fout.write(_clear(line, all_cols))
     shutil.move(tmpfile, filename)
 
-def write_content_tbl(folder, filename, tbl, query, selecter, approve_row, users, sep):
+def write_content_tbl(data_folder, tbl, query, selecter, approve_row, users, sep):
     # The SQL queries for talks and seminars are different
+    tablename = IdentifierWrapper(tbl.search_table)
     if tbl in [db.talks, db.seminars]:
         cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + tbl.search_cols))
         query = SQL(query)
-        tblname = IdentifierWrapper(tbl.search_table)
-        selecter = selecter.format(cols, cols, tblname, query)
-    filename = os.path.join(folder, filename)
+        selecter = selecter.format(cols, cols, tablename, query)
+
+    searchfile = os.path.join(data_folder, tablename + ".txt")
+
+
     header = sep.join(["id"] + tbl.search_cols) + "\n" + sep.join(["bigint"] + [tbl.col_type[col] for col in tbl.search_cols]) + "\n\n"
-    tbl._copy_to_select(selecter, filename, header, sep=sep)
+    tbl._copy_to_select(selecter, searchfile, header, sep=sep)
     safe_cols = ["id"] + [col for col in tbl.search_cols if col in whitelisted_cols]
-    clear_private_data(filename, safe_cols, approve_row, users, sep)
+    clear_private_data(searchfile, safe_cols, approve_row, users, sep)
+
+    # do the other files
+    statsfile = os.path.join(data_folder, tablename + "_stats.txt")
+    countsfile = os.path.join(data_folder, tablename + "_counts.txt")
+    indexesfile = os.path.join(data_folder, tablename + "_indexes.txt")
+    constraintsfile = os.path.join(data_folder, tablename + "_constraints.txt")
+    metafile = os.path.join(data_folder, tablename + "_meta.txt")
 
 def basic_selecter(tbl, query=SQL("")):
     return SQL("SELECT {0} FROM {1}{2}").format(
@@ -88,7 +100,7 @@ def basic_selecter(tbl, query=SQL("")):
         query,
     )
 
-def export_dev_db(folder, users, sep="|"):
+def export_dev_db(folder, users, sep="\t"):
     # We only export the most recent version in case people removed information they didn't want public
     def approve_all(by_col):
         return True
