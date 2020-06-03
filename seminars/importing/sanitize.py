@@ -2,7 +2,7 @@
 
 import os, random, string, secrets, shutil
 from lmfdb.backend.utils import IdentifierWrapper, DelayCommit
-from psycopg2.sql import SQL, Identifier, Placeholder, Literal
+from psycopg2.sql import SQL, Identifier, Literal
 
 from seminars import db
 from seminars.seminar import seminars_search, _selecter as seminar_selecter
