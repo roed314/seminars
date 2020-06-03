@@ -1,13 +1,15 @@
 # This module is used for exporting the database to a version without private information so that other developers can use it.
 
 import os, random, string, secrets, shutil
-from lmfdb.backend.utils import IdentifierWrapper
-from psycopg2.sql import SQL
+from lmfdb.backend.utils import IdentifierWrapper, DelayCommit
+from psycopg2.sql import SQL, Identifier, Placeholder, Literal
+
 from seminars import db
 from seminars.seminar import seminars_search, _selecter as seminar_selecter
 from seminars.talk import _selecter as talk_selecter
 from seminars.utils import whitelisted_cols
 from functools import lru_cache
+import time
 
 @lru_cache(maxsize=None)
 def mask_email(actual):
@@ -70,37 +72,98 @@ def clear_private_data(filename, safe_cols, approve_row, users, sep):
                     Fout.write(_clear(line, all_cols))
     shutil.move(tmpfile, filename)
 
-def write_content_tbl(data_folder, tbl, query, selecter, approve_row, users, sep):
+def write_content_table(data_folder, table, query, selecter, approve_row, users, sep):
+    now_overall = time.time()
+    print("Exporting %s..." % (table.search_table))
     # The SQL queries for talks and seminars are different
-    tablename = IdentifierWrapper(tbl.search_table)
-    if tbl in [db.talks, db.seminars]:
-        cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + tbl.search_cols))
+    tablename = table.search_table
+    if table in [db.talks, db.seminars]:
+        cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
         query = SQL(query)
-        selecter = selecter.format(cols, cols, tablename, query)
+        selecter = selecter.format(cols, cols, IdentifierWrapper(tablename), query)
 
     searchfile = os.path.join(data_folder, tablename + ".txt")
 
 
-    header = sep.join(["id"] + tbl.search_cols) + "\n" + sep.join(["bigint"] + [tbl.col_type[col] for col in tbl.search_cols]) + "\n\n"
-    tbl._copy_to_select(selecter, searchfile, header, sep=sep)
-    safe_cols = ["id"] + [col for col in tbl.search_cols if col in whitelisted_cols]
+    header = sep.join(["id"] + table.search_cols) + "\n" + sep.join(["bigint"] + [table.col_type[col] for col in table.search_cols]) + "\n\n"
+    table._copy_to_select(selecter, searchfile, header, sep=sep)
+    safe_cols = ["id"] + [col for col in table.search_cols if col in whitelisted_cols]
     clear_private_data(searchfile, safe_cols, approve_row, users, sep)
 
     # do the other files
+
+    from lmfdb.backend.table import _counts_cols, _stats_cols
+    from lmfdb.backend.base import _meta_indexes_cols, _meta_constraints_cols, _meta_tables_cols
     statsfile = os.path.join(data_folder, tablename + "_stats.txt")
     countsfile = os.path.join(data_folder, tablename + "_counts.txt")
     indexesfile = os.path.join(data_folder, tablename + "_indexes.txt")
     constraintsfile = os.path.join(data_folder, tablename + "_constraints.txt")
     metafile = os.path.join(data_folder, tablename + "_meta.txt")
+    tabledata = [
+        # tablename, cols, addid, write_header, filename
+        (table.stats.counts, _counts_cols, False, False, countsfile),
+        (table.stats.stats, _stats_cols, False, False, statsfile),
+    ]
 
-def basic_selecter(tbl, query=SQL("")):
+    metadata = [
+        ("meta_indexes", "table_name", _meta_indexes_cols, indexesfile),
+        ("meta_constraints", "table_name", _meta_constraints_cols, constraintsfile),
+        ("meta_tables", "name", _meta_tables_cols, metafile),
+    ]
+
+    with DelayCommit(table):
+        for tbl, cols, addid, write_header, filename in tabledata:
+            if filename is None:
+                continue
+            now = time.time()
+            if addid:
+                cols = ["id"] + cols
+            cols_wquotes = ['"' + col + '"' for col in cols]
+            cur = table._db.cursor()
+            with open(filename, "w") as F:
+                try:
+                    if write_header:
+                        table._write_header_lines(F, cols, sep=sep)
+                    cur.copy_to(F, tbl, columns=cols_wquotes, sep=sep)
+                except Exception:
+                    table.conn.rollback()
+                    raise
+            print(
+                "\tExported %s in %.3f secs to %s"
+                % (tbl, time.time() - now, filename)
+            )
+
+        for tbl, wherecol, cols, filename in metadata:
+            if filename is None:
+                continue
+            now = time.time()
+            cols = SQL(", ").join(map(Identifier, cols))
+            select = SQL("SELECT {0} FROM {1} WHERE {2} = {3}").format(
+                cols,
+                Identifier(tbl),
+                Identifier(wherecol),
+                Literal(table.search_table),
+            )
+            table._copy_to_select(select, filename, silent=True, sep=sep)
+            print(
+                "\tExported data from %s in %.3f secs to %s"
+                % (tbl, time.time() - now, filename)
+            )
+
+        print(
+            "Exported %s in %.3f secs"
+            % (table.search_table, time.time() - now_overall)
+        )
+
+def basic_selecter(table, query=SQL("")):
     return SQL("SELECT {0} FROM {1}{2}").format(
-        SQL(", ").join(map(IdentifierWrapper, ["id"] + tbl.search_cols)),
-        IdentifierWrapper(tbl.search_table),
+        SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols)),
+        IdentifierWrapper(table.search_table),
         query,
     )
 
 def export_dev_db(folder, users, sep="\t"):
+    db.copy_to(['new_topics'], folder, sep=sep)
     # We only export the most recent version in case people removed information they didn't want public
     def approve_all(by_col):
         return True
@@ -108,30 +171,32 @@ def export_dev_db(folder, users, sep="\t"):
         return False
 
     # Seminars table
-    write_content_tbl(folder, "seminars.txt", db.seminars, " WHERE visibility=2 AND deleted=false", seminar_selecter, approve_all, users, sep)
+    write_content_table(folder, db.seminars, " WHERE visibility=2 AND deleted=false", seminar_selecter, approve_all, users, sep)
 
     visible_seminars = set(seminars_search({"visibility": 2}, "shortname"))
     # Talks table
     def approve_row(by_col):
         return by_col["seminar_id"] in visible_seminars
-    write_content_tbl(folder, "talks.txt", db.talks, " WHERE hidden=false AND deleted=false", talk_selecter, approve_row, users, sep)
+    write_content_table(folder,  db.talks, " WHERE hidden=false AND deleted=false", talk_selecter, approve_row, users, sep)
 
     user_selecter = basic_selecter(db.users)
     def approve_row(by_col):
         return by_col["email"] in users
-    write_content_tbl(folder, "users.txt", db.users, "", user_selecter, approve_row, users, sep)
+    write_content_table(folder,  db.users, "", user_selecter, approve_row, users, sep)
 
     institutions_selecter = basic_selecter(db.institutions)
-    write_content_tbl(folder, "institutions.txt", db.institutions, "", institutions_selecter, approve_all, users, sep)
+    write_content_table(folder,  db.institutions, "", institutions_selecter, approve_all, users, sep)
 
     new_topics_selecter = basic_selecter(db.new_topics)
-    write_content_tbl(folder, "new_topics.txt", db.new_topics, "", new_topics_selecter, approve_all, users, sep)
+    write_content_table(folder, db.new_topics, "", new_topics_selecter, approve_all, users, sep)
 
     preendorsed_selecter = basic_selecter(db.preendorsed_users)
-    write_content_tbl(folder, "preendorsed_users.txt", db.preendorsed_users, "", preendorsed_selecter, approve_none, users, sep)
+    write_content_table(folder, db.preendorsed_users, "", preendorsed_selecter, approve_none, users, sep)
 
     organizers_selecter = basic_selecter(db.seminar_organizers, SQL(" WHERE display=true"))
-    write_content_tbl(folder, "seminar_organizers.txt", db.seminar_organizers, "", organizers_selecter, approve_all, users, sep)
+    write_content_table(folder, db.seminar_organizers, "", organizers_selecter, approve_all, users, sep)
 
     registrations_selecter = basic_selecter(db.talk_registrations)
-    write_content_tbl(folder, "talk_registrations.txt", db.talk_registrations, "", registrations_selecter, approve_none, users, sep)
+    write_content_table(folder, db.talk_registrations, "", registrations_selecter, approve_none, users, sep)
+
+
