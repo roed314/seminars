@@ -253,9 +253,9 @@ room:
     <br><br>
     Instructions to help visitors find the room should be entered in the Comments box (you can include a link to a campus map, for example).
 chat_link:
-  title: Chat stream
+  title: Chat link
   contents: |
-    The URL for a chat stream or other online discussion forum associated to the talk or series (this might link to a Zulip stream or topic, a Slack channel, or a Discord channel, for example).
+    The URL for an online discussion forum associated to the talk or series (this might link to a <a href="https://zulipchat.com">Zulip</a> stream or topic, a <a href="https://slack.com/">Slack</a> channel, or a <a href="https://discord.com/">Discord</a> channel, for example).
 online:
   title: Online
   contents: |

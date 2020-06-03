@@ -81,10 +81,6 @@
       <td><input name="video_link" value="{{ talk.video_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['video_link'] }}"placeholder="https://www.youtube.com/watch?v=abc123" /></td>
     </tr>
     <tr>
-      <td>{{ KNOWL("chat_link", "Chat link") }}</td>
-      <td><input name="chat_link" value="{{ talk.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https/researchseminars.zulipchat.com/#narrow/stream/seriesid/"></td>
-    </tr>
-    <tr>
       <td>{{ KNOWL("abstract") }}</td>
       <td style="align:right;"><a id="refresh-view" onclick="delay_refresh(); return false;" style="display: none;" href="#">(Refresh)</a></td>
     </tr>
@@ -218,6 +214,10 @@
       <td>{{ KNOWL("stream_link") }}</td>
       <td><input name="stream_link" value="{{ talk.stream_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['stream_link'] }}" placeholder="https://www.youtube.com/watch?v=..."/></td>
     </tr>
+    <tr class="online chat_link">
+      <td>{{ KNOWL("chat_link", "Chat link") }}</td>
+      <td><input name="chat_link" value="{{ talk.chat_link | blanknone }}" style="width:600px;" maxlength="{{ maxlength['chat_link'] }}" placeholder="https://researchseminars.zulipchat.com/#narrow/stream/seriesid/"></td>
+    </tr>
     {% else %}
     {# attributes non-organizers cannot edit #}
     <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
@@ -305,6 +305,7 @@
     $('tr.online').hide();
     if ( document.getElementById('online').value == "no" ) return false;
     $('tr.access_control').show();
+    $('tr.chat_link').show();
     $('tr.stream_link').show();
     n = parseInt(document.getElementById('access_control').value);
     switch(n) {
