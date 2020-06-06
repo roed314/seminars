@@ -234,6 +234,11 @@ a:hover {
     background: {{color.a_background_hover}};
 }
 
+#banner {
+  background: {{color.banner_backgroun}};
+  color: {{color.banner_text}};
+}
+
 
 #logo a,
 #logo a:hover,
