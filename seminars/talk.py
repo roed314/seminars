@@ -362,7 +362,7 @@ class WebTalk(object):
                 title=self.show_title(),
                 seminar_id=self.seminar_id,
                 talkid=self.seminar_ctr,
-                reschedule='<span style="color: red;">' if rescheduled else '',
+                reschedule='<span style="color: red;">Rescheduled:</span>' if rescheduled else '',
             )
 
 
