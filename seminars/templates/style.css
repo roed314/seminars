@@ -235,8 +235,8 @@ a:hover {
 }
 
 div.banner {
-  background-color: #000000; /* #373737; */
-  color: #ffffff; /* #f8d047; */
+  background-color: #f8d047; /* #373737; */
+  color: #000000; /* #f8d047; */
 }
 
 a.banner:link { color: #f8d0f7; }
