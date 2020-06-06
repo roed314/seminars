@@ -234,9 +234,17 @@ a:hover {
     background: {{color.a_background_hover}};
 }
 
-div.banner_text {
-  background-color: {{color.banner_background}};
-  color: {{color.banner_text}};
+div.banner {
+  background-color: #373737;
+  color: #f8d047;
+}
+
+a.banner:link {
+  color: #f8d047;
+}
+
+a.banner:visited {
+  color: #f8d047;
 }
 
 #logo a,
