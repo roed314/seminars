@@ -236,13 +236,12 @@ a:hover {
 
 div.banner {
   background-color: #f8d047; /* #373737; */
-  color: #000000; /* #f8d047; */
+  color: black; /* #f8d047; */
 }
 
-a.banner:link { color: #f8d0f7; }
-a.banner:visited { color: #f8d0f7; }
+a.banner:link { color: black; font-weight: bold; }
+a.banner:visited { color: black; font-weight: bold; }
 a.banner:hover { color: #575757; }
-
 
 #logo a,
 #logo a:hover,
