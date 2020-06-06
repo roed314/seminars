@@ -848,7 +848,7 @@ def save_talk():
     else:
         if new_version.start_time != talk.start_time and raw_data.get("reschedule"):
             talk.seminar_ctr = -talk.seminar_ctr
-            print("saving talk with seminar ctr = %d"%talk.seminar_ct)
+            print("saving talk with seminar ctr = %d"%talk.seminar_ctr)
             talk.save()
         new_version.save()
         if talk.new:
