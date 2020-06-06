@@ -320,7 +320,7 @@
 
   function showreschedule() {
     $('tr.reschedule').hide()
-    if ( document.getElementById('start_time').value != "{{ talk.editable_start_time() }}" )
+    if ( $('select[name="start_time"]')[0].value != "{{ talk.editable_start_time() }}" )
       $('tr.reschedule').show();
     return false;
   }
