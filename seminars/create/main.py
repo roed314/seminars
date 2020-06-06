@@ -449,12 +449,11 @@ def save_seminar():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_seminar", shortname=shortname), 302)
 
-    data, organizers, errmsgs = process_save_seminar(seminar, raw_data)
+    new_version, errmsgs = process_save_seminar(seminar, raw_data)
     # Don't try to create new_version using invalid input
-    if errmsgs:
+    if new_version is None:
         return show_input_errors(errmsgs)
     else: # to make it obvious that these two statements should be together
-        new_version = WebSeminar(shortname, data=data, organizers=organizers)
 
     if seminar.new or new_version != seminar:
         new_version.save()
@@ -641,7 +640,8 @@ def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=for
                     "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
                 )
             )
-    return data, organizers, errmsgs
+    new_version = WebSeminar(shortname, data=data, organizers=organizers) if not errmsgs else None
+    return new_version, errmsgs
 
 @create.route("edit/institution/", methods=["GET", "POST"])
 @email_confirmed_required
@@ -839,17 +839,17 @@ def save_talk():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
 
-    data, errmsgs = process_save_talk(talk, raw_data)
+    new_version, errmsgs = process_save_talk(talk, raw_data)
     # Don't try to create new_version using invalid input
-    if errmsgs:
+    if new_version is None:
         return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
-        new_version = WebTalk(talk.seminar_id, data=data)
 
-    sanity_check_times(new_version.start_time, new_version.end_time)
     if new_version == talk:
         flash("No changes made to talk.")
     else:
+        if new_version.start_time != talk.start_time and raw_data.get("reschedule"):
+            talk.seminar_ctr = -talk.seminar_ctr
+            talk.save()
         new_version.save()
         if talk.new:
             flash("Talk successfully created!")
@@ -919,16 +919,17 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
                 errmsgs.append(format_errmsg("Registration link %s must be a valid URL or email address", data["access_registration"]))
 
     # Don't try to create new_version using invalid input
+    new_version = None
     if errmsgs:
         return data, errmsgs
     else:  # to make it obvious that these two statements should be together
         new_version = WebTalk(talk.seminar_id, data=data)
 
     # Warnings
-    sanity_check_times(new_version.start_time, new_version.end_time)
+    sanity_check_times(new_version.start_time, new_version.end_time, warn=warn)
     if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
         warn("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
-    return data, errmsgs
+    return new_version, errmsgs
 
 def layout_schedule(seminar, data):
     """ Returns a list of schedule slots in specified date range (date, daytime-interval, talk)

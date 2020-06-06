@@ -376,13 +376,11 @@ def save_series(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    data, organizers, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers, user=user)
-    if errmsgs:
+    new_version, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers, user=user)
+    if new_version is None:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
                         "errors": errmsgs})
-    else:
-        new_version = WebSeminar(series_id, data=data, organizers=organizers, user=user)
     if series.new or new_version != series:
         # Series saved by the API are not displayed until user approves
         new_version.display = False
@@ -439,14 +437,11 @@ def save_talk(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    data, errmsgs = process_save_talk(talk, raw_data, warn, format_error, format_input_error) # doesn't currently use the user
-    if errmsgs:
+    new_version, errmsgs = process_save_talk(talk, raw_data, warn, format_error, format_input_error) # doesn't currently use the user
+    if new_version is None:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
                         "errors": errmsgs})
-    else:
-        new_version = WebTalk(talk.seminar_id, data=data)
-    sanity_check_times(new_version.start_time, new_version.end_time)
     if talk.new or new_version != talk:
         # Talks saved by the API are not displayed until user approves
         new_version.display = False
