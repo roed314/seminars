@@ -234,7 +234,12 @@ a:hover {
     background: {{color.a_background_hover}};
 }
 
-#banner {
+div.banner_text {
+  background: {{color.banner_backgroun}};
+  color: {{color.banner_text}};
+}
+#banner,
+#banner.inner {
   background: {{color.banner_backgroun}};
   color: {{color.banner_text}};
 }
