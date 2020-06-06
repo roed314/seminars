@@ -2,7 +2,7 @@ from lmfdb.utils.color import SteelBlue, c  # original LMFDB color scheme
 
 
 class Slate(SteelBlue):
-    col_main_ld = "#373737"  # header background
+    col_main_ld = "#373737"  # header background\
     header_shadow = c.white  # remove shadow by making it white
     footer_border = "#f8d047"  # yellow from logo, border along footer
     header_text_title = c.white
