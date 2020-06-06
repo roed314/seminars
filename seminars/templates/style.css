@@ -235,12 +235,12 @@ a:hover {
 }
 
 div.banner_text {
-  background: {{color.banner_backgroun}};
+  background: {{color.banner_background}};
   color: {{color.banner_text}};
 }
 #banner,
 #banner.inner {
-  background: {{color.banner_backgroun}};
+  background: {{color.banner_background}};
   color: {{color.banner_text}};
 }
 
