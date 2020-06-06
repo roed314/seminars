@@ -351,17 +351,18 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self, _external=False, preload=False, tz=None):
+    def show_knowl_title(self, _external=False, rescheduled=False, preload=False, tz=None):
         if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
-            return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
+            return r'{reschedule}<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
                 title=self.show_title(),
                 seminar_id=self.seminar_id,
-                talkid=self.seminar_ctr
+                talkid=self.seminar_ctr,
+                reschedule='<span style="color: red;">' if rescheduled else '',
             )
 
 
@@ -630,7 +631,8 @@ Thank you,
         return self.seminar_ctr < 0
 
     def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
-        if self.rescheduled():
+        rescheduled = self.rescheduled()
+        if rescheduled:
             t0 = adapt_datetime(self.start_time, newtz=tz)
             new_version = talks_lookup(self.seminar_id, -self.seminar_ctr)
             t = adapt_datetime(self.start_time, newtz=tz)
@@ -638,6 +640,9 @@ Thank you,
                 datetime_tds = t.strftime('<td class="weekday rescheduled">Now</td><td class="monthdate rescheduled">at</td><td class="time rescheduled">%H:%M</td>')
             else:
                 datetime_tds = t.strftime('<td class="weekday">Now</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
+
+            self = new_version
+
         else:
             t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
             if t < now < e:
@@ -650,16 +655,17 @@ Thank you,
             cols.append(('class="%s"'%cls, self.show_seminar()))
         cls = "speaker rescheduled" if self.rescheduled() else "speaker"
         cols.append(('class="%s"'%cls, self.show_speaker(affiliation=False)))
-        if self.rescheduled():
-            cols.append(('class="talktitle rescheduled"', self.show_link_title()))
-        else:
-            cols.append(('class="talktitle"', self.show_knowl_title(_external=_external, tz=tz)))
+        cls = "talktitle rescheduled" if self.rescheduled() else "talktitle"
+        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external, rescheduled=rescheduled, tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
             cols.append(('', self.show_paper_link()))
         if include_subscribe:
-            cols.append(('class="subscribe"', self.show_subscribe()))
+            if rescheduled:
+                cols.append(("", ""))
+            else:
+                cols.append(('class="subscribe"', self.show_subscribe()))
         #cols.append(('style="display: none;"', self.show_link_title()))
         return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
 

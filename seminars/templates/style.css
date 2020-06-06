@@ -712,7 +712,28 @@ table.ntdata td.institutions {
     min-width: 180px;
 }
 
-table ntdata td.subscribe {
+table.ntdata tr.oddrow {
+    background: #E3F2Fd;
+}
+table.ndata tr.evenrow {
+    background: none;
+}
+
+table.ntdata tr.blm {
+    background: #000000!important;
+    color: #f8d047!important;
+}
+table.ntdata tr.blm a {
+    color: #f8d047!important;
+}
+table.ntdata tr.blm a:hover {
+    background: #000000!important;
+}
+table.ntdata tr.blm *[knowl] {
+    border-bottom: 1px dotted #f8d047!important;
+}
+
+table.ntdata td.subscribe {
     text-align: right;
     padding-right: 0px;
 }
@@ -728,6 +749,10 @@ table.ntdata td.talktitle {
 table.ntdata td.audience {
     white-space:nowrap;
     min-width: 150px;
+}
+
+table.ntdata td.rescheduled {
+    font-style: italic;
 }
 
 .talk-table td:nth-child(6) {
