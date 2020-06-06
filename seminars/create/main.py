@@ -453,7 +453,6 @@ def save_seminar():
     # Don't try to create new_version using invalid input
     if new_version is None:
         return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
 
     if seminar.new or new_version != seminar:
         new_version.save()

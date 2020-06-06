@@ -9,7 +9,6 @@ from seminars.users.pwdmanager import SeminarsUser, ilike_query
 from seminars.users.main import creator_required
 from seminars.utils import (
     allowed_shortname,
-    sanity_check_times,
     short_weekdays,
     process_user_input,
     sanitized_table,
