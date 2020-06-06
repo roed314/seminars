@@ -317,11 +317,21 @@
     }
     return false;
   }
+
+  function showreschedule() {
+    $('tr.reschedule').hide()
+    if ( document.getElementById('start_time').value != {{ talk.editable_start_time() }} )
+      $('tr.reschedule').show();
+    return false;
+  }
+
   $('select[name="online"]').change(showaccess);
   $('select[name="access_control"]').change(showaccess);
+  $('input[name="start_time"]')[0].addEventListener('keyup', (event) => { showreschedule(); });
 
   window.onpageshow = function(e) {
     showaccess();
+    showreschedule();
   };
 {% endif %}
 });
