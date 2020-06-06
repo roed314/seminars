@@ -241,6 +241,8 @@ div.banner {
 
 a.banner:link { color: #f8d0f7; }
 a.banner:visited { color: #f8d0f7; }
+a.banner:hover { color: #575757; }
+
 
 #logo a,
 #logo a:hover,
