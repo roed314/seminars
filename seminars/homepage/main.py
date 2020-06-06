@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky, talks_lookup
+from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk
 from seminars.utils import (
     Toggle,
     ics_file,
