@@ -160,7 +160,7 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
     if current_user.is_creator:
         api_series = [series for (series, r) in seminars + conferences if series.by_api and not series.display]
         api_series.sort(key = lambda S: S.edited_at, reverse=True)
-        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, r) in seminars + conferences]}}, sort=[("edited_at", -1)], include_pending=True))
+        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, r) in seminars + conferences]}, "seminar_ctr": {"$gt": 0}}, sort=[("edited_at", -1)], include_pending=True))
     else:
         api_series = api_talks = []
 
@@ -286,9 +286,9 @@ def delete_seminar(shortname):
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
     if seminar.deleted:
-        talks = list(talks_search({"seminar_id": shortname, "deleted_with_seminar": True}, sort=["start_time"], include_deleted=True))
+        talks = list(talks_search({"seminar_id": shortname, "deleted_with_seminar": True, "seminar_ctr": {"$gt": 0}}, sort=["start_time"], include_deleted=True))
     else:
-        talks = list(talks_search({"seminar_id": shortname}, sort=["start_time"]))
+        talks = list(talks_search({"seminar_id": shortname, "seminar_ctr": {"$gt": 0}}, sort=["start_time"]))
 
     return render_template(
         "deleted_seminar.html",
@@ -979,7 +979,7 @@ def layout_schedule(seminar, data):
     midnight_begin = midnight(begin, tz)
     midnight_end = midnight(end, tz)
     query = {"$gte": midnight_begin, "$lt": midnight_end + day}
-    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]))
+    talks = list(talks_search({"seminar_id": shortname, "seminar_ctr": {"$gt": 0}, "start_time": query}, sort=["start_time"]))
     if any(talk.by_api and not talk.display for talk in talks):
         raise APIError
     slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]

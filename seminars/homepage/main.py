@@ -511,6 +511,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
         query["end_time"] = {"$lt": datetime.now(pytz.UTC)}
+        query["seminar_ctr"] = {"$gt": 0} # don't show rescheduled talks
         if sort is None:
             sort = [("start_time", -1), "seminar_id"]
     else:
@@ -663,7 +664,7 @@ def show_seminar(shortname):
 
 
 def talks_search_api(shortname, projection=1):
-    query = {"seminar_id": shortname, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
+    query = {"seminar_id": shortname, "seminar_ctr": {"$gt": 0}, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
     reverse_sort = False
     if 'daterange' in request.args:
         if request.args.get('daterange') == 'past':

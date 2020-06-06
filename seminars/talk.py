@@ -622,17 +622,38 @@ Thank you,
             classes="subscribe"
         )
 
+    def rescheduled(self):
+        """
+        Return True if this talk has been rescheduled to another time.
+        """
+        # We currently indicate that a talk has been rescheduled by giving it a negative seminar_ctr; the version with the new time will have id equal to the absolute value.
+        return self.seminar_ctr < 0
+
     def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
-        t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
-        if t < now < e:
-            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
+        if self.rescheduled():
+            t0 = adapt_datetime(self.start_time, newtz=tz)
+            new_version = talks_lookup(self.seminar_id, -self.seminar_ctr)
+            t = adapt_datetime(self.start_time, newtz=tz)
+            if t.date() == t0.date():
+                datetime_tds = t.strftime('<td class="weekday rescheduled">Now</td><td class="monthdate rescheduled">at</td><td class="time rescheduled">%H:%M</td>')
+            else:
+                datetime_tds = t.strftime('<td class="weekday">Now</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         else:
-            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
+            t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
+            if t < now < e:
+                datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
+            else:
+                datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
         if include_seminar:
-            cols.append(('class="seriesname"', self.show_seminar()))
-        cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
-        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external, tz=tz)))
+            cls = "seriesname rescheduled" if self.rescheduled() else "seriesname"
+            cols.append(('class="%s"'%cls, self.show_seminar()))
+        cls = "speaker rescheduled" if self.rescheduled() else "speaker"
+        cols.append(('class="%s"'%cls, self.show_speaker(affiliation=False)))
+        if self.rescheduled():
+            cols.append(('class="talktitle rescheduled"', self.show_link_title()))
+        else:
+            cols.append(('class="talktitle"', self.show_knowl_title(_external=_external, tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
