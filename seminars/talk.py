@@ -641,10 +641,10 @@ Thank you,
         rescheduled = self.rescheduled()
         if rescheduled:
             new_version = talks_lookup(self.seminar_id, -self.seminar_ctr)
+            self = new_version
             t = adapt_datetime(self.start_time, newtz=tz)
             datetime_tds = t.strftime('<td class="weekday rescheduled">Now</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
 
-            self = new_version
 
         else:
             t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
