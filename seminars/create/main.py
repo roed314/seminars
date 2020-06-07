@@ -851,7 +851,7 @@ def save_talk():
                 talk.seminar_ctr = -talk.seminar_ctr
                 talk.save()
             else:
-                db.talks.delete({"seminar_id": self.seminar_id, "seminar_ctr": -self.seminar_ctr})
+                db.talks.delete({"seminar_id": talk.seminar_id, "seminar_ctr": -talk.seminar_ctr})
         new_version.save()
         if talk.new:
             flash("Talk successfully created!")
