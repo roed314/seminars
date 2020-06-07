@@ -359,7 +359,7 @@ class WebTalk(object):
             )
         else:
             if rescheduled:
-                return r'<span style="color: red;">Rescheduled:</span> <a title="{title}" href="talk/{seminar_id}/{talkid}" style="text-decoration: line-through;">{title}</a>'.format(
+                return r'<a title="{title}" href="talk/{seminar_id}/{talkid}" style="text-decoration: line-through;">{title}</a> (rescheduled)'.format(
                     title=self.show_title(),
                     seminar_id=self.seminar_id,
                     talkid=self.seminar_ctr,
