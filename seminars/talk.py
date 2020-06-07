@@ -34,7 +34,7 @@ import re
 
 blackout_dates = [ # Use %Y-%m-%d format
     "2020-06-10",
-    "2020-06-10",
+    "2021-06-10",
 ]
 
 required_talk_columns = [
