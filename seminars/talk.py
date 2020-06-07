@@ -646,7 +646,7 @@ Thank you,
         rescheduled = self.rescheduled()
         t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if rescheduled:
-            datetime_tds = t.strftime('<td class="weekday"><i><s>%a</s></i></td><td class="monthdate"><i><s>%b %d</s></i></td><td class="time"><i><s>%H:%M</s></i></td>')
+            datetime_tds = t.strftime('<td class="weekday rescheduled">%a</i></td><td class="monthdate rescheduled">%b %d</td><td class="time rescheduled"><i>%H:%M</i></td>')
         else:
             if t < now < e:
                 datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
@@ -654,12 +654,9 @@ Thank you,
                 datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
         if include_seminar:
-            cls = "seriesname rescheduled" if self.rescheduled() else "seriesname"
-            cols.append(('class="%s"'%cls, self.show_seminar()))
-        cls = "speaker rescheduled" if self.rescheduled() else "speaker"
-        cols.append(('class="%s"'%cls, self.show_speaker(affiliation=False)))
-        cls = "talktitle rescheduled" if self.rescheduled() else "talktitle"
-        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external, rescheduled=rescheduled, tz=tz)))
+            cols.append(("seriesname", self.show_seminar()))
+        cols.append(("speaker", self.show_speaker(affiliation=False)))
+        cols.append(("talktitle", self.show_knowl_title(_external=_external, rescheduled=rescheduled, tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
@@ -669,8 +666,8 @@ Thank you,
                 cols.append(("", ""))
             else:
                 cols.append(('class="subscribe"', self.show_subscribe()))
-        #cols.append(('style="display: none;"', self.show_link_title()))
-        return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
+        tds = ''.join('<td class="%s rescheduled">%s</td>' % c for c in cols) if rescheduled else ''.join('<td class="%s">%s</td>' % c for c in cols)
+        return datetime_tds + tds
 
     def show_comments(self, prefix=""):
         if self.comments:
