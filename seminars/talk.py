@@ -646,7 +646,7 @@ Thank you,
         rescheduled = self.rescheduled()
         t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if rescheduled:
-            datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate"><s>%b %d</s></td><td class="time"><s>%H:%M</s></td>')
+            datetime_tds = t.strftime('<td class="weekday"><i><s>%a</s></i></td><td class="monthdate"><i><s>%b %d</s></i></td><td class="time"><i><s>%H:%M</s></i></td>')
         else:
             if t < now < e:
                 datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
