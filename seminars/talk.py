@@ -363,8 +363,8 @@ class WebTalk(object):
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
-            if rescheduled:
-                return r'<a title="{title}" href="talk/{seminar_id}/{talkid}" style="text-decoration: line-through;">{title}</a> (rescheduled)'.format(
+            if rescheduled and self.blackout_date():
+                return r'<a title="{title}" href="talk/{seminar_id}/{talkid}"">{title}</a> (rescheduled)'.format(
                     title=self.show_title(),
                     seminar_id=self.seminar_id,
                     talkid=self.seminar_ctr,
@@ -657,7 +657,7 @@ Thank you,
             cols.append(("seriesname", self.show_seminar()))
         cols.append(("speaker", self.show_speaker(affiliation=False)))
         new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr) if rescheduled else self
-        cols.append(("talktitle", new_talk.show_knowl_title(_external=_external, tz=tz)))
+        cols.append(("talktitle", new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
