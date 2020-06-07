@@ -356,24 +356,27 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self, _external=False, rescheduled=False, preload=False, tz=None):
+    def show_knowl_title(self, _external=False, rescheduled=False, blackout=False, preload=False, tz=None):
         if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
-            if rescheduled and self.blackout_date():
-                return r'<a title="{title}" href="talk/{seminar_id}/{talkid}"">{title}</a> (rescheduled)'.format(
+            if rescheduled:
+                if 
+                return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}"">{title}</a> (rescheduled)'.format(
                     title=self.show_title(),
                     seminar_id=self.seminar_id,
                     talkid=self.seminar_ctr,
                 )
             else:
-                return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
+                return r'<a title="{title}" {knowl_href}="talk/{seminar_id}/{talkid}">{title}</a>{reschedule}'.format(
                     title=self.show_title(),
+                    knowl_href="href" if blackout else "knowl",
                     seminar_id=self.seminar_id,
                     talkid=self.seminar_ctr,
+                    reschedule="(rescheduled)" if rescheduled else "",
                 )
 
 
@@ -657,7 +660,7 @@ Thank you,
             cols.append(("seriesname", self.show_seminar()))
         cols.append(("speaker", self.show_speaker(affiliation=False)))
         new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr) if rescheduled else self
-        cols.append(("talktitle", new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, tz=tz)))
+        cols.append(("talktitle", new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, blackout=self.blackout_date(), tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
