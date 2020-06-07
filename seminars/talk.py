@@ -369,7 +369,6 @@ class WebTalk(object):
                     seminar_id=self.seminar_id,
                     talkid=self.seminar_ctr,
                 )
-
             else:
                 return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
                     title=self.show_title(),
@@ -645,15 +644,10 @@ Thank you,
 
     def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
         rescheduled = self.rescheduled()
+        t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if rescheduled:
-            new_version = talks_lookup(self.seminar_id, -self.seminar_ctr)
-            self = new_version
-            t = adapt_datetime(self.start_time, newtz=tz)
-            datetime_tds = t.strftime('<td class="weekday rescheduled">Now</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
-
-
+            datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate"><s>%b %d</s></td><td class="time"><s>%H:%M</s></td>')
         else:
-            t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
             if t < now < e:
                 datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
             else:
