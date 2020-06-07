@@ -364,11 +364,11 @@ class WebTalk(object):
             )
         else:
             return r'<a title="{title}" {knowl_href}="talk/{seminar_id}/{talkid}">{title}</a>{reschedule}'.format(
-                title=self.show_title(),
+                title="<i><s>" + self.show_title() + "</s></i>" if reschedule else self.show_title(),
                 knowl_href="href" if blackout else "knowl",
                 seminar_id=self.seminar_id,
                 talkid=self.seminar_ctr,
-                reschedule="(rescheduled)" if rescheduled else "",
+                reschedule=" (rescheduled)" if rescheduled else "",
             )
 
     def show_lang_topics(self):
@@ -647,11 +647,12 @@ Thank you,
             else:
                 datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
+        rclass = " rescheduled" if rescheduled else ""
         if include_seminar:
-            cols.append(("seriesname", self.show_seminar()))
-        cols.append(("speaker", self.show_speaker(affiliation=False)))
+            cols.append(('class="seriesname%s"'%rclass, self.show_seminar()))
+        cols.append(('class="speaker%s"'%rclass, self.show_speaker(affiliation=False)))
         new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr) if rescheduled else self
-        cols.append(("talktitle", new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, blackout=self.blackout_date(), tz=tz)))
+        cols.append(('class="talktitle"', new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, blackout=self.blackout_date(), tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
@@ -661,8 +662,7 @@ Thank you,
                 cols.append(("", ""))
             else:
                 cols.append(('class="subscribe"', self.show_subscribe()))
-        tds = ''.join('<td class="%s rescheduled">%s</td>' % c for c in cols) if rescheduled else ''.join('<td class="%s">%s</td>' % c for c in cols)
-        return datetime_tds + tds
+        return datetime_tds + ''.join('<td class="%s">%s</td>' % c for c in cols)
 
     def show_comments(self, prefix=""):
         if self.comments:
