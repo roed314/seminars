@@ -569,7 +569,7 @@ class WebSeminar(object):
     def talks(self, projection=1):
         from seminars.talk import talks_search  # avoid import loop
 
-        query = {"seminar_id": self.shortname, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
+        query = {"seminar_id": self.shortname, "seminar_ctr": {"$gt": 0}, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
         if self.user_can_edit():
             query.pop("display")
         return talks_search(query, projection=projection)
