@@ -846,9 +846,12 @@ def save_talk():
     if new_version == talk:
         flash("No changes made to talk.")
     else:
-        if new_version.start_time != talk.start_time and raw_data.get("reschedule"):
-            talk.seminar_ctr = -talk.seminar_ctr
-            talk.save()
+        if new_version.start_time != talk.start_time:
+            if raw_data.get("reschedule"):
+                talk.seminar_ctr = -talk.seminar_ctr
+                talk.save()
+            else:
+                db.talks.delete({"seminar_id": talk.seminar_id, "seminar_ctr": -talk.seminar_ctr})
         new_version.save()
         if talk.new:
             flash("Talk successfully created!")
