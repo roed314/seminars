@@ -662,7 +662,7 @@ Thank you,
                 cols.append(("", ""))
             else:
                 cols.append(('class="subscribe"', self.show_subscribe()))
-        return datetime_tds + ''.join('<td class="%s">%s</td>' % c for c in cols)
+        return datetime_tds + ''.join('<td %s>%s</td>' % c for c in cols)
 
     def show_comments(self, prefix=""):
         if self.comments:
