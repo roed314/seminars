@@ -131,7 +131,7 @@
       <td></td><td>Talk will be displayed at the new time.</td>
     </tr>
     <tr class="reschedule">
-      {% if {{ talk.blackout_day() %}
+      {% if talk.blackout_day() %}
         <td></td><td><input name="reschedule" value="yes" type="checkbox" />Also display talk at {{ talk.editable_start_time() }} with title crossed out and black background.</td>
       {% else %}
         <td></td><td><input name="reschedule" value="yes" type="checkbox" />Also display talk at {{ talk.editable_start_time() }} with title crossed out.</td>
