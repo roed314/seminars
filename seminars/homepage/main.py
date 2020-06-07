@@ -20,11 +20,10 @@ from flask import abort, render_template, request, redirect, url_for, Response, 
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted, audience_options
 from flask_login import current_user
 import json
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import pytz
 from collections import Counter
 from dateutil.parser import parse
-, WebTalk
 from lmfdb.utils import (
     flash_error,
     to_dict,
