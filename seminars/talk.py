@@ -364,7 +364,7 @@ class WebTalk(object):
             )
         else:
             return r'<a title="{title}" {knowl_href}="talk/{seminar_id}/{talkid}">{title}</a>{reschedule}'.format(
-                title="<i><s>" + self.show_title() + "</s></i>" if reschedule else self.show_title(),
+                title="<i><s>" + self.show_title() + "</s></i>" if rescheduled else self.show_title(),
                 knowl_href="href" if blackout else "knowl",
                 seminar_id=self.seminar_id,
                 talkid=self.seminar_ctr,
