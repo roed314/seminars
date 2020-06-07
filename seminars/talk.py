@@ -640,13 +640,9 @@ Thank you,
     def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
         rescheduled = self.rescheduled()
         if rescheduled:
-            t0 = adapt_datetime(self.start_time, newtz=tz)
             new_version = talks_lookup(self.seminar_id, -self.seminar_ctr)
             t = adapt_datetime(self.start_time, newtz=tz)
-            if t.date() == t0.date():
-                datetime_tds = t.strftime('<td class="weekday rescheduled">Now</td><td class="monthdate rescheduled">at</td><td class="time rescheduled">%H:%M</td>')
-            else:
-                datetime_tds = t.strftime('<td class="weekday">Now</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
+            datetime_tds = t.strftime('<td class="weekday rescheduled">Now</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
 
             self = new_version
 
