@@ -307,8 +307,8 @@ class WebTalk(object):
         format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
         return adapt_datetime(self.start_time, newtz=tz).strftime(format)
 
-    def blackout_date(self, tz=None):
-        return adapt_datetime(self.start_time, newtz=tz).strftime("%Y-%m-%d") in blackout_dates
+    def blackout_date(self):
+        return adapt_datetime(self.start_time, newtz=self.tz).strftime("%Y-%m-%d") in blackout_dates
 
     def show_time_and_duration(self, adapt=True, tz=None):
         start = self.start_time
