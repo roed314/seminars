@@ -776,8 +776,12 @@ whitelisted_cols = [
     "access_time",
     "access_hint",
     "access_registration",
+    "audience",
+    "by_api",
+    "chat_link",
     "comments",
     "deleted",
+    "deleted_with_seminar",
     "description",
     "display",
     "edited_at",
@@ -811,6 +815,7 @@ whitelisted_cols = [
     "topics",
     "video_link",
     "visibility",
+    "weekdays",
 ]
 
 class APIError(Exception):

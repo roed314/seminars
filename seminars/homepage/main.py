@@ -510,11 +510,11 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
-        query["end_time"] = {"$lt": datetime.now()}
+        query["end_time"] = {"$lt": datetime.now(pytz.UTC)}
         if sort is None:
             sort = [("start_time", -1), "seminar_id"]
     else:
-        query["end_time"] = {"$gte": datetime.now()}
+        query["end_time"] = {"$gte": datetime.now(pytz.UTC)}
         if sort is None:
             sort = ["start_time", "seminar_id"]
     talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
