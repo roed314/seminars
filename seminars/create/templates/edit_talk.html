@@ -131,7 +131,11 @@
       <td></td><td>Talk will be displayed at the new time.</td>
     </tr>
     <tr class="reschedule">
-      <td></td><td><input name="reschedule" value="yes" type="checkbox" />Also display talk at {{ talk.editable_start_time() }} with title crossed out.</td>
+      {% if talk.blackout_date() %}
+        <td></td><td><input name="reschedule" value="yes" type="checkbox" />Also display talk at {{ talk.editable_start_time() }} with title crossed out and black background.</td>
+      {% else %}
+        <td></td><td><input name="reschedule" value="yes" type="checkbox" />Also display talk at {{ talk.editable_start_time() }} with title crossed out.</td>
+      {% endif %}
     </tr>
     {% else %}
     {# non-organizers cannot edit the following attributes #}

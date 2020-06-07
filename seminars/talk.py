@@ -32,6 +32,11 @@ from lmfdb.logger import critical
 from datetime import datetime, timedelta
 import re
 
+blackout_dates = [ # Use %Y-%m-%d format
+    "2020-06-10",
+    "2020-12-10",
+]
+
 required_talk_columns = [
     "audience",
     "by_api",
@@ -300,11 +305,11 @@ class WebTalk(object):
         return adapt_datetime(self.start_time, tz).strftime("%H:%M") + "-" + adapt_datetime(self.end_time, tz).strftime("%H:%M")
 
     def show_date(self, tz=None):
-        if self.start_time is None:
-            return ""
-        else:
-            format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
-            return adapt_datetime(self.start_time, newtz=tz).strftime(format)
+        format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
+        return adapt_datetime(self.start_time, newtz=tz).strftime(format)
+
+    def blackout_date(self):
+        return adapt_datetime(self.start_time, newtz=self.tz).strftime("%Y-%m-%d") in blackout_dates
 
     def show_time_and_duration(self, adapt=True, tz=None):
         start = self.start_time

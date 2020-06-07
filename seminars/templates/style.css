@@ -733,6 +733,24 @@ table.ntdata > thead > tr.evenrow {
     background: {{color.table_ntdata_background_cn}} ! important;
 }
 
+table.ntdata > tr.even.blm,
+table.ntdata > tbody > tr.evenrow.blm,
+table.ntdata > tr.oddrow.blm,
+table.ntdata > tbody > tr.oddrow.blm {
+    background: #000000!important;
+    color: #f8d047!important;
+}
+table.ntdata tr.blm a {
+    color: #f8d047!important;
+}
+table.ntdata tr.blm a:hover {
+    background: #000000!important;
+}
+table.ntdata tr.blm *[knowl] {
+    border-bottom: 1px dotted #f8d047!important;
+}
+
+
 
 table.ntdata tr.toggle { font-size: 80%; text-align: left; }
 
@@ -805,20 +823,6 @@ table.ntdata td.institutions {
 }
 
 
-
-table.ntdata tr.blm {
-    background: #000000!important;
-    color: #f8d047!important;
-}
-table.ntdata tr.blm a {
-    color: #f8d047!important;
-}
-table.ntdata tr.blm a:hover {
-    background: #000000!important;
-}
-table.ntdata tr.blm *[knowl] {
-    border-bottom: 1px dotted #f8d047!important;
-}
 
 table.ntdata td.subscribe {
     text-align: right;
