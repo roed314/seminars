@@ -656,7 +656,8 @@ Thank you,
         if include_seminar:
             cols.append(("seriesname", self.show_seminar()))
         cols.append(("speaker", self.show_speaker(affiliation=False)))
-        cols.append(("talktitle", self.show_knowl_title(_external=_external, rescheduled=rescheduled, tz=tz)))
+        new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr) if rescheduled else self
+        cols.append(("talktitle", new_talk.show_knowl_title(_external=_external, tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
