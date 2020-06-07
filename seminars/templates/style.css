@@ -844,6 +844,7 @@ table.ntdata td.audience {
 
 table.ntdata td.rescheduled {
     font-style: italic;
+    text-decoration: line-through;
 }
 
 .talk-table td:nth-child(6) {

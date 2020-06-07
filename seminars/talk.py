@@ -356,27 +356,20 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self, _external=False, rescheduled=False, preload=False, tz=None):
+    def show_knowl_title(self, _external=False, rescheduled=False, blackout=False, preload=False, tz=None):
         if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
-            if rescheduled:
-                return r'<a title="{title}" href="talk/{seminar_id}/{talkid}" style="text-decoration: line-through;">{title}</a> (rescheduled)'.format(
-                    title=self.show_title(),
-                    seminar_id=self.seminar_id,
-                    talkid=self.seminar_ctr,
-                )
-
-            else:
-                return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
-                    title=self.show_title(),
-                    seminar_id=self.seminar_id,
-                    talkid=self.seminar_ctr,
-                )
-
+            return r'<a title="{title}" {knowl_href}="talk/{seminar_id}/{talkid}">{title}</a>'.format(
+                title=("<i><s>" + self.show_title() + "</s></i> (rescheduled)") if rescheduled else self.show_title(),
+                knowl_href="href" if rescheduled else "knowl",
+                seminar_id=self.seminar_id,
+                talkid=self.seminar_ctr,
+                reschedule=" (rescheduled)" if rescheduled else "",
+            )
 
     def show_lang_topics(self):
         if self.language and self.language != "en":
@@ -645,27 +638,21 @@ Thank you,
 
     def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
         rescheduled = self.rescheduled()
+        t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if rescheduled:
-            new_version = talks_lookup(self.seminar_id, -self.seminar_ctr)
-            self = new_version
-            t = adapt_datetime(self.start_time, newtz=tz)
-            datetime_tds = t.strftime('<td class="weekday rescheduled">Now</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
-
-
+            datetime_tds = t.strftime('<td class="weekday rescheduled">%a</i></td><td class="monthdate rescheduled">%b %d</td><td class="time rescheduled"><i>%H:%M</i></td>')
         else:
-            t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
             if t < now < e:
                 datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
             else:
                 datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
+        rclass = " rescheduled" if rescheduled else ""
         if include_seminar:
-            cls = "seriesname rescheduled" if self.rescheduled() else "seriesname"
-            cols.append(('class="%s"'%cls, self.show_seminar()))
-        cls = "speaker rescheduled" if self.rescheduled() else "speaker"
-        cols.append(('class="%s"'%cls, self.show_speaker(affiliation=False)))
-        cls = "talktitle rescheduled" if self.rescheduled() else "talktitle"
-        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external, rescheduled=rescheduled, tz=tz)))
+            cols.append(('class="seriesname%s"'%rclass, self.show_seminar()))
+        cols.append(('class="speaker%s"'%rclass, self.show_speaker(affiliation=False)))
+        new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr) if rescheduled else self
+        cols.append(('class="talktitle"', new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, blackout=self.blackout_date(), tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
@@ -675,8 +662,7 @@ Thank you,
                 cols.append(("", ""))
             else:
                 cols.append(('class="subscribe"', self.show_subscribe()))
-        #cols.append(('style="display: none;"', self.show_link_title()))
-        return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
+        return datetime_tds + ''.join('<td %s>%s</td>' % c for c in cols)
 
     def show_comments(self, prefix=""):
         if self.comments:
