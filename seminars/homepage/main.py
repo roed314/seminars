@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky, talks_lookup
+from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk
 from seminars.utils import (
     Toggle,
     ics_file,
@@ -24,7 +24,7 @@ from datetime import datetime, timedelta, date
 import pytz
 from collections import Counter
 from dateutil.parser import parse
-
+, WebTalk
 from lmfdb.utils import (
     flash_error,
     to_dict,
@@ -36,7 +36,6 @@ from lmfdb.utils.search_boxes import (
     SearchButton,
     TextBox,
 )
-PROTEST_DATE = date(2020, 12, 10)
 
 from lmfdb.utils.search_parsing import collapse_ors
 
@@ -470,7 +469,7 @@ def _get_row_attributes(objects):
     visible_counter = 0
     for obj in objects:
         classes, filtered = filter_classes(obj)
-        if isinstance(obj, WebTalk) and adapt_datetime(obj.start_time, current_user.tz).date() == PROTEST_DATE and obj.rescheduled():
+        if isinstance(obj, WebTalk) and obj.blackout_date() and obj.rescheduled():
             classes.append("blm")
         style = ""
         if filtered:
