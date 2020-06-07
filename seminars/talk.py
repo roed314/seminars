@@ -358,12 +358,19 @@ class WebTalk(object):
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
-            return r'{reschedule}<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
-                title=self.show_title(),
-                seminar_id=self.seminar_id,
-                talkid=self.seminar_ctr,
-                reschedule='<span style="color: red;">Rescheduled:</span>' if rescheduled else '',
-            )
+            if rescheduled:
+                return r'<span style="color: red;">Rescheduled:</span> <a title="{title}" href="talk/{seminar_id}/{talkid}" style="text-decoration: line-through;">{title}</a>'.format(
+                    title=self.show_title(),
+                    seminar_id=self.seminar_id,
+                    talkid=self.seminar_ctr,
+                )
+
+            else:
+                return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
+                    title=self.show_title(),
+                    seminar_id=self.seminar_id,
+                    talkid=self.seminar_ctr,
+                )
 
 
     def show_lang_topics(self):
