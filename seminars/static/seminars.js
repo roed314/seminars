@@ -539,8 +539,8 @@ function toggleFilterView(id) {
 }
 
 function apply_striping() {
-  $('#browse-talks tbody tr:visible:odd').css('background', '#E3F2FD');
-  $('#browse-talks tbody tr:visible:even').css('background', 'none');
+    $('#browse-talks tbody tr:visible:odd').removeClass("evenrow").addClass("oddrow"); //.css('background', '#E3F2FD');
+    $('#browse-talks tbody tr:visible:even').removeClass("oddrow").addClass("evenrow"); //css('background', 'none');
 }
 
 function tickClock() {
