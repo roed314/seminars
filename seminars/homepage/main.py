@@ -470,8 +470,8 @@ def _get_row_attributes(objects):
     visible_counter = 0
     for obj in objects:
         classes, filtered = filter_classes(obj)
-        #if isinstance(obj, WebTalk) and adapt_datetime(obj.start_time, current_user.tz) == PROTEST_DATE and obj.rescheduled():
-        #    classes.append("blm")
+        if isinstance(obj, WebTalk) and adapt_datetime(obj.start_time, current_user.tz) == PROTEST_DATE and obj.rescheduled():
+            classes.append("blm")
         style = ""
         if filtered:
             style = ' style="display: none;"'
