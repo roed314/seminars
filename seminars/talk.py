@@ -362,10 +362,9 @@ class WebTalk(object):
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
-            return r'<a title="{hovertitle}" {knowl_href}="talk/{seminar_id}/{talkid}">{title}</a>'.format(
-                hovertitle=self.show_title(),
-                title=("<i><s>" + self.show_title() + "</s></i> (rescheduled)") if rescheduled else self.show_title(),
-                knowl_href="href" if rescheduled else "knowl",
+            return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}" {style}>{title}</a>'.format(
+                title=self.show_title(),
+                style='style="text-decoration: line-through;font-style: italic;"' if rescheduled else '',
                 seminar_id=self.seminar_id,
                 talkid=self.seminar_ctr,
             )
