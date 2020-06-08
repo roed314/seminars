@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky, talks_lookup
+from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk
 from seminars.utils import (
     Toggle,
     ics_file,
@@ -20,7 +20,7 @@ from flask import abort, render_template, request, redirect, url_for, Response, 
 from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted, audience_options
 from flask_login import current_user
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import pytz
 from collections import Counter
 from dateutil.parser import parse
@@ -36,6 +36,7 @@ from lmfdb.utils.search_boxes import (
     SearchButton,
     TextBox,
 )
+PROTEST_DATE = date(2020, 12, 10)
 
 from lmfdb.utils.search_parsing import collapse_ors
 
@@ -469,15 +470,20 @@ def _get_row_attributes(objects):
     visible_counter = 0
     for obj in objects:
         classes, filtered = filter_classes(obj)
+        #if isinstance(obj, WebTalk) and adapt_datetime(obj.start_time, current_user.tz) == PROTEST_DATE and obj.rescheduled():
+        #    classes.append("blm")
+        style = ""
         if filtered:
-            style = "display: none;"
+            style = ' style="display: none;"'
         else:
-            visible_counter += 1
             if visible_counter % 2: # odd
-                style = "background: none;"
+                classes.append("oddrow")
+                #style = "background: #E3F2FD;"
             else:
-                style = "background: #E3F2FD;"
-        row_attributes = 'class="{classes}" style="{style}"'.format(
+                classes.append("evenrow")
+                #style = "background: none;"
+            visible_counter += 1
+        row_attributes = 'class="{classes}"{style}'.format(
             classes=' '.join(classes),
             style=style)
         attributes.append(row_attributes)
@@ -511,6 +517,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
         query["end_time"] = {"$lt": datetime.now(pytz.UTC)}
+        query["seminar_ctr"] = {"$gt": 0} # don't show rescheduled talks
         if sort is None:
             sort = [("start_time", -1), "seminar_id"]
     else:
@@ -663,7 +670,7 @@ def show_seminar(shortname):
 
 
 def talks_search_api(shortname, projection=1):
-    query = {"seminar_id": shortname, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
+    query = {"seminar_id": shortname, "seminar_ctr": {"$gt": 0}, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
     reverse_sort = False
     if 'daterange' in request.args:
         if request.args.get('daterange') == 'past':

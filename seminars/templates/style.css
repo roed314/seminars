@@ -234,6 +234,14 @@ a:hover {
     background: {{color.a_background_hover}};
 }
 
+div.banner {
+  background-color: #f8d047; /* #373737; */
+  color: black; /* #f8d047; */
+}
+
+a.banner:link { color: black; font-weight: bold; }
+a.banner:visited { color: black; font-weight: bold; }
+a.banner:hover { color: #575757; }
 
 #logo a,
 #logo a:hover,
@@ -661,6 +669,90 @@ div.col6 {
     border-radius: 5px 5px 0 0;
 }
 
+table.ntdata {
+  width: auto;
+  border: 3px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+table.ntdata thead th {
+  background: {{ color.table_ntdata_background }};
+}
+table.ntdata > thead {
+  border-bottom: 2px solid {{ color.table_ntdata_border }};
+}
+table.ntdata > thead > tr.bottomlined {
+  border-bottom: 2px solid {{ color.table_ntdata_border }};
+}
+
+table.ntdata th {
+  text-align: left;
+  padding-right: 7px;
+  padding-left: 7px;
+}
+
+
+
+
+table.ntdata > tr:nth-of-type(odd),
+table.ntdata > tbody > tr:nth-of-type(odd),
+table.ntdata > thead > tr:nth-of-type(odd),
+table.ntdata > tr:first-child
+table.ntdata > tbody > tr:first-child
+table.ntdata > thead > tr:first-child,
+ {
+    background: {{color.table_ntdata_background_c1}};
+}
+
+table.ntdata > tr.oddrow,
+table.ntdata > tbody > tr.oddrow,
+table.ntdata > thead > tr.oddrow {
+    background: {{color.table_ntdata_background_c1}} ! important;
+}
+
+/*
+table.ntdata > tbody > tr:last-child {
+    border-bottom:  2px solid {{ color.table_ntdata_border }};
+}
+*/
+
+table.ntdata > caption {
+    caption-side: bottom;
+    padding-top: 10px;
+    text-align: right;
+}
+
+table.ntdata > tr:nth-of-type(even),
+table.ntdata > tbody > tr:nth-of-type(even),
+table.ntdata > thead > tr:nth-of-type(even) {
+    background: {{color.table_ntdata_background_cn}};
+}
+table.ntdata > tr.even,
+table.ntdata > tbody > tr.evenrow,
+table.ntdata > thead > tr.evenrow {
+    background: {{color.table_ntdata_background_cn}} ! important;
+}
+
+
+table.ntdata tr.toggle { font-size: 80%; text-align: left; }
+
+table.ntdata tr.toggle:nth-of-type(2n) {
+    background: {{color.table_ntdata_background_c1}};
+}
+
+
+
+table.ntdata tr.toggle a:hover {
+  background: {{color.table_ntdata_background_c1}};
+}
+
+table.ntdata tr.line {
+    border-bottom: 1px dotted {{color.table_ntdata_border_bottom}};
+}
+table.ntdata tr.endsection {
+    border-bottom: 1px solid {{color.table_ntdata_border}};
+}
+
 table.ntdata th.yourtime {
     text-align: center;
 }
@@ -712,7 +804,23 @@ table.ntdata td.institutions {
     min-width: 180px;
 }
 
-table ntdata td.subscribe {
+
+
+table.ntdata tr.blm {
+    background: #000000!important;
+    color: #f8d047!important;
+}
+table.ntdata tr.blm a {
+    color: #f8d047!important;
+}
+table.ntdata tr.blm a:hover {
+    background: #000000!important;
+}
+table.ntdata tr.blm *[knowl] {
+    border-bottom: 1px dotted #f8d047!important;
+}
+
+table.ntdata td.subscribe {
     text-align: right;
     padding-right: 0px;
 }
@@ -728,6 +836,10 @@ table.ntdata td.talktitle {
 table.ntdata td.audience {
     white-space:nowrap;
     min-width: 150px;
+}
+
+table.ntdata td.rescheduled {
+    font-style: italic;
 }
 
 .talk-table td:nth-child(6) {
@@ -1172,7 +1284,7 @@ body.intro #sidebar a.intro { background: {{ color.sidebar_bkg_highlight }}; }
 .forminfo {
    font-size: 80%;
    font-style: italic;
-   color: {RGC(70,70,70)};
+   color: #333333;
    vertical-align: middle;
 }
 
@@ -1326,74 +1438,7 @@ table td.spacing {
 }
 
 
-table.ntdata {
-  width: auto;
-  border: 3px;
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
-table.ntdata thead th {
-  background: {{ color.table_ntdata_background }};
-}
-table.ntdata > thead {
-  border-bottom: 2px solid {{ color.table_ntdata_border }};
-}
-table.ntdata > thead > tr.bottomlined {
-  border-bottom: 2px solid {{ color.table_ntdata_border }};
-}
 
-table.ntdata th {
-  text-align: left;
-  padding-right: 7px;
-  padding-left: 7px;
-}
-
-table.ntdata > tr.odd,
-table.ntdata > tbody > tr.odd,
-table.ntdata > thead > tr.odd,
-table.ntdata > tr:nth-of-type(odd),
-table.ntdata > tbody > tr:nth-of-type(odd),
-table.ntdata > thead > tr:nth-of-type(odd),
-table.ntdata > tr:first-child
-table.ntdata > tbody > tr:first-child
-table.ntdata > thead > tr:first-child {
-    background: {{color.table_ntdata_background_c1}};
-}
-
-/*
-table.ntdata > tbody > tr:last-child {
-    border-bottom:  2px solid {{ color.table_ntdata_border }};
-}
-*/
-
-table.ntdata > caption {
-    caption-side: bottom;
-    padding-top: 10px;
-    text-align: right;
-}
-
-table.ntdata > tr.even,
-table.ntdata > tbody > tr.even,
-table.ntdata > thead > tr.even,
-table.ntdata > tr:nth-of-type(even),
-table.ntdata > tbody > tr:nth-of-type(even),
-table.ntdata > thead > tr:nth-of-type(even) {
-    background: {{color.table_ntdata_background_cn}};
-}
-table.ntdata tr.toggle { font-size: 80%; text-align: left; }
-table.ntdata tr.toggle:nth-of-type(2n) { 
-    background: {{color.table_ntdata_background_c1}};
-}
-table.ntdata tr.toggle a:hover {
-  background: {{color.table_ntdata_background_c1}};
-}
-
-table.ntdata tr.line {
-    border-bottom: 1px dotted {{color.table_ntdata_border_bottom}};
-}
-table.ntdata tr.endsection {
-    border-bottom: 1px solid {{color.table_ntdata_border}};
-}
 
 table.right_align_table td {
   text-align: right;
@@ -1570,39 +1615,6 @@ body.knowl table.ntdata tr:nth-of-type(even) {
 }
 
 
-table.mfdata {
-  width: auto;
-  border: 0;
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
-table.mfdata thead tr {
-  border-bottom: 2px solid {{ color.table_ntdata_border }};
-}
-
-table.mfdata td {
-    vertical-align: middle;
-}
-
-table.mfdata tr.oddrow {
-    background: {{color.table_ntdata_background_2}};
-}
-table.mfdata tr.evenrow {
-    background: {{color.white}};
-}
-
-table.dimgrid thead tr {
-    background: {{color.table_ntdata_background_2}};
-    border-bottom: 2px solid {{ color.table_ntdata_border }};
-}
-table.dimgrid thead tr th.blank {
-    background: {{color.white}};
-    border-bottom: 2px solid {{color.table_ntdata_background_2}} ;
-}
-table.dimgrid tbody tr th.left {
-    border-right: 2px solid {{ color.table_ntdata_border }};
-    background: {{color.table_ntdata_background_2}};
-}
 
 table.ntdata th.left {
     border-right: 2px solid {{color.table_ntdata_border}};
