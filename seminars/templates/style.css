@@ -742,6 +742,7 @@ table.ntdata > tbody > tr.oddrow.blm {
 }
 table.ntdata tr.blm a {
     color: #f8d047!important;
+    background: #000000!important;
 }
 table.ntdata tr.blm a:hover {
     background: #000000!important;
