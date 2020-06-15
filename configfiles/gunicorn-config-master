@@ -2,7 +2,7 @@
 # /home/mathseminars/seminars-git-master/gunicorn-config-master.py
 # as gunicorn doesn't handle well the config file being part of the repo
 bind = "0.0.0.0:9093"
-workers = 15
+workers = 30
 SESSION_PROTECTION = None
 #daemon = True
 pidfile = '/home/mathseminars/gunicorn-master.pid'
