@@ -121,12 +121,22 @@
     <tr>
       <td>{{ ASTKNOWL("talk_start_time") }}</td>
       <td><input name="start_time" value="{{ talk.editable_start_time() }}" style="width:600px;" required /></td>
+      <td class="forminfo">To reschedule, edit times.</td>
     </tr>
     <tr>
       <td>{{ ASTKNOWL("talk_end_time") }}</td>
       <td><input name="end_time" value="{{ talk.editable_end_time() }}" style="width:600px;" required /></td>
     </tr>
-
+    <tr class="reschedule">
+      <td></td><td>Talk will be displayed at the new time.</td>
+    </tr>
+    <tr class="reschedule">
+      {% if talk.blackout_date() %}
+        <td></td><td><input name="reschedule" value="yes" type="checkbox" />Also display talk at {{ talk.editable_start_time() }}, crossed out with black background.</td>
+      {% else %}
+        <td></td><td><input name="reschedule" value="yes" type="checkbox" />Also display talk at {{ talk.editable_start_time() }}, crossed out.</td>
+      {% endif %}
+    </tr>
     {% else %}
     {# non-organizers cannot edit the following attributes #}
     <input type="hidden" name="timezone" value="{{ talk.timezone }}" />
@@ -316,11 +326,21 @@
     }
     return false;
   }
+
+  function showreschedule() {
+    $('tr.reschedule').hide()
+    if ( $('input[name="start_time"]')[0].value != "{{ talk.editable_start_time() }}" )
+      $('tr.reschedule').show();
+    return false;
+  }
+
   $('select[name="online"]').change(showaccess);
   $('select[name="access_control"]').change(showaccess);
+  $('input[name="start_time"]')[0].addEventListener('keyup', (event) => { showreschedule(); });
 
   window.onpageshow = function(e) {
     showaccess();
+    showreschedule();
   };
 {% endif %}
 });

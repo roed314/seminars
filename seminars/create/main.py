@@ -160,7 +160,7 @@ WHERE ({Tsems}.{Cowner} ~~* %s OR {Torgs}.{Cemail} ~~* %s) AND {Ttalks}.{Cdel} =
     if current_user.is_creator:
         api_series = [series for (series, r) in seminars + conferences if series.by_api and not series.display]
         api_series.sort(key = lambda S: S.edited_at, reverse=True)
-        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, r) in seminars + conferences]}}, sort=[("edited_at", -1)], include_pending=True))
+        api_talks = list(talks_search({"by_api": True, "display": False, "seminar_id": {"$in": [series.shortname for (series, r) in seminars + conferences]}, "seminar_ctr": {"$gt": 0}}, sort=[("edited_at", -1)], include_pending=True))
     else:
         api_series = api_talks = []
 
@@ -286,9 +286,9 @@ def delete_seminar(shortname):
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
     if seminar.deleted:
-        talks = list(talks_search({"seminar_id": shortname, "deleted_with_seminar": True}, sort=["start_time"], include_deleted=True))
+        talks = list(talks_search({"seminar_id": shortname, "deleted_with_seminar": True, "seminar_ctr": {"$gt": 0}}, sort=["start_time"], include_deleted=True))
     else:
-        talks = list(talks_search({"seminar_id": shortname}, sort=["start_time"]))
+        talks = list(talks_search({"seminar_id": shortname, "seminar_ctr": {"$gt": 0}}, sort=["start_time"]))
 
     return render_template(
         "deleted_seminar.html",
@@ -449,12 +449,10 @@ def save_seminar():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_seminar", shortname=shortname), 302)
 
-    data, organizers, errmsgs = process_save_seminar(seminar, raw_data)
+    new_version, errmsgs = process_save_seminar(seminar, raw_data)
     # Don't try to create new_version using invalid input
-    if errmsgs:
+    if new_version is None:
         return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
-        new_version = WebSeminar(shortname, data=data, organizers=organizers)
 
     if seminar.new or new_version != seminar:
         new_version.save()
@@ -641,7 +639,8 @@ def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=for
                     "If none of the organizers has a confirmed account, add yourself and leave the organizer box unchecked.",
                 )
             )
-    return data, organizers, errmsgs
+    new_version = WebSeminar(shortname, data=data, organizers=organizers) if not errmsgs else None
+    return new_version, errmsgs
 
 @create.route("edit/institution/", methods=["GET", "POST"])
 @email_confirmed_required
@@ -839,17 +838,20 @@ def save_talk():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
 
-    data, errmsgs = process_save_talk(talk, raw_data)
+    new_version, errmsgs = process_save_talk(talk, raw_data)
     # Don't try to create new_version using invalid input
-    if errmsgs:
+    if new_version is None:
         return show_input_errors(errmsgs)
-    else: # to make it obvious that these two statements should be together
-        new_version = WebTalk(talk.seminar_id, data=data)
 
-    sanity_check_times(new_version.start_time, new_version.end_time)
     if new_version == talk:
         flash("No changes made to talk.")
     else:
+        if new_version.start_time != talk.start_time:
+            if raw_data.get("reschedule"):
+                talk.seminar_ctr = -talk.seminar_ctr
+                talk.save()
+            else:
+                db.talks.delete({"seminar_id": talk.seminar_id, "seminar_ctr": -talk.seminar_ctr})
         new_version.save()
         if talk.new:
             flash("Talk successfully created!")
@@ -920,15 +922,14 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
 
     # Don't try to create new_version using invalid input
     if errmsgs:
-        return data, errmsgs
-    else:  # to make it obvious that these two statements should be together
-        new_version = WebTalk(talk.seminar_id, data=data)
+        return None, errmsgs
+    new_version = WebTalk(talk.seminar_id, data=data)
 
     # Warnings
-    sanity_check_times(new_version.start_time, new_version.end_time)
+    sanity_check_times(new_version.start_time, new_version.end_time, warn=warn)
     if "zoom" in data["video_link"] and not "rec" in data["video_link"]:
         warn("Recorded video link should not be used for Zoom meeting links; be sure to use Livestream link for meeting links.")
-    return data, errmsgs
+    return new_version, errmsgs
 
 def layout_schedule(seminar, data):
     """ Returns a list of schedule slots in specified date range (date, daytime-interval, talk)
@@ -979,7 +980,7 @@ def layout_schedule(seminar, data):
     midnight_begin = midnight(begin, tz)
     midnight_end = midnight(end, tz)
     query = {"$gte": midnight_begin, "$lt": midnight_end + day}
-    talks = list(talks_search({"seminar_id": shortname, "start_time": query}, sort=["start_time"]))
+    talks = list(talks_search({"seminar_id": shortname, "seminar_ctr": {"$gt": 0}, "start_time": query}, sort=["start_time"]))
     if any(talk.by_api and not talk.display for talk in talks):
         raise APIError
     slots = [(t.show_date(tz), t.show_daytimes(tz), t) for t in talks]

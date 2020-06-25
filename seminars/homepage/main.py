@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky, talks_lookup
+from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk
 from seminars.utils import (
     Toggle,
     ics_file,
@@ -24,7 +24,6 @@ from datetime import datetime, timedelta
 import pytz
 from collections import Counter
 from dateutil.parser import parse
-
 from lmfdb.utils import (
     flash_error,
     to_dict,
@@ -469,15 +468,20 @@ def _get_row_attributes(objects):
     visible_counter = 0
     for obj in objects:
         classes, filtered = filter_classes(obj)
+        if isinstance(obj, WebTalk) and obj.blackout_date() and obj.rescheduled():
+            classes.append("blm")
+        style = ""
         if filtered:
-            style = "display: none;"
+            style = ' style="display: none;"'
         else:
-            visible_counter += 1
             if visible_counter % 2: # odd
-                style = "background: none;"
+                classes.append("oddrow")
+                #style = "background: #E3F2FD;"
             else:
-                style = "background: #E3F2FD;"
-        row_attributes = 'class="{classes}" style="{style}"'.format(
+                classes.append("evenrow")
+                #style = "background: none;"
+            visible_counter += 1
+        row_attributes = 'class="{classes}"{style}'.format(
             classes=' '.join(classes),
             style=style)
         attributes.append(row_attributes)
@@ -511,6 +515,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     if past:
         query["end_time"] = {"$lt": datetime.now(pytz.UTC)}
+        query["seminar_ctr"] = {"$gt": 0} # don't show rescheduled talks
         if sort is None:
             sort = [("start_time", -1), "seminar_id"]
     else:
@@ -663,7 +668,7 @@ def show_seminar(shortname):
 
 
 def talks_search_api(shortname, projection=1):
-    query = {"seminar_id": shortname, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
+    query = {"seminar_id": shortname, "seminar_ctr": {"$gt": 0}, "display": True, "hidden": {"$or": [False, {"$exists": False}]}}
     reverse_sort = False
     if 'daterange' in request.args:
         if request.args.get('daterange') == 'past':

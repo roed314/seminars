@@ -32,6 +32,10 @@ from lmfdb.logger import critical
 from datetime import datetime, timedelta
 import re
 
+blackout_dates = [ # Use %Y-%m-%d format
+    "2020-06-10",
+]
+
 required_talk_columns = [
     "audience",
     "by_api",
@@ -300,11 +304,11 @@ class WebTalk(object):
         return adapt_datetime(self.start_time, tz).strftime("%H:%M") + "-" + adapt_datetime(self.end_time, tz).strftime("%H:%M")
 
     def show_date(self, tz=None):
-        if self.start_time is None:
-            return ""
-        else:
-            format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
-            return adapt_datetime(self.start_time, newtz=tz).strftime(format)
+        format = "%a %b %-d" if adapt_datetime(self.start_time, newtz=tz).year == datetime.now(tz).year else "%d-%b-%Y"
+        return adapt_datetime(self.start_time, newtz=tz).strftime(format)
+
+    def blackout_date(self):
+        return adapt_datetime(self.start_time, newtz=self.tz).strftime("%Y-%m-%d") in blackout_dates
 
     def show_time_and_duration(self, adapt=True, tz=None):
         start = self.start_time
@@ -351,19 +355,20 @@ class WebTalk(object):
             title=self.show_title(),
         )
 
-    def show_knowl_title(self, _external=False, preload=False, tz=None):
+    def show_knowl_title(self, _external=False, rescheduled=False, blackout=False, preload=False, tz=None):
         if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
-            return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}">{title}</a>'.format(
+            return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}" {style}>{title}</a>{rescheduled}'.format(
                 title=self.show_title(),
+                style='style="text-decoration: line-through;font-style: italic;"' if rescheduled else '',
                 seminar_id=self.seminar_id,
-                talkid=self.seminar_ctr
+                talkid=self.seminar_ctr,
+                rescheduled=' (rescheduled)' if rescheduled else '',
             )
-
 
     def show_lang_topics(self):
         if self.language and self.language != "en":
@@ -591,6 +596,7 @@ Thank you,
     def delete(self):
         if self.user_can_delete():
             with DelayCommit(db):
+                db.talks.delete({"seminar_id": self.seminar_id, "seminar_ctr": -self.seminar_ctr})
                 db.talks.update({"seminar_id": self.seminar_id, "seminar_ctr": self.seminar_ctr},
                                 {"deleted": True, "deleted_with_seminar": False})
                 for i, talk_sub in db._execute(
@@ -622,25 +628,40 @@ Thank you,
             classes="subscribe"
         )
 
+    def rescheduled(self):
+        """
+        Return True if this talk has been rescheduled to another time.
+        """
+        # We currently indicate that a talk has been rescheduled by giving it a negative seminar_ctr; the version with the new time will have id equal to the absolute value.
+        return self.seminar_ctr < 0
+
     def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
+        rescheduled = self.rescheduled()
         t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
-        if t < now < e:
-            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
+        if rescheduled:
+            datetime_tds = t.strftime('<td class="weekday rescheduled">%a</i></td><td class="monthdate rescheduled">%b %d</td><td class="time rescheduled"><i>%H:%M</i></td>')
         else:
-            datetime_tds =  t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
+            if t < now < e:
+                datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
+            else:
+                datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
         cols = []
+        rclass = " rescheduled" if rescheduled else ""
         if include_seminar:
-            cols.append(('class="seriesname"', self.show_seminar()))
-        cols.append(('class="speaker"', self.show_speaker(affiliation=False)))
-        cols.append(('class="talktitle"', self.show_knowl_title(_external=_external, tz=tz)))
+            cols.append(('class="seriesname%s"'%rclass, self.show_seminar()))
+        cols.append(('class="speaker%s"'%rclass, self.show_speaker(affiliation=False)))
+        new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr) if rescheduled else self
+        cols.append(('class="talktitle"', new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, blackout=self.blackout_date(), tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))
             cols.append(('', self.show_paper_link()))
         if include_subscribe:
-            cols.append(('class="subscribe"', self.show_subscribe()))
-        #cols.append(('style="display: none;"', self.show_link_title()))
-        return datetime_tds + "".join("<td %s>%s</td>" % c for c in cols)
+            if rescheduled:
+                cols.append(("", ""))
+            else:
+                cols.append(('class="subscribe"', self.show_subscribe()))
+        return datetime_tds + ''.join('<td %s>%s</td>' % c for c in cols)
 
     def show_comments(self, prefix=""):
         if self.comments:
