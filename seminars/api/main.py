@@ -43,6 +43,17 @@ def get_request_json():
                         "description": "could not parse json",
                         "error": str(err)})
 
+
+def get_request_args_json():
+    try:
+        return dict( (key, json.loads(value)) for key, value in dict(request.args).items())
+    except Exception as err:
+        raise APIError({"code": "json_parse_error",
+                        "description": "could not parse json",
+                        "error": str(err)})
+
+
+
 def str_jsonify(result, callback=False):
     if callback:
         return Response(
@@ -154,7 +165,7 @@ def lookup_series(version=0):
     if request.method == "POST":
         raw_data = get_request_json()
     else:
-        raw_data = dict(request.args)
+        raw_data = get_request_args_json()
     series_id = _get_col("series_id", raw_data, "looking up a series")
     try:
         result = seminars_lookup(series_id, objects=False, sanitized=True)
@@ -178,7 +189,7 @@ def lookup_talk(version=0):
     if request.method == "POST":
         raw_data = get_request_json()
     else:
-        raw_data = dict(request.args)
+        raw_data = get_request_args_json()
     series_id = _get_col("series_id", raw_data, "looking up a talk")
     series_ctr = _get_col("series_ctr", raw_data, "looking up a talk")
     result = talks_lookup(series_id, series_ctr, objects=False, sanitized=True)
@@ -197,7 +208,7 @@ def search_series(version=0):
         query = raw_data.pop("query", {})
         tz = raw_data.pop("timezone", "UTC")
     else:
-        query = dict(request.args)
+        query = get_request_args_json()
         tz = current_user.tz # Is this the right choice?
         for col, val in query.items():
             if col in db.seminars.col_type:
@@ -227,11 +238,11 @@ def search_talks(version=0):
         try:
             raw_data = request.get_json()
         except Exception:
-            raw_data = None
+            raw_data = {}
         query = raw_data.pop("query", {})
         projection = raw_data.pop("projection", 1)
     else:
-        query = dict(request.args)
+        query = get_request_args_json()
         projection = 1
         raw_data = {}
     query["hidden"] = False

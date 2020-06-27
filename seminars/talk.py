@@ -478,6 +478,11 @@ class WebTalk(object):
             else:
                 return show_link(self, user=user, raw=raw)
         elif self.access_control == 5:
+            if not user.is_anonymous and db.seminar_registrations.lucky({'seminar_id':self.seminar_id,'email':user.email}):
+                if not user.email_confirmed:
+                    return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
+                else:
+                    return show_link(self, user=user, raw=raw)
             # If there is a view-only link, show that rather than an external registration link
             if raw:
                 return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
