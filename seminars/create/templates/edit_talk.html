@@ -317,12 +317,12 @@
     $('tr.access_control').show();
     $('tr.chat_link').show();
     $('tr.stream_link').show();
+    $('tr.live_link').show();
     n = parseInt(document.getElementById('access_control').value);
     switch(n) {
-      case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
-      case 2: $('tr.live_link').show(); $('tr.access_hint').show(); break;
+      case 1: $('tr.access_time').show(); break;
+      case 2: $('tr.access_hint').show(); break;
       case 5: $('tr.access_registration').show(); break;
-      default: $('tr.live_link').show();
     }
     return false;
   }
