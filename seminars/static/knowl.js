@@ -237,16 +237,12 @@ function knowl_click_handler(evt) {
       col.setAttribute('colspan', cols)
       col.appendChild(knowl_output)
       newrow.appendChild(col)
-      // BLM fix
-      newrow.classList.remove('blm')
       tr_tag.insertAdjacentElement('afterend', newrow)
 
       // For alternating color tables
       var hiddenrow = document.createElement('tr')
       hiddenrow.className = tr_tag.className
       hiddenrow.classList.add('hidden')
-      // BLM fix
-      hiddenrow.classList.remove('blm')
       tr_tag.insertAdjacentElement('afterend', hiddenrow)
     } else {
       knowl.parentNode.insertAdjacentElement('afterend', knowl_output)

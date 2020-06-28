@@ -546,7 +546,7 @@ export_series:
     allow you to export this series as a calendar to your chosen calendar app.  
     Later, if talks are added to the series, 
     your calendar will automatically be updated.  
-    Registered users can instead 
+    Registered users have a better solution: they can 
     select favorite series and talks on the Browse page 
     and export them all as a single calendar on the Account page.
     <br><br>  
@@ -560,7 +560,7 @@ export_talk:
   contents: |
     The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> 
     allow you to export this talk as a calendar to your chosen calendar app.  
-    Registered users can instead 
+    Registered users have a better solution: they can 
     select favorite series and talks on the Browse page 
     and export them all as a single calendar on the Account page.
     <br><br>  
