@@ -38,6 +38,7 @@ from lmfdb.utils.search_boxes import (
 
 from lmfdb.utils.search_parsing import collapse_ors
 
+DEFAULT_AUDIENCE = 5    # Show everything up to general audience by default
 
 def get_now():
     # Returns now in UTC, comparable to time-zone aware datetimes from the database
@@ -290,7 +291,7 @@ class SemSearchArray(SearchArray):
             name="audience",
             label="Audience",
             width=textwidth+10, # select boxes need 10px more than text areas
-            options=[("", "")] + [(str(code), desc) for (code, desc) in audience_options],
+            options=[("", "")] + [(str(code), desc) for (code, desc) in audience_options if code <= DEFAULT_AUDIENCE],
         )
 
     def main_table(self, info=None):
@@ -513,6 +514,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
         query["topics"] = {"$contains": "math"}
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
+    query["audience"] = {"$lte" : DEFAULT_AUDIENCE}
     if past:
         query["end_time"] = {"$lt": datetime.now(pytz.UTC)}
         query["seminar_ctr"] = {"$gt": 0} # don't show rescheduled talks
