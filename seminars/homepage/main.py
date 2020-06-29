@@ -38,6 +38,7 @@ from lmfdb.utils.search_boxes import (
 
 from lmfdb.utils.search_parsing import collapse_ors
 
+DEFAULT_AUDIENCE = 5    # Show everything up to general audience by default
 
 def get_now():
     # Returns now in UTC, comparable to time-zone aware datetimes from the database
@@ -156,6 +157,8 @@ def parse_audience(info, query):
     v = info.get("audience")
     if v:
         query["audience"] = int(v)
+    else:
+        query["audience"] = {"$lte": DEFAULT_AUDIENCE}        
 
 def parse_language(info, query):
     v = info.get("language")
