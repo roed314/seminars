@@ -157,8 +157,6 @@ def parse_audience(info, query):
     v = info.get("audience")
     if v:
         query["audience"] = int(v)
-    else:
-        query["audience"] = {"$lte": DEFAULT_AUDIENCE}        
 
 def parse_language(info, query):
     v = info.get("language")
@@ -516,6 +514,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
         query["topics"] = {"$contains": "math"}
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
+    query["audience"] = {"$lte" : DEFAULT_AUDIENCE}
     if past:
         query["end_time"] = {"$lt": datetime.now(pytz.UTC)}
         query["seminar_ctr"] = {"$gt": 0} # don't show rescheduled talks
