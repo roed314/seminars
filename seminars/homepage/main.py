@@ -291,7 +291,7 @@ class SemSearchArray(SearchArray):
             name="audience",
             label="Audience",
             width=textwidth+10, # select boxes need 10px more than text areas
-            options=[("", "")] + [(str(code), desc) for (code, desc) in audience_options],
+            options=[("", "")] + [(str(code), desc) for (code, desc) in audience_options if code <= DEFAULT_AUDIENCE],
         )
 
     def main_table(self, info=None):
