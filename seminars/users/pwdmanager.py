@@ -210,7 +210,7 @@ class SeminarsUser(UserMixin):
         self._authenticated = False
         self._uid = None
         self._dirty = False  # flag if we have to save
-        self._data = dict([(_, None) for _ in SeminarsUser.properties])
+        self._data = dict() # dict([(_, None) for _ in SeminarsUser.properties])
 
         user_row = userdb.lucky(query, projection=SeminarsUser.properties)
         if user_row:
