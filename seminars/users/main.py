@@ -392,7 +392,7 @@ def reset_password():
         email = request.form["email"]
         if userdb.user_exists(email):
             send_reset_password(email)
-        flask.flash(Markup("Check your inbox for instructions on how to reset your password."))
+        flask.flash(Markup("Check your email's inbox for instructions on how to reset your password."))
         return redirect(url_for(".info"))
     return render_template("reset_password_ask_email.html", title="Forgot Password",)
 
