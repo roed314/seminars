@@ -43,6 +43,12 @@ from seminars.tokens import generate_timed_token, read_timed_token, read_token
 from datetime import datetime
 
 
+external_id_types = [ "MR Author", "ORCID" ]
+
+def user_options():
+    return { 'external_id_types' : external_id_types, 'timezones' : timezones }
+
+
 login_page = Blueprint("user", __name__, template_folder="templates")
 logger = make_logger(login_page)
 
@@ -169,7 +175,7 @@ def info():
         next=request.args.get("next", ''),
         title=title,
         section=section,
-        timezones=timezones,
+        options=user_options(),
         session=session,
     )
 
