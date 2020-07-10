@@ -504,7 +504,7 @@ def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=for
         if col.endswith("time") and typ == "timestamp with time zone":
             typ = "time"
         try:
-            val = raw_data[col]
+            val = raw_data.get(col,"")
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
@@ -894,7 +894,7 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
             continue
         typ = db.talks.col_type[col]
         try:
-            val = raw_data[col]
+            val = raw_data.get(col, "")
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
