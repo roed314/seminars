@@ -133,7 +133,7 @@
       <tr>
         <td>Time zone</td>
         <td>
-          <select name="timezone" style="width:350px;">
+          <select name="timezone" style="width:346px;">
             {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones"] %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
@@ -157,13 +157,15 @@
       {% endfor %}
       <tr>
         <td></td>
-        <select name="external_id_type" style="width:100px;">
-          <option value="add ID (select type)" selected>
+        <td>
+        <select name="external_id_type" style="width:146px;">
+          <option value="" selected>add ID (select type)</option>
           {% for type in options["external_id_types"] %}
             <option value="{{ type }}">{{type}}</option>
           {% endfor %}
         </select>
-        <td><inpute name="external_id_value" value="" size="250"/></td>
+      </td>
+        <td><inpute name="external_id_value" value="" size="200"/></td>
       </tr>
       <tr>
         <td></td>
