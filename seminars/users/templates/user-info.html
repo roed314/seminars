@@ -134,7 +134,7 @@
         <td>Time zone</td>
         <td>
           <select name="timezone" style="width:350px;">
-            {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones" %}
+            {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones"] %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
                     selected=true
