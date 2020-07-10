@@ -422,7 +422,7 @@ class WebTalk(object):
             return ""
 
     def show_stream_link(self, user=None, raw=False):
-        if any([self.deleted, not self.online, not self.stream_link, self.is_really_over()]):
+        if any([self.deleted, not self.online, not self.stream_link, self.is_past()]):
             return ""
         link = self.stream_link
         if raw:
@@ -435,7 +435,7 @@ class WebTalk(object):
     def show_live_link(self, user=None, raw=False):
         if user is None: user = current_user
         now = datetime.now(pytz.utc)
-        if any([self.deleted, not self.online, self.is_really_over()]):
+        if any([self.deleted, not self.online, self.is_past()]):
             return ""
         link = self.live_link
 
@@ -555,15 +555,12 @@ Thank you,
                        _external=True, _scheme="webcal")
 
     def is_past(self):
-        return self.end_time < datetime.now(pytz.utc)
+        now = datetime.now(pytz.utc)
+        return (now - timedelta(minutes=60) > self.end_time)
 
     def is_starting_soon(self):
         now = datetime.now(pytz.utc)
         return (self.start_time - timedelta(minutes=15) <= now < self.end_time)
-
-    def is_really_over(self):
-        now = datetime.now(pytz.utc)
-        return (now - timedelta(minutes=30) > self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:
