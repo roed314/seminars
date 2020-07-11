@@ -917,7 +917,7 @@ function checkpw() {
   if (len > 0 && len < 8) { $("#pw1status").html("Too short (less than 8 characters)"); $("#pw1status").css('color','red'); }
   if (len >= 8 ) {
     $("#pw1status").html("");
-    if ($("#pw1").val() != $("#pw2").val()) { $("#pw2status").html("Not matching");  $("#pw1status").css('color','red'); }
+    if ($("#pw1").val() != $("#pw2").val()) { $("#pw2status").html("Not matching");  $("#pw2status").css('color','red'); }
   }
 }
 

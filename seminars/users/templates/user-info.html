@@ -129,7 +129,7 @@
       <tr>
         <td>Homepage</td>
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
-        {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td>{% else %} <td></td>{% endif %}
+        <td class=forminfo id="urltest">{% if not user.homepage %}Entering your homepage ensures your email is never visible (use https if possible).{% endif %}</td>
       </tr>
       <tr>
         <td>Time zone</td>
