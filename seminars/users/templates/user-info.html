@@ -232,13 +232,13 @@
       function add_id() {
         id_type = document.getElementById('ids').value;
         console.log(id_type);
-        document.getElementById(id_type).show();
+        document.getElementById(id_type).toggle();
         document.getElementById('ids').value = "";
       }
       $('select[name="ids"]').change(add_id);
       {% for type,id in user.external_ids %}
         document.getElementById("input_{{type}}").value="{{id}}";
-        document.getElementById("{{type}}").show();
+        document.getElementById("{{type}}").toggle();
       {% endfor %}
     });
   </script>
