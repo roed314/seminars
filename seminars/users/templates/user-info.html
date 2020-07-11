@@ -146,16 +146,17 @@
           </select>
         </td>
       </tr>
+      {% set first=user.external_ids[0][0] %}
       {% for type,id in user.external_ids %}
         <tr>
-          <td>{% if (n==0) %} {{KNOWL("ids")}} {% n+=1 %} {% endif %}</td>
+          <td>{% if (type==first) %} {{KNOWL("ids")}} {% endif %}</td>
           <td>{{type}} {{id}}</td>
           <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="delete_id" id="delete_id" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
         </tr>
       {% endfor %}
       <tr>{{n}}</tr>
       <tr>
-        <td>{%if (n==0) %} {{KNOWL("ids")}} {% endif %}</td>
+        <td>{%if ((external_ids|length) == 0) %} {{KNOWL("ids")}} {% endif %}</td>
         <td>
         <select name="external_id_type" style="width:170px;">
           <option value="" selected>add ID (select type)</option>
