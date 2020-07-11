@@ -525,7 +525,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def external_ids(self):
-        return [r.split("|") for r in self._data.get("external_ids",[])]
+        return {a[0]:a[1] for a in [r.split(":") for r in self._data.get("external_ids",[])]}
 
     def check_password(self, pwd):
         """
@@ -623,7 +623,7 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
 
     @property
     def external_ids(self):
-        return []
+        return {}
 
     @property
     def email_confirmed(self):

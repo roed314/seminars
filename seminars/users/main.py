@@ -42,12 +42,9 @@ from seminars.utils import (
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 from datetime import datetime
 
-
-external_id_types = [ "MR Author", "ORCID" ]
-
 def user_options():
-    return { 'external_id_types' : external_id_types, 'timezones' : timezones }
-
+    author_ids = sorted(list(db.author_ids.search({})),key=lambda r: r["name"])
+    return { 'external_id_types' : author_ids, 'timezones' : timezones }
 
 login_page = Blueprint("user", __name__, template_folder="templates")
 logger = make_logger(login_page)
@@ -170,7 +167,6 @@ def info():
         title = section = "Account"
     else:
         title = section = "Login"
-    print(current_user.external_ids)
     return render_template(
         "user-info.html",
         next=request.args.get("next", ''),

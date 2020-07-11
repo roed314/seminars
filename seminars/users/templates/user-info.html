@@ -108,7 +108,7 @@
       </tr>
       <tr>
         <td>Email</td>
-        <td><input name="email" value="{{user.email}}" tabindex="1" required style="width:344px;"/></td>
+        <td><input name="email" value="{{user.email}}" size="30" tabindex="1" required/></td>
         {% if not user.email_confirmed %}
         <td>
           (not yet confirmed <a href="{{ url_for('.resend_confirmation_email') }}">Resend link?</a>)
@@ -117,23 +117,23 @@
       </tr>
       <tr>
         <td>Name</td>
-        <td><input name="name" value="{{user.name}}" tabindex="1" required style="width:344px;"/></td>
+        <td><input name="name" value="{{user.name}}" size="30" tabindex="1" required/></td>
         <td/>
       </tr>
       <tr>
         <td>Affiliation</td>
-        <td><input name="affiliation" value="{{user.affiliation}}" tabindex="1" style="width:344px;"/></td>
+        <td><input name="affiliation" value="{{user.affiliation}}" size="30" tabindex="1"/></td>
         <td/>
       </tr>
       <tr>
         <td>Homepage</td>
-        <td><input name="homepage" id="url" value="{{user.homepage}}" tabindex="3" style="width:344px;" placeholder="https://upan.edu/~someone"/></td>
+        <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
       <tr>
         <td>Time zone</td>
         <td>
-          <select name="timezone" style="width:354px;">
+          <select name="timezone" style="width:348px;">
             {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones"] %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
@@ -146,30 +146,26 @@
           </select>
         </td>
       </tr>
-      {% if user.external_ids %}
-        {% set first=user.external_ids[0][0] %}
-        {% for type,id in user.external_ids %}
-          <tr id="tr_external_id_{{type}}">
-            <td>{% if (type==first) %} {{KNOWL("ids")}} {% endif %}</td>
-            <td>{{type}} <b>{{id}}</b> <a class="delete_id" id="external_id_{{type}}" style="vertical-align:middle;" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
-          </tr>
-        {% endfor %}
-      {% endif %}
+      {% for author_id in options["author_ids"] %}
+        <tr id="{{author_id["name"]}}" style="display:none;">
+          <td>{{author_id["display_name"]}}</td>
+          <td><input id="{{author_id['name']}}" name="{{author_id['name']}}" value="" size="30" tabindex="1" placeholde="{{author_id['placeholder']}}"/></td>
+            <!--<a class="delete_id" id="a_id_{{type}}" style="vertical-align:middle;" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a>-->
+        </tr>
+      {% endfor %}
       <tr>
-        <td>{%if ((user.external_ids|length) == 0) %} {{KNOWL("ids")}} {% endif %}</td>
         <td>
-        <select name="external_id_type" style="width:170px;">
+        <select id="add_id" style="width:348px;" onchange="add_id();">
           <option value="" selected>add ID (select type)</option>
-          {% for type in options["external_id_types"] %}
-            <option value="{{ type }}">{{type}}</option>
+          {% for author_id in options["author_ids"] %}
+            <option value="{{ author_id["name"] }}">{{author_id["display_name"]}}</option>
           {% endfor %}
         </select>
-        <input name="external_id_value" value="" style="width:170px;"/>
         </td>
       </tr>
       <tr>
         <td></td>
-        <td colspan="2"><button class="save" type="submit" tabindex="5">Update details</button></td>
+        <td colspan="2"><button class="save" type="submit" tabindex="3">Update details</button></td>
       </tr>
 
     </table>
@@ -196,7 +192,7 @@
       </tr>
       <tr>
         <td></td>
-        <td><button class="save" name="submit" type="submit">Change password</button></td>
+        <td><button class="save" name="submit" type="submit" tabindex="4">Change password</button></td>
       </tr>
     </table>
   </form>
@@ -230,25 +226,14 @@
         $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
         checkpw();
       });
+      function add_id() { $("#"+$("#add_id").val()).style.display = 'block'; }
+      {% for type,id in user.external_ids %}
+        $("#{{type}}_input").value = "{{id}}";
+        $("#{{type}}").style.display="block";
+      {% endfor %}
+
     });
   </script>
 {% endif %}
-
-
-<script type="text/javascript">
-document.addEventListener("DOMContentLoaded", function() {
-  /* prevent accidental closing of browser window */
-  {{ prevent_unsaved() }}
-  function removeid(e) {
-    e.preventDefault();
-    console.log("hi");
-    console.log(e.id)
-    document.getElementById('tr_'+e.id).style.visibility = 'none';
-    return true;
-  }
-  $("a.delete_id").click(removeid);
-});
-</script>
-
 
 {% endblock %}
