@@ -167,11 +167,13 @@ def info():
         title = section = "Account"
     else:
         title = section = "Login"
+    print(current_user.external_ids)
     return render_template(
         "user-info.html",
         next=request.args.get("next", ''),
         title=title,
         section=section,
+        user=current_user,
         options=user_options(),
         session=session,
     )
