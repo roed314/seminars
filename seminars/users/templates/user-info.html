@@ -146,10 +146,9 @@
           </select>
         </td>
       </tr>
-      {% set n=0 %}
       {% for type,id in user.external_ids %}
         <tr>
-          <td>{% if (n==0) %} {{KNOWL("ids")}} {% set n=1 %} {% endif %}</td>
+          <td>{% if (n==0) %} {{KNOWL("ids")}} {% n+=1 %} {% endif %}</td>
           <td>{{type}} {{id}}</td>
           <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="delete_id" id="delete_id" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
         </tr>
