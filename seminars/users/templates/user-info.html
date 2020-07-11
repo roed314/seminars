@@ -108,7 +108,7 @@
       </tr>
       <tr>
         <td>Email</td>
-        <td><input name="email" value="{{user.email}}" size="30" tabindex="1" required /></td>
+        <td><input name="email" value="{{user.email}}" tabindex="1" required style="width:356px;"/></td>
         {% if not user.email_confirmed %}
         <td>
           (not yet confirmed <a href="{{ url_for('.resend_confirmation_email') }}">Resend link?</a>)
@@ -117,23 +117,23 @@
       </tr>
       <tr>
         <td>Name</td>
-        <td><input name="name" value="{{user.name}}" size="30" tabindex="1" required /></td>
+        <td><input name="name" value="{{user.name}}" tabindex="1" required style="width:356px;"/></td>
         <td/>
       </tr>
       <tr>
         <td>Affiliation</td>
-        <td><input name="affiliation" value="{{user.affiliation}}" size="30" tabindex="1" /></td>
+        <td><input name="affiliation" value="{{user.affiliation}}" tabindex="1" style="width:356px;"/></td>
         <td/>
       </tr>
       <tr>
         <td>Homepage</td>
-        <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" placeholder="https://upan.edu/~someone"/></td>
+        <td><input name="homepage" id="url" value="{{user.homepage}}" tabindex="3" style="width:356px;" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
       <tr>
         <td>Time zone</td>
         <td>
-          <select name="timezone" style="width:346px;">
+          <select name="timezone" style="width:356px;">
             {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones"] %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
@@ -158,13 +158,13 @@
       <tr>
         <td>{%if ( n==0) %} {{KNOWL("ids")}} {% endif %}</td>
         <td>
-        <select name="external_id_type" style="width:166px;">
+        <select name="external_id_type" style="width:170px;">
           <option value="" selected>add ID (select type)</option>
           {% for type in options["external_id_types"] %}
             <option value="{{ type }}">{{type}}</option>
           {% endfor %}
         </select>
-        <input name="external_id_value" value="" style="width:176px;"/>
+        <input name="external_id_value" value="" style="width:170px;"/>
         </td>
       </tr>
       <tr>
