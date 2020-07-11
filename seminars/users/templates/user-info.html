@@ -229,7 +229,12 @@
         $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
         checkpw();
       });
-      function add_id() { $("#"+$("#ids").val()).style.display = 'block'; }
+      function add_id() {
+        id_type = document.getElementById('ids').value;
+        console.log(id_type);
+        document.getElementById(id_type).style.display = "block";
+        document.getElementById('ids').value = "";
+      }
       $('select[name="ids"]').change(add_id);
       {% for r in options["author_ids"] %}
         document.getElementById("{{r['name']}}").style.display="none";
