@@ -105,6 +105,7 @@
       <tr>
         <td>Created</td>
         <td>{{ user.created|fmtdatetime }}</td>
+        <td></td>
       </tr>
       <tr>
         <td>Email</td>
@@ -118,17 +119,17 @@
       <tr>
         <td>Name</td>
         <td><input name="name" value="{{user.name}}" size="30" tabindex="1" required/></td>
-        <td/>
+        <td></td>
       </tr>
       <tr>
         <td>Affiliation</td>
         <td><input name="affiliation" value="{{user.affiliation}}" size="30" tabindex="1"/></td>
-        <td/>
+        <td></td>
       </tr>
       <tr>
         <td>Homepage</td>
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
-        {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
+        {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td>{% else %} <td></td> {% endif %}
       </tr>
       <tr>
         <td>Time zone</td>
@@ -145,12 +146,13 @@
             {% endfor %}
           </select>
         </td>
+        <td></td>
       </tr>
       {% for r in options["author_ids"] %}
         <tr id="{{r["name"]}}" style="display:none;">
           <td>{{r["display_name"]}}</td>
           <td><input name="{{r['name']}}" value="" size="30" tabindex="1" placeholde="{{r['placeholder']}}"/></td>
-            <!--<a class="delete_id" id="a_id_{{type}}" style="vertical-align:middle;" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a>-->
+          <td></td>
         </tr>
       {% endfor %}
       <tr>
@@ -162,6 +164,7 @@
           {% endfor %}
         </select>
         </td>
+        <td></td>
       </tr>
       <tr>
         <td></td>
@@ -228,7 +231,7 @@
       });
       function add_id() { $("#"+$("#add_id").val()).style.display = 'block'; }
       {% for type,id in user.external_ids %}
-        $("input.{{type}}").value = "{{id}}";
+        $("input.{{type}}").val("{{id}}");
         document.getElementById("{{type}}").style.display="block";
       {% endfor %}
     });
