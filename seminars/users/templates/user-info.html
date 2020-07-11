@@ -239,6 +239,7 @@
       }
 
       {% for r in author_ids %}
+        console.log("{{r['name']}}");
         $("#{{r["name"]}}_value").keyup(function(evt) {
             evt.preventDefault(); author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
         });
