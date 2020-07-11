@@ -170,7 +170,7 @@ def info():
         title = section = "Account"
     else:
         title = section = "Login"
-    print(current_user.external_ids())
+    print(current_user.external_ids)
     return render_template(
         "user-info.html",
         next=request.args.get("next", ''),
