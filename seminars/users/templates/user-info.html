@@ -149,9 +149,9 @@
       {% if user.external_ids %}
         {% set first=user.external_ids[0][0] %}
         {% for type,id in user.external_ids %}
-          <tr>
+          <tr id="tr_external_id_{{type}}">
             <td>{% if (type==first) %} {{KNOWL("ids")}} {% endif %}</td>
-            <td>{{type}} <b>{{id}}</b> <a class="delete_id" id="delete_id" style="vertical-align:middle;" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
+            <td>{{type}} <b>{{id}}</b> <a class="delete_id" id="external_id_{{type}}" style="vertical-align:middle;" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
           </tr>
         {% endfor %}
       {% endif %}
@@ -233,5 +233,20 @@
     });
   </script>
 {% endif %}
+
+
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function() {
+  /* prevent accidental closing of browser window */
+  {{ prevent_unsaved() }}
+  function removeid(e) {
+    e.preventDefault();
+    document.getElementById('tr'+e.id).style.visibility = 'none';
+    return true;
+  }
+  $("a.delete_id").click(removeid);
+});
+</script>
+
 
 {% endblock %}
