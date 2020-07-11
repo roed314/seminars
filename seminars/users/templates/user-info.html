@@ -149,7 +149,7 @@
       {% for r in options["author_ids"] %}
         <tr id="{{r["name"]}}" style="display:none;">
           <td>{{r["display_name"]}}</td>
-          <td><input id="{{r['name']}}" name="{{r['name']}}" value="" size="30" tabindex="1" placeholde="{{r['placeholder']}}"/></td>
+          <td><input name="{{r['name']}}" value="" size="30" tabindex="1" placeholde="{{r['placeholder']}}"/></td>
             <!--<a class="delete_id" id="a_id_{{type}}" style="vertical-align:middle;" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a>-->
         </tr>
       {% endfor %}
@@ -228,10 +228,9 @@
       });
       function add_id() { $("#"+$("#add_id").val()).style.display = 'block'; }
       {% for type,id in user.external_ids %}
-        $("#{{type}}_input").value = "{{id}}";
+        $("input.{{type}}").value = "{{id}}";
         $("#{{type}}").style.display="block";
       {% endfor %}
-
     });
   </script>
 {% endif %}
