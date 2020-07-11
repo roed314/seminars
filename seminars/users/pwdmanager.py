@@ -525,7 +525,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def external_ids(self):
-        return [r.split(":") for r in self._data.get("external_ids",[])]
+        return [r.split(":") for r in self._data.get("external_ids")] if self._data.get("external_ids") else []
 
     def check_password(self, pwd):
         """
