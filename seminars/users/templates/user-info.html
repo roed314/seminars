@@ -233,13 +233,13 @@
         e.preventDefault();
         id_type = document.getElementById('ids').value;
         console.log(id_type);
-        document.getElementById(id_type).style.display = 'block';
+        //document.getElementById(id_type).style.display = 'block';
         document.getElementById('ids').value = "";
       }
       $('select[name="ids"]').change(add_id);
       {% for type,id in user.external_ids %}
         document.getElementById("input_{{type}}").value="{{id}}";
-        document.getElementById("{{type}}").style.display = 'block';
+        //document.getElementById("{{type}}").style.display = 'block';
       {% endfor %}
     });
   </script>
