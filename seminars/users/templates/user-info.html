@@ -229,7 +229,7 @@
       function add_id() { $("#"+$("#add_id").val()).style.display = 'block'; }
       {% for type,id in user.external_ids %}
         $("input.{{type}}").value = "{{id}}";
-        $("#{{type}}").style.display="block";
+        document.getElementById("{{type}}").style.display="block";
       {% endfor %}
     });
   </script>
