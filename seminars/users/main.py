@@ -214,6 +214,7 @@ def set_info():
         return show_input_errors(errmsgs)
     data["external_ids"] = external_ids
     for k in data.keys():
+        print(k)
         setattr(current_user, k, data[k])
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))
