@@ -238,8 +238,8 @@
         }
       }
 
-      {% for r in author_ids %}
-        console.log("{{r['name']}}");
+      {% for r in ptions["author_ids"] %}
+        console.log("registering keyp event for {{r['name']}}");
         $("#{{r["name"]}}_value").keyup(function(evt) {
             evt.preventDefault(); author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
         });
