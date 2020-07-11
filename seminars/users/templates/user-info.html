@@ -158,13 +158,13 @@
       <tr>
         <td>{%if ( n==0) %} {{KNOWL("ids")}} {% endif %}</td>
         <td>
-        <select name="external_id_type" style="width:176px;">
+        <select name="external_id_type" style="width:166px;">
           <option value="" selected>add ID (select type)</option>
           {% for type in options["external_id_types"] %}
             <option value="{{ type }}">{{type}}</option>
           {% endfor %}
         </select>
-        <input name="external_id_value" value="" style="width:180px;"/>
+        <input name="external_id_value" value="" style="width:176px;"/>
         </td>
       </tr>
       <tr>
