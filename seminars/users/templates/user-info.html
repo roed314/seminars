@@ -103,12 +103,12 @@
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
       <tr>
-        <td style="width:100px;">Created</td>
+        <td>Created</td>
         <td>{{ user.created|fmtdatetime }}</td>
         <td></td>
       </tr>
       <tr>
-        <td style="width:100px;">Email</td>
+        <td>Email</td>
         <td><input name="email" value="{{user.email}}" size="30" tabindex="1" required/></td>
         {% if not user.email_confirmed %}
         <td>
@@ -117,22 +117,22 @@
         {%endif%}
       </tr>
       <tr>
-        <td style="width:100px;">Name</td>
+        <td>Name</td>
         <td><input name="name" value="{{user.name}}" size="30" tabindex="1" required/></td>
         <td></td>
       </tr>
       <tr>
-        <<td style="width:100px;">Affiliation</td>
+        <td>Affiliation</td>
         <td><input name="affiliation" value="{{user.affiliation}}" size="30" tabindex="1"/></td>
         <td></td>
       </tr>
       <tr>
-        <td style="width:100px;">Homepage</td>
+        <td>Homepage</td>
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td>{% else %} <td></td>{% endif %}
       </tr>
       <tr>
-        <td style="width:100px;">Time zone</td>
+        <td>Time zone</td>
         <td>
           <select name="timezone" style="width:344px;">
             {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones"] %}
@@ -150,7 +150,7 @@
       </tr>
       {% for r in options["author_ids"] %}
         <tr id="{{r["name"]}}">
-          <<td style="width:100px;">{{r["display_name"]}}</td>
+          <td>{{r["display_name"]}}</td>
           <td><input id="{{'input_'+r['name']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
           <td></td>
         </tr>
@@ -232,16 +232,16 @@
       function add_id() {
         id_type = document.getElementById('ids').value;
         console.log(id_type);
-        document.getElementById(id_type).style.display = "block";
+        document.getElementById(id_type).show();
         document.getElementById('ids').value = "";
       }
       $('select[name="ids"]').change(add_id);
       {% for r in options["author_ids"] %}
-        document.getElementById("{{r['name']}}").style.display="none";
+        document.getElementById("{{r['name']}}").visibility="hidden";
       {% endfor %}
       {% for type,id in user.external_ids %}
         document.getElementById("input_{{type}}").value="{{id}}";
-        document.getElementById("{{type}}").style.display="block";
+        document.getElementById("{{type}}").show();
       {% endfor %}
     });
   </script>
