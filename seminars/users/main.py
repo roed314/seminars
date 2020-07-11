@@ -44,7 +44,7 @@ from datetime import datetime
 
 def user_options():
     author_ids = sorted(list(db.author_ids.search({})),key=lambda r: r["name"])
-    return { 'external_id_types' : author_ids, 'timezones' : timezones }
+    return { 'author_ids' : author_ids, 'timezones' : timezones }
 
 login_page = Blueprint("user", __name__, template_folder="templates")
 logger = make_logger(login_page)

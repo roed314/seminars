@@ -133,7 +133,7 @@
       <tr>
         <td>Time zone</td>
         <td>
-          <select name="timezone" style="width:348px;">
+          <select name="timezone" style="width:344px;">
             {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones"] %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
@@ -146,19 +146,19 @@
           </select>
         </td>
       </tr>
-      {% for author_id in options["author_ids"] %}
-        <tr id="{{author_id["name"]}}" style="display:none;">
-          <td>{{author_id["display_name"]}}</td>
-          <td><input id="{{author_id['name']}}" name="{{author_id['name']}}" value="" size="30" tabindex="1" placeholde="{{author_id['placeholder']}}"/></td>
+      {% for r in options["author_ids"] %}
+        <tr id="{{r["name"]}}" style="display:none;">
+          <td>{{r["display_name"]}}</td>
+          <td><input id="{{r['name']}}" name="{{r['name']}}" value="" size="30" tabindex="1" placeholde="{{r['placeholder']}}"/></td>
             <!--<a class="delete_id" id="a_id_{{type}}" style="vertical-align:middle;" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a>-->
         </tr>
       {% endfor %}
       <tr>
-        <td>
-        <select id="add_id" style="width:348px;" onchange="add_id();">
+        <td></td><td>
+        <select id="add_id" style="width:344px;" onchange="add_id();">
           <option value="" selected>add ID (select type)</option>
-          {% for author_id in options["author_ids"] %}
-            <option value="{{ author_id["name"] }}">{{author_id["display_name"]}}</option>
+          {% for r in options["author_ids"] %}
+            <option value="{{ r["name"] }}">{{r["display_name"]}}</option>
           {% endfor %}
         </select>
         </td>
