@@ -217,18 +217,14 @@
         $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
       }
 
-      $(function() {
-        $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
-      });
+      $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
 
       makelink();
 
       /* this tells the user if the passwords match */
-      $(function () {
-        $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-        $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-        checkpw();
-      });
+      $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+      $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+
       function add_id(e) {
         e.preventDefault();
         id_type = document.getElementById('ids').value;
