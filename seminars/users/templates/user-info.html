@@ -108,7 +108,7 @@
       </tr>
       <tr>
         <td>Email</td>
-        <td><input name="email" value="{{user.email}}" tabindex="1" required style="width:350px;"/></td>
+        <td><input name="email" value="{{user.email}}" tabindex="1" required style="width:346px;"/></td>
         {% if not user.email_confirmed %}
         <td>
           (not yet confirmed <a href="{{ url_for('.resend_confirmation_email') }}">Resend link?</a>)
@@ -117,17 +117,17 @@
       </tr>
       <tr>
         <td>Name</td>
-        <td><input name="name" value="{{user.name}}" tabindex="1" required style="width:350px;"/></td>
+        <td><input name="name" value="{{user.name}}" tabindex="1" required style="width:346px;"/></td>
         <td/>
       </tr>
       <tr>
         <td>Affiliation</td>
-        <td><input name="affiliation" value="{{user.affiliation}}" tabindex="1" style="width:350px;"/></td>
+        <td><input name="affiliation" value="{{user.affiliation}}" tabindex="1" style="width:346px;"/></td>
         <td/>
       </tr>
       <tr>
         <td>Homepage</td>
-        <td><input name="homepage" id="url" value="{{user.homepage}}" tabindex="3" style="width:350px;" placeholder="https://upan.edu/~someone"/></td>
+        <td><input name="homepage" id="url" value="{{user.homepage}}" tabindex="3" style="width:346px;" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
       <tr>
