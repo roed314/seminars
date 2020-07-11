@@ -157,7 +157,7 @@
       {% endif %}
       <tr>
         <td>{%if ((user.external_ids|length) == 0) %} {{KNOWL("ids")}} {% endif %}</td>
-        <td></td><td>
+        <td>
         <select name="external_id_type" style="width:170px;">
           <option value="" selected>add ID (select type)</option>
           {% for type in options["external_id_types"] %}
