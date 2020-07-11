@@ -623,7 +623,7 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
 
     @property
     def external_ids(self):
-        return [r.split("|") for r in self._data.get("external_ids",[])]
+        return []
 
     @property
     def email_confirmed(self):
