@@ -101,7 +101,7 @@
   <h2>Edit my details</h2>
 
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
-    <table style="table-layout: fixed; width: 100%">
+    <table>
       <tr>
         <td>Created</td>
         <td>{{ user.created|fmtdatetime }}</td>
@@ -148,13 +148,6 @@
         </td>
         <td></td>
       </tr>
-      {% for r in options["author_ids"] %}
-        <tr id="{{r["name"]}}">
-          <td>{{r["display_name"]}}</td>
-          <td><input id="{{'input_'+r['name']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
-          <td></td>
-        </tr>
-      {% endfor %}
       <tr>
         <td></td><td>
         <select id="ids" name="ids" style="width:344px;">
@@ -166,6 +159,13 @@
         </td>
         <td></td>
       </tr>
+      {% for r in options["author_ids"] %}
+        <tr id="{{r["name"]}}">
+          <td>{{r["display_name"]}}</td>
+          <td><input id="{{'input_'+r['name']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
+          <td></td>
+        </tr>
+      {% endfor %}
       <tr>
         <td></td>
         <td colspan="2"><button class="save" type="submit" tabindex="3">Update details</button></td>
