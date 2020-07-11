@@ -241,7 +241,9 @@ document.addEventListener("DOMContentLoaded", function() {
   {{ prevent_unsaved() }}
   function removeid(e) {
     e.preventDefault();
-    document.getElementById('tr'+e.id).style.visibility = 'none';
+    console.log("hi");
+    console.log(e.id)
+    document.getElementById('tr_'+e.id).style.visibility = 'none';
     return true;
   }
   $("a.delete_id").click(removeid);
