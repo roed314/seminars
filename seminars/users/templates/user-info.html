@@ -211,7 +211,7 @@
     document.addEventListener("DOMContentLoaded", function() {
       function homepage_test() {
         var url = $("#homepage").val();
-        if ( url.substring(0,7) == "http://" || url.substring(0,8) !== "https://" ) {
+        if ( url.substring(0,7) == "http://" || url.substring(0,8) == "https://" ) {
           $("#homepage_test").html("<a href='" + url + "' target='_blank'>test homepage link</a>");
         } else {
           $("#homepage_test").html("Entering your homepage ensures your email is never visible (use https if possible).");
