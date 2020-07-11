@@ -150,13 +150,13 @@
       </tr>
       {% for r in options["author_ids"] %}
         <tr id="{{r["name"]}}">
-          <td>{{r["display_name"]}}</td>
+          <td style="width:150px;">{{r["display_name"]}}</td>
           <td><input id="{{'input_'+r['name']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
           <td></td>
         </tr>
       {% endfor %}
       <tr>
-        <td></td><td>
+        <td style="width:150px;"></td><td>
         <select id="ids" name="ids" style="width:344px;">
           <option value="" selected>add ID (select type)</option>
           {% for r in options["author_ids"] %}
@@ -241,7 +241,7 @@
       {% endfor %}
       {% for type,id in user.external_ids %}
         document.getElementById("input_{{type}}").value="{{id}}";
-        document.getElementById("input_{{type}}").style.display="block";
+        document.getElementById("{{type}}").style.display="block";
       {% endfor %}
     });
   </script>
