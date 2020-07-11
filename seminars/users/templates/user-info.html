@@ -127,7 +127,7 @@
         <td></td>
       </tr>
       <tr>
-        <td>Homepage</td>
+        <td>Homepage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td>{% else %} <td></td>{% endif %}
       </tr>
@@ -232,16 +232,15 @@
       function add_id() {
         id_type = document.getElementById('ids').value;
         console.log(id_type);
-        document.getElementById(id_type).show();
+        document.getElementById(id_type).style.display="block";
         document.getElementById('ids').value = "";
       }
       $('select[name="ids"]').change(add_id);
       {% for r in options["author_ids"] %}
-        document.getElementById("{{r['name']}}").style.visibility="hidden";
+        document.getElementById("{{r['name']}}").style.display="none";
       {% endfor %}
       {% for type,id in user.external_ids %}
         document.getElementById("input_{{type}}").value="{{id}}";
-        document.getElementById("{{type}}").style.visibility="visible";
       {% endfor %}
     });
   </script>
