@@ -913,11 +913,11 @@ $(document).ready(function(){
 function checkpw() {
   var len = $("#pw1").val().length;
   $("#pw2status").html("");
-  if (len == 0) $("#pw1status").html("Don't use a password that you use elsewhere!");
-  if (len > 0 && len < 8) $("#pw1status").html("Too short (less than 8 characters)");
+  if (len == 0) { $("#pw1status").html("Don't use a password that you use elsewhere!"); $("#pw1status").style.color = 'black'; }
+  if (len > 0 && len < 8) { $("#pw1status").html("Too short (less than 8 characters)"); $("#pw1status").style.color = 'red'; }
   if (len >= 8 ) {
     $("#pw1status").html("");
-    if ($("#pw2").val().length && $("#pw1").val() != $("#pw2").val()) $("#pw2status").html("Not matching");
+    if ($("#pw1").val() != $("#pw2").val()) { $("#pw2status").html("Not matching");  $("#pw1status").style.color = 'red'; }
   }
 }
 
