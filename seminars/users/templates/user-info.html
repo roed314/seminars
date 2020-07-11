@@ -226,7 +226,7 @@
       checkpw();
 
       function author_id_test(name,display_name,regex,url) {
-        var id = $("#"+name+"_value").val();
+        var id = document.getElementById(name+"_value").value;
         console.log(name+":"+id);
         if (id.length==0) return;
         var re = new RegExp(regex);
