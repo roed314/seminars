@@ -128,8 +128,8 @@
       </tr>
       <tr>
         <td>Homepage</td>
-        <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
-        <td class=forminfo id="urltest">{% if not user.homepage %}Entering your homepage ensures your email is never visible (use https if possible).{% endif %}</td>
+        <td><input name="homepage" id="homepage" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
+        <td class=forminfo id="homepage_test"></td>
       </tr>
       <tr>
         <td>Time zone</td>
@@ -209,17 +209,17 @@
   {# this script constructs a url and shows it as a link, just for testing #}
   <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
-      function makelink() {
-        var url = $("#url").val();
-        if (url.substring(0,7) != "http://" && url.substring(0,8) != "https://") {
-          url = "http://" + url;
+      function homepage_test() {
+        var url = $("#homepage").val();
+        if ( url.length == 0 ) {
+        if ( url.substring(0,7) == "http://" || url.substring(0,8) !== "https://" ) {
+          $("#homepage_test").html("<a href='" + url + "' target='_blank'>test homepage link</a>");
+        } else {
+          $("#homepage_test").html("Entering your homepage ensures your email is never visible (use https if possible).");
         }
-        $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
       }
-
-      $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
-
-      makelink();
+      $("#homepage").keyup(function(evt) { evt.preventDefault(); homepage_test()});
+      homepage_test();
 
       /* checkpw() is defined in static/seminars.js and handles warning messages and colors */
       $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
