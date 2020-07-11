@@ -151,8 +151,8 @@
       {% for r in options["author_ids"] %}
         <tr id="{{r["name"]}}" style="display:none">
           <td>{{r["display_name"]}}</td>
-          <td><input id="{{'input_'+r['name']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
-          <td></td>
+          <td><input id="{{r['name']+'_value'}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
+          <td class="forminfo" id="{{r['name'+_test'}}></td>
         </tr>
       {% endfor %}
       <tr>
@@ -223,6 +223,26 @@
       /* checkpw() is defined in static/seminars.js and handles warning messages and colors */
       $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
       $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+      checkpw();
+
+      function author_id_test(name,display_name,regex,url) {
+        var id = $("#"+name+"_input").val();
+        if (id.length==0) return;
+        var re = new RegExp(regex);
+        if ( re.test(id) ) {
+          $("#"+name+"_test").html("<a href='" + url.replace("%s",id) + "' target=_blank'>test "+name+" link</a>"); // replace("%s",...) is  poor man's sprintf
+        } else {
+          $("#"+name+"_test").html("Invalid " + display_name);
+          $("#"+name+"_test").css("color", "red");
+        }
+      }
+
+      {% for r in author_ids %}
+        $("#{{r["name"]}}_value").keyup(function(evt) {
+            evt.preventDefault(); author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
+        });
+        author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
+      {% endfor %}
 
       function add_id(e) {
         e.preventDefault();
@@ -233,7 +253,7 @@
       }
       $('select[name="ids"]').change(add_id);
       {% for type,id in user.external_ids %}
-        document.getElementById("input_{{type}}").value="{{id}}";
+        document.getElementById("{{type}}_value").value="{{id}}";
         document.getElementById("{{type}}").style.display = '';
       {% endfor %}
     });
