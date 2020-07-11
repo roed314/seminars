@@ -227,6 +227,7 @@
 
       function author_id_test(name,display_name,regex,url) {
         var id = $("#"+name+"_input").val();
+        console.log(name+":"+id);
         if (id.length==0) return;
         var re = new RegExp(regex);
         if ( re.test(id) ) {
