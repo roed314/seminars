@@ -131,7 +131,7 @@
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td>{% else %} <td></td>{% endif %}
       </tr>
-      <tr>
+      <!--<tr>
         <td>Time zone</td>
         <td>
           <select name="timezone" style="width:344px;">
@@ -147,7 +147,14 @@
           </select>
         </td>
         <td></td>
-      </tr>
+      </tr>-->
+      {% for r in options["author_ids"] %}
+        <tr id="{{r["name"]}}" style="display:none">
+          <td>{{r["display_name"]}}</td>
+          <td><input id="{{'input_'+r['name']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
+          <td></td>
+        </tr>
+      {% endfor %}
       <tr>
         <td></td><td>
         <select id="ids" name="ids" style="width:344px;">
@@ -159,13 +166,6 @@
         </td>
         <td></td>
       </tr>
-      {% for r in options["author_ids"] %}
-        <tr id="{{r["name"]}}">
-          <td>{{r["display_name"]}}</td>
-          <td><input id="{{'input_'+r['name']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
-          <td></td>
-        </tr>
-      {% endfor %}
       <tr>
         <td></td>
         <td colspan="2"><button class="save" type="submit" tabindex="3">Update details</button></td>
@@ -232,16 +232,13 @@
       function add_id() {
         id_type = document.getElementById('ids').value;
         console.log(id_type);
-        document.getElementById(id_type).style.display="block";
+        document.getElementById(id_type).show();
         document.getElementById('ids').value = "";
       }
       $('select[name="ids"]').change(add_id);
-      {% for r in options["author_ids"] %}
-        document.getElementById("{{r['name']}}").style.display="none";
-      {% endfor %}
       {% for type,id in user.external_ids %}
         document.getElementById("input_{{type}}").value="{{id}}";
-        document.getElementById("{{type}}").style.display="block";
+        document.getElementById("{{type}}").show();
       {% endfor %}
     });
   </script>
