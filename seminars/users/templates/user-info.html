@@ -147,7 +147,7 @@
         </td>
       </tr>
       {% set n=0 %}
-      {% for type,id in ids %}
+      {% for type,id in user.external_ids() %}
         <tr>
           <td>{% if (n==0) %} {{KNOWL("ids")}} {% set n=1 %} {% endif %}</td>
           <td>type</td>

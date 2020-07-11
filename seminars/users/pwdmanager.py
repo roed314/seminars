@@ -523,6 +523,10 @@ class SeminarsUser(UserMixin):
     def is_organizer(self):
         return self.id and (self.is_admin or self.is_creator or self._organizer)
 
+    @property
+    def external_ids(self):
+        return [r.split("|") for r in self._data.get("external_ids",[])]
+
     def check_password(self, pwd):
         """
         checks if the given password for the user is valid.
@@ -617,6 +621,9 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
         except UnknownTimeZoneError:
             return timezone("UTC")
 
+    @property
+    def external_ids(self):
+        return [r.split("|") for r in self._data.get("external_ids",[])]
 
     @property
     def email_confirmed(self):
