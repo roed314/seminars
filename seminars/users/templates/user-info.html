@@ -237,11 +237,11 @@
       }
       $('select[name="ids"]').change(add_id);
       {% for r in options["author_ids"] %}
-        document.getElementById("{{r['name']}}").visibility="hidden";
+        document.getElementById("{{r['name']}}").style.visibility="hidden";
       {% endfor %}
       {% for type,id in user.external_ids %}
         document.getElementById("input_{{type}}").value="{{id}}";
-        document.getElementById("{{type}}").show();
+        document.getElementById("{{type}}").style.visibility="visible";
       {% endfor %}
     });
   </script>
