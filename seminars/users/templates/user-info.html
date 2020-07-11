@@ -127,7 +127,7 @@
         <td></td>
       </tr>
       <tr>
-        <td style="width:150px;">Homepage</td>
+        <td width="200">Homepage</td>
         <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td>{% else %} <td></td>{% endif %}
       </tr>
@@ -156,7 +156,7 @@
         </tr>
       {% endfor %}
       <tr>
-        <td style="width:150px;"></td><td>
+        <td width="200"></td><td>
         <select id="ids" name="ids" style="width:344px;">
           <option value="" selected>add ID (select type)</option>
           {% for r in options["author_ids"] %}
