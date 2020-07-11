@@ -229,7 +229,7 @@
         $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
         checkpw();
       });
-      function add_id() { $("#"+$("#add_id").val()).style.display = 'block'; }
+      function add_id() { $("#"+$("#ids").val()).style.display = 'block'; }
       $('select[name="ids"]').change(add_id);
       {% for r in options["author_ids"] %}
         document.getElementById("{{r['name']}}").style.display="none";
