@@ -241,7 +241,7 @@
       {% endfor %}
       {% for type,id in user.external_ids %}
         document.getElementById("input_{{type}}").value="{{id}}";
-        document.getElementById(id_type).style.display="block";
+        document.getElementById("input_{{type}}").style.display="block";
       {% endfor %}
     });
   </script>
