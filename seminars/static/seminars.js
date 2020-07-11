@@ -916,7 +916,7 @@ function checkpw() {
   console.log(len2);
   $("#pw2status").html("");
   if (len == 0) $("#pw1status").html("Don't use a password that you use elsewhere!");
-  if (len > 0 && len1 < 8) $("#pw1status").html("Too short (less than 8 characters)");
+  if (len > 0 && len < 8) $("#pw1status").html("Too short (less than 8 characters)");
   if (len >= 8 ) {
     $("#pw1status").html("");
     if ($("#pw2").val().length && $("#pw1").val() != $("#pw2").val()) $("#pw2status").html("Not matching");
