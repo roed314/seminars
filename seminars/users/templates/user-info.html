@@ -149,9 +149,9 @@
         <td></td>
       </tr>
       {% for r in options["author_ids"] %}
-        <tr id="{{r["name"]}}" style="display:none;">
+        <tr id="{{r["name"]}}">
           <td>{{r["display_name"]}}</td>
-          <td><input name="{{r['name']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
+          <td><input id="{{'intput_'+r['name=']}}" value="" size="30" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
           <td></td>
         </tr>
       {% endfor %}
@@ -231,9 +231,11 @@
       });
       function add_id() { $("#"+$("#add_id").val()).style.display = 'block'; }
       $('select[name="ids"]').change(add_id);
+      {% for r in options["author_ids"] %}
+        document.getElementById("{{r['name']}}").style.display="none";
+      {% endfor %}
       {% for type,id in user.external_ids %}
-        $("input.{{type}}").val("{{id}}");
-        console.log($("input.{{type}}").val());
+        document.getElementById("input_{{type}}").value="{{id}}";
         document.getElementById("{{type}}").style.display="block";
       {% endfor %}
     });
