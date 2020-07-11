@@ -157,7 +157,7 @@
       {% endfor %}
       <tr>
         <td></td><td>
-        <select id="add_id" style="width:344px;" onchange="add_id();">
+        <select name="ids" style="width:344px;">
           <option value="" selected>add ID (select type)</option>
           {% for r in options["author_ids"] %}
             <option value="{{ r["name"] }}">{{r["display_name"]}}</option>
@@ -230,8 +230,10 @@
         checkpw();
       });
       function add_id() { $("#"+$("#add_id").val()).style.display = 'block'; }
+      $('select[name="ids"]').change(add_id);
       {% for type,id in user.external_ids %}
         $("input.{{type}}").val("{{id}}");
+        console.log($("input.{{type}}").val());
         document.getElementById("{{type}}").style.display="block";
       {% endfor %}
     });
