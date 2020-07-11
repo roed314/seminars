@@ -151,7 +151,7 @@
         {% for type,id in user.external_ids %}
           <tr>
             <td>{% if (type==first) %} {{KNOWL("ids")}} {% endif %}</td>
-            <td style="vertical-align:middle; padding-left:0px; padding-right:47px;"><a class="delete_id" id="delete_id" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
+            <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="delete_id" id="delete_id" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
             <td>{{type}} {{id}}</td>
           </tr>
         {% endfor %}
