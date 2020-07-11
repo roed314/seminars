@@ -103,11 +103,11 @@
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
       <tr>
-        <td>Created</td><td></td>
+        <td>Created</td>
         <td>{{ user.created|fmtdatetime }}</td>
       </tr>
       <tr>
-        <td>Email</td><td></td>
+        <td>Email</td>
         <td><input name="email" value="{{user.email}}" tabindex="1" required style="width:344px;"/></td>
         {% if not user.email_confirmed %}
         <td>
@@ -116,22 +116,22 @@
         {%endif%}
       </tr>
       <tr>
-        <td>Name</td><td></td>
+        <td>Name</td>
         <td><input name="name" value="{{user.name}}" tabindex="1" required style="width:344px;"/></td>
         <td/>
       </tr>
       <tr>
-        <td>Affiliation</td><td></td>
+        <td>Affiliation</td>
         <td><input name="affiliation" value="{{user.affiliation}}" tabindex="1" style="width:344px;"/></td>
         <td/>
       </tr>
       <tr>
-        <td>Homepage</td><td></td>
+        <td>Homepage</td>
         <td><input name="homepage" id="url" value="{{user.homepage}}" tabindex="3" style="width:344px;" placeholder="https://upan.edu/~someone"/></td>
         {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
       </tr>
       <tr>
-        <td>Time zone</td><td></td>
+        <td>Time zone</td>
         <td>
           <select name="timezone" style="width:354px;">
             {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones"] %}
@@ -151,8 +151,7 @@
         {% for type,id in user.external_ids %}
           <tr>
             <td>{% if (type==first) %} {{KNOWL("ids")}} {% endif %}</td>
-            <td style="vertical-align:middle; padding-left:0px; padding-right:0px;"><a class="delete_id" id="delete_id" style="{{hide}}" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
-            <td>{{type}} {{id}}</td>
+            <td>{{type}} {{id}} <a class="delete_id" id="delete_id" style="vertical-align:middle;" href="#"><i style="color:darkred;" class="fas fa-times-circle"></i></a></td>
           </tr>
         {% endfor %}
       {% endif %}
