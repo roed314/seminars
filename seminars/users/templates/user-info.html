@@ -225,27 +225,6 @@
       $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
       checkpw();
 
-      function author_id_test(name,display_name,regex,url) {
-        var id = document.getElementById(name+"_value").value;
-        console.log(name+":"+id);
-        if (id.length==0) return;
-        var re = new RegExp(regex);
-        if ( re.test(id) ) {
-          $("#"+name+"_test").html("<a href='" + url.replace("%s",id) + "' target=_blank'>test "+name+" link</a>"); // replace("%s",...) is  poor man's sprintf
-        } else {
-          $("#"+name+"_test").html("Invalid " + display_name);
-          $("#"+name+"_test").css("color", "red");
-        }
-      }
-
-      {% for r in options["author_ids"] %}
-        console.log("registering keyp event for {{r['name']}}");
-        $("#{{r["name"]}}_value").keyup(function(evt) {
-            evt.preventDefault(); author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
-        });
-        author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
-      {% endfor %}
-
       function add_id(e) {
         e.preventDefault();
         id_type = document.getElementById('ids').value;
@@ -257,6 +236,27 @@
       {% for type,id in user.external_ids %}
         document.getElementById("{{type}}_value").value="{{id}}";
         document.getElementById("{{type}}").style.display = '';
+      {% endfor %}
+
+      function author_id_test(name,display_name,regex,url) {
+        var id = document.getElementById(name+"_value").value;
+        console.log(name+":"+id);
+        if (id.length==0) return;
+        console.log(regex);
+        var re = new RegExp(regex);
+        if ( re.test(id) ) {
+          $("#"+name+"_test").html("<a href='" + url.replace("%s",id) + "' target=_blank'>test "+name+" link</a>"); // replace("%s",...) is  poor man's sprintf
+        } else {
+          $("#"+name+"_test").html("Invalid " + display_name);
+          $("#"+name+"_test").css("color", "red");
+        }
+      }
+
+      {% for r in options["author_ids"] %}
+        $("#{{r["name"]}}_value").keyup(function(evt) {
+            evt.preventDefault(); author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
+        });
+        author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
       {% endfor %}
     });
   </script>
