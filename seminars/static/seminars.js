@@ -911,19 +911,13 @@ $(document).ready(function(){
 
 
 function checkpw() {
-  var match = "Too short";
-  if($("#pw1").val().length < 8){
-    "Too short (less than 8 characters)";
-    $("#pw1status").html("Too short (less than 8 characters)");
-    $("#pw2status").html("");
-  } else {
+  var len = $("#pw1").val().length;
+  $("#pw2status").html("");
+  if (len == 0) { $("#pw1status").html("Don't use a password that you use elsewhere!"); $("#pw1status").css('color','black'); }
+  if (len > 0 && len < 8) { $("#pw1status").html("Too short (less than 8 characters)"); $("#pw1status").css('color','red'); }
+  if (len >= 8 ) {
     $("#pw1status").html("");
-  }
-
-  if($("#pw1").val() == $("#pw2").val()) {
-    $("#pw2status").html("");
-  } else {
-    $("#pw2status").html("Not matching");
+    if ($("#pw1").val() != $("#pw2").val()) { $("#pw2status").html("Not matching");  $("#pw2status").css('color','red'); }
   }
 }
 

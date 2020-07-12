@@ -83,11 +83,11 @@
     <form name="endorse" action="{{ url_for('.get_endorsing_link') }}" method="post" name="endorse">
       <table>
         <tr>
-          <td style="width:75px;">
-            Email
+          <td width="160">
+            Email to endorse
           </td>
           <td>
-            <input name="email" size="30" tabindex="1" required />
+            <input name="email" style="width:334px;" tabindex="1" required />
           </td>
           <td>
             <button type="submit" tabindex="2">Endorse</button>
@@ -103,12 +103,13 @@
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
     <table>
       <tr>
-        <td>Created</td>
+        <td width="160">Created</td>
         <td>{{ user.created|fmtdatetime }}</td>
+        <td></td>
       </tr>
       <tr>
         <td>Email</td>
-        <td><input name="email" value="{{user.email}}" size="30" tabindex="1" required /></td>
+        <td><input name="email" value="{{user.email}}" style="width:334px;" tabindex="1" required/></td>
         {% if not user.email_confirmed %}
         <td>
           (not yet confirmed <a href="{{ url_for('.resend_confirmation_email') }}">Resend link?</a>)
@@ -117,24 +118,24 @@
       </tr>
       <tr>
         <td>Name</td>
-        <td><input name="name" value="{{user.name}}" size="30" tabindex="1" required /></td>
-        <td/>
+        <td><input name="name" value="{{user.name}}" style="width:334px;" tabindex="1" required/></td>
+        <td></td>
       </tr>
       <tr>
         <td>Affiliation</td>
-        <td><input name="affiliation" value="{{user.affiliation}}" size="30" tabindex="1" /></td>
-        <td/>
+        <td><input name="affiliation" value="{{user.affiliation}}" style="width:334px;"tabindex="1"/></td>
+        <td></td>
       </tr>
       <tr>
         <td>Homepage</td>
-        <td><input name="homepage" id="url" value="{{user.homepage}}" size="30" tabindex="3" placeholder="https://upan.edu/~someone"/></td>
-        {% if not user.homepage %} <td class=forminfo> Entering your homepage ensures your email is never visible (use https if possible).</td> {% endif %}
+        <td><input name="homepage" id="homepage" value="{{user.homepage}}" style="width:334px;" tabindex="1" placeholder="https://upan.edu/~someone"/></td>
+        <td class=forminfo id="homepage_test"></td>
       </tr>
       <tr>
         <td>Time zone</td>
         <td>
-          <select name="timezone" style="width:356px;">
-            {% for tz, pretty_tz in [('', 'Browser time zone')] + timezones %}
+          <select name="timezone" style="width:344px;">
+            {% for tz, pretty_tz in [('', 'Browser time zone')] + options["timezones"] %}
             <option value="{{tz}}"
                     {% if tz == user.raw_timezone %}
                     selected=true
@@ -145,10 +146,29 @@
             {% endfor %}
           </select>
         </td>
+        <td></td>
+      </tr>
+      {% for r in options["author_ids"] %}
+        <tr id="{{r["name"]}}" style="display:none">
+          <td>{{r["display_name"]}}</td>
+          <td><input name="{{r['name']+'_value'}}" id="{{r['name']+'_value'}}" value="" style="width:334px;" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
+          <td class="forminfo" id="{{r['name']+'_test'}}"></td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <td>{{KNOWL("ids")}}</td><td>
+        <select id="ids" name="ids" style="width:344px;">
+          <option value="" selected>add ID (select type)</option>
+          {% for r in options["author_ids"] %}
+            <option value="{{ r["name"] }}">{{r["display_name"]}}</option>
+          {% endfor %}
+        </select>
+        </td>
+        <td></td>
       </tr>
       <tr>
         <td></td>
-        <td colspan="2"><button class="save" type="submit" tabindex="5">Update details</button></td>
+        <td colspan="2"><button class="save" type="submit" tabindex="3">Update details</button></td>
       </tr>
 
     </table>
@@ -159,23 +179,23 @@
   <form action="{{ url_for('.change_password') }}" method="POST" name="changepassword">
     <table>
       <tr>
-         <td>Old password</td>
-         <td><input name="oldpwd" type="password" style="width:260px;" required /></td>
-         <td class="forminfo" />Don't use a password you use elsewhere!</td>
+         <td width="160">Old password</td>
+         <td><input name="oldpwd" type="password" style="width:334px;" required /></td>
+         <td class="forminfo"></td>
       </tr>
       <tr>
         <td>New password</td>
-        <td><input id="pw1" name="password1" type="password" style="width:260px;" required></td>
-        <td class="forminfo" id="pw1status" style="color: {{color.red}};"></td>
+        <td><input id="pw1" name="password1" type="password" style="width:334px;" required /></td>
+        <td class="forminfo" id="pw1status"></td>
       </tr>
       <tr>
         <td>New password (repeat)</td>
-        <td><input id="pw2" name="password2" type="password" style="width:260px;" required></td>
-        <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td>
+        <td><input id="pw2" name="password2" type="password" style="width:334px;" required /></td>
+        <td class="forminfo" id="pw2status"></td>
       </tr>
       <tr>
         <td></td>
-        <td><button class="save" name="submit" type="submit">Change password</button></td>
+        <td><button class="save" name="submit" type="submit" tabindex="4">Change password</button></td>
       </tr>
     </table>
   </form>
@@ -189,26 +209,52 @@
   {# this script constructs a url and shows it as a link, just for testing #}
   <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
-      function makelink() {
-        var url = $("#url").val();
-        if (url.substring(0,7) != "http://" && url.substring(0,8) != "https://") {
-          url = "http://" + url;
+      function homepage_test() {
+        var url = $("#homepage").val();
+        if ( url.substring(0,7) == "http://" || url.substring(0,8) == "https://" ) {
+          $("#homepage_test").html("<a href='" + url + "' target='_blank'>test homepage link</a>");
+        } else {
+          $("#homepage_test").html("Entering your homepage ensures your email is never visible (use https if possible).");
         }
-        $("#urltest").html("<a href='" + url + "' target='_blank'>test</a>");
+      }
+      $("#homepage").keyup(function(evt) { evt.preventDefault(); homepage_test()});
+      homepage_test();
+
+      /* checkpw() is defined in static/seminars.js and handles warning messages and colors */
+      $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+      $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+      checkpw();
+
+      function add_id(e) {
+        e.preventDefault();
+        id_type = document.getElementById('ids').value;
+        document.getElementById(id_type).style.display = '';
+        document.getElementById('ids').value = "";
+      }
+      $('select[name="ids"]').change(add_id);
+      {% for id, val in user.external_ids %}
+        document.getElementById("{{id}}_value").value="{{val}}";
+        document.getElementById("{{id}}").style.display = '';
+      {% endfor %}
+
+      function author_id_test(name,display_name,regex,url) {
+        var id = document.getElementById(name+"_value").value;
+        if (id.length==0) return;
+        var re = new RegExp(regex);
+        if ( re.test(id) ) {
+          $("#"+name+"_test").html("<a href='" + url.replace("%s",id) + "' target=_blank'>test "+name+" link</a>"); // replace("%s",...) is  poor man's sprintf
+        } else {
+          $("#"+name+"_test").html("Invalid " + display_name);
+          $("#"+name+"_test").css("color", "red");
+        }
       }
 
-      $(function() {
-        $("#url").keyup(function(evt) { evt.preventDefault(); makelink()});
-      });
-
-      makelink();
-
-      /* this tells the user if the passwords match */
-      $(function () {
-        $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-        $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-        checkpw();
-      });
+      {% for r in options["author_ids"] %}
+        $("#{{r["name"]}}_value").keyup(function(evt) {
+            evt.preventDefault(); author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
+        });
+        author_id_test("{{r['name']}}","{{r['display_name']}}","{{r['regex']}}","{{r['url']}}");
+      {% endfor %}
     });
   </script>
 {% endif %}

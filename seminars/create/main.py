@@ -449,7 +449,7 @@ def save_seminar():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_seminar", shortname=shortname), 302)
 
-    new_version, errmsgs = process_save_seminar(seminar, raw_data)
+    new_version, errmsgs = process_save_seminar(seminar, raw_data, incremental_update=False)
     # Don't try to create new_version using invalid input
     if new_version is None:
         return show_input_errors(errmsgs)
@@ -469,7 +469,7 @@ def save_seminar():
     return redirect(url_for(".edit_seminar", shortname=shortname), 302)
 
 
-def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg, update_organizers=True, user=None):
+def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg, update_organizers=True, incremental_update=True, user=None):
     if user is None:
         user = current_user
     errmsgs = []
@@ -495,8 +495,8 @@ def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=for
     for col in db.seminars.search_cols:
         if col in data:
             continue
-        # For the API, we want to carry over unspecified columns from the previous data
-        if col not in raw_data:
+        # For incremental updates carry over unspecified columns from the previous data
+        if incremental_update and col not in raw_data:
             data[col] = getattr(seminar, col, None)
             continue
         typ = db.seminars.col_type[col]
@@ -504,7 +504,7 @@ def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=for
         if col.endswith("time") and typ == "timestamp with time zone":
             typ = "time"
         try:
-            val = raw_data[col]
+            val = raw_data.get(col,"")
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
@@ -838,7 +838,7 @@ def save_talk():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
 
-    new_version, errmsgs = process_save_talk(talk, raw_data)
+    new_version, errmsgs = process_save_talk(talk, raw_data, incremental_update=False)
     # Don't try to create new_version using invalid input
     if new_version is None:
         return show_input_errors(errmsgs)
@@ -864,7 +864,7 @@ def save_talk():
         edit_kwds.pop("token", None)
     return redirect(url_for(".edit_talk", **edit_kwds), 302)
 
-def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg):
+def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_errmsg, format_input_error=format_input_errmsg, incremental_update=True):
     errmsgs = []
     data = {
         "seminar_id": talk.seminar_id,
@@ -889,12 +889,12 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
         if col in data:
             continue
         # For the API, we want to carry over unspecified columns from the previous data
-        if col not in raw_data:
+        if incremental_update and col not in raw_data:
             data[col] = getattr(talk, col, None)
             continue
         typ = db.talks.col_type[col]
         try:
-            val = raw_data[col]
+            val = raw_data.get(col, "")
             data[col] = None  # make sure col is present even if process_user_input fails
             data[col] = process_user_input(val, col, typ, tz)
         except Exception as err:  # should only be ValueError's but let's be cautious
