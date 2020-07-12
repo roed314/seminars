@@ -234,7 +234,6 @@
       $('select[name="ids"]').change(add_id);
       {% for id, val in user.external_ids %}
         console.log("{{id}}:{{val}}")
-        var s = r.split(":");
         document.getElementById("{{id}}_value").value="{{val}}";
         document.getElementById("{{id}}").style.display = '';
       {% endfor %}
