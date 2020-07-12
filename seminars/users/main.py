@@ -167,7 +167,6 @@ def info():
         title = section = "Account"
     else:
         title = section = "Login"
-    print(current_user.external_ids)
     return render_template(
         "user-info.html",
         next=request.args.get("next", ''),
@@ -192,7 +191,6 @@ def set_info():
     for col, val in request.form.items():
         if col == "ids":
             continue
-        print("processing "+col+" with value "+val)
         try:
             # handle external id values separately, these are not named columns, they all go in external_ids
             if col.endswith("_value"):
@@ -215,8 +213,6 @@ def set_info():
         return show_input_errors(errmsgs)
     data["external_ids"] = external_ids
     for k in data.keys():
-        print(k)
-        print(data[k])
         setattr(current_user, k, data[k])
     if current_user.save():
         flask.flash(Markup("Thank you for updating your details!"))
