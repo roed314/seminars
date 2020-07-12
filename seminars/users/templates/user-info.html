@@ -151,7 +151,7 @@
       {% for r in options["author_ids"] %}
         <tr id="{{r["name"]}}" style="display:none">
           <td>{{r["display_name"]}}</td>
-          <td><input id="{{r['name']+'_value'}}" value="" style="width:334px;" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
+          <td><input name="{{r['name']+_value'}}" id="{{r['name']+'_value'}}" value="" style="width:334px;" tabindex="1" placeholder="{{r['placeholder']}}"/></td>
           <td class="forminfo" id="{{r['name']+'_test'}}"></td>
         </tr>
       {% endfor %}
