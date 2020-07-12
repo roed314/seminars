@@ -191,6 +191,7 @@ def set_info():
     for col, val in request.form.items():
         if col == "ids":
             continue
+        print("processing "+col+" with value "+val)
         try:
             # handle external id values separately, these are not named columns, they all go in external_ids
             if col.endswith("_value"):
