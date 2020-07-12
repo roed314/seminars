@@ -232,9 +232,10 @@
         document.getElementById('ids').value = "";
       }
       $('select[name="ids"]').change(add_id);
-      {% for type,id in user.author_ids %}
-        document.getElementById("{{type}}_value").value="{{id}}";
-        document.getElementById("{{type}}").style.display = '';
+      {% for r in user.author_ids %}
+        var s = r.split(":");
+        document.getElementById(s[0]+"_value").value=s[1];
+        document.getElementById(s[0]).style.display = '';
       {% endfor %}
 
       function author_id_test(name,display_name,regex,url) {
