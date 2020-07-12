@@ -520,6 +520,15 @@ class SeminarsUser(UserMixin):
             flash("Someone endorsed you! You can now create series.", "success")
 
     @property
+    def external_ids(self):
+        return [ r.splitr(":") for r in self._data.get("external_ids",[]) ]
+
+    @external_ids.setter
+    def external_ids(self, author_ids):
+        self._data["external_ids"] = author_ids
+        self._dirty = True
+
+    @property
     def is_organizer(self):
         return self.id and (self.is_admin or self.is_creator or self._organizer)
 

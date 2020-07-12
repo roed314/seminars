@@ -232,11 +232,11 @@
         document.getElementById('ids').value = "";
       }
       $('select[name="ids"]').change(add_id);
-      {% for r in user.external_ids %}
-        console.log(r)
+      {% for id,val in user.external_ids %}
+        console.log(id+":"+val)
         var s = r.split(":");
-        document.getElementById(s[0]+"_value").value=s[1];
-        document.getElementById(s[0]).style.display = '';
+        document.getElementById(id+"_value").value=val;
+        document.getElementById(id).style.display = '';
       {% endfor %}
 
       function author_id_test(name,display_name,regex,url) {
