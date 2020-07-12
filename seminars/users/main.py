@@ -43,7 +43,7 @@ from seminars.tokens import generate_timed_token, read_timed_token, read_token
 from datetime import datetime
 
 def user_options():
-    author_ids = sorted(list(db.author_ids.search({})),key=lambda r: r["name"])
+    author_ids = sorted(list(db.author_ids.search({})),key=lambda r: r["name"].lower())
     return { 'author_ids' : author_ids, 'timezones' : timezones }
 
 login_page = Blueprint("user", __name__, template_folder="templates")
