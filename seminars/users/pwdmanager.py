@@ -521,7 +521,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def external_ids(self):
-        return [ r.splitr(":") for r in self._data.get("external_ids",[]) ]
+        return [ r.split(":") for r in self._data.get("external_ids",[]) ]
 
     @external_ids.setter
     def external_ids(self, author_ids):
