@@ -232,7 +232,7 @@
         document.getElementById('ids').value = "";
       }
       $('select[name="ids"]').change(add_id);
-      {% for type,id in user.external_ids %}
+      {% for type,id in user.author_ids %}
         document.getElementById("{{type}}_value").value="{{id}}";
         document.getElementById("{{type}}").style.display = '';
       {% endfor %}
