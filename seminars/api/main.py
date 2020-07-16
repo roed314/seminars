@@ -37,7 +37,8 @@ def version_error(version):
 
 def get_request_json():
     try:
-        return request.get_json()
+        req = request.get_json()
+        return req if req else {}
     except Exception as err:
         raise APIError({"code": "json_parse_error",
                         "description": "could not parse json",
