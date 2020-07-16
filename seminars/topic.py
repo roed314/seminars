@@ -103,20 +103,20 @@ class TopicDAG(object):
                     children[current_path[-1]].add(topic_id)
                 current_path.append(topic_id)
         topic_list = [{"topic_id": tid, "name": name, "children": sorted(children[tid])} for (tid, name) in new_topics.items()]
-        update_list = {tid: sorted(children[tid]) for tid in update_children if tid not in new_topics}
+        updates = {tid: sorted(children[tid]) for tid in update_children if tid not in new_topics}
         print("New topics being added:\n  %s" % ("\n  ".join(T["name"] for T in topic_list)))
         print("Child relationships being added:")
         for T in topic_list:
             for C in T["children"]:
                 print("  %s -> %s" % (T["name"], existing_topics[C].name))
-        for tid, children in update_list.items():
+        for tid, children in updates.items():
             for C in children:
                 if C not in self.by_id[tid].children:
                     print("  %s -> %s" % (existing_topics[tid].name, existing_topics[C].name))
         if not dryrun:
             with DelayCommit(db):
                 db.new_topics.insert_many(topic_list)
-                for tid, children in update_list:
+                for tid, children in updates.items():
                     db.new_topics.update({"topic_id": tid}, {"children": children})
 
     def filtered_topics(self, topic=None):
