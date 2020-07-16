@@ -237,7 +237,7 @@ def search_talks(version=0):
         raise version_error(version)
     if request.method == "POST":
         try:
-            raw_data = request.get_json()
+            raw_data = get_request_json()
         except Exception:
             raw_data = {}
         query = raw_data.pop("query", {})
@@ -297,7 +297,7 @@ def save_series(version=0, user=None):
     if version != 0:
         raise version_error(version)
     try:
-        raw_data = request.get_json()
+        raw_data = get_request_json()
     except Exception:
         raw_data = None
     if not isinstance(raw_data, dict):
@@ -418,7 +418,7 @@ def save_talk(version=0, user=None):
     if version != 0:
         raise APIError({"code": "invalid_version",
                         "description": "Unknown API version: %s" % version})
-    raw_data = request.get_json()
+    raw_data = get_request_json()
     # Temporary measure while we rename seminar_id
     series_id = raw_data.pop("series_id", None)
     raw_data["seminar_id"] = series_id
