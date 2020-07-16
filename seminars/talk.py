@@ -34,7 +34,6 @@ import re
 
 blackout_dates = [ # Use %Y-%m-%d format
     "2020-06-10",
-    "2020-12-10",
 ]
 
 required_talk_columns = [
@@ -363,12 +362,12 @@ class WebTalk(object):
                 content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
             )
         else:
-            return r'<a title="{hovertitle}" {knowl_href}="talk/{seminar_id}/{talkid}">{title}</a>'.format(
-                hovertitle=self.show_title(),
-                title=("<i><s>" + self.show_title() + "</s></i> (rescheduled)") if rescheduled else self.show_title(),
-                knowl_href="href" if rescheduled else "knowl",
+            return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}" {style}>{title}</a>{rescheduled}'.format(
+                title=self.show_title(),
+                style='style="text-decoration: line-through;font-style: italic;"' if rescheduled else '',
                 seminar_id=self.seminar_id,
                 talkid=self.seminar_ctr,
+                rescheduled=' (rescheduled)' if rescheduled else '',
             )
 
     def show_lang_topics(self):
@@ -423,7 +422,7 @@ class WebTalk(object):
             return ""
 
     def show_stream_link(self, user=None, raw=False):
-        if any([self.deleted, not self.online, not self.stream_link, self.is_really_over()]):
+        if any([self.deleted, not self.online, not self.stream_link, self.is_past()]):
             return ""
         link = self.stream_link
         if raw:
@@ -436,7 +435,7 @@ class WebTalk(object):
     def show_live_link(self, user=None, raw=False):
         if user is None: user = current_user
         now = datetime.now(pytz.utc)
-        if any([self.deleted, not self.online, self.is_really_over()]):
+        if any([self.deleted, not self.online, self.is_past()]):
             return ""
         link = self.live_link
 
@@ -479,6 +478,11 @@ class WebTalk(object):
             else:
                 return show_link(self, user=user, raw=raw)
         elif self.access_control == 5:
+            if not user.is_anonymous and db.seminar_registrations.lucky({'seminar_id':self.seminar_id,'email':user.email}):
+                if not user.email_confirmed:
+                    return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
+                else:
+                    return show_link(self, user=user, raw=raw)
             # If there is a view-only link, show that rather than an external registration link
             if raw:
                 return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
@@ -551,15 +555,12 @@ Thank you,
                        _external=True, _scheme="webcal")
 
     def is_past(self):
-        return self.end_time < datetime.now(pytz.utc)
+        now = datetime.now(pytz.utc)
+        return (now - timedelta(minutes=60) > self.end_time)
 
     def is_starting_soon(self):
         now = datetime.now(pytz.utc)
         return (self.start_time - timedelta(minutes=15) <= now < self.end_time)
-
-    def is_really_over(self):
-        now = datetime.now(pytz.utc)
-        return (now - timedelta(minutes=30) > self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:

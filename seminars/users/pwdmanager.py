@@ -93,6 +93,8 @@ class PostgresUserTable(PostgresSearchTable):
         kwargs["api_access"] = kwargs.get("api_access", 0)
         kwargs["api_token"] = kwargs.get("api_token", secrets.token_urlsafe(32))
         kwargs["created"] = datetime.now(UTC)
+        if "external_ids" not in kwargs:
+            kwargs["external_ids"] = []
         if sorted(list(kwargs) + ['id']) != sorted(self.col_type):
             log_error("Columns for user creation do not match, %s != %s" % (sorted(list(kwargs) + ['id']), sorted(self.col_type)))
         self.insert_many([kwargs], restat=False)
@@ -210,7 +212,7 @@ class SeminarsUser(UserMixin):
         self._authenticated = False
         self._uid = None
         self._dirty = False  # flag if we have to save
-        self._data = dict([(_, None) for _ in SeminarsUser.properties])
+        self._data = dict() # dict([(_, None) for _ in SeminarsUser.properties])
 
         user_row = userdb.lucky(query, projection=SeminarsUser.properties)
         if user_row:
@@ -518,6 +520,15 @@ class SeminarsUser(UserMixin):
             flash("Someone endorsed you! You can now create series.", "success")
 
     @property
+    def external_ids(self):
+        return [ r.split(":") for r in self._data.get("external_ids",[]) ] if self._data.get("external_ids") else []
+
+    @external_ids.setter
+    def external_ids(self, author_ids):
+        self._data["external_ids"] = author_ids
+        self._dirty = True
+
+    @property
     def is_organizer(self):
         return self.id and (self.is_admin or self.is_creator or self._organizer)
 
@@ -614,7 +625,6 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
             return timezone(self.timezone)
         except UnknownTimeZoneError:
             return timezone("UTC")
-
 
     @property
     def email_confirmed(self):

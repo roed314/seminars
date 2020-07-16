@@ -37,11 +37,23 @@ def version_error(version):
 
 def get_request_json():
     try:
-        return request.get_json()
+        req = request.get_json()
+        return req if req else {}
     except Exception as err:
         raise APIError({"code": "json_parse_error",
                         "description": "could not parse json",
                         "error": str(err)})
+
+
+def get_request_args_json():
+    try:
+        return dict( (key, json.loads(value)) for key, value in dict(request.args).items())
+    except Exception as err:
+        raise APIError({"code": "json_parse_error",
+                        "description": "could not parse json",
+                        "error": str(err)})
+
+
 
 def str_jsonify(result, callback=False):
     if callback:
@@ -154,7 +166,7 @@ def lookup_series(version=0):
     if request.method == "POST":
         raw_data = get_request_json()
     else:
-        raw_data = dict(request.args)
+        raw_data = get_request_args_json()
     series_id = _get_col("series_id", raw_data, "looking up a series")
     try:
         result = seminars_lookup(series_id, objects=False, sanitized=True)
@@ -178,7 +190,7 @@ def lookup_talk(version=0):
     if request.method == "POST":
         raw_data = get_request_json()
     else:
-        raw_data = dict(request.args)
+        raw_data = get_request_args_json()
     series_id = _get_col("series_id", raw_data, "looking up a talk")
     series_ctr = _get_col("series_ctr", raw_data, "looking up a talk")
     result = talks_lookup(series_id, series_ctr, objects=False, sanitized=True)
@@ -198,7 +210,7 @@ def search_series(version=0):
         projection = raw_data.pop("projection", 1)
         tz = raw_data.pop("timezone", "UTC")
     else:
-        query = dict(request.args)
+        query = get_request_args_json()
         tz = current_user.tz # Is this the right choice?
         for col, val in query.items():
             if col in db.seminars.col_type:
@@ -230,7 +242,7 @@ def search_talks(version=0):
         projection = raw_data.pop("projection", 1)
         tz = raw_data.pop("timezone", "UTC")
     else:
-        query = dict(request.args)
+        query = get_request_args_json()
         projection = 1
         raw_data = {}
     query["hidden"] = False
@@ -284,7 +296,7 @@ def save_series(version=0, user=None):
     if version != 0:
         raise version_error(version)
     try:
-        raw_data = request.get_json()
+        raw_data = get_request_json()
     except Exception:
         raw_data = None
     if not isinstance(raw_data, dict):
@@ -374,7 +386,7 @@ def save_series(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    new_version, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers, user=user)
+    new_version, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers, incremental_update=True, user=user)
     if new_version is None:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
@@ -405,7 +417,7 @@ def save_talk(version=0, user=None):
     if version != 0:
         raise APIError({"code": "invalid_version",
                         "description": "Unknown API version: %s" % version})
-    raw_data = request.get_json()
+    raw_data = get_request_json()
     # Temporary measure while we rename seminar_id
     series_id = raw_data.pop("series_id", None)
     raw_data["seminar_id"] = series_id
@@ -435,7 +447,7 @@ def save_talk(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    new_version, errmsgs = process_save_talk(talk, raw_data, warn, format_error, format_input_error) # doesn't currently use the user
+    new_version, errmsgs = process_save_talk(talk, raw_data, warn, format_error, format_input_error, incremental_update=True) # doesn't currently use the user
     if new_version is None:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
-import flask
+import flask, re
 from email_validator import validate_email, EmailNotValidError
 from urllib.parse import urlencode, quote
 from functools import wraps
@@ -42,6 +42,9 @@ from seminars.utils import (
 from seminars.tokens import generate_timed_token, read_timed_token, read_token
 from datetime import datetime
 
+def user_options():
+    author_ids = sorted(list(db.author_ids.search({})),key=lambda r: r["name"].lower())
+    return { 'author_ids' : author_ids, 'timezones' : timezones }
 
 login_page = Blueprint("user", __name__, template_folder="templates")
 logger = make_logger(login_page)
@@ -169,7 +172,8 @@ def info():
         next=request.args.get("next", ''),
         title=title,
         section=section,
-        timezones=timezones,
+        user=current_user,
+        options=user_options(),
         session=session,
     )
 
@@ -183,8 +187,22 @@ def set_info():
     errmsgs = []
     data = {}
     previous_email = current_user.email
+    external_ids = []
     for col, val in request.form.items():
+        if col == "ids":
+            continue
         try:
+            # handle external id values separately, these are not named columns, they all go in external_ids
+            if col.endswith("_value"):
+                name = col.split("_")[0]
+                value = val.strip()
+                # external id values are validated against regex by the form, but the user can still click update
+                if value:
+                    if not re.match(db.author_ids.lookup(name,"regex"),value):
+                        errmsgs.append(format_input_errmsg("Invalid %s format"%(db.author_ids.lookup(name,"display_name")), val, name))
+                    else:
+                        external_ids.append(name + ":" + value)
+                continue
             typ = db.users.col_type[col]
             data[col] = process_user_input(val, col, typ)
         except Exception as err:  # should only be ValueError's but let's be cautious
@@ -192,7 +210,8 @@ def set_info():
     if not data.get("name"):
         errmsgs.append(format_errmsg('Name cannot be left blank.  See the user behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
     if errmsgs:
-        return show_input_errors(errmsgs)        
+        return show_input_errors(errmsgs)
+    data["external_ids"] = external_ids
     for k in data.keys():
         setattr(current_user, k, data[k])
     if current_user.save():
@@ -392,7 +411,7 @@ def reset_password():
         email = request.form["email"]
         if userdb.user_exists(email):
             send_reset_password(email)
-        flask.flash(Markup("Check your inbox for instructions on how to reset your password."))
+        flask.flash(Markup("Check your email's inbox for instructions on how to reset your password."))
         return redirect(url_for(".info"))
     return render_template("reset_password_ask_email.html", title="Forgot Password",)
 
