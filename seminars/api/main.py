@@ -195,6 +195,7 @@ def search_series(version=0):
     if request.method == "POST":
         raw_data = get_request_json()
         query = raw_data.pop("query", {})
+        projection = raw_data.pop("projection", 1)
         tz = raw_data.pop("timezone", "UTC")
     else:
         query = dict(request.args)
@@ -224,12 +225,10 @@ def search_talks(version=0):
     if version != 0:
         raise version_error(version)
     if request.method == "POST":
-        try:
-            raw_data = request.get_json()
-        except Exception:
-            raw_data = None
+        raw_data = get_request_json()
         query = raw_data.pop("query", {})
         projection = raw_data.pop("projection", 1)
+        tz = raw_data.pop("timezone", "UTC")
     else:
         query = dict(request.args)
         projection = 1
