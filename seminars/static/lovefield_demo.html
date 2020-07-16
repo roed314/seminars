@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Minimal example of using Lovefield</title>
+    <script src="https://unpkg.com/lovefield@2.1.12/dist/lovefield.min.js"></script>
+  </head>
+  <body>
+    <script>
+
+
+/******  Begin schema creation  ****/
+var schemaBuilder = lf.schema.create('beantheory', 1);
+
+//id: integer
+//series_id: string
+//series_ctr: string
+//topics: string # concatenated with pipes at the end and beginning
+//language: string
+//title: string
+//speaker: string
+//start_time: datetime
+//end_time: datetime
+schemaBuilder.createTable('talks').
+    addColumn('uid', lf.Type.STRING). //  == series_id/series_ctr
+    addColumn('series_id', lf.Type.STRING).
+    addColumn('series_ctr', lf.Type.INTEGER).
+    addColumn('topics', lf.Type.STRING).
+    addColumn('language', lf.Type.STRING).
+    addColumn('start_time', lf.Type.DATE_TIME).
+    addColumn('end_time', lf.Type.DATE_TIME).
+    addPrimaryKey(['uid']).
+    addIndex('idxStartTime', ['start_time'], false, lf.Order.ASC);
+
+function insertOrReplace_talks_worker(data) {
+  if (data.code == "success") {
+    schemaBuilder.connect().then(function(db) {
+      talks = db.getSchema().table('talks');
+      rows = [];
+      data.results.forEach( elt => {
+        rows.push(
+          talks.createRow({
+            'uid' : elt.seminar_id + '/' + elt.seminar_ctr,
+            'series_id' : elt.seminar_id,
+            'series_ctr' : elt.seminar_id,
+            'topics' : '|' + elt.topics.join('|') + '|',
+            'language' : elt.language,
+            'start_time' : new Date(elt.start_time),
+            'end_time' : new Date(elt.end_time),
+          })
+        )
+      })
+      db.insertOrReplace().into(talks).values(rows).exec();
+      return true;
+    })
+  }
+  return false;
+}
+
+function search_and_insert_talks(query) {
+  console.log(query);
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function() {
+    console.log(this.readyState, this.status);
+    if (this.readyState == 4 && this.status == 200) {
+      console.log("dobule yeay");
+      if( insertOrReplace_talks_worker(JSON.parse(this.responseText)) )
+        console.log('talks loaded');
+    }
+  }
+  //FIXME
+  xmlhttp.open("POST", "https://researchseminars.org/api/0/search/talks", true);
+  //xmlhttp.open("POST", "/api/0/search/talks", true);
+  xmlhttp.setRequestHeader('Content-type', 'application/json');
+  projection =  ["seminar_id", "seminar_id", "topics", "language", "start_time", "end_time"]
+  xmlhttp.send(JSON.stringify({'query': query, 'projection': projection}))
+}
+
+//search_and_insert_talks({'end_time' : {'$gte': '2020-09-24 15:45:00-04:00'}});
+search_and_insert_talks({});
+
+
+
+
+    </script>
+  </body>
+</html>
+

@@ -2,6 +2,7 @@ email_validator
 html2text
 python-dateutil
 Flask-Mail
+flask-compress
 flask_cors
 itsdangerous
 icalendar
@@ -10,3 +11,4 @@ PyYAML
 flask-login
 bcrypt
 psycopg2-binary
+

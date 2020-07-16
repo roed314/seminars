@@ -15,6 +15,7 @@ from flask import (
     abort,
 )
 from flask_mail import Mail, Message
+from flask_compress import Compress
 from flask_cors import CORS
 
 from lmfdb.logger import logger_file_handler
@@ -38,6 +39,8 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 ############################
 
 app = Flask(__name__, static_url_path="", static_folder="static",)
+# compress replies by default
+Compress(app)
 # disable cache temporarily
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
@@ -52,6 +55,8 @@ mail_settings = {
 
 app.config.update(mail_settings)
 mail = Mail(app)
+
+
 
 
 # Enable cross origin for fonts
