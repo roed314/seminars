@@ -10,31 +10,68 @@
 
 
 /******  Begin schema creation  ****/
-var schemaBuilder = lf.schema.create('beantheory', 1);
+//Define beantheory.db namespace
+var db = null;
+var beantheory = { db: {} };
 
-//id: integer
-//series_id: string
-//series_ctr: string
-//topics: string # concatenated with pipes at the end and beginning
-//language: string
-//title: string
-//speaker: string
-//start_time: datetime
-//end_time: datetime
-schemaBuilder.createTable('talks').
-    addColumn('uid', lf.Type.STRING). //  == series_id/series_ctr
-    addColumn('series_id', lf.Type.STRING).
-    addColumn('series_ctr', lf.Type.INTEGER).
-    addColumn('topics', lf.Type.STRING).
-    addColumn('language', lf.Type.STRING).
-    addColumn('start_time', lf.Type.DATE_TIME).
-    addColumn('end_time', lf.Type.DATE_TIME).
-    addPrimaryKey(['uid']).
-    addIndex('idxStartTime', ['start_time'], false, lf.Order.ASC);
+/** @return {!lf.schema.Builder} */
+beantheory.db.getSchemaBuilder = function() {
+  var schemaBuilder = lf.schema.create('beantheory', 1);
+  //id: integer
+  //series_id: string
+  //series_ctr: string
+  //topics: string # concatenated with pipes at the end and beginning
+  //language: string
+  //title: string
+  //speaker: string
+  //start_time: datetime
+  //end_time: datetime
+  schemaBuilder.createTable('talks').
+      addColumn('uid', lf.Type.STRING). //  == series_id/series_ctr
+      addColumn('series_id', lf.Type.STRING).
+      addColumn('series_ctr', lf.Type.INTEGER).
+      addColumn('topics', lf.Type.STRING).
+      addColumn('language', lf.Type.STRING).
+      addColumn('start_time', lf.Type.DATE_TIME).
+      addColumn('end_time', lf.Type.DATE_TIME).
+      addPrimaryKey(['uid']).
+      addIndex('idxStartTime', ['start_time'], false, lf.Order.ASC);
+  return schemaBuilder;
+}
 
-function insertOrReplace_talks_worker(data) {
+
+// When the page loads.
+document.addEventListener("DOMContentLoaded", function(){
+  main().then(function () { countTopics()});
+  function main() {
+    return beantheory.db.getSchemaBuilder().connect({
+      //FIXME?
+      storeType: lf.schema.DataStoreType.MEMORY
+    }).then(function(database) {
+      db = database;
+      return checkForExistingData();
+    }).then(function(dataExist) {
+      return dataExist ? Promise.resolve() : loadAllTalks();
+    });
+  }
+});
+
+
+function checkForExistingData() {
+  var talks = db.getSchema().table('talks');
+  var column = lf.fn.count(talks.uid);
+  return db.select(column).from(talks).exec().then(
+      function(rows) {
+        console.log(rows[0][column.getName()]);
+        return rows[0][column.getName()] > 0;
+      });
+}
+
+
+
+
+var insertOrReplace_talks = function(data) {
   if (data.code == "success") {
-    schemaBuilder.connect().then(function(db) {
       talks = db.getSchema().table('talks');
       rows = [];
       data.results.forEach( elt => {
@@ -50,39 +87,98 @@ function insertOrReplace_talks_worker(data) {
           })
         )
       })
-      db.insertOrReplace().into(talks).values(rows).exec();
-      return true;
-    })
+      return db.insertOrReplace().into(talks).values(rows).exec();
   }
-  return false;
-}
+  return Promise.reject();
+};
 
-function search_and_insert_talks(query) {
+var fetch_talks = function(query) {
   console.log(query);
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.onreadystatechange = function() {
-    console.log(this.readyState, this.status);
-    if (this.readyState == 4 && this.status == 200) {
-      console.log("dobule yeay");
-      if( insertOrReplace_talks_worker(JSON.parse(this.responseText)) )
-        console.log('talks loaded');
+  var request = new XMLHttpRequest();
+  return new Promise(function (resolve, reject) {
+    // Setup our listern to process complete requests
+    request.onreadystatechange = function() {
+    // Only run if the request is complete
+		if (this.readyState !== 4) return;
+
+      // Process the response
+      if (this.status >= 200 && this.status < 300) {
+        return resolve(JSON.parse(this.responseText));
+      } else {
+        // If failed
+        reject({
+          status: this.status,
+          statusText: this.statusText
+        });
+      }
     }
-  }
-  //FIXME
-  xmlhttp.open("POST", "https://researchseminars.org/api/0/search/talks", true);
-  //xmlhttp.open("POST", "/api/0/search/talks", true);
-  xmlhttp.setRequestHeader('Content-type', 'application/json');
-  projection =  ["seminar_id", "seminar_id", "topics", "language", "start_time", "end_time"]
-  xmlhttp.send(JSON.stringify({'query': query, 'projection': projection}))
+    //FIXME
+    request.open("POST", "https://researchseminars.org/api/0/search/talks", true);
+    //xmlhttp.open("POST", "/api/0/search/talks", true);
+    request.setRequestHeader('Content-type', 'application/json');
+    projection =  ["seminar_id", "seminar_id", "topics", "language", "start_time", "end_time"]
+    request.send(JSON.stringify({'query': query, 'projection': projection}))
+  });
 }
 
 //search_and_insert_talks({'end_time' : {'$gte': '2020-09-24 15:45:00-04:00'}});
-search_and_insert_talks({});
+function loadAllTalks(query) {
+  return fetch_talks(query).then(insertOrReplace_talks);
+}
 
 
+function countTopics() {
+  var talks = db.getSchema().table('talks');
+  return db.select(talks.topics).from(talks).exec().then(
+    function(results) {
+      var counter = {};
+      results.forEach(
+        function(row) {
+          row.topics.split('|').forEach(
+            function(topic) {
+              if( topic ){
+                if( !(topic in counter) ) {
+                  counter[topic] = 0;
+                }
+                counter[topic] += 1;
+              }
+            })
+        }
+      );
+      var pairs = Object.keys(counter).map(function(key) {
+        return [key, counter[key]];
+      });
+      // Sort the array based on the second element
+      pairs.sort(function(first, second) {
+        return second[1] - first[1];
+      });
+      var table = document.createElement("table");
+      var newRow = document.createElement("tr");
+      var topic = document.createElement("th")
+      topic.innerText = "topic";
+      newRow.appendChild(topic);
+      var count = document.createElement("th");
+      count.innerText = "count";
+      newRow.appendChild(count);
+      table.appendChild(newRow);
+      for (const [key, value] of pairs) {
+        var newRow = document.createElement("tr");
+        var topic = document.createElement("td")
+        topic.innerText = key;
+        newRow.appendChild(topic);
+        var count = document.createElement("td");
+        count.innerText = value;
+        newRow.appendChild(count);
+        table.appendChild(newRow);
+
+      }
+      document.body.appendChild(table);
+      });
+}
 
 
     </script>
+<p id="demo"></p>
   </body>
 </html>
 
