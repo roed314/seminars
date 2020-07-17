@@ -79,7 +79,7 @@ var insertOrReplace_talks = function(data) {
           talks.createRow({
             'uid' : elt.seminar_id + '/' + elt.seminar_ctr,
             'series_id' : elt.seminar_id,
-            'series_ctr' : elt.seminar_id,
+            'series_ctr' : elt.seminar_ctr,
             'topics' : '|' + elt.topics.join('|') + '|',
             'language' : elt.language,
             'start_time' : new Date(elt.start_time),
@@ -116,7 +116,7 @@ var fetch_talks = function(query) {
     request.open("POST", "https://researchseminars.org/api/0/search/talks", true);
     //xmlhttp.open("POST", "/api/0/search/talks", true);
     request.setRequestHeader('Content-type', 'application/json');
-    projection =  ["seminar_id", "seminar_id", "topics", "language", "start_time", "end_time"]
+    projection =  ["seminar_id", "seminar_ctr", "topics", "language", "start_time", "end_time"]
     request.send(JSON.stringify({'query': query, 'projection': projection}))
   });
 }
