@@ -223,7 +223,7 @@ def search_series(version=0):
     query["visibility"] = 2
     # TODO: encode the times....
     try:
-        results = list(seminars_search(query, objects=False, sanitized=True, **raw_data))
+        results = list(seminars_search(query, projection, objects=False, sanitized=True, **raw_data))
     except Exception as err:
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
