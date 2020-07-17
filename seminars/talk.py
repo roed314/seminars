@@ -173,13 +173,13 @@ class WebTalk(object):
                 log_error("column %s is None for talk %s/%s" % (col, self.seminar_id, self.seminar_ctr))
         if not self.topics:
             sts = False
-            log_error("No topics set for talk %s/%s" % (self.seminar_id, self.seminar_ctr))            
+            log_error("No topics set for talk %s/%s" % (self.seminar_id, self.seminar_ctr))
         return sts
 
     def cleanse(self):
         """
         This function is used to ensure backward compatibility across changes to the schema and/or validation
-        This is the only place where columns we plan to drop should be referenced 
+        This is the only place where columns we plan to drop should be referenced
         """
         for col in optional_talk_text_columns:
             if getattr(self, col) is None:

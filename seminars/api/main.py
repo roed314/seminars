@@ -3,7 +3,13 @@ from flask_login import current_user
 from seminars import db
 from seminars.app import app
 from seminars.api import api_page
-from seminars.seminar import WebSeminar, seminars_lookup, seminars_search
+from seminars.seminar import (
+    WebSeminar,
+    seminars_lookup,
+    seminars_search,
+    all_seminars,
+    all_organizers,
+)
 from seminars.talk import WebTalk, talks_lookup, talks_search
 from seminars.users.pwdmanager import SeminarsUser, ilike_query
 from seminars.users.main import creator_required
@@ -268,7 +274,37 @@ def search_talks(version=0):
     callback = raw_data.get("callback", False)
     return str_jsonify(ans, callback)
 
-# These 
+# The following routes are used in constructing the list of talks client-side
+# They are not versioned since they're intended for internal use.
+
+@api_page.route("/browse/talks", methods=["POST"])
+def browse_talk_data():
+    raw_data = get_request_json()
+    query = raw_data.pop("query", {})
+    seminar_dict = all_seminars()
+    talks = talks_search(query, seminar_dict=seminar_dict, **raw_data)
+    now = datetime.now(tz=pytz.UTC)
+    def make_dict(talk):
+        D = {"seminar_id": talk.seminar_id,
+             "seminar_ctr": talk.seminar_ctr,
+             "topics": talk.topics,
+             "language": talk.language,
+             "start_time": talk.start_time,
+             "end_time": talk.end_time}
+        if current_user.is_authenticated:
+            D["saved"] = (
+                talk.seminar_id in current_user.seminar_subscriptions() or
+                talk.seminar_ctr in current_user.talk_subscriptions().get(
+                    talk.seminar_id, []
+                )
+            )
+        if talk.start_time - now > timedelta(days=-1):
+            D["future_oneline"] = talk.oneline()
+        if now - talk.end_time > timedelta(days=-1):
+            D["past_oneline"] = talk.oneline(include_content=True, include_subscribe=False)
+        return D
+    data = [make_dict(talk) for talk in talks]
+    return str_jsonify(data, False)
 
 def api_auth_required(fn):
     # Note that this wrapper will pass the user as a keyword argument to the wrapped function
