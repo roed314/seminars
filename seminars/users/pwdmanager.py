@@ -630,6 +630,14 @@ class SeminarsAnonymousUser(AnonymousUserMixin):
     def email_confirmed(self):
         return False
 
+    @property
+    def seminar_subscriptions(self):
+        return []
+
+    @property
+    def talk_subscriptions(self):
+        return {}
+
     def show_timezone(self, dest="topmenu"):
         # dest can be 'browse', in which case "now" is inserted, or 'selecter', in which case fixed width is used.
         return pretty_timezone(self.tz, dest=dest)

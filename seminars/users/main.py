@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
-import flask, re
+import flask, re, json
 from email_validator import validate_email, EmailNotValidError
 from urllib.parse import urlencode, quote
 from functools import wraps
@@ -14,6 +14,7 @@ from flask import (
     redirect,
     make_response,
     session,
+    Response,
 )
 from flask_login import (
     login_required,
@@ -177,6 +178,14 @@ def info():
         session=session,
     )
 
+@login_page.route("/display_data")
+def display_data():
+    # Return user data used in displaying talks on the browse page as json
+    data = {"authenticated": current_user.is_authenticated,
+            "timezone": current_user.timezone,
+            "seminar_subscriptions": current_user.seminar_subscriptions,
+            "talk_subscriptions": current_user.talk_subscriptions}
+    return Response(json.dumps(data), mimetype="application/json")
 
 # ./info again, but for POST!
 
