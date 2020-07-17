@@ -69,6 +69,7 @@ audience_options = [
     (3, "learners"),
     (4, "undergraduates"),
     (5, "general audience"),
+    (6, "social"),
 ]
 
 required_seminar_columns = [

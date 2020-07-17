@@ -3,6 +3,8 @@ from .toggle import toggle, toggle3way
 from .utils import num_columns
 from flask import request
 from collections import defaultdict, Counter
+from lmfdb.backend.utils import DelayCommit
+import re
 
 
 class WebTopic(object):
@@ -53,6 +55,69 @@ class TopicDAG(object):
         self.subjects = sorted(
             (topic for topic in self.by_id.values() if not topic.parents), key=sort_key
         )
+
+    def add_topics(self, filename, dryrun=False):
+        """
+        File format: one line for each topic, asterisks to indicate children, tilde for dividing topic id from topic name.
+        You can include a topic that already exists in order to add children, and you can include a topic multiple times to get the DAG structure.
+        Example:
+
+        chem ~ Chemistry
+        * bio_BC ~ biochemistry
+        ** bio_EZ ~ enzymology
+        bio ~ Biology
+        * bio_BC ~ biochemistry
+        math_NT ~ number theory
+        * math_AR ~ arithmetic geometry
+        math_AG ~ algebraic geometry
+        * math_AR ~ arithmetic geometry
+        """
+        existing_topics = dict(self.by_id)
+        new_topics = {}
+        children = defaultdict(set)
+        children.update({tid: set(WT.id for WT in self.by_id[tid].children) for tid in self.by_id})
+        update_children = set()
+        current_path = []
+        with open(filename) as F:
+            for line in F:
+                m = re.match(r"^([*\s]*)(.*)", line)
+                depth = m.group(1).count("*")
+                if depth > len(current_path):
+                    raise ValueError("Invalid tree structure: can only indent one level at a time")
+                content = m.group(2).split("~")
+                if len(content) != 2:
+                    raise ValueError("You must specify both id and name: %s" % content)
+                topic_id = content[0].strip()
+                topic_name = content[1].strip()
+                current_path = current_path[:depth]
+                if topic_id in existing_topics:
+                    old_name = existing_topics[topic_id].name
+                    if topic_name != old_name:
+                        raise ValueError("Inconsistent topic name: %s (new) vs %s (existing)" % (topic_name, old_name))
+                else:
+                    new_topics[topic_id] = topic_name
+                    existing_topics[topic_id] = WebTopic(topic_id, topic_name)
+                if current_path:
+                    if topic_id not in children[current_path[-1]]:
+                        update_children.add(current_path[-1])
+                    children[current_path[-1]].add(topic_id)
+                current_path.append(topic_id)
+        topic_list = [{"topic_id": tid, "name": name, "children": sorted(children[tid])} for (tid, name) in new_topics.items()]
+        updates = {tid: sorted(children[tid]) for tid in update_children if tid not in new_topics}
+        print("New topics being added:\n  %s" % ("\n  ".join(T["name"] for T in topic_list)))
+        print("Child relationships being added:")
+        for T in topic_list:
+            for C in T["children"]:
+                print("  %s -> %s" % (T["name"], existing_topics[C].name))
+        for tid, children in updates.items():
+            for C in children:
+                if C not in self.by_id[tid].children:
+                    print("  %s -> %s" % (existing_topics[tid].name, existing_topics[C].name))
+        if not dryrun:
+            with DelayCommit(db):
+                db.new_topics.insert_many(topic_list)
+                for tid, children in updates.items():
+                    db.new_topics.update({"topic_id": tid}, {"children": children})
 
     def filtered_topics(self, topic=None):
         cookie = self.read_cookie()

@@ -21,20 +21,17 @@ the <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
   <table>
     <tr>
       <td>Email:</td>
-      <td><input name="email" size="30" value="{{ email }}" /></td>
+      <td><input name="email" size="30" value="{{ email }}" required /></td>
       <td colspan="2" class="forminfo">By default, not visible to others.</td></tr>
-    <tr
-      ><td style="height: 20px; vertical-align: middle;" colspan="2" class="forminfo">Don't use a password that you use elsewhere!</td>
-    </tr>
     <tr>
       <td>Password:</td>
-      <td><input id="pw1" name="password1" type="password" size="30"/></td>
-      <td class="forminfo" id="pw1status" style="color: {{color.red}};"></td></tr>
+      <td><input id="pw1" name="password1" type="password" size="30" required /></td>
+      <td class="forminfo" id="pw1status"></td></tr>
     </tr>
     <tr>
       <td>Password (repeat):</td>
-      <td><input id="pw2" name="password2" type="password" size="30"/></td>
-      <td class="forminfo" id="pw2status" style="color: {{color.red}};"></td></tr>
+      <td><input id="pw2" name="password2" type="password" size="30" required /></td>
+      <td class="forminfo" id="pw2status"></td></tr>
     </tr>
       <td></td>
       <td><button class="save" name="submit" type="submit">Register</button></td>
@@ -44,12 +41,10 @@ the <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
 
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function() {
-  /* this tells the user if the passwords match */
-  $(function () {
-    $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-    $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
-    checkpw();
-  });
+  /* checkpw() is defined in static/seminars.js and handles warning messages and colors */
+  $("#pw1").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+  $("#pw2").keyup(function(evt) { evt.preventDefault(); checkpw(); });
+  checkpw();
 });
 </script>
 

@@ -173,13 +173,13 @@ class WebTalk(object):
                 log_error("column %s is None for talk %s/%s" % (col, self.seminar_id, self.seminar_ctr))
         if not self.topics:
             sts = False
-            log_error("No topics set for talk %s/%s" % (self.seminar_id, self.seminar_ctr))            
+            log_error("No topics set for talk %s/%s" % (self.seminar_id, self.seminar_ctr))
         return sts
 
     def cleanse(self):
         """
         This function is used to ensure backward compatibility across changes to the schema and/or validation
-        This is the only place where columns we plan to drop should be referenced 
+        This is the only place where columns we plan to drop should be referenced
         """
         for col in optional_talk_text_columns:
             if getattr(self, col) is None:
@@ -422,7 +422,7 @@ class WebTalk(object):
             return ""
 
     def show_stream_link(self, user=None, raw=False):
-        if any([self.deleted, not self.online, not self.stream_link, self.is_really_over()]):
+        if any([self.deleted, not self.online, not self.stream_link, self.is_past()]):
             return ""
         link = self.stream_link
         if raw:
@@ -435,7 +435,7 @@ class WebTalk(object):
     def show_live_link(self, user=None, raw=False):
         if user is None: user = current_user
         now = datetime.now(pytz.utc)
-        if any([self.deleted, not self.online, self.is_really_over()]):
+        if any([self.deleted, not self.online, self.is_past()]):
             return ""
         link = self.live_link
 
@@ -478,6 +478,11 @@ class WebTalk(object):
             else:
                 return show_link(self, user=user, raw=raw)
         elif self.access_control == 5:
+            if not user.is_anonymous and db.seminar_registrations.lucky({'seminar_id':self.seminar_id,'email':user.email}):
+                if not user.email_confirmed:
+                    return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
+                else:
+                    return show_link(self, user=user, raw=raw)
             # If there is a view-only link, show that rather than an external registration link
             if raw:
                 return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
@@ -550,15 +555,12 @@ Thank you,
                        _external=True, _scheme="webcal")
 
     def is_past(self):
-        return self.end_time < datetime.now(pytz.utc)
+        now = datetime.now(pytz.utc)
+        return (now - timedelta(minutes=60) > self.end_time)
 
     def is_starting_soon(self):
         now = datetime.now(pytz.utc)
         return (self.start_time - timedelta(minutes=15) <= now < self.end_time)
-
-    def is_really_over(self):
-        now = datetime.now(pytz.utc)
-        return (now - timedelta(minutes=30) > self.end_time)
 
     def is_subscribed(self):
         if current_user.is_anonymous:

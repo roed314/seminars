@@ -160,7 +160,7 @@
     <tr class="online access_control">
       <td>{{ ASTKNOWL("access_control") }}</td>
       <td>
-        <select id="access_control" name="access_control" style="width:610px;" onchange="showaccess();">
+        <select id="access_control" name="access_control" style="width:610px;">
           {% for opt in options["access_control"] %}
             <option value="{{opt[0]}}" {% if seminar.access_control == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -365,12 +365,12 @@ document.addEventListener("DOMContentLoaded", function() {
     $('tr.access_control').show();
     $('tr.chat_link').show();
     $('tr.stream_link').show();
+    $('tr.live_link').show(); 
     n = parseInt(document.getElementById('access_control').value);
     switch(n) {
-      case 1: $('tr.live_link').show(); $('tr.access_time').show(); break;
-      case 2: $('tr.live_link').show(); $('tr.access_hint').show(); break;
+      case 1: $('tr.access_time').show(); break;
+      case 2: $('tr.access_hint').show(); break;
       case 5: $('tr.access_registration').show(); break;
-      default: $('tr.live_link').show();
     }
     return false;
   }
