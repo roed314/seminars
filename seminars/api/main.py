@@ -208,10 +208,11 @@ def search_series(version=0):
         raw_data = get_request_json()
         query = raw_data.pop("query", {})
         projection = raw_data.pop("projection", 1)
-        tz = raw_data.pop("timezone", "UTC")
+        #tz = raw_data.pop("timezone", "UTC")
     else:
         query = get_request_args_json()
         tz = current_user.tz # Is this the right choice?
+        projection = 1
         for col, val in query.items():
             if col in db.seminars.col_type:
                 query[col] = process_user_input(val, col, db.seminars.col_type[col], tz)
@@ -240,9 +241,17 @@ def search_talks(version=0):
         raw_data = get_request_json()
         query = raw_data.pop("query", {})
         projection = raw_data.pop("projection", 1)
-        tz = raw_data.pop("timezone", "UTC")
+        #tz = raw_data.pop("timezone", "UTC")
     else:
         query = get_request_args_json()
+        tz = current_user.tz # Is this the right choice?
+        for col, val in query.items():
+            if col in db.talks.col_type:
+                query[col] = process_user_input(val, col, db.talks.col_type[col], tz)
+            else:
+                raise APIError({"code": "unknown_column",
+                                "col": col,
+                                "description": "%s not a column of talks" % col})
         projection = 1
         raw_data = {}
     query["hidden"] = False
@@ -258,6 +267,8 @@ def search_talks(version=0):
     ans = {"code": "success", "results": results}
     callback = raw_data.get("callback", False)
     return str_jsonify(ans, callback)
+
+# These 
 
 def api_auth_required(fn):
     # Note that this wrapper will pass the user as a keyword argument to the wrapped function
