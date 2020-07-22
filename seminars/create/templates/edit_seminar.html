@@ -287,8 +287,6 @@ const instOptions = [
 const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
 
 document.addEventListener("DOMContentLoaded", function() {
-  /* prevent accidental closing of browser window */
-  {{ prevent_unsaved() }}
 
   // institutions, topics, language selectors
   makeInstitutionSelector(instOptions,{{ seminar.institutions | safe }});
@@ -428,6 +426,9 @@ document.addEventListener("DOMContentLoaded", function() {
     showaccess();
     showswaps();
   };
+
+  /* prevent accidental closing of browser window -- this needs to come at the end*/
+  {{ prevent_unsaved() }}
 });
 </script>
 
