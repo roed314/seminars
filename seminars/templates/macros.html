@@ -38,7 +38,7 @@
   var initialState = $form.serialize();
   window.onbeforeunload = function() {
     if (unsaved && initialState !== $form.serialize())  {
-      consol.log(initialState);
+      console.log(initialState);
       console.log('Form has changed!');
       console.log($form.searialize());
       return "There are unsaved edits. Really close?";
