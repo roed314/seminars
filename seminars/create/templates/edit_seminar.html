@@ -287,7 +287,7 @@ const instOptions = [
 const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
 
 document.addEventListener("DOMContentLoaded", function() {
-  /* prevent accidental closing of browser window */
+  /* prevent accidental closing of browser window -- this is currently broken, it forces unnecessary confirmations */
   {{ prevent_unsaved() }}
 
   // institutions, topics, language selectors
