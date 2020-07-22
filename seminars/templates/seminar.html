@@ -41,7 +41,12 @@ If you are seeking an endorsement, see if you know anyone on this <a href="{{ ur
 {% elif seminar.frequency %}
 <tr>
   <td style="padding:0px;">Seminar series time{% if (seminar.weekdays | length) > 1 %}s{% endif %}:</td>
-  <td>{{seminar.show_seminar_times() | safe }}{% if seminar.timezone != user.timezone %} in your time zone, {{ user.timezone.replace("_", " ") }}{% endif %}.</td>
+  <td>{{seminar.show_seminar_times() | safe }}{% if seminar.timezone != user.timezone %} in your time zone, {{ user.timezone.replace("_", " ") }}{% endif %}</td>
+</tr>
+{% else %}
+<tr>
+  <td style="padding:0px;">Seminar series times:</td>
+  <td>No fixed schedule</td>
 </tr>
 {% endif %}
 {% set n = seminar.num_visible_organizers() %}

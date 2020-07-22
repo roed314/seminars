@@ -160,7 +160,7 @@
     <tr class="online access_control">
       <td>{{ ASTKNOWL("access_control") }}</td>
       <td>
-        <select id="access_control" name="access_control" style="width:610px;" onchange="showaccess();">
+        <select id="access_control" name="access_control" style="width:610px;">
           {% for opt in options["access_control"] %}
             <option value="{{opt[0]}}" {% if seminar.access_control == opt[0] %}selected{% endif %}>{{opt[1]}}</option>
           {% endfor %}
@@ -287,7 +287,7 @@ const instOptions = [
 const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
 
 document.addEventListener("DOMContentLoaded", function() {
-  /* prevent accidental closing of browser window */
+  /* prevent accidental closing of browser window -- this is currently broken, it forces unnecessary confirmations */
   {{ prevent_unsaved() }}
 
   // institutions, topics, language selectors

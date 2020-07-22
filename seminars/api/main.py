@@ -37,7 +37,8 @@ def version_error(version):
 
 def get_request_json():
     try:
-        return request.get_json()
+        req = request.get_json()
+        return req if req else {}
     except Exception as err:
         raise APIError({"code": "json_parse_error",
                         "description": "could not parse json",
@@ -206,6 +207,7 @@ def search_series(version=0):
     if request.method == "POST":
         raw_data = get_request_json()
         query = raw_data.pop("query", {})
+        projection = raw_data.pop("projection", 1)
         tz = raw_data.pop("timezone", "UTC")
     else:
         query = get_request_args_json()
@@ -235,12 +237,10 @@ def search_talks(version=0):
     if version != 0:
         raise version_error(version)
     if request.method == "POST":
-        try:
-            raw_data = request.get_json()
-        except Exception:
-            raw_data = {}
+        raw_data = get_request_json()
         query = raw_data.pop("query", {})
         projection = raw_data.pop("projection", 1)
+        tz = raw_data.pop("timezone", "UTC")
     else:
         query = get_request_args_json()
         projection = 1
@@ -296,7 +296,7 @@ def save_series(version=0, user=None):
     if version != 0:
         raise version_error(version)
     try:
-        raw_data = request.get_json()
+        raw_data = get_request_json()
     except Exception:
         raw_data = None
     if not isinstance(raw_data, dict):
@@ -386,7 +386,7 @@ def save_series(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    new_version, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers, user=user)
+    new_version, errmsgs = process_save_seminar(series, raw_data, warn, format_error, format_input_error, update_organizers, incremental_update=True, user=user)
     if new_version is None:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
@@ -417,7 +417,7 @@ def save_talk(version=0, user=None):
     if version != 0:
         raise APIError({"code": "invalid_version",
                         "description": "Unknown API version: %s" % version})
-    raw_data = request.get_json()
+    raw_data = get_request_json()
     # Temporary measure while we rename seminar_id
     series_id = raw_data.pop("series_id", None)
     raw_data["seminar_id"] = series_id
@@ -447,7 +447,7 @@ def save_talk(version=0, user=None):
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)
-    new_version, errmsgs = process_save_talk(talk, raw_data, warn, format_error, format_input_error) # doesn't currently use the user
+    new_version, errmsgs = process_save_talk(talk, raw_data, warn, format_error, format_input_error, incremental_update=True) # doesn't currently use the user
     if new_version is None:
         raise APIError({"code": "processing_error",
                         "description": "Error in processing input",
