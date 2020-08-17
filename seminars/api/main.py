@@ -207,7 +207,8 @@ def search_series(version=0):
     if request.method == "POST":
         raw_data = get_request_json()
         query = raw_data.pop("query", {})
-        projection = raw_data.pop("projection", 1)
+        # FIXME
+        # projection = raw_data.pop("projection", 1)
         tz = raw_data.pop("timezone", "UTC")
     else:
         query = get_request_args_json()
@@ -240,7 +241,8 @@ def search_talks(version=0):
         raw_data = get_request_json()
         query = raw_data.pop("query", {})
         projection = raw_data.pop("projection", 1)
-        tz = raw_data.pop("timezone", "UTC")
+        # FIXME
+        # tz = raw_data.pop("timezone", "UTC")
     else:
         query = get_request_args_json()
         projection = 1
