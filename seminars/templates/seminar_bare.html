@@ -5,7 +5,11 @@
     {% endif %}
     <thead>
       <tr>
-        {{ talks_header(include_seminar=False, include_subscribe=False,  datetime_header="Time") | safe }}
+        {% if past %}
+          {{ talks_header(include_seminar=False, include_subscribe=False,  datetime_header="Past times") | safe }}
+        {% else %}
+          {{ talks_header(include_seminar=False, include_subscribe=False,  datetime_header="Time") | safe }}
+        {% endif %}
       </tr>
     </thead>
     {% for talk in talks %}
