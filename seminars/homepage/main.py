@@ -707,10 +707,12 @@ def show_seminar_bare(shortname):
         except pytz.UnknownTimeZoneError:
             pass
     resp = make_response(render_template("seminar_bare.html",
-                                         title=seminar.name, talks=talks,
+                                         title=seminar.name,
+                                         talks=talks,
                                          seminar=seminar,
                                          _external=( '_external' in request.args ),
                                          site_footer=( 'site_footer' in request.args ),
+                                         past = ( 'past' in request.args ),
                                          timezone=timezone))
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
