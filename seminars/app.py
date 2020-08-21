@@ -2,6 +2,8 @@
 from __future__ import absolute_import
 import os
 import time
+import getpass
+from socket import gethostname
 from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 from flask import (
@@ -40,6 +42,12 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 app = Flask(__name__, static_url_path="", static_folder="static",)
 # disable cache temporarily
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+if gethostname() == 'grace' and getpass.getuser() == 'mathseminars':
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Strict',
+    )
 
 mail_settings = {
     "MAIL_SERVER": "heaviside.mit.edu",
@@ -404,7 +412,6 @@ def git_infos():
 
 @app.route("/raw_info")
 def raw_info():
-    from socket import gethostname
 
     output = ""
     output += "HOSTNAME = %s\n\n" % gethostname()
