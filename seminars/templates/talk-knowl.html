@@ -54,7 +54,7 @@
           {% endif %}
           {% if not talk.deleted %}
             {% set stream_link = talk.show_stream_link() %}
-            {% set live_link = talk.show_live_link() %}
+            {% set live_link = talk.show_live_link(external=_external) %}
             {% set hint = talk.show_password_hint() %}
             {{ stream_link | safe }}
             {% if (room or stream_link) and hint and live_link %}<br>{% endif %}
