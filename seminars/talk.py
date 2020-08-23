@@ -358,7 +358,10 @@ class WebTalk(object):
         if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
-                content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
+                content=Markup.escape(
+                    render_template("talk-knowl.html", talk=self,
+                                    _external=_external,
+                                    tz=tz)),
             )
         else:
             return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}" {style}>{title}</a>{rescheduled}'.format(
