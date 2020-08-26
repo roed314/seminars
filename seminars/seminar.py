@@ -525,7 +525,8 @@ class WebSeminar(object):
                 name = rec["name"] if rec["name"] else link
                 if name:
                     namelink = '<a href="%s">%s</a>' % (link, name) if link else name
-                    if link and db.users.count({"email":rec["email"], "email_confirmed":True}):
+                    r = db.users.lookup(rec["email"])
+                    if link and r and r["email_confirmed"]:
                         namelink += "*"
                     editors.append(namelink)
         return ", ".join(editors)
