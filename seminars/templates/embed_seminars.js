@@ -60,9 +60,9 @@
 
     fetchURL += "&_external=";
 
-    if (target.hasAttribute('sitefooter')) {
-      fetchURL += "&site_footer=";
-    };
+    //if (target.hasAttribute('sitefooter')) {
+    //  fetchURL += "&site_footer=";
+    //};
 
     var timezone = target.getAttribute('timezone');
     if ( timezone ) {
