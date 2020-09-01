@@ -1,8 +1,6 @@
   <table class="ntdata" id="embed_content">
-    {% if site_footer %}
     {# DOM standard says that caption should be the first child of table  #}
-    <caption>Powered by <a href="https://{{topdomain}}">{{topdomain}}</a></caption>
-    {% endif %}
+    <caption>Schedule hosted at <a href="{{url_for("show_seminar", shortname=shortname, _external=_external) }}">researchseminars.org</a></caption>
     <thead>
       <tr>
         {% if past %}
