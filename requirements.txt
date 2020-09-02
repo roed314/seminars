@@ -10,3 +10,4 @@ PyYAML
 flask-login
 bcrypt
 psycopg2-binary
+pytz
