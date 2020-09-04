@@ -758,7 +758,7 @@ def num_columns(labels):
         return 2
     elif mlen > 20:
         return 3
-    elif mlen > 16:
+    elif mlen > 15:
         return 4
     elif mlen > 10:
         return 5
