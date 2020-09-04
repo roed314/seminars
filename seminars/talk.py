@@ -151,8 +151,8 @@ class WebTalk(object):
         return "%s (%s) - %s, %s" % (
             title,
             self.show_speaker(raw=True),
-            self.show_date(),
-            self.show_start_time(self.timezone),
+            self.show_date(self.tz),
+            self.show_start_time(self.tz),
         )
 
     def __eq__(self, other):
