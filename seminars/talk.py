@@ -478,7 +478,7 @@ class WebTalk(object):
                 return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access</b></div>' % link
             elif not user.email_confirmed:
                 return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
-            elif access_control == 4 and not len(user.name) < 2:
+            elif self.access_control == 4 and not len(user.name) < 2:
                 return '<div class="access_button no_link"><a href="%s">Name required</a> for livestream access</b></div>' % link
             else:
                 return show_link(self, user=user, raw=raw)
