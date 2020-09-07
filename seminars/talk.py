@@ -430,7 +430,7 @@ class WebTalk(object):
         if raw:
             return link
         if self.is_starting_soon():
-            return '<div class="access_button is_link view_only"><b> <a href="%s">Watch view-only livestream <i class="play filter-white"></i></a></b></div>' % link
+            return '<div class="access_button is_link view_only"><b> <a href="%s">Watch livestream <i class="play filter-white"></i></a></b></div>' % link
         else:
             return '<div class="access_button is_link">View-only livestream access <a href="%s">available</a></div>' % link
 
@@ -447,7 +447,10 @@ class WebTalk(object):
             if raw:
                 return link if link else ''
             if not link:
-                return '<div class=access_button no_link">Interactive livestream not posted by organizers</div>'
+                if self.stream_link:
+                    return '<div class=access_button no_link">Interactive livestream link not posted by organizers</div>'
+                else:
+                    return '<div class=access_button no_link">Livestream link not posted by organizers</div>'
             if self.access_control == 4 and not self.user_is_registered(user):
                 link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
                 if self.is_starting_soon():
