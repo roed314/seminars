@@ -479,7 +479,7 @@ class WebTalk(object):
                                talkid=self.seminar_ctr,
                                _external=external
                                )
-            if user.is_anonymous:
+            if user.is_anonymous or (access_control == 4 and len(user.name) < 2):
                 link = url_for("user.info",
                                next=url_for("register_for_talk",
                                             seminar_id=self.seminar_id,
@@ -488,7 +488,7 @@ class WebTalk(object):
                 return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access</b></div>' % link
             elif not user.email_confirmed:
                 return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
-            elif not user.name:
+            elif access_control == 4 and not user.name:
                 return '<div class="access_button no_link"><a href="%s">Name required</a> for livestream access</b></div>' % link
             else:
                 return show_link(self, user=user, raw=raw)
