@@ -479,7 +479,7 @@ class WebTalk(object):
                                talkid=self.seminar_ctr,
                                _external=external
                                )
-            if user.is_anonymous or (access_control == 4 and len(user.name) < 2):
+            if user.is_anonymous or (self.access_control == 4 and len(user.name) < 2):
                 link = url_for("user.info",
                                next=url_for("register_for_talk",
                                             seminar_id=self.seminar_id,
