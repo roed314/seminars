@@ -189,7 +189,7 @@ def set_info():
     previous_email = current_user.email
     external_ids = []
     for col, val in request.form.items():
-        if col == "ids":
+        if col == "ids" or col == "next":
             continue
         try:
             # handle external id values separately, these are not named columns, they all go in external_ids
@@ -219,8 +219,7 @@ def set_info():
     if previous_email != current_user.email:
         if send_confirmation_email(current_user.email):
             flask.flash(Markup("New confirmation email has been sent!"))
-    return redirect(url_for(".info"))
-
+    return redirect(request.form.get("next") or url_for(".info"))
 
 @login_page.route("/send_confirmation_email")
 @login_required
