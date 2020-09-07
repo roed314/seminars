@@ -517,7 +517,7 @@ def get_endorsing_link():
             welcome = "Hello" if not target_name else ("Dear " + target_name)
             to_send = """{welcome},<br>
 <p>
-You have been endorsed you on {topdomain} and any content you create will
+You have been endorsed on {topdomain} and any content you create will
 be publicly viewable.
 </p>
 <p>
