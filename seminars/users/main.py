@@ -249,9 +249,13 @@ def housekeeping(fn):
 @login_page.route("/register/", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        name = request.form["name"].strip()
         email = request.form["email"]
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
+        if len(name) < 2:
+            flash_error("Oops, name is too short.  Please enter at least 2 characters.")
+            return make_response(render_template("register.html", title="Register", email=email))            
         try:
             email = validate_email(email)['email']
         except EmailNotValidError as e:
