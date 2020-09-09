@@ -447,12 +447,12 @@ class WebTalk(object):
             if raw:
                 return link if link else ''
             if not link:
-                return '<div class=access_button no_link">Livestream link not yet posted by organizers</div>'
+                if self.stream_link:
+                    return '<div class=access_button no_link">Interactive livestream link not posted by organizers</div>'
+                else:
+                    return '<div class=access_button no_link">Livestream link not posted by organizers</div>'
             if self.access_control == 4 and not self.user_is_registered(user):
-                link = url_for("register_for_talk",
-                               seminar_id=self.seminar_id,
-                               talkid=self.seminar_ctr,
-                               _external=external)
+                link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
                 if self.is_starting_soon():
                     return '<div class="access_button is_link starting_soon"><b> <a href="%s">Instantly register and join livestream <i class="play filter-white"></i> </a></b></div>' % link
                 else:
@@ -474,20 +474,15 @@ class WebTalk(object):
             return show_link(self, user=user, raw=raw)
         elif self.access_control in [3,4]:
             if raw:
-                return url_for("show_talk",
-                               seminar_id=self.seminar_id,
-                               talkid=self.seminar_ctr,
-                               _external=external
-                               )
+                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
+            if user.is_anonymous or (self.access_control == 4 and len(user.name) < 2):
+                link = url_for("user.info", next=url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr), _external=external)
             if user.is_anonymous:
-                link = url_for("user.info",
-                               next=url_for("register_for_talk",
-                                            seminar_id=self.seminar_id,
-                                            talkid=self.seminar_ctr),
-                               _external=external)
                 return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access</b></div>' % link
             elif not user.email_confirmed:
                 return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
+            elif self.access_control == 4 and len(user.name) < 2:
+                return '<div class="access_button no_link"><a href="%s">Name required</a> for livestream access</b></div>' % link
             else:
                 return show_link(self, user=user, raw=raw)
         elif self.access_control == 5:
@@ -498,10 +493,7 @@ class WebTalk(object):
                     return show_link(self, user=user, raw=raw)
             # If there is a view-only link, show that rather than an external registration link
             if raw:
-                return url_for("show_talk",
-                               seminar_id=self.seminar_id,
-                               talkid=self.seminar_ctr,
-                               _external=external)
+                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
             if not self.access_registration:
                 # This should never happen, registration link is required, but just in case...
                 return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</a></div>' % link
@@ -525,10 +517,7 @@ Thank you,
                     talk = self.title,
                     speaker = self.show_speaker(raw=True),
                     series = self.seminar.name,
-                    url = url_for('show_talk',
-                                  seminar_id=self.seminar.shortname,
-                                  talkid=self.seminar_ctr,
-                                  _external=True),
+                    url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr, _external=True),
                     user = user.name)
                 msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
                 link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))
