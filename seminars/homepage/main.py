@@ -852,7 +852,7 @@ def register_for_talk(seminar_id, talkid):
     # where the user will see an appropriate livestream link
     if talk.access_control != 4:
         return redirect(url_for('show_talk',seminar_id=seminar_id,talkid=talkid))
-    if current_user.is_anonymous:
+    if current_user.is_anonymous or len(current_user.name) < 2:
         return redirect(url_for("user.info", next=url_for("register_for_talk", seminar_id=seminar_id, talkid=talkid)))
     if not current_user.email_confirmed:
         flash_error("You need to confirm your email before you can register.")

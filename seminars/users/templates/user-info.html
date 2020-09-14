@@ -101,6 +101,7 @@
   <h2>Edit my details</h2>
 
   <form action="{{ url_for('.set_info') }}" method="post" name="userinfo">
+    <input type="hidden" name="next" value="{{ next }}" />
     <table>
       <tr>
         <td width="160">Created</td>

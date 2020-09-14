@@ -2,7 +2,7 @@
 
 def lookup_series():
     from requests import get
-    url = "https://researchseminars.org/api/0/lookup/series?series_id=MITNT"
+    url = 'https://researchseminars.org/api/0/lookup/series?series_id="MITNT"'
     r = get(url)
     if r.status_code == 200:
         J = r.json()
@@ -12,7 +12,7 @@ def lookup_series():
 
 def lookup_talk():
     from requests import get
-    url = "https://researchseminars.org/api/0/lookup/series?series_id=MathOnlineHostingEvents&series_ctr=1"
+    url = 'https://researchseminars.org/api/0/lookup/series?series_id="MathOnlineHostingEvents"&series_ctr=1'
     r = get(url)
     if r.status_code == 200:
         J = r.json()
@@ -22,7 +22,7 @@ def lookup_talk():
 def search_series_get():
     from requests import get
     # Note that America/Los_Angeles is considered different than US/Pacific
-    url = "https://researchseminars.org/api/0/search/series?timezone=US/Pacific"
+    url = 'https://researchseminars.org/api/0/search/series?timezone="US/Pacific"'
     r = get(url)
     if r.status_code == 200:
         J = r.json()

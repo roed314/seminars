@@ -20,6 +20,11 @@ the <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
 <form name="login" action="{{ url_for('.register') }}" method="POST">
   <table>
     <tr>
+      <td>Name:</td>
+      <td><input name="name" size="30" value="{{ name }}" required /></td>
+      <td colspan="2" class="forminfo"></td></tr>
+    <tr>
+    <tr>
       <td>Email:</td>
       <td><input name="email" size="30" value="{{ email }}" required /></td>
       <td colspan="2" class="forminfo">By default, not visible to others.</td></tr>
