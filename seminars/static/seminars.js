@@ -641,7 +641,7 @@ function copySourceOfId(id) {
 function displayCookieBanner() {
     console.log("showing banner");
     $.notify.addStyle('banner', {
-        html: "<div><div class='message' data-notify-html='message'/><div><button class='yes' data-notify-text='button'></button></div></div></div>",
+        html: "<div><div class='message' data-notify-html='message'/></div><button class='yes' data-notify-text='button'></button></div>",
     });
 
     //listen for click events from this style
