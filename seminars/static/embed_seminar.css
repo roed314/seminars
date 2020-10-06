@@ -198,7 +198,7 @@ div.embedded_schedule .knowl-output {
     margin-right: 10px;
     text-align: left;
     overflow-y: hidden;
-    max-height: 1000px;
+    max-height: 5000px;
     transition: max-height 0.4s ease, border-width 0.4s step-start;
 }
 
