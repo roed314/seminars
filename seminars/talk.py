@@ -6,18 +6,17 @@ from flask_login import current_user
 from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
 from seminars import db
 from seminars.utils import (
-    search_distinct,
-    lucky_distinct,
-    count_distinct,
-    max_distinct,
-    adapt_datetime,
-    make_links,
-    sanitized_table,
-    how_long,
-    topdomain,
-    comma_list,
-    log_error,
     SPEAKER_DELIMITER,
+    adapt_datetime,
+    comma_list,
+    count_distinct,
+    how_long,
+    log_error,
+    lucky_distinct,
+    make_links,
+    max_distinct,
+    sanitized_table,
+    search_distinct,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -152,8 +151,8 @@ class WebTalk(object):
         return "%s (%s) - %s, %s" % (
             title,
             self.show_speaker(raw=True),
-            self.show_date(),
-            self.show_start_time(self.timezone),
+            self.show_date(self.tz),
+            self.show_start_time(self.tz),
         )
 
     def __eq__(self, other):
@@ -359,7 +358,10 @@ class WebTalk(object):
         if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
                 title=self.show_title(),
-                content=Markup.escape(render_template("talk-knowl.html", talk=self, _external=_external, tz=tz)),
+                content=Markup.escape(
+                    render_template("talk-knowl.html", talk=self,
+                                    _external=_external,
+                                    tz=tz)),
             )
         else:
             return r'<a title="{title}" knowl="talk/{seminar_id}/{talkid}" {style}>{title}</a>{rescheduled}'.format(
@@ -432,7 +434,7 @@ class WebTalk(object):
         else:
             return '<div class="access_button is_link">View-only livestream access <a href="%s">available</a></div>' % link
 
-    def show_live_link(self, user=None, raw=False):
+    def show_live_link(self, user=None, raw=False, external=False):
         if user is None: user = current_user
         now = datetime.now(pytz.utc)
         if any([self.deleted, not self.online, self.is_past()]):
@@ -445,9 +447,12 @@ class WebTalk(object):
             if raw:
                 return link if link else ''
             if not link:
-                return '<div class=access_button no_link">Livestream link not yet posted by organizers</div>'
+                if self.stream_link:
+                    return '<div class=access_button no_link">Interactive livestream link not posted by organizers</div>'
+                else:
+                    return '<div class=access_button no_link">Livestream link not posted by organizers</div>'
             if self.access_control == 4 and not self.user_is_registered(user):
-                link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
+                link = url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
                 if self.is_starting_soon():
                     return '<div class="access_button is_link starting_soon"><b> <a href="%s">Instantly register and join livestream <i class="play filter-white"></i> </a></b></div>' % link
                 else:
@@ -455,7 +460,7 @@ class WebTalk(object):
             if self.is_starting_soon():
                 return '<div class="access_button is_link starting_soon"><b> <a href="%s">Join livestream <i class="play filter-white"></i> </a></b></div>' % link
             else:
-                return '<div class="access_button is_link"> Livestream access <a href="%s">available</a></div>' % link
+                return '<div class="access_button is_link">Livestream access <a href="%s">available</a></div>' % link
 
         if self.access_control in [0,2]: # password hint will be shown nearby, not our problem
             return show_link(self, user=user, raw=raw)
@@ -469,12 +474,15 @@ class WebTalk(object):
             return show_link(self, user=user, raw=raw)
         elif self.access_control in [3,4]:
             if raw:
-                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
+                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
+            if user.is_anonymous or (self.access_control == 4 and len(user.name) < 2):
+                link = url_for("user.info", next=url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr), _external=external)
             if user.is_anonymous:
-                link = url_for("user.info", next=url_for("register_for_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr))
                 return '<div class="access_button no_link"><a href="%s">Login required</a> for livestream access</b></div>' % link
             elif not user.email_confirmed:
                 return '<div class="access_button no_link">Please confirm your email address for livestream access</div>'
+            elif self.access_control == 4 and len(user.name) < 2:
+                return '<div class="access_button no_link"><a href="%s">Name required</a> for livestream access</b></div>' % link
             else:
                 return show_link(self, user=user, raw=raw)
         elif self.access_control == 5:
@@ -485,7 +493,7 @@ class WebTalk(object):
                     return show_link(self, user=user, raw=raw)
             # If there is a view-only link, show that rather than an external registration link
             if raw:
-                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
+                return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
             if not self.access_registration:
                 # This should never happen, registration link is required, but just in case...
                 return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</a></div>' % link
@@ -500,7 +508,7 @@ by {speaker}, in the series
 
     {series}
 
-listed at https://{domain}{url}.
+listed at {url}.
 
 Thank you,
 
@@ -509,8 +517,7 @@ Thank you,
                     talk = self.title,
                     speaker = self.show_speaker(raw=True),
                     series = self.seminar.name,
-                    domain = topdomain(),
-                    url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr),
+                    url = url_for('show_talk', seminar_id=self.seminar.shortname, talkid=self.seminar_ctr, _external=True),
                     user = user.name)
                 msg = { "body": body, "subject": "Request to attend %s" % self.seminar.shortname }
                 link = "mailto:%s?%s" % (self.access_registration, urlencode(msg, quote_via=quote))

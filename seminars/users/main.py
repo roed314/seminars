@@ -189,7 +189,7 @@ def set_info():
     previous_email = current_user.email
     external_ids = []
     for col, val in request.form.items():
-        if col == "ids":
+        if col == "ids" or col == "next":
             continue
         try:
             # handle external id values separately, these are not named columns, they all go in external_ids
@@ -207,8 +207,8 @@ def set_info():
             data[col] = process_user_input(val, col, typ)
         except Exception as err:  # should only be ValueError's but let's be cautious
             errmsgs.append(format_input_errmsg(err, val, col))
-    if not data.get("name"):
-        errmsgs.append(format_errmsg('Name cannot be left blank.  See the user behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
+    if len(data.get("name","")) < 2:
+        errmsgs.append(format_errmsg('Name too short.  See the user behavior section of our <a href="' + url_for('policies') + '" target="_blank">policies</a> page for details.'))
     if errmsgs:
         return show_input_errors(errmsgs)
     data["external_ids"] = external_ids
@@ -219,8 +219,7 @@ def set_info():
     if previous_email != current_user.email:
         if send_confirmation_email(current_user.email):
             flask.flash(Markup("New confirmation email has been sent!"))
-    return redirect(url_for(".info"))
-
+    return redirect(request.form.get("next") or url_for(".info"))
 
 @login_page.route("/send_confirmation_email")
 @login_required
@@ -249,9 +248,13 @@ def housekeeping(fn):
 @login_page.route("/register/", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        name = request.form["name"].strip()
         email = request.form["email"]
         pw1 = request.form["password1"]
         pw2 = request.form["password2"]
+        if len(name) < 2:
+            flash_error("Oops, name is too short.  Please enter at least 2 characters.")
+            return make_response(render_template("register.html", title="Register", email=email))            
         try:
             email = validate_email(email)['email']
         except EmailNotValidError as e:
@@ -517,7 +520,7 @@ def get_endorsing_link():
             welcome = "Hello" if not target_name else ("Dear " + target_name)
             to_send = """{welcome},<br>
 <p>
-You have been endorsed you on {topdomain} and any content you create will
+You have been endorsed on {topdomain} and any content you create will
 be publicly viewable.
 </p>
 <p>

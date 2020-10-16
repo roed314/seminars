@@ -121,7 +121,7 @@ def index():
     role = "creator"
     for seminar_id in seminars_search({"owner": ilike_query(current_user.email)}, "shortname", include_deleted=True, include_pending=True):
         if seminar_id not in seminars and seminar_id not in conferences:
-            seminar = WebSeminar(seminar_id, include_deleted=True)  # allow deleted
+            seminar = WebSeminar(seminar_id, include_deleted=True, include_pending=True)  # allow deleted and pending
             pair = (seminar, role)
             if seminar.deleted:
                 deleted_seminars.append(seminar)

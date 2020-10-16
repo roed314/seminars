@@ -232,7 +232,7 @@
     {# attributes non-organizers cannot edit #}
     <input type="hidden" name="hidden" value="{{ 'yes' if talk.hidden else 'no' }}" />
     <input type="hidden" name="room" value="{{ talk.room | blanknone }}" />
-    <input type="hidden" name="room" value="{{ 'yes' if talk.online else 'no' }}" />
+    <input type="hidden" name="online" value="{{ 'yes' if talk.online else 'no' }}" />
     <input type="hidden" name="access_control" value="{{ talk.access_control }}" />
     <input type="hidden" name="access_time" value="{{ talk.access_time }}" />
     <input type="hidden" name="access_hint" value="{{ talk.access_hint | blanknone }}" />

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SAGE_ROOT=/home/sage/sage-9.0
+SAGE_ROOT=/home/sage/sage-root
 SAGE=$SAGE_ROOT/sage
 
 # These two lines copied from ~/common:
