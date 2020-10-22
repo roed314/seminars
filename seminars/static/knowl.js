@@ -128,7 +128,7 @@ function toggle(element) {
 }
 
 function knowl_click_handler(evt) {
-  var knowl = evt.target || evt.srcElement
+  var knowl = evt.currentTarget || evt.srcElement
   var uid = knowl.getAttribute("knowl-uid")
   var output_id = 'knowl-output-' + uid
   var output = document.getElementById(output_id)
@@ -279,7 +279,7 @@ function knowl_click_handler(evt) {
 var knowl_id_counter = 0
 function knowl_handle(evt) {
   evt.preventDefault()
-  var knowl = evt.target || evt.srcElement
+  var knowl = evt.currentTarget || evt.srcElement
   if(!knowl.getAttribute("knowl-uid") ) {
     knowl.setAttribute("knowl-uid", knowl_id_counter)
     knowl_id_counter++
