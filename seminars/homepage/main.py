@@ -676,7 +676,7 @@ def talks_search_api(shortname, projection=1):
         if request.args.get('daterange') == 'past':
             query["start_time"] = {'$lte': get_now()}
         elif request.args.get('daterange') == 'future':
-            query["start_time"] = {'$gte': get_now()}
+            query["end_time"] = {'$gte': get_now()}
         else:
             parse_daterange(request.args, query, time=True)
     elif 'past' in request.args and 'future' in request.args:
@@ -686,7 +686,7 @@ def talks_search_api(shortname, projection=1):
         query["start_time"] = {'$lte': get_now()}
         reverse_sort = True
     elif 'future' in request.args:
-        query["start_time"] = {'$gte': get_now()}
+        query["end_time"] = {'$gte': get_now()}
     talks = list(talks_search(query, projection=3))
     talks.sort(key=lambda talk: talk.start_time, reverse=reverse_sort)
     return talks
@@ -860,9 +860,9 @@ def register_for_talk(seminar_id, talkid):
     if not talk.live_link:
         return abort(404, "Livestream link for talk not found")
     if talk.register_user():
-        flash("You have been registered, enjoy the talk!")
+        flash("You have been registered; enjoy the talk!")
     else:
-        flash("Previous registration confirmed, enjoy the talk!")
+        flash("Previous registration confirmed; enjoy the talk!")
     if talk.is_starting_soon():
         return redirect(talk.live_link)
     else:
