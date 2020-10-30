@@ -633,7 +633,7 @@ def list_institutions():
 @app.route("/seminar/<shortname>")
 def show_seminar(shortname):
     # We need organizers to be able to see seminars with display=False
-    seminar = seminars_lucky({"shortname": shortname})
+    seminar = seminars_lucky({"shortname": shortname}, include_pending=True)
     if seminar is None:
         return abort(404, "Seminar not found")
     if not seminar.visible():
@@ -811,7 +811,7 @@ def ics_talk_file(seminar_id, talkid):
 @app.route("/talk/<seminar_id>/<int:talkid>/")
 def show_talk(seminar_id, talkid):
     token = request.args.get("token", "")  # save the token so user can toggle between view and edit
-    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid})
+    talk = talks_lucky({"seminar_id": seminar_id, "seminar_ctr": talkid}, include_pending=True)
     if talk is None:
         return abort(404, "Talk not found")
     if not talk.visible():
