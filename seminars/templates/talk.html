@@ -7,7 +7,11 @@
   <h3><i>{{ talk.show_speaker() | safe }}</i></h3>
 </div>
 
-{% if not talk.display %}
+{% if talk.by_api %}
+<p>
+  This version of the talk has been created or modified using the API and needs to be approved before being shown publicly.
+</p>
+{% elif not talk.display %}
 <p>
 This talk is part of a seminar that is not publicly listed yet.
 Once the seminar's creator is endorsed, the seminar and its talks will be made public, and the seminar's creator will be able to endorse other users.

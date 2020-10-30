@@ -12,8 +12,11 @@
   <p style="padding: 0x; margin: 0px;"> {{ seminar.show_homepage(newtab=True) | safe }} </p>
 {% endif %}
 
-
-{% if not seminar.display %}
+{% if seminar.by_api %}
+<p>
+  This version of the seminar has been created or modified using the API and needs to be approved before being shown publicly.
+</p>
+{% elif not seminar.display %}
 <p>
 This seminar is not publicly listed, since the creator of the seminar is not yet endorsed.
 Once the creator is endorsed, the seminar and its talks will be made public, and the
