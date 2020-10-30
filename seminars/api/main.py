@@ -351,17 +351,18 @@ def save_series(version=0, user=None):
                         "description": "Error in processing slots",
                         "errors": ["slots must be a list of strings of length at most %s" % MAX_SLOTS]})
     for i, slot in enumerate(slots):
-        day, time = slot.split(None, 1)
         try:
+            day, time = slot.split(None, 1)
             day = short_weekdays.index(day)
         except ValueError:
             raise APIError({"code": "processing_error",
                             "description": "Error in processing slots",
-                            "errors": ["slots must start with a three letter day-of-week"]})
+                            "errors": ["slots must be a three letter day-of-week followed by a time range after a space"]})
         raw_data["weekday%s"%i] = str(day)
         raw_data["time_slot%s"%i] = time
     for i in range(len(slots), MAX_SLOTS):
         raw_data["weekday%s"%i] = raw_data["time_slot%s"%i] = ""
+    raw_data["num_slots"] = len(slots)
 
     if update_organizers:
         # We require specifying the organizers of a new seminar and don't allow updates,
