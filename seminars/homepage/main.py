@@ -536,8 +536,7 @@ def _talks_index(query={},
     info.update(request.args)
     if keywords:
         info["keywords"] = keywords
-    if info["keywords"]:
-        keywords = info["keywords"]
+    keywords = info.get("keywords", "")
     query = dict(query)
     parse_substring(info, query, "keywords",
                     ["title",
