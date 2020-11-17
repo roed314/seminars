@@ -68,7 +68,7 @@ var infScroll = new InfiniteScroll( elem, {
   history: true,
   status: '#page-load-status',
   checkLastPage: '.lasttime',
-  scrollThreshold: 1
+  scrollThreshold: 1000,
 });
 
 function checkVisible(elm) {
@@ -81,6 +81,7 @@ function loadmoreifyouseetheend() {
   if( checkVisible(document.getElementById('footer')) ){
     infScroll.loadNextPage();
   } else {
+    console.log("footer not visible")
   }
 }
 
