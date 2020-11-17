@@ -27,8 +27,6 @@
     {% endfor %}
     {%if last_time %}
       <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}">
-    {%else%}
-      <tr class="talk" style="display: none;" id="nomoretalks">
     {%endif%}
   </tbody>
 </table>
@@ -71,7 +69,7 @@ var infScroll = new InfiniteScroll( elem, {
   history: true,
   status: '#page-load-status',
   debug: true,
-  checkLastPage: '#nomoretalks',
+  checkLastPage: '.lasttime',
 });
 
 function checkVisible(elm) {
