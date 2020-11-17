@@ -57,9 +57,6 @@ function getpath() {
     return base_url + timestamp + '?visible=' + visibletalks();
   }
 }
-function last() {
-  return Array.from(document.getElementsByClassName("lasttime")).pop().getAttribute("timestamp") === null;
-}
 var infScroll = new InfiniteScroll( document.querySelector('#browse-talks'), {
   // options
   path: getpath,
