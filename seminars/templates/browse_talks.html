@@ -60,8 +60,7 @@ function getpath() {
 function last() {
   return Array.from(document.getElementsByClassName("lasttime")).pop().getAttribute("timestamp") === null;
 }
-var elem = document.querySelector('#browse-talks');
-var infScroll = new InfiniteScroll( elem, {
+var infScroll = new InfiniteScroll( document.querySelector('#browse-talks'), {
   // options
   path: getpath,
   append: '.talk',
@@ -72,20 +71,20 @@ var infScroll = new InfiniteScroll( elem, {
   debug: true,
 });
 
-function checkVisible(elm) {
-  var rect = elm.getBoundingClientRect();
-  var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
-  return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
-}
-
-function loadmoreifyouseetheend() {
-  if( checkVisible(document.getElementById('footer')) ){
-    infScroll.loadNextPage();
-  } else {
-    console.log("footer not visible")
-  }
-}
-
+//function checkVisible(elm) {
+//  var rect = elm.getBoundingClientRect();
+//  var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+//  return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+//}
+//
+//function loadmoreifyouseetheend() {
+//  if( checkVisible(document.getElementById('footer')) ){
+//    infScroll.loadNextPage();
+//  } else {
+//    console.log("footer not visible")
+//  }
+//}
+//
 //document.addEventListener('DOMContentLoaded', loadmoreifyouseetheend)
 //infScroll.on('append',loadmoreifyouseetheend)
 
