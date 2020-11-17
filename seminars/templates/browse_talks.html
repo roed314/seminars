@@ -25,7 +25,74 @@
       {% endif %}
     </tr>
     {% endfor %}
+    {%if last_time %}
+      <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}">
+    {%else%}
+      <tr class="talk" style="display: none;" id="nomoretalks">
+    {%endif%}
   </tbody>
 </table>
+<div id="page-load-status" style="text-align: center;">
+  <div class="loader-ellips infinite-scroll-request">
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  </div>
+  <div class="infinite-scroll-last">No more talks</div>
+  <div class="infinite-scroll-error">Error loading more talks</div>
+</div>
 
+
+<script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
+  <script>
+function visibletalks() {
+  return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length;
+}
+function getpath() {
+  var timestamp = Array.from(document.getElementsByClassName("lasttime")).pop().getAttribute("timestamp");
+  var base_url = '/talks/';
+  if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
+    var base_url = '/past_talks/';
+  }
+  if (timestamp != null) {
+    console.log(timestamp)
+    return base_url + timestamp + '?visible=' + visibletalks();
+  }
+}
+function last() {
+  return Array.from(document.getElementsByClassName("lasttime")).pop().getAttribute("timestamp") === null;
+}
+var elem = document.querySelector('#browse-talks');
+var infScroll = new InfiniteScroll( elem, {
+  // options
+  path: getpath,
+  append: '.talk',
+  history: true,
+  status: '#page-load-status',
+  debug: true,
+  checkLastPage: '#nomoretalks',
+});
+
+function checkVisible(elm) {
+  var rect = elm.getBoundingClientRect();
+  var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+  return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+}
+
+function loadmoreifyouseetheend() {
+  if( checkVisible(document.getElementById('page-load-status')) ){
+    console.log("end is visible");
+    infScroll.loadNextPage();
+  } else {
+    console.log("end is not visible");
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadmoreifyouseetheend)
+infScroll.on('append', loadmoreifyouseetheend)
+
+
+
+  </script>
 {% endblock %}

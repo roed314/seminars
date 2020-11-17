@@ -727,7 +727,7 @@ table.ntdata > tbody > tr:nth-of-type(even),
 table.ntdata > thead > tr:nth-of-type(even) {
     background: {{color.table_ntdata_background_cn}};
 }
-table.ntdata > tr.even,
+table.ntdata > tr.evenrow,
 table.ntdata > tbody > tr.evenrow,
 table.ntdata > thead > tr.evenrow {
     background: {{color.table_ntdata_background_cn}} ! important;
@@ -1159,7 +1159,8 @@ body > .debug {
   font-size: 95%;
   /* line-height: 135%; */
   padding-right: 10px;
-  min-height: calc(100vh - 217px);
+  /* FIXME for infinite scroll? */
+  /* min-height: calc(100vh - 217px); */
 }
 
 #content blockquote
@@ -2730,4 +2731,55 @@ input.tgl.disabled + .tgl-btn:after {
 }
 }
 
+/* loader-ellips
+------------------------- */
 
+.loader-ellips {
+  font-size: 20px;
+  position: relative;
+  width: 4em;
+  height: 1em;
+  margin: 10px auto;
+}
+
+.loader-ellips__dot {
+  display: block;
+  width: 1em;
+  height: 1em;
+  border-radius: 0.5em;
+  background: #555;
+  position: absolute;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-iteration-count: infinite;
+}
+
+.loader-ellips__dot:nth-child(1),
+.loader-ellips__dot:nth-child(2) {
+  left: 0;
+}
+.loader-ellips__dot:nth-child(3) { left: 1.5em; }
+.loader-ellips__dot:nth-child(4) { left: 3em; }
+
+@keyframes reveal {
+  from { transform: scale(0.001); }
+  to { transform: scale(1); }
+}
+
+@keyframes slide {
+  to { transform: translateX(1.5em) }
+}
+
+.loader-ellips__dot:nth-child(1) {
+  animation-name: reveal;
+}
+
+.loader-ellips__dot:nth-child(2),
+.loader-ellips__dot:nth-child(3) {
+  animation-name: slide;
+}
+
+.loader-ellips__dot:nth-child(4) {
+  animation-name: reveal;
+  animation-direction: reverse;
+}

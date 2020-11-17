@@ -386,9 +386,39 @@ def index():
         return redirect(url_for_with_args(subsection+"_index", {'keywords': keywords} if keywords else {}))
     return _talks_index(subsection="talks")
 
-@app.route("/talks")
-def talks_index():
-    return _talks_index(subsection="talks")
+
+# we need two functions because of url_for calls
+@app.route("/talks", defaults={'limit': 500, 'timestamp': None})
+@app.route("/talks/<int:timestamp>", defaults={'limit': 500})
+@app.route("/talks/<int:timestamp>/<int:limit>")
+def talks_index(timestamp, limit):
+    return talks_index_main(timestamp, limit, past=False)
+
+@app.route("/past_talks", defaults={'limit': 500, 'timestamp': None})
+@app.route("/past_talks/<int:timestamp>", defaults={'limit': 500})
+@app.route("/past_talks/<int:timestamp>/<int:limit>")
+def past_talks_index(timestamp, limit):
+    return talks_index_main(timestamp, limit, past=True)
+
+def talks_index_main(timestamp, limit, past=False):
+    query = {}
+    if timestamp:
+        query["start_time"] = {"$gt" if not past else "$lt": pytz.UTC.localize(datetime.utcfromtimestamp(timestamp))}
+    visible = 0
+    if request.args.get("visible"):
+        try:
+            visible = int(request.args.get("visible"))
+        except ValueError:
+            visible = 0
+    return _talks_index(query,
+                        subsection="talks" if not past else "past_talks",
+                        past=past,
+                        limit=limit,
+                        asblock=limit is not None,
+                        fullcounters=timestamp is None,
+                        visible_counter=visible)
+
+
 
 @app.route("/conferences")
 def conferences_index():
@@ -398,9 +428,7 @@ def conferences_index():
 def seminar_series_index():
     return _series_index({"is_conference": False}, subsection="seminar_series", conference=False)
 
-@app.route("/past_talks")
-def past_talks_index():
-    return _talks_index(subsection="past_talks", past=True)
+
 
 @app.route("/past_conferences")
 def past_conferences_index():
@@ -429,7 +457,7 @@ def _get_counters(objects):
     langs.sort(key=lambda x: (-language_counts[x[0]], x[1]))
     return {"topic_counts": topic_counts, "language_counts": language_counts}
 
-def _get_row_attributes(objects):
+def _get_row_attributes(objects, visible_counter=0):
     filtered_topics = topic_dag.filtered_topics()
     filter_topic = request.cookies.get('filter_topic', '-1') == '1'
     filtered_languages = set(request.cookies.get('languages', '').split(','))
@@ -466,7 +494,6 @@ def _get_row_attributes(objects):
         return classes, filtered
 
     attributes = []
-    visible_counter = 0
     for obj in objects:
         classes, filtered = filter_classes(obj)
         if isinstance(obj, WebTalk) and obj.blackout_date() and obj.rescheduled():
@@ -490,7 +517,17 @@ def _get_row_attributes(objects):
     return attributes
 
 
-def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
+def _talks_index(query={},
+                 sort=None,
+                 subsection=None,
+                 past=False,
+                 keywords="",
+                 limit=None, # this is an upper bound on desired number of talks, we might filter some extra out
+                 limitbuffer=10, # the number of extra talks that we give ourselves to try to get the limit right
+                 asblock=False, # the number of talks returned is based on star time blocks
+                 fullcounters=True, # doesn't limit the SQL search to get the full counters
+                 visible_counter=0,
+                 ):
     # Eventually want some kind of cutoff on which talks are included.
     search_array = TalkSearchArray(past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
@@ -515,18 +552,62 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
     query["display"] = True
     query["hidden"] = {"$or": [False, {"$exists": False}]}
     query["audience"] = {"$lte" : DEFAULT_AUDIENCE}
+    now  = datetime.now(pytz.UTC)
     if past:
-        query["end_time"] = {"$lt": datetime.now(pytz.UTC)}
+        query["end_time"] = {"$lt": now}
         query["seminar_ctr"] = {"$gt": 0} # don't show rescheduled talks
         if sort is None:
             sort = [("start_time", -1), "seminar_id"]
     else:
-        query["end_time"] = {"$gte": datetime.now(pytz.UTC)}
+        query["end_time"] = {"$gte": now}
         if sort is None:
             sort = ["start_time", "seminar_id"]
-    talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
-    # Filtering on display and hidden isn't sufficient since the seminar could be private
-    talks = [talk for talk in talks if talk.searchable()]
+
+
+    def dosearch(limit=limit, limitbuffer=limitbuffer):
+        if limit and not fullcounters:
+            # we fetch extra talks to account for filtering
+            talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more, limit=limit + limitbuffer))
+        else:
+           talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
+        # Filtering on display and hidden isn't sufficient since the seminar could be private
+        talks =  [talk for talk in talks if talk.searchable()]
+        print(len(talks))
+        return talks
+
+
+    def filteringasblock(talks, retry=0):
+        if not talks:
+            return talks
+        last_time = None
+        # find enough talks such that the next talk has a different starting time
+        for i, t in enumerate(talks):
+            if last_time is None:
+                last_time = t.start_time
+                continue
+            if t.start_time != last_time:
+                if i > limit:
+                    return talks[:i-1]
+                else:
+                    last_time = t.start_time
+        else:
+            if retry and limit:
+                # redo the search without limits
+                talks = dosearch(limit=None)
+                return filteringasblock(talks)
+            return talks
+
+    talks = dosearch()
+    if fullcounters: # do the counting before truncating
+        counters = _get_counters(talks)
+    if asblock:
+        talks = filteringasblock(talks)
+    elif limit:
+        talks = talks[:limit]
+    if not fullcounters: # do counting after truncating
+        counters = _get_counters(talks)
+    print(visible_counter, limit, len(talks))
+
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
     timerange = info.get("timerange", "").strip()
     if timerange:
@@ -551,8 +632,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
                     talkend = adapt_datetime(talk.end_time, tz)
                     t0, t1 = date_and_daytimes_to_times(talkstart.date(), timerange, tz)
                     talk.more = (t0 <= talkstart) and (talkend <= t1)
-    counters = _get_counters(talks)
-    row_attributes = _get_row_attributes(talks)
+    row_attributes = _get_row_attributes(talks, visible_counter)
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse past talks" if past else "Browse talks",
@@ -561,6 +641,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
         subsection=subsection,
         talk_row_attributes=zip(talks, row_attributes),
         past=past,
+        last_time=int(talks[-1].start_time.timestamp()) if talks else None,
         **counters
     ))
     if request.cookies.get("topics", ""):
@@ -570,7 +651,7 @@ def _talks_index(query={}, sort=None, subsection=None, past=False, keywords=""):
         response.set_cookie("topics", "", max_age=0)
     return response
 
-def _series_index(query, sort=None, subsection=None, conference=True, past=False, keywords=""):
+def _series_index(query, sort=None, subsection=None, conference=True, past=False, keywords="", visible_counter=0):
     search_array = SeriesSearchArray(conference=conference, past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
     info.update(request.args)
@@ -597,7 +678,7 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
         results = [unique[key] for key in unique]
     series = series_sorted(results, conference=conference, reverse=past)
     counters = _get_counters(series)
-    row_attributes = _get_row_attributes(series)
+    row_attributes = _get_row_attributes(series, visible_counter)
     response = make_response(render_template(
         "browse_series.html",
         title="Browse " + ("past " if past else "") + ("conferences" if conference else "seminar series"),

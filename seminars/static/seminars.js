@@ -383,7 +383,7 @@ function toggleTopicDAG_core(togid) {
             talks.show();
         }
     }
-    if (topicFiltering() && (to_show.length  + to_show.length) > 0) {
+    if (topicFiltering() && (to_hide.length  + to_show.length) > 0) {
       apply_striping();
     }
 
