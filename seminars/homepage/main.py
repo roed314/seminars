@@ -388,14 +388,15 @@ def index():
 
 
 # we need two functions because of url_for calls
-@app.route("/talks", defaults={'limit': 500, 'timestamp': None})
-@app.route("/talks/<int:timestamp>", defaults={'limit': 500})
+default_limit=100
+@app.route("/talks", defaults={'limit': default_limit, 'timestamp': None})
+@app.route("/talks/<int:timestamp>", defaults={'limit': default_limit})
 @app.route("/talks/<int:timestamp>/<int:limit>")
 def talks_index(timestamp, limit):
     return talks_index_main(timestamp, limit, past=False)
 
-@app.route("/past_talks", defaults={'limit': 500, 'timestamp': None})
-@app.route("/past_talks/<int:timestamp>", defaults={'limit': 500})
+@app.route("/past_talks", defaults={'limit': default_limit, 'timestamp': None})
+@app.route("/past_talks/<int:timestamp>", defaults={'limit': default_limit})
 @app.route("/past_talks/<int:timestamp>/<int:limit>")
 def past_talks_index(timestamp, limit):
     return talks_index_main(timestamp, limit, past=True)
