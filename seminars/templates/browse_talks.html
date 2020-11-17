@@ -61,11 +61,10 @@ var infScroll = new InfiniteScroll( document.querySelector('#browse-talks'), {
   // options
   path: getpath,
   append: '.talk',
-  history: true,
+  history: false,
   status: '#page-load-status',
   checkLastPage: '.lasttime',
   scrollThreshold: 500,
-  debug: true,
   prefill: true,
 });
 
