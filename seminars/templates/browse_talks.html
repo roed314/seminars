@@ -54,7 +54,6 @@ function getpath() {
     var base_url = '/past_talks/';
   }
   if (timestamp != null) {
-    console.log(timestamp)
     return base_url + timestamp + '?visible=' + visibletalks();
   }
 }
@@ -68,7 +67,6 @@ var infScroll = new InfiniteScroll( elem, {
   append: '.talk',
   history: true,
   status: '#page-load-status',
-  debug: true,
   checkLastPage: '.lasttime',
 });
 
@@ -79,16 +77,14 @@ function checkVisible(elm) {
 }
 
 function loadmoreifyouseetheend() {
-  if( checkVisible(document.getElementById('page-load-status')) ){
-    console.log("end is visible");
+  if( checkVisible(document.getElementById('footer')) ){
     infScroll.loadNextPage();
   } else {
-    console.log("end is not visible");
   }
 }
 
 document.addEventListener('DOMContentLoaded', loadmoreifyouseetheend)
-infScroll.on('append', loadmoreifyouseetheend)
+infScroll.on('append',loadmoreifyouseetheend)
 
 
 
