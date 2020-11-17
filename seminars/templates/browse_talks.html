@@ -25,8 +25,8 @@
       {% endif %}
     </tr>
     {% endfor %}
-    {%if last_time %}
-      <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}">
+    {%if last_time and extraargs %}
+      <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}" extraargs="{{extraargs}}">
     {%endif%}
   </tbody>
 </table>
@@ -45,28 +45,34 @@
 <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
   <script>
 function visibletalks() {
-  return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length;
+  return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length % 2;
 }
 function getpath() {
-  var timestamp = Array.from(document.getElementsByClassName("lasttime")).pop().getAttribute("timestamp");
-  var base_url = '/talks/';
-  if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
-    var base_url = '/past_talks/';
-  }
-  if (timestamp != null) {
-    return base_url + timestamp + '?visible=' + visibletalks();
+  var lasttimes = document.getElementsByClassName("lasttime")
+  if( lasttimes.length > 0) {
+    var lastrow = lasttimes[lasttimes.length - 1]
+    var timestamp = lastrow.getAttribute("timestamp");
+    var extraargs = lastrow.getAttribute("extraargs")
+    var base_url = '/talks/';
+    if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
+      var base_url = '/past_talks/';
+    }
+    return base_url + timestamp + '?visible=' + visibletalks() + '&' + extraargs;
   }
 }
-var infScroll = new InfiniteScroll( document.querySelector('#browse-talks'), {
-  // options
-  path: getpath,
-  append: '.talk',
-  history: false,
-  status: '#page-load-status',
-  checkLastPage: '.lasttime',
-  scrollThreshold: 500,
-  prefill: true,
-});
+if( document.getElementsByClassName('lasttime').length > 0 ) {
+  var infScroll = new InfiniteScroll( document.querySelector('#browse-talks'), {
+    // options
+    path: getpath,
+    append: '.talk',
+    history: false,
+    status: '#page-load-status',
+    checkLastPage: '.lasttime',
+    scrollThreshold: 500,
+    prefill: true,
+    debug: true,
+  });
+}
 
 //function checkVisible(elm) {
 //  var rect = elm.getBoundingClientRect();

@@ -22,6 +22,7 @@ from flask_login import current_user
 import json
 from datetime import datetime, timedelta
 import pytz
+from urllib.parse import urlencode
 from collections import Counter
 from dateutil.parser import parse
 from lmfdb.utils import (
@@ -535,6 +536,8 @@ def _talks_index(query={},
     info.update(request.args)
     if keywords:
         info["keywords"] = keywords
+    if info["keywords"]:
+        keywords = info["keywords"]
     query = dict(query)
     parse_substring(info, query, "keywords",
                     ["title",
@@ -573,7 +576,6 @@ def _talks_index(query={},
            talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
         # Filtering on display and hidden isn't sufficient since the seminar could be private
         talks =  [talk for talk in talks if talk.searchable()]
-        print(len(talks))
         return talks
 
 
@@ -607,7 +609,6 @@ def _talks_index(query={},
         talks = talks[:limit]
     if not fullcounters: # do counting after truncating
         counters = _get_counters(talks)
-    print(visible_counter, limit, len(talks))
 
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
     timerange = info.get("timerange", "").strip()
@@ -643,6 +644,7 @@ def _talks_index(query={},
         talk_row_attributes=zip(talks, row_attributes),
         past=past,
         last_time=int(talks[-1].start_time.timestamp()) if talks else None,
+        extraargs=urlencode({'keywords': keywords}),
         **counters
     ))
     if request.cookies.get("topics", ""):
