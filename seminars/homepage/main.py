@@ -378,6 +378,7 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
+default_limit=500
 @app.route("/", methods=["GET"])
 def index():
     if request.args.get("submit"):
@@ -385,11 +386,14 @@ def index():
         subsection=x[0]
         keywords = ' '.join(x[1:])
         return redirect(url_for_with_args(subsection+"_index", {'keywords': keywords} if keywords else {}))
-    return _talks_index(subsection="talks")
+    return _talks_index(subsection="talks",
+                        limit=default_limit,
+                        asblock=True,
+                        getcounters=True,
+                        fully_filtered=True)
 
 
 # we need two functions because of url_for calls
-default_limit=500
 @app.route("/talks", defaults={'limit': default_limit, 'timestamp': None})
 @app.route("/talks/<int:timestamp>", defaults={'limit': default_limit})
 @app.route("/talks/<int:timestamp>/<int:limit>")
