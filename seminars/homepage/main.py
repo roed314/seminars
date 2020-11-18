@@ -591,11 +591,11 @@ def _talks_index(query={},
             talks = talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more, limit=limit + limitbuffer)
         else:
             talks = talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more)
-        print("talks_search: %.2fs" % walltime(w))
+        db.logger.info("talks_search: %.2fs" % walltime(w))
         # Filtering on display and hidden isn't sufficient since the seminar could be private
         w = walltime()
         talks =  [talk for talk in talks if talk.searchable()]
-        print("searchable filter: %.2fs" % walltime(w))
+        db.logger.info("searchable filter: %.2fs" % walltime(w))
         return talks
 
 
@@ -624,18 +624,18 @@ def _talks_index(query={},
     if getcounters: # do the counting before truncating
         w = walltime()
         counters = _get_counters(talks)
-        print("_get_counters(talks): %.2fs" % walltime(w))
+        db.logger.info("_get_counters(talks): %.2fs" % walltime(w))
         # and maybe disable filtered mode if appropriate?
     if asblock:
         w = walltime()
         talks = filteringasblock(talks)
-        print("filteringasblock: %.2fs" % walltime(w))
+        db.logger.info("filteringasblock: %.2fs" % walltime(w))
     elif limit:
         talks = talks[:limit]
     if not getcounters: # populate counters with zeros
         w = walltime()
         counters = _get_counters([])
-        print("_get_counters([]): %.2fs" % walltime(w))
+        db.logger.info("_get_counters([]): %.2fs" % walltime(w))
 
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
     timerange = info.get("timerange", "").strip()
@@ -666,7 +666,7 @@ def _talks_index(query={},
         row_attributes, talks = _get_row_attributes(talks, visible_counter, fully_filtered)
     else:
         row_attributes = _get_row_attributes(talks, visible_counter)
-    print("_get_row_attributes(]): %.2fs" % walltime(w))
+    db.logger.info("_get_row_attributes(]): %.2fs" % walltime(w))
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse past talks" if past else "Browse talks",
