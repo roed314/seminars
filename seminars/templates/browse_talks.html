@@ -1,47 +1,6 @@
 {% extends 'browse.html' %}
 
 {% block browsing %}
-<input type="hidden" name="past" value="{{ past }}">
-
-<div id="timezone-table" style="padding: 10px 4px 0px 4px;">
-  Times in {{ user.show_timezone("browse") }}
-</div>
-
-<table id="browse-talks" class="talk-table ntdata">
-  <thead>
-    {% if past %}
-    <tr> {{ talks_header(include_content=True, include_subscribe=False) | safe }} </tr>
-    {% else %}
-    <tr> {{ talks_header()  | safe }} </tr>
-    {% endif %}
-  </thead>
-  <tbody>
-    {% for talk, row_attributes in talk_row_attributes %}
-    <tr {{ row_attributes | safe }} >
-      {% if past %}
-      {{ talk.oneline(include_content=True, include_subscribe=False) | safe }}
-      {% else %}
-      {{ talk.oneline() | safe }}
-      {% endif %}
-    </tr>
-    {% endfor %}
-    {%if last_time and extraargs %}
-    <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}" extraargs="{{extraargs}}">
-    {%endif%}
-  </tbody>
-</table>
-<div id="page-load-status" style="text-align: center;" >
-  <div class="loader-ellips infinite-scroll-request">
-  <span class="loader-ellips__dot"></span>
-  <span class="loader-ellips__dot"></span>
-  <span class="loader-ellips__dot"></span>
-  <span class="loader-ellips__dot"></span>
-  </div>
-  <div class="infinite-scroll-last" style="display: none;">No more talks</div>
-  <div class="infinite-scroll-error" style="display: none;">Error loading more talks</div>
-</div>
-
-
 <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
 <script>
   var infScroll = null;
@@ -120,21 +79,49 @@
     setTimeout(() => init_infScroll(), 50);
   })
 })
-//function checkVisible(elm) {
-//  var rect = elm.getBoundingClientRect();
-//  var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
-//  return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
-//}
-//
-//function loadmoreifyouseetheend() {
-//  if( checkVisible(document.getElementById('footer')) ){
-//    infScroll.loadNextPage();
-//  } else {
-//    console.log("footer not visible")
-//  }
-//}
-//
-//document.addEventListener('DOMContentLoaded', loadmoreifyouseetheend)
-//infScroll.on('append',loadmoreifyouseetheend)
-  </script>
+</script>
+
+
+<input type="hidden" name="past" value="{{ past }}">
+
+<div id="timezone-table" style="padding: 10px 4px 0px 4px;">
+  Times in {{ user.show_timezone("browse") }}
+</div>
+
+<table id="browse-talks" class="talk-table ntdata">
+  <thead>
+    {% if past %}
+    <tr> {{ talks_header(include_content=True, include_subscribe=False) | safe }} </tr>
+    {% else %}
+    <tr> {{ talks_header()  | safe }} </tr>
+    {% endif %}
+  </thead>
+  <tbody>
+    {% for talk, row_attributes in talk_row_attributes %}
+    <tr {{ row_attributes | safe }} >
+      {% if past %}
+      {{ talk.oneline(include_content=True, include_subscribe=False) | safe }}
+      {% else %}
+      {{ talk.oneline() | safe }}
+      {% endif %}
+    </tr>
+    {% endfor %}
+    {%if last_time and extraargs %}
+    <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}" extraargs="{{extraargs}}">
+    {%endif%}
+  </tbody>
+</table>
+<div id="page-load-status" style="text-align: center;" >
+  <div class="loader-ellips infinite-scroll-request">
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  </div>
+  <div class="infinite-scroll-last" style="display: none;">No more talks</div>
+  <div class="infinite-scroll-error" style="display: none;">Error loading more talks</div>
+</div>
+
+
+
 {% endblock %}
