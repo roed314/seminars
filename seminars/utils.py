@@ -387,6 +387,8 @@ def search_distinct(
     include_pending=False,
     more=False,
 ):
+    from sage.all import walltime
+    w0 = walltime()
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
 
@@ -432,10 +434,11 @@ def search_distinct(
     else:
         cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
     fselecter = selecter.format(cols, all_cols, tbl, qstr)
+    w = walltime()
     cur = table._execute(
         fselecter,
         values,
-        buffered=(limit is None),
+        buffered=False,
         slow_note=(
             table.search_table,
             "analyze",
@@ -445,7 +448,10 @@ def search_distinct(
             offset,
         ),
     )
+    print("\t\ttable._execute: %.3fs" % walltime(w))
+    w = walltime()
     results = iterator(cur, search_cols, extra_cols, projection)
+    print("\t\titerator: %.3fs" % walltime(w))
     if info is not None:
         # caller is requesting count data
         nres = count_distinct(table, counter, query)
@@ -476,7 +482,11 @@ def search_distinct(
         info["count"] = limit
         info["start"] = offset
         info["exact_count"] = True
-    return list(results)
+    w = walltime()
+    res = list(results)
+    print('\t\tlist: %.3fs  avg %.2fms' % (walltime(w), 1000*walltime(w)/len(res)))
+    print('\tsearch_distinct: %.3fs' % walltime(w0))
+    return res
 
 
 def lucky_distinct(
