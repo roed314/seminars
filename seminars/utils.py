@@ -484,7 +484,7 @@ def search_distinct(
         info["exact_count"] = True
     w = walltime()
     res = list(results)
-    db.logger.info('\t\tlist: %.3fs  avg %.2fms' % (walltime(w), 1000*walltime(w)/len(res)))
+    db.logger.info('\t\tlist: %.3fs   %.2fms' % (walltime(w), 0 if len(res) == 0 else 1000*walltime(w)/len(res)))
     db.logger.info('\tsearch_distinct: %.3fs' % walltime(w0))
     return res
 
