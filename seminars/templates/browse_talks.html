@@ -13,7 +13,7 @@
     if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
       var base_url = '/past_talks';
     }
-    var filteredargs='filtered=' + (0 + filtered_mode);
+    var filteredargs = 'filtered=' + (0 + filtered_mode);
     var lasttimes = document.querySelectorAll('table#browse-talks > tbody > tr.lasttime')
     if( lasttimes.length > 0) {
       var lastrow = lasttimes[lasttimes.length - 1]
