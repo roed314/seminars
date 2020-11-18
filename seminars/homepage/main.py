@@ -583,7 +583,7 @@ def _talks_index(query={},
             # we fetch extra talks to account for filtering
             talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more, limit=limit + limitbuffer))
         else:
-           talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
+            talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more))
         # Filtering on display and hidden isn't sufficient since the seminar could be private
         talks =  [talk for talk in talks if talk.searchable()]
         return talks
