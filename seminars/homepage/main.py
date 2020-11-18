@@ -415,7 +415,7 @@ def talks_index_main(timestamp, limit, past=False):
     fully_filtered = int(request.args.get("filtered", "1"))
     if fully_filtered:
         limit *= 2
-    getcounters=(timestamp is None) and not request.args.get("visible", "1")
+    getcounters=(timestamp is None) and not request.args.get("visible", "")
     return _talks_index(query,
                         subsection="talks" if not past else "past_talks",
                         past=past,
