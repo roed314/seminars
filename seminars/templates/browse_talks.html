@@ -26,54 +26,99 @@
     </tr>
     {% endfor %}
     {%if last_time and extraargs %}
-      <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}" extraargs="{{extraargs}}">
+    <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}" extraargs="{{extraargs}}">
     {%endif%}
   </tbody>
 </table>
-<div id="page-load-status" style="text-align: center; display: none;">
+<div id="page-load-status" style="text-align: center;" >
   <div class="loader-ellips infinite-scroll-request">
   <span class="loader-ellips__dot"></span>
   <span class="loader-ellips__dot"></span>
   <span class="loader-ellips__dot"></span>
   <span class="loader-ellips__dot"></span>
   </div>
-  <div class="infinite-scroll-last">No more talks</div>
-  <div class="infinite-scroll-error">Error loading more talks</div>
+  <div class="infinite-scroll-last" style="display: none;">No more talks</div>
+  <div class="infinite-scroll-error" style="display: none;">Error loading more talks</div>
 </div>
 
 
 <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
-  <script>
-function visibletalks() {
-  return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length % 2;
-}
-function getpath() {
-  var lasttimes = document.getElementsByClassName("lasttime")
-  if( lasttimes.length > 0) {
-    var lastrow = lasttimes[lasttimes.length - 1]
-    var timestamp = lastrow.getAttribute("timestamp");
-    var extraargs = lastrow.getAttribute("extraargs")
-    var base_url = '/talks/';
-    if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
-      var base_url = '/past_talks/';
-    }
-    return base_url + timestamp + '?visible=' + visibletalks() + '&' + extraargs;
+<script>
+  var infScroll = null;
+  document.addEventListener('DOMContentLoaded', function () {
+  function visibletalks() {
+    return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length % 2;
   }
-}
-if( document.getElementsByClassName('lasttime').length > 0 ) {
-  var infScroll = new InfiniteScroll( document.querySelector('#browse-talks'), {
-    // options
-    path: getpath,
-    append: '.talk',
-    history: false,
-    status: '#page-load-status',
-    checkLastPage: '.lasttime',
-    scrollThreshold: 500,
-    prefill: true,
-    //debug: true,
-  });
-}
+  function getpath() {
+    var base_url = '/talks';
+    if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
+      var base_url = '/past_talks';
+    }
+    var filteredargs='filtered=' + (0 + filtered_mode);
+    var lasttimes = document.querySelectorAll('table#browse-talks > tbody > tr.lasttime')
+    if( lasttimes.length > 0) {
+      var lastrow = lasttimes[lasttimes.length - 1]
+      var timestamp = lastrow.getAttribute("timestamp");
+      var extraargs = lastrow.getAttribute("extraargs")
+      if(extraargs) {
+        var extraargs = extraargs + '&' + filteredargs;
+      } else {
+        var extraargs = filteredargs;
+      }
+      if(timestamp) {
+        return base_url + "/" + timestamp + '?visible=' + visibletalks() + '&' + extraargs;
+      } else {
+        return base_url + '?' + extraargs;
+      }
+    }
+  }
+  function init_infScroll() {
+    console.log('init_infScroll')
+    console.log(document.querySelectorAll('table#browse-talks > tbody > tr.lasttime'))
+    if( document.querySelectorAll('table#browse-talks > tbody > tr.lasttime').length > 0 ) {
+      infScroll = new InfiniteScroll( document.querySelector('table#browse-talks > tbody'), {
+        // options
+        path: getpath,
+        append: '.talk',
+        history: false,
+        status: '#page-load-status',
+        checkLastPage: '.lasttime',
+        scrollThreshold: 500,
+        prefill: true,
+        debug: true,
+      });
+    }
+  }
+  init_infScroll();
 
+
+
+  document.addEventListener('filtered_mode_disabled', function () {
+    console.log("filtered_mode_disabled");
+    if( infScroll != null) {
+      infScroll.destroy()
+    }
+    var lasttimes = document.querySelectorAll('table#browse-talks > tbody > tr.lasttime');
+    var extraargs="";
+    if( lasttimes.length > 0) {
+      var extraargs = lasttimes[lasttimes.length - 1].getAttribute("extraargs")
+      console.log(lasttimes[lasttimes.length - 1])
+    }
+    var tbody = document.querySelector("table#browse-talks > tbody");
+    Array.from(tbody.children).forEach(row => row.remove());
+    //$('table#browse-talks > tbody > tr').remove();
+    tr = tbody.insertRow();
+    tr.classList.add("talk");
+    tr.classList.add("lasttime");
+    tr.classList.add("init");
+    tr.setAttribute("style", "display: none;");
+    tr.setAttribute("extraargs", extraargs);
+    //var old_tbody = document.querySelector("table#browse-talks > tbody");
+    //old_tbody.parentNode.replaceChild(tbody, old_tbody);
+    document.querySelector('#page-load-status > div.infinite-scroll-request').setAttribute('style', 'display: block;');
+    setTimeout(() => init_infScroll(), 50);
+  })
+})
 //function checkVisible(elm) {
 //  var rect = elm.getBoundingClientRect();
 //  var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
@@ -90,8 +135,5 @@ if( document.getElementsByClassName('lasttime').length > 0 ) {
 //
 //document.addEventListener('DOMContentLoaded', loadmoreifyouseetheend)
 //infScroll.on('append',loadmoreifyouseetheend)
-
-
-
   </script>
 {% endblock %}

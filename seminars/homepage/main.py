@@ -412,13 +412,17 @@ def talks_index_main(timestamp, limit, past=False):
             visible = int(request.args.get("visible"))
         except ValueError:
             visible = 0
+    fully_filtered = int(request.args.get("filtered", "1"))
+    if fully_filtered:
+        limit *= 2
     return _talks_index(query,
                         subsection="talks" if not past else "past_talks",
                         past=past,
                         limit=limit,
                         asblock=limit is not None,
                         fullcounters=timestamp is None,
-                        visible_counter=visible)
+                        visible_counter=visible,
+                        fully_filtered=fully_filtered)
 
 
 
@@ -459,7 +463,7 @@ def _get_counters(objects):
     langs.sort(key=lambda x: (-language_counts[x[0]], x[1]))
     return {"topic_counts": topic_counts, "language_counts": language_counts}
 
-def _get_row_attributes(objects, visible_counter=0):
+def _get_row_attributes(objects, visible_counter=0, fully_filtered=False):
     filtered_topics = topic_dag.filtered_topics()
     filter_topic = request.cookies.get('filter_topic', '-1') == '1'
     filtered_languages = set(request.cookies.get('languages', '').split(','))
@@ -496,12 +500,15 @@ def _get_row_attributes(objects, visible_counter=0):
         return classes, filtered
 
     attributes = []
+    new_objects = []
     for obj in objects:
         classes, filtered = filter_classes(obj)
         if isinstance(obj, WebTalk) and obj.blackout_date() and obj.rescheduled():
             classes.append("blm")
         style = ""
         if filtered:
+            if fully_filtered:
+                continue
             style = ' style="display: none;"'
         else:
             if visible_counter % 2: # odd
@@ -510,12 +517,15 @@ def _get_row_attributes(objects, visible_counter=0):
             else:
                 classes.append("evenrow")
                 #style = "background: none;"
+            if fully_filtered:
+                new_objects.append(obj)
             visible_counter += 1
         row_attributes = 'class="{classes}"{style}'.format(
             classes=' '.join(classes),
             style=style)
         attributes.append(row_attributes)
-
+    if fully_filtered:
+        return attributes, new_objects
     return attributes
 
 
@@ -529,6 +539,7 @@ def _talks_index(query={},
                  asblock=False, # the number of talks returned is based on star time blocks
                  fullcounters=True, # doesn't limit the SQL search to get the full counters
                  visible_counter=0,
+                 fully_filtered=True,
                  ):
     # Eventually want some kind of cutoff on which talks are included.
     search_array = TalkSearchArray(past=past)
@@ -633,7 +644,10 @@ def _talks_index(query={},
                     talkend = adapt_datetime(talk.end_time, tz)
                     t0, t1 = date_and_daytimes_to_times(talkstart.date(), timerange, tz)
                     talk.more = (t0 <= talkstart) and (talkend <= t1)
-    row_attributes = _get_row_attributes(talks, visible_counter)
+    if fully_filtered:
+        row_attributes, talks = _get_row_attributes(talks, visible_counter, fully_filtered)
+    else:
+        row_attributes = _get_row_attributes(talks, visible_counter)
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse past talks" if past else "Browse talks",

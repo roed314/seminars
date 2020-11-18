@@ -141,6 +141,8 @@ function getTopicCookieWithValue(value) {
     return with_value;
 }
 */
+
+
 function _val(id) {
     var toggle = $('#'+id);
     return parseInt(toggle.attr('data-chosen'));
@@ -269,8 +271,31 @@ function pushForCookies() {
         disableMoreButton();
     }
 }
+// maybe moved up earlier
+var filtered_mode = true;
+document.addEventListener('DOMContentLoaded', function () {
+  if( //no filter is enabled
+    ! [topicFiltering(), languageFiltering(), calFiltering(), moreFiltering()].reduce(
+      (acc, val) => (acc || val))) {
+    filtered_mode = false;
+  }
+})
+const filtered_mode_disabled = new Event('filtered_mode_disabled');
+
+// if filtered_mode is enabled desables it before trying to add new talks
+// this triggers repopulating the table
+function disableFilteredModeQ() {
+  if( filtered_mode ) {
+    filtered_mode = false;
+    document.dispatchEvent(filtered_mode_disabled);
+    return true;
+  }
+  return false;
+}
+
 
 function toggleLanguage_core(id) {
+    console.log("toggleLanguage_core", id);
     var toggleval = _val(id);
     console.log(id, toggleval);
     var lang = id.substring(9); // langlink-*
@@ -290,8 +315,8 @@ function toggleLanguage_core(id) {
             talks = talksToShow(talks);
             talks.show();
             apply_striping();
-        }
-    }
+      }
+  }
 }
 
 function toggleLanguage(togid) {
@@ -301,33 +326,35 @@ function toggleLanguage(togid) {
 }
 
 
+
 function toggleTopicDAG_core(togid) {
-    var previous = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
-    var topic = topicFromTriple(togid);
-    var toggleval = _val(togid);
-    setTopicCookie(topic, toggleval);
-    // Update other toggles in other parts of the tree that have the same id
-    setOtherToggles(topic, toggleval);
-    if (toggleval == 0) {
-        $("#" + togid + "-pane " + "input.tgl.sub_" + topic).removeClass("disabled");
-        $("#" + togid + "-pane " + "a.sub_"+topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).removeClass("not_toggleable");
-        var pane = $("#"+togid+"-pane");
-        var is_visible = pane.is(":visible");
-        if (!is_visible) {
-            var triple = togid.split("--");
-            toggleTopicView(triple[0], triple[1], triple[2]);
-        }
-      /*
-        // Need to show rows corresponding to sub-topics.
-        // We can't just use $("tgl.sub_"+topic).each(),
-        // since some 1s may be under -1s.
-        var blocking_toggles = [];
-        $('input[data-chosen="-1"].tgl3way.sub_'+topic).each(function() {
-            blocking_toggles.push(topicFromTriple(this.id));
-        });
-        console.log("blocking_toggles", blocking_toggles);
-        var show_selector = $('input[data-chosen="1"].sub_'+topic);
-        for (let i=0; i<blocking_toggles.length; i++) {
+  console.log("toggleTopicDAG_core", togid);
+  var previous = $('input.sub_topic:not(.disabled)[data-chosen="1"]').toArray().map( elt => $(elt).attr("name") );
+  var topic = topicFromTriple(togid);
+  var toggleval = _val(togid);
+  setTopicCookie(topic, toggleval);
+  // Update other toggles in other parts of the tree that have the same id
+  setOtherToggles(topic, toggleval);
+  if (toggleval == 0) {
+      $("#" + togid + "-pane " + "input.tgl.sub_" + topic).removeClass("disabled");
+      $("#" + togid + "-pane " + "a.sub_"+topic + ", " + "#" + togid + "-pane " + "span.sub_"+topic).removeClass("not_toggleable");
+      var pane = $("#"+togid+"-pane");
+      var is_visible = pane.is(":visible");
+      if (!is_visible) {
+          var triple = togid.split("--");
+          toggleTopicView(triple[0], triple[1], triple[2]);
+      }
+    /*
+      // Need to show rows corresponding to sub-topics.
+      // We can't just use $("tgl.sub_"+topic).each(),
+      // since some 1s may be under -1s.
+      var blocking_toggles = [];
+      $('input[data-chosen="-1"].tgl3way.sub_'+topic).each(function() {
+          blocking_toggles.push(topicFromTriple(this.id));
+      });
+      console.log("blocking_toggles", blocking_toggles);
+      var show_selector = $('input[data-chosen="1"].sub_'+topic);
+      for (let i=0; i<blocking_toggles.length; i++) {
             show_selector = show_selector.not(".sub_"+blocking_toggles[i]);
         }
         show_selector.each(function() {
@@ -353,10 +380,10 @@ function toggleTopicDAG_core(togid) {
     // if previous = [math, math-ph], and now = [math-ph],
     // if we take the difference then to_show = []
     var to_show = now; //  now.filter(x => !previous.includes(x) );
-    console.log("now ", now);
-    console.log("previous ", previous);
-    console.log("to_show ", to_show);
-    console.log("to_hide ", to_hide);
+    console.log("toggleTopicDAG_core", "now ", now);
+    console.log("toggleTopicDAG_core", "previous ", previous);
+    console.log("toggleTopicDAG_core", "to_show ", to_show);
+    console.log("toggleTopicDAG_core", "to_hide ", to_hide);
     if (to_hide.length > 0) {
         var talks = $();
         for (let i=0; i < to_hide.length; i++) {
@@ -437,55 +464,63 @@ function toggleTopicView(pid, cid, did) {
 
 var filter_menus = ['topic', 'language', 'more'];
 var filter_classes = [['.topic-filtered', topicFiltering], ['.language-filtered', languageFiltering], ['.calendar-filtered', calFiltering], ['.more-filtered', moreFiltering]];
+
+
+
 function talksToShow(talks) {
+  // we are about to show some talks, disable filtered mode if necessary
+  if( disableFilteredModeQ() ) {
+    return talks.not('talk');
+  } else {
     for (i=0; i<filter_classes.length; i++) {
-        if (filter_classes[i][1]()) {
-            talks = talks.not(filter_classes[i][0]);
-            console.log("talksToShow", filter_classes[i][0], talks.length);
-        }
+      if (filter_classes[i][1]()) {
+        talks = talks.not(filter_classes[i][0]);
+        console.log("talksToShow", filter_classes[i][0], talks.length);
+      }
     }
     return talks;
+  }
 }
 function filterMenuId(ftype) {
-    if (ftype == "topic") {
-        return "#root--topic--0-pane";
-    } else {
-        return "#"+ftype+"-filter-menu";
-    }
+  if (ftype == "topic") {
+    return "#root--topic--0-pane";
+  } else {
+    return "#"+ftype+"-filter-menu";
+  }
 }
 function filterMenuVisible(ftype) {
-    return $(filterMenuId(ftype)).is(":visible");
+  return $(filterMenuId(ftype)).is(":visible");
 }
 function toggleFilters_core(id, on_menu_open=false) {
-    console.log("filters", id);
-    if (id !== null) {
-        var is_enabled = (_val(id) == 1);
-        var ftype = id;
-        setCookie("filter_" + ftype, is_enabled ? "1" : "-1");
-        if (!on_menu_open && is_enabled && !filterMenuVisible(ftype) && !getCookie(ftype+"s")) {
-            toggleFilterView(ftype+"-filter-btn");
-        }
-        if (ftype == "more") {
-            if (is_enabled && moreHasChanges()) {
-                return reloadForCookies();
-            }
-            if (is_enabled) {
-                disableMoreButton();
-            } else {
-                enableMoreButton();
-            }
-        }
+  console.log("toggleFilters_core", "filters", id);
+  if (id !== null) {
+    var is_enabled = (_val(id) == 1);
+    var ftype = id;
+    setCookie("filter_" + ftype, is_enabled ? "1" : "-1");
+    if (!on_menu_open && is_enabled && !filterMenuVisible(ftype) && !getCookie(ftype+"s")) {
+      toggleFilterView(ftype+"-filter-btn");
     }
-    var talks = $('.talk');
-    talks.hide();
-    talks = talksToShow(talks);
-    talks.show();
-    apply_striping();
+    if (ftype == "more") {
+      if (is_enabled && moreHasChanges()) {
+        return reloadForCookies();
+      }
+      if (is_enabled) {
+        disableMoreButton();
+      } else {
+        enableMoreButton();
+      }
+    }
+  }
+  var talks = $('.talk');
+  talks.hide();
+  talks = talksToShow(talks);
+  talks.show();
+  apply_striping();
 }
 function toggleFilters(id, on_menu_open=false) {
   var copy_id = id;
   var copy_on_menu_open = on_menu_open;
-  setTimeout( () => toggleFilters_core(copy_id, copy_on_menu_open), 1);
+  setTimeout( () => toggleFilters_core(copy_id, copy_on_menu_open), 1)
 }
 
 function shouldUnsetFilterToggle(ftype) {
@@ -498,7 +533,7 @@ function shouldUnsetFilterToggle(ftype) {
 }
 function toggleFilterView(id) {
     // If this filter is not enabled, we enable it
-    console.log("filterview", id);
+    console.log("toggleFilterView", id);
     var ftype = id.split("-")[0];
     console.log("ftype", ftype);
     var is_enabled = (getCookie("filter_"+ftype) == "1");
