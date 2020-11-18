@@ -389,7 +389,7 @@ def index():
 
 
 # we need two functions because of url_for calls
-default_limit=1000
+default_limit=500
 @app.route("/talks", defaults={'limit': default_limit, 'timestamp': None})
 @app.route("/talks/<int:timestamp>", defaults={'limit': default_limit})
 @app.route("/talks/<int:timestamp>/<int:limit>")
