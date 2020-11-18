@@ -407,7 +407,6 @@ def search_distinct(
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     search_cols, extra_cols = table._parse_projection(projection)
     tbl = IdentifierWrapper(table.search_table)
-    nres = count_distinct(table, counter, query)
     if limit is None:
         qstr, values = table._build_query(query, sort=sort)
     else:
@@ -447,12 +446,12 @@ def search_distinct(
         ),
     )
     results = iterator(cur, search_cols, extra_cols, projection)
-    if limit is None:
-        if info is not None:
-            # caller is requesting count data
-            info["number"] = nres
-        return results
     if info is not None:
+        # caller is requesting count data
+        nres = count_distinct(table, counter, query)
+        if limit is None:
+            info["number"] = nres
+            return results
         if offset >= nres > 0:
             # We're passing in an info dictionary, so this is a front end query,
             # and the user has requested a start location larger than the number
