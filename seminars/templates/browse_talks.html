@@ -65,10 +65,11 @@
       } else {
         var extraargs = filteredargs;
       }
+      var args = '?visible=' + visibletalks() + '&' + extraargs
       if(timestamp) {
-        return base_url + "/" + timestamp + '?visible=' + visibletalks() + '&' + extraargs;
+        return base_url + "/" + timestamp + args;
       } else {
-        return base_url + '?' + extraargs;
+        return base_url + args;
       }
     }
   }
@@ -99,7 +100,7 @@
       infScroll.destroy()
     }
     var lasttimes = document.querySelectorAll('table#browse-talks > tbody > tr.lasttime');
-    var extraargs="counters=0&";
+    var extraargs="";
     if( lasttimes.length > 0) {
       var extraargs = lasttimes[lasttimes.length - 1].getAttribute("extraargs")
       console.log(lasttimes[lasttimes.length - 1])
