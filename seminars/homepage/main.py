@@ -378,7 +378,7 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
-default_limit=100
+default_limit=500
 @app.route("/", methods=["GET"])
 def index():
     if request.args.get("submit"):
