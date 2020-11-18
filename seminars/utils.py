@@ -448,10 +448,10 @@ def search_distinct(
             offset,
         ),
     )
-    print("\t\ttable._execute: %.3fs" % walltime(w))
+    db.logger.info("\t\ttable._execute: %.3fs" % walltime(w))
     w = walltime()
     results = iterator(cur, search_cols, extra_cols, projection)
-    print("\t\titerator: %.3fs" % walltime(w))
+    db.logger.info("\t\titerator: %.3fs" % walltime(w))
     if info is not None:
         # caller is requesting count data
         nres = count_distinct(table, counter, query)
@@ -484,8 +484,8 @@ def search_distinct(
         info["exact_count"] = True
     w = walltime()
     res = list(results)
-    print('\t\tlist: %.3fs  avg %.2fms' % (walltime(w), 1000*walltime(w)/len(res)))
-    print('\tsearch_distinct: %.3fs' % walltime(w0))
+    db.logger.info('\t\tlist: %.3fs  avg %.2fms' % (walltime(w), 1000*walltime(w)/len(res)))
+    db.logger.info('\tsearch_distinct: %.3fs' % walltime(w0))
     return res
 
 
