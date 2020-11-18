@@ -99,7 +99,7 @@
       infScroll.destroy()
     }
     var lasttimes = document.querySelectorAll('table#browse-talks > tbody > tr.lasttime');
-    var extraargs="";
+    var extraargs="counters=0&";
     if( lasttimes.length > 0) {
       var extraargs = lasttimes[lasttimes.length - 1].getAttribute("extraargs")
       console.log(lasttimes[lasttimes.length - 1])

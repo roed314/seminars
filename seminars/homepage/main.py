@@ -415,12 +415,13 @@ def talks_index_main(timestamp, limit, past=False):
     fully_filtered = int(request.args.get("filtered", "1"))
     if fully_filtered:
         limit *= 2
+    getcounters=(timestamp is None) and int(request.args.get("counters", "1"))
     return _talks_index(query,
                         subsection="talks" if not past else "past_talks",
                         past=past,
                         limit=limit,
                         asblock=limit is not None,
-                        fullcounters=timestamp is None,
+                        getcounters=getcounters,
                         visible_counter=visible,
                         fully_filtered=fully_filtered)
 
@@ -537,7 +538,7 @@ def _talks_index(query={},
                  limit=None, # this is an upper bound on desired number of talks, we might filter some extra out
                  limitbuffer=10, # the number of extra talks that we give ourselves to try to get the limit right
                  asblock=False, # the number of talks returned is based on star time blocks
-                 fullcounters=True, # doesn't limit the SQL search to get the full counters
+                 getcounters=True, # doesn't limit the SQL search to get the full counters
                  visible_counter=0,
                  fully_filtered=True,
                  ):
@@ -579,7 +580,7 @@ def _talks_index(query={},
 
 
     def dosearch(limit=limit, limitbuffer=limitbuffer):
-        if limit and not fullcounters:
+        if limit and not getcounters:
             # we fetch extra talks to account for filtering
             talks = list(talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more, limit=limit + limitbuffer))
         else:
@@ -611,14 +612,14 @@ def _talks_index(query={},
             return talks
 
     talks = dosearch()
-    if fullcounters: # do the counting before truncating
+    if getcounters: # do the counting before truncating
         counters = _get_counters(talks)
     if asblock:
         talks = filteringasblock(talks)
     elif limit:
         talks = talks[:limit]
-    if not fullcounters: # do counting after truncating
-        counters = _get_counters(talks)
+    if not getcounters: # populate counters with zeros
+        counters = _get_counters([])
 
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
     timerange = info.get("timerange", "").strip()
