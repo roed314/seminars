@@ -54,6 +54,7 @@
   // when we hide talks we might need to trigger prefilling
   // we do this after apply_striping, which might also be triggered when adding talks
   document.addEventListener('strip_event', function () {
+    console.log("reenabling prefilling")
     infScroll.updateMeasurements();
     infScroll.updateScroller();
     infScroll.isPrefilling = true;
