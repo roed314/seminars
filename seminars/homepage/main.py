@@ -651,7 +651,7 @@ def _talks_index(query={},
                     t0, t1 = date_and_daytimes_to_times(talkstart.date(), timerange, tz)
                     talk.more = (t0 <= talkstart) and (talkend <= t1)
     # get last_time before throwing away talks
-    last_time = int(talks[-1].start_time.timestamp()) if talks else None,
+    last_time = int(talks[-1].start_time.timestamp()) if talks else None
     if fully_filtered:
         row_attributes, talks = _get_row_attributes(talks, visible_counter, fully_filtered)
     else:
