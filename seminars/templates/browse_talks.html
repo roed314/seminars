@@ -60,23 +60,23 @@
       console.log('enable loading');
       loading.style.display = 'block';
     }
+    infScroll.showRequestStatus();
     infScroll.updateMeasurements();
     infScroll.updateScroller();
     infScroll.isPrefilling = true;
     infScroll.on('append', infScroll.prefill);
-    infScroll.on('request', show_loading);
     infScroll.once('error', infScroll.stopPrefill);
     infScroll.once('last', infScroll.stopPrefill);
     infScroll.prefill();
     function keep_showing_loading() {
       if(infScroll.isLoading){
-        show_loading();
+        infScroll.showRequestStatus();
         setTimeout(keep_showing_loading, 100);
       } else {
         console.log('no longer loading');
       }
     }
-    keep_showing_loading();
+    setTimeout(keep_showing_loading, 100);
   })
 
 
