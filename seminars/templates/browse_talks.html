@@ -85,6 +85,7 @@
   document.addEventListener('filtered_mode_disabled', function () {
     console.log("filtered_mode_disabled");
     if( infScroll != null) {
+      infScroll.showRequestStatus();
       infScroll.destroy()
     }
     var rows = document.querySelectorAll('table#browse-talks > tbody > tr.extraargs');
@@ -101,10 +102,7 @@
     tr.classList.add("extraargs");
     tr.setAttribute("style", "display: none;");
     tr.setAttribute("extraargs", extraargs);
-    //var old_tbody = document.querySelector("table#browse-talks > tbody");
-    //old_tbody.parentNode.replaceChild(tbody, old_tbody);
-    document.querySelector('#page-load-status > div.infinite-scroll-request').setAttribute('style', 'display: block;');
-    setTimeout(() => init_infScroll(), 50);
+    init_infScroll();
   })
 
 })
