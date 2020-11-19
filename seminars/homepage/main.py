@@ -662,7 +662,7 @@ def _talks_index(query={},
         subsection=subsection,
         talk_row_attributes=zip(talks, row_attributes),
         past=past,
-        last_time=int(talks[-1].start_time.timestamp()) if talks else None,
+        last_time=int(talks[-1].start_time.timestamp()) if talks else "",
         extraargs=urlencode({'keywords': keywords}),
         **counters
     ))
