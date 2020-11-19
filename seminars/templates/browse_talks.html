@@ -9,6 +9,7 @@
     return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length % 2;
   }
   function getpath() {
+    infScroll.showRequestStatus()
     var base_url = '/talks';
     if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
       var base_url = '/past_talks';
@@ -60,7 +61,6 @@
     infScroll.updateScroller();
     infScroll.isPrefilling = true;
     infScroll.on('append', infScroll.prefill);
-    infScroll.on('request', infScroll.showRequestStatus);
     infScroll.once('error', infScroll.stopPrefill);
     infScroll.once('last', infScroll.stopPrefill);
     infScroll.on('request', console.log("##################################"));
