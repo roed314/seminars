@@ -416,7 +416,7 @@ def talks_index_main(timestamp, limit, past=False):
             visible = int(request.args.get("visible"))
         except ValueError:
             visible = 0
-    fully_filtered = int(request.args.get("filtered", "1"))
+    fully_filtered = bool(int(request.args.get("filtered", "1")))
     if fully_filtered:
         limit *= 2
     getcounters=(timestamp is None) and not request.args.get("visible", "")
@@ -612,7 +612,7 @@ def _talks_index(query={},
             if retry and limit and not getcounters:
                 # redo the search without limits
                 talks = dosearch(limit=None)
-                return truncateasblock(talks)
+                return truncateasblock(talks, retry=False)
             return talks
     def truncate(talks):
         if asblock and limit:
@@ -628,9 +628,15 @@ def _talks_index(query={},
     else:
         counters = _get_counters([])
 
-    if getcounters or not fully_filtered: # truncate results as early as possible
+    if getcounters and fully_filtered:
+        # the initial query was not limited as getcounters = True
+        # we will first filter after figuring out the more attribute
+        # and then truncate
+        pass
+    else:
+        # we are not going to filter or the query was already limited, so we can truncate
         talks = truncate(talks)
-
+    print("(limit, asblock, getcounters, fully_filtered, talks) = ", limit, asblock, getcounters, fully_filtered, len(talks))
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
     timerange = info.get("timerange", "").strip()
     if timerange:
@@ -661,9 +667,10 @@ def _talks_index(query={},
     if fully_filtered: # first filter then truncate
         row_attributes, talks = _get_row_attributes(talks, visible_counter, fully_filtered)
         if getcounters: # we have not yet truncated the results
-            talks = truncate(talks)
-            row_attributes = row_attributes[:len(talks)]
-            last_time = int(talks[-1].start_time.timestamp()) if talks else None
+            if limit and len(talks) > limit:
+                talks = truncate(talks)
+                row_attributes = row_attributes[:len(talks)]
+                last_time = int(talks[-1].start_time.timestamp()) if talks else None
     else:
         row_attributes = _get_row_attributes(talks, visible_counter)
 
