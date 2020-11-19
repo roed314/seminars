@@ -57,7 +57,7 @@
   //}
 
   function loadmoreifyouseetheend() {
-    if(window.innerHeight - infScroll.element.clientHeight>=0 ){
+    if(window.innerHeight - infScroll.element.clientHeight>=-100 ){
       console.log("footer is visible")
       infScroll.loadNextPage();
     } else {
@@ -71,11 +71,11 @@
     if(window.innerHeight - infScroll.element.clientHeight>=0) {
       infScroll.updateMeasurements();
       infScroll.updateScroller();
-    //infScroll.isPrefilling = true;
-    //infScroll.on('append', infScroll.prefill);
-    //infScroll.once('error', infScroll.stopPrefill);
-    //infScroll.once('last', infScroll.stopPrefill);
-    //infScroll.prefill();
+      infScroll.isPrefilling = true;
+      infScroll.on('append', infScroll.prefill);
+      infScroll.once('error', infScroll.stopPrefill);
+      infScroll.once('last', infScroll.stopPrefill);
+      infScroll.prefill();
     }
   })
 
