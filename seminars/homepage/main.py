@@ -540,12 +540,13 @@ def _talks_index(query={},
                  past=False,
                  keywords="",
                  limit=None, # this is an upper bound on desired number of talks, we might filter some extra out
-                 limitbuffer=10, # the number of extra talks that we give ourselves to try to get the limit right
+                 limitbuffer=200, # the number of extra talks that we give ourselves to try to get the limit right
                  asblock=False, # the number of talks returned is based on star time blocks
                  getcounters=True, # doesn't limit the SQL search to get the full counters
                  visible_counter=0,
                  fully_filtered=True,
                  ):
+    asblock = asblock and limit # asblock only makes sense with limit
     # Eventually want some kind of cutoff on which talks are included.
     search_array = TalkSearchArray(past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
@@ -594,7 +595,7 @@ def _talks_index(query={},
         return talks
 
 
-    def filteringasblock(talks, retry=0):
+    def truncateasblock(talks, retry=True):
         if not talks:
             return talks
         last_time = None
@@ -609,22 +610,27 @@ def _talks_index(query={},
                 else:
                     last_time = t.start_time
         else:
-            if retry and limit:
+            if retry and limit and not getcounters:
                 # redo the search without limits
                 talks = dosearch(limit=None)
-                return filteringasblock(talks)
+                return truncateasblock(talks)
+            return talks
+    def truncate(talks):
+        if asblock: # this implies limit
+            return truncateasblock(talks)
+        elif limit:
+            return talks[:limit]
+        else:
             return talks
 
     talks = dosearch()
-    if getcounters: # do the counting before truncating
+    if getcounters:
         counters = _get_counters(talks)
-        # and maybe disable filtered mode if appropriate?
-    if asblock:
-        talks = filteringasblock(talks)
-    elif limit:
-        talks = talks[:limit]
-    if not getcounters: # populate counters with zeros
+    else:
         counters = _get_counters([])
+
+    if getcounters or not fully_filtered: # then truncate results as early as possible
+        talks = truncate(talks)
 
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
     timerange = info.get("timerange", "").strip()
@@ -650,12 +656,20 @@ def _talks_index(query={},
                     talkend = adapt_datetime(talk.end_time, tz)
                     t0, t1 = date_and_daytimes_to_times(talkstart.date(), timerange, tz)
                     talk.more = (t0 <= talkstart) and (talkend <= t1)
-    # get last_time before throwing away talks
+
+    # get last_time before potential filtering
     last_time = int(talks[-1].start_time.timestamp()) if talks else None
-    if fully_filtered:
+    if fully_filtered: # first filter then truncate
         row_attributes, talks = _get_row_attributes(talks, visible_counter, fully_filtered)
+        if getcounters: # we have not yet truncated the results
+            talks = truncate(talks)
+            row_attributes = row_attributes[:len(talks)]
+            last_time = int(talks[-1].start_time.timestamp()) if talks else None
     else:
         row_attributes = _get_row_attributes(talks, visible_counter)
+
+
+
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse past talks" if past else "Browse talks",

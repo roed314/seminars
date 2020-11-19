@@ -44,11 +44,9 @@
         status: '#page-load-status',
         checkLastPage: '.lasttime',
         scrollThreshold: 500,
-        prefill: false,
+        prefill: true,
         debug: true,
       });
-      infScroll.on( 'request', function( path ) {console.log('**request**' + path)})
-      infScroll.options({prefill: true})
     }
   }
   init_infScroll();
