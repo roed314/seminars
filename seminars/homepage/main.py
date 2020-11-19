@@ -629,7 +629,7 @@ def _talks_index(query={},
     else:
         counters = _get_counters([])
 
-    if getcounters or not fully_filtered: # then truncate results as early as possible
+    if getcounters or not fully_filtered: # truncate results as early as possible
         talks = truncate(talks)
 
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
