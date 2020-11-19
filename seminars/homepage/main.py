@@ -583,19 +583,14 @@ def _talks_index(query={},
             sort = ["start_time", "seminar_id"]
 
 
-    from sage.all import walltime
     def dosearch(limit=limit, limitbuffer=limitbuffer):
-        w = walltime()
         if limit and not getcounters:
             # we fetch extra talks to account for filtering
             talks = talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more, limit=limit + limitbuffer)
         else:
             talks = talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more)
-        db.logger.info("talks_search: %.2fs" % walltime(w))
         # Filtering on display and hidden isn't sufficient since the seminar could be private
-        w = walltime()
         talks =  [talk for talk in talks if talk.searchable()]
-        db.logger.info("searchable filter: %.2fs" % walltime(w))
         return talks
 
 
@@ -622,20 +617,14 @@ def _talks_index(query={},
 
     talks = dosearch()
     if getcounters: # do the counting before truncating
-        w = walltime()
         counters = _get_counters(talks)
-        db.logger.info("_get_counters(talks): %.2fs" % walltime(w))
         # and maybe disable filtered mode if appropriate?
     if asblock:
-        w = walltime()
         talks = filteringasblock(talks)
-        db.logger.info("filteringasblock: %.2fs" % walltime(w))
     elif limit:
         talks = talks[:limit]
     if not getcounters: # populate counters with zeros
-        w = walltime()
         counters = _get_counters([])
-        db.logger.info("_get_counters([]): %.2fs" % walltime(w))
 
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
     timerange = info.get("timerange", "").strip()
@@ -661,12 +650,10 @@ def _talks_index(query={},
                     talkend = adapt_datetime(talk.end_time, tz)
                     t0, t1 = date_and_daytimes_to_times(talkstart.date(), timerange, tz)
                     talk.more = (t0 <= talkstart) and (talkend <= t1)
-    w = walltime()
     if fully_filtered:
         row_attributes, talks = _get_row_attributes(talks, visible_counter, fully_filtered)
     else:
         row_attributes = _get_row_attributes(talks, visible_counter)
-    db.logger.info("_get_row_attributes(]): %.2fs" % walltime(w))
     response = make_response(render_template(
         "browse_talks.html",
         title="Browse past talks" if past else "Browse talks",
