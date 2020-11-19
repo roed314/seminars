@@ -9,7 +9,6 @@
     return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length % 2;
   }
   function getpath() {
-    if(infScroll) { console.log('trying'); infScroll.showRequestStatus(); }
     var base_url = '/talks';
     if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
       var base_url = '/past_talks';
@@ -51,27 +50,27 @@
   }
   init_infScroll();
 
-  // when we hide talks we might need to trigger prefilling
-  // we do this after apply_striping, which might also be triggered when adding talks
-  function checkVisible(elm) {
-    var rect = elm.getBoundingClientRect();
-    var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
-    return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
-  }
+  //function checkVisible(elm) {
+  //  var rect = elm.getBoundingClientRect();
+  //  var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+  //  return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+  //}
 
   function loadmoreifyouseetheend() {
-    if(infScroll.windowHeight - infScroll.element.clientHeight>=0 ){
+    if(window.innerHeight - infScroll.element.clientHeight>=0 ){
       console.log("footer is visible")
       infScroll.loadNextPage();
     } else {
       console.log("footer not visible")
     }
   }
+  // when we hide talks we might need to trigger prefilling
+  // we do this after apply_striping, which might also be triggered when adding talks
   document.addEventListener('strip_event', function () {
     console.log("reenabling prefilling")
     infScroll.on('append',loadmoreifyouseetheend);
     loadmoreifyouseetheend();
-    infScroll.off('append', loadmoreifyouseetheend);
+    //infScroll.off('append', loadmoreifyouseetheend);
     //infScroll.showRequestStatus();
     //infScroll.updateMeasurements();
     //infScroll.updateScroller();
