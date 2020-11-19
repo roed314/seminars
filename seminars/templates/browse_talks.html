@@ -51,7 +51,8 @@
   }
   init_infScroll();
 
-  // on strip, trigger prefill
+  // when we hide talks we might need to trigger prefilling
+  // we do this after apply_striping, which might also be triggered when adding talks
   document.addEventListener('strip_event', function () {
     infScroll.updateMeasurements();
     infScroll.updateScroller();
