@@ -55,11 +55,6 @@
   // we do this after apply_striping, which might also be triggered when adding talks
   document.addEventListener('strip_event', function () {
     console.log("reenabling prefilling")
-    loading = document.getElementsByClassName("infinite-scroll-request");
-    function show_loading() {
-      console.log('enable loading');
-      loading.style.display = 'block';
-    }
     infScroll.showRequestStatus();
     infScroll.updateMeasurements();
     infScroll.updateScroller();
@@ -68,6 +63,7 @@
     infScroll.on('request', infScroll.showRequestStatus);
     infScroll.once('error', infScroll.stopPrefill);
     infScroll.once('last', infScroll.stopPrefill);
+    infScroll.on('request', console.log("##################################"));
     infScroll.prefill();
   })
 
