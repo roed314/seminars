@@ -1035,6 +1035,7 @@ form button.aslink:hover {
   margin:  0px auto;
   padding: 0px 0px 0px 10px;
   /* min-height: 700px; */
+  min-height: calc(100vh - 200px);
   max-width: 1000px;
 }
 
@@ -1159,7 +1160,6 @@ body > .debug {
   font-size: 95%;
   /* line-height: 135%; */
   padding-right: 10px;
-  min-height: calc(100vh - 217px);
 }
 
 #content blockquote
