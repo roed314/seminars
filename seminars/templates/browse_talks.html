@@ -67,6 +67,13 @@
     infScroll.once('error', infScroll.stopPrefill);
     infScroll.once('last', infScroll.stopPrefill);
     infScroll.prefill();
+    function loading() {
+      if(inScroll.isLoading){
+        show_loading();
+        setTimeout(1, loading());
+      }
+    }
+    loading();
   })
 
 
