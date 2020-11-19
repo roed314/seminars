@@ -77,6 +77,8 @@
     document.querySelector('#page-load-status > div.infinite-scroll-request').setAttribute('style', 'display: block;');
     setTimeout(() => init_infScroll(), 50);
   })
+
+  infScroll.on( 'request', function( path ) {consolo.log('request', path)})
 })
 </script>
 
