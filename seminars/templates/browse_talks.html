@@ -56,14 +56,18 @@
   document.addEventListener('strip_event', function () {
     console.log("reenabling prefilling")
     loading = document.getElementsByClassName("infinite-scroll-request");
-    loading.style.display = 'block';
+    function show_loading() {
+      loading.style.display = 'block';
+    }
     infScroll.updateMeasurements();
     infScroll.updateScroller();
     infScroll.isPrefilling = true;
-    infScroll.on( 'append', infScroll.prefill );
-    infScroll.once( 'error', infScroll.stopPrefill);
-    infScroll.once( 'last', infScroll.stopPrefill);
+    infScroll.on('append', infScroll.prefill);
+    infScroll.on('append', show_loading);
+    infScroll.once('error', infScroll.stopPrefill);
+    infScroll.once('last', infScroll.stopPrefill);
     infScroll.prefill();
+    infScroll.off('append', show_loading);
   })
 
 
