@@ -546,7 +546,6 @@ def _talks_index(query={},
                  visible_counter=0,
                  fully_filtered=True,
                  ):
-    asblock = asblock and limit # asblock only makes sense with limit
     # Eventually want some kind of cutoff on which talks are included.
     search_array = TalkSearchArray(past=past)
     info = to_dict(read_search_cookie(search_array), search_array=search_array)
@@ -616,7 +615,7 @@ def _talks_index(query={},
                 return truncateasblock(talks)
             return talks
     def truncate(talks):
-        if asblock: # this implies limit
+        if asblock and limit:
             return truncateasblock(talks)
         elif limit:
             return talks[:limit]
