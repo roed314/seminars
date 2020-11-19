@@ -9,7 +9,7 @@
     return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length % 2;
   }
   function getpath() {
-    if(infScroll) { infScroll.showRequestStatus(); }
+    if(infScroll) { console.log('trying'); infScroll.showRequestStatus(); }
     var base_url = '/talks';
     if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
       var base_url = '/past_talks';
