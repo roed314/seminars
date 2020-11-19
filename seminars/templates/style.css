@@ -1159,8 +1159,7 @@ body > .debug {
   font-size: 95%;
   /* line-height: 135%; */
   padding-right: 10px;
-  /* FIXME for infinite scroll? */
-  /* min-height: calc(100vh - 217px); */
+  min-height: calc(100vh - 217px);
 }
 
 #content blockquote
