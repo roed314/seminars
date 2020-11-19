@@ -58,11 +58,10 @@
     if( infScroll != null) {
       infScroll.destroy()
     }
-    var lasttimes = document.querySelectorAll('table#browse-talks > tbody > tr.lasttime');
+    var rows = document.querySelectorAll('table#browse-talks > tbody > tr.extraargs');
     var extraargs="";
-    if( lasttimes.length > 0) {
-      var extraargs = lasttimes[lasttimes.length - 1].getAttribute("extraargs")
-      console.log(lasttimes[lasttimes.length - 1])
+    if( rows.length > 0) {
+      var extraargs = rows[rows.length - 1].getAttribute("extraargs")
     }
     var tbody = document.querySelector("table#browse-talks > tbody");
     Array.from(tbody.children).forEach(row => row.remove());
@@ -70,7 +69,7 @@
     tr = tbody.insertRow();
     tr.classList.add("talk");
     tr.classList.add("lasttime");
-    tr.classList.add("init");
+    tr.classList.add("extraargs");
     tr.setAttribute("style", "display: none;");
     tr.setAttribute("extraargs", extraargs);
     //var old_tbody = document.querySelector("table#browse-talks > tbody");
@@ -106,7 +105,13 @@
       {% endif %}
     </tr>
     {% endfor %}
-    <tr class="talk lasttime" style="display: none;" timestamp="{{last_time}}" extraargs="{{extraargs}}">
+    {% if last_time %}
+      <tr class="talk lasttime extraargs" style="display: none;" timestamp="{{last_time}}" extraargs="{{extraargs}}">
+    {% else %}
+      <tr class="talk extraargs" style="display: none;" extraargs="{{extraargs}}">
+    {% endif %}
+    {% else %}
+
   </tbody>
 </table>
 <div id="page-load-status" style="text-align: center;" >
