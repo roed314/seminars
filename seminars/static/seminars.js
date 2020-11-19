@@ -281,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 })
 const filtered_mode_disabled = new Event('filtered_mode_disabled');
+const hide_event = new Event('hide_event');
 
 // if filtered_mode is enabled desables it before trying to add new talks
 // this triggers repopulating the table
@@ -306,6 +307,7 @@ function toggleLanguage_core(id) {
         if (languageFiltering()) {
             talks.hide();
             apply_striping();
+            document.dispatchEvent(hide_event);
         }
     } else {
         addToCookie(lang, "languages");
@@ -396,6 +398,7 @@ function toggleTopicDAG_core(togid) {
         talks.addClass("topic-filtered");
         if (topicFiltering()) {
             talks.hide();
+            document.dispatchEvent(hide_event);
         }
     }
     if (to_show.length > 0) {
@@ -515,6 +518,7 @@ function toggleFilters_core(id, on_menu_open=false) {
   talks.hide();
   talks = talksToShow(talks);
   talks.show();
+  document.dispatchEvent(hide_event);
   apply_striping();
 }
 function toggleFilters(id, on_menu_open=false) {
@@ -573,11 +577,9 @@ function toggleFilterView(id) {
     }
 }
 
-const strip_event = new Event('strip_event');
 function apply_striping() {
   $('tbody > tr.talk:visible:odd').removeClass("evenrow").addClass("oddrow"); //.css('background', '#E3F2FD');
   $(' tbody > tr.talk:visible:even').removeClass("oddrow").addClass("evenrow"); //css('background', 'none');
-  document.dispatchEvent(strip_event);
 }
 
 function tickClock() {
