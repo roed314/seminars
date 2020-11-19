@@ -1035,13 +1035,18 @@ form button.aslink:hover {
   margin:  0px auto;
   padding: 0px 0px 0px 10px;
   /* min-height: 700px; */
-  min-height: calc(100vh - 200px);
   max-width: 1000px;
+  flex: 1; /* so that it pushes footer to bottom */
 }
 
 .debug {
     background: #FF9;
     font-style: italic;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 body > .debug {
