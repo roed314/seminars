@@ -59,8 +59,9 @@
     infScroll.updateScroller();
     infScroll.isPrefilling = true;
     infScroll.on( 'append', infScroll.prefill );
-    infScroll.once( 'error', infScroll.stopPrefill );
-    infScroll.once( 'last', infScroll.stopPrefill );
+    infScroll.once( 'error', infScroll.stopPrefill);
+    infScroll.once( 'last', infScroll.stopPrefill);
+    infScroll.on( 'request', infScroll.showRequestStatus);
     infScroll.prefill();
   })
 
