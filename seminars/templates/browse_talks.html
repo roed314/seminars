@@ -9,7 +9,7 @@
     return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length % 2;
   }
   function getpath() {
-    infScroll.showRequestStatus()
+    infScroll.showRequestStatus();
     var base_url = '/talks';
     if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
       var base_url = '/past_talks';
@@ -35,7 +35,6 @@
   }
   function init_infScroll() {
     console.log('init_infScroll')
-    console.log(document.querySelectorAll('table#browse-talks > tbody > tr.lasttime'))
     if( document.querySelectorAll('table#browse-talks > tbody > tr.lasttime').length > 0 ) {
       infScroll = new InfiniteScroll( document.querySelector('table#browse-talks > tbody'), {
         // options
