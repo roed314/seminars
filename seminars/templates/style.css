@@ -1034,7 +1034,7 @@ form button.aslink:hover {
 #main {
   margin:  0px auto;
   padding: 0px 0px 0px 10px;
-  min-height: 700px;
+  /* min-height: 700px; */
   max-width: 1000px;
 }
 
