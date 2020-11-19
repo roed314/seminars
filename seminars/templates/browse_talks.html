@@ -57,6 +57,7 @@
     console.log("reenabling prefilling")
     loading = document.getElementsByClassName("infinite-scroll-request");
     function show_loading() {
+      console.log('enable loading');
       loading.style.display = 'block';
     }
     infScroll.updateMeasurements();
@@ -71,6 +72,8 @@
       if(inScroll.isLoading){
         show_loading();
         setTimeout(100, loading());
+      } else {
+        console.log('no longer loading');
       }
     }
     loading();
