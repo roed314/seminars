@@ -68,15 +68,15 @@
     infScroll.once('error', infScroll.stopPrefill);
     infScroll.once('last', infScroll.stopPrefill);
     infScroll.prefill();
-    function loading() {
+    function keep_showing_loading() {
       if(infScroll.isLoading){
         show_loading();
-        setTimeout(100, loading());
+        setTimeout(keep_showing_loading, 100);
       } else {
         console.log('no longer loading');
       }
     }
-    loading();
+    keep_showing_loading();
   })
 
 
