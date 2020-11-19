@@ -51,6 +51,17 @@
   }
   init_infScroll();
 
+  // on strip, trigger prefill
+  document.addEventListener('strip_event', function () {
+    infScroll.updateMeasurements();
+    infScroll.updateScroller();
+    infScroll.isPrefilling = true;
+    infScroll.on( 'append', infScroll.prefill );
+    infScroll.once( 'error', infScroll.stopPrefill );
+    infScroll.once( 'last', infScroll.stopPrefill );
+    infScroll.prefill();
+  })
+
 
 
   document.addEventListener('filtered_mode_disabled', function () {

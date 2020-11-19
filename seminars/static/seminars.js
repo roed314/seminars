@@ -573,9 +573,11 @@ function toggleFilterView(id) {
     }
 }
 
+const strip_event = new Event('strip_event');
 function apply_striping() {
-    $('#browse-talks tbody tr:visible:odd').removeClass("evenrow").addClass("oddrow"); //.css('background', '#E3F2FD');
-    $('#browse-talks tbody tr:visible:even').removeClass("oddrow").addClass("evenrow"); //css('background', 'none');
+  $('tbody > tr.talk:visible:odd').removeClass("evenrow").addClass("oddrow"); //.css('background', '#E3F2FD');
+  $(' tbody > tr.talk:visible:even').removeClass("oddrow").addClass("evenrow"); //css('background', 'none');
+  document.dispatchEvent(strip_event);
 }
 
 function tickClock() {
