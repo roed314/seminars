@@ -378,7 +378,7 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
-default_limit=200
+default_limit=100
 @app.route("/", methods=["GET"])
 def index():
     if request.args.get("submit"):
@@ -543,7 +543,7 @@ def _talks_index(query={},
                  past=False,
                  keywords="",
                  limit=None, # this is an upper bound on desired number of talks, we might filter some extra out
-                 limitbuffer=200, # the number of extra talks that we give ourselves to try to get the limit right
+                 limitbuffer=1000, # the number of extra talks that we give ourselves to try to get the limit right
                  asblock=False, # the number of talks returned is based on star time blocks
                  getcounters=True, # doesn't limit the SQL search to get the full counters
                  visible_counter=0,
