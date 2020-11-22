@@ -17,9 +17,9 @@
     if( lasttimes.length > 0) {
       var lastrow = lasttimes[lasttimes.length - 1]
       var timestamp = lastrow.getAttribute("timestamp");
-      var extraargs = lastrow.getAttribute("extraargs")
-      if(!extraargs) {
-        var extraargs = '';
+      var extraargs = '';
+      if(lastrow.hasAttribute("extraargs")) {
+        var extraargs = lastrow.getAttribute("extraargs");
       }
       var args = '?visible=' + visibletalks() + '&' + extraargs;
       if(timestamp) {

@@ -378,7 +378,7 @@ class SeriesSearchArray(SemSearchArray):
         assert conference in [True, False]
         self.conference = conference
 
-default_limit=500
+default_limit=200
 @app.route("/", methods=["GET"])
 def index():
     if request.args.get("submit"):
@@ -413,13 +413,16 @@ def talks_index_main(timestamp, limit, past=False):
     visible = 0
     if request.args.get("visible"):
         try:
-            visible = int(request.args.get("visible"))
+            visible = int(request.args.get("visible")) % 2
         except ValueError:
             visible = 0
     #fully_filtered = bool(int(request.args.get("filtered", "1")))
     #if fully_filtered:
     #    limit *= 2
-    getcounters=(timestamp is None) and not request.args.get("visible", "")
+
+    # we might not care about counters, if we are repopulating table
+    # but we would like to fill the first page properly before relying on prefill
+    getcounters=timestamp is None
     return _talks_index(query,
                         subsection="talks" if not past else "past_talks",
                         past=past,
