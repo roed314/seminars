@@ -416,9 +416,9 @@ def talks_index_main(timestamp, limit, past=False):
             visible = int(request.args.get("visible"))
         except ValueError:
             visible = 0
-    fully_filtered = bool(int(request.args.get("filtered", "1")))
-    if fully_filtered:
-        limit *= 2
+    #fully_filtered = bool(int(request.args.get("filtered", "1")))
+    #if fully_filtered:
+    #    limit *= 2
     getcounters=(timestamp is None) and not request.args.get("visible", "")
     return _talks_index(query,
                         subsection="talks" if not past else "past_talks",
@@ -427,7 +427,7 @@ def talks_index_main(timestamp, limit, past=False):
                         asblock=limit is not None,
                         getcounters=getcounters,
                         visible_counter=visible,
-                        fully_filtered=fully_filtered)
+                        fully_filtered=True)
 
 
 
@@ -636,7 +636,6 @@ def _talks_index(query={},
     else:
         # we are not going to filter or the query was already limited, so we can truncate
         talks = truncate(talks)
-    print("(limit, asblock, getcounters, fully_filtered, talks) = ", limit, asblock, getcounters, fully_filtered, len(talks))
     # While we may be able to write a query specifying inequalities on the timestamp in the user's timezone, it's not easily supported by talks_search.  So we filter afterward
     timerange = info.get("timerange", "").strip()
     if timerange:

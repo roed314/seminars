@@ -271,28 +271,9 @@ function pushForCookies() {
         disableMoreButton();
     }
 }
-// maybe moved up earlier
-var filtered_mode = true;
-document.addEventListener('DOMContentLoaded', function () {
-  if( //no filter is enabled
-    ! [topicFiltering(), languageFiltering(), calFiltering(), moreFiltering()].reduce(
-      (acc, val) => (acc || val))) {
-    filtered_mode = false;
-  }
-})
-const filtered_mode_disabled = new Event('filtered_mode_disabled');
-const hide_event = new Event('hide_event');
 
-// if filtered_mode is enabled desables it before trying to add new talks
-// this triggers repopulating the table
-function disableFilteredModeQ() {
-  if( filtered_mode ) {
-    filtered_mode = false;
-    document.dispatchEvent(filtered_mode_disabled);
-    return true;
-  }
-  return false;
-}
+const showing_talks = new Event('showing_talks');
+const hide_event = new Event('hide_event');
 
 
 function toggleLanguage_core(id) {
@@ -472,17 +453,14 @@ var filter_classes = [['.topic-filtered', topicFiltering], ['.language-filtered'
 
 function talksToShow(talks) {
   // we are about to show some talks, disable filtered mode if necessary
-  if( disableFilteredModeQ() ) {
-    return talks.not('talk');
-  } else {
-    for (i=0; i<filter_classes.length; i++) {
-      if (filter_classes[i][1]()) {
-        talks = talks.not(filter_classes[i][0]);
-        console.log("talksToShow", filter_classes[i][0], talks.length);
-      }
+  for (i=0; i<filter_classes.length; i++) {
+    if (filter_classes[i][1]()) {
+      talks = talks.not(filter_classes[i][0]);
+      console.log("talksToShow", filter_classes[i][0], talks.length);
     }
-    return talks;
   }
+  document.dispatchEvent(showing_talks);
+  return talks;
 }
 function filterMenuId(ftype) {
   if (ftype == "topic") {

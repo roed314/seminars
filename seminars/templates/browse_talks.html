@@ -13,16 +13,13 @@
     if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
       var base_url = '/past_talks';
     }
-    var filteredargs = 'filtered=' + (0 + filtered_mode);
     var lasttimes = document.querySelectorAll('table#browse-talks > tbody > tr.lasttime')
     if( lasttimes.length > 0) {
       var lastrow = lasttimes[lasttimes.length - 1]
       var timestamp = lastrow.getAttribute("timestamp");
       var extraargs = lastrow.getAttribute("extraargs")
-      if(extraargs) {
-        var extraargs = extraargs + '&' + filteredargs;
-      } else {
-        var extraargs = filteredargs;
+      if(!extraargs) {
+        var extraargs = '';
       }
       var args = '?visible=' + visibletalks() + '&' + extraargs;
       if(timestamp) {
@@ -81,8 +78,7 @@
 
 
 
-  document.addEventListener('filtered_mode_disabled', function () {
-    console.log("filtered_mode_disabled");
+  document.addEventListener('showing_talks', function () {
     if( infScroll != null) {
       infScroll.showRequestStatus();
       infScroll.destroy()
@@ -102,9 +98,7 @@
     tr.setAttribute("style", "display: none;");
     tr.setAttribute("extraargs", extraargs);
     init_infScroll();
-    document.dispatchEvent(hide_event);
   })
-
 })
 </script>
 
