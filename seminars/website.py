@@ -44,12 +44,16 @@ def main():
 
     if "profiler" in flask_options and flask_options["profiler"]:
         info("Profiling!")
-        from werkzeug.contrib.profiler import ProfilerMiddleware
+        from werkzeug.middleware.profiler import ProfilerMiddleware
 
         app.wsgi_app = ProfilerMiddleware(
             app.wsgi_app, restrictions=[30], sort_by=("cumulative", "time", "calls")
         )
         del flask_options["profiler"]
+    #/from werkzeug.middleware.profiler import ProfilerMiddleware
+    #/app.wsgi_app = ProfilerMiddleware(
+    #/    app.wsgi_app, restrictions=[30], sort_by=("cumulative", "time", "calls")
+    #/    )
 
     set_running()
     app.run(**flask_options)
