@@ -40,8 +40,8 @@ SEMINARS_VERSION = "Seminars Release 0.1"
 ############################
 
 app = Flask(__name__, static_url_path="", static_folder="static",)
-# disable cache temporarily
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+# disable cache temporarily if needed
+# app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 if gethostname() == 'grace' and getpass.getuser() == 'mathseminars':
     app.config.update(
         SESSION_COOKIE_SECURE=True,
