@@ -870,9 +870,8 @@ $(document).ready(function() {
 });
 
 
-
 //handling subscriptions
-$(document).ready(function(){
+function register_subsribe_change() {
     $("input.subscribe").change(function(evt) {
         var elem = $(this);
         function success(msg) {
@@ -923,7 +922,7 @@ $(document).ready(function(){
             console.log('/user/unsubscribe/' +  $(this)[0].name);
         }
     });
-});
+$(document).ready(register_subsribe_change());
 
 
 
