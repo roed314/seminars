@@ -43,7 +43,10 @@
         prefill: true,
         debug: true,
       });
-      infScroll.on('append',  function () {knowl_register_onclick(document.querySelector('table#browse-talks > tbody'))});
+      infScroll.on('append',  function () {
+        knowl_register_onclick(document.querySelector('table#browse-talks > tbody'));
+        register_subsribe_change();
+      });
     }
   }
   init_infScroll();
