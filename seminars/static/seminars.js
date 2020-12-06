@@ -922,6 +922,7 @@ function register_subsribe_change() {
             console.log('/user/unsubscribe/' +  $(this)[0].name);
         }
     });
+};
 $(document).ready(register_subsribe_change());
 
 
