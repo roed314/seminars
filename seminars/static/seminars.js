@@ -658,7 +658,7 @@ function copySourceOfId(id) {
 function displayCookieBanner() {
     console.log("showing banner");
     $.notify.addStyle('banner', {
-        html: "<div><div class='message' data-notify-html='message'/></div><button class='yes' data-notify-text='button'></button></div>",
+        html: "<div><div class='message' data-notify-html='message'/><button class='yes' data-notify-html='button'/></div>",
     });
 
     //listen for click events from this style
@@ -669,7 +669,7 @@ function displayCookieBanner() {
     });
     $.notify({
         message: 'This website uses cookies to improve your experience.',
-        button: 'Got it!'
+        button: 'Got it!',
     }, {
         style: 'banner',
         position: 'b r',
