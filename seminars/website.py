@@ -30,10 +30,8 @@ from . import api
 assert api
 
 
-from lmfdb.backend import db
+from . import db
 
-if db.is_verifying:
-    raise RuntimeError("Cannot start website while verifying (SQL injection vulnerabilities)")
 
 
 def main():
