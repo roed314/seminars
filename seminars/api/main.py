@@ -72,6 +72,60 @@ def _get_col(col, raw_data, activity):
                         "description": "You must specify %s when %s" % (col, activity)})
     return val
 
+
+def api_auth_required(fn):
+    # Note that this wrapper will pass the user as a keyword argument to the wrapped function
+    @wraps(fn)
+    def inner(*args, **kwds):
+        auth = request.headers.get("authorization", None)
+        if auth is None:
+            raise APIError({"code": "missing_authorization",
+                            "description": "No authorization header"}, 401)
+        pieces = auth.split()
+        if len(pieces) != 2:
+            raise APIError({"code": "invalid_header",
+                            "description": "Authorization header must have length 2"}, 401)
+        email, token = pieces
+        user = SeminarsUser(email=email)
+        if user.id is None:
+            raise APIError({"code": "missing_user",
+                            "description": "User %s not found" % email}, 401)
+        if token == user.api_token:
+            kwds["user"] = user
+            return fn(*args, **kwds)
+        else:
+            raise APIError({"code": "invalid_token",
+                            "description": "Token not valid"}, 401)
+    return inner
+
+def api_auth_optional(fn):
+    # Note that this wrapper will pass the user as a keyword argument to the wrapped function
+    # if no authorization headers are found we pass user=None
+    @wraps(fn)
+    def inner(*args, **kwds):
+        auth = request.headers.get("authorization", None)
+        # no auth args
+        if auth is None:
+            kwds["user"] = None
+            return fn(*args, **kwds)
+
+        pieces = auth.split()
+        if len(pieces) != 2:
+            raise APIError({"code": "invalid_header",
+                            "description": "Authorization header must have length 2"}, 401)
+        email, token = pieces
+        user = SeminarsUser(email=email)
+        if user.id is None:
+            raise APIError({"code": "missing_user",
+                            "description": "User %s not found" % email}, 401)
+        if token == user.api_token:
+            kwds["user"] = user
+            return fn(*args, **kwds)
+        else:
+            raise APIError({"code": "invalid_token",
+                            "description": "Token not valid"}, 401)
+    return inner
+
 @app.errorhandler(APIError)
 def handle_api_error(err):
     response = jsonify(err.error)
@@ -162,7 +216,6 @@ def institutions(version=0):
 @api_page.route("/<int:version>/lookup/series", methods=["GET", "POST"])
 @api_auth_optional
 def lookup_series(version=0, user=None):
-    sanitized = user is None
     if version != 0:
         raise version_error(version)
     if request.method == "POST":
@@ -170,7 +223,14 @@ def lookup_series(version=0, user=None):
     else:
         raw_data = get_request_args_json()
     series_id = _get_col("series_id", raw_data, "looking up a series")
+
+
     try:
+        if user is None:
+            sanitized = True
+        else:
+            sem = seminars_lookup(series_id)
+            sanitized = sem.user_can_edit(user=user)
         result = seminars_lookup(series_id, objects=False, sanitized=sanitized)
     except Exception as err:
         raise APIError({"code": "lookup_error",
@@ -188,7 +248,6 @@ def lookup_series(version=0, user=None):
 @api_page.route("/<int:version>/lookup/talk", methods=["GET", "POST"])
 @api_auth_optional
 def lookup_talk(version=0, user=None):
-    sanitized = user is None
     if version != 0:
         raise version_error(version)
     if request.method == "POST":
@@ -197,6 +256,11 @@ def lookup_talk(version=0, user=None):
         raw_data = get_request_args_json()
     series_id = _get_col("series_id", raw_data, "looking up a talk")
     series_ctr = _get_col("series_ctr", raw_data, "looking up a talk")
+    if user is None:
+        sanitized = True
+    else:
+        sem = seminars_lookup(series_id)
+        sanitized = sem.user_can_edit(user=user)
     result = talks_lookup(series_id, series_ctr, objects=False, sanitized=sanitized)
     ans = {"code": "success", "properties": result}
     callback = raw_data.get("callback", False)
@@ -205,9 +269,7 @@ def lookup_talk(version=0, user=None):
     # TODO: adapt the times, support daterange
 
 @api_page.route("/<int:version>/search/series", methods=["GET", "POST"])
-@api_auth_optional
-def search_series(version=0, user=None):
-    sanitized = user is None
+def search_series(version=0):
     if version != 0:
         raise version_error(version)
     if request.method == "POST":
@@ -230,7 +292,7 @@ def search_series(version=0, user=None):
     query["visibility"] = 2
     # TODO: encode the times....
     try:
-        results = list(seminars_search(query, objects=False, sanitized=sanitized, **raw_data))
+        results = list(seminars_search(query, objects=False, sanitized=True, **raw_data))
     except Exception as err:
         raise APIError({"code": "search_error",
                         "description": "error in executing search",
@@ -267,58 +329,7 @@ def search_talks(version=0):
     callback = raw_data.get("callback", False)
     return str_jsonify(ans, callback)
 
-def api_auth_required(fn):
-    # Note that this wrapper will pass the user as a keyword argument to the wrapped function
-    @wraps(fn)
-    def inner(*args, **kwds):
-        auth = request.headers.get("authorization", None)
-        if auth is None:
-            raise APIError({"code": "missing_authorization",
-                            "description": "No authorization header"}, 401)
-        pieces = auth.split()
-        if len(pieces) != 2:
-            raise APIError({"code": "invalid_header",
-                            "description": "Authorization header must have length 2"}, 401)
-        email, token = pieces
-        user = SeminarsUser(email=email)
-        if user.id is None:
-            raise APIError({"code": "missing_user",
-                            "description": "User %s not found" % email}, 401)
-        if token == user.api_token:
-            kwds["user"] = user
-            return fn(*args, **kwds)
-        else:
-            raise APIError({"code": "invalid_token",
-                            "description": "Token not valid"}, 401)
-    return inner
 
-def api_auth_optional(fn):
-    # Note that this wrapper will pass the user as a keyword argument to the wrapped function
-    # if no authorization headers are found we pass user=None
-    @wraps(fn)
-    def inner(*args, **kwds):
-        auth = request.headers.get("authorization", None)
-        # no auth args
-        if auth is None:
-            kwds["user"] = None
-            return fn(*args, **kwds)
-
-        pieces = auth.split()
-        if len(pieces) != 2:
-            raise APIError({"code": "invalid_header",
-                            "description": "Authorization header must have length 2"}, 401)
-        email, token = pieces
-        user = SeminarsUser(email=email)
-        if user.id is None:
-            raise APIError({"code": "missing_user",
-                            "description": "User %s not found" % email}, 401)
-        if token == user.api_token:
-            kwds["user"] = user
-            return fn(*args, **kwds)
-        else:
-            raise APIError({"code": "invalid_token",
-                            "description": "Token not valid"}, 401)
-    return inner
 
 @api_page.route("/<int:version>/test")
 @api_auth_required
