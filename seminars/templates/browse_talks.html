@@ -1,6 +1,112 @@
 {% extends 'browse.html' %}
 
 {% block browsing %}
+<script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
+<script>
+  var infScroll = null;
+  document.addEventListener('DOMContentLoaded', function () {
+  function visibletalks() {
+    return Array.from(document.querySelectorAll(".talk")).filter(row => row.offsetHeight > 0 && row.offsetWidth > 0).length % 2;
+  }
+  function getpath() {
+    var base_url = '/talks';
+    if( document.querySelector("input[name=past]").getAttribute('value') == "True" ){
+      var base_url = '/past_talks';
+    }
+    var lasttimes = document.querySelectorAll('table#browse-talks > tbody > tr.lasttime')
+    if( lasttimes.length > 0) {
+      var lastrow = lasttimes[lasttimes.length - 1]
+      var timestamp = lastrow.getAttribute("timestamp");
+      var extraargs = '';
+      if(lastrow.hasAttribute("extraargs")) {
+        var extraargs = lastrow.getAttribute("extraargs");
+      }
+      var args = '?visible=' + visibletalks() + '&' + extraargs;
+      if(timestamp) {
+        return base_url + "/" + timestamp + args;
+      } else {
+        return base_url + args;
+      }
+    }
+  }
+  function init_infScroll() {
+    console.log('init_infScroll')
+    if( document.querySelectorAll('table#browse-talks > tbody > tr.lasttime').length > 0 ) {
+      infScroll = new InfiniteScroll( document.querySelector('table#browse-talks > tbody'), {
+        // options
+        path: getpath,
+        append: '.talk',
+        history: false,
+        status: '#page-load-status',
+        checkLastPage: '.lasttime',
+        scrollThreshold: 500,
+        prefill: true,
+        debug: true,
+      });
+      infScroll.on('append',  function () {
+        knowl_register_onclick(document.querySelector('table#browse-talks > tbody'));
+        register_subsribe_change();
+      });
+    }
+  }
+  init_infScroll();
+
+  //function checkVisible(elm) {
+  //  var rect = elm.getBoundingClientRect();
+  //  var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+  //  return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+  //}
+
+  function loadmoreifyouseetheend() {
+    if(window.innerHeight - infScroll.element.clientHeight>=-100 ){
+      console.log("footer is visible")
+      infScroll.loadNextPage();
+    } else {
+      console.log("footer not visible")
+    }
+  }
+  // when we hide talks we might need to trigger prefilling
+  // we do this after apply_striping, which might also be triggered when adding talks
+  document.addEventListener('hide_event', function () {
+    console.log("reenabling prefilling")
+    if(window.innerHeight - infScroll.element.clientHeight>=0) {
+      infScroll.updateMeasurements();
+      infScroll.updateScroller();
+      infScroll.isPrefilling = true;
+      infScroll.on('append', infScroll.prefill);
+      infScroll.once('error', infScroll.stopPrefill);
+      infScroll.once('last', infScroll.stopPrefill);
+      infScroll.prefill();
+    }
+  })
+
+
+
+  document.addEventListener('showing_talks', function () {
+    if( infScroll != null) {
+      infScroll.showRequestStatus();
+      infScroll.destroy()
+    }
+    var rows = document.querySelectorAll('table#browse-talks > tbody > tr.extraargs');
+    var extraargs="";
+    if( rows.length > 0) {
+      var extraargs = rows[rows.length - 1].getAttribute("extraargs")
+    }
+    var tbody = document.querySelector("table#browse-talks > tbody");
+    Array.from(tbody.children).forEach(row => row.remove());
+    //$('table#browse-talks > tbody > tr').remove();
+    tr = tbody.insertRow();
+    tr.classList.add("talk");
+    tr.classList.add("lasttime");
+    tr.classList.add("extraargs");
+    tr.setAttribute("style", "display: none;");
+    tr.setAttribute("extraargs", extraargs);
+    init_infScroll();
+  })
+})
+</script>
+
+
 <input type="hidden" name="past" value="{{ past }}">
 
 <div id="timezone-table" style="padding: 10px 4px 0px 4px;">
@@ -25,7 +131,24 @@
       {% endif %}
     </tr>
     {% endfor %}
+    {% if last_time %}
+      <tr class="talk lasttime extraargs" style="display: none;" timestamp="{{last_time}}" extraargs="{{extraargs}}">
+    {% else %}
+      <tr class="talk extraargs" style="display: none;" extraargs="{{extraargs}}">
+    {% endif %}
   </tbody>
 </table>
+<div id="page-load-status" style="text-align: center;" >
+  <div class="loader-ellips infinite-scroll-request" style="display: none;">
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  <span class="loader-ellips__dot"></span>
+  </div>
+  <div class="infinite-scroll-last" style="display: none;"></div>
+  <div class="infinite-scroll-error" style="display: none;">Error loading more talks</div>
+</div>
+
+
 
 {% endblock %}
