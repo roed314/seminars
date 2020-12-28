@@ -230,7 +230,7 @@ def lookup_series(version=0, user=None):
             sanitized = True
         else:
             sem = seminars_lookup(series_id)
-            sanitized = sem.user_can_edit(user=user)
+            sanitized = not sem.user_can_edit(user=user)
         result = seminars_lookup(series_id, objects=False, sanitized=sanitized)
     except Exception as err:
         raise APIError({"code": "lookup_error",
@@ -260,7 +260,7 @@ def lookup_talk(version=0, user=None):
         sanitized = True
     else:
         sem = seminars_lookup(series_id)
-        sanitized = sem.user_can_edit(user=user)
+        sanitized = not sem.user_can_edit(user=user)
     result = talks_lookup(series_id, series_ctr, objects=False, sanitized=sanitized)
     ans = {"code": "success", "properties": result}
     callback = raw_data.get("callback", False)
