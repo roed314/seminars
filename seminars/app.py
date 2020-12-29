@@ -162,6 +162,7 @@ def ctx_proc_userdata():
     data["topic_dag"] = topic_dag
     data["languages"] = languages
     data["url_for_with_args"] = url_for_with_args
+    data["db_read_only"] = db._read_only
 
     return data
 

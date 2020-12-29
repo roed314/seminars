@@ -214,15 +214,16 @@ class SeminarsUser(UserMixin):
         self._dirty = False  # flag if we have to save
         self._data = dict() # dict([(_, None) for _ in SeminarsUser.properties])
 
-        #user_row = userdb.lucky(query, projection=SeminarsUser.properties)
-        #if user_row:
-        #    self._authenticated = True
-        #    self._data.update(user_row)
-        #    self._uid = str(self._data["id"])
-        #    self._organizer = (
-        #        db.seminar_organizers.count({"email": ilike_query(self.email)}, record=False) > 0
-        #    )
-        #   self.try_to_endorse()
+        if not db._read_only: # this if prevents logging in when the database is in read-only mode
+            user_row = userdb.lucky(query, projection=SeminarsUser.properties)
+            if user_row:
+                self._authenticated = True
+                self._data.update(user_row)
+                self._uid = str(self._data["id"])
+                self._organizer = (
+                    db.seminar_organizers.count({"email": ilike_query(self.email)}, record=False) > 0
+                )
+               self.try_to_endorse()
 
     def try_to_endorse(self):
         if self.email_confirmed and not self.is_creator:
