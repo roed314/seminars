@@ -2,7 +2,7 @@
 {% block content %}
 
 {% if db_read_only %}
-<h1>You cannot login at this time..</h1>
+<h1>You cannot login at this time.</h1>
 <h2>The website is running in read-only mode.</h2>
 {% else %}
 {% if not user.is_authenticated %}
