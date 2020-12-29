@@ -32,6 +32,7 @@ from seminars.toggle import toggle, toggle3way
 from seminars.knowls import static_knowl
 from .seminar import series_header
 from .talk import talks_header
+from . import db
 
 SEMINARS_VERSION = "Seminars Release 0.1"
 
