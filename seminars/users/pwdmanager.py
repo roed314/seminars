@@ -223,7 +223,7 @@ class SeminarsUser(UserMixin):
                 self._organizer = (
                     db.seminar_organizers.count({"email": ilike_query(self.email)}, record=False) > 0
                 )
-               self.try_to_endorse()
+                self.try_to_endorse()
 
     def try_to_endorse(self):
         if self.email_confirmed and not self.is_creator:
