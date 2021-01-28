@@ -769,9 +769,10 @@ def show_seminar(shortname):
         return abort(404, "Seminar not found")
     if not seminar.visible():
         # There may be a non-API version of the seminar that can be shown
+        name = seminar.name # for flash_error
         seminar = seminars_lucky({"shortname": shortname})
         if seminar is None or not seminar.visible():
-            flash_error("You do not have permission to view %s", seminar.name)
+            flash_error("You do not have permission to view %s", name)
             return redirect(url_for("seminar_series_index"), 302)
     talks = seminar.talks(projection=3)
     now = get_now()
