@@ -124,8 +124,36 @@ def edit_series():
 
 def create_talk():
     from requests import post
+    from datetime import now, timedelta
     url = "https://researchseminars.org/api/0/save/talk/"
-    payload = {"series_id": "test_conf"} # TODO: add more
+    
+    # See https://github.com/roed314/seminars/blob/master/Schema.md for more details
+    payload = {
+        "series_id": "test_conf",
+        
+        # Speaker info
+        "speaker":"Example Speaker",
+        "speaker_email":"Speaker@Talk.ing", # Only visible to organizers
+        "speaker_affiliation":"Example Affiliation",
+
+        # Talk info
+        "title":"Talk Title",
+        "abstract":"Abstract that supports LaTeX",
+        "start_time":now().strftime('%Y-%m-%dT%H:%M:%S'),
+        "end_time":(now() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S'),
+        "timezone":"UTC", # Not required per se, copied from seminar series
+
+        # Extra info
+        "online": True,
+        "access_control":5, # Manual registration
+        "access_registration":"https://registerehere.doesnotexist",
+
+        # !! Leave these out if unavailable
+        #"slides_link":"http://Unavailable.org",
+        #"video_link":"http://ToBeUpdated",
+        #"paper_link":"https://arxiv.org/abs/test"
+    }
+        
     r = post(url, json=payload, headers={"authorization": authorization()})
     J = r.json()
     code = J.get("code")
