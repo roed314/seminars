@@ -10,4 +10,4 @@ PyYAML
 flask-login
 bcrypt
 psycopg2-binary
-pytz>=2020
+pytz>=2021
