@@ -6,6 +6,7 @@ for branch in stable master test; do
     pushd /home/mathseminars/seminars-git-$branch
     git fetch
     git checkout origin/$branch -f
+    git submodule init
     git submodule update
     popd
   fi
