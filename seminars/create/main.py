@@ -60,8 +60,8 @@ from seminars.institution import (
 from seminars.language import languages
 from seminars.lock import get_lock
 from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
-from lmfdb.utils import flash_error
-from lmfdb.backend.utils import IdentifierWrapper
+from seminars.utils import flash_error
+from psycodict.utils import IdentifierWrapper
 from psycopg2.sql import SQL
 from datetime import datetime, timedelta
 from math import ceil

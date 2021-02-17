@@ -19,7 +19,6 @@ from flask import (
 from flask_mail import Mail, Message
 from flask_cors import CORS
 
-from lmfdb.logger import logger_file_handler
 from seminars.utils import (
     domain,
     top_menu,
@@ -68,6 +67,22 @@ mail = Mail(app)
 # Enable cross origin for fonts
 CORS(app, resources={r"/fontawesome/webfonts/*": {"origins": "*"}, r"/api/*": {"origins": "*"}})
 
+@app.before_first_request
+def setup():
+    import logging
+    from .config import Configuration
+    formatter = logging.Formatter("""%(asctime)s %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]:\n  %(message)s""")
+
+    logger = logging.getLogger("seminars")
+    logger.setLevel(logging.INFO)
+    logfile = Configuration().get_logging()["logfile"]
+    ch = logging.FileHandler(logfile)
+    ch.setLevel(logging.INFO)
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+
+
 ############################
 # App attribute functions  #
 ############################
@@ -94,20 +109,9 @@ def is_running():
 # Global app configuration #
 ############################
 
-app.logger.addHandler(logger_file_handler())
-
-# If the debug toolbar is installed then use it
-if app.debug:
-    try:
-        from flask_debugtoolbar import DebugToolbarExtension
-        app.config["SECRET_KEY"] = """shh, it's a secret"""
-        toolbar = DebugToolbarExtension(app)
-    except ImportError:
-        pass
-
 # secret key, necessary for sessions and tokens
 # sessions are in turn necessary for users to login
-from lmfdb.utils.config import get_secret_key
+from .config import get_secret_key
 app.secret_key = get_secret_key()
 
 # tell jinja to remove linebreaks

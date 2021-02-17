@@ -6,16 +6,16 @@ __version__ = "0.1"
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../lmfdb"))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../psycodict"))
 
 # from .website import main
 # assert main
-from lmfdb.backend.database import PostgresDatabase
+from psycodict.database import PostgresDatabase
 import __main__
 startQ =  getattr(__main__, '__file__').endswith("start-seminars.py") if hasattr(__main__, '__file__') else False
-from lmfdb.utils.config import Configuration
+from .config import Configuration
 db = PostgresDatabase(config=Configuration(writeargstofile=startQ, readargs=startQ))
-from lmfdb.backend.searchtable import PostgresSearchTable
+from psycodict.searchtable import PostgresSearchTable
 
 # Have to make sure that changes aren't logged using the LMFDB's logging mechanism.
 def nothing(self, *args, **kwds):

@@ -1,7 +1,7 @@
 # This module is used for exporting the database to a version without private information so that other developers can use it.
 
 import os, random, string, secrets, shutil
-from lmfdb.backend.utils import IdentifierWrapper, DelayCommit
+from psycodict.utils import IdentifierWrapper, DelayCommit
 from psycopg2.sql import SQL, Identifier, Literal
 
 from seminars import db
@@ -92,8 +92,8 @@ def write_content_table(data_folder, table, query, selecter, approve_row, users,
 
     # do the other files
 
-    from lmfdb.backend.table import _counts_cols, _stats_cols
-    from lmfdb.backend.base import _meta_indexes_cols, _meta_constraints_cols, _meta_tables_cols
+    from psycodict.table import _counts_cols, _stats_cols
+    from psycodict.base import _meta_indexes_cols, _meta_constraints_cols, _meta_tables_cols
     statsfile = os.path.join(data_folder, tablename + "_stats.txt")
     countsfile = os.path.join(data_folder, tablename + "_counts.txt")
     indexesfile = os.path.join(data_folder, tablename + "_indexes.txt")

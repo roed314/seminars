@@ -16,10 +16,10 @@ from seminars.utils import (
     sanitized_table,
     log_error,
 )
-from seminars.topic import topic_dag
-from seminars.toggle import toggle
-from lmfdb.utils import flash_error
-from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
+from .topic import topic_dag
+from .toggle import toggle
+from .utils import flash_error
+from psycodict.utils import DelayCommit, IdentifierWrapper
 from markupsafe import Markup
 from psycopg2.sql import SQL
 import pytz
@@ -157,9 +157,9 @@ class WebSeminar(object):
                 elif typ == "date":
                     setattr(self, key, None)
                 else:
-                    from lmfdb.logger import critical
+                    from .app import app
                     # don't write these to the flasklog
-                    critical("Need to update seminar code to account for schema change key=%s" % key)
+                    app.logger.critical("Need to update seminar code to account for schema change key=%s" % key)
                     setattr(self, key, None)
             if organizers is None:
                 organizers = [
