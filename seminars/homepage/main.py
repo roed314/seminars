@@ -3,13 +3,16 @@ from seminars import db
 from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk
 from seminars.utils import (
     Toggle,
-    ics_file,
-    topdomain,
-    maxlength,
     adapt_datetime,
+    collapse_ors,
     date_and_daytime_to_time,
     date_and_daytimes_to_times,
+    flash_error,
+    ics_file,
+    maxlength,
     process_user_input,
+    to_dict,
+    topdomain,
     url_for_with_args,
 )
 from seminars.topic import topic_dag
@@ -25,11 +28,7 @@ import pytz
 from urllib.parse import urlencode
 from collections import Counter
 from dateutil.parser import parse
-from lmfdb.utils import (
-    flash_error,
-    to_dict,
-)
-from lmfdb.utils.search_boxes import (
+from seminars.search_boxes import (
     SearchArray,
     SearchBox,
     SelectBox,
@@ -37,7 +36,6 @@ from lmfdb.utils.search_boxes import (
     TextBox,
 )
 
-from lmfdb.utils.search_parsing import collapse_ors
 
 DEFAULT_AUDIENCE = 5    # Show everything up to general audience by default
 

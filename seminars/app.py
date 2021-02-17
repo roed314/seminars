@@ -19,7 +19,6 @@ from flask import (
 from flask_mail import Mail, Message
 from flask_cors import CORS
 
-from lmfdb.logger import logger_file_handler
 from seminars.utils import (
     domain,
     top_menu,
@@ -94,20 +93,9 @@ def is_running():
 # Global app configuration #
 ############################
 
-app.logger.addHandler(logger_file_handler())
-
-# If the debug toolbar is installed then use it
-if app.debug:
-    try:
-        from flask_debugtoolbar import DebugToolbarExtension
-        app.config["SECRET_KEY"] = """shh, it's a secret"""
-        toolbar = DebugToolbarExtension(app)
-    except ImportError:
-        pass
-
 # secret key, necessary for sessions and tokens
 # sessions are in turn necessary for users to login
-from lmfdb.utils.config import get_secret_key
+from .config import get_secret_key
 app.secret_key = get_secret_key()
 
 # tell jinja to remove linebreaks

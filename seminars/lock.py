@@ -11,7 +11,8 @@ def set_locked(shortname):
 
 
 def get_lock(shortname, ignore_existence):
-    from seminars.create import create_logger as logger
+    from .app import app
+    logger = app.logger
 
     lock = None
     if ignore_existence != "ignore":

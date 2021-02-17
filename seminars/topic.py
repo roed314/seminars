@@ -3,7 +3,7 @@ from .toggle import toggle, toggle3way
 from .utils import num_columns
 from flask import request
 from collections import defaultdict, Counter
-from lmfdb.backend.utils import DelayCommit
+from psycodict.utils import DelayCommit
 import re
 
 
