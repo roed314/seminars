@@ -5,6 +5,7 @@
   <input type="hidden" name="shortname" value="{{ institution.shortname }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if institution.new else 'no' }}"/>
   <table>
+    <tr><td colspan='2' style="padding-bottom: 5px;">Click blue captions for more details. Asterisks denote required items.</td></tr>
     <tr>
       <td>{{ KNOWL('institution_shortname') }}</td>
       <td>{{ institution.shortname }}</td>
