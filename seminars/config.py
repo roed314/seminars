@@ -82,7 +82,7 @@ class Configuration(_Configuration):
             metavar="PORT",
             help="the seminars server will be running on PORT [default: %(default)d]",
             type=int,
-            default=37777,
+            default=37778,
         )
         parser.add_argument(
             "-b",
