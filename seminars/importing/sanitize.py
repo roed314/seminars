@@ -33,7 +33,7 @@ def make_random(col, current, users):
     if col == "edited_by":
         # Just throw away edited by info, since it's not currently used
         return "0"
-    if col in ["hidden", "password", "affiliation", "admin", "creator", "email_confirmed", "created", "endorser", "seminar_subscriptions", "talk_subscriptions", "subject_admin", "api_access", "order", "curator", "topic_id", "children", "city", "type"]:
+    if col in ["hidden", "password", "affiliation", "admin", "creator", "email_confirmed", "created", "endorser", "seminar_subscriptions", "talk_subscriptions", "subject_admin", "api_access", "order", "curator", "topic_id", "children", "city", "type", "version"]:
         # We already selected only those rows with hidden=False
         # Data in the user table is only recorded for requested users, so we keep their data (including bchashed passwords)
         # Data in the seminar_organizers table is only kept when display is True, so the remainder of the information is public (aside from obfuscated emails)
@@ -94,8 +94,8 @@ def write_content_table(data_folder, table, query, selecter, approve_row, users,
 
     from psycodict.table import _counts_cols, _stats_cols
     from psycodict.base import _meta_indexes_cols, _meta_constraints_cols, _meta_tables_cols
-    statsfile = os.path.join(data_folder, tablename + "_stats.txt")
-    countsfile = os.path.join(data_folder, tablename + "_counts.txt")
+    statsfile = None #os.path.join(data_folder, tablename + "_stats.txt")
+    countsfile = None #os.path.join(data_folder, tablename + "_counts.txt")
     indexesfile = os.path.join(data_folder, tablename + "_indexes.txt")
     constraintsfile = os.path.join(data_folder, tablename + "_constraints.txt")
     metafile = os.path.join(data_folder, tablename + "_meta.txt")
