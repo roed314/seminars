@@ -46,7 +46,7 @@ class Configuration(_Configuration):
 
         # 1: parsing command-line arguments
         parser = argparse.ArgumentParser(
-            description="LMFDB - The L-functions and modular forms database"
+            description="seminars - a list of research seminars and conferences!"
         )
 
         parser.add_argument(
@@ -74,21 +74,13 @@ class Configuration(_Configuration):
             help="enable debug mode",
         )
 
-        parser.add_argument(
-            "--color",
-            dest="core_color",
-            metavar="COLOR",
-            help="color template (see lmfdb/utils/color.py)",
-            default=19,
-            type=int,
-        )
 
         parser.add_argument(
             "-p",
             "--port",
             dest="web_port",
             metavar="PORT",
-            help="the LMFDB server will be running on PORT [default: %(default)d]",
+            help="the seminars server will be running on PORT [default: %(default)d]",
             type=int,
             default=37777,
         )
@@ -97,7 +89,7 @@ class Configuration(_Configuration):
             "--bind_ip",
             dest="web_bindip",
             metavar="HOST",
-            help="the LMFDB server will be listening to HOST [default: %(default)s]",
+            help="the seminars server will be listening to HOST [default: %(default)s]",
             default="127.0.0.1",
         )
 
@@ -130,13 +122,6 @@ class Configuration(_Configuration):
             metavar="FILE",
             default="slow_queries.log",
         )
-        logginggroup.add_argument(
-            "--editor",
-            help="username for editor making data changes",
-            dest="logging_editor",
-            metavar="EDITOR",
-            default="",
-        )
 
         # PostgresSQL options
         postgresqlgroup = parser.add_argument_group("PostgreSQL options")
@@ -145,7 +130,7 @@ class Configuration(_Configuration):
             dest="postgresql_host",
             metavar="HOST",
             help="PostgreSQL server host or socket directory [default: %(default)s]",
-            default="devmirror.lmfdb.xyz",
+            default="seminars.lmfdb.xyz",
         )
         postgresqlgroup.add_argument(
             "--postgresql-port",
@@ -161,15 +146,16 @@ class Configuration(_Configuration):
             dest="postgresql_user",
             metavar="USER",
             help="PostgreSQL username [default: %(default)s]",
-            default="lmfdb",
+            default="editor",
         )
 
+        default_password="Obtain the development's database password by emailing researchseminars@math.mit.edu"
         postgresqlgroup.add_argument(
             "--postgresql-pass",
             dest="postgresql_password",
             metavar="PASS",
             help="PostgreSQL password [default: %(default)s]",
-            default="lmfdb",
+            default=default_password,
         )
 
         postgresqlgroup.add_argument(
@@ -177,7 +163,7 @@ class Configuration(_Configuration):
             dest="postgresql_dbname",
             metavar="DBNAME",
             help="PostgreSQL database name [default: %(default)s]",
-            default="lmfdb",
+            default="beantheory",
         )
 
         # undocumented options
@@ -238,8 +224,6 @@ class Configuration(_Configuration):
             if opt in extopts:
                 self.flask_options[opt] = extopts[opt]
 
-        self.color = opts["core"]["color"]
-
         self.postgresql_options = {
             "port": opts["postgresql"]["port"],
             "host": opts["postgresql"]["host"],
@@ -251,11 +235,16 @@ class Configuration(_Configuration):
             if elt in opts["postgresql"]:
                 self.postgresql_options[elt] = opts["postgresql"][elt]
 
+        if opts["postgresql"]["password"] == default_password:
+            print("#"*90)
+            print(default_password)
+            print("and edit the file config.ini accordingly")
+            print("#"*90)
+
         self.logging_options = {
             "logfile": opts["logging"]["logfile"],
             "slowcutoff": opts["logging"]["slowcutoff"],
             "slowlogfile": opts["logging"]["slowlogfile"],
-            "editor": opts["logging"]["editor"],
         }
         if "logfocus" in extopts:
             self.logging_options["logfocus"] = extopts["logfocus"]
@@ -269,9 +258,6 @@ class Configuration(_Configuration):
 
     def get_flask(self):
         return self.flask_options
-
-    def get_color(self):
-        return self.color
 
     def get_postgresql(self):
         return self.postgresql_options
