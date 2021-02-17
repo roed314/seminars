@@ -25,7 +25,7 @@ def static_knowl(name, title=None):
     if title is None:
         title = knowl.get("title", "")
     knowl["contents"]=Markup(knowl.get("contents",""))
-    return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
+    return r'<a title="{title} (click to expand)" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
         title=title, content=Markup.escape(render_template("static-knowl.html", knowl=knowl))
     )
 
