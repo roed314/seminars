@@ -77,7 +77,7 @@ def setup():
     logger.setLevel(logging.INFO)
     logfile = Configuration().get_logging()["logfile"]
     ch = logging.FileHandler(logfile)
-    ch.setLevel(logging.INFO)
+    ch.setLevel(logging.WARNING)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
