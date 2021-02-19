@@ -3,7 +3,7 @@ import secrets
 from urllib.parse import urlencode, quote
 from flask import url_for, redirect, render_template
 from flask_login import current_user
-from lmfdb.backend.utils import DelayCommit, IdentifierWrapper
+from psycodict.utils import DelayCommit, IdentifierWrapper
 from seminars import db
 from seminars.utils import (
     SPEAKER_DELIMITER,
@@ -22,12 +22,11 @@ from seminars.language import languages
 from seminars.toggle import toggle
 from seminars.topic import topic_dag
 from seminars.seminar import WebSeminar, can_edit_seminar, audience_options
-from lmfdb.utils import flash_error
+from .utils import flash_error
 from markupsafe import Markup
 from psycopg2.sql import SQL
 import urllib.parse
 from icalendar import Event
-from lmfdb.logger import critical
 from datetime import datetime, timedelta
 import re
 
@@ -133,7 +132,8 @@ class WebTalk(object):
                 else:
                     # don't complain about columns we know are going to be set later
                     if not key in ["edited_by", "edited_at", "start_time", "end_time"]:
-                        critical("Need to update talk code to account for schema change key=%s" % key)
+                        from .app import app
+                        app.logger.critical("Need to update talk code to account for schema change key=%s" % key)
                     setattr(self, key, None)
         else:
             # The output from psycopg2 seems to always be given in the server's time zone

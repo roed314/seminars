@@ -1,1 +1,1 @@
-pushd /home/mathseminars/seminars-git-live/ && git fetch && git checkout origin/live -f && git submodule update &&  popd
+pushd /home/mathseminars/seminars-git-live/ && git fetch && git checkout origin/live -f && git submodule init && git submodule update &&  popd

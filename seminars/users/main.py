@@ -5,7 +5,6 @@ from email_validator import validate_email, EmailNotValidError
 from urllib.parse import urlencode, quote
 from functools import wraps
 from seminars.app import app, send_email
-from lmfdb.logger import make_logger
 from flask import (
     render_template,
     request,
@@ -22,7 +21,7 @@ from flask_login import (
     logout_user,
     LoginManager,
 )
-from lmfdb.utils import flash_error
+from seminars.utils import flash_error
 from markupsafe import Markup
 
 from seminars import db
@@ -47,7 +46,7 @@ def user_options():
     return { 'author_ids' : author_ids, 'timezones' : timezones }
 
 login_page = Blueprint("user", __name__, template_folder="templates")
-logger = make_logger(login_page)
+logger = app.logger
 
 
 login_manager = LoginManager()

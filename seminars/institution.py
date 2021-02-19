@@ -3,9 +3,8 @@ from flask_login import current_user
 from seminars import db
 from seminars.utils import allowed_shortname
 from seminars.users.pwdmanager import userdb
-from lmfdb.utils import flash_error
+from seminars.utils import flash_error
 from collections.abc import Iterable
-from lmfdb.logger import critical
 import pytz
 from datetime import datetime
 
@@ -73,7 +72,8 @@ class WebInstitution(object):
                 elif typ == "text[]":
                     setattr(self, key, [])
                 else:
-                    critical(
+                    from .app import app
+                    app.logger.critical(
                         "Need to update institution code to account for schema change key=%s" % key
                     )
                     setattr(self, key, None)
