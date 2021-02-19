@@ -147,6 +147,7 @@ class WebSeminar(object):
             self.online = True  # default
             self.by_api = False # reset by API code if needed
             self.access_control = 4 # default is instant registration
+            self.access_time = None
             self.edited_by = user.id
             self.visibility = 2 # public by default, once display is set to True
             self.audience = 0 # default is researchers
