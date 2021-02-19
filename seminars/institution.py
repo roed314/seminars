@@ -107,7 +107,10 @@ class WebInstitution(object):
 
     def admin_link(self):
         rec = userdb.lookup(self.admin)
-        link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
+        if rec:
+            link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
+        else:
+            link = "mailto:researchseminars@math.mit.edu"
         return '<a href="%s"><i>%s</i></a>' % (link, "Contact this page's maintainer.")
 
 def can_edit_institution(shortname, name, new):

@@ -10,7 +10,11 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../lmf
 
 # from .website import main
 # assert main
-from lmfdb.backend import db
+from lmfdb.backend.database import PostgresDatabase
+import __main__
+startQ =  getattr(__main__, '__file__').endswith("start-seminars.py") if hasattr(__main__, '__file__') else False
+from lmfdb.utils.config import Configuration
+db = PostgresDatabase(config=Configuration(writeargstofile=startQ, readargs=startQ))
 from lmfdb.backend.searchtable import PostgresSearchTable
 
 # Have to make sure that changes aren't logged using the LMFDB's logging mechanism.

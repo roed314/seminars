@@ -32,6 +32,7 @@ from seminars.toggle import toggle, toggle3way
 from seminars.knowls import static_knowl
 from .seminar import series_header
 from .talk import talks_header
+from . import db
 
 SEMINARS_VERSION = "Seminars Release 0.1"
 
@@ -162,6 +163,7 @@ def ctx_proc_userdata():
     data["topic_dag"] = topic_dag
     data["languages"] = languages
     data["url_for_with_args"] = url_for_with_args
+    data["db_read_only"] = db._read_only
 
     return data
 
