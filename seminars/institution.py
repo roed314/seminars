@@ -59,6 +59,7 @@ class WebInstitution(object):
             if data is None:
                 raise ValueError("Institution %s does not exist" % shortname)
         self.new = data is None
+        self.deleted = False
         if self.new:
             self.shortname = shortname
             self.type = "university"
@@ -71,6 +72,8 @@ class WebInstitution(object):
                     setattr(self, key, "")
                 elif typ == "text[]":
                     setattr(self, key, [])
+                elif typ == "timestamp with time zone":
+                    setattr(self, key, None)
                 else:
                     from .app import app
                     app.logger.critical(
