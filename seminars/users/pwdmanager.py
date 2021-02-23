@@ -6,18 +6,20 @@ import bcrypt
 import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
-from seminars.seminar import WebSeminar, seminars_search, seminars_lucky, next_talk_sorted
-from seminars.talk import WebTalk
+from seminars.seminar import seminars_search, seminars_lucky, next_talk_sorted, all_seminars
+from seminars.talk import talks_search
 from seminars.utils import pretty_timezone, log_error
+from seminars.toggle import toggle
 from psycodict.searchtable import PostgresSearchTable
 from seminars.utils import flash_error
 from flask import flash
 from psycodict.utils import DelayCommit
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
 import secrets
 from .main import logger
+from collections import defaultdict
 
 # Read about flask-login if you are unfamiliar with this UserMixin/Login
 from flask_login import UserMixin, AnonymousUserMixin
@@ -393,10 +395,13 @@ class SeminarsUser(UserMixin):
 
     @property
     def seminars(self):
+        seminars = all_seminars()
         ans = []
         for elt in self.seminar_subscriptions:
             try:
-                ans.append(WebSeminar(elt))
+                sem = seminars[elt]
+                if sem.visibility != 0 or sem.user_can_edit():
+                    ans.append(sem)
             except ValueError:
                 self._data["seminar_subscriptions"].remove(elt)
                 self._dirty = True
@@ -428,24 +433,54 @@ class SeminarsUser(UserMixin):
         return self._data.get("talk_subscriptions", {})
 
     @property
-    def talks(self):
-        res = []
+    def talks_query(self):
+        query = []
         for shortname, ctrs in self.talk_subscriptions.items():
-            for ctr in ctrs:
-                try:
-                    res.append(WebTalk(shortname, ctr))
-                except ValueError:
-                    self._data["talk_subscriptions"][shortname].remove(ctr)
-                    self._dirty = True
+            query.append({'seminar_id': shortname,
+                          'seminar_ctr': {'$in': ctrs}})
+        return query
 
-        if self._dirty:
-            for shortname in self._data["talk_subscriptions"]:
-                if not self._data["talk_subscriptions"]:
-                    self._data["talk_subscriptions"].pop("shortname")
+
+
+    @property
+    def talks(self):
+        query = {'$or': self.talks_query, 'hidden': {"$or": [False, {"$exists": False}]}}
+        res = [t for t in talks_search(query,
+                                       sort=["start_time"],
+                                       seminar_dict=all_seminars())
+               if t.searchable() or t.user_can_edit(user=self)]
+        talk_subscriptions = defaultdict(list)
+
+        for t in res:
+            bisect.insort(talk_subscriptions[t.seminar_id], t.seminar_ctr)
+
+        if talk_subscriptions != self.talk_subscriptions:
+            self._data["talk_subscriptions"] = talk_subscriptions
             self.save()
 
-        res.sort(key=lambda elt: elt.start_time)
         return res
+
+    @property
+    def ics_talks(self):
+        query = self.talks_query[:]
+        for shortname in self.seminar_subscriptions:
+            query.append({'seminar_id': shortname})
+        query = {'$or': query, 'hidden': {"$or": [False, {"$exists": False}]}}
+        query_st = {}
+        now = datetime.now(tz=UTC)
+        if self.ics_limit_past:
+            query_st['$gte'] = now - timedelta(days=14)
+        if self.ics_limit_future:
+            query_st['$lte'] = now + timedelta(days=31)
+        if query_st:
+            query['start_time'] = query_st
+        res = [t for t in talks_search(query,
+                                       seminar_dict=all_seminars())
+               if t.searchable() or t.user_can_edit(user=self)]
+        res.sort(key=lambda elt:
+                 now - elt.start_time if now > elt.start_time else elt.start_time - now)
+        return res
+
 
     def talk_subscriptions_add(self, shortname, ctr):
         if shortname in self._data["seminar_subscriptions"]:
@@ -561,6 +596,44 @@ class SeminarsUser(UserMixin):
 
     def delete(self):
         userdb.delete(self._data)
+
+
+    @property
+    def ics_limit_past(self):
+        return self._data.get("ics_limit_past", True)
+
+    @property
+    def ics_limit_future(self):
+        return self._data.get("ics_limit_future", False)
+
+
+    # avoiding writing duplicated javascript
+    @property
+    def toggle_limit_past(self):
+        name = 'IC/ics_limit_past' # series shortnames must be at least 3 letters
+        return toggle(
+            tglid="tlg" + name.replace('/','--'),
+            name=name,
+            value=1 if self.ics_limit_past else -1,
+            classes="subscribe ics_options"
+        )
+
+    @property
+    def toggle_limit_future(self):
+        name = 'IC/ics_limit_future' # series shortnames must be at least 3 letters
+        return toggle(
+            tglid="tlg" + name.replace('/','--'),
+            name=name,
+            value=1 if self.ics_limit_future else -1,
+            classes="subscribe ics_options"
+        )
+
+    def ics_limit(self, option, value):
+        assert option in ['ics_limit_future', 'ics_limit_past']
+        assert value in [True, False]
+        self._data[option] = value
+        self._dirty = True
+        return 200, "Change recorded"
 
 class SeminarsAnonymousUser(AnonymousUserMixin):
     """

@@ -880,18 +880,19 @@ function register_subsribe_change() {
           $(row).notify(msg, {className: "success", position:"right" });
           //evt.stopPropagation();
           var name = elem[0].name;
-          // is a seminar
-          if( ! name.includes('/') ){
-            // apply the same thing to the talks of that seminar
-            foo = $('input.subscribe[id^="tlg' + name +'--"]');
-            $('input.subscribe[id^="tlg' + name +'--"]').val(elem.val());
-            $('input.subscribe[id^="tlg' + name +'--"]').attr('data-chosen', elem.val());
-          } else {
-            // for the browse page
-            if( elem.val() == "1" ) {
-              $(row).removeClass("calendar-filtered");
-            } else {
-              $(row).addClass("calendar-filtered");
+          if( ! elem.hasClass("ics_options") ){ // is not part of the ICS options
+            if ( ! name.includes('/') ){ // is a seminar
+              // apply the same thing to the talks of that seminar
+              foo = $('input.subscribe[id^="tlg' + name +'--"]');
+              $('input.subscribe[id^="tlg' + name +'--"]').val(elem.val());
+              $('input.subscribe[id^="tlg' + name +'--"]').attr('data-chosen', elem.val());
+            } else { // is a talk
+              // for the browse page
+              if( elem.val() == "1" ) {
+                $(row).removeClass("calendar-filtered");
+              } else {
+                $(row).addClass("calendar-filtered");
+              }
             }
           }
         }
