@@ -67,6 +67,29 @@
     <p>Please confirm your email to get access to your personalized calendar.</p>
   {% else %}
     {{ calendar_block('favorites', user) }}
+
+    <h2>Calendar options</h2>
+    <form name="ical">
+      <table>
+        <tr>
+          <td>
+            {{user.toggle_limit_past | safe }}
+          </td>
+          <td>
+            Do not sync past events more than one week old.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            {{user.toggle_limit_future | safe }}
+          </td>
+          <td>
+            Do not sync events more than one month in the future.
+          </td>
+        </tr>
+      </table>
+    </form>
+
   {% endif %}
 
   {% if user.is_creator %}
