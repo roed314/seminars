@@ -587,18 +587,18 @@ Thank you,
         # Check whether the current user can delete the talk
         return self.user_can_edit()
 
-    def user_can_edit(self):
+    def user_can_edit(self, user=current_user):
         # Check whether the current user can edit the talk
         # See can_edit_seminar for another permission check
         # that takes a seminar's shortname as an argument
         # and returns various error messages if not editable
         return (
-            current_user.is_subject_admin(self)
-            or current_user.email_confirmed
+            user.is_subject_admin(self)
+            or user.email_confirmed
             and (
-                current_user.email.lower() in self.seminar.editors()
-                or (self.speaker_email and current_user.email and
-                    current_user.email.lower() in self.speaker_email.lower())
+                user.email.lower() in self.seminar.editors()
+                or (self.speaker_email and user.email and
+                    user.email.lower() in self.speaker_email.lower())
             )
         )
 
@@ -710,6 +710,10 @@ Email link to speaker
             link=self.speaker_link(), email_to=email_to, msg=urlencode(data, quote_via=quote),
         )
 
+    @property
+    def link(self):
+        return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
+
     def event(self, user):
         event = Event()
         #FIXME: code to remove hrefs from speaker name is a temporary hack to be
@@ -725,7 +729,7 @@ Email link to speaker
         desc = ""
         # Title
         if self.title:
-            desc += "Title: %s\n" % (self.title)
+            desc += "Title: <a href=%s>%s</a>\n" % (self.link, self.title,)
         # Speaker and seminar
         desc += "by %s" % (speaker)
         if self.seminar.name:
@@ -752,9 +756,10 @@ Email link to speaker
         if self.comments:
             desc += "\n%s\n" % self.comments
 
+
+
         event.add("description", desc)
-        if self.room:
-            event.add("location", "Lecture held in {}".format(self.room))
+        event.add("location", self.link)
         event.add("DTSTAMP", datetime.now(tz=pytz.UTC))
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
