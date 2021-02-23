@@ -7,7 +7,7 @@ import urllib.parse
 from seminars import db
 from seminars.tokens import generate_token
 from seminars.seminar import seminars_search, seminars_lucky, next_talk_sorted, all_seminars
-from seminars.talk import WebTalk, talks_search
+from seminars.talk import talks_search
 from seminars.utils import pretty_timezone, log_error
 from seminars.toggle import toggle
 from psycodict.searchtable import PostgresSearchTable
