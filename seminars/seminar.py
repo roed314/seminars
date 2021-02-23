@@ -203,7 +203,7 @@ class WebSeminar(object):
                 sort=["name"],
             )]
         else:
-            institutions = [(shortname,) + institutions[shortname] for shortname in self.institutions]
+            institutions = [(elt,) + institutions[elt] for elt in self.institutions]
             institutions.sort(key=lambda x: x[1])
         self.institutions_data = institutions
         self.cleanse()

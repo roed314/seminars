@@ -61,6 +61,7 @@ class WebInstitution(object):
         self.new = data is None
         self.deleted = False
         if self.new:
+            self.edited_by = user.id
             self.shortname = shortname
             self.type = "university"
             self.timezone = "US/Eastern"
