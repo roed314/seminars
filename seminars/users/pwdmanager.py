@@ -94,8 +94,10 @@ class PostgresUserTable(PostgresSearchTable):
         kwargs["api_access"] = kwargs.get("api_access", 0)
         kwargs["api_token"] = kwargs.get("api_token", secrets.token_urlsafe(32))
         kwargs["created"] = datetime.now(UTC)
-        if "external_ids" not in kwargs:
-            kwargs["external_ids"] = []
+        kwargs["external_ids"] = kwargs.get("external_ids", [])
+        if 'ics_limit_past' in self.col_type: # FIXME after adding columns
+            kwargs['ics_limit_past'] = True
+            kwargs['ics_limit_future'] = False
         if sorted(list(kwargs) + ['id']) != sorted(self.col_type):
             log_error("Columns for user creation do not match, %s != %s" % (sorted(list(kwargs) + ['id']), sorted(self.col_type)))
         self.insert_many([kwargs], restat=False)
