@@ -348,12 +348,6 @@ class WebTalk(object):
             #    title += " (online)"
         return title
 
-    def show_link_title(self):
-        return "<a href={url}>{title}</a>".format(
-            url=url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr),
-            title=self.show_title(),
-        )
-
     def show_knowl_title(self, _external=False, rescheduled=False, blackout=False, preload=False, tz=None):
         if self.deleted or _external or preload:
             return r'<a title="{title}" knowl="dynamic_show" kwargs="{content}">{title}</a>'.format(
@@ -710,11 +704,10 @@ Email link to speaker
             link=self.speaker_link(), email_to=email_to, msg=urlencode(data, quote_via=quote),
         )
 
-    @property
-    def link(self):
-        return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr)
 
     def event(self, user):
+        link = url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr,
+                       _external=True, _scheme='https')
         event = Event()
         #FIXME: code to remove hrefs from speaker name is a temporary hack to be
         # removed once we support multiple speakers
@@ -729,7 +722,7 @@ Email link to speaker
         desc = ""
         # Title
         if self.title:
-            desc += "Title: <a href=%s>%s</a>\n" % (self.link, self.title,)
+            desc += 'Title: <a href="%s">%s</a>\n' % (link, self.title,)
         # Speaker and seminar
         desc += "by %s" % (speaker)
         if self.seminar.name:
@@ -759,7 +752,7 @@ Email link to speaker
 
 
         event.add("description", desc)
-        event.add("location", self.link)
+        event.add("location", link)
         event.add("DTSTAMP", datetime.now(tz=pytz.UTC))
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event

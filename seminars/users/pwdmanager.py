@@ -14,7 +14,7 @@ from psycodict.searchtable import PostgresSearchTable
 from seminars.utils import flash_error
 from flask import flash
 from psycodict.utils import DelayCommit
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
 import secrets
@@ -464,10 +464,19 @@ class SeminarsUser(UserMixin):
         for shortname in self.seminar_subscriptions:
             query.append({'seminar_id': shortname})
         query = {'$or': query, 'hidden': {"$or": [False, {"$exists": False}]}}
+        query_st = {}
+        now = datetime.now(tz=UTC)
+        if self.ics_limit_past:
+            query_st['$gte'] = now - timedelta(days=14)
+        if self.ics_limit_future:
+            query_st['$lte'] = now + timedelta(days=31)
+        if query_st:
+            query['start_time'] = query_st
         res = [t for t in talks_search(query,
-                                       sort=["start_time"],
                                        seminar_dict=all_seminars())
                if t.searchable() or t.user_can_edit(user=self)]
+        res.sort(key=lambda elt:
+                 now - elt.start_time if now > elt.start_time else elt.start_time - now)
         return res
 
 
@@ -599,7 +608,7 @@ class SeminarsUser(UserMixin):
     # avoiding writing duplicated javascript
     @property
     def toggle_limit_past(self):
-        name = 'IC/limit_past' # series shortnames must be at least 3 letters
+        name = 'IC/ics_limit_past' # series shortnames must be at least 3 letters
         return toggle(
             tglid="tlg" + name.replace('/','--'),
             name=name,
@@ -609,7 +618,7 @@ class SeminarsUser(UserMixin):
 
     @property
     def toggle_limit_future(self):
-        name = 'IC/limit_future' # series shortnames must be at least 3 letters
+        name = 'IC/ics_limit_future' # series shortnames must be at least 3 letters
         return toggle(
             tglid="tlg" + name.replace('/','--'),
             name=name,
@@ -621,6 +630,7 @@ class SeminarsUser(UserMixin):
         assert option in ['ics_limit_future', 'ics_limit_past']
         assert value in [True, False]
         self._data[option] = value
+        self._dirty = True
         return 200, "Change recorded"
 
 class SeminarsAnonymousUser(AnonymousUserMixin):
