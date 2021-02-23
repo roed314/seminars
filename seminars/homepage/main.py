@@ -3,13 +3,16 @@ from seminars import db
 from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk
 from seminars.utils import (
     Toggle,
-    ics_file,
-    topdomain,
-    maxlength,
     adapt_datetime,
+    collapse_ors,
     date_and_daytime_to_time,
     date_and_daytimes_to_times,
+    flash_error,
+    ics_file,
+    maxlength,
     process_user_input,
+    to_dict,
+    topdomain,
     url_for_with_args,
 )
 from seminars.topic import topic_dag
@@ -17,7 +20,7 @@ from seminars.language import languages
 from seminars.institution import institutions, WebInstitution
 from seminars.knowls import static_knowl
 from flask import abort, render_template, request, redirect, url_for, Response, make_response
-from seminars.seminar import seminars_search, all_seminars, all_organizers, seminars_lucky, next_talk_sorted, series_sorted, audience_options
+from seminars.seminar import seminars_search, all_seminars, all_organizers, all_institutions, seminars_lucky, next_talk_sorted, series_sorted, audience_options
 from flask_login import current_user
 import json
 from datetime import datetime, timedelta
@@ -25,11 +28,7 @@ import pytz
 from urllib.parse import urlencode
 from collections import Counter
 from dateutil.parser import parse
-from lmfdb.utils import (
-    flash_error,
-    to_dict,
-)
-from lmfdb.utils.search_boxes import (
+from seminars.search_boxes import (
     SearchArray,
     SearchBox,
     SelectBox,
@@ -37,7 +36,6 @@ from lmfdb.utils.search_boxes import (
     TextBox,
 )
 
-from lmfdb.utils.search_parsing import collapse_ors
 
 DEFAULT_AUDIENCE = 5    # Show everything up to general audience by default
 
@@ -720,10 +718,11 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     org_query, more = {}, {}
     # we will be selecting talks satsifying the query and recording whether they satisfy the "more" query
     seminars_parser(info, more, org_query)
-    results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), more=more))
+    institutions = all_institutions()
+    results = list(seminars_search(kw_query, organizer_dict=all_organizers(org_query), institution_dict=institutions, more=more))
     if info.get("keywords", ""):
         parse_substring(info, org_query, "keywords", organizers_keyword_columns())
-        results += list(seminars_search(query, organizer_dict=all_organizers(org_query), more=more))
+        results += list(seminars_search(query, organizer_dict=all_organizers(org_query), institution_dict=institutions, more=more))
         unique = {s.shortname:s for s in results}
         results = [unique[key] for key in unique]
     series = series_sorted(results, conference=conference, reverse=past)
@@ -1022,7 +1021,10 @@ def show_institution(shortname):
     query = {"institutions": {"$contains": shortname}}
     if not current_user.is_admin:
         query["display"] = True
-    events = next_talk_sorted(list(seminars_search(query, organizer_dict=all_organizers())))
+    # Find other institutions that are joint with seminars here
+    others = list(set(sum(seminars_search(query, "institutions"), [])))
+    idict = all_institutions({"shortname": {"$in": others}})
+    events = next_talk_sorted(list(seminars_search(query, organizer_dict=all_organizers(), institution_dict=idict)))
     seminars = [S for S in events if not S.is_conference]
     conferences = [S for S in events if S.is_conference]
     conferences.sort(key=lambda S: (S.start_date, S.name))

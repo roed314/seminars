@@ -9,11 +9,10 @@ from seminars.tokens import generate_token
 from seminars.seminar import WebSeminar, seminars_search, seminars_lucky, next_talk_sorted
 from seminars.talk import WebTalk
 from seminars.utils import pretty_timezone, log_error
-from lmfdb.backend.searchtable import PostgresSearchTable
-from lmfdb.utils import flash_error
+from psycodict.searchtable import PostgresSearchTable
+from seminars.utils import flash_error
 from flask import flash
-from lmfdb.backend.utils import DelayCommit
-from lmfdb.logger import critical
+from psycodict.utils import DelayCommit
 from datetime import datetime
 from pytz import UTC, all_timezones, timezone, UnknownTimeZoneError
 import bisect
@@ -93,8 +92,10 @@ class PostgresUserTable(PostgresSearchTable):
         kwargs["api_access"] = kwargs.get("api_access", 0)
         kwargs["api_token"] = kwargs.get("api_token", secrets.token_urlsafe(32))
         kwargs["created"] = datetime.now(UTC)
-        if "external_ids" not in kwargs:
-            kwargs["external_ids"] = []
+        kwargs["external_ids"] = kwargs.get("external_ids", [])
+        if 'ics_limit_past' in self.col_type: # FIXME after adding columns
+            kwargs['ics_limit_past'] = True
+            kwargs['ics_limit_future'] = False
         if sorted(list(kwargs) + ['id']) != sorted(self.col_type):
             log_error("Columns for user creation do not match, %s != %s" % (sorted(list(kwargs) + ['id']), sorted(self.col_type)))
         self.insert_many([kwargs], restat=False)
@@ -159,7 +160,8 @@ class PostgresUserTable(PostgresSearchTable):
         for key in list(data):
             if key not in self.search_cols:
                 if key != "id":
-                    critical("Need to update pwdmanager code to account for schema change key=%s" % key)
+                    from .app import app
+                    app.logger.critical("Need to update pwdmanager code to account for schema change key=%s" % key)
                 data.pop(key)
         with DelayCommit(db):
             if "email" in data:

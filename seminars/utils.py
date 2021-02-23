@@ -8,8 +8,8 @@ from flask_login import current_user
 from functools import lru_cache
 from icalendar import Calendar
 from io import BytesIO
-from lmfdb.backend.utils import IdentifierWrapper
-from lmfdb.utils.search_boxes import SearchBox
+from psycodict.utils import IdentifierWrapper
+from seminars.search_boxes import SearchBox
 from markupsafe import Markup, escape
 from psycopg2.sql import SQL
 from seminars import db
@@ -18,7 +18,7 @@ from urllib.parse import urlparse, urlencode
 from psycopg2.sql import Placeholder
 import pytz
 import re
-from lmfdb.backend.searchtable import PostgresSearchTable
+from psycodict.searchtable import PostgresSearchTable
 from .toggle import toggle
 
 
@@ -850,4 +850,55 @@ def sanitized_table(name):
     table.search_cols = [col for col in table.search_cols if col in whitelisted_cols]
     table.col_type = {col: typ for (col, typ) in table.col_type.items() if col in whitelisted_cols}
     return table
+
+
+def flash_error(errmsg, *args):
+    """ flash errmsg in red with args in black; errmsg may contain markup, including latex math mode"""
+    flash(Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))), "error")
+
+def flash_warning(errmsg, *args):
+    """ flash warning in grey with args in red; warning may contain markup, including latex math mode"""
+    flash(Markup("Warning: " + (errmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args))), "warning")
+
+def to_dict(args, exclude = [], **kwds):
+    r"""
+    Input a dictionary `args` whose values may be lists.
+    Output a dictionary whose values are not lists, by choosing the last
+    element in a list if the input was a list.
+
+    INPUT:
+
+    - ``args`` -- a dictionary
+    - ``exclude`` -- a list of keys to allow lists for.
+    - ``kwds`` -- also included in the result
+
+    Example:
+    >>> to_dict({"not_list": 1, "is_list":[2,3,4]})
+    {'is_list': 4, 'not_list': 1}
+    """
+    d = dict(kwds)
+    for key, values in args.items():
+        if key in d:
+            continue
+        if isinstance(values, list) and key not in exclude:
+            if values:
+                d[key] = values[-1]
+        elif values:
+            d[key] = values
+    return d
+
+
+def collapse_ors(parsed, query):
+    # work around syntax for $or
+    # we have to foil out multiple or conditions
+    if parsed[0] == '$or' and '$or' in query:
+        newors = []
+        for y in parsed[1]:
+            oldors = [dict.copy(x) for x in query['$or']]
+            for x in oldors:
+                x.update(y)
+            newors.extend(oldors)
+        parsed[1] = newors
+    query[parsed[0]] = parsed[1]
+
 

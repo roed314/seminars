@@ -3,9 +3,8 @@ from flask_login import current_user
 from seminars import db
 from seminars.utils import allowed_shortname
 from seminars.users.pwdmanager import userdb
-from lmfdb.utils import flash_error
+from seminars.utils import flash_error
 from collections.abc import Iterable
-from lmfdb.logger import critical
 import pytz
 from datetime import datetime
 
@@ -60,7 +59,9 @@ class WebInstitution(object):
             if data is None:
                 raise ValueError("Institution %s does not exist" % shortname)
         self.new = data is None
+        self.deleted = False
         if self.new:
+            self.edited_by = user.id
             self.shortname = shortname
             self.type = "university"
             self.timezone = "US/Eastern"
@@ -72,8 +73,11 @@ class WebInstitution(object):
                     setattr(self, key, "")
                 elif typ == "text[]":
                     setattr(self, key, [])
+                elif typ == "timestamp with time zone":
+                    setattr(self, key, None)
                 else:
-                    critical(
+                    from .app import app
+                    app.logger.critical(
                         "Need to update institution code to account for schema change key=%s" % key
                     )
                     setattr(self, key, None)

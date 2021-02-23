@@ -13,7 +13,6 @@ add --debug if you are developing (auto-restart, full stacktrace in browser, ...
 from __future__ import print_function, absolute_import
 
 # Needs to be done first so that other modules and gunicorn can use logging
-from lmfdb.logger import info
 from .app import app, set_running  # So that we can set it running below
 
 
@@ -34,13 +33,13 @@ assert api
 
 
 def main():
-    info("main: ...done.")
-    from lmfdb.utils.config import Configuration
+    app.logger.info("main: ...done.")
+    from .config import Configuration
 
     flask_options = Configuration().get_flask()
 
     if "profiler" in flask_options and flask_options["profiler"]:
-        info("Profiling!")
+        app.logger.info("Profiling!")
         from werkzeug.middleware.profiler import ProfilerMiddleware
 
         app.wsgi_app = ProfilerMiddleware(
