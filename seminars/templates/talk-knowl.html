@@ -11,12 +11,12 @@
         </div>
       {% endif %}
   </div>
-  <div align="right">
+  <div align="left">
       <b>{{ talk.show_time_and_duration(tz=tz) | safe }}</b><br>
       {% if not talk.is_past() %}
         {% set room = talk.room %}
         {% if room %}
-        <p>Lecture held in {{ room }}</p>
+        Lecture held in {{ room }}<br>
         {% endif %}
         {% if not talk.deleted %}
           {% set stream_link = talk.show_stream_link() %}
