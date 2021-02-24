@@ -16,7 +16,7 @@
       {% if not talk.is_past() %}
         {% set room = talk.room %}
         {% if room %}
-          Lecture held in {{ room }}
+        <p>Lecture held in {{ room }}</p>
         {% endif %}
         {% if not talk.deleted %}
           {% set stream_link = talk.show_stream_link() %}
