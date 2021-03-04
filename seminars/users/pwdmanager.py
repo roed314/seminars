@@ -444,6 +444,8 @@ class SeminarsUser(UserMixin):
 
     @property
     def talks(self):
+        if not self.talks_query: # searching on the empty gives us everything
+            return []
         query = {'$or': self.talks_query, 'hidden': {"$or": [False, {"$exists": False}]}}
         res = [t for t in talks_search(query,
                                        sort=["start_time"],
@@ -465,6 +467,8 @@ class SeminarsUser(UserMixin):
         query = self.talks_query[:]
         for shortname in self.seminar_subscriptions:
             query.append({'seminar_id': shortname})
+        if not query: # searching on the empty query us everything
+            return []
         query = {'$or': query, 'hidden': {"$or": [False, {"$exists": False}]}}
         query_st = {}
         now = datetime.now(tz=UTC)
