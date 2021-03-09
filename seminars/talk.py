@@ -717,6 +717,7 @@ Email link to speaker
         else:
             speaker = self.show_speaker(raw=True)
         event.add("summary", speaker)
+        event.add("location", link)
         event.add("dtstart", adapt_datetime(self.start_time, pytz.UTC))
         event.add("dtend", adapt_datetime(self.end_time, pytz.UTC))
         desc = ""
@@ -752,7 +753,6 @@ Email link to speaker
 
 
         event.add("description", desc)
-        event.add("location", link)
         event.add("DTSTAMP", datetime.now(tz=pytz.UTC))
         event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
         return event
