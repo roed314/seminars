@@ -583,7 +583,10 @@ def process_user_input(inp, col, typ, tz=None):
         # as datetimes on Jan 1, 2020.
         if inp.isdigit():
             inp += ":00"  # treat numbers as times not dates
-        t = parse_time(inp)
+        try:
+            t = parse_time(inp)
+        except Exception:
+            raise ValueError("Unable to parse time '%s'" % inp)
         t = t.replace(year=2020, month=1, day=1)
         assert tz is not None
         return localize_time(t, tz)
@@ -605,7 +608,10 @@ def process_user_input(inp, col, typ, tz=None):
         return validate_email(inp)["email"]
     elif typ == "timestamp with time zone":
         assert tz is not None
-        return localize_time(parse_time(inp), tz)
+        try:
+            return localize_time(parse_time(inp), tz)
+        except Exception:
+            raise ValueError("Unable to parse date '%s'" % inp)
     elif typ == "daytime":
         res = validate_daytime(inp)
         if res is None:
@@ -623,7 +629,10 @@ def process_user_input(inp, col, typ, tz=None):
             raise ValueError("Invalid day of week, must be an integer in [0,6]")
         return res
     elif typ == "date":
-        return parse_time(inp).date()
+        try:
+            return parse_time(inp).date()
+        except Exception:
+            raise ValueError("Unable to parse date '%s'" % inp)
     elif typ == "boolean":
         if inp in ["yes", "true", "y", "t", True]:
             return True
