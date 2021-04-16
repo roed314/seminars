@@ -67,8 +67,7 @@ mail = Mail(app)
 # Enable cross origin for fonts
 CORS(app, resources={r"/fontawesome/webfonts/*": {"origins": "*"}, r"/api/*": {"origins": "*"}})
 
-@app.before_first_request
-def setup():
+def setup_logging():
     import logging
     from .config import Configuration
     formatter = logging.Formatter("""%(asctime)s %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]:\n  %(message)s""")
@@ -80,6 +79,7 @@ def setup():
     ch.setLevel(logging.WARNING)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
+setup_logging()
 
 
 

@@ -11,6 +11,23 @@
         </div>
       {% endif %}
   </div>
+  <div align="left">
+      <b>{{ talk.show_time_and_duration(tz=tz) | safe }}</b><br>
+      {% if not talk.is_past() %}
+        {% set room = talk.room %}
+        {% if room %}
+        Lecture held in {{ room }}<br>
+        {% endif %}
+        {% if not talk.deleted %}
+          {% set stream_link = talk.show_stream_link() %}
+          {% set live_link = talk.show_live_link(external=_external) %}
+          {% set hint = talk.show_password_hint() %}
+          {{ stream_link | safe }}
+          {% if (room or stream_link) and hint and live_link %}<br>{% endif %}
+          {{ live_link | safe }} {{ hint | safe }}
+        {% endif %}
+      {% endif %}
+  </div>
   <div style="clear:both;"></div>
 
   <div class="talk-details-container" style="margin:-10px 0px 0px 0px;">
@@ -45,23 +62,7 @@
     {{ calendar_block("talk", talk) }}
     {% endif %}
 
-    <div align="right">
-        <b>{{ talk.show_time_and_duration(tz=tz) | safe }}</b><br>
-        {% if not talk.is_past() %}
-          {% set room = talk.room %}
-          {% if room %}
-            Lecture held in {{ room }}
-          {% endif %}
-          {% if not talk.deleted %}
-            {% set stream_link = talk.show_stream_link() %}
-            {% set live_link = talk.show_live_link(external=_external) %}
-            {% set hint = talk.show_password_hint() %}
-            {{ stream_link | safe }}
-            {% if (room or stream_link) and hint and live_link %}<br>{% endif %}
-            {{ hint | safe }} {{ live_link | safe }}
-          {% endif %}
-        {% endif %}
-    </div>
+
   </div>
 </div>
 

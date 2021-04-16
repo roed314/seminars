@@ -586,7 +586,10 @@ def seminar_subscriptions_remove(shortname):
 @login_page.route("/subscribe/<shortname>/<ctr>")
 @login_required
 def talk_subscriptions_add(shortname, ctr):
-    code, msg = current_user.talk_subscriptions_add(shortname, int(ctr))
+    if shortname == 'IC':
+        code, msg =  current_user.ics_limit(ctr, True)
+    else:
+        code, msg = current_user.talk_subscriptions_add(shortname, int(ctr))
     current_user.save()
     return msg, code
 
@@ -594,7 +597,10 @@ def talk_subscriptions_add(shortname, ctr):
 @login_page.route("/unsubscribe/<shortname>/<ctr>")
 @login_required
 def talk_subscriptions_remove(shortname, ctr):
-    code, msg = current_user.talk_subscriptions_remove(shortname, int(ctr))
+    if shortname == 'IC':
+        code, msg =  current_user.ics_limit(ctr, False)
+    else:
+        code, msg = current_user.talk_subscriptions_remove(shortname, int(ctr))
     current_user.save()
     return msg, code
 
@@ -613,16 +619,8 @@ def user_ics_file(token):
             return flask.abort(404, "The email address has not yet been confirmed!")
     except Exception:
         return flask.abort(404, "Invalid link")
-
-    talks = [t for t in user.talks if not (t.hidden or t.seminar.visibility == 0)]
-    for seminar in user.seminars:
-        # Organizers may have hidden seminar
-        if seminar.visibility == 0:
-            continue
-        for talk in seminar.talks():
-            talks.append(talk)
     return ics_file(
-        talks=talks,
+        talks=user.ics_talks,
         filename="seminars.ics",
         user=user)
 
