@@ -402,7 +402,7 @@ class SeminarsUser(UserMixin):
                 sem = seminars[elt]
                 if sem.visibility != 0 or sem.user_can_edit():
                     ans.append(sem)
-            except ValueError:
+            except (KeyError, ValueError):
                 self._data["seminar_subscriptions"].remove(elt)
                 self._dirty = True
         ans = next_talk_sorted(ans)
