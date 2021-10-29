@@ -714,6 +714,11 @@ $(document).ready(function () {
         function (e) {
             setMoreButton();
         });
+    $('#daterange').on(
+        "apply.daterangepicker",
+        function (e) {
+            setMoreButton();
+        });
     // this is now done on the server side
     //for (let i=0; i<filter_menus.length; i++) {
     //    if (getCookie("visible_" + filter_menus[i]) == "1") {
