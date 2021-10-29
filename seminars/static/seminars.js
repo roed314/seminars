@@ -745,7 +745,7 @@ $(document).ready(function () {
 $(document).ready(function() {
   dr = $('#daterange')
   var past = $('input[name="past"]').val() === "True";
-  var minDate = 'January 1, 2020';
+  var minDate = 'January 1, 1970';
   var maxDate = 'January 1, 2050';
   if (past) {
     maxDate = moment();
@@ -838,6 +838,7 @@ $(document).ready(function() {
     opens: "center",
     drops: "down",
     ranges: ranges,
+    showDropdowns: true,
     cancelButtonClasses: "cancelcolors",
     locale: {
       format: "MMMM D, YYYY",
