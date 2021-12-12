@@ -1,0 +1,19 @@
+# WARNING: after editing this file don't forget to copy it to
+# /home/mathseminars/seminars-git-test/gunicorn-config-test.py
+# as gunicorn doesn't handle well the config file being part of the repo
+wsgi_app = 'seminars.website:app'
+bind = "0.0.0.0:9092"
+workers = 15
+SESSION_PROTECTION = None
+#daemon = True
+pidfile = '/home/mathseminars/gunicorn-test.pid'
+#
+errorlog = '/home/mathseminars/logs/test/errorlog'
+accesslog = '/home/mathseminars/logs/test/accesslog'
+loglevel = 'info' # change to 'debug' for more output
+#
+default_proc_name = 'mathseminars-test'
+timeout = 30
+max_requests = 1000
+# The maximum size of HTTP request line in bytes.
+limit_request_line = 8190
