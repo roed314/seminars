@@ -2,7 +2,7 @@
 # /home/mathseminars/seminars-git-test/gunicorn-config-test.py
 # as gunicorn doesn't handle well the config file being part of the repo
 wsgi_app = 'seminars.website:app'
-bind = "0.0.0.0:9092"
+bind = "0.0.0.0:9094"
 workers = 15
 SESSION_PROTECTION = None
 #daemon = True
