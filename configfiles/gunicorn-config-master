@@ -13,7 +13,7 @@ accesslog = '/home/mathseminars/logs/master/accesslog'
 loglevel = 'info' # change to 'debug' for more output
 #
 default_proc_name = 'mathseminars-master'
-timeout = 5
+timeout = 30
 max_requests = 1000
 # The maximum size of HTTP request line in bytes.
 limit_request_line = 8190
