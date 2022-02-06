@@ -103,6 +103,9 @@ def parse_daterange(info, query, time=True):
         if "-" not in date:
             # make it into a range
             date = date + "-" + date
+        elif date.count("-") > 1:
+            flash_error("Too many hyphens in date %s.  Try using / instead.", date)
+            return
         start, end = date.split("-")
         if start.strip():
             try:
