@@ -3,7 +3,7 @@ echo 'Killing supervisord ...'
 kill -TERM `cat /home/mathseminars/supervisord.pid`
 rm /home/mathseminars/supervisord.pid
 echo 'Killing gunicorn ...'
-for branch in live stable master; do
+for branch in live stable master test; do
   echo branch = $branch
   kill -TERM `cat /home/mathseminars/gunicorn-$branch.pid`
   rm /home/mathseminars/gunicorn-$branch.pid
