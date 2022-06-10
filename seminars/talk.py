@@ -807,7 +807,11 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
         if token:
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
-                return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
+            elif datetime.now(tz=pytz.UTC) - talk.start_time > timedelta(days=30):
+                flash_error("For spam prevention, you cannot use a token to edit a talk more than a month in the past.  Please contact the organizer to update this talk.")
+            else:
+                return None, talk
+            return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
         else:
             if not talk.user_can_edit():
                 flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
