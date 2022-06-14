@@ -807,7 +807,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
         if token:
             if token != talk.token:
                 flash_error("Invalid token for editing talk")
-            elif datetime.now(tz=pytz.UTC) - talk.start_time > timedelta(days=30):
+            elif not talk.user_can_edit() and datetime.now(tz=pytz.UTC) - talk.start_time > timedelta(days=30):
                 flash_error("For spam prevention, you cannot use a token to edit a talk more than a month in the past.  Please contact the organizer to update this talk.")
             else:
                 return None, talk
