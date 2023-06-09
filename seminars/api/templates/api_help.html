@@ -157,6 +157,8 @@
   Queries are constructed from dictionaries, where each key gives a constraint for that column.  By default, each value is treated as an equality constraint.  To get other conditions, the value is also taken to be a dictionary with keys special codes starting with a `$` symbol.  For example, use {"topics": {"$contains": "math_NT"}, "abstract": {"$ilike": "%p-adic%"}} to search for a talk having number theory as a topic and having an abstract that contains the string "p-adic".  Documentation for the query language will be added here.  For now, see <a href="https://github.com/roed314/psycodict/blob/master/psycodict/searchtable.py#135">the source code</a> for the special keys available.
 </p>
 
+{{ code_examples["search_talks_query_language"] | safe }}
+
 <h2>Topics</h2>
 
 <p>
