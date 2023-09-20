@@ -26,7 +26,7 @@ def search_series_get():
     r = get(url)
     if r.status_code == 200:
         J = r.json()
-        results = J["properties"]["results"]
+        results = J["results"]
         print("There are %s series in the US/Pacific time zone" % len(results))
 
 def search_series_post():
@@ -165,6 +165,15 @@ def create_talk():
     else:
         print("Creation failed")
         print(J)
+        
+def search_talks_query_language():
+    from requests import get
+    url = '''https://researchseminars.org/api/0/search/talks?topics={"$contains": "math_NT"}&abstract={"$ilike": "%p-adic%"}'''
+    r = get(url)
+    if r.status_code == 200:
+        J = r.json()
+        results = J["results"]
+        print("There are %s p-adic number theory talks" % len(results))
 
 def topics():
     from requests import get
