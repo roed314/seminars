@@ -730,6 +730,12 @@ def sanity_check_times(start_time, end_time, warn=flash_warnmsg):
 
 class Toggle(SearchBox):
     def _input(self, info=None):
+        value = info.get(self.name, -1)
+        try:
+            value = int(value)
+        except ValueError:
+            flash_error("Invalid value %s", value)
+            value = -1
         main = toggle(
             tglid="toggle_%s" % self.name,
             name=self.name,
