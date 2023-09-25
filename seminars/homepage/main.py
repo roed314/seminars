@@ -162,7 +162,10 @@ def parse_access(info, query):
 def parse_audience(info, query):
     v = info.get("audience")
     if v:
-        query["audience"] = int(v)
+        try:
+            query["audience"] = int(v)
+        except ValueError:
+            flash_error("Invalid audience value: %s", v)
 
 def parse_language(info, query):
     v = info.get("language")
