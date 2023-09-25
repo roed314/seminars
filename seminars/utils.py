@@ -739,7 +739,7 @@ class Toggle(SearchBox):
         main = toggle(
             tglid="toggle_%s" % self.name,
             name=self.name,
-            value=int(info.get(self.name, -1)),
+            value=value,
         )
         return '<span style="display: inline-block">%s</span>' % (main,)
 
