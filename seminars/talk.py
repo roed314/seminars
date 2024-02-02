@@ -642,12 +642,12 @@ Thank you,
         rescheduled = self.rescheduled()
         t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if rescheduled:
-            datetime_tds = t.strftime('<td class="weekday rescheduled">%a</td><td class="monthdate rescheduled">%b %d</td><td class="time rescheduled">%H:%M</td>')
+            datetime_tds = t.strftime('<td class="weekday rescheduled">%a</td><td class="monthdate rescheduled">%b %d</td><td class="time rescheduled" title="%Z">%H:%M</td>')
         else:
             if t < now < e:
-                datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time"><b>%H:%M</b></td>')
+                datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time" title="%Z"><b>%H:%M</b></td>')
             else:
-                datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time">%H:%M</td>')
+                datetime_tds = t.strftime('<td class="weekday">%a</td><td class="monthdate">%b %d</td><td class="time" title="%Z">%H:%M</td>')
         cols = []
         rclass = " rescheduled" if rescheduled else ""
         if include_seminar:
