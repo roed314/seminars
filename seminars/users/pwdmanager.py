@@ -181,8 +181,8 @@ class PostgresUserTable(PostgresSearchTable):
         email = data["email"]
         with DelayCommit(db):
             # We probably have code that assumes that admin/owner isn't None....
-            db.institutions.update({"admin": ilike_query(email)}, {"admin": "researchseminars@math.mit.edu"})
-            db.seminars.update({"owner": ilike_query(email)}, {"owner": "researchseminars@math.mit.edu"})
+            db.institutions.update({"admin": ilike_query(email)}, {"admin": "researchseminars@mit.edu"})
+            db.seminars.update({"owner": ilike_query(email)}, {"owner": "researchseminars@mit.edu"})
             db.seminar_organizers.delete({"email": ilike_query(email)})
             db.talks.update({"speaker_email": ilike_query(email)}, {"speaker_email": ""})
             self.update({"id": uid}, {key: None for key in self.search_cols}, restat=False)
