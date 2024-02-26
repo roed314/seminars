@@ -730,10 +730,16 @@ def sanity_check_times(start_time, end_time, warn=flash_warnmsg):
 
 class Toggle(SearchBox):
     def _input(self, info=None):
+        value = info.get(self.name, -1)
+        try:
+            value = int(value)
+        except ValueError:
+            flash_error("Invalid value %s", value)
+            value = -1
         main = toggle(
             tglid="toggle_%s" % self.name,
             name=self.name,
-            value=int(info.get(self.name, -1)),
+            value=value,
         )
         return '<span style="display: inline-block">%s</span>' % (main,)
 
@@ -752,9 +758,7 @@ def ics_file(talks, filename, user=None):
     bIO = BytesIO()
     bIO.write(cal.to_ical())
     bIO.seek(0)
-    return send_file(
-        bIO, attachment_filename=filename, as_attachment=True, add_etags=False
-    )
+    return send_file(bIO, download_name=filename, as_attachment=True)
 
 def num_columns(labels):
     if not labels:

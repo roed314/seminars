@@ -156,7 +156,7 @@ class Configuration(_Configuration):
             default="editor",
         )
 
-        default_password="Obtain the development's database password by emailing researchseminars@math.mit.edu"
+        default_password="Obtain the development's database password by emailing researchseminars@mit.edu"
         postgresqlgroup.add_argument(
             "--postgresql-pass",
             dest="postgresql_password",

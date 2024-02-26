@@ -84,8 +84,12 @@ def parse_venue(info, query):
 
 
 def parse_substring(info, query, field, qfields, start="%", end="%"):
-    if info.get(field):
-        kwds = [elt.strip() for elt in info.get(field).split(",") if elt.strip()]
+    inp = info.get(field)
+    if inp:
+        if "\x00" in inp:
+            flash_error("Invalid %s input: %s", field, repr(info.get(field)))
+            return
+        kwds = [elt.strip() for elt in inp.split(",") if elt.strip()]
         collapse_ors(
             [
                 "$or",
@@ -158,7 +162,10 @@ def parse_access(info, query):
 def parse_audience(info, query):
     v = info.get("audience")
     if v:
-        query["audience"] = int(v)
+        try:
+            query["audience"] = int(v)
+        except ValueError:
+            flash_error("Invalid audience value: %s", v)
 
 def parse_language(info, query):
     v = info.get("language")
