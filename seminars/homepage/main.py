@@ -392,6 +392,9 @@ def index():
     if request.args.get("submit"):
         x = request.args["submit"].strip().split(' ')
         subsection=x[0]
+        # these are the only routes to redirect for
+        if subsection not in ['talks', 'past_talks', 'seminar_series', 'conferences', 'past_conferences']:
+            return abort(404, "Page not found")
         keywords = ' '.join(x[1:])
         return redirect(url_for_with_args(subsection+"_index", {'keywords': keywords} if keywords else {}))
     return _talks_index(subsection="talks",
