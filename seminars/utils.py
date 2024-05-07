@@ -215,7 +215,7 @@ def daytimes_long(s):
     return daytimes_minutes(s) > 8*60
 
 def make_links(x):
-    """ Given a blob of text looks for URLs (beggining with http:// or https://) and makes them hyperlinks. """
+    """ Given a blob of text looks for URLs (beginning with http:// or https://) and makes them hyperlinks. """
     tokens = re.split(r"(\s+)", x)
     for i in range(len(tokens)):
         if valid_url(tokens[i]):

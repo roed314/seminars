@@ -2,6 +2,3 @@
 	path = seminars/static/select-pure
 	url = https://github.com/duetosymmetry/select-pure.git
 
-[submodule "seminars/psycodict"]
-	path = psycodict
-	url = https://github.com/roed314/psycodict.git
