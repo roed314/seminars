@@ -145,7 +145,7 @@ seminar_description:
     on the Browse page.
     Here you might indicate, for example, whether the series is 
     a research seminar series or a learning seminar series.
-    The short desription can be at most 50 characters long.
+    The short description can be at most 50 characters long.
 seminar_homepage:
   title: Homepage
   contents: |
@@ -333,7 +333,7 @@ stream_link:
   contents: |
     This should be the URL that users will visit 
     to <i>watch</i> an ongoing talk
-    without the possiblity of interaction (e.g., on YouTube).
+    without the possibility of interaction (e.g., on YouTube).
     If the URL is the same for all talks in the series,
     set the URL in the series properties,
     and new talks in the series will inherit it.

@@ -55,7 +55,7 @@ id                  | bigint      | auto
 access_control      | smallint    | live_link access control: 0=open  1=time, 2=password, 3=users, 4=internal reg., 5=external reg., null if not online [inherited]
 access_time         | integer     | number of minutes before talks.start_time that talks.live_link is shown if access_control=1, null otherwise [inherited]
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
-access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inhertied]
+access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inherited]
 audience            | smallint    | 0 = researchers in topic, 1 = researchers in discipline, 2 = advanced learners, 3 = learners, 4 = undergraudates, 5 = general public [inherited]
 chat_link           | text        | URL linking to chat stream for the series (e.g. Zulip, Slack, Discord, ...)
 comments            | text        |
@@ -80,7 +80,7 @@ start_date          | date        | start date of the conference, null for semin
 stream_link         | text        | URL for non-interactive livestream (e.g. YouTube), not yet used [inherited]
 timezone            | text        | time zone code, e.g. "America/New York"
 time_slots          | text[]      | list of time slots for seminar series with frequency != 0, null for conferences.  Each entry is a daytime interval of the form "HH:MM-HH:MM"; if end time is less than start time the interval extends to the next day.  All of relative to the timezone of the seminar.
-topics              | text[]      | list of topics.abbreviation for each topic associated ot the seminar [inherited]
+topics              | text[]      | list of topics.abbreviation for each topic associated to the seminar [inherited]
 visibility          | smallint    | 0 = private, 1 = unlisted, 2 = public (only talks in public seminars are shown on the browse/search pages)
 weekdays            | smallint[]  | list of weekdays (0=Monday, 6=Sunday) one for each time slot for the seminar series, null for conferences
 
@@ -93,7 +93,7 @@ abstract            | text        | may contain latex
 access_control      | smallint    | live_link access control: 0=open  1=time, 2=password, 3=users, 4=internal reg, 5=external reg., null if not online [inherited]
 access_time         | integer     | number of minutes before talk start time live_link is shown if access_control=1, null otherwise [inherited]
 accces_hint         | text        | hint for live_link password, required if access_control=2, null otherwise [inherited]
-access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inhertied]
+access_registration | text        | URL (possibly an email) for external registration if access_control=5, null otherwise [inherited]
 audience            | smallint    | 0 = researchers in topic, 1 = researchers in discipline, 2 = advanced learners, 3 = learners, 4 = undergraudates, 5 = general public [inherited]
 chat_link           | text        | URL linking to chat stream for the talk (e.g. Zulip, Slack, Discord, ...)
 comments            | text        | talk specific comments to be displayed in addition to seminar comments
@@ -114,7 +114,7 @@ seminar_id          | text        | seminars.shortname of series containing this
 slides_link         | text        | URL providing link to slides for the talk
 speaker             | text        | full name of the speaker (required) [to be replaced by speakers]
 speaker_email       | text        | email address of the speaker, it need not match the email of any user [to be replaced by speaker_emails]
-speaker_affiliation | text        | free text, it need not be present in the insitutions table (optional) [to be replaced by speaker_affiliations]
+speaker_affiliation | text        | free text, it need not be present in the institutions table (optional) [to be replaced by speaker_affiliations]
 speaker_homepage    | text        | URL of the homepage for the speaker (speaker's name will be anchor for this link) [to be replaced by speaker_homepages]
 start_time          | timestamptz | 
 stream_link         | text        | URL for non-interactive livestream (e.g. YouTube), not yet used [inherited]
