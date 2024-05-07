@@ -10,4 +10,5 @@ PyYAML
 flask-login
 bcrypt
 psycopg2-binary
+git+https://github.com/roed314/psycodict.git
 pytz>=2021
