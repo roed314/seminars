@@ -37,7 +37,7 @@ def search_series_post():
 
 def authorization():
     # We suggest keeping your api token in a separate file and adding it to your .gitignore
-    # so that you don't accidentlly commit it to your repository
+    # so that you don't accidentally commit it to your repository
     with open("apitoken.txt") as tokenfile:
         apitoken = tokenfile.read().strip()
     return "roed@mit.edu %s" % apitoken
