@@ -733,7 +733,8 @@ class Toggle(SearchBox):
         value = info.get(self.name, -1)
         try:
             value = int(value)
-        except ValueError:
+            assert value in [-1, 1]
+        except (ValueError, AssertionError):
             flash_error("Invalid value %s", value)
             value = -1
         main = toggle(
