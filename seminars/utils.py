@@ -843,9 +843,9 @@ def sanitized_table(name):
         "SELECT name, label_col, sort, count_cutoff, id_ordered, out_of_order, "
         "has_extras, stats_valid, total, include_nones FROM meta_tables WHERE name=%s"
     ), [name])
-    def update(self, query, changes, resort=False, restat=False, commit=True):
+    def update(self, query, changes, resort=False, restat=False):
         raise APIError({"code": "update_prohibited"})
-    def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
+    def insert_many(self, data, resort=False, reindex=False, restat=False):
         raise APIError({"code": "insert_prohibited"})
     # We remove the raw argument from search and lucky keywords since these allow the execution of arbitrary SQL
     def search(self, *args, **kwds):

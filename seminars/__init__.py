@@ -36,9 +36,9 @@ def are_you_REALLY_sure(func):
     return call
 
 
-def update(self, query, changes, resort=False, restat=False, commit=True):
+def update(self, query, changes, resort=False, restat=False):
     return PostgresSearchTable.update(
-        self, query=query, changes=changes, resort=resort, restat=restat, commit=commit
+        self, query=query, changes=changes, resort=resort, restat=restat
     )
 
 
@@ -46,9 +46,9 @@ def count(self, query, groupby=None, record=False):
     return PostgresSearchTable.count(self, query=query, groupby=groupby, record=record)
 
 
-def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
+def insert_many(self, data, resort=False, reindex=False, restat=False):
     return PostgresSearchTable.insert_many(
-        self, data=data, resort=resort, reindex=reindex, restat=restat, commit=commit
+        self, data=data, resort=resort, reindex=reindex, restat=restat
     )
 
 
