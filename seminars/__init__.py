@@ -46,9 +46,9 @@ def count(self, query, groupby=None, record=False):
     return PostgresSearchTable.count(self, query=query, groupby=groupby, record=record)
 
 
-def insert_many(self, data, resort=False, reindex=False, restat=False, commit=True):
+def insert_many(self, data, resort=False, reindex=False, restat=False):
     return PostgresSearchTable.insert_many(
-        self, data=data, resort=resort, reindex=reindex, restat=restat, commit=commit
+        self, data=data, resort=resort, reindex=reindex, restat=restat
     )
 
 
