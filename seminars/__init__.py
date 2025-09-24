@@ -36,9 +36,9 @@ def are_you_REALLY_sure(func):
     return call
 
 
-def update(self, query, changes, resort=False, restat=False, commit=True):
+def update(self, query, changes, resort=False, restat=False):
     return PostgresSearchTable.update(
-        self, query=query, changes=changes, resort=resort, restat=restat, commit=commit
+        self, query=query, changes=changes, resort=resort, restat=restat
     )
 
 
