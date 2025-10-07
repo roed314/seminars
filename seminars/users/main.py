@@ -97,7 +97,12 @@ def login(**kwargs):
         return redirect(url_for(".info"))
     # we always remember
     remember = True  # if request.form["remember"] == "on" else False
-    user = SeminarsUser(email=email)
+    try:
+        user = SeminarsUser(email=email)
+    except ValueError:
+        # Handle database errors from invalid input (e.g., NUL bytes)
+        flash_error("Oops! Wrong username or password.")
+        return redirect(url_for(".info"))
     if user.email and user.check_password(password):
         # this is where we set current_user = user
         login_user(user, remember=remember)
