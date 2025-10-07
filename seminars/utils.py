@@ -671,13 +671,14 @@ def process_user_input(inp, col, typ, tz=None):
 
 
 def format_errmsg(errmsg, *args):
-    return Markup(
-        "Error: "
-        + (
-            errmsg
-            % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)
-        )
-    )
+    # Escape all arguments to prevent XSS and format string issues
+    escaped_args = tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)
+    try:
+        formatted_msg = errmsg % escaped_args
+    except (TypeError, ValueError):
+        # If formatting fails (e.g., error message itself contains %), just concatenate
+        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+    return Markup("Error: " + formatted_msg)
 
 
 def format_input_errmsg(err, inp, col):
@@ -689,20 +690,28 @@ def format_input_errmsg(err, inp, col):
 
 
 def format_warning(warnmsg, *args):
-    return Markup(
-        "Warning: "
-        + (
-            warnmsg
-            % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)
-        )
-    )
+    # Escape all arguments to prevent XSS and format string issues
+    escaped_args = tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)
+    try:
+        formatted_msg = warnmsg % escaped_args
+    except (TypeError, ValueError):
+        # If formatting fails (e.g., warning message itself contains %), just concatenate
+        formatted_msg = warnmsg + " " + " ".join(str(escape(x)) for x in args)
+    return Markup("Warning: " + formatted_msg)
 
 
 def flash_warnmsg(warnmsg, *args):
     flash(format_warning(warnmsg, *args), "warning")
 
 def format_infomsg(infomsg, *args):
-    return Markup(infomsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))
+    # Escape all arguments to prevent XSS and format string issues
+    escaped_args = tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)
+    try:
+        formatted_msg = infomsg % escaped_args
+    except (TypeError, ValueError):
+        # If formatting fails (e.g., info message itself contains %), just concatenate
+        formatted_msg = infomsg + " " + " ".join(str(escape(x)) for x in args)
+    return Markup(formatted_msg)
 
 
 def flash_infomsg(infomsg, *args):
