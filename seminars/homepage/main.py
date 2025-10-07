@@ -170,6 +170,10 @@ def parse_access(info, query):
 def parse_audience(info, query):
     v = info.get("audience")
     if v:
+        # Check for NUL bytes which can cause database errors
+        if "\x00" in v:
+            flash_error("Invalid audience value: %s", repr(v))
+            return
         try:
             query["audience"] = int(v)
         except ValueError:

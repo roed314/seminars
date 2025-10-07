@@ -574,6 +574,9 @@ def process_user_input(inp, col, typ, tz=None):
         inp = inp.strip()
     if inp == "":
         return False if typ == "boolean" else ("" if typ == "text" else None)
+    # Check for NUL bytes which can cause database errors
+    if inp and isinstance(inp, str) and "\x00" in inp:
+        raise ValueError("Input contains invalid characters")
     if col in maxlength and len(inp) > maxlength[col]:
         raise ValueError("Input exceeds maximum length permitted")
     if typ == "time":
