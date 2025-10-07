@@ -103,6 +103,9 @@ def parse_daterange(info, query, time=True):
     tz = current_user.tz
     date = info.get("daterange")
     if date:
+        if "\x00" in date:
+            flash_error("Invalid daterange input: %s", repr(date))
+            return
         sub_query = {}
         if "-" not in date:
             # make it into a range
@@ -116,24 +119,27 @@ def parse_daterange(info, query, time=True):
                 start = tz.localize(parse(start))
                 sub_query["$gte"] = start if time else start.date()
             except Exception as e:
-                flash_error("Could not parse start date %s.  Error: " + str(e), start)
+                flash_error("Could not parse start date %s.  Error: %s", start, str(e))
         if end.strip():
             try:
                 end = tz.localize(parse(end))
                 end = end + timedelta(hours=23, minutes=59, seconds=59)
                 sub_query["$lte"] = end if time else end.date()
             except Exception as e:
-                flash_error("Could not parse end date %s.  Error: " + str(e), end)
+                flash_error("Could not parse end date %s.  Error: %s", end, str(e))
         if sub_query:
             query["start_time" if time else "start_date"] = sub_query
 
 def parse_recent_edit(info, query):
     recent = info.get("recent", "").strip()
     if recent:
+        if "\x00" in recent:
+            flash_error("Invalid recent edit input: %s", repr(recent))
+            return
         try:
             recent = float(recent)
         except Exception as e:
-            flash_error("Could not parse recent edit input %s.  Error: " + str(e), recent)
+            flash_error("Could not parse recent edit input %s.  Error: %s", recent, str(e))
         else:
             recent = datetime.now() - timedelta(hours=recent)
             query["edited_at"] = {"$gte": recent}
