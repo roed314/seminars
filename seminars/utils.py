@@ -868,11 +868,25 @@ def sanitized_table(name):
 
 def flash_error(errmsg, *args):
     """ flash errmsg in red with args in black; errmsg may contain markup, including latex math mode"""
-    flash(Markup("Error: " + (errmsg % tuple("<span style='color:black'>%s</span>" % escape(x) for x in args))), "error")
+    # Escape all arguments to prevent XSS and format string issues
+    escaped_args = tuple("<span style='color:black'>%s</span>" % escape(x) for x in args)
+    try:
+        formatted_msg = errmsg % escaped_args
+    except (TypeError, ValueError):
+        # If formatting fails (e.g., error message itself contains %), just concatenate
+        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+    flash(Markup("Error: " + formatted_msg), "error")
 
 def flash_warning(errmsg, *args):
     """ flash warning in grey with args in red; warning may contain markup, including latex math mode"""
-    flash(Markup("Warning: " + (errmsg % tuple("<span style='color:red'>%s</span>" % escape(x) for x in args))), "warning")
+    # Escape all arguments to prevent XSS and format string issues
+    escaped_args = tuple("<span style='color:red'>%s</span>" % escape(x) for x in args)
+    try:
+        formatted_msg = errmsg % escaped_args
+    except (TypeError, ValueError):
+        # If formatting fails (e.g., warning message itself contains %), just concatenate
+        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+    flash(Markup("Warning: " + formatted_msg), "warning")
 
 def to_dict(args, exclude = [], **kwds):
     r"""

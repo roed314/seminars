@@ -103,6 +103,10 @@ def parse_daterange(info, query, time=True):
     tz = current_user.tz
     date = info.get("daterange")
     if date:
+        # Check for NUL bytes which can cause database errors
+        if "\x00" in date:
+            flash_error("Invalid daterange input: %s", repr(date))
+            return
         sub_query = {}
         if "-" not in date:
             # make it into a range
@@ -130,6 +134,10 @@ def parse_daterange(info, query, time=True):
 def parse_recent_edit(info, query):
     recent = info.get("recent", "").strip()
     if recent:
+        # Check for NUL bytes which can cause database errors
+        if "\x00" in recent:
+            flash_error("Invalid recent edit input: %s", repr(recent))
+            return
         try:
             recent = float(recent)
         except Exception as e:
