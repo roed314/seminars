@@ -95,6 +95,10 @@ def login(**kwargs):
     if not email or not password:
         flash_error("Oops! Wrong username or password.")
         return redirect(url_for(".info"))
+    # Check for NUL bytes which can cause database errors
+    if "\x00" in email or "\x00" in password:
+        flash_error("Oops! Wrong username or password.")
+        return redirect(url_for(".info"))
     # we always remember
     remember = True  # if request.form["remember"] == "on" else False
     try:
