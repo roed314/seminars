@@ -665,6 +665,23 @@ function updateEmbedAddCSS(checkbox) {
   updateEmbedCode(checkbox, /'addCSS': (true|false)/, "'addCSS': " + value);
 }
 
+function getEmbedDaterangeState(dateInput) {
+  var state = dateInput.data("embed-state");
+  if (!state) {
+    var modeSelect = $("#" + dateInput.attr("data-mode-target"));
+    state = {
+      range: null,
+      display: "",
+      start: null,
+      end: null,
+      selectionPending: false,
+      lastCommittedMode: modeSelect.attr("data-initial-mode"),
+    };
+    dateInput.data("embed-state", state);
+  }
+  return state;
+}
+
 function setEmbedDaterangeError(dateInput, message) {
   var help = document.getElementById(dateInput.attr("aria-describedby"));
   var defaultMessage = help.getAttribute("data-default-message");
@@ -681,19 +698,20 @@ function updateEmbedDaterange(dateInput, start, end) {
   var embedRange = start.format("MMM+DD,+YYYY") + "-" + end.format("MMM+DD,+YYYY");
   var picker = dateInput.data('daterangepicker');
   var modeSelect = $("#" + dateInput.attr("data-mode-target"));
+  var state = getEmbedDaterangeState(dateInput);
 
   dateInput.val(displayRange);
   if (picker) {
     picker.setStartDate(start);
     picker.setEndDate(end);
   }
-  dateInput.data("embed-range", embedRange);
-  dateInput.data("embed-display", displayRange);
-  dateInput.data("embed-start", start.clone());
-  dateInput.data("embed-end", end.clone());
-  dateInput.data("custom-selection-pending", false);
+  state.range = embedRange;
+  state.display = displayRange;
+  state.start = start.clone();
+  state.end = end.clone();
+  state.selectionPending = false;
+  state.lastCommittedMode = "custom";
   modeSelect.val("custom");
-  modeSelect.attr("data-last-value", "custom");
   setEmbedDaterangeError(dateInput, "");
   updateEmbedCode(
     dateInput,
@@ -705,15 +723,15 @@ function updateEmbedDaterange(dateInput, start, end) {
 function showEmbedCustomDaterange(modeSelect) {
   var dateInput = $("#" + modeSelect.attr("data-custom-input"));
   var container = document.getElementById(modeSelect.attr("aria-controls"));
-  var embedRange = dateInput.data("embed-range");
+  var state = getEmbedDaterangeState(dateInput);
 
   container.hidden = false;
   dateInput.prop("disabled", false);
-  if (embedRange) {
-    updateEmbedCode(modeSelect, /daterange="[^"]*"/, 'daterange="' + embedRange + '"');
-    modeSelect.attr("data-last-value", "custom");
+  if (state.range) {
+    updateEmbedCode(modeSelect, /daterange="[^"]*"/, 'daterange="' + state.range + '"');
+    state.lastCommittedMode = "custom";
   }
-  dateInput.data("custom-selection-pending", true);
+  state.selectionPending = true;
   if (!dateInput.data("daterangepicker")) {
     initializeEmbedDaterange(dateInput[0]);
   }
@@ -724,21 +742,22 @@ function updateEmbedDaterangeMode(modeSelect) {
   var mode = modeSelect.val();
   var dateInput = $("#" + modeSelect.attr("data-custom-input"));
   var container = document.getElementById(modeSelect.attr("aria-controls"));
+  var state = getEmbedDaterangeState(dateInput);
 
   if (mode == "custom") {
     showEmbedCustomDaterange(modeSelect);
   } else {
-    dateInput.data("custom-selection-pending", false);
+    state.selectionPending = false;
     if (dateInput.data("daterangepicker") && dateInput.data("daterangepicker").isShowing) {
       dateInput.data("daterangepicker").hide();
     }
     container.hidden = true;
     dateInput.prop("disabled", true);
     if (dateInput.attr("aria-invalid") == "true") {
-      dateInput.val(dateInput.data("embed-display") || "");
+      dateInput.val(state.display);
       setEmbedDaterangeError(dateInput, "");
     }
-    modeSelect.attr("data-last-value", mode);
+    state.lastCommittedMode = mode;
     updateEmbedCode(modeSelect, /daterange="[^"]*"/, 'daterange="' + mode + '"');
   }
 }
@@ -762,21 +781,22 @@ function initializeEmbedDaterange(input) {
     updateEmbedDaterange(dateInput, picker.startDate, picker.endDate);
   });
   dateInput.on('show.daterangepicker', function() {
-    dateInput.data("custom-selection-pending", true);
+    getEmbedDaterangeState(dateInput).selectionPending = true;
   });
   dateInput.on('hide.daterangepicker', function() {
     setTimeout(function() {
-      if (dateInput.data("custom-selection-pending")) {
+      var state = getEmbedDaterangeState(dateInput);
+      if (state.selectionPending) {
         var modeSelect = $("#" + dateInput.attr("data-mode-target"));
         var picker = dateInput.data("daterangepicker");
-        if (dateInput.data("embed-range")) {
-          picker.setStartDate(dateInput.data("embed-start"));
-          picker.setEndDate(dateInput.data("embed-end"));
-          dateInput.val(dateInput.data("embed-display"));
+        if (state.range) {
+          picker.setStartDate(state.start);
+          picker.setEndDate(state.end);
+          dateInput.val(state.display);
           setEmbedDaterangeError(dateInput, "");
-          dateInput.data("custom-selection-pending", false);
+          state.selectionPending = false;
         } else {
-          modeSelect.val(modeSelect.attr("data-last-value"));
+          modeSelect.val(state.lastCommittedMode);
           updateEmbedDaterangeMode(modeSelect);
         }
       }
