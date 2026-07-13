@@ -14,7 +14,7 @@ Use the options below to customize the embedded schedule before copying the code
     class="embed-daterange-mode"
     data-embed-target="embed-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
     data-custom-input="embed-daterange-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
-    data-last-value="{{ daterange | safe }}"
+    data-initial-mode="{{ daterange | safe }}"
     aria-controls="embed-custom-daterange-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}">
     <option value="future"{% if daterange == "future" %} selected{% endif %}>Future</option>
     <option value="past"{% if daterange == "past" %} selected{% endif %}>Past</option>
