@@ -655,6 +655,72 @@ function copySourceOfId(id) {
   copyText.notify("Copied!", {className: "success", position:"bottom right" });
 }
 
+function setEmbedDaterangeError(dateInput, message) {
+  var help = document.getElementById(dateInput.attr("aria-describedby"));
+  var defaultMessage = help.getAttribute("data-default-message");
+  if (defaultMessage === null) {
+    defaultMessage = help.textContent;
+    help.setAttribute("data-default-message", defaultMessage);
+  }
+  dateInput.attr("aria-invalid", message ? "true" : "false");
+  help.textContent = message || defaultMessage;
+}
+
+function updateEmbedDaterange(dateInput, start, end) {
+  var target = document.getElementById(dateInput.attr("data-embed-target"));
+  var displayRange = start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY");
+  var embedRange = start.format("MMM+DD,+YYYY") + "-" + end.format("MMM+DD,+YYYY");
+  var picker = dateInput.data('daterangepicker');
+
+  dateInput.val(displayRange);
+  if (picker) {
+    picker.setStartDate(start);
+    picker.setEndDate(end);
+  }
+  setEmbedDaterangeError(dateInput, "");
+  target.value = target.value.replace(
+    /daterange="[^"]*"/,
+    'daterange="' + embedRange + '"'
+  );
+}
+
+function initializeEmbedDaterange(input) {
+  var dateInput = $(input);
+  var dateFormat = "MMMM D, YYYY";
+  dateInput.daterangepicker({
+    autoUpdateInput: false,
+    opens: "center",
+    drops: "down",
+    showDropdowns: true,
+    cancelButtonClasses: "cancelcolors",
+    locale: {
+      applyLabel: "Select",
+      format: dateFormat,
+    },
+  });
+
+  dateInput.on('apply.daterangepicker', function(ev, picker) {
+    updateEmbedDaterange(dateInput, picker.startDate, picker.endDate);
+  });
+  dateInput.on('change keydown', function(ev) {
+    if (ev.type == 'keydown' && ev.keyCode != 13) {
+      return;
+    }
+    var dates = dateInput.val().split(' - ');
+    var validDates = dates.length == 2;
+    if (validDates) {
+      var start = moment(dates[0], dateFormat, true);
+      var end = moment(dates[1], dateFormat, true);
+      validDates = start.isValid() && end.isValid() && !end.isBefore(start);
+    }
+    if (validDates) {
+      updateEmbedDaterange(dateInput, start, end);
+    } else {
+      setEmbedDaterangeError(dateInput, "Enter a valid date range using the example format.");
+    }
+  });
+}
+
 function displayCookieBanner() {
     console.log("showing banner");
     $.notify.addStyle('banner', {
@@ -719,6 +785,14 @@ $(document).ready(function () {
         function (e) {
             setMoreButton();
         });
+    $(document).on('mousedown focusin click', '.embed-daterange', function (e) {
+        if (!$(this).data('daterangepicker')) {
+            initializeEmbedDaterange(this);
+            if (e.type != 'mousedown') {
+                $(this).data('daterangepicker').show();
+            }
+        }
+    });
     // this is now done on the server side
     //for (let i=0; i<filter_menus.length; i++) {
     //    if (getCookie("visible_" + filter_menus[i]) == "1") {
