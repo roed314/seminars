@@ -36,15 +36,19 @@
     class="embed-daterange"
     data-embed-target="embed-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
     data-mode-target="embed-daterange-mode-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
-    aria-describedby="embed-daterange-help-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    data-error-target="embed-daterange-error-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    aria-describedby="embed-daterange-help-{{ seminar.shortname | safe }}-{{ uniqstr | safe }} embed-daterange-error-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
     aria-invalid="false"
     disabled
     placeholder="Select or enter a date range">
   <span
     id="embed-daterange-help-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
-    class="forminfo"
-    aria-live="polite">Example: January 20, 2026 - May 5, 2026</span>
+    class="forminfo">Example: January 20, 2026 - May 5, 2026</span>
 </p>
+<p
+  id="embed-daterange-error-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+  class="forminfo"
+  aria-live="polite"></p>
 
 <p>
   <input
