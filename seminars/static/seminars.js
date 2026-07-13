@@ -676,6 +676,7 @@ function getEmbedDaterangeState(dateInput) {
       end: null,
       selectionPending: false,
       lastCommittedMode: modeSelect.attr("data-initial-mode"),
+      validationMessage: "",
     };
     dateInput.data("embed-state", state);
   }
@@ -683,14 +684,10 @@ function getEmbedDaterangeState(dateInput) {
 }
 
 function setEmbedDaterangeError(dateInput, message) {
-  var help = document.getElementById(dateInput.attr("aria-describedby"));
-  var defaultMessage = help.getAttribute("data-default-message");
-  if (defaultMessage === null) {
-    defaultMessage = help.textContent;
-    help.setAttribute("data-default-message", defaultMessage);
-  }
+  var error = document.getElementById(dateInput.attr("data-error-target"));
+  getEmbedDaterangeState(dateInput).validationMessage = message;
   dateInput.attr("aria-invalid", message ? "true" : "false");
-  help.textContent = message || defaultMessage;
+  error.textContent = message;
 }
 
 function updateEmbedDaterange(dateInput, start, end) {
@@ -738,7 +735,7 @@ function showEmbedCustomDaterange(modeSelect) {
   dateInput.data("daterangepicker").show();
 }
 
-function updateEmbedDaterangeMode(modeSelect) {
+function updateEmbedDaterangeMode(modeSelect, preserveError) {
   var mode = modeSelect.val();
   var dateInput = $("#" + modeSelect.attr("data-custom-input"));
   var container = document.getElementById(modeSelect.attr("aria-controls"));
@@ -753,12 +750,39 @@ function updateEmbedDaterangeMode(modeSelect) {
     }
     container.hidden = true;
     dateInput.prop("disabled", true);
-    if (dateInput.attr("aria-invalid") == "true") {
+    if (state.validationMessage) {
       dateInput.val(state.display);
-      setEmbedDaterangeError(dateInput, "");
+      if (preserveError) {
+        dateInput.attr("aria-invalid", "false");
+      } else {
+        setEmbedDaterangeError(dateInput, "");
+      }
     }
     state.lastCommittedMode = mode;
     updateEmbedCode(modeSelect, /daterange="[^"]*"/, 'daterange="' + mode + '"');
+  }
+}
+
+function restoreCommittedEmbedDaterange(dateInput) {
+  var state = getEmbedDaterangeState(dateInput);
+  var modeSelect = $("#" + dateInput.attr("data-mode-target"));
+  var picker = dateInput.data("daterangepicker");
+
+  if (state.range) {
+    picker.setStartDate(state.start);
+    picker.setEndDate(state.end);
+    dateInput.val(state.display);
+    modeSelect.val("custom");
+    updateEmbedCode(dateInput, /daterange="[^"]*"/, 'daterange="' + state.range + '"');
+    if (state.validationMessage) {
+      dateInput.attr("aria-invalid", "false");
+    } else {
+      setEmbedDaterangeError(dateInput, "");
+    }
+    state.selectionPending = false;
+  } else {
+    modeSelect.val(state.lastCommittedMode);
+    updateEmbedDaterangeMode(modeSelect, true);
   }
 }
 
@@ -783,22 +807,14 @@ function initializeEmbedDaterange(input) {
   dateInput.on('show.daterangepicker', function() {
     getEmbedDaterangeState(dateInput).selectionPending = true;
   });
+  dateInput.on('cancel.daterangepicker', function() {
+    restoreCommittedEmbedDaterange(dateInput);
+  });
   dateInput.on('hide.daterangepicker', function() {
     setTimeout(function() {
       var state = getEmbedDaterangeState(dateInput);
       if (state.selectionPending) {
-        var modeSelect = $("#" + dateInput.attr("data-mode-target"));
-        var picker = dateInput.data("daterangepicker");
-        if (state.range) {
-          picker.setStartDate(state.start);
-          picker.setEndDate(state.end);
-          dateInput.val(state.display);
-          setEmbedDaterangeError(dateInput, "");
-          state.selectionPending = false;
-        } else {
-          modeSelect.val(state.lastCommittedMode);
-          updateEmbedDaterangeMode(modeSelect);
-        }
+        restoreCommittedEmbedDaterange(dateInput);
       }
     }, 0);
   });
@@ -816,7 +832,7 @@ function initializeEmbedDaterange(input) {
     if (validDates) {
       updateEmbedDaterange(dateInput, start, end);
     } else {
-      setEmbedDaterangeError(dateInput, "Enter a valid date range using the example format.");
+      setEmbedDaterangeError(dateInput, "Custom date range was not applied. Enter a valid range using the example format.");
     }
   });
 }
