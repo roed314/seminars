@@ -655,6 +655,188 @@ function copySourceOfId(id) {
   copyText.notify("Copied!", {className: "success", position:"bottom right" });
 }
 
+function updateEmbedCode(control, pattern, replacement) {
+  var target = document.getElementById(control.attr("data-embed-target"));
+  target.value = target.value.replace(pattern, replacement);
+}
+
+function updateEmbedAddCSS(checkbox) {
+  var value = checkbox.prop("checked") ? "true" : "false";
+  updateEmbedCode(checkbox, /'addCSS': (true|false)/, "'addCSS': " + value);
+}
+
+function getEmbedDaterangeState(dateInput) {
+  var state = dateInput.data("embed-state");
+  if (!state) {
+    var modeSelect = $("#" + dateInput.attr("data-mode-target"));
+    state = {
+      range: null,
+      display: "",
+      start: null,
+      end: null,
+      selectionPending: false,
+      lastCommittedMode: modeSelect.attr("data-initial-mode"),
+      validationMessage: "",
+    };
+    dateInput.data("embed-state", state);
+  }
+  return state;
+}
+
+function setEmbedDaterangeError(dateInput, message) {
+  var error = document.getElementById(dateInput.attr("data-error-target"));
+  getEmbedDaterangeState(dateInput).validationMessage = message;
+  dateInput.attr("aria-invalid", message ? "true" : "false");
+  error.textContent = message;
+}
+
+function updateEmbedDaterange(dateInput, start, end) {
+  var displayRange = start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY");
+  var embedRange = start.format("MMM+DD,+YYYY") + "-" + end.format("MMM+DD,+YYYY");
+  var picker = dateInput.data('daterangepicker');
+  var modeSelect = $("#" + dateInput.attr("data-mode-target"));
+  var state = getEmbedDaterangeState(dateInput);
+
+  dateInput.val(displayRange);
+  if (picker) {
+    picker.setStartDate(start);
+    picker.setEndDate(end);
+  }
+  state.range = embedRange;
+  state.display = displayRange;
+  state.start = start.clone();
+  state.end = end.clone();
+  state.selectionPending = false;
+  state.lastCommittedMode = "custom";
+  modeSelect.val("custom");
+  setEmbedDaterangeError(dateInput, "");
+  updateEmbedCode(
+    dateInput,
+    /daterange="[^"]*"/,
+    'daterange="' + embedRange + '"'
+  );
+}
+
+function showEmbedCustomDaterange(modeSelect) {
+  var dateInput = $("#" + modeSelect.attr("data-custom-input"));
+  var container = document.getElementById(modeSelect.attr("aria-controls"));
+  var state = getEmbedDaterangeState(dateInput);
+
+  container.hidden = false;
+  dateInput.prop("disabled", false);
+  if (state.range) {
+    updateEmbedCode(modeSelect, /daterange="[^"]*"/, 'daterange="' + state.range + '"');
+    state.lastCommittedMode = "custom";
+  }
+  state.selectionPending = true;
+  if (!dateInput.data("daterangepicker")) {
+    initializeEmbedDaterange(dateInput[0]);
+  }
+  dateInput.data("daterangepicker").show();
+}
+
+function updateEmbedDaterangeMode(modeSelect, preserveError) {
+  var mode = modeSelect.val();
+  var dateInput = $("#" + modeSelect.attr("data-custom-input"));
+  var container = document.getElementById(modeSelect.attr("aria-controls"));
+  var state = getEmbedDaterangeState(dateInput);
+
+  if (mode == "custom") {
+    showEmbedCustomDaterange(modeSelect);
+  } else {
+    state.selectionPending = false;
+    if (dateInput.data("daterangepicker") && dateInput.data("daterangepicker").isShowing) {
+      dateInput.data("daterangepicker").hide();
+    }
+    container.hidden = true;
+    dateInput.prop("disabled", true);
+    if (state.validationMessage) {
+      dateInput.val(state.display);
+      if (preserveError) {
+        dateInput.attr("aria-invalid", "false");
+      } else {
+        setEmbedDaterangeError(dateInput, "");
+      }
+    }
+    state.lastCommittedMode = mode;
+    updateEmbedCode(modeSelect, /daterange="[^"]*"/, 'daterange="' + mode + '"');
+  }
+}
+
+function restoreCommittedEmbedDaterange(dateInput) {
+  var state = getEmbedDaterangeState(dateInput);
+  var modeSelect = $("#" + dateInput.attr("data-mode-target"));
+  var picker = dateInput.data("daterangepicker");
+
+  if (state.range) {
+    picker.setStartDate(state.start);
+    picker.setEndDate(state.end);
+    dateInput.val(state.display);
+    modeSelect.val("custom");
+    updateEmbedCode(dateInput, /daterange="[^"]*"/, 'daterange="' + state.range + '"');
+    if (state.validationMessage) {
+      dateInput.attr("aria-invalid", "false");
+    } else {
+      setEmbedDaterangeError(dateInput, "");
+    }
+    state.selectionPending = false;
+  } else {
+    modeSelect.val(state.lastCommittedMode);
+    updateEmbedDaterangeMode(modeSelect, true);
+  }
+}
+
+function initializeEmbedDaterange(input) {
+  var dateInput = $(input);
+  var dateFormat = "MMMM D, YYYY";
+  dateInput.daterangepicker({
+    autoUpdateInput: false,
+    opens: "center",
+    drops: "down",
+    showDropdowns: true,
+    cancelButtonClasses: "cancelcolors",
+    locale: {
+      applyLabel: "Select",
+      format: dateFormat,
+    },
+  });
+
+  dateInput.on('apply.daterangepicker', function(ev, picker) {
+    updateEmbedDaterange(dateInput, picker.startDate, picker.endDate);
+  });
+  dateInput.on('show.daterangepicker', function() {
+    getEmbedDaterangeState(dateInput).selectionPending = true;
+  });
+  dateInput.on('cancel.daterangepicker', function() {
+    restoreCommittedEmbedDaterange(dateInput);
+  });
+  dateInput.on('hide.daterangepicker', function() {
+    setTimeout(function() {
+      var state = getEmbedDaterangeState(dateInput);
+      if (state.selectionPending) {
+        restoreCommittedEmbedDaterange(dateInput);
+      }
+    }, 0);
+  });
+  dateInput.on('change keydown', function(ev) {
+    if (ev.type == 'keydown' && ev.keyCode != 13) {
+      return;
+    }
+    var dates = dateInput.val().split(' - ');
+    var validDates = dates.length == 2;
+    if (validDates) {
+      var start = moment(dates[0], dateFormat, true);
+      var end = moment(dates[1], dateFormat, true);
+      validDates = start.isValid() && end.isValid() && !end.isBefore(start);
+    }
+    if (validDates) {
+      updateEmbedDaterange(dateInput, start, end);
+    } else {
+      setEmbedDaterangeError(dateInput, "Custom date range was not applied. Enter a valid range using the example format.");
+    }
+  });
+}
+
 function displayCookieBanner() {
     console.log("showing banner");
     $.notify.addStyle('banner', {
@@ -719,6 +901,20 @@ $(document).ready(function () {
         function (e) {
             setMoreButton();
         });
+    $(document).on('change', '.embed-add-css', function () {
+        updateEmbedAddCSS($(this));
+    });
+    $(document).on('change', '.embed-daterange-mode', function () {
+        updateEmbedDaterangeMode($(this));
+    });
+    $(document).on('mousedown focusin click', '.embed-daterange', function (e) {
+        if (!$(this).data('daterangepicker')) {
+            initializeEmbedDaterange(this);
+            if (e.type != 'mousedown') {
+                $(this).data('daterangepicker').show();
+            }
+        }
+    });
     // this is now done on the server side
     //for (let i=0; i<filter_menus.length; i++) {
     //    if (getCookie("visible_" + filter_menus[i]) == "1") {

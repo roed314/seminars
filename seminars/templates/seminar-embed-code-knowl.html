@@ -9,8 +9,56 @@
   To include the schedules of multiple series, you need the &lt;div&gt; tag for each but the &lt;script&gt; tag only once, so copy the code block for each series to your webpage and remove all but one copy of the &lt;script&gt; tag.
 </p>
 <p>
-  By default, the code uses <i>our</i> styling when displaying the schedule.  If instead you want <i>your</i> webpage's style settings to apply, then after copying the code, change <code>'addCSS': true</code> to <code>'addCSS': false</code> inside the &lt;script&gt; tag.</p>
+  Use the options below to customize the embedded schedule before copying the code.
+</p>
 </div>
+
+<p>
+  <label for="embed-daterange-mode-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}">Talks to include:</label>
+  <select
+    id="embed-daterange-mode-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    class="embed-daterange-mode"
+    data-embed-target="embed-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    data-custom-input="embed-daterange-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    data-initial-mode="{{ daterange | safe }}"
+    aria-controls="embed-custom-daterange-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}">
+    <option value="future"{% if daterange == "future" %} selected{% endif %}>Future</option>
+    <option value="past"{% if daterange == "past" %} selected{% endif %}>Past</option>
+    <option value="custom">Custom date range</option>
+  </select>
+</p>
+
+<p id="embed-custom-daterange-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}" hidden>
+  <label for="embed-daterange-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}">Custom date range:</label>
+  <input
+    type="text"
+    id="embed-daterange-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    class="embed-daterange"
+    data-embed-target="embed-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    data-mode-target="embed-daterange-mode-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    data-error-target="embed-daterange-error-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    aria-describedby="embed-daterange-help-{{ seminar.shortname | safe }}-{{ uniqstr | safe }} embed-daterange-error-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    aria-invalid="false"
+    disabled
+    placeholder="Select or enter a date range">
+  <span
+    id="embed-daterange-help-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    class="forminfo">Example: January 20, 2026 - May 5, 2026</span>
+</p>
+<p
+  id="embed-daterange-error-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+  class="forminfo"
+  aria-live="polite"></p>
+
+<p>
+  <input
+    type="checkbox"
+    id="embed-add-css-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    class="embed-add-css"
+    data-embed-target="embed-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}"
+    checked>
+  <label for="embed-add-css-{{ seminar.shortname | safe }}-{{ uniqstr | safe }}">Use ResearchSeminars.org styling</label>
+</p>
 
 <textarea style="width: calc(100% - 20px);" rows=2 readonly id="embed-{{ seminar.shortname | safe }}-{{ uniqstr  | safe }}" onclick="this.focus();this.select()">
 <div class="embeddable_schedule" shortname="{{ seminar.shortname | safe }}" daterange="{{ daterange | safe }}"></div>
