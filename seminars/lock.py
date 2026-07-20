@@ -1,4 +1,4 @@
-from psycopg2 import DatabaseError
+from seminars.psycopg_compat import DatabaseError
 from flask_login import current_user
 
 

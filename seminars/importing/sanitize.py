@@ -2,7 +2,7 @@
 
 import os, random, string, secrets, shutil
 from psycodict.utils import IdentifierWrapper, DelayCommit
-from psycopg2.sql import SQL, Identifier, Literal
+from seminars.psycopg_compat import SQL, Identifier, Literal, copy_table_to_file
 
 from seminars import db
 from seminars.seminar import seminars_search, _selecter as seminar_selecter
@@ -118,13 +118,11 @@ def write_content_table(data_folder, table, query, selecter, approve_row, users,
             now = time.time()
             if addid:
                 cols = ["id"] + cols
-            cols_wquotes = ['"' + col + '"' for col in cols]
-            cur = table._db.cursor()
             with open(filename, "w") as F:
                 try:
                     if write_header:
                         table._write_header_lines(F, cols, sep=sep)
-                    cur.copy_to(F, tbl, columns=cols_wquotes, sep=sep)
+                    copy_table_to_file(table._db, tbl, cols, F, sep)
                 except Exception:
                     table.conn.rollback()
                     raise
