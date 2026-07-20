@@ -22,6 +22,43 @@ from psycodict.searchtable import PostgresSearchTable
 from .toggle import toggle
 
 
+# psycodict used to allow a table to be split into a search table and an
+# "extras" table, and several of the private methods used below took the extras
+# columns as a separate argument.  The helpers here work with psycodict either
+# side of that removal; once the psycodict requirement is pinned past it, this
+# flag and the branches guarded by it can go.
+_psycodict_has_extras = hasattr(PostgresSearchTable, "_get_table_clause")
+
+
+def parse_projection(table, projection):
+    """
+    The columns a projection selects, as a flat tuple of names.
+    """
+    cols = table._parse_projection(projection)
+    if _psycodict_has_extras:
+        cols = cols[0] + cols[1]
+    return cols
+
+
+def search_iterator(table, cur, cols, projection):
+    """
+    Iterate over the results in a cursor, yielding dictionaries keyed by ``cols``.
+    """
+    if _psycodict_has_extras:
+        return table._search_iterator(cur, cols, (), projection)
+    return table._search_iterator(cur, cols, projection)
+
+
+def plain_iterator(table):
+    """
+    An iterator for ``search_distinct`` that yields dictionaries rather than
+    Web* objects.
+    """
+    def iterator(cur, cols, projection):
+        return search_iterator(table, cur, cols, projection)
+    return iterator
+
+
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 short_weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 daytime_re_string = r"\d{1,4}|\d{1,2}:\d\d|"
@@ -390,14 +427,15 @@ def search_distinct(
     """
     Replacement for db.*.search to account for versioning, return Web* objects.
 
-    Doesn't support split_ors, raw or extra tables.  Always computes count.
+    Doesn't support split_ors or raw.  Always computes count.
 
     INPUT:
 
     - ``table`` -- a search table, such as db.seminars or db.talks
     - ``counter`` -- an SQL object counting distinct entries
     - ``selecter`` -- an SQL objecting selecting distinct entries
-    - ``iterator`` -- an iterator taking the same arguments as ``_search_iterator``
+    - ``iterator`` -- a callable ``(cur, cols, projection)`` yielding one object
+      per row, such as the result of ``plain_iterator``
     """
     if offset < 0:
         raise ValueError("Offset cannot be negative")
@@ -405,7 +443,7 @@ def search_distinct(
     if not include_deleted:
         query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
-    search_cols, extra_cols = table._parse_projection(projection)
+    cols = parse_projection(table, projection)
     tbl = IdentifierWrapper(table.search_table)
     if limit is None:
         qstr, values = table._build_query(query, sort=sort)
@@ -426,12 +464,12 @@ def search_distinct(
             more = Placeholder()
             moreval = [True]
 
-        cols = SQL(", ").join(list(map(IdentifierWrapper, search_cols + extra_cols)) + [more])
-        extra_cols = extra_cols + ("more",)
+        fcols = SQL(", ").join(list(map(IdentifierWrapper, cols)) + [more])
+        cols = cols + ("more",)
         values = moreval + values
     else:
-        cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
-    fselecter = selecter.format(cols, all_cols, tbl, qstr)
+        fcols = SQL(", ").join(map(IdentifierWrapper, cols))
+    fselecter = selecter.format(fcols, all_cols, tbl, qstr)
     cur = table._execute(
         fselecter,
         values,
@@ -445,7 +483,7 @@ def search_distinct(
             offset,
         ),
     )
-    results = iterator(cur, search_cols, extra_cols, projection)
+    results = iterator(cur, cols, projection)
     if info is not None:
         # caller is requesting count data
         nres = count_distinct(table, counter, query)
@@ -495,10 +533,10 @@ def lucky_distinct(
     if not include_deleted:
         query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
-    search_cols, extra_cols = table._parse_projection(projection)
-    cols = SQL(", ").join(map(IdentifierWrapper, search_cols + extra_cols))
+    cols = parse_projection(table, projection)
+    fcols = SQL(", ").join(map(IdentifierWrapper, cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
-    tbl = table._get_table_clause(extra_cols)
+    tbl = IdentifierWrapper(table.search_table)
     prequery = {} if include_pending else {'$or': [{'display': True}, {'by_api': False}]}
     if prequery:
         # We filter the records before finding the most recent (normal queries filter after finding the most recent)
@@ -508,14 +546,14 @@ def lucky_distinct(
         if pqstr is not None:
             tbl = tbl + SQL(" WHERE {0}").format(pqstr)
             values = pqvalues + values
-    fselecter = selecter.format(cols, all_cols, tbl, qstr)
+    fselecter = selecter.format(fcols, all_cols, tbl, qstr)
     cur = table._execute(fselecter, values)
     if cur.rowcount > 0:
         rec = cur.fetchone()
         if projection == 0 or isinstance(projection, string_types):
             rec = rec[0]
         else:
-            rec = {k: v for k, v in zip(search_cols + extra_cols, rec)}
+            rec = {k: v for k, v in zip(cols, rec)}
         return construct(rec)
 
 
@@ -853,7 +891,8 @@ class APIError(Exception):
 def sanitized_table(name):
     cur = db._execute(SQL(
         "SELECT name, label_col, sort, count_cutoff, id_ordered, out_of_order, "
-        "has_extras, stats_valid, total, include_nones FROM meta_tables WHERE name=%s"
+        + ("has_extras, " if _psycodict_has_extras else "")
+        + "stats_valid, total, include_nones FROM meta_tables WHERE name=%s"
     ), [name])
     def update(self, query, changes, resort=False, restat=False):
         raise APIError({"code": "update_prohibited"})
