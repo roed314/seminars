@@ -10,7 +10,9 @@ from seminars.utils import (
     lucky_distinct,
     make_links,
     max_distinct,
+    plain_iterator,
     search_distinct,
+    search_iterator,
     show_input_errors,
     weekdays,
     sanitized_table,
@@ -709,12 +711,12 @@ def _construct(organizer_dict, institution_dict, objects=True, more=False):
 
 
 def _iterator(organizer_dict, institution_dict, objects=True, more=False):
-    def object_iterator(cur, search_cols, extra_cols, projection):
-        for rec in db.seminars._search_iterator(cur, search_cols, extra_cols, projection):
+    def object_iterator(cur, cols, projection):
+        for rec in search_iterator(db.seminars, cur, cols, projection):
             if isinstance(rec, dict) and "shortname" in rec and not rec["shortname"] in organizer_dict:
                 continue
             yield _construct(organizer_dict, institution_dict, more=more)(rec)
-    return object_iterator if objects else db.seminars._search_iterator
+    return object_iterator if objects else plain_iterator(db.seminars)
 
 
 def seminars_count(query={}, include_deleted=False):
@@ -828,7 +830,7 @@ SELECT DISTINCT ON (seminar_id) {0} FROM
             db.talks,
             _selecter,
             talks_counter,
-            db.talks._search_iterator,
+            plain_iterator(db.talks),
             query,
             projection=["seminar_id", "start_time"],
             sort=["seminar_id", "start_time"]):
