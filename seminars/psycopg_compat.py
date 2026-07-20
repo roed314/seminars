@@ -44,7 +44,7 @@ def copy_table_to_file(db, tablename, columns, F, sep):
     (psycopg2 had ``cursor.copy_to``; psycopg3 replaced it with the
     ``cursor.copy`` streaming interface.)
     """
-    cur = db.cursor()
+    cur = (getattr(db, "_cursor", None) or db.cursor)()
     if _PSYCOPG2:
         # copy_to quotes the column names itself since psycopg2 2.9; the
         # manual quoting this helper replaced had been broken since then
