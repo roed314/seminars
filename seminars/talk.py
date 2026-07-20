@@ -15,8 +15,10 @@ from seminars.utils import (
     lucky_distinct,
     make_links,
     max_distinct,
+    plain_iterator,
     sanitized_table,
     search_distinct,
+    search_iterator,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -865,11 +867,11 @@ def _construct(seminar_dict, objects=True, more=False):
 
 
 def _iterator(seminar_dict, objects=True, more=False):
-    def object_iterator(cur, search_cols, extra_cols, projection):
-        for rec in db.talks._search_iterator(cur, search_cols, extra_cols, projection):
+    def object_iterator(cur, cols, projection):
+        for rec in search_iterator(db.talks, cur, cols, projection):
             yield _construct(seminar_dict, more=more)(rec)
 
-    return object_iterator if objects else db.talks._search_iterator
+    return object_iterator if objects else plain_iterator(db.talks)
 
 
 def talks_count(query={}, include_deleted=False):
