@@ -62,7 +62,7 @@ from seminars.lock import get_lock
 from seminars.users.pwdmanager import ilike_query, ilike_escape, userdb
 from seminars.utils import flash_error
 from psycodict.utils import IdentifierWrapper
-from psycopg2.sql import SQL
+from seminars.psycopg_compat import SQL
 from datetime import datetime, timedelta
 from math import ceil
 from dateutil.parser import parse as parse_time
