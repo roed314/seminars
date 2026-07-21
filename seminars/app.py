@@ -273,7 +273,10 @@ def alive():
     """
     from . import db
 
-    if db.is_alive():
+    # is_alive became _is_alive in roed314/psycodict#92; accept either name so
+    # this works whichever psycodict is installed (matches the fallbacks in
+    # psycopg_compat.py and users/pwdmanager.py).
+    if (getattr(db, "_is_alive", None) or db.is_alive)():
         return "Bean Theory!"
     else:
         abort(503)
