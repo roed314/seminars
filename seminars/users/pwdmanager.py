@@ -47,7 +47,7 @@ class PostgresUserTable(PostgresSearchTable):
             self, db=db, search_table="users", label_col="email", include_nones=True
         )
         # FIXME
-        self._rw_userdb = db.can_read_write_userdb()
+        self._rw_userdb = (getattr(db, "_can_read_write_userdb", None) or db.can_read_write_userdb)()
 
     def log_db_change(self, what, **kwargs):
         " no need to log the changes "
