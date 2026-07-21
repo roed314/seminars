@@ -26,7 +26,7 @@ from seminars.topic import topic_dag
 from seminars.seminar import WebSeminar, can_edit_seminar, audience_options
 from .utils import flash_error
 from markupsafe import Markup
-from psycopg2.sql import SQL
+from seminars.psycopg_compat import SQL
 import urllib.parse
 from icalendar import Event
 from datetime import datetime, timedelta

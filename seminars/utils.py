@@ -11,11 +11,11 @@ from io import BytesIO
 from psycodict.utils import IdentifierWrapper
 from seminars.search_boxes import SearchBox
 from markupsafe import Markup, escape
-from psycopg2.sql import SQL
+from seminars.psycopg_compat import SQL
 from seminars import db
 from six import string_types
 from urllib.parse import urlparse, urlencode
-from psycopg2.sql import Placeholder
+from seminars.psycopg_compat import Placeholder
 import pytz
 import re
 from psycodict.searchtable import PostgresSearchTable

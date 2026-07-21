@@ -53,7 +53,9 @@ def insert_many(self, data, resort=False, reindex=False, restat=False):
 
 
 for tname in db.tablenames:
-    db[tname].log_db_change = nothing
+    # both names, so the no-op takes effect whichever one the installed
+    # psycodict calls (it became _log_db_change in roed314/psycodict#92)
+    db[tname].log_db_change = db[tname]._log_db_change = nothing
     # db[tname].add_column = are_you_REALLY_sure(db[tname].add_column)
     db[tname].drop_column = are_you_REALLY_sure(db[tname].drop_column)
     db[tname].update = update.__get__(db[tname])

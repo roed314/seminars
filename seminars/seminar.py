@@ -23,7 +23,7 @@ from .toggle import toggle
 from .utils import flash_error
 from psycodict.utils import DelayCommit, IdentifierWrapper
 from markupsafe import Markup
-from psycopg2.sql import SQL
+from seminars.psycopg_compat import SQL
 import pytz
 from collections import defaultdict
 from datetime import datetime
