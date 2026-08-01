@@ -200,7 +200,9 @@ class SeminarsUser(UserMixin):
     The User Object
     """
 
-    properties = sorted(userdb.col_type) + ["id"]
+    # col_type already includes "id", so no need to append it separately
+    # (psycodict >= 1.0 rejects a duplicated column in a list projection)
+    properties = sorted(userdb.col_type)
 
     def __init__(self, uid=None, email=None):
         if email:
