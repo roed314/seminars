@@ -27,6 +27,9 @@ def load_api_functions(*names):
     ns = {"MAX_TEXT_LEN": 8192}
 
     def process_user_input(inp, col, typ, tz=None):
+        maxlength = {"weekdays": 12}
+        if col in maxlength and len(inp) > maxlength[col]:
+            raise ValueError("Input exceeds maximum length permitted")
         if typ == "smallint[]":
             raise ValueError("Unrecognized type smallint[]")
         if typ in ["int", "smallint", "bigint", "integer"]:

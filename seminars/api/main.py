@@ -85,11 +85,11 @@ def _search_mod_value(value):
     return [residue, modulus]
 
 
-def _search_array_value(value, col, typ, tz):
+def _search_array_value(value, typ, tz):
     if not isinstance(value, list):
         raise ValueError("Array operands must be JSON arrays")
     elttyp = typ[:-2]
-    return [process_user_input(elt, col, elttyp, tz) for elt in value]
+    return [process_user_input(elt, "", elttyp, tz) for elt in value]
 
 
 def _process_search_condition(inp, typ, convert_value):
@@ -144,7 +144,7 @@ def process_search_input(inp, col, typ, tz):
         if value is None:
             return None
         if typ == "smallint[]" and isinstance(value, list):
-            return _search_array_value(value, col, typ, tz)
+            return _search_array_value(value, typ, tz)
         return process_user_input(value, col, typ, tz)
 
     return _process_search_condition(inp, typ, convert_value)
