@@ -54,6 +54,20 @@ def get_request_args_json():
                         "error": str(err)})
 
 
+def process_search_input(inp, col, typ, tz):
+    if isinstance(inp, dict):
+        query = {}
+        for op, value in inp.items():
+            if op in ["$and", "$or", "$nor"] and isinstance(value, list):
+                query[op] = [process_search_input(elt, col, typ, tz) for elt in value]
+            elif op == "$not" and isinstance(value, dict):
+                query[op] = process_search_input(value, col, typ, tz)
+            else:
+                query[op] = process_user_input(value, col, typ, tz)
+        return query
+    return process_user_input(inp, col, typ, tz)
+
+
 
 def str_jsonify(result, callback=False):
     if callback:
@@ -283,7 +297,7 @@ def search_series(version=0):
         tz = current_user.tz # Is this the right choice?
         for col, val in query.items():
             if col in db.seminars.col_type:
-                query[col] = process_user_input(val, col, db.seminars.col_type[col], tz)
+                query[col] = process_search_input(val, col, db.seminars.col_type[col], tz)
             else:
                 raise APIError({"code": "unknown_column",
                                 "col": col,
