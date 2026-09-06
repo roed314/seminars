@@ -74,6 +74,24 @@ def _search_size_value(value):
     return value
 
 
+def _search_mod_value(value):
+    if not isinstance(value, list) or len(value) != 2:
+        raise ValueError("$mod operands must be JSON arrays of length 2")
+    residue, modulus = value
+    if type(residue) is not int or type(modulus) is not int:
+        raise ValueError("$mod operands must be JSON integers")
+    if modulus == 0:
+        raise ValueError("$mod modulus cannot be 0")
+    return [residue, modulus]
+
+
+def _search_array_value(value, col, typ, tz):
+    if not isinstance(value, list):
+        raise ValueError("Array operands must be JSON arrays")
+    elttyp = typ[:-2]
+    return [process_user_input(elt, col, elttyp, tz) for elt in value]
+
+
 def _process_search_condition(inp, typ, convert_value):
     if not isinstance(inp, dict):
         return convert_value(inp)
@@ -100,7 +118,16 @@ def _process_search_condition(inp, typ, convert_value):
         elif op == "$size":
             if not (typ.endswith("[]") or typ == "jsonb"):
                 raise ValueError("$size requires an array or jsonb column")
-            query[op] = _process_search_condition(value, "integer", _search_size_value)
+            if isinstance(value, dict):
+                def _convert_size_operand(operand):
+                    if operand is None:
+                        return None
+                    return _search_size_value(operand)
+                query[op] = _process_search_condition(value, "integer", _convert_size_operand)
+            else:
+                query[op] = _search_size_value(value)
+        elif op == "$mod":
+            query[op] = _search_mod_value(value)
         elif op in ("$like", "$ilike", "$regex", "$startswith"):
             query[op] = _search_pattern(value, typ)
         else:
@@ -116,6 +143,8 @@ def process_search_input(inp, col, typ, tz):
     def convert_value(value):
         if value is None:
             return None
+        if typ == "smallint[]" and isinstance(value, list):
+            return _search_array_value(value, col, typ, tz)
         return process_user_input(value, col, typ, tz)
 
     return _process_search_condition(inp, typ, convert_value)
