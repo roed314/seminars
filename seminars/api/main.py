@@ -13,6 +13,7 @@ from seminars.utils import (
     process_user_input,
     sanitized_table,
     APIError,
+    MAX_TEXT_LEN,
     MAX_SLOTS,
     MAX_ORGANIZERS,
 )
@@ -54,18 +55,70 @@ def get_request_args_json():
                         "error": str(err)})
 
 
+MAX_SEARCH_PATTERN_LEN = MAX_TEXT_LEN
+
+
+def _search_pattern(value, typ):
+    if typ != "text" or not isinstance(value, str):
+        raise ValueError("Pattern operators require a text column and a string")
+    if "\x00" in value:
+        raise ValueError("Input contains invalid characters")
+    if len(value) > MAX_SEARCH_PATTERN_LEN:
+        raise ValueError("Search pattern exceeds maximum length permitted")
+    return value
+
+
+def _search_size_value(value):
+    if type(value) is not int:
+        raise ValueError("$size operands must be JSON integers")
+    return value
+
+
+def _process_search_condition(inp, typ, convert_value):
+    if not isinstance(inp, dict):
+        return convert_value(inp)
+
+    query = {}
+    for op, value in inp.items():
+        if op in ("$and", "$or", "$nor"):
+            if not isinstance(value, list):
+                raise ValueError("%s requires a JSON array" % op)
+            query[op] = [
+                _process_search_condition(elt, typ, convert_value)
+                for elt in value
+            ]
+        elif op == "$not":
+            query[op] = _process_search_condition(value, typ, convert_value)
+        elif op in ("$in", "$nin"):
+            if not isinstance(value, list):
+                raise ValueError("%s requires a JSON array" % op)
+            query[op] = [convert_value(elt) for elt in value]
+        elif op == "$exists":
+            if type(value) is not bool:
+                raise ValueError("$exists requires a JSON boolean")
+            query[op] = value
+        elif op == "$size":
+            if not (typ.endswith("[]") or typ == "jsonb"):
+                raise ValueError("$size requires an array or jsonb column")
+            query[op] = _process_search_condition(value, "integer", _search_size_value)
+        elif op in ("$like", "$ilike", "$regex", "$startswith"):
+            query[op] = _search_pattern(value, typ)
+        else:
+            query[op] = convert_value(value)
+
+    if "$nor" in query:
+        negated = {"$not": {"$or": query.pop("$nor")}}
+        return {"$and": [query, negated]} if query else negated
+    return query
+
+
 def process_search_input(inp, col, typ, tz):
-    if isinstance(inp, dict):
-        query = {}
-        for op, value in inp.items():
-            if op in ["$and", "$or", "$nor"] and isinstance(value, list):
-                query[op] = [process_search_input(elt, col, typ, tz) for elt in value]
-            elif op == "$not" and isinstance(value, dict):
-                query[op] = process_search_input(value, col, typ, tz)
-            else:
-                query[op] = process_user_input(value, col, typ, tz)
-        return query
-    return process_user_input(inp, col, typ, tz)
+    def convert_value(value):
+        if value is None:
+            return None
+        return process_user_input(value, col, typ, tz)
+
+    return _process_search_condition(inp, typ, convert_value)
 
 
 
@@ -296,12 +349,17 @@ def search_series(version=0):
         query = get_request_args_json()
         tz = current_user.tz # Is this the right choice?
         for col, val in query.items():
-            if col in db.seminars.col_type:
-                query[col] = process_search_input(val, col, db.seminars.col_type[col], tz)
-            else:
+            if col not in db.seminars.col_type:
                 raise APIError({"code": "unknown_column",
                                 "col": col,
                                 "description": "%s not a column of seminars" % col})
+            try:
+                query[col] = process_search_input(val, col, db.seminars.col_type[col], tz)
+            except (ValueError, TypeError, AttributeError, KeyError, OverflowError) as err:
+                raise APIError({"code": "invalid_filter",
+                                "col": col,
+                                "description": "Unable to process search filter",
+                                "error": str(err)}, 400) from err
         raw_data = {}
     query["visibility"] = 2
     # TODO: encode the times....
