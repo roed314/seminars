@@ -24,7 +24,7 @@ def load_api_functions(*names):
             fn.decorator_list = []
             nodes.append(fn)
     mini = ast.Module(body=nodes, type_ignores=[])
-    ns = {"MAX_TEXT_LEN": 8192}
+    ns = {"MAX_TEXT_LEN": 8192, "maxlength": {"weekdays": 12}}
 
     def process_user_input(inp, col, typ, tz=None):
         maxlength = {"weekdays": 12}
@@ -112,6 +112,49 @@ class SearchInputTests(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             process_search_input({"$size": None}, "topics", "text[]", "UTC")
+
+    def test_original_like_and_date_examples(self):
+        ns = load_api_functions(
+            "_search_pattern",
+            "_search_size_value",
+            "_search_mod_value",
+            "_search_array_value",
+            "_process_search_condition",
+            "process_search_input",
+        )
+        process_search_input = ns["process_search_input"]
+        # Original #984 examples: must not raise, patterns pass through.
+        self.assertEqual(
+            process_search_input({"$like": "%ieve%"}, "name", "text", "UTC"),
+            {"$like": "%ieve%"},
+        )
+        self.assertEqual(
+            process_search_input({"$ilike": "%ieve%"}, "name", "text", "UTC"),
+            {"$ilike": "%ieve%"},
+        )
+        self.assertEqual(
+            process_search_input(
+                {"$gte": "2025-01-01"}, "start_date", "date", "UTC"
+            ),
+            {"$gte": date(2025, 1, 1)},
+        )
+
+    def test_weekday_array_length_enforced(self):
+        ns = load_api_functions(
+            "_search_pattern",
+            "_search_size_value",
+            "_search_mod_value",
+            "_search_array_value",
+            "_process_search_condition",
+            "process_search_input",
+        )
+        process_search_input = ns["process_search_input"]
+        # 13 weekdays exceeds maxlength["weekdays"]=12 -> rejected on the
+        # array, not via len(int) on an element.
+        with self.assertRaises(ValueError):
+            process_search_input(
+                {"$contains": list(range(13))}, "weekdays", "smallint[]", "UTC"
+            )
 
     def test_search_series_returns_invalid_filter(self):
         ns = load_api_functions(
