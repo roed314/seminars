@@ -14,6 +14,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE_URL = os.environ.get("SEMINARS_STAGING_URL", "http://127.0.0.1:37780")
@@ -105,7 +107,10 @@ class LiveServerTests(unittest.TestCase):
 
 class TemplateSyntaxTests(unittest.TestCase):
     def test_all_templates_parse(self):
-        import jinja2
+        jinja2 = pytest.importorskip(
+            "jinja2",
+            reason="jinja2 not installed in the lightweight CI job",
+        )
 
         env = jinja2.Environment()
         templates = list((ROOT / "seminars").rglob("templates/*.html")) + \
