@@ -19,6 +19,7 @@ from seminars.utils import (
     sanitized_table,
     search_distinct,
     search_iterator,
+    topdomain,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -777,8 +778,14 @@ Email link to speaker
 
         event.add("description", desc)
         event.add("location", link)
-        event.add("DTSTAMP", datetime.now(tz=pytz.UTC))
-        event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
+        # Stable DTSTAMP so feed bytes don't change between requests (#777):
+        # prefer edited_at, fall back to start_time.
+        dtstamp = getattr(self, "edited_at", None) or self.start_time
+        event.add("DTSTAMP", adapt_datetime(dtstamp, pytz.UTC))
+        event.add("UID", "%s/%s@%s" % (self.seminar_id, self.seminar_ctr, topdomain()))
+        event.add("SEQUENCE", 0)
+        if getattr(self, "edited_at", None) is not None:
+            event.add("LAST-MODIFIED", adapt_datetime(self.edited_at, pytz.UTC))
         return event
 
 def talks_header(include_seminar=True, include_content=False, include_subscribe=True, datetime_header="Your time"):
@@ -838,7 +845,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
         else:
             if not talk.user_can_edit():
-                flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
+                flash_error("You do not have permission to edit talk %s/%s.", seminar_id, seminar_ctr)
                 return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
@@ -846,7 +853,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             return resp, None
         if seminar.new:
             # TODO: This is where you might insert the ability to create a talk without first making a seminar
-            flash_error("You must first create the seminar %s" % seminar_id)
+            flash_error("You must first create the seminar %s", seminar_id)
             return redirect(url_for(".edit_seminar", shortname=seminar_id), 302)
         if new:
             talk = WebTalk(seminar_id, seminar=seminar, editing=True)

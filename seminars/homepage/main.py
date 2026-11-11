@@ -15,6 +15,7 @@ from seminars.utils import (
     to_dict,
     topdomain,
     url_for_with_args,
+    valid_jsonp_callback,
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
@@ -49,6 +50,9 @@ def parse_topic(info, query):
     # of the talk
     topic = info.get("topic")
     if topic:
+        if "\x00" in topic:
+            flash_error("Invalid topic input: %s", repr(topic))
+            return
         # FIXME: temporary bridge during addition of physics
         if "_" not in topic:
             topic = "math_" + topic
@@ -63,6 +67,9 @@ def parse_institution_sem(info, query):
     if inst == "None":
         query["institutions"] = []
     elif inst:
+        if "\x00" in inst:
+            flash_error("Invalid institution input: %s", repr(inst))
+            return
         # one day we will do joins
         query["institutions"] = {"$contains": inst}
 
@@ -187,6 +194,9 @@ def parse_audience(info, query):
 def parse_language(info, query):
     v = info.get("language")
     if v:
+        if "\x00" in v:
+            flash_error("Invalid language input: %s", repr(v))
+            return
         query["language"] = v
 
 
@@ -909,6 +919,8 @@ def show_seminar_json(shortname):
     ]
     callback = request.args.get("callback", False)
     if callback:
+        if not valid_jsonp_callback(callback):
+            return abort(400, "Invalid callback")
         return Response(
             "{}({})".format(str(callback), json.dumps(talks, default=str)),
             mimetype="application/javascript",

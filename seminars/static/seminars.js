@@ -949,11 +949,11 @@ $(document).ready(function() {
   var past = $('input[name="past"]').val() === "True";
   var minDate = 'January 1, 1970';
   var maxDate = 'January 1, 2050';
+  // Keep picker bounds wide in both modes so pre-2020 (and other typed)
+  // dates remain queryable; only the shortcut ranges below are filtered
+  // by past.  The backend parse_daterange() accepts arbitrary dates.
   if (past) {
-    maxDate = moment();
     dr.attr('placeholder', moment().format('- MMMM D, YYYY'));
-  } else {
-    minDate = moment();
   }
 
   var start = false;
@@ -972,7 +972,7 @@ $(document).ready(function() {
       end = false;
     }
   }
-  if(dr.lenght > 0) {
+  if(dr.length > 0) {
     deduce_start_end_from_value();
   }
 
