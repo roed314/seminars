@@ -492,7 +492,7 @@ class WebTalk(object):
                 return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
             if not self.access_registration:
                 # This should never happen, registration link is required, but just in case...
-                return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</a></div>' % link
+                return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</div>'
             if "@" in self.access_registration:
                 body = """Dear organizers,
 
