@@ -609,6 +609,10 @@ class WebSeminar(object):
         return url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="webcal")
 
     @property
+    def rss_link(self):
+        return url_for(".rss_seminar_file", shortname=self.shortname, _external=True, _scheme="https")
+
+    @property
     def next_talk_time(self):
         try:
             return self._next_talk_time
@@ -648,6 +652,19 @@ class WebSeminar(object):
                 ):
                     del talk_sub[self.shortname]
                     db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+                if "talk_exclusions" in db.users.search_cols:
+                    for i, excl in db._execute(
+                        SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                            *map(
+                                IdentifierWrapper,
+                                ["id", "talk_exclusions", "users", "talk_exclusions"],
+                            )
+                        ),
+                        [self.shortname],
+                    ):
+                        if self.shortname in excl:
+                            del excl[self.shortname]
+                            db.users.update({"id": i}, {"talk_exclusions": excl})
             self.deleted = True
             return True
         else:
@@ -719,11 +736,15 @@ def _iterator(organizer_dict, institution_dict, objects=True, more=False):
     return object_iterator if objects else plain_iterator(db.seminars)
 
 
-def seminars_count(query={}, include_deleted=False):
+def seminars_count(query={}, include_deleted=False, include_pending=False):
     """
     Replacement for db.seminars.count to account for versioning.
+
+    Counts the same SQL-level row set that ``seminars_search`` selects (see
+    ``count_distinct`` for the count-vs-search caveat on Python-side
+    filtering).
     """
-    return count_distinct(db.seminars, _counter, query, include_deleted)
+    return count_distinct(db.seminars, _counter, query, include_deleted, include_pending)
 
 
 def seminars_max(col, constraint={}, include_deleted=False):
@@ -904,7 +925,7 @@ def can_edit_seminar(shortname, new):
             errmsgs.append(format_errmsg("Identifier %s is reserved by a series that has been deleted", shortname))
         else:
             if not seminar:
-                flash_error("No series with identifier %s exists" % shortname)
+                flash_error("No series with identifier %s exists", shortname)
                 return redirect(url_for("create.index"), 302), None
             else:
                 errmsgs.append(format_errmsg("Identifier %s is already in use by another series", shortname))

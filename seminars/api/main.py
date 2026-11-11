@@ -12,24 +12,40 @@ from seminars.utils import (
     short_weekdays,
     process_user_input,
     sanitized_table,
+    valid_jsonp_callback,
     APIError,
+    MAX_TEXT_LEN,
     MAX_SLOTS,
     MAX_ORGANIZERS,
+    maxlength,
 )
 from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
 
 import inspect
 import json
+from markupsafe import escape
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 
 def format_error(msg, *args):
-    return msg % args
+    # Escape all arguments to prevent XSS and format string issues (mirrors
+    # seminars.utils.format_errmsg, but returns plain text for JSON errors).
+    escaped_args = tuple(str(escape(x)) for x in args)
+    try:
+        return msg % escaped_args
+    except (TypeError, ValueError):
+        # If formatting fails (e.g., the message itself contains %), fall back
+        # to concatenation with everything escaped.
+        return str(escape(msg)) + " " + " ".join(escaped_args)
 
 def format_input_error(err, inp, col):
-    return 'Unable to process input "%s" for property %s: %s' % (inp, col, err)
+    # Pass err as a formatting argument (not interpolated into the template)
+    # so that user-controlled error text is escaped (#964).
+    return format_error(
+        'Unable to process input "%s" for property %s: %s', inp, col, err
+    )
 
 def version_error(version):
     return APIError({"code": "invalid_version",
@@ -54,9 +70,152 @@ def get_request_args_json():
                         "error": str(err)})
 
 
+MAX_SEARCH_PATTERN_LEN = MAX_TEXT_LEN
+
+
+def _search_pattern(value, typ):
+    if typ != "text" or not isinstance(value, str):
+        raise ValueError("Pattern operators require a text column and a string")
+    if "\x00" in value:
+        raise ValueError("Input contains invalid characters")
+    if len(value) > MAX_SEARCH_PATTERN_LEN:
+        raise ValueError("Search pattern exceeds maximum length permitted")
+    return value
+
+
+def _search_size_value(value):
+    if type(value) is not int:
+        raise ValueError("$size operands must be JSON integers")
+    return value
+
+
+def _search_mod_value(value):
+    if not isinstance(value, list) or len(value) != 2:
+        raise ValueError("$mod operands must be JSON arrays of length 2")
+    residue, modulus = value
+    if type(residue) is not int or type(modulus) is not int:
+        raise ValueError("$mod operands must be JSON integers")
+    if modulus == 0:
+        raise ValueError("$mod modulus cannot be 0")
+    return [residue, modulus]
+
+
+def _search_array_value(value, typ, tz):
+    if not isinstance(value, list):
+        raise ValueError("Array operands must be JSON arrays")
+    elttyp = typ[:-2]
+    # Pass col="" so element conversion does not hit the parent column's
+    # container-length check (len(int) -> TypeError). Array-length is
+    # enforced on the whole array by the caller, not per element.
+    return [process_user_input(elt, "", elttyp, tz) for elt in value]
+
+
+def _process_search_condition(inp, typ, convert_value):
+    if not isinstance(inp, dict):
+        return convert_value(inp)
+
+    query = {}
+    for op, value in inp.items():
+        if op in ("$and", "$or", "$nor"):
+            if not isinstance(value, list):
+                raise ValueError("%s requires a JSON array" % op)
+            query[op] = [
+                _process_search_condition(elt, typ, convert_value)
+                for elt in value
+            ]
+        elif op == "$not":
+            query[op] = _process_search_condition(value, typ, convert_value)
+        elif op in ("$in", "$nin"):
+            if not isinstance(value, list):
+                raise ValueError("%s requires a JSON array" % op)
+            query[op] = [convert_value(elt) for elt in value]
+        elif op == "$exists":
+            if type(value) is not bool:
+                raise ValueError("$exists requires a JSON boolean")
+            query[op] = value
+        elif op == "$size":
+            if not (typ.endswith("[]") or typ == "jsonb"):
+                raise ValueError("$size requires an array or jsonb column")
+            if isinstance(value, dict):
+                def _convert_size_operand(operand):
+                    if operand is None:
+                        return None
+                    return _search_size_value(operand)
+                query[op] = _process_search_condition(value, "integer", _convert_size_operand)
+            else:
+                query[op] = _search_size_value(value)
+        elif op == "$mod":
+            query[op] = _search_mod_value(value)
+        elif op in ("$like", "$ilike", "$regex", "$startswith"):
+            query[op] = _search_pattern(value, typ)
+        else:
+            query[op] = convert_value(value)
+
+    if "$nor" in query:
+        negated = {"$not": {"$or": query.pop("$nor")}}
+        return {"$and": [query, negated]} if query else negated
+    return query
+
+
+def process_search_input(inp, col, typ, tz):
+    def convert_value(value):
+        if value is None:
+            return None
+        if typ == "smallint[]" and isinstance(value, list):
+            # Enforce the container-length constraint on the array itself,
+            # not on each integer element.
+            if col in maxlength and len(value) > maxlength[col]:
+                raise ValueError("Input exceeds maximum length permitted")
+            return _search_array_value(value, typ, tz)
+        return process_user_input(value, col, typ, tz)
+
+    return _process_search_condition(inp, typ, convert_value)
+
+
+
+def _process_slots(slots, raw_data):
+    """Validate API `slots` and expand into weekdayN/time_slotN entries.
+
+    Raises APIError (400) instead of letting malformed input 500 (#844).
+    """
+    if not isinstance(slots, list) or len(slots) > MAX_SLOTS or not all(isinstance(slot, str) for slot in slots):
+        raise APIError({"code": "processing_error",
+                        "description": "Error in processing slots",
+                        "errors": ["slots must be a list of strings of length at most %s" % MAX_SLOTS]})
+    for i, slot in enumerate(slots):
+        try:
+            day, time = slot.split(None, 1)
+            day = short_weekdays.index(day)
+        except ValueError:
+            raise APIError({"code": "processing_error",
+                            "description": "Error in processing slots",
+                            "errors": ["slots must be a three letter day-of-week followed by a time range after a space"]})
+        raw_data["weekday%s"%i] = str(day)
+        raw_data["time_slot%s"%i] = time
+    for i in range(len(slots), MAX_SLOTS):
+        raw_data["weekday%s"%i] = raw_data["time_slot%s"%i] = ""
+    raw_data["num_slots"] = len(slots)
+
+
+def _reject_deleted_keys(raw_data):
+    """API saves must not set deletion status directly (#670).
+
+    Deletion goes through the delete/revive routes so organizer and
+    subscription cleanup runs; setting `deleted` on a single version
+    would bypass it.
+    """
+    bad = [k for k in ("deleted", "deleted_with_seminar") if k in raw_data]
+    if bad:
+        raise APIError({"code": "deleted_prohibited",
+                        "description": "You may not set deletion status through the API; use the delete/revive routes",
+                        "errors": bad}, 400)
+
 
 def str_jsonify(result, callback=False):
     if callback:
+        if not valid_jsonp_callback(callback):
+            raise APIError({"code": "invalid_callback",
+                            "description": "Invalid JSONP callback"}, 400)
         return Response(
             "{}({})".format(str(callback), json.dumps(result, default=str)),
             mimetype="application/javascript",
@@ -73,6 +232,27 @@ def _get_col(col, raw_data, activity):
     return val
 
 
+def _process_query_filters(query, col_type, tz):
+    """Validate and convert raw search filters, rejecting bad input with 400.
+
+    Without this, malformed or NUL-containing input reaches the database
+    layer and produces 500s (#964).
+    """
+    for col, val in list(query.items()):
+        if col not in col_type:
+            raise APIError({"code": "unknown_column",
+                            "col": col,
+                            "description": "%s not a searchable column" % col})
+        try:
+            query[col] = process_search_input(val, col, col_type[col], tz)
+        except (ValueError, TypeError, AttributeError, KeyError, OverflowError) as err:
+            raise APIError({"code": "invalid_filter",
+                            "col": col,
+                            "description": "Unable to process search filter",
+                            "error": str(err)}, 400) from err
+    return query
+
+
 def api_auth_required(fn):
     # Note that this wrapper will pass the user as a keyword argument to the wrapped function
     @wraps(fn)
@@ -86,7 +266,14 @@ def api_auth_required(fn):
             raise APIError({"code": "invalid_header",
                             "description": "Authorization header must have length 2"}, 401)
         email, token = pieces
-        user = SeminarsUser(email=email)
+        if "\x00" in email or "\x00" in token:
+            raise APIError({"code": "invalid_header",
+                            "description": "Authorization header contains invalid characters"}, 401)
+        try:
+            user = SeminarsUser(email=email)
+        except Exception as err:
+            raise APIError({"code": "missing_user",
+                            "description": "User %s not found" % email}, 401) from err
         if user.id is None:
             raise APIError({"code": "missing_user",
                             "description": "User %s not found" % email}, 401)
@@ -114,7 +301,14 @@ def api_auth_optional(fn):
             raise APIError({"code": "invalid_header",
                             "description": "Authorization header must have length 2"}, 401)
         email, token = pieces
-        user = SeminarsUser(email=email)
+        if "\x00" in email or "\x00" in token:
+            raise APIError({"code": "invalid_header",
+                            "description": "Authorization header contains invalid characters"}, 401)
+        try:
+            user = SeminarsUser(email=email)
+        except Exception as err:
+            raise APIError({"code": "missing_user",
+                            "description": "User %s not found" % email}, 401) from err
         if user.id is None:
             raise APIError({"code": "missing_user",
                             "description": "User %s not found" % email}, 401)
@@ -278,16 +472,11 @@ def search_series(version=0):
         # FIXME
         # projection = raw_data.pop("projection", 1)
         tz = raw_data.pop("timezone", "UTC")
+        _process_query_filters(query, db.seminars.col_type, tz)
     else:
         query = get_request_args_json()
         tz = current_user.tz # Is this the right choice?
-        for col, val in query.items():
-            if col in db.seminars.col_type:
-                query[col] = process_user_input(val, col, db.seminars.col_type[col], tz)
-            else:
-                raise APIError({"code": "unknown_column",
-                                "col": col,
-                                "description": "%s not a column of seminars" % col})
+        _process_query_filters(query, db.seminars.col_type, tz)
         raw_data = {}
     query["visibility"] = 2
     # TODO: encode the times....
@@ -311,9 +500,12 @@ def search_talks(version=0):
         projection = raw_data.pop("projection", 1)
         # FIXME
         # tz = raw_data.pop("timezone", "UTC")
+        tz = raw_data.get("timezone", "UTC")
+        _process_query_filters(query, db.talks.col_type, tz)
     else:
         query = get_request_args_json()
         projection = 1
+        _process_query_filters(query, db.talks.col_type, current_user.tz)
         raw_data = {}
     query["hidden"] = False
     visible_series = set(seminars_search({"visibility": 2}, "shortname"))
@@ -355,6 +547,7 @@ def save_series(version=0, user=None):
     if series_id is None:
         raise APIError({"code": "unspecified_series_id",
                         "description": "You must specify series_id when saving a series"})
+    _reject_deleted_keys(raw_data)
     series = seminars_lookup(series_id, include_deleted=True)
     if series is None:
         # Creating new series
@@ -391,23 +584,7 @@ def save_series(version=0, user=None):
         slots = raw_data["slots"]
     else:
         slots = [short_weekdays[day] + " " + slot for (day, slot) in zip(series.weekdays, series.time_slots)]
-    if not isinstance(slots, list) or len(slots) > MAX_SLOTS or not all(isinstance(slot, str) for slot in slots):
-        raise APIError({"code": "processing_error",
-                        "description": "Error in processing slots",
-                        "errors": ["slots must be a list of strings of length at most %s" % MAX_SLOTS]})
-    for i, slot in enumerate(slots):
-        try:
-            day, time = slot.split(None, 1)
-            day = short_weekdays.index(day)
-        except ValueError:
-            raise APIError({"code": "processing_error",
-                            "description": "Error in processing slots",
-                            "errors": ["slots must be a three letter day-of-week followed by a time range after a space"]})
-        raw_data["weekday%s"%i] = str(day)
-        raw_data["time_slot%s"%i] = time
-    for i in range(len(slots), MAX_SLOTS):
-        raw_data["weekday%s"%i] = raw_data["time_slot%s"%i] = ""
-    raw_data["num_slots"] = len(slots)
+    _process_slots(slots, raw_data)
 
     if update_organizers:
         # We require specifying the organizers of a new seminar and don't allow updates,
@@ -472,6 +649,7 @@ def save_talk(version=0, user=None):
     if series_id is None:
         raise APIError({"code": "unspecified_series_id",
                         "description": "You must specify series_id when saving a talk"})
+    _reject_deleted_keys(raw_data)
     series = seminars_lookup(series_id)
     if series is None:
         raise APIError({"code": "no_series",

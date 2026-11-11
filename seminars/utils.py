@@ -3,11 +3,13 @@ from datetime import datetime, timedelta
 from datetime import time as maketime
 from dateutil.parser import parse as parse_time
 from email_validator import validate_email
-from flask import url_for, flash, render_template, request, send_file
+from email.utils import formatdate, parsedate_to_datetime
+from flask import url_for, flash, render_template, request, send_file, Response
 from flask_login import current_user
 from functools import lru_cache
 from icalendar import Calendar
 from io import BytesIO
+from xml.sax.saxutils import escape as xml_escape
 from psycodict.utils import IdentifierWrapper
 from seminars.search_boxes import SearchBox
 from markupsafe import Markup, escape
@@ -16,6 +18,7 @@ from seminars import db
 from six import string_types
 from urllib.parse import urlparse, urlencode
 from seminars.psycopg_compat import Placeholder
+import hashlib
 import pytz
 import re
 from psycodict.searchtable import PostgresSearchTable
@@ -348,6 +351,14 @@ def allowed_shortname(shortname):
     return bool(shortname_re.match(shortname))
 
 
+# JSONP callbacks are emitted unquoted into a JavaScript response, so only
+# allow identifiers (with dots for namespaced callbacks).  Anything else
+# gets a 400 rather than reflected script (#964).
+jsonp_callback_re = re.compile(r"^[A-Za-z_$][A-Za-z0-9_.$]*$")
+
+
+def valid_jsonp_callback(callback):
+    return bool(jsonp_callback_re.match(str(callback)))
 
 
 @lru_cache(maxsize=None)
@@ -384,15 +395,51 @@ def clean_topics(inp):
     return []
 
 
-def count_distinct(table, counter, query={}, include_deleted=False):
+def _distinct_table(table, include_pending=False):
+    """
+    Table clause for DISTINCT ON queries, with the pending-record prefilter.
+
+    Unless ``include_pending`` is true, rows that are not yet approved
+    (``display`` false on API-created records) are filtered *before* the
+    most-recent-version selection, so that counts and searches agree on the
+    row set.  Returns ``(tbl, pre_values)`` where ``pre_values`` must be
+    prepended to the query values.
+    """
+    tbl = IdentifierWrapper(table.search_table)
+    if include_pending:
+        return tbl, []
+    prequery = {'$or': [{'display': True}, {'by_api': False}]}
+    # We filter the records before finding the most recent (normal queries filter after finding the most recent)
+    # This is mainly used for setting display=False or display=True
+    # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
+    pqstr, pqvalues = table._parse_dict(prequery)
+    if pqstr is None:
+        return tbl, []
+    return tbl + SQL(" WHERE {0}").format(pqstr), pqvalues
+
+
+def count_distinct(table, counter, query={}, include_deleted=False, include_pending=False):
+    """
+    Count distinct entries, accounting for versioning like ``search_distinct``.
+
+    Unless ``include_pending`` is true, unapproved (pending) records are
+    excluded, matching the SELECT side of ``search_distinct``.
+
+    NOTE on count-vs-search semantics: this counts rows at the SQL level.
+    Search layers may drop additional rows in Python afterwards (e.g. the
+    ``organizer_dict`` filter in ``seminars_search``, or ``searchable()``
+    visibility checks on the browse pages that force ``visibility = 2`` and
+    ``display = True``), so a displayed result list can legitimately be
+    shorter than this count.
+    """
     query = dict(query)
     if not include_deleted:
         query["deleted"] = {"$or": [False, {"$exists": False}]}
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
-    tbl = IdentifierWrapper(table.search_table)
     qstr, values = table._build_query(query, sort=[])
+    tbl, pre_values = _distinct_table(table, include_pending)
     counter = counter.format(cols, tbl, qstr)
-    cur = table._execute(counter, values)
+    cur = table._execute(counter, pre_values + values)
     return int(cur.fetchone()[0])
 
 
@@ -429,6 +476,12 @@ def search_distinct(
 
     Doesn't support split_ors or raw.  Always computes count.
 
+    The count reported in ``info["number"]`` uses the same row set as the
+    SELECT (same ``include_deleted``/``include_pending`` flags and the same
+    pending-record prefilter).  It is still an SQL-level count: callers may
+    drop further rows in Python (see ``count_distinct``), so a displayed
+    result list can be shorter than the reported number.
+
     INPUT:
 
     - ``table`` -- a search table, such as db.seminars or db.talks
@@ -440,24 +493,17 @@ def search_distinct(
     if offset < 0:
         raise ValueError("Offset cannot be negative")
     query = dict(query)
+    more_arg = more
     if not include_deleted:
         query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     cols = parse_projection(table, projection)
-    tbl = IdentifierWrapper(table.search_table)
     if limit is None:
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
-    prequery = {} if include_pending else {'$or': [{'display': True}, {'by_api': False}]}
-    if prequery:
-        # We filter the records before finding the most recent (normal queries filter after finding the most recent)
-        # This is mainly used for setting display=False or display=True
-        # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
-        pqstr, pqvalues = table._parse_dict(prequery)
-        if pqstr is not None:
-            tbl = tbl + SQL(" WHERE {0}").format(pqstr)
-            values = pqvalues + values
+    tbl, pre_values = _distinct_table(table, include_pending)
+    values = pre_values + values
     if more is not False: # might empty dictionary
         more, moreval = table._parse_dict(more)
         if more is None:
@@ -486,7 +532,7 @@ def search_distinct(
     results = iterator(cur, cols, projection)
     if info is not None:
         # caller is requesting count data
-        nres = count_distinct(table, counter, query)
+        nres = count_distinct(table, counter, query, include_deleted=include_deleted, include_pending=include_pending)
         if limit is None:
             info["number"] = nres
             return results
@@ -508,6 +554,9 @@ def search_distinct(
                 offset,
                 sort,
                 info,
+                include_deleted,
+                include_pending,
+                more_arg,
             )
         info["query"] = dict(query)
         info["number"] = nres
@@ -536,16 +585,8 @@ def lucky_distinct(
     cols = parse_projection(table, projection)
     fcols = SQL(", ").join(map(IdentifierWrapper, cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
-    tbl = IdentifierWrapper(table.search_table)
-    prequery = {} if include_pending else {'$or': [{'display': True}, {'by_api': False}]}
-    if prequery:
-        # We filter the records before finding the most recent (normal queries filter after finding the most recent)
-        # This is mainly used for setting display=False or display=True
-        # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
-        pqstr, pqvalues = table._parse_dict(prequery)
-        if pqstr is not None:
-            tbl = tbl + SQL(" WHERE {0}").format(pqstr)
-            values = pqvalues + values
+    tbl, pre_values = _distinct_table(table, include_pending)
+    values = pre_values + values
     fselecter = selecter.format(fcols, all_cols, tbl, qstr)
     cur = table._execute(fselecter, values)
     if cur.rowcount > 0:
@@ -714,16 +755,21 @@ def format_errmsg(errmsg, *args):
     try:
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
-        # If formatting fails (e.g., error message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        # If formatting fails (e.g., error message itself contains %), fall back
+        # to concatenation with everything (including the template, which may
+        # embed user input from legacy call sites) escaped.
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup("Error: " + formatted_msg)
 
 
 def format_input_errmsg(err, inp, col):
+    # Pass err as a formatting argument (not interpolated into the template)
+    # so that user-controlled error text is escaped by format_errmsg (#964).
     return format_errmsg(
-        "Unable to process input %s for property %s: {0}".format(err),
+        "Unable to process input %s for property %s: %s",
         '"' + str(inp) + '"',
         col,
+        err,
     )
 
 
@@ -734,7 +780,7 @@ def format_warning(warnmsg, *args):
         formatted_msg = warnmsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., warning message itself contains %), just concatenate
-        formatted_msg = warnmsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(warnmsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup("Warning: " + formatted_msg)
 
 
@@ -748,7 +794,7 @@ def format_infomsg(infomsg, *args):
         formatted_msg = infomsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., info message itself contains %), just concatenate
-        formatted_msg = infomsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(infomsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup(formatted_msg)
 
 
@@ -797,19 +843,97 @@ class Toggle(SearchBox):
 
 def ics_file(talks, filename, user=None):
     if user is None: user = current_user
+    talks = list(talks)
     cal = Calendar()
     cal.add("VERSION", "2.0")
     cal.add("PRODID", topdomain())
     cal.add("CALSCALE", "GREGORIAN")
+    cal.add("METHOD", "PUBLISH")
     cal.add("X-WR-CALNAME", topdomain())
 
     for talk in talks:
         cal.add_component(talk.event(user=user))
 
+    data = cal.to_ical()
+    etag = '"%s"' % hashlib.sha256(data).hexdigest()
+    # Last-Modified is the latest edit across the feed (None if unknown)
+    last_modified = None
+    for talk in talks:
+        edited = getattr(talk, "edited_at", None)
+        if edited is not None:
+            if edited.tzinfo is None:
+                edited = pytz.UTC.localize(edited)
+            if last_modified is None or edited > last_modified:
+                last_modified = edited
+    # Conditional requests: a matching validator means "not modified"
+    inm = request.headers.get("If-None-Match")
+    if inm is not None and inm.strip() == etag:
+        resp = Response(status=304)
+        resp.headers["ETag"] = etag
+        return resp
+    ims = request.headers.get("If-Modified-Since")
+    if ims and last_modified is not None:
+        try:
+            ims_dt = parsedate_to_datetime(ims)
+            if ims_dt is not None and last_modified <= ims_dt:
+                resp = Response(status=304)
+                resp.headers["ETag"] = etag
+                return resp
+        except (TypeError, ValueError):
+            pass
     bIO = BytesIO()
-    bIO.write(cal.to_ical())
+    bIO.write(data)
     bIO.seek(0)
-    return send_file(bIO, download_name=filename, as_attachment=True)
+    resp = send_file(bIO, download_name=filename, as_attachment=False,
+                     mimetype="text/calendar")
+    resp.headers["Content-Type"] = "text/calendar; charset=utf-8"
+    resp.headers["ETag"] = etag
+    if last_modified is not None:
+        resp.headers["Last-Modified"] = formatdate(last_modified.timestamp(), usegmt=True)
+    resp.headers["Cache-Control"] = "public, max-age=3600"
+    return resp
+
+def rss_file(talks, seminar):
+    """RSS 2.0 feed of upcoming talks in a series (see #759).
+
+    Mirrors ics_file's query path; hand-rolled with stdlib so no new
+    dependency is needed.
+    """
+    channel_link = url_for("show_seminar", shortname=seminar.shortname,
+                           _external=True, _scheme="https")
+    items = []
+    for talk in talks:
+        link = url_for("show_talk", seminar_id=talk.seminar_id,
+                       talkid=talk.seminar_ctr, _external=True, _scheme="https")
+        speaker = talk.show_speaker(raw=True)
+        description = "%s by %s" % (talk.show_title(), speaker)
+        if talk.room:
+            description += " in %s" % talk.room
+        if talk.abstract:
+            description += "\n\n%s" % talk.abstract
+        else:
+            description += "\n\nAbstract: TBA"
+        try:
+            pubdate = formatdate(talk.start_time.timestamp())
+        except (AttributeError, ValueError, OverflowError, OSError):
+            pubdate = ""
+        items.append(
+            "<item><title>%s</title><link>%s</link>"
+            "<guid isPermaLink=\"true\">%s</guid>"
+            "<pubDate>%s</pubDate><description>%s</description></item>" % (
+                xml_escape(description), xml_escape(link),
+                xml_escape(link), pubdate, xml_escape(description)))
+    body = (
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        "<rss version=\"2.0\"><channel>"
+        "<title>%s</title><link>%s</link>"
+        "<description>%s</description>%s</channel></rss>" % (
+            xml_escape(seminar.name or seminar.shortname),
+            xml_escape(channel_link),
+            xml_escape("Upcoming talks in %s" % (seminar.name or seminar.shortname)),
+            "".join(items)))
+    return Response(body, mimetype="application/rss+xml")
+
 
 def num_columns(labels):
     if not labels:
@@ -924,8 +1048,9 @@ def flash_error(errmsg, *args):
     try:
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
-        # If formatting fails (e.g., error message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        # If formatting fails (e.g., error message itself contains %), fall back
+        # to concatenation with everything escaped (see format_errmsg).
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     flash(Markup("Error: " + formatted_msg), "error")
 
 def flash_warning(errmsg, *args):
@@ -936,7 +1061,7 @@ def flash_warning(errmsg, *args):
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., warning message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     flash(Markup("Warning: " + formatted_msg), "warning")
 
 def to_dict(args, exclude = [], **kwds):

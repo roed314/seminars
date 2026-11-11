@@ -238,6 +238,7 @@ def edit_seminar():
         options=seminar_options(),
         maxlength=maxlength,
         lock=lock,
+        submitted_topics=None,
     )
 
 
@@ -247,7 +248,7 @@ def delete_seminar(shortname):
     try:
         seminar = WebSeminar(shortname, include_deleted=True)
     except ValueError as err:
-        flash_error(str(err))
+        flash_error("%s", str(err))
         return redirect(url_for(".index"), 302)
     manage = "Manage" if current_user.is_organizer else "Create"
     lock = get_lock(shortname, request.args.get("lock"))
@@ -281,7 +282,7 @@ def delete_seminar(shortname):
             if seminar.delete():
                 flash("%s %s deleted." % (seminar.series_type, shortname))
             else:
-                flash_error("You do not have permission to delete the %s %s."% (seminar.series_type, seminar.name))
+                flash_error("You do not have permission to delete the %s %s.", seminar.series_type, seminar.name)
                 return failure()
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
@@ -346,7 +347,7 @@ def delete_talk(seminar_id, seminar_ctr):
     try:
         talk = WebTalk(seminar_id, seminar_ctr, include_deleted=True)
     except ValueError as err:
-        flash_error(str(err))
+        flash_error("%s", str(err))
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
 
     def failure():
@@ -432,6 +433,18 @@ def permdelete_talk(seminar_id, seminar_ctr):
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
 
 
+def _rerender_with_topics(template, errmsgs, raw_data, **kwds):
+    """Re-display an edit form after a failed save, preserving the user's
+    submitted topics (#696) instead of the dead-end inputerror.html page.
+    """
+    for msg in errmsgs:
+        flash(msg, "error")
+    return render_template(
+        template,
+        submitted_topics=clean_topics(raw_data.get("topics")),
+        **kwds)
+
+
 @create.route("save/seminar/", methods=["POST"])
 @email_confirmed_required
 def save_seminar():
@@ -450,9 +463,16 @@ def save_seminar():
         return redirect(url_for(".delete_seminar", shortname=shortname), 302)
 
     new_version, errmsgs = process_save_seminar(seminar, raw_data, incremental_update=False)
-    # Don't try to create new_version using invalid input
+    # Don't try to create new_version using invalid input; re-display the
+    # form with the user's submitted topics preserved (#696)
     if new_version is None:
-        return show_input_errors(errmsgs)
+        manage = "Manage" if current_user.is_organizer else "Create"
+        title = "Create series" if new else "Edit series"
+        return _rerender_with_topics(
+            "edit_seminar.html", errmsgs, raw_data,
+            seminar=seminar, title=title, section=manage,
+            subsection="editsem", options=seminar_options(),
+            maxlength=maxlength, lock=get_lock(shortname, raw_data.get("lock")))
 
     if seminar.new or new_version != seminar:
         new_version.save()
@@ -821,6 +841,7 @@ def edit_talk():
         options=talk_options(),
         maxlength=maxlength,
         token=token,
+        submitted_topics=None,
         **extras
     )
 
@@ -839,9 +860,15 @@ def save_talk():
         return redirect(url_for(".delete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
 
     new_version, errmsgs = process_save_talk(talk, raw_data, incremental_update=False)
-    # Don't try to create new_version using invalid input
+    # Don't try to create new_version using invalid input; re-display the
+    # form with the user's submitted topics preserved (#696)
     if new_version is None:
-        return show_input_errors(errmsgs)
+        talk_title = "Create talk" if talk.new else "Edit talk"
+        return _rerender_with_topics(
+            "edit_talk.html", errmsgs, raw_data,
+            talk=talk, seminar=talk.seminar, title=talk_title,
+            section="Manage", subsection="edittalk",
+            options=talk_options(), maxlength=maxlength, token=token)
 
     if new_version == talk:
         flash("No changes made to talk.")

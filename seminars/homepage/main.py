@@ -11,9 +11,11 @@ from seminars.utils import (
     ics_file,
     maxlength,
     process_user_input,
+    rss_file,
     to_dict,
     topdomain,
     url_for_with_args,
+    valid_jsonp_callback,
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
@@ -48,6 +50,9 @@ def parse_topic(info, query):
     # of the talk
     topic = info.get("topic")
     if topic:
+        if "\x00" in topic:
+            flash_error("Invalid topic input: %s", repr(topic))
+            return
         # FIXME: temporary bridge during addition of physics
         if "_" not in topic:
             topic = "math_" + topic
@@ -62,6 +67,9 @@ def parse_institution_sem(info, query):
     if inst == "None":
         query["institutions"] = []
     elif inst:
+        if "\x00" in inst:
+            flash_error("Invalid institution input: %s", repr(inst))
+            return
         # one day we will do joins
         query["institutions"] = {"$contains": inst}
 
@@ -143,7 +151,7 @@ def parse_recent_edit(info, query):
         except Exception as e:
             flash_error("Could not parse recent edit input %s.  Error: %s", recent, str(e))
         else:
-            recent = datetime.now() - timedelta(hours=recent)
+            recent = get_now() - timedelta(hours=recent)
             query["edited_at"] = {"$gte": recent}
 
 def parse_video(info, query):
@@ -164,6 +172,10 @@ def parse_paper(info, query):
 def parse_access(info, query):
     v = info.get("access")
     if v == "1":
+        # Must match the display gate (talk.show_live_link requires
+        # online); otherwise offline talks with a stale live_link leak
+        # into the "Livestream available" filter (#921).
+        query["online"] = True
         query["access_control"] = {"$ne": 5}
         query["live_link"] = {"$ne": ""}
 
@@ -182,6 +194,9 @@ def parse_audience(info, query):
 def parse_language(info, query):
     v = info.get("language")
     if v:
+        if "\x00" in v:
+            flash_error("Invalid language input: %s", repr(v))
+            return
         query["language"] = v
 
 
@@ -716,8 +731,8 @@ def _talks_index(query={},
     if request.cookies.get("topics", ""):
         # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
         # For now we set the max_age to 30 years
-        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
-        response.set_cookie("topics", "", max_age=0)
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30, samesite="Lax")
+        response.set_cookie("topics", "", max_age=0, samesite="Lax")
 
     # disable cache
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -767,8 +782,8 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     if request.cookies.get("topics", ""):
         # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
         # For now we set the max_age to 30 years
-        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
-        response.set_cookie("topics", "", max_age=0)
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30, samesite="Lax")
+        response.set_cookie("topics", "", max_age=0, samesite="Lax")
     return response
 
 @app.route("/institutions/")
@@ -904,6 +919,8 @@ def show_seminar_json(shortname):
     ]
     callback = request.args.get("callback", False)
     if callback:
+        if not valid_jsonp_callback(callback):
+            return abort(400, "Invalid callback")
         return Response(
             "{}({})".format(str(callback), json.dumps(talks, default=str)),
             mimetype="application/javascript",
@@ -951,6 +968,20 @@ def ics_seminar_file(shortname):
         seminar.talks(),
         filename="{}.ics".format(shortname),
         user=current_user)
+
+
+@app.route("/seminar/<shortname>/rss")
+def rss_seminar_file(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            return abort(404, "Seminar not found")
+
+    return rss_file(
+        seminar.talks(),
+        seminar)
 
 
 @app.route("/talk/<seminar_id>/<int:talkid>/ics")
