@@ -3,11 +3,13 @@ from datetime import datetime, timedelta
 from datetime import time as maketime
 from dateutil.parser import parse as parse_time
 from email_validator import validate_email
-from flask import url_for, flash, render_template, request, send_file
+from email.utils import formatdate
+from flask import url_for, flash, render_template, request, send_file, Response
 from flask_login import current_user
 from functools import lru_cache
 from icalendar import Calendar
 from io import BytesIO
+from xml.sax.saxutils import escape as xml_escape
 from psycodict.utils import IdentifierWrapper
 from seminars.search_boxes import SearchBox
 from markupsafe import Markup, escape
@@ -810,6 +812,48 @@ def ics_file(talks, filename, user=None):
     bIO.write(cal.to_ical())
     bIO.seek(0)
     return send_file(bIO, download_name=filename, as_attachment=True)
+
+def rss_file(talks, seminar):
+    """RSS 2.0 feed of upcoming talks in a series (see #759).
+
+    Mirrors ics_file's query path; hand-rolled with stdlib so no new
+    dependency is needed.
+    """
+    channel_link = url_for("show_seminar", shortname=seminar.shortname,
+                           _external=True, _scheme="https")
+    items = []
+    for talk in talks:
+        link = url_for("show_talk", seminar_id=talk.seminar_id,
+                       talkid=talk.seminar_ctr, _external=True, _scheme="https")
+        speaker = talk.show_speaker(raw=True)
+        description = "%s by %s" % (talk.show_title(), speaker)
+        if talk.room:
+            description += " in %s" % talk.room
+        if talk.abstract:
+            description += "\n\n%s" % talk.abstract
+        else:
+            description += "\n\nAbstract: TBA"
+        try:
+            pubdate = formatdate(talk.start_time.timestamp())
+        except (AttributeError, ValueError, OverflowError, OSError):
+            pubdate = ""
+        items.append(
+            "<item><title>%s</title><link>%s</link>"
+            "<guid isPermaLink=\"true\">%s</guid>"
+            "<pubDate>%s</pubDate><description>%s</description></item>" % (
+                xml_escape(description), xml_escape(link),
+                xml_escape(link), pubdate, xml_escape(description)))
+    body = (
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        "<rss version=\"2.0\"><channel>"
+        "<title>%s</title><link>%s</link>"
+        "<description>%s</description>%s</channel></rss>" % (
+            xml_escape(seminar.name or seminar.shortname),
+            xml_escape(channel_link),
+            xml_escape("Upcoming talks in %s" % (seminar.name or seminar.shortname)),
+            "".join(items)))
+    return Response(body, mimetype="application/rss+xml")
+
 
 def num_columns(labels):
     if not labels:
