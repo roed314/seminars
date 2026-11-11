@@ -11,6 +11,7 @@ from seminars.utils import (
     ics_file,
     maxlength,
     process_user_input,
+    rss_file,
     to_dict,
     topdomain,
     url_for_with_args,
@@ -951,6 +952,20 @@ def ics_seminar_file(shortname):
         seminar.talks(),
         filename="{}.ics".format(shortname),
         user=current_user)
+
+
+@app.route("/seminar/<shortname>/rss")
+def rss_seminar_file(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            return abort(404, "Seminar not found")
+
+    return rss_file(
+        seminar.talks(),
+        seminar)
 
 
 @app.route("/talk/<seminar_id>/<int:talkid>/ics")
