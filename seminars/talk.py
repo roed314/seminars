@@ -903,11 +903,15 @@ def _iterator(seminar_dict, objects=True, more=False):
     return object_iterator if objects else plain_iterator(db.talks)
 
 
-def talks_count(query={}, include_deleted=False):
+def talks_count(query={}, include_deleted=False, include_pending=False):
     """
     Replacement for db.talks.count to account for versioning and so that we don't cache results.
+
+    Counts the same SQL-level row set that ``talks_search`` selects (see
+    ``count_distinct`` for the count-vs-search caveat on Python-side
+    filtering).
     """
-    return count_distinct(db.talks, _counter, query, include_deleted)
+    return count_distinct(db.talks, _counter, query, include_deleted, include_pending)
 
 
 def talks_max(col, constraint={}, include_deleted=False):

@@ -24,7 +24,7 @@
 <body>
 
 <h1>researchseminars.org — Architecture &amp; Outstanding Items</h1>
-<p class="meta">Repo: <code>roed314/seminars</code> (Flask app) · Fork: <code>winstoncheong/seminars</code> · Generated 2026-11-11 rev2 from source + <code>gh</code> (fork <code>integrate-5</code> + 3 pending branches)</p>
+<p class="meta">Repo: <code>roed314/seminars</code> (Flask app) · Fork: <code>winstoncheong/seminars</code> · Generated 2026-11-11 rev3 from source + <code>gh</code> (fork <code>integrate-7</code>)</p>
 
 <h2>1. Stack &amp; Topology</h2>
 <table>
@@ -84,15 +84,13 @@ GET /api/0/lookup/series|talk   single-record fetch</pre>
 <pre>GET /seminar/&lt;short&gt;/ics   homepage/main.py:941  (per-series, already filters ctr&gt;0)
 GET /talk/&lt;id&gt;/&lt;ctr&gt;/ics  homepage/main.py:956  (single talk)
 GET /ics/&lt;token&gt;             users/main.py:617      (favorites → user.ics_talks; ctr&lt;0 tombstones filtered by #989)</pre>
-<p>Generation: <code>utils.py:798 ics_file()</code> + <code>talk.py:780 event()</code> → full regen per HTTP poll, no
-<code>ETag/Last-Modified/Cache-Control</code> (ETags removed in #930), <code>DTSTAMP=now()</code> every request
-(still true on fork — feed hardening NOT done),
+<p>Generation: <code>utils.py:798 ics_file()</code> + <code>talk.py event()</code> → <code>DTSTAMP=edited_at</code> (fallback <code>start_time</code>), stable <code>UID {id}/{ctr}@topdomain</code>, <code>SEQUENCE:0</code> + <code>LAST-MODIFIED</code>, <code>METHOD:PUBLISH</code>, <code>text/calendar</code> inline, <code>ETag/Last-Modified</code> with <code>304</code> (<code>fix-feed-hardening</code> in integrate-7).
 stable <code>UID</code> but no <code>SEQUENCE/LAST-MODIFIED/METHOD:PUBLISH</code>. Favorites query does a full
 <code>all_seminars()</code> scan + per-subscription <code>$or</code> + Python filter/sort
 (<code>pwdmanager.py:466-484</code>). External clients poll on their schedule (Google ~12–24h, Outlook 24h+, no SLA);
 Google drops feeds over ~1MB/~1111 events (#777 — documented in #991, not code-fixed).</p>
 
-<h2>4. Outstanding Items (rev2 — fork status as of integrate-5)</h2>
+<h2>4. Outstanding Items (rev3 — fork status as of integrate-7)</h2>
 
 <h3>4.1 Our PRs / issues (winstoncheong → upstream, all OPEN upstream)</h3>
 <table>
@@ -103,9 +101,9 @@ Google drops feeds over ~1MB/~1111 events (#777 — documented in #991, not code
   <tr><td><a href="https://github.com/roed314/seminars/pull/991">#991</a></td><td>Docs: polling reality, 1MB cap, force-refresh (closes #990).</td><td><span class="tag done">INTEGRATED</span> <code>docs-sync-expectations</code></td></tr>
   <tr><td><a href="https://github.com/roed314/seminars/pull/992">#992</a></td><td>CI, PR/issue templates, CONTRIBUTING.</td><td><span class="tag done">INTEGRATED</span> <code>chore/repo-hygiene</code></td></tr>
   <tr><td><a href="https://github.com/roed314/seminars/pull/993">#993</a></td><td>Pinned deps (staging-validated).</td><td><span class="tag done">INTEGRATED</span> <code>chore/pin-deps</code></td></tr>
-  <tr><td>#994</td><td>API save hardening: reject <code>deleted</code> keys (closes #670); <code>_process_slots</code> 400s malformed slots (fixes #844).</td><td><span class="tag pend">BRANCH PENDING</span> <code>fix-api-authz</code> (not in integrate-5)</td></tr>
-  <tr><td>#995</td><td>Tz-aware now for edited_at/ongoing display (closes #742).</td><td><span class="tag pend">BRANCH PENDING</span> <code>fix-naive-datetime</code></td></tr>
-  <tr><td>#996</td><td>Livestream filter requires online (closes #921).</td><td><span class="tag pend">BRANCH PENDING</span> <code>fix-livestream-filter</code></td></tr>
+  <tr><td>#994</td><td>API save hardening: reject <code>deleted</code> keys (closes #670); <code>_process_slots</code> 400s malformed slots (fixes #844).</td><td><span class="tag done">INTEGRATED</span> <code>fix-api-authz</code> via integrate-6</td></tr>
+  <tr><td>#995</td><td>Tz-aware now for edited_at/ongoing display (closes #742).</td><td><span class="tag done">INTEGRATED</span> <code>fix-naive-datetime</code> via integrate-6</td></tr>
+  <tr><td>#996</td><td>Livestream filter requires online (closes #921).</td><td><span class="tag done">INTEGRATED</span> <code>fix-livestream-filter</code> via integrate-6</td></tr>
   <tr><td>#998</td><td>README.md + AGENTS.md (closes #997).</td><td><span class="tag done">INTEGRATED</span> <code>docs/readme-agents</code></td></tr>
   <tr><td><a href="https://github.com/roed314/seminars/pull/999">#999</a></td><td>Email-change organizer migration test (closes #933).</td><td><span class="tag done">INTEGRATED</span> <code>fix-933-email-migration</code></td></tr>
   <tr><td>#1000</td><td>SameSite=Lax cookies (closes #840).</td><td><span class="tag done">INTEGRATED</span> <code>fix-840-cookies</code></td></tr>
@@ -116,26 +114,29 @@ Google drops feeds over ~1MB/~1111 events (#777 — documented in #991, not code
   <tr><td>#1007</td><td>Mute talks in favorited series (closes #460).</td><td><span class="tag done">INTEGRATED</span> <code>fix-460-unfavorite</code></td></tr>
   <tr><td>#1009</td><td>Vet deps: ruff, drop setuptools/typing_extensions (closes #1008).</td><td><span class="tag done">INTEGRATED</span> <code>chore/vet-deps</code></td></tr>
   <tr><td>#985</td><td>Upstream bot PR (draft, unmerged) superseded by #987.</td><td><span class="tag open">DRAFT</span></td></tr>
+  <tr><td>#908</td><td>Wide daterangepicker bounds so pre-2020 dates are queryable + <code>lenght</code> typo (closes #908).</td><td><span class="tag done">INTEGRATED</span> <code>fix-908-predates</code> via integrate-7</td></tr>
+  <tr><td>#964</td><td>XSS/format-string/NUL hardening + JSONP + query filters (closes #964).</td><td><span class="tag done">INTEGRATED</span> <code>fix-964-xss</code> via integrate-7</td></tr>
+  <tr><td>feed</td><td>Stable <code>DTSTAMP</code>, UID domain, <code>SEQUENCE</code>, <code>ETag/304</code>, <code>text/calendar</code> inline (relates #777, part of #82).</td><td><span class="tag done">INTEGRATED</span> <code>fix-feed-hardening</code> via integrate-7</td></tr>
 </table>
 
 <h3>4.2 Upstream defects (by severity + fork status)</h3>
 <table>
   <tr><th>Issue</th><th>Severity</th><th>One-line</th><th>Fork</th></tr>
   <tr><td>#984 / #986</td><td><span class="tag crit">CRITICAL</span></td><td><code>GET /api/0/search/series</code> 500s on valid operator/date filters</td><td><span class="tag done">FIXED</span> #987</td></tr>
-  <tr><td>#844</td><td><span class="tag crit">CRITICAL</span></td><td><code>POST /api/0/save/series</code> 500 on <code>slot.split</code> → now 400 via <code>_process_slots</code></td><td><span class="tag pend">FIXED IN BRANCH</span> #994</td></tr>
+  <tr><td>#844</td><td><span class="tag crit">CRITICAL</span></td><td><code>POST /api/0/save/series</code> 500 on <code>slot.split</code> → now 400 via <code>_process_slots</code></td><td><span class="tag done">FIXED</span> #994</td></tr>
   <tr><td>#933</td><td><span class="tag crit">CRITICAL</span></td><td>Email change orphans <code>seminar_organizers</code> (lose edit rights)</td><td><span class="tag done">FIXED</span> #999</td></tr>
   <tr><td>#89</td><td><span class="tag crit">CRITICAL</span></td><td>No edit locks — last-write-wins on versioned rows (one-liner issue, no design proposed)</td><td><span class="tag open">OPEN</span></td></tr>
-  <tr><td>#964</td><td><span class="tag high">HIGH</span></td><td>XSS/format-string/NUL 500s (partially fixed #965/#966, never closed)</td><td><span class="tag open">OPEN</span> needs hardening</td></tr>
-  <tr><td>#670</td><td><span class="tag high">HIGH</span></td><td>API can set <code>deleted</code> on a single version</td><td><span class="tag pend">FIXED IN BRANCH</span> #994</td></tr>
+  <tr><td>#964</td><td><span class="tag high">HIGH</span></td><td>XSS/format-string/NUL 500s (partially fixed #965/#966, never closed)</td><td><span class="tag done">FIXED</span> <code>fix-964-xss</code></td></tr>
+  <tr><td>#670</td><td><span class="tag high">HIGH</span></td><td>API can set <code>deleted</code> on a single version</td><td><span class="tag done">FIXED</span> #994</td></tr>
   <tr><td>#636</td><td><span class="tag high">HIGH</span></td><td><code>seminars_count/talks_count</code> wrong (45 vs 0)</td><td><span class="tag open">OPEN</span></td></tr>
-  <tr><td>#742</td><td><span class="tag high">HIGH</span></td><td>Naive vs UTC <code>datetime.now()</code> mixed</td><td><span class="tag pend">FIXED IN BRANCH</span> #995</td></tr>
+  <tr><td>#742</td><td><span class="tag high">HIGH</span></td><td>Naive vs UTC <code>datetime.now()</code> mixed</td><td><span class="tag done">FIXED</span> #995</td></tr>
   <tr><td>#745 / #217</td><td><span class="tag high">HIGH</span></td><td>Page weight (~1.8MB past talks), 21 queries to render browse</td><td><span class="tag open">OPEN</span></td></tr>
   <tr><td>#840</td><td><span class="tag high">HIGH</span></td><td><code>SameSite=None</code> without <code>Secure</code> — filter cookies rejected</td><td><span class="tag done">FIXED</span> #1000</td></tr>
   <tr><td>#931</td><td><span class="tag high">HIGH</span></td><td>Reschedule tombstone syncs at old time w/ broken link</td><td><span class="tag done">FIXED</span> #989</td></tr>
-  <tr><td>#777</td><td><span class="tag high">HIGH</span></td><td>Google truncates 1MB/1111-event feeds; stale TBA persists (mitigated #895, documented #991)</td><td><span class="tag open">OPEN BY DESIGN</span> pull-only</td></tr>
-  <tr><td>#921</td><td><span class="tag high">HIGH</span></td><td>Livestream filter wrong</td><td><span class="tag pend">FIXED IN BRANCH</span> #996</td></tr>
+  <tr><td>#777</td><td><span class="tag high">HIGH</span></td><td>Google truncates 1MB/1111-event feeds; stale TBA persists (mitigated #895, documented #991, hardened: stable DTSTAMP/SEQUENCE/ETag in <code>fix-feed-hardening</code>)</td><td><span class="tag open">OPEN BY DESIGN</span> pull-only</td></tr>
+  <tr><td>#921</td><td><span class="tag high">HIGH</span></td><td>Livestream filter wrong</td><td><span class="tag done">FIXED</span> #996</td></tr>
   <tr><td>#696</td><td><span class="tag high">HIGH</span></td><td>Unfriendly input errors, topics lost</td><td><span class="tag done">FIXED</span> #1006</td></tr>
-  <tr><td>#908</td><td><span class="tag high">HIGH</span></td><td>Pre-2020 dates unqueryable (daterangepicker minDate blocks typing earlier dates)</td><td><span class="tag open">OPEN</span></td></tr>
+  <tr><td>#908</td><td><span class="tag high">HIGH</span></td><td>Pre-2020 dates unqueryable (daterangepicker minDate blocks typing earlier dates)</td><td><span class="tag done">FIXED</span> <code>fix-908-predates</code></td></tr>
 </table>
 
 <h3>4.3 Structural / maintenance gaps</h3>
@@ -146,17 +147,17 @@ Google drops feeds over ~1MB/~1111 events (#777 — documented in #991, not code
   <li>ICS is pull-only: poll interval (Google/Apple/Outlook) is <strong>not fixable from this codebase</strong>. Mitigation = small/stable feeds (partially done: #989 + #991) + different model: <strong>event-driven notifications</strong> (prototype #1002: change event + subscriber lookup, no sending yet; parent #82) keeping ICS as fallback.</li>
 </ul>
 
-<h3>4.4 Suggested next work (fork) — rev2 status</h3>
+<h3>4.4 Suggested next work (fork) — rev3 status</h3>
 <ol>
   <li><span class="tag done">DONE</span> Email-on-edit prototype (#1002: change event from <code>save()</code> + subscriber lookup, no sending yet).</li>
-  <li><span class="tag open">OPEN</span> Feed hardening: stable <code>DTSTAMP</code>, <code>SEQUENCE/LAST-MODIFIED</code>, <code>ETag/304</code>, <code>text/calendar</code> inline. Still <code>DTSTAMP=now()</code> at <code>talk.py:780</code>.</li>
+  <li><span class="tag done">DONE</span> Feed hardening via <code>fix-feed-hardening</code> (stable <code>DTSTAMP</code> from <code>edited_at</code>, <code>SEQUENCE/LAST-MODIFIED</code>, UID domain, <code>METHOD:PUBLISH</code>, <code>ETag/304</code>, <code>text/calendar</code> inline).</li>
   <li><span class="tag open">OPEN</span> Bulk-export endpoint (#910 — organizer + all-my-series download; API crawl today).</li>
   <li><span class="tag done">DONE</span> Pin deps + minimal pytest job (#993 + #992 + #1004).</li>
-  <li><span class="tag open">OPEN</span> Merge 3 pending branches to fork <code>master</code>: <code>fix-api-authz</code> (#994/#844/#670), <code>fix-naive-datetime</code> (#995/#742), <code>fix-livestream-filter</code> (#996/#921), then push.</li>
-  <li><span class="tag open">OPEN</span> Remaining upstream defects: #89 (locks), #636 (counts), #745/#217 (perf), #964 (XSS hardening), #908 (pre-2020 dates), #910 (bulk), #777 (by-design cap).</li>
+  <li><span class="tag done">DONE</span> Merged to <code>integrate-7</code>: <code>fix-api-authz</code> (#994/#844/#670), <code>fix-naive-datetime</code> (#995/#742), <code>fix-livestream-filter</code> (#996/#921), <code>fix-908-predates</code>, <code>fix-964-xss</code>, <code>fix-feed-hardening</code>. 88 passed.</li>
+  <li><span class="tag open">OPEN</span> Remaining upstream defects: #89 (locks), #636 (counts), #745/#217 (perf), #910 (bulk), #777 (by-design cap).</li>
 </ol>
 
-<footer>Contact: @winstoncheong · winstonc@ksu.edu · Fork <code>master</code> = integrate-5 (14 PRs) + pending: <code>fix-api-authz</code>, <code>fix-naive-datetime</code>, <code>fix-livestream-filter</code></footer>
+<footer>Contact: @winstoncheong · winstonc@ksu.edu · Fork <code>integrate-7</code> = integrate-6 + #908 + #964 + feed hardening</footer>
 
 </body>
 </html>
