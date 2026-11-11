@@ -144,7 +144,7 @@ def parse_recent_edit(info, query):
         except Exception as e:
             flash_error("Could not parse recent edit input %s.  Error: %s", recent, str(e))
         else:
-            recent = datetime.now() - timedelta(hours=recent)
+            recent = get_now() - timedelta(hours=recent)
             query["edited_at"] = {"$gte": recent}
 
 def parse_video(info, query):
@@ -165,6 +165,10 @@ def parse_paper(info, query):
 def parse_access(info, query):
     v = info.get("access")
     if v == "1":
+        # Must match the display gate (talk.show_live_link requires
+        # online); otherwise offline talks with a stale live_link leak
+        # into the "Livestream available" filter (#921).
+        query["online"] = True
         query["access_control"] = {"$ne": 5}
         query["live_link"] = {"$ne": ""}
 

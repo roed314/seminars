@@ -664,7 +664,7 @@ Thank you,
 
     def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
         rescheduled = self.rescheduled()
-        t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
+        t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(pytz.UTC), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if rescheduled:
             datetime_tds = t.strftime('<td class="weekday rescheduled">%a</td><td class="monthdate rescheduled">%b %d</td><td class="time rescheduled" title="%Z">%H:%M</td>')
         else:

@@ -159,6 +159,44 @@ def process_search_input(inp, col, typ, tz):
 
 
 
+def _process_slots(slots, raw_data):
+    """Validate API `slots` and expand into weekdayN/time_slotN entries.
+
+    Raises APIError (400) instead of letting malformed input 500 (#844).
+    """
+    if not isinstance(slots, list) or len(slots) > MAX_SLOTS or not all(isinstance(slot, str) for slot in slots):
+        raise APIError({"code": "processing_error",
+                        "description": "Error in processing slots",
+                        "errors": ["slots must be a list of strings of length at most %s" % MAX_SLOTS]})
+    for i, slot in enumerate(slots):
+        try:
+            day, time = slot.split(None, 1)
+            day = short_weekdays.index(day)
+        except ValueError:
+            raise APIError({"code": "processing_error",
+                            "description": "Error in processing slots",
+                            "errors": ["slots must be a three letter day-of-week followed by a time range after a space"]})
+        raw_data["weekday%s"%i] = str(day)
+        raw_data["time_slot%s"%i] = time
+    for i in range(len(slots), MAX_SLOTS):
+        raw_data["weekday%s"%i] = raw_data["time_slot%s"%i] = ""
+    raw_data["num_slots"] = len(slots)
+
+
+def _reject_deleted_keys(raw_data):
+    """API saves must not set deletion status directly (#670).
+
+    Deletion goes through the delete/revive routes so organizer and
+    subscription cleanup runs; setting `deleted` on a single version
+    would bypass it.
+    """
+    bad = [k for k in ("deleted", "deleted_with_seminar") if k in raw_data]
+    if bad:
+        raise APIError({"code": "deleted_prohibited",
+                        "description": "You may not set deletion status through the API; use the delete/revive routes",
+                        "errors": bad}, 400)
+
+
 def str_jsonify(result, callback=False):
     if callback:
         return Response(
@@ -464,6 +502,7 @@ def save_series(version=0, user=None):
     if series_id is None:
         raise APIError({"code": "unspecified_series_id",
                         "description": "You must specify series_id when saving a series"})
+    _reject_deleted_keys(raw_data)
     series = seminars_lookup(series_id, include_deleted=True)
     if series is None:
         # Creating new series
@@ -500,23 +539,7 @@ def save_series(version=0, user=None):
         slots = raw_data["slots"]
     else:
         slots = [short_weekdays[day] + " " + slot for (day, slot) in zip(series.weekdays, series.time_slots)]
-    if not isinstance(slots, list) or len(slots) > MAX_SLOTS or not all(isinstance(slot, str) for slot in slots):
-        raise APIError({"code": "processing_error",
-                        "description": "Error in processing slots",
-                        "errors": ["slots must be a list of strings of length at most %s" % MAX_SLOTS]})
-    for i, slot in enumerate(slots):
-        try:
-            day, time = slot.split(None, 1)
-            day = short_weekdays.index(day)
-        except ValueError:
-            raise APIError({"code": "processing_error",
-                            "description": "Error in processing slots",
-                            "errors": ["slots must be a three letter day-of-week followed by a time range after a space"]})
-        raw_data["weekday%s"%i] = str(day)
-        raw_data["time_slot%s"%i] = time
-    for i in range(len(slots), MAX_SLOTS):
-        raw_data["weekday%s"%i] = raw_data["time_slot%s"%i] = ""
-    raw_data["num_slots"] = len(slots)
+    _process_slots(slots, raw_data)
 
     if update_organizers:
         # We require specifying the organizers of a new seminar and don't allow updates,
@@ -581,6 +604,7 @@ def save_talk(version=0, user=None):
     if series_id is None:
         raise APIError({"code": "unspecified_series_id",
                         "description": "You must specify series_id when saving a talk"})
+    _reject_deleted_keys(raw_data)
     series = seminars_lookup(series_id)
     if series is None:
         raise APIError({"code": "no_series",
