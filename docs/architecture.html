@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>researchseminars.org — Architecture &amp; Outstanding Items</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; line-height: 1.55; }
+  h1 { border-bottom: 2px solid #222; padding-bottom: .4rem; }
+  h2 { margin-top: 2.2rem; border-bottom: 1px solid #ccc; padding-bottom: .3rem; }
+  h3 { margin-top: 1.4rem; }
+  code { background: #f2f2f2; padding: .1em .35em; border-radius: 3px; font-size: .92em; }
+  pre { background: #f6f6f6; padding: 1rem; overflow-x: auto; border-radius: 6px; font-size: .85em; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .92em; }
+  th, td { border: 1px solid #ccc; padding: .5rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f2f2f2; }
+  .meta { color: #555; font-size: .9em; }
+  .tag { display: inline-block; font-size: .78em; font-weight: 700; border-radius: 4px; padding: .1em .5em; margin-right: .3em; }
+  .crit { background: #fde8e8; color: #a00; } .high { background: #fff3d6; color: #8a5a00; }
+  .open { background: #e8f0fe; color: #1a56db; } .done { background: #e6f4ea; color: #1a7f37; } .pend { background: #fff3d6; color: #8a5a00; }
+  footer { margin-top: 3rem; color: #777; font-size: .85em; border-top: 1px solid #ddd; padding-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>researchseminars.org — Architecture &amp; Outstanding Items</h1>
+<p class="meta">Repo: <code>roed314/seminars</code> (Flask app) · Fork: <code>winstoncheong/seminars</code> · Generated 2026-11-11 rev2 from source + <code>gh</code> (fork <code>integrate-5</code> + 3 pending branches)</p>
+
+<h2>1. Stack &amp; Topology</h2>
+<table>
+  <tr><th>Layer</th><th>What</th><th>Where</th></tr>
+  <tr><td>Web framework</td><td>Flask blueprints: <code>homepage</code>, <code>create</code>, <code>users</code> (auth), <code>api</code></td><td><code>seminars/*/main.py</code>, <code>seminars/app.py</code></td></tr>
+  <tr><td>Database</td><td>Postgres via <code>psycodict.PostgresDatabase</code> (now pinned; was floating git dep)</td><td><code>seminars/__init__.py:13-17</code>, <code>requirements.txt</code> (#993)</td></tr>
+  <tr><td>Auth</td><td>Flask-Login, bcrypt, token links for speakers</td><td><code>seminars/users/pwdmanager.py</code>, <code>talk.py:119</code></td></tr>
+  <tr><td>Mail</td><td>Flask-Mail via <code>heaviside.mit.edu:465</code>, MIT sender</td><td><code>seminars/app.py:378-392</code></td></tr>
+  <tr><td>Frontend</td><td>Jinja templates + <code>seminars.js</code>, KaTeX, daterangepicker</td><td><code>seminars/templates/</code>, <code>seminars/static/</code></td></tr>
+  <tr><td>Deploy</td><td>Apache + gunicorn + supervisord; branches <code>master → live → stable</code> pulled on server</td><td><code>configfiles/</code> (<code>apache.conf</code>, <code>gunicorn-config-*</code>, <code>seminars_fetch.sh</code>)</td></tr>
+  <tr><td>CI / tests</td><td>GitHub Actions: <code>pytest tests/</code> + <code>ruff/pyflakes</code> + knowl YAML check (fork #992/#993/#1004). Upstream was Travis <code>pyflakes .</code> only.</td><td><code>.github/workflows/ci.yml</code>, <code>tests/</code>, <code>CONTRIBUTING.md</code></td></tr>
+</table>
+
+<h2>2. Data Model (versioned, append-only)</h2>
+<p>Every edit inserts a new row (<code>db.*.insert_many([data])</code>); reads take the latest via
+<code>SELECT DISTINCT ON (key) … ORDER BY id DESC</code>. History is implicit, nothing is ever updated in place.
+Wrappers force <code>resort=False, reindex=False, restat=False</code> (<code>seminars/__init__.py:39-52</code>).</p>
+<table>
+  <tr><th>Table</th><th>Key</th><th>Notes</th></tr>
+  <tr><td><code>seminars</code></td><td><code>shortname</code></td><td>Series/conferences; <code>save()</code> at <code>seminar.py:297-305</code>, organizers via <code>save_organizers()</code> (delete + re-insert)</td></tr>
+  <tr><td><code>talks</code></td><td><code>(seminar_id, seminar_ctr)</code></td><td><code>save()</code> at <code>talk.py:208-219</code>; reschedule tombstones use <strong>negative</strong> <code>ctr</code> (<code>create/main.py:850</code>)</td></tr>
+  <tr><td><code>institutions</code>, <code>topics</code>, <code>seminar_organizers</code></td><td>various</td><td>See <code>Schema.md</code></td></tr>
+  <tr><td><code>userdb.users</code></td><td><code>email</code></td><td>Subscriptions: <code>seminar_subscriptions text[]</code>, <code>talk_subscriptions json</code></td></tr>
+  <tr><td>knowls</td><td>YAML</td><td>Static help text loaded at import (<code>knowls.py</code>, <code>knowls.yaml</code>)</td></tr>
+</table>
+<p>Schema doc: <code>Schema.md</code> (omits <code>new_topics</code>, <code>author_ids</code>, <code>talk_registrations</code>, <code>preendorsed_users</code>, <code>subjects</code>, <code>by_api</code> — see #993 staging notes). Contributing: <code>CONTRIBUTING.md</code> + <code>AGENTS.md</code> (fork #992/#998).</p>
+
+<h3>2.1 Data volume (measured live 2026-11-11)</h3>
+<p>Via public <code>POST /api/0/search/*</code> with <code>limit/offset</code> probes + offset binary search:</p>
+<table>
+  <tr><th>Corpus</th><th>Count</th><th>Avg sanitized record</th></tr>
+  <tr><td>Public series (<code>visibility=2</code>)</td><td>~2,359</td><td>~0.8KB</td></tr>
+  <tr><td>Public talks (<code>hidden=False</code>, visible series)</td><td>~47,938</td><td>~1.1KB</td></tr>
+</table>
+<p>Current public versions ≈ <strong>~55MB</strong> over the wire. DB-side is larger: rows carry all
+<code>search_cols</code>, the schema is append-only (every edit = full new row, deleted rows retained),
+plus non-public rows, users, institutions, organizers, and the knowl DB.
+Estimate: <strong>low hundreds of MB (~200–600MB with indexes)</strong>; compressed <code>pg_dump</code> likely
+~100–300MB (their <code>configfiles/backup.sh</code> does <code>pg_dump --format tar</code>).
+Public corpus is harvestable (~25–50 paged requests); private data (emails, tokens, subscriptions) is not.</p>
+
+<h2>3. Key Request Flows</h2>
+<h3>3.1 Edit seminar / talk (write path)</h3>
+<pre>POST /create/save/seminar/  → create/main.py:435 save_seminar()
+POST /create/save/talk/     → create/main.py:828 save_talk()
+POST /create/save/schedule/ → create/main.py:1075 save_seminar_schedule()  (N unbatched inserts!)
+POST /api/0/save/series|talk/ → api/main.py:340,462  (display=False gate + review queue)</pre>
+<p>Cost per save: 3–6 versioned reads (<code>DISTINCT ON</code>), up to 10 sequential <code>users.lookup</code> (organizers), <code>talks_max()</code> scan, <code>email_validator</code>. No index rebuild, no mail, no cache purge — writes are cheap; bulk schedule-save is N commits.</p>
+
+<h3>3.2 Read / browse / search</h3>
+<pre>GET /                          homepage browse (21 DB queries for non-endorsed users, #217 — OPEN)
+GET /search                    filtered talk search
+GET /api/0/search/series|talks  machine API (operator/dict filters; #984/#986 500s → fixed by #987, integrated)
+GET /api/0/lookup/series|talk   single-record fetch</pre>
+
+<h3>3.3 Calendar export (ICS — on-demand, uncached)</h3>
+<pre>GET /seminar/&lt;short&gt;/ics   homepage/main.py:941  (per-series, already filters ctr&gt;0)
+GET /talk/&lt;id&gt;/&lt;ctr&gt;/ics  homepage/main.py:956  (single talk)
+GET /ics/&lt;token&gt;             users/main.py:617      (favorites → user.ics_talks; ctr&lt;0 tombstones filtered by #989)</pre>
+<p>Generation: <code>utils.py:798 ics_file()</code> + <code>talk.py:780 event()</code> → full regen per HTTP poll, no
+<code>ETag/Last-Modified/Cache-Control</code> (ETags removed in #930), <code>DTSTAMP=now()</code> every request
+(still true on fork — feed hardening NOT done),
+stable <code>UID</code> but no <code>SEQUENCE/LAST-MODIFIED/METHOD:PUBLISH</code>. Favorites query does a full
+<code>all_seminars()</code> scan + per-subscription <code>$or</code> + Python filter/sort
+(<code>pwdmanager.py:466-484</code>). External clients poll on their schedule (Google ~12–24h, Outlook 24h+, no SLA);
+Google drops feeds over ~1MB/~1111 events (#777 — documented in #991, not code-fixed).</p>
+
+<h2>4. Outstanding Items (rev2 — fork status as of integrate-5)</h2>
+
+<h3>4.1 Our PRs / issues (winstoncheong → upstream, all OPEN upstream)</h3>
+<table>
+  <tr><th>Ref</th><th>What</th><th>Fork status</th></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/987">#987</a></td><td>Weekday-array + operator-dict fix. Closes #984, #986.</td><td><span class="tag done">INTEGRATED</span> <code>fix-985-weekday</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/issues/988">#988</a></td><td>Meta: 5 fixed-but-never-closed issues (#961, #964, #777, #886, #116).</td><td><span class="tag open">OPEN</span> tracking</td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/989">#989</a></td><td>Filter <code>ctr&lt;0</code> tombstones from favorites ICS. Closes #931.</td><td><span class="tag done">INTEGRATED</span> <code>fix-931-tombstone</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/991">#991</a></td><td>Docs: polling reality, 1MB cap, force-refresh (closes #990).</td><td><span class="tag done">INTEGRATED</span> <code>docs-sync-expectations</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/992">#992</a></td><td>CI, PR/issue templates, CONTRIBUTING.</td><td><span class="tag done">INTEGRATED</span> <code>chore/repo-hygiene</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/993">#993</a></td><td>Pinned deps (staging-validated).</td><td><span class="tag done">INTEGRATED</span> <code>chore/pin-deps</code></td></tr>
+  <tr><td>#994</td><td>API save hardening: reject <code>deleted</code> keys (closes #670); <code>_process_slots</code> 400s malformed slots (fixes #844).</td><td><span class="tag pend">BRANCH PENDING</span> <code>fix-api-authz</code> (not in integrate-5)</td></tr>
+  <tr><td>#995</td><td>Tz-aware now for edited_at/ongoing display (closes #742).</td><td><span class="tag pend">BRANCH PENDING</span> <code>fix-naive-datetime</code></td></tr>
+  <tr><td>#996</td><td>Livestream filter requires online (closes #921).</td><td><span class="tag pend">BRANCH PENDING</span> <code>fix-livestream-filter</code></td></tr>
+  <tr><td>#998</td><td>README.md + AGENTS.md (closes #997).</td><td><span class="tag done">INTEGRATED</span> <code>docs/readme-agents</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/999">#999</a></td><td>Email-change organizer migration test (closes #933).</td><td><span class="tag done">INTEGRATED</span> <code>fix-933-email-migration</code></td></tr>
+  <tr><td>#1000</td><td>SameSite=Lax cookies (closes #840).</td><td><span class="tag done">INTEGRATED</span> <code>fix-840-cookies</code></td></tr>
+  <tr><td>#1002</td><td>Push-notify prototype: change event + subscriber lookup, no send (closes #1001, part of #82).</td><td><span class="tag done">INTEGRATED</span> <code>prototype-push-notify</code></td></tr>
+  <tr><td>#1004</td><td>UI smoke + browser tests (closes #1003).</td><td><span class="tag done">INTEGRATED</span> <code>test-ui-smoke</code></td></tr>
+  <tr><td>#1005</td><td>Per-series RSS 2.0 feed (closes #759).</td><td><span class="tag done">INTEGRATED</span> <code>fix-759-rss</code></td></tr>
+  <tr><td>#1006</td><td>Preserve topics on input errors (closes #696).</td><td><span class="tag done">INTEGRATED</span> <code>fix-696-input-errors</code></td></tr>
+  <tr><td>#1007</td><td>Mute talks in favorited series (closes #460).</td><td><span class="tag done">INTEGRATED</span> <code>fix-460-unfavorite</code></td></tr>
+  <tr><td>#1009</td><td>Vet deps: ruff, drop setuptools/typing_extensions (closes #1008).</td><td><span class="tag done">INTEGRATED</span> <code>chore/vet-deps</code></td></tr>
+  <tr><td>#985</td><td>Upstream bot PR (draft, unmerged) superseded by #987.</td><td><span class="tag open">DRAFT</span></td></tr>
+</table>
+
+<h3>4.2 Upstream defects (by severity + fork status)</h3>
+<table>
+  <tr><th>Issue</th><th>Severity</th><th>One-line</th><th>Fork</th></tr>
+  <tr><td>#984 / #986</td><td><span class="tag crit">CRITICAL</span></td><td><code>GET /api/0/search/series</code> 500s on valid operator/date filters</td><td><span class="tag done">FIXED</span> #987</td></tr>
+  <tr><td>#844</td><td><span class="tag crit">CRITICAL</span></td><td><code>POST /api/0/save/series</code> 500 on <code>slot.split</code> → now 400 via <code>_process_slots</code></td><td><span class="tag pend">FIXED IN BRANCH</span> #994</td></tr>
+  <tr><td>#933</td><td><span class="tag crit">CRITICAL</span></td><td>Email change orphans <code>seminar_organizers</code> (lose edit rights)</td><td><span class="tag done">FIXED</span> #999</td></tr>
+  <tr><td>#89</td><td><span class="tag crit">CRITICAL</span></td><td>No edit locks — last-write-wins on versioned rows (one-liner issue, no design proposed)</td><td><span class="tag open">OPEN</span></td></tr>
+  <tr><td>#964</td><td><span class="tag high">HIGH</span></td><td>XSS/format-string/NUL 500s (partially fixed #965/#966, never closed)</td><td><span class="tag open">OPEN</span> needs hardening</td></tr>
+  <tr><td>#670</td><td><span class="tag high">HIGH</span></td><td>API can set <code>deleted</code> on a single version</td><td><span class="tag pend">FIXED IN BRANCH</span> #994</td></tr>
+  <tr><td>#636</td><td><span class="tag high">HIGH</span></td><td><code>seminars_count/talks_count</code> wrong (45 vs 0)</td><td><span class="tag open">OPEN</span></td></tr>
+  <tr><td>#742</td><td><span class="tag high">HIGH</span></td><td>Naive vs UTC <code>datetime.now()</code> mixed</td><td><span class="tag pend">FIXED IN BRANCH</span> #995</td></tr>
+  <tr><td>#745 / #217</td><td><span class="tag high">HIGH</span></td><td>Page weight (~1.8MB past talks), 21 queries to render browse</td><td><span class="tag open">OPEN</span></td></tr>
+  <tr><td>#840</td><td><span class="tag high">HIGH</span></td><td><code>SameSite=None</code> without <code>Secure</code> — filter cookies rejected</td><td><span class="tag done">FIXED</span> #1000</td></tr>
+  <tr><td>#931</td><td><span class="tag high">HIGH</span></td><td>Reschedule tombstone syncs at old time w/ broken link</td><td><span class="tag done">FIXED</span> #989</td></tr>
+  <tr><td>#777</td><td><span class="tag high">HIGH</span></td><td>Google truncates 1MB/1111-event feeds; stale TBA persists (mitigated #895, documented #991)</td><td><span class="tag open">OPEN BY DESIGN</span> pull-only</td></tr>
+  <tr><td>#921</td><td><span class="tag high">HIGH</span></td><td>Livestream filter wrong</td><td><span class="tag pend">FIXED IN BRANCH</span> #996</td></tr>
+  <tr><td>#696</td><td><span class="tag high">HIGH</span></td><td>Unfriendly input errors, topics lost</td><td><span class="tag done">FIXED</span> #1006</td></tr>
+  <tr><td>#908</td><td><span class="tag high">HIGH</span></td><td>Pre-2020 dates unqueryable (daterangepicker minDate blocks typing earlier dates)</td><td><span class="tag open">OPEN</span></td></tr>
+</table>
+
+<h3>4.3 Structural / maintenance gaps</h3>
+<ul>
+  <li><span class="tag done">DONE</span> <code>CONTRIBUTING.md</code>, PR/issue templates, CI required checks (#992); fixes now require <code>Fixes/Closes</code>.</li>
+  <li><span class="tag done">DONE</span> Pinned <code>requirements.txt</code> + staging validation (#993); ruff gate + dep vetting (#1009). Floating <code>psycodict@git</code> was the cause of #982/#980.</li>
+  <li>Still open: ~90 upstream issues oldest from 2020; triage discipline (see <code>forgotten-to-close.md</code>: #961, #964, #777, #886, #116 — tracked in #988).</li>
+  <li>ICS is pull-only: poll interval (Google/Apple/Outlook) is <strong>not fixable from this codebase</strong>. Mitigation = small/stable feeds (partially done: #989 + #991) + different model: <strong>event-driven notifications</strong> (prototype #1002: change event + subscriber lookup, no sending yet; parent #82) keeping ICS as fallback.</li>
+</ul>
+
+<h3>4.4 Suggested next work (fork) — rev2 status</h3>
+<ol>
+  <li><span class="tag done">DONE</span> Email-on-edit prototype (#1002: change event from <code>save()</code> + subscriber lookup, no sending yet).</li>
+  <li><span class="tag open">OPEN</span> Feed hardening: stable <code>DTSTAMP</code>, <code>SEQUENCE/LAST-MODIFIED</code>, <code>ETag/304</code>, <code>text/calendar</code> inline. Still <code>DTSTAMP=now()</code> at <code>talk.py:780</code>.</li>
+  <li><span class="tag open">OPEN</span> Bulk-export endpoint (#910 — organizer + all-my-series download; API crawl today).</li>
+  <li><span class="tag done">DONE</span> Pin deps + minimal pytest job (#993 + #992 + #1004).</li>
+  <li><span class="tag open">OPEN</span> Merge 3 pending branches to fork <code>master</code>: <code>fix-api-authz</code> (#994/#844/#670), <code>fix-naive-datetime</code> (#995/#742), <code>fix-livestream-filter</code> (#996/#921), then push.</li>
+  <li><span class="tag open">OPEN</span> Remaining upstream defects: #89 (locks), #636 (counts), #745/#217 (perf), #964 (XSS hardening), #908 (pre-2020 dates), #910 (bulk), #777 (by-design cap).</li>
+</ol>
+
+<footer>Contact: @winstoncheong · winstonc@ksu.edu · Fork <code>master</code> = integrate-5 (14 PRs) + pending: <code>fix-api-authz</code>, <code>fix-naive-datetime</code>, <code>fix-livestream-filter</code></footer>
+
+</body>
+</html>
