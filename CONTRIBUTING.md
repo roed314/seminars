@@ -33,7 +33,7 @@ You need Postgres. See `GettingStarted.md` and `Schema.md`.
 4. **Run checks locally:**
    ```bash
    python -m pytest tests/ -q
-   python -m pyflakes seminars tests
+   python -m ruff check seminars tests --select F
    python -c "import yaml; yaml.safe_load(open('seminars/knowls.yaml'))"
    ```
    CI runs the same three commands on every push/PR.
