@@ -5,9 +5,9 @@ from flask import Blueprint
 
 create = Blueprint("create", __name__, template_folder="templates", static_folder="static")
 
-from . import main
+from . import main, bulk_export
 
-assert main  # silence pyflakes
+assert main and bulk_export  # silence pyflakes
 
 app.register_blueprint(
     create, url_prefix="/"
