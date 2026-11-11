@@ -754,6 +754,14 @@ def _talks_index(query={},
             return talks
 
     talks = dosearch()
+    # In-app "changed" badge (#82): flag talks edited in the last 7 days,
+    # reusing the versioned-write edited_at stamp.  Best-effort only.
+    try:
+        from seminars.create.mail_digest import mark_recently_changed
+
+        mark_recently_changed(talks)
+    except Exception:
+        pass
     if getcounters:
         # Separate lightweight counters query (#745): topics/language only,
         # not the fulltalk fetch.  Infinite-scroll pages pass getcounters=False.

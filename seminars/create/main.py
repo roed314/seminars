@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import render_template, request, redirect, url_for, flash
+from flask import abort, jsonify, render_template, request, redirect, session, url_for, flash
 from flask_login import current_user
 from seminars.users.main import email_confirmed_required
 from seminars import db
@@ -67,6 +67,7 @@ from datetime import datetime, timedelta
 from math import ceil
 from dateutil.parser import parse as parse_time
 import pytz
+import secrets
 
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 TBA_CONVERSION_MESSAGE = 'To be announced title converted to a blank title that will be shown as "TBA" on all publicly visible pages.'
@@ -1373,3 +1374,157 @@ def save_seminar_schedule():
                 ),
                 302,
             )
+
+
+# ---------------------------------------------------------------------------
+# Opt-in mail digest (#82): organizer preview + confirmed send.
+# Safe slice on top of the prototype (seminars/notify.py): no auto-send on
+# save, dry-run by default, per-run cap, explicit opt-in only.
+# ---------------------------------------------------------------------------
+
+def _recent_digest_events(days=7, limit=100):
+    """Recently-edited talks as pseudo-events for preview/send.
+
+    We lack stored old versions here, so each recently-edited talk
+    becomes an ``updated`` event (changed=["edited_at"]).  Real
+    old-vs-new diffing (notify.talk_event) stays in the save path's
+    future work; this route never auto-sends.  Returns (events, talks).
+    """
+    from seminars.create import mail_digest as md
+
+    try:
+        days = min(max(int(days), 1), 30)
+    except (TypeError, ValueError):
+        days = 7
+    since = datetime.now(pytz.UTC) - timedelta(days=days)
+    try:
+        recent = list(
+            talks_search(
+                {"edited_at": {"$gte": since}, "seminar_ctr": {"$gt": 0}},
+                sort=[("edited_at", -1)],
+                limit=limit,
+            )
+        )
+    except Exception:
+        return [], []
+    events = [
+        {
+            "scope": "talk",
+            "kind": "updated",
+            "seminar_id": t.seminar_id,
+            "seminar_ctr": t.seminar_ctr,
+            "changed": ["edited_at"],
+        }
+        for t in recent
+    ]
+    md.mark_recently_changed(recent)
+    return events, recent
+
+
+def _digest_candidate_users(series_ids, limit=500):
+    """Best-effort candidate subscribers for the affected series.
+
+    Queries confirmed users following any of ``series_ids`` (plus a
+    bounded fallback scan); callers filter to explicit opt-ins via
+    mail_digest.eligible_recipients.  Never raises (returns [] on DB
+    trouble) so preview stays read-only and safe.
+    """
+    try:
+        users = []
+        seen = set()
+        for sid in list(series_ids)[:20]:
+            try:
+                rows = db.users.search(
+                    {"email_confirmed": True, "seminar_subscriptions": {"$contains": sid}},
+                    projection=[
+                        "email",
+                        "email_confirmed",
+                        "mail_digest_opt_in",
+                        "seminar_subscriptions",
+                        "talk_subscriptions",
+                        "talk_exclusions",
+                    ],
+                    limit=200,
+                )
+            except Exception:
+                continue
+            for row in rows:
+                email = (row.get("email") or "").lower()
+                if email and email not in seen:
+                    seen.add(email)
+                    users.append(dict(row))
+                if len(users) >= limit:
+                    return users
+        return users
+    except Exception:
+        return []
+
+
+@create.route("manage/mail/preview")
+@email_confirmed_required
+def mail_preview():
+    """Organizer digest preview: counts + sample, never sends."""
+    from seminars.create import mail_digest as md
+
+    if not current_user.is_organizer:
+        return abort(403)
+    try:
+        days = min(max(int(request.args.get("days", "7")), 1), 30)
+    except (TypeError, ValueError):
+        days = 7
+    events, recent = _recent_digest_events(days=days)
+    series_ids = sorted({e["seminar_id"] for e in events})
+    candidates = _digest_candidate_users(series_ids)
+    preview = md.preview_digest(events, candidates)
+    token = secrets.token_urlsafe(16)
+    session["mail_send_token"] = token
+    sample_talks = [
+        {"seminar_id": t.seminar_id, "seminar_ctr": t.seminar_ctr,
+         "title": getattr(t, "title", "")}
+        for t in recent[:5]
+    ]
+    return jsonify({
+        "event_count": preview["event_count"],
+        "recipient_count": preview["recipient_count"],
+        "recipients_sample": preview["recipients_sample"],
+        "series": series_ids,
+        "sample_talks": sample_talks,
+        "sample_subject": preview["sample_subject"],
+        "sample_body": preview["sample_body"],
+        "confirm_token": token,
+        "dry_run": True,
+        "sent": False,
+        "cap": md.MAX_DIGEST_RECIPIENTS,
+    })
+
+
+@create.route("manage/mail/send", methods=["POST"])
+@email_confirmed_required
+def mail_send():
+    """Confirmed digest send: confirm token + per-run cap, dry-run default."""
+    from seminars.create import mail_digest as md
+
+    if not current_user.is_organizer:
+        return abort(403)
+    submitted = request.form.get("confirm", "")
+    expected = session.get("mail_send_token", "")
+    if not md.confirm_token_ok(submitted, expected):
+        return jsonify({"error": "invalid or missing confirm token"}), 403
+    # Single-use token.
+    session.pop("mail_send_token", None)
+    try:
+        days = min(max(int(request.form.get("days", "7")), 1), 30)
+    except (TypeError, ValueError):
+        days = 7
+    try:
+        asked = int(request.form.get("max", md.MAX_DIGEST_RECIPIENTS))
+    except (TypeError, ValueError):
+        asked = md.MAX_DIGEST_RECIPIENTS
+    cap = min(max(asked, 1), md.MAX_DIGEST_RECIPIENTS)
+    live = request.form.get("live", "") == "1"
+    events, _ = _recent_digest_events(days=days)
+    series_ids = sorted({e["seminar_id"] for e in events})
+    candidates = _digest_candidate_users(series_ids)
+    summary = md.send_digest(events, candidates, dry_run=not live, max_recipients=cap)
+    status = 200 if (live or summary.get("dry_run")) else 200
+    return jsonify(summary), status

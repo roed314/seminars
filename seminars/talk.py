@@ -710,7 +710,12 @@ Thank you,
         # Lazy knowl: rescheduled rows fetch only the replacement title with a
         # pruned projection (no abstract/comments) to avoid N+1 heavy rows.
         new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr, projection=talk_list_projection()) if rescheduled else self
-        cols.append(('class="talktitle"', new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, blackout=self.blackout_date(), tz=tz)))
+        title_html = new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, blackout=self.blackout_date(), tz=tz)
+        if getattr(self, "changed_badge", False):
+            # In-app "changed" hook (#82): marks talks edited in the last
+            # 7 days (flag set by talks_index via mail_digest.recently_changed).
+            title_html += ' <span class="changed-badge">changed</span>'
+        cols.append(('class="talktitle"', title_html))
         if include_content:
             cols.append(('', self.show_slides_link()))
             cols.append(('', self.show_video_link()))

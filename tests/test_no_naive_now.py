@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1] / "seminars"
 # Bare datetime.now() calls that are known-harmless (date-only comparison
 # or display sorting with no tz semantics); see #742 triage.
 ALLOWLIST = {
-    ("homepage/main.py", 847),  # end_date is a date, not timestamptz
+    ("homepage/main.py", 855),  # end_date is a date, not timestamptz
     ("utils.py", 270),          # naive_utcoffset display sort
 }
 
