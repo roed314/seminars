@@ -492,7 +492,7 @@ class WebTalk(object):
                 return url_for("show_talk", seminar_id=self.seminar_id, talkid=self.seminar_ctr, _external=external)
             if not self.access_registration:
                 # This should never happen, registration link is required, but just in case...
-                return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</a></div>' % link
+                return "" if raw else '<div class="access_button no_link">Registration required, see comments or external site.</div>'
             if "@" in self.access_registration:
                 body = """Dear organizers,
 
@@ -616,6 +616,19 @@ Thank you,
                     if self.seminar_ctr in talk_sub[self.seminar.shortname]:
                         talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
                         db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+                if "talk_exclusions" in db.users.search_cols:
+                    for i, excl in db._execute(
+                        SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                            *map(
+                                IdentifierWrapper,
+                                ["id", "talk_exclusions", "users", "talk_exclusions"],
+                            )
+                        ),
+                        [self.seminar.shortname],
+                    ):
+                        if self.seminar_ctr in excl.get(self.seminar.shortname, []):
+                            excl[self.seminar.shortname].remove(self.seminar_ctr)
+                            db.users.update({"id": i}, {"talk_exclusions": excl})
             self.deleted = True
             return True
         else:
@@ -626,6 +639,15 @@ Thank you,
             return ""
 
         name = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
+        if self.seminar_id in current_user.seminar_subscriptions:
+            # Talks in a favorited series toggle a per-talk mute (#460)
+            excluded = self.seminar_ctr in (current_user.talk_exclusions or {}).get(self.seminar_id, [])
+            return toggle(
+                tglid="tlg" + name.replace('/','--'),
+                name=name,
+                value=-1 if excluded else 1,
+                classes="subscribe talk-exclusion"
+            )
         return toggle(
             tglid="tlg" + name.replace('/','--'),
             name=name,
@@ -642,7 +664,7 @@ Thank you,
 
     def oneline(self, include_seminar=True, include_content=False, include_subscribe=True, tz=None, _external=False):
         rescheduled = self.rescheduled()
-        t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
+        t, now, e = adapt_datetime(self.start_time, newtz=tz), adapt_datetime(datetime.now(pytz.UTC), newtz=tz), adapt_datetime(self.end_time, newtz=tz)
         if rescheduled:
             datetime_tds = t.strftime('<td class="weekday rescheduled">%a</td><td class="monthdate rescheduled">%b %d</td><td class="time rescheduled" title="%Z">%H:%M</td>')
         else:
@@ -816,7 +838,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
         else:
             if not talk.user_can_edit():
-                flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
+                flash_error("You do not have permission to edit talk %s/%s.", seminar_id, seminar_ctr)
                 return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
@@ -824,7 +846,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             return resp, None
         if seminar.new:
             # TODO: This is where you might insert the ability to create a talk without first making a seminar
-            flash_error("You must first create the seminar %s" % seminar_id)
+            flash_error("You must first create the seminar %s", seminar_id)
             return redirect(url_for(".edit_seminar", shortname=seminar_id), 302)
         if new:
             talk = WebTalk(seminar_id, seminar=seminar, editing=True)

@@ -3,11 +3,13 @@ from datetime import datetime, timedelta
 from datetime import time as maketime
 from dateutil.parser import parse as parse_time
 from email_validator import validate_email
-from flask import url_for, flash, render_template, request, send_file
+from email.utils import formatdate
+from flask import url_for, flash, render_template, request, send_file, Response
 from flask_login import current_user
 from functools import lru_cache
 from icalendar import Calendar
 from io import BytesIO
+from xml.sax.saxutils import escape as xml_escape
 from psycodict.utils import IdentifierWrapper
 from seminars.search_boxes import SearchBox
 from markupsafe import Markup, escape
@@ -348,6 +350,14 @@ def allowed_shortname(shortname):
     return bool(shortname_re.match(shortname))
 
 
+# JSONP callbacks are emitted unquoted into a JavaScript response, so only
+# allow identifiers (with dots for namespaced callbacks).  Anything else
+# gets a 400 rather than reflected script (#964).
+jsonp_callback_re = re.compile(r"^[A-Za-z_$][A-Za-z0-9_.$]*$")
+
+
+def valid_jsonp_callback(callback):
+    return bool(jsonp_callback_re.match(str(callback)))
 
 
 @lru_cache(maxsize=None)
@@ -714,16 +724,21 @@ def format_errmsg(errmsg, *args):
     try:
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
-        # If formatting fails (e.g., error message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        # If formatting fails (e.g., error message itself contains %), fall back
+        # to concatenation with everything (including the template, which may
+        # embed user input from legacy call sites) escaped.
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup("Error: " + formatted_msg)
 
 
 def format_input_errmsg(err, inp, col):
+    # Pass err as a formatting argument (not interpolated into the template)
+    # so that user-controlled error text is escaped by format_errmsg (#964).
     return format_errmsg(
-        "Unable to process input %s for property %s: {0}".format(err),
+        "Unable to process input %s for property %s: %s",
         '"' + str(inp) + '"',
         col,
+        err,
     )
 
 
@@ -734,7 +749,7 @@ def format_warning(warnmsg, *args):
         formatted_msg = warnmsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., warning message itself contains %), just concatenate
-        formatted_msg = warnmsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(warnmsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup("Warning: " + formatted_msg)
 
 
@@ -748,7 +763,7 @@ def format_infomsg(infomsg, *args):
         formatted_msg = infomsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., info message itself contains %), just concatenate
-        formatted_msg = infomsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(infomsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup(formatted_msg)
 
 
@@ -810,6 +825,48 @@ def ics_file(talks, filename, user=None):
     bIO.write(cal.to_ical())
     bIO.seek(0)
     return send_file(bIO, download_name=filename, as_attachment=True)
+
+def rss_file(talks, seminar):
+    """RSS 2.0 feed of upcoming talks in a series (see #759).
+
+    Mirrors ics_file's query path; hand-rolled with stdlib so no new
+    dependency is needed.
+    """
+    channel_link = url_for("show_seminar", shortname=seminar.shortname,
+                           _external=True, _scheme="https")
+    items = []
+    for talk in talks:
+        link = url_for("show_talk", seminar_id=talk.seminar_id,
+                       talkid=talk.seminar_ctr, _external=True, _scheme="https")
+        speaker = talk.show_speaker(raw=True)
+        description = "%s by %s" % (talk.show_title(), speaker)
+        if talk.room:
+            description += " in %s" % talk.room
+        if talk.abstract:
+            description += "\n\n%s" % talk.abstract
+        else:
+            description += "\n\nAbstract: TBA"
+        try:
+            pubdate = formatdate(talk.start_time.timestamp())
+        except (AttributeError, ValueError, OverflowError, OSError):
+            pubdate = ""
+        items.append(
+            "<item><title>%s</title><link>%s</link>"
+            "<guid isPermaLink=\"true\">%s</guid>"
+            "<pubDate>%s</pubDate><description>%s</description></item>" % (
+                xml_escape(description), xml_escape(link),
+                xml_escape(link), pubdate, xml_escape(description)))
+    body = (
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        "<rss version=\"2.0\"><channel>"
+        "<title>%s</title><link>%s</link>"
+        "<description>%s</description>%s</channel></rss>" % (
+            xml_escape(seminar.name or seminar.shortname),
+            xml_escape(channel_link),
+            xml_escape("Upcoming talks in %s" % (seminar.name or seminar.shortname)),
+            "".join(items)))
+    return Response(body, mimetype="application/rss+xml")
+
 
 def num_columns(labels):
     if not labels:
@@ -924,8 +981,9 @@ def flash_error(errmsg, *args):
     try:
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
-        # If formatting fails (e.g., error message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        # If formatting fails (e.g., error message itself contains %), fall back
+        # to concatenation with everything escaped (see format_errmsg).
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     flash(Markup("Error: " + formatted_msg), "error")
 
 def flash_warning(errmsg, *args):
@@ -936,7 +994,7 @@ def flash_warning(errmsg, *args):
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., warning message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     flash(Markup("Warning: " + formatted_msg), "warning")
 
 def to_dict(args, exclude = [], **kwds):
