@@ -15,6 +15,8 @@ def cookie_writes_without_samesite():
     """
     bad = []
     for path in list((ROOT / "static").rglob("*.js")) + list(ROOT.rglob("*.html")):
+        if not path.is_file():
+            continue  # generated/minified assets absent from fresh checkouts
         if "daterangepicker" in path.parts or "jstree" in path.parts:
             continue  # vendored libs, not ours
         for i, line in enumerate(path.read_text().splitlines(), 1):
