@@ -609,6 +609,10 @@ class WebSeminar(object):
         return url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="webcal")
 
     @property
+    def rss_link(self):
+        return url_for(".rss_seminar_file", shortname=self.shortname, _external=True, _scheme="https")
+
+    @property
     def next_talk_time(self):
         try:
             return self._next_talk_time
