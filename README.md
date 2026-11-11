@@ -56,12 +56,15 @@ Smoke suite: `GET /health`, `GET /`, `POST /api/0/search/*`,
 
 ```bash
 python -m pytest tests/ -q
-python -m pyflakes seminars tests
+python -m ruff check seminars tests --select F
 python -c "import yaml; yaml.safe_load(open('seminars/knowls.yaml'))"
 ```
 
 GitHub Actions runs the same on push/PR (see `.github/workflows/ci.yml`).
 Every PR must link an issue (`Closes #N`) and state verification limits.
+Opt-in browser smoke (`tests/test_ui_browser.py`, needs
+`SEMINARS_BROWSER_TESTS=1`, a staging server, and
+`python3 -m playwright install chromium`) never runs in CI.
 
 ## Contributing
 

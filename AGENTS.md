@@ -12,7 +12,7 @@ applies.
   work use the embedded-Postgres staging flow (see README + #993).
   Tables the code needs beyond `Schema.md`: `new_topics`, `author_ids`,
   `talk_registrations`, `preendorsed_users`, `subjects`, plus `by_api`
-  on seminars/talks.
+  on seminars/talks and `talk_exclusions` (json) on users.
 - Versioned append-only writes (`insert_many`, `DISTINCT ON` reads).
   Reschedules leave negative-`seminar_ctr` tombstones.
 
@@ -26,8 +26,11 @@ applies.
 - Tests live in `tests/`, stdlib `unittest`, no live DB: extract pure
   functions via `ast`, stub DB access (see `test_api_search_input.py`,
   `test_ics_tombstone.py`). New behavior needs a failing-then-passing test.
-- Before pushing: `pytest tests/ -q`, `pyflakes seminars tests`,
+- Before pushing: `pytest tests/ -q`, `ruff check seminars tests --select F`,
   YAML parse check. CI runs the same plus a pip-install check.
+- Browser tests are opt-in only (`SEMINARS_BROWSER_TESTS=1`, staging up,
+  browsers installed); use `pytest.importorskip` for optional deps
+  (playwright, jinja2) so the lightweight CI job skips cleanly.
 - Staging server: single instance only — duplicate `start-seminars.py`
   processes will race on the port with stale table metadata. Kill by
   CommandLine match before restarting; restart after any schema change.
