@@ -350,6 +350,14 @@ def allowed_shortname(shortname):
     return bool(shortname_re.match(shortname))
 
 
+# JSONP callbacks are emitted unquoted into a JavaScript response, so only
+# allow identifiers (with dots for namespaced callbacks).  Anything else
+# gets a 400 rather than reflected script (#964).
+jsonp_callback_re = re.compile(r"^[A-Za-z_$][A-Za-z0-9_.$]*$")
+
+
+def valid_jsonp_callback(callback):
+    return bool(jsonp_callback_re.match(str(callback)))
 
 
 @lru_cache(maxsize=None)
@@ -716,16 +724,21 @@ def format_errmsg(errmsg, *args):
     try:
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
-        # If formatting fails (e.g., error message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        # If formatting fails (e.g., error message itself contains %), fall back
+        # to concatenation with everything (including the template, which may
+        # embed user input from legacy call sites) escaped.
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup("Error: " + formatted_msg)
 
 
 def format_input_errmsg(err, inp, col):
+    # Pass err as a formatting argument (not interpolated into the template)
+    # so that user-controlled error text is escaped by format_errmsg (#964).
     return format_errmsg(
-        "Unable to process input %s for property %s: {0}".format(err),
+        "Unable to process input %s for property %s: %s",
         '"' + str(inp) + '"',
         col,
+        err,
     )
 
 
@@ -736,7 +749,7 @@ def format_warning(warnmsg, *args):
         formatted_msg = warnmsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., warning message itself contains %), just concatenate
-        formatted_msg = warnmsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(warnmsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup("Warning: " + formatted_msg)
 
 
@@ -750,7 +763,7 @@ def format_infomsg(infomsg, *args):
         formatted_msg = infomsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., info message itself contains %), just concatenate
-        formatted_msg = infomsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(infomsg)) + " " + " ".join(str(escape(x)) for x in args)
     return Markup(formatted_msg)
 
 
@@ -968,8 +981,9 @@ def flash_error(errmsg, *args):
     try:
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
-        # If formatting fails (e.g., error message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        # If formatting fails (e.g., error message itself contains %), fall back
+        # to concatenation with everything escaped (see format_errmsg).
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     flash(Markup("Error: " + formatted_msg), "error")
 
 def flash_warning(errmsg, *args):
@@ -980,7 +994,7 @@ def flash_warning(errmsg, *args):
         formatted_msg = errmsg % escaped_args
     except (TypeError, ValueError):
         # If formatting fails (e.g., warning message itself contains %), just concatenate
-        formatted_msg = errmsg + " " + " ".join(str(escape(x)) for x in args)
+        formatted_msg = str(escape(errmsg)) + " " + " ".join(str(escape(x)) for x in args)
     flash(Markup("Warning: " + formatted_msg), "warning")
 
 def to_dict(args, exclude = [], **kwds):

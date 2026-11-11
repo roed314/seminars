@@ -22,7 +22,7 @@ from flask_login import (
     LoginManager,
 )
 from seminars.utils import flash_error
-from markupsafe import Markup
+from markupsafe import Markup, escape
 
 from seminars import db
 
@@ -111,7 +111,7 @@ def login(**kwargs):
         # this is where we set current_user = user
         login_user(user, remember=remember)
         if user.name:
-            flask.flash(Markup("Hello %s, your login was successful!" % user.name))
+            flask.flash(Markup("Hello %s, your login was successful!" % escape(user.name)))
         else:
             flask.flash(Markup("Hello, your login was successful!"))
         logger.info("login: '%s' - '%s'" % (user.get_id(), user.name))
@@ -345,11 +345,15 @@ def loginas(emailorid):
         user = SeminarsUser(uid=uid)
     except ValueError:
         email = emailorid
-        user = SeminarsUser(email=email)
-    if user.id:
+        try:
+            user = SeminarsUser(email=email)
+        except Exception:
+            # Invalid input (e.g., NUL bytes) must not 500 (#964)
+            user = None
+    if user is not None and user.id:
         logout_user()
         login_user(user)
-        flask.flash(Markup("Using your superpowers, you are now logged in as %s" % (user.email)))
+        flask.flash(Markup("Using your superpowers, you are now logged in as %s" % escape(user.email)))
         return redirect(url_for(".info"))
     else:
         return "No user matches the email/id provided."

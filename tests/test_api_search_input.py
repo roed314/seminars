@@ -164,6 +164,7 @@ class SearchInputTests(unittest.TestCase):
             "_search_array_value",
             "_process_search_condition",
             "process_search_input",
+            "_process_query_filters",
             "search_series",
         )
 
