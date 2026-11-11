@@ -80,6 +80,11 @@ For AI-agent conventions in this repo, see [`AGENTS.md`](AGENTS.md).
 | #994 | API save hardening: reject deleted keys, closes #670 |
 | #995 | Tz-aware now for edited_at/ongoing display, closes #742 |
 | #996 | Livestream filter requires online, closes #921 |
+| #998 | README.md + AGENTS.md, closes #997 |
+| #999 | Email-change migration regression test, closes #933 |
+| #1000 | SameSite=Lax cookies, closes #840 |
+| #1002 | Push-notify prototype, closes #1001 (part of #82) |
+| #1004 | UI smoke + browser tests, closes #1003 |
 | #988 | Meta: fixed-but-never-closed issues |
 
 ## License
