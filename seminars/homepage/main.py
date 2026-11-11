@@ -143,7 +143,7 @@ def parse_recent_edit(info, query):
         except Exception as e:
             flash_error("Could not parse recent edit input %s.  Error: %s", recent, str(e))
         else:
-            recent = datetime.now() - timedelta(hours=recent)
+            recent = get_now() - timedelta(hours=recent)
             query["edited_at"] = {"$gte": recent}
 
 def parse_video(info, query):
