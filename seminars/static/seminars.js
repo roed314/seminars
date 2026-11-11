@@ -1184,8 +1184,31 @@ function makeTopicsTree(json_tree) {
 
 
 
-  function callback_topics(instance) {
-    function cmp(a, b) {
+  // Client-side guard for #696: block series/talk saves with no topics
+  // selected, instead of round-tripping to an error page that loses them.
+  function topics_empty(val) {
+    var t = (val || "").trim();
+    return !t || t === "[]" || t === "['']" || t === '[""]';
+  }
+  function check_topics(form) {
+    var input = form.find('input[name="topics"]');
+    if (input.length && topics_empty(input.val())) {
+      input.notify("Please select at least one topic.", {className: "error", position: "top"});
+      var selector = $("#topicDAG_selector");
+      (selector.length ? selector : input).get(0).scrollIntoView({block: "center"});
+      return false;
+    }
+    return true;
+  }
+  $(document).ready(function() {
+    $("#seminarform, #talkform").on("submit", function(e) {
+      if (!check_topics($(this))) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  function callback_topics(instance) {    function cmp(a, b) {
       var ad = instance.get_checked_descendants(a.id).length > 0;
       var bd = instance.get_checked_descendants(b.id).length > 0;
       if( ad == bd) {
