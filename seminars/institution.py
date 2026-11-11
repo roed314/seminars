@@ -108,6 +108,19 @@ class WebInstitution(object):
         else:
             assert data.get("shortname")
             db.institutions.upsert({"shortname": self.shortname}, data)
+        # Invalidate cached dicts (#217); lazy imports avoid cycles.
+        try:
+            from seminars.seminar import invalidate_seminar_cache
+
+            invalidate_seminar_cache()
+        except Exception:
+            pass
+        try:
+            from seminars.homepage.main import invalidate_shortnames_cache
+
+            invalidate_shortnames_cache()
+        except Exception:
+            pass
 
     def admin_link(self):
         rec = userdb.lookup(self.admin)
