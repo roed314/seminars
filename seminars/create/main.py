@@ -248,7 +248,7 @@ def delete_seminar(shortname):
     try:
         seminar = WebSeminar(shortname, include_deleted=True)
     except ValueError as err:
-        flash_error(str(err))
+        flash_error("%s", str(err))
         return redirect(url_for(".index"), 302)
     manage = "Manage" if current_user.is_organizer else "Create"
     lock = get_lock(shortname, request.args.get("lock"))
@@ -282,7 +282,7 @@ def delete_seminar(shortname):
             if seminar.delete():
                 flash("%s %s deleted." % (seminar.series_type, shortname))
             else:
-                flash_error("You do not have permission to delete the %s %s."% (seminar.series_type, seminar.name))
+                flash_error("You do not have permission to delete the %s %s.", seminar.series_type, seminar.name)
                 return failure()
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
@@ -347,7 +347,7 @@ def delete_talk(seminar_id, seminar_ctr):
     try:
         talk = WebTalk(seminar_id, seminar_ctr, include_deleted=True)
     except ValueError as err:
-        flash_error(str(err))
+        flash_error("%s", str(err))
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
 
     def failure():

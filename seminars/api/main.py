@@ -12,6 +12,7 @@ from seminars.utils import (
     short_weekdays,
     process_user_input,
     sanitized_table,
+    valid_jsonp_callback,
     APIError,
     MAX_TEXT_LEN,
     MAX_SLOTS,
@@ -23,15 +24,28 @@ from functools import wraps
 
 import inspect
 import json
+from markupsafe import escape
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 
 def format_error(msg, *args):
-    return msg % args
+    # Escape all arguments to prevent XSS and format string issues (mirrors
+    # seminars.utils.format_errmsg, but returns plain text for JSON errors).
+    escaped_args = tuple(str(escape(x)) for x in args)
+    try:
+        return msg % escaped_args
+    except (TypeError, ValueError):
+        # If formatting fails (e.g., the message itself contains %), fall back
+        # to concatenation with everything escaped.
+        return str(escape(msg)) + " " + " ".join(escaped_args)
 
 def format_input_error(err, inp, col):
-    return 'Unable to process input "%s" for property %s: %s' % (inp, col, err)
+    # Pass err as a formatting argument (not interpolated into the template)
+    # so that user-controlled error text is escaped (#964).
+    return format_error(
+        'Unable to process input "%s" for property %s: %s', inp, col, err
+    )
 
 def version_error(version):
     return APIError({"code": "invalid_version",
@@ -199,6 +213,9 @@ def _reject_deleted_keys(raw_data):
 
 def str_jsonify(result, callback=False):
     if callback:
+        if not valid_jsonp_callback(callback):
+            raise APIError({"code": "invalid_callback",
+                            "description": "Invalid JSONP callback"}, 400)
         return Response(
             "{}({})".format(str(callback), json.dumps(result, default=str)),
             mimetype="application/javascript",
@@ -215,6 +232,27 @@ def _get_col(col, raw_data, activity):
     return val
 
 
+def _process_query_filters(query, col_type, tz):
+    """Validate and convert raw search filters, rejecting bad input with 400.
+
+    Without this, malformed or NUL-containing input reaches the database
+    layer and produces 500s (#964).
+    """
+    for col, val in list(query.items()):
+        if col not in col_type:
+            raise APIError({"code": "unknown_column",
+                            "col": col,
+                            "description": "%s not a searchable column" % col})
+        try:
+            query[col] = process_search_input(val, col, col_type[col], tz)
+        except (ValueError, TypeError, AttributeError, KeyError, OverflowError) as err:
+            raise APIError({"code": "invalid_filter",
+                            "col": col,
+                            "description": "Unable to process search filter",
+                            "error": str(err)}, 400) from err
+    return query
+
+
 def api_auth_required(fn):
     # Note that this wrapper will pass the user as a keyword argument to the wrapped function
     @wraps(fn)
@@ -228,7 +266,14 @@ def api_auth_required(fn):
             raise APIError({"code": "invalid_header",
                             "description": "Authorization header must have length 2"}, 401)
         email, token = pieces
-        user = SeminarsUser(email=email)
+        if "\x00" in email or "\x00" in token:
+            raise APIError({"code": "invalid_header",
+                            "description": "Authorization header contains invalid characters"}, 401)
+        try:
+            user = SeminarsUser(email=email)
+        except Exception as err:
+            raise APIError({"code": "missing_user",
+                            "description": "User %s not found" % email}, 401) from err
         if user.id is None:
             raise APIError({"code": "missing_user",
                             "description": "User %s not found" % email}, 401)
@@ -256,7 +301,14 @@ def api_auth_optional(fn):
             raise APIError({"code": "invalid_header",
                             "description": "Authorization header must have length 2"}, 401)
         email, token = pieces
-        user = SeminarsUser(email=email)
+        if "\x00" in email or "\x00" in token:
+            raise APIError({"code": "invalid_header",
+                            "description": "Authorization header contains invalid characters"}, 401)
+        try:
+            user = SeminarsUser(email=email)
+        except Exception as err:
+            raise APIError({"code": "missing_user",
+                            "description": "User %s not found" % email}, 401) from err
         if user.id is None:
             raise APIError({"code": "missing_user",
                             "description": "User %s not found" % email}, 401)
@@ -420,21 +472,11 @@ def search_series(version=0):
         # FIXME
         # projection = raw_data.pop("projection", 1)
         tz = raw_data.pop("timezone", "UTC")
+        _process_query_filters(query, db.seminars.col_type, tz)
     else:
         query = get_request_args_json()
         tz = current_user.tz # Is this the right choice?
-        for col, val in query.items():
-            if col not in db.seminars.col_type:
-                raise APIError({"code": "unknown_column",
-                                "col": col,
-                                "description": "%s not a column of seminars" % col})
-            try:
-                query[col] = process_search_input(val, col, db.seminars.col_type[col], tz)
-            except (ValueError, TypeError, AttributeError, KeyError, OverflowError) as err:
-                raise APIError({"code": "invalid_filter",
-                                "col": col,
-                                "description": "Unable to process search filter",
-                                "error": str(err)}, 400) from err
+        _process_query_filters(query, db.seminars.col_type, tz)
         raw_data = {}
     query["visibility"] = 2
     # TODO: encode the times....
@@ -458,9 +500,12 @@ def search_talks(version=0):
         projection = raw_data.pop("projection", 1)
         # FIXME
         # tz = raw_data.pop("timezone", "UTC")
+        tz = raw_data.get("timezone", "UTC")
+        _process_query_filters(query, db.talks.col_type, tz)
     else:
         query = get_request_args_json()
         projection = 1
+        _process_query_filters(query, db.talks.col_type, current_user.tz)
         raw_data = {}
     query["hidden"] = False
     visible_series = set(seminars_search({"visibility": 2}, "shortname"))
