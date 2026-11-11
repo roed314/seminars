@@ -44,6 +44,7 @@ class IcsTombstoneTests(unittest.TestCase):
         fake_self = types.SimpleNamespace(
             talks_query=[{"seminar_id": "vantage", "seminar_ctr": {"$in": [72]}}],
             seminar_subscriptions=["vantage"],
+            talk_exclusions={},
             ics_limit_past=True,
             ics_limit_future=False,
         )
