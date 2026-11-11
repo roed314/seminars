@@ -26,7 +26,7 @@ applies.
 - Tests live in `tests/`, stdlib `unittest`, no live DB: extract pure
   functions via `ast`, stub DB access (see `test_api_search_input.py`,
   `test_ics_tombstone.py`). New behavior needs a failing-then-passing test.
-- Before pushing: `pytest tests/ -q`, `pyflakes seminars tests`,
+- Before pushing: `pytest tests/ -q`, `ruff check seminars tests --select F`,
   YAML parse check. CI runs the same plus a pip-install check.
 - Staging server: single instance only — duplicate `start-seminars.py`
   processes will race on the port with stale table metadata. Kill by

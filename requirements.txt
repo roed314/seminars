@@ -6,8 +6,11 @@
 # Additions vs. the floating file, all required at import/request time:
 #   six         seminars/utils.py (string_types)
 #   Pygments    seminars/api/main.py (syntax highlighting)
-#   setuptools  distutils shim (seminars/users/__init__.py StrictVersion;
-#               proper fix is to drop the distutils import)
+#
+# Removed after vetting (nothing imports them):
+#   setuptools  was a distutils shim for StrictVersion; users/__init__.py
+#               now parses versions with a 3-line tuple helper.
+#   typing_extensions  unused (transitive only).
 email_validator==2.3.0
 html2text==2025.4.15
 python-dateutil==4.0.0
@@ -32,8 +35,6 @@ dnspython==2.9.2
 idna==3.20
 Pygments==2.21.0
 six==1.17.0
-setuptools==84.2.1
 tzdata==2026.6
-typing_extensions==4.16.0
 psycopg==3.3.8
 psycopg-binary==3.3.8
