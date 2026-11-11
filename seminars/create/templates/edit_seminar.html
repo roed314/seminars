@@ -19,7 +19,7 @@
   <form id="seminarform" action="{{ url_for('.save_seminar') }}" method="POST">
     <input type="hidden" name="shortname" value="{{ seminar.shortname }}"/>
     <input type="hidden" name="new" value="{{ 'yes' if seminar.new else 'no' }}"/>
-    <input type="hidden" name="topics" value="{{ seminar.topics  | safe }}"/>
+    <input type="hidden" name="topics" value="{{ (submitted_topics if submitted_topics is not none else seminar.topics)  | safe }}"/>
     <input type="hidden" name="institutions" value="{{ seminar.institutions  | safe }}"/>
     <input type="hidden" name="language" value="{{ seminar.language  | safe }}"/>
     <input type="hidden" name="is_conference" value="{% if seminar.is_conference %}yes{% else %}no{% endif %}"/>
@@ -285,7 +285,7 @@ const instOptions = [
   {{ languages.js_options() | safe }}
 
 
-const json_tree = {{ topic_dag.json(seminar.topics) | safe }};
+const json_tree = {{ topic_dag.json(submitted_topics if submitted_topics is not none else seminar.topics) | safe }};
 
 document.addEventListener("DOMContentLoaded", function() {
   /* prevent accidental closing of browser window -- this is currently broken, it forces unnecessary confirmations */

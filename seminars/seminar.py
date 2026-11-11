@@ -609,6 +609,10 @@ class WebSeminar(object):
         return url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="webcal")
 
     @property
+    def rss_link(self):
+        return url_for(".rss_seminar_file", shortname=self.shortname, _external=True, _scheme="https")
+
+    @property
     def next_talk_time(self):
         try:
             return self._next_talk_time
@@ -648,6 +652,19 @@ class WebSeminar(object):
                 ):
                     del talk_sub[self.shortname]
                     db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+                if "talk_exclusions" in db.users.search_cols:
+                    for i, excl in db._execute(
+                        SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                            *map(
+                                IdentifierWrapper,
+                                ["id", "talk_exclusions", "users", "talk_exclusions"],
+                            )
+                        ),
+                        [self.shortname],
+                    ):
+                        if self.shortname in excl:
+                            del excl[self.shortname]
+                            db.users.update({"id": i}, {"talk_exclusions": excl})
             self.deleted = True
             return True
         else:
