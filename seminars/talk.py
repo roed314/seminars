@@ -616,6 +616,19 @@ Thank you,
                     if self.seminar_ctr in talk_sub[self.seminar.shortname]:
                         talk_sub[self.seminar.shortname].remove(self.seminar_ctr)
                         db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+                if "talk_exclusions" in db.users.search_cols:
+                    for i, excl in db._execute(
+                        SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                            *map(
+                                IdentifierWrapper,
+                                ["id", "talk_exclusions", "users", "talk_exclusions"],
+                            )
+                        ),
+                        [self.seminar.shortname],
+                    ):
+                        if self.seminar_ctr in excl.get(self.seminar.shortname, []):
+                            excl[self.seminar.shortname].remove(self.seminar_ctr)
+                            db.users.update({"id": i}, {"talk_exclusions": excl})
             self.deleted = True
             return True
         else:
@@ -626,6 +639,15 @@ Thank you,
             return ""
 
         name = "{sem}/{ctr}".format(sem=self.seminar_id, ctr=self.seminar_ctr)
+        if self.seminar_id in current_user.seminar_subscriptions:
+            # Talks in a favorited series toggle a per-talk mute (#460)
+            excluded = self.seminar_ctr in (current_user.talk_exclusions or {}).get(self.seminar_id, [])
+            return toggle(
+                tglid="tlg" + name.replace('/','--'),
+                name=name,
+                value=-1 if excluded else 1,
+                classes="subscribe talk-exclusion"
+            )
         return toggle(
             tglid="tlg" + name.replace('/','--'),
             name=name,

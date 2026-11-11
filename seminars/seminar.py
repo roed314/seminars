@@ -652,6 +652,19 @@ class WebSeminar(object):
                 ):
                     del talk_sub[self.shortname]
                     db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+                if "talk_exclusions" in db.users.search_cols:
+                    for i, excl in db._execute(
+                        SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                            *map(
+                                IdentifierWrapper,
+                                ["id", "talk_exclusions", "users", "talk_exclusions"],
+                            )
+                        ),
+                        [self.shortname],
+                    ):
+                        if self.shortname in excl:
+                            del excl[self.shortname]
+                            db.users.update({"id": i}, {"talk_exclusions": excl})
             self.deleted = True
             return True
         else:

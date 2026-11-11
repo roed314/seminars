@@ -87,6 +87,8 @@ class PostgresUserTable(PostgresSearchTable):
             kwargs[col] = kwargs.get(col, False)
         kwargs["talk_subscriptions"] = kwargs.get("talk_subscriptions", {})
         kwargs["seminar_subscriptions"] = kwargs.get("seminar_subscriptions", [])
+        if 'talk_exclusions' in self.col_type: # FIXME after adding columns
+            kwargs['talk_exclusions'] = kwargs.get("talk_exclusions", {})
         for col in ["name", "affiliation", "homepage", "timezone"]:
             kwargs[col] = kwargs.get(col, "")
         tz = kwargs.get("timezone", "")
@@ -425,6 +427,8 @@ class SeminarsUser(UserMixin):
     def seminar_subscriptions_remove(self, shortname):
         if shortname in self._data["seminar_subscriptions"]:
             self._data["seminar_subscriptions"].remove(shortname)
+            # Moot exclusions go away with the series (#460)
+            self._data.get("talk_exclusions", {}).pop(shortname, None)
             self._dirty = True
             return 200, "Removed from favorites"
         else:
@@ -481,10 +485,46 @@ class SeminarsUser(UserMixin):
         res = [t for t in talks_search(query,
                                        seminar_dict=all_seminars())
                if t.searchable() or t.user_can_edit(user=self)]
+        # Muted talks stay out of the calendar even inside favorited
+        # series; explicit favorites always win (#460).
+        exclusions = self.talk_exclusions
+        res = [t for t in res
+               if not (t.seminar_id in self.seminar_subscriptions
+                       and t.seminar_ctr in exclusions.get(t.seminar_id, []))]
         res.sort(key=lambda elt:
                  now - elt.start_time if now > elt.start_time else elt.start_time - now)
         return res
 
+
+    @property
+    def talk_exclusions(self):
+        """{shortname: [ctr, ...]} talks muted inside favorited series (#460)."""
+        return self._data.get("talk_exclusions", {})
+
+    def is_excluded(self, shortname, ctr):
+        return ctr in self.talk_exclusions.get(shortname, [])
+
+    def exclusion_add(self, shortname, ctr):
+        exclusions = self._data.setdefault("talk_exclusions", {})
+        if ctr in exclusions.get(shortname, []):
+            return 200, "Talk already muted"
+        if shortname in exclusions:
+            bisect.insort(exclusions[shortname], ctr)
+        else:
+            exclusions[shortname] = [ctr]
+        self._dirty = True
+        return 200, "Talk muted"
+
+    def exclusion_remove(self, shortname, ctr):
+        exclusions = self._data.setdefault("talk_exclusions", {})
+        if ctr in exclusions.get(shortname, []):
+            exclusions[shortname].remove(ctr)
+            if not exclusions[shortname]:
+                del exclusions[shortname]
+            self._dirty = True
+            return 200, "Talk unmuted"
+        else:
+            return 200, "Talk was not muted"
 
     def talk_subscriptions_add(self, shortname, ctr):
         if shortname in self._data["seminar_subscriptions"]:
@@ -496,6 +536,11 @@ class SeminarsUser(UserMixin):
                 bisect.insort(self._data["talk_subscriptions"][shortname], ctr)
             else:
                 self._data["talk_subscriptions"][shortname] = [ctr]
+            # An explicit favorite wins over a mute (#460)
+            if ctr in self._data.get("talk_exclusions", {}).get(shortname, []):
+                self._data["talk_exclusions"][shortname].remove(ctr)
+                if not self._data["talk_exclusions"][shortname]:
+                    del self._data["talk_exclusions"][shortname]
             self._dirty = True
             return 200, "Added to favorites"
 
