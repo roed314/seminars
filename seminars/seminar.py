@@ -736,11 +736,15 @@ def _iterator(organizer_dict, institution_dict, objects=True, more=False):
     return object_iterator if objects else plain_iterator(db.seminars)
 
 
-def seminars_count(query={}, include_deleted=False):
+def seminars_count(query={}, include_deleted=False, include_pending=False):
     """
     Replacement for db.seminars.count to account for versioning.
+
+    Counts the same SQL-level row set that ``seminars_search`` selects (see
+    ``count_distinct`` for the count-vs-search caveat on Python-side
+    filtering).
     """
-    return count_distinct(db.seminars, _counter, query, include_deleted)
+    return count_distinct(db.seminars, _counter, query, include_deleted, include_pending)
 
 
 def seminars_max(col, constraint={}, include_deleted=False):

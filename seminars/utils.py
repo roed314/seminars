@@ -395,15 +395,51 @@ def clean_topics(inp):
     return []
 
 
-def count_distinct(table, counter, query={}, include_deleted=False):
+def _distinct_table(table, include_pending=False):
+    """
+    Table clause for DISTINCT ON queries, with the pending-record prefilter.
+
+    Unless ``include_pending`` is true, rows that are not yet approved
+    (``display`` false on API-created records) are filtered *before* the
+    most-recent-version selection, so that counts and searches agree on the
+    row set.  Returns ``(tbl, pre_values)`` where ``pre_values`` must be
+    prepended to the query values.
+    """
+    tbl = IdentifierWrapper(table.search_table)
+    if include_pending:
+        return tbl, []
+    prequery = {'$or': [{'display': True}, {'by_api': False}]}
+    # We filter the records before finding the most recent (normal queries filter after finding the most recent)
+    # This is mainly used for setting display=False or display=True
+    # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
+    pqstr, pqvalues = table._parse_dict(prequery)
+    if pqstr is None:
+        return tbl, []
+    return tbl + SQL(" WHERE {0}").format(pqstr), pqvalues
+
+
+def count_distinct(table, counter, query={}, include_deleted=False, include_pending=False):
+    """
+    Count distinct entries, accounting for versioning like ``search_distinct``.
+
+    Unless ``include_pending`` is true, unapproved (pending) records are
+    excluded, matching the SELECT side of ``search_distinct``.
+
+    NOTE on count-vs-search semantics: this counts rows at the SQL level.
+    Search layers may drop additional rows in Python afterwards (e.g. the
+    ``organizer_dict`` filter in ``seminars_search``, or ``searchable()``
+    visibility checks on the browse pages that force ``visibility = 2`` and
+    ``display = True``), so a displayed result list can legitimately be
+    shorter than this count.
+    """
     query = dict(query)
     if not include_deleted:
         query["deleted"] = {"$or": [False, {"$exists": False}]}
     cols = SQL(", ").join(map(IdentifierWrapper, table.search_cols))
-    tbl = IdentifierWrapper(table.search_table)
     qstr, values = table._build_query(query, sort=[])
+    tbl, pre_values = _distinct_table(table, include_pending)
     counter = counter.format(cols, tbl, qstr)
-    cur = table._execute(counter, values)
+    cur = table._execute(counter, pre_values + values)
     return int(cur.fetchone()[0])
 
 
@@ -440,6 +476,12 @@ def search_distinct(
 
     Doesn't support split_ors or raw.  Always computes count.
 
+    The count reported in ``info["number"]`` uses the same row set as the
+    SELECT (same ``include_deleted``/``include_pending`` flags and the same
+    pending-record prefilter).  It is still an SQL-level count: callers may
+    drop further rows in Python (see ``count_distinct``), so a displayed
+    result list can be shorter than the reported number.
+
     INPUT:
 
     - ``table`` -- a search table, such as db.seminars or db.talks
@@ -451,24 +493,17 @@ def search_distinct(
     if offset < 0:
         raise ValueError("Offset cannot be negative")
     query = dict(query)
+    more_arg = more
     if not include_deleted:
         query["deleted"] = {"$or": [False, {"$exists": False}]}
     all_cols = SQL(", ").join(map(IdentifierWrapper, ["id"] + table.search_cols))
     cols = parse_projection(table, projection)
-    tbl = IdentifierWrapper(table.search_table)
     if limit is None:
         qstr, values = table._build_query(query, sort=sort)
     else:
         qstr, values = table._build_query(query, limit, offset, sort)
-    prequery = {} if include_pending else {'$or': [{'display': True}, {'by_api': False}]}
-    if prequery:
-        # We filter the records before finding the most recent (normal queries filter after finding the most recent)
-        # This is mainly used for setting display=False or display=True
-        # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
-        pqstr, pqvalues = table._parse_dict(prequery)
-        if pqstr is not None:
-            tbl = tbl + SQL(" WHERE {0}").format(pqstr)
-            values = pqvalues + values
+    tbl, pre_values = _distinct_table(table, include_pending)
+    values = pre_values + values
     if more is not False: # might empty dictionary
         more, moreval = table._parse_dict(more)
         if more is None:
@@ -497,7 +532,7 @@ def search_distinct(
     results = iterator(cur, cols, projection)
     if info is not None:
         # caller is requesting count data
-        nres = count_distinct(table, counter, query)
+        nres = count_distinct(table, counter, query, include_deleted=include_deleted, include_pending=include_pending)
         if limit is None:
             info["number"] = nres
             return results
@@ -519,6 +554,9 @@ def search_distinct(
                 offset,
                 sort,
                 info,
+                include_deleted,
+                include_pending,
+                more_arg,
             )
         info["query"] = dict(query)
         info["number"] = nres
@@ -547,16 +585,8 @@ def lucky_distinct(
     cols = parse_projection(table, projection)
     fcols = SQL(", ").join(map(IdentifierWrapper, cols))
     qstr, values = table._build_query(query, 1, offset, sort=sort)
-    tbl = IdentifierWrapper(table.search_table)
-    prequery = {} if include_pending else {'$or': [{'display': True}, {'by_api': False}]}
-    if prequery:
-        # We filter the records before finding the most recent (normal queries filter after finding the most recent)
-        # This is mainly used for setting display=False or display=True
-        # We take advantage of the fact that the WHERE clause occurs just after the table name in all of our query constructions
-        pqstr, pqvalues = table._parse_dict(prequery)
-        if pqstr is not None:
-            tbl = tbl + SQL(" WHERE {0}").format(pqstr)
-            values = pqvalues + values
+    tbl, pre_values = _distinct_table(table, include_pending)
+    values = pre_values + values
     fselecter = selecter.format(fcols, all_cols, tbl, qstr)
     cur = table._execute(fselecter, values)
     if cur.rowcount > 0:
