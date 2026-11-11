@@ -130,7 +130,7 @@ def can_edit_institution(shortname, name, new):
     institution = db.institutions.lookup(shortname)
     # Check if institution exists
     if new != (institution is None):
-        flash_error("Identifier %s %s" % (shortname, "already exists" if new else "does not exist"))
+        flash_error("Identifier %s %s", shortname, "already exists" if new else "does not exist")
         return redirect(url_for("list_institutions"), 302), None
     if not new and not current_user.is_admin:
         # Make sure user has permission to edit
@@ -139,8 +139,9 @@ def can_edit_institution(shortname, name, new):
             link = rec["homepage"] if rec["homepage"] else "mailto:%s" % rec["email"]
             owner = "%s (%s)" % (rec['name'], link)
             flash_error(
-                "You do not have permission to edit %s.  Contact the institution admin, %s, and ask them to fix any errors."
-                % (institution["name"], owner)
+                "You do not have permission to edit %s.  Contact the institution admin, %s, and ask them to fix any errors.",
+                institution["name"],
+                owner,
             )
             return redirect(url_for(".index"), 302), None
     institution = WebInstitution(shortname, data=None, editing=new)
