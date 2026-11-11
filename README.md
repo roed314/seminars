@@ -85,6 +85,10 @@ For AI-agent conventions in this repo, see [`AGENTS.md`](AGENTS.md).
 | #1000 | SameSite=Lax cookies, closes #840 |
 | #1002 | Push-notify prototype, closes #1001 (part of #82) |
 | #1004 | UI smoke + browser tests, closes #1003 |
+| #1005 | Per-series RSS feed, closes #759 |
+| #1006 | Preserve topics on input errors, closes #696 |
+| #1007 | Mute talks in favorited series, closes #460 |
+| #1009 | Vet deps (ruff, drop setuptools), closes #1008 |
 | #988 | Meta: fixed-but-never-closed issues |
 
 ## License
