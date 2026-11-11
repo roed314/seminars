@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk
+from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk, talk_list_projection
 from seminars.utils import (
     Toggle,
     adapt_datetime,
@@ -25,6 +25,7 @@ from flask import abort, render_template, request, redirect, url_for, Response, 
 from seminars.seminar import seminars_search, all_seminars, all_organizers, all_institutions, seminars_lucky, next_talk_sorted, series_sorted, audience_options
 from flask_login import current_user
 import json
+import time
 from datetime import datetime, timedelta
 import pytz
 from urllib.parse import urlencode
@@ -245,9 +246,28 @@ def seminars_parser(info, query, org_query, conference=False):
 
 
 def institutions_shortnames():
-    return sorted(
+    # Cached dropdown data (#217): institutions change rarely; cache for a
+    # short TTL to avoid a DB round-trip on every browse-page load.
+    now = time.monotonic()
+    if (
+        getattr(institutions_shortnames, "_val", None) is not None
+        and (now - getattr(institutions_shortnames, "_ts", 0)) < institutions_shortnames_ttl
+    ):
+        return institutions_shortnames._val
+    val = sorted(
         db.institutions.search({}, projection=["shortname", "name"]), key=lambda elt: elt["name"]
     )
+    institutions_shortnames._val = val
+    institutions_shortnames._ts = now
+    return val
+
+
+institutions_shortnames_ttl = 300
+
+
+def invalidate_shortnames_cache():
+    institutions_shortnames._val = None
+    institutions_shortnames._ts = 0
 
 
 textwidth = 300
@@ -575,15 +595,81 @@ def _get_row_attributes(objects, visible_counter=0, fully_filtered=False):
     return attributes
 
 
+def _talks_counters_light(query, more, seminar_dict):
+    # Lightweight counters query (#745): fetch only topics/language (no
+    # abstract/comments, no WebTalk construction) so filter-pane counts don't
+    # require pulling full talk bodies.  Usable as the "separate counters"
+    # source; the /talks_counters endpoint exposes the same data as JSON.
+    try:
+        recs = talks_search(
+            query,
+            projection=["topics", "language"],
+            seminar_dict=seminar_dict,
+            more=more,
+            objects=False,
+        )
+    except Exception:
+        return {"topic_counts": {}, "language_counts": {}}
+    from collections import Counter as _Counter
+
+    topic_counts = _Counter()
+    language_counts = _Counter()
+    for rec in recs:
+        if not isinstance(rec, dict):
+            continue
+        # Mirror WebTalk.searchable() without WebTalk cost: display, hidden,
+        # and public seminar.
+        if not rec.get("display"):
+            continue
+        if rec.get("hidden"):
+            continue
+        sem = seminar_dict.get(rec.get("seminar_id")) if isinstance(seminar_dict, dict) else None
+        if sem is not None and not getattr(sem, "display", True):
+            continue
+        try:
+            vis = getattr(sem, "visibility", 2) if sem is not None else 2
+        except Exception:
+            vis = 2
+        if sem is not None and vis is not None and vis <= 1:
+            continue
+        for topic in rec.get("topics") or []:
+            topic_counts[topic] += 1
+        language_counts[rec.get("language")] += 1
+    langs = [(code, languages.show(code)) for code in language_counts]
+    langs.sort(key=lambda x: (-language_counts[x[0]], x[1]))
+    return {"topic_counts": topic_counts, "language_counts": language_counts}
+
+
+@app.route("/talks_counters")
+@app.route("/past_talks_counters")
+def talks_counters():
+    # Separate counters endpoint (#745): returns filter-pane counts as JSON
+    # so the browse page can render rows first and fetch counts async.
+    past = request.path.startswith("/past_talks")
+    now = datetime.now(pytz.UTC)
+    query = {"display": True, "hidden": {"$or": [False, {"$exists": False}]}, "audience": {"$lte": DEFAULT_AUDIENCE}}
+    if past:
+        query["end_time"] = {"$lt": now}
+        query["seminar_ctr"] = {"$gt": 0}
+    else:
+        query["end_time"] = {"$gte": now}
+    try:
+        seminar_dict = all_seminars()
+    except Exception:
+        seminar_dict = {}
+    counters = _talks_counters_light(query, {}, seminar_dict)
+    return Response(json.dumps({k: dict(v) for k, v in counters.items()}, default=str), mimetype="application/json")
+
+
 def _talks_index(query={},
                  sort=None,
                  subsection=None,
                  past=False,
                  keywords="",
                  limit=None, # this is an upper bound on desired number of talks, we might filter some extra out
-                 limitbuffer=1000, # the number of extra talks that we give ourselves to try to get the limit right
+                 limitbuffer=200, # bounded extra rows to absorb filtering (was 1000; 200 keeps SQL LIMIT ~100)
                  asblock=False, # the number of talks returned is based on star time blocks
-                 getcounters=True, # doesn't limit the SQL search to get the full counters
+                 getcounters=True, # computed via a lightweight separate query, not by fetching full talks
                  visible_counter=0,
                  fully_filtered=True,
                  ):
@@ -625,17 +711,24 @@ def _talks_index(query={},
 
 
     def dosearch(limit=limit, limitbuffer=limitbuffer):
-        if limit and not getcounters:
-            # we fetch extra talks to account for filtering
-            talks = talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more, limit=limit + limitbuffer)
-        else:
-            talks = talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more)
+        # #745: always bound SQL (LIMIT ~100) and prune abstract/comments.
+        # The list view renders via lazy knowls, so heavy text is never needed.
+        eff = limit if limit else default_limit
+        buf = limitbuffer if limitbuffer else 0
+        talks = talks_search(
+            query,
+            sort=sort,
+            seminar_dict=all_seminars(),
+            more=more,
+            limit=eff + buf,
+            projection=talk_list_projection(),
+        )
         # Filtering on display and hidden isn't sufficient since the seminar could be private
         talks =  [talk for talk in talks if talk.searchable()]
         return talks
 
 
-    def truncateasblock(talks, retry=True):
+    def truncateasblock(talks, retry=False):
         if not talks:
             return talks
         last_time = None
@@ -650,10 +743,7 @@ def _talks_index(query={},
                 else:
                     last_time = t.start_time
         else:
-            if retry and limit and not getcounters:
-                # redo the search without limits
-                talks = dosearch(limit=None)
-                return truncateasblock(talks, retry=False)
+            # Bounded: never retry with an unlimited fetch (#745).
             return talks
     def truncate(talks):
         if asblock and limit:
@@ -665,14 +755,19 @@ def _talks_index(query={},
 
     talks = dosearch()
     if getcounters:
-        counters = _get_counters(talks)
+        # Separate lightweight counters query (#745): topics/language only,
+        # not the fulltalk fetch.  Infinite-scroll pages pass getcounters=False.
+        try:
+            counters = _talks_counters_light(query, more, all_seminars())
+        except Exception:
+            counters = _get_counters(talks)
     else:
         counters = _get_counters([])
 
     if getcounters and fully_filtered:
-        # the initial query was not limited as getcounters = True
-        # we will first filter after figuring out the more attribute
-        # and then truncate
+        # the list query was already bounded (SQL LIMIT ~100); we filter the
+        # fetched rows for the "more"/visibility rules and then truncate to a
+        # time block.  Counters came from the separate lightweight query above.
         pass
     else:
         # we are not going to filter or the query was already limited, so we can truncate

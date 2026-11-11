@@ -87,6 +87,34 @@ optional_talk_text_columns = [
     "video_link",
 ]
 
+# Columns excluded from the browse-list projection (#745).  The list view
+# (WebTalk.oneline) only needs identifiers, speaker/title/times, topics and
+# language; abstract/comments are the bulk of page weight and are loaded
+# lazily via the talk knowl (/knowl/talk/<series>/<ctr>).
+TALK_LIST_EXCLUDE = ("abstract", "comments")
+
+
+def talk_list_projection():
+    """
+    Projection for browse-list queries: every talk search column except
+    abstract/comments.  Falls back to an explicit list when db is unavailable
+    (e.g. unit tests without a live DB).
+    """
+    try:
+        cols = list(db.talks.search_cols)
+    except Exception:
+        cols = None
+    if not cols:
+        return [
+            "seminar_id", "seminar_ctr", "seminar_ctr", "title", "speaker",
+            "speaker_affiliation", "speaker_homepage", "speaker_email",
+            "start_time", "end_time", "timezone", "topics", "language",
+            "display", "hidden", "online", "audience", "deleted",
+            "live_link", "stream_link", "room", "video_link", "slides_link",
+            "paper_link",
+        ]
+    return [c for c in cols if c not in TALK_LIST_EXCLUDE]
+
 class WebTalk(object):
     def __init__(
         self,
@@ -181,10 +209,11 @@ class WebTalk(object):
     def cleanse(self):
         """
         This function is used to ensure backward compatibility across changes to the schema and/or validation
-        This is the only place where columns we plan to drop should be referenced 
+        This is the only place where columns we plan to drop should be referenced
         """
         for col in optional_talk_text_columns:
-            if getattr(self, col) is None:
+            # getattr default: pruned list-view projections omit abstract/comments
+            if getattr(self, col, None) is None:
                 setattr(self, col, "")
         self.validate()
 
@@ -678,7 +707,9 @@ Thank you,
         if include_seminar:
             cols.append(('class="seriesname%s"'%rclass, self.show_seminar()))
         cols.append(('class="speaker%s"'%rclass, self.show_speaker(affiliation=False)))
-        new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr) if rescheduled else self
+        # Lazy knowl: rescheduled rows fetch only the replacement title with a
+        # pruned projection (no abstract/comments) to avoid N+1 heavy rows.
+        new_talk = talks_lookup(self.seminar_id, -self.seminar_ctr, projection=talk_list_projection()) if rescheduled else self
         cols.append(('class="talktitle"', new_talk.show_knowl_title(_external=_external, rescheduled=rescheduled, blackout=self.blackout_date(), tz=tz)))
         if include_content:
             cols.append(('', self.show_slides_link()))
