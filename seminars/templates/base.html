@@ -15,7 +15,7 @@
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if( document.cookie.includes('browser_timezone') ) {
     } else {
-      document.cookie = "browser_timezone=" + tz + ";path=/";
+      document.cookie = "browser_timezone=" + tz + ";path=/;SameSite=Lax";
       location.reload();
     }
     } else {
