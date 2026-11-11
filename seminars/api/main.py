@@ -19,7 +19,7 @@ from seminars.utils import (
     MAX_ORGANIZERS,
     maxlength,
 )
-from seminars.create.main import process_save_seminar, process_save_talk
+from seminars.create.main import process_save_seminar, process_save_talk, edited_at_conflict
 from functools import wraps
 
 import inspect
@@ -571,6 +571,26 @@ def save_series(version=0, user=None):
             raise APIError({"code": "organizers_prohibited",
                             "description": "You may not specify organizers when editing series"})
         update_organizers = False
+    # Optimistic concurrency (#89): for edits, require a version stamp
+    # (edited_at in payload or If-Unmodified-Since header) and reject stale
+    # submissions before processing.  Check before equality/save since
+    # __eq__ ignores edited_at.
+    if not series.new:
+        submitted = raw_data.get("edited_at", None)
+        if submitted is None:
+            try:
+                submitted = request.headers.get("If-Unmodified-Since")
+            except Exception:
+                submitted = None
+        if submitted is None:
+            raise APIError({"code": "version_required",
+                            "description": "You must specify edited_at (or If-Unmodified-Since) when editing series"}, 400)
+        if edited_at_conflict(submitted, getattr(series, "edited_at", None)):
+            raise APIError({"code": "stale_edit",
+                            "description": "Series %s was modified after the version you supplied; please refetch and reapply your changes" % series_id}, 409)
+    # Drop the version stamp so it is never treated as data (process_save
+    # also skips VERSION_COLS).
+    raw_data.pop("edited_at", None)
     # Check that there aren't extraneous keys (which might be misspelled)
     extra_keys = [key for key in raw_data if key not in db.seminars.search_cols + ["slots", "organizers"]]
     if extra_keys:
@@ -670,6 +690,21 @@ def save_talk(version=0, user=None):
         if talk is None:
             raise APIError({"code": "no_talk",
                             "description": "The talk %s/%s does not exist (or is deleted)" % (series_id, series_ctr)})
+        # Optimistic concurrency (#89): require version stamp for edits.
+        # Check before equality/save since __eq__ ignores edited_at.
+        submitted = raw_data.get("edited_at", None)
+        if submitted is None:
+            try:
+                submitted = request.headers.get("If-Unmodified-Since")
+            except Exception:
+                submitted = None
+        if submitted is None:
+            raise APIError({"code": "version_required",
+                            "description": "You must specify edited_at (or If-Unmodified-Since) when editing talks"}, 400)
+        if edited_at_conflict(submitted, getattr(talk, "edited_at", None)):
+            raise APIError({"code": "stale_edit",
+                            "description": "Talk %s/%s was modified after the version you supplied; please refetch and reapply your changes" % (series_id, series_ctr)}, 409)
+    raw_data.pop("edited_at", None)
     warnings = []
     def warn(msg, *args):
         warnings.append(msg % args)

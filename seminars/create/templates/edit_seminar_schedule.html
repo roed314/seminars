@@ -65,6 +65,7 @@
         <td align="left" style="padding-right:0px;"><input type="checkbox" name="hidden{{i}}" value="yes"{% if talk.hidden %} checked {% endif %} /></td>
         <td align="left">{{ talk.details_link() | safe }}</td>
         <input type="hidden" name="seminar_ctr{{i}}" value="{{ talk.seminar_ctr }}" />
+        <input type="hidden" name="edited_at{{i}}" value="{{ talk.edited_at.isoformat() if talk.edited_at else '' }}" />
       {% else %}
         <td class="speakerinp"><input name="speaker{{i}}" value="" maxlength="{{ maxlength['speaker'] }}"/></td>
         <td class="emailinp"><input name="speaker_email{{i}}" value="" maxlength="{{ maxlength['email'] }}"/></td>
@@ -72,6 +73,7 @@
         <td class="titleinp"><input name="title{{i}}" value="" maxlength="{{ maxlength['title'] }}"/></td>
         <td><input type="checkbox" name="hidden{{i}}" value="yes"/></td>
         <input type="hidden" name="seminar_ctr{{i}}" value="" />
+        <input type="hidden" name="edited_at{{i}}" value="" />
       {% endif %}
     </tr>
     {% endfor %}
