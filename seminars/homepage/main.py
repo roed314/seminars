@@ -1,6 +1,6 @@
 from seminars.app import app
 from seminars import db
-from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk
+from seminars.talk import talks_search, talks_lucky, talks_lookup, WebTalk, talk_list_projection
 from seminars.utils import (
     Toggle,
     adapt_datetime,
@@ -11,9 +11,11 @@ from seminars.utils import (
     ics_file,
     maxlength,
     process_user_input,
+    rss_file,
     to_dict,
     topdomain,
     url_for_with_args,
+    valid_jsonp_callback,
 )
 from seminars.topic import topic_dag
 from seminars.language import languages
@@ -23,6 +25,7 @@ from flask import abort, render_template, request, redirect, url_for, Response, 
 from seminars.seminar import seminars_search, all_seminars, all_organizers, all_institutions, seminars_lucky, next_talk_sorted, series_sorted, audience_options
 from flask_login import current_user
 import json
+import time
 from datetime import datetime, timedelta
 import pytz
 from urllib.parse import urlencode
@@ -48,6 +51,9 @@ def parse_topic(info, query):
     # of the talk
     topic = info.get("topic")
     if topic:
+        if "\x00" in topic:
+            flash_error("Invalid topic input: %s", repr(topic))
+            return
         # FIXME: temporary bridge during addition of physics
         if "_" not in topic:
             topic = "math_" + topic
@@ -62,6 +68,9 @@ def parse_institution_sem(info, query):
     if inst == "None":
         query["institutions"] = []
     elif inst:
+        if "\x00" in inst:
+            flash_error("Invalid institution input: %s", repr(inst))
+            return
         # one day we will do joins
         query["institutions"] = {"$contains": inst}
 
@@ -143,7 +152,7 @@ def parse_recent_edit(info, query):
         except Exception as e:
             flash_error("Could not parse recent edit input %s.  Error: %s", recent, str(e))
         else:
-            recent = datetime.now() - timedelta(hours=recent)
+            recent = get_now() - timedelta(hours=recent)
             query["edited_at"] = {"$gte": recent}
 
 def parse_video(info, query):
@@ -164,6 +173,10 @@ def parse_paper(info, query):
 def parse_access(info, query):
     v = info.get("access")
     if v == "1":
+        # Must match the display gate (talk.show_live_link requires
+        # online); otherwise offline talks with a stale live_link leak
+        # into the "Livestream available" filter (#921).
+        query["online"] = True
         query["access_control"] = {"$ne": 5}
         query["live_link"] = {"$ne": ""}
 
@@ -182,6 +195,9 @@ def parse_audience(info, query):
 def parse_language(info, query):
     v = info.get("language")
     if v:
+        if "\x00" in v:
+            flash_error("Invalid language input: %s", repr(v))
+            return
         query["language"] = v
 
 
@@ -230,9 +246,28 @@ def seminars_parser(info, query, org_query, conference=False):
 
 
 def institutions_shortnames():
-    return sorted(
+    # Cached dropdown data (#217): institutions change rarely; cache for a
+    # short TTL to avoid a DB round-trip on every browse-page load.
+    now = time.monotonic()
+    if (
+        getattr(institutions_shortnames, "_val", None) is not None
+        and (now - getattr(institutions_shortnames, "_ts", 0)) < institutions_shortnames_ttl
+    ):
+        return institutions_shortnames._val
+    val = sorted(
         db.institutions.search({}, projection=["shortname", "name"]), key=lambda elt: elt["name"]
     )
+    institutions_shortnames._val = val
+    institutions_shortnames._ts = now
+    return val
+
+
+institutions_shortnames_ttl = 300
+
+
+def invalidate_shortnames_cache():
+    institutions_shortnames._val = None
+    institutions_shortnames._ts = 0
 
 
 textwidth = 300
@@ -560,15 +595,81 @@ def _get_row_attributes(objects, visible_counter=0, fully_filtered=False):
     return attributes
 
 
+def _talks_counters_light(query, more, seminar_dict):
+    # Lightweight counters query (#745): fetch only topics/language (no
+    # abstract/comments, no WebTalk construction) so filter-pane counts don't
+    # require pulling full talk bodies.  Usable as the "separate counters"
+    # source; the /talks_counters endpoint exposes the same data as JSON.
+    try:
+        recs = talks_search(
+            query,
+            projection=["topics", "language"],
+            seminar_dict=seminar_dict,
+            more=more,
+            objects=False,
+        )
+    except Exception:
+        return {"topic_counts": {}, "language_counts": {}}
+    from collections import Counter as _Counter
+
+    topic_counts = _Counter()
+    language_counts = _Counter()
+    for rec in recs:
+        if not isinstance(rec, dict):
+            continue
+        # Mirror WebTalk.searchable() without WebTalk cost: display, hidden,
+        # and public seminar.
+        if not rec.get("display"):
+            continue
+        if rec.get("hidden"):
+            continue
+        sem = seminar_dict.get(rec.get("seminar_id")) if isinstance(seminar_dict, dict) else None
+        if sem is not None and not getattr(sem, "display", True):
+            continue
+        try:
+            vis = getattr(sem, "visibility", 2) if sem is not None else 2
+        except Exception:
+            vis = 2
+        if sem is not None and vis is not None and vis <= 1:
+            continue
+        for topic in rec.get("topics") or []:
+            topic_counts[topic] += 1
+        language_counts[rec.get("language")] += 1
+    langs = [(code, languages.show(code)) for code in language_counts]
+    langs.sort(key=lambda x: (-language_counts[x[0]], x[1]))
+    return {"topic_counts": topic_counts, "language_counts": language_counts}
+
+
+@app.route("/talks_counters")
+@app.route("/past_talks_counters")
+def talks_counters():
+    # Separate counters endpoint (#745): returns filter-pane counts as JSON
+    # so the browse page can render rows first and fetch counts async.
+    past = request.path.startswith("/past_talks")
+    now = datetime.now(pytz.UTC)
+    query = {"display": True, "hidden": {"$or": [False, {"$exists": False}]}, "audience": {"$lte": DEFAULT_AUDIENCE}}
+    if past:
+        query["end_time"] = {"$lt": now}
+        query["seminar_ctr"] = {"$gt": 0}
+    else:
+        query["end_time"] = {"$gte": now}
+    try:
+        seminar_dict = all_seminars()
+    except Exception:
+        seminar_dict = {}
+    counters = _talks_counters_light(query, {}, seminar_dict)
+    return Response(json.dumps({k: dict(v) for k, v in counters.items()}, default=str), mimetype="application/json")
+
+
 def _talks_index(query={},
                  sort=None,
                  subsection=None,
                  past=False,
                  keywords="",
                  limit=None, # this is an upper bound on desired number of talks, we might filter some extra out
-                 limitbuffer=1000, # the number of extra talks that we give ourselves to try to get the limit right
+                 limitbuffer=200, # bounded extra rows to absorb filtering (was 1000; 200 keeps SQL LIMIT ~100)
                  asblock=False, # the number of talks returned is based on star time blocks
-                 getcounters=True, # doesn't limit the SQL search to get the full counters
+                 getcounters=True, # computed via a lightweight separate query, not by fetching full talks
                  visible_counter=0,
                  fully_filtered=True,
                  ):
@@ -610,17 +711,24 @@ def _talks_index(query={},
 
 
     def dosearch(limit=limit, limitbuffer=limitbuffer):
-        if limit and not getcounters:
-            # we fetch extra talks to account for filtering
-            talks = talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more, limit=limit + limitbuffer)
-        else:
-            talks = talks_search(query, sort=sort, seminar_dict=all_seminars(), more=more)
+        # #745: always bound SQL (LIMIT ~100) and prune abstract/comments.
+        # The list view renders via lazy knowls, so heavy text is never needed.
+        eff = limit if limit else default_limit
+        buf = limitbuffer if limitbuffer else 0
+        talks = talks_search(
+            query,
+            sort=sort,
+            seminar_dict=all_seminars(),
+            more=more,
+            limit=eff + buf,
+            projection=talk_list_projection(),
+        )
         # Filtering on display and hidden isn't sufficient since the seminar could be private
         talks =  [talk for talk in talks if talk.searchable()]
         return talks
 
 
-    def truncateasblock(talks, retry=True):
+    def truncateasblock(talks, retry=False):
         if not talks:
             return talks
         last_time = None
@@ -635,10 +743,7 @@ def _talks_index(query={},
                 else:
                     last_time = t.start_time
         else:
-            if retry and limit and not getcounters:
-                # redo the search without limits
-                talks = dosearch(limit=None)
-                return truncateasblock(talks, retry=False)
+            # Bounded: never retry with an unlimited fetch (#745).
             return talks
     def truncate(talks):
         if asblock and limit:
@@ -650,14 +755,19 @@ def _talks_index(query={},
 
     talks = dosearch()
     if getcounters:
-        counters = _get_counters(talks)
+        # Separate lightweight counters query (#745): topics/language only,
+        # not the fulltalk fetch.  Infinite-scroll pages pass getcounters=False.
+        try:
+            counters = _talks_counters_light(query, more, all_seminars())
+        except Exception:
+            counters = _get_counters(talks)
     else:
         counters = _get_counters([])
 
     if getcounters and fully_filtered:
-        # the initial query was not limited as getcounters = True
-        # we will first filter after figuring out the more attribute
-        # and then truncate
+        # the list query was already bounded (SQL LIMIT ~100); we filter the
+        # fetched rows for the "more"/visibility rules and then truncate to a
+        # time block.  Counters came from the separate lightweight query above.
         pass
     else:
         # we are not going to filter or the query was already limited, so we can truncate
@@ -716,8 +826,8 @@ def _talks_index(query={},
     if request.cookies.get("topics", ""):
         # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
         # For now we set the max_age to 30 years
-        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
-        response.set_cookie("topics", "", max_age=0)
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30, samesite="Lax")
+        response.set_cookie("topics", "", max_age=0, samesite="Lax")
 
     # disable cache
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -767,8 +877,8 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     if request.cookies.get("topics", ""):
         # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
         # For now we set the max_age to 30 years
-        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
-        response.set_cookie("topics", "", max_age=0)
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30, samesite="Lax")
+        response.set_cookie("topics", "", max_age=0, samesite="Lax")
     return response
 
 @app.route("/institutions/")
@@ -904,6 +1014,8 @@ def show_seminar_json(shortname):
     ]
     callback = request.args.get("callback", False)
     if callback:
+        if not valid_jsonp_callback(callback):
+            return abort(400, "Invalid callback")
         return Response(
             "{}({})".format(str(callback), json.dumps(talks, default=str)),
             mimetype="application/javascript",
@@ -951,6 +1063,20 @@ def ics_seminar_file(shortname):
         seminar.talks(),
         filename="{}.ics".format(shortname),
         user=current_user)
+
+
+@app.route("/seminar/<shortname>/rss")
+def rss_seminar_file(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            return abort(404, "Seminar not found")
+
+    return rss_file(
+        seminar.talks(),
+        seminar)
 
 
 @app.route("/talk/<seminar_id>/<int:talkid>/ics")
