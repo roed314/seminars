@@ -24,7 +24,7 @@
 <body>
 
 <h1>researchseminars.org — Architecture &amp; Outstanding Items</h1>
-<p class="meta">Repo: <code>roed314/seminars</code> (Flask app) · Fork: <code>winstoncheong/seminars</code> · Generated 2026-11-11 rev4 from source + <code>gh</code> (fork <code>integrate-8</code>, 119 passed)</p>
+<p class="meta">Repo: <code>roed314/seminars</code> (Flask app) · Fork: <code>winstoncheong/seminars</code> · Generated 2026-11-11 rev5 from source + <code>gh</code> (fork <code>master</code> = <code>integrate-9</code> <code>b705a789</code>, 119 passed, PRs #1010–#1016 open upstream)</p>
 
 <h2>1. Stack &amp; Topology</h2>
 <table>
@@ -75,7 +75,7 @@ POST /api/0/save/series|talk/ → api/main.py:340,462  (display=False gate + rev
 <p>Cost per save: 3–6 versioned reads (<code>DISTINCT ON</code>), up to 10 sequential <code>users.lookup</code> (organizers), <code>talks_max()</code> scan, <code>email_validator</code>. No index rebuild, no mail, no cache purge — writes are cheap; bulk schedule-save is N commits.</p>
 
 <h3>3.2 Read / browse / search</h3>
-<pre>GET /                          homepage browse (21 DB queries for non-endorsed users, #217 — OPEN)
+<pre>GET /                          homepage browse (bounded LIMIT 100+200 + pruned projection + TTL dict cache; fixed #217/#745 via <code>fix-745-perf</code>)
 GET /search                    filtered talk search
 GET /api/0/search/series|talks  machine API (operator/dict filters; #984/#986 500s → fixed by #987, integrated)
 GET /api/0/lookup/series|talk   single-record fetch</pre>
@@ -84,13 +84,13 @@ GET /api/0/lookup/series|talk   single-record fetch</pre>
 <pre>GET /seminar/&lt;short&gt;/ics   homepage/main.py:941  (per-series, already filters ctr&gt;0)
 GET /talk/&lt;id&gt;/&lt;ctr&gt;/ics  homepage/main.py:956  (single talk)
 GET /ics/&lt;token&gt;             users/main.py:617      (favorites → user.ics_talks; ctr&lt;0 tombstones filtered by #989)</pre>
-<p>Generation: <code>utils.py:798 ics_file()</code> + <code>talk.py event()</code> → <code>DTSTAMP=edited_at</code> (fallback <code>start_time</code>), stable <code>UID {id}/{ctr}@topdomain</code>, <code>SEQUENCE:0</code> + <code>LAST-MODIFIED</code>, <code>METHOD:PUBLISH</code>, <code>text/calendar</code> inline, <code>ETag/Last-Modified</code> with <code>304</code> (<code>fix-feed-hardening</code> in integrate-7).
-stable <code>UID</code> but no <code>SEQUENCE/LAST-MODIFIED/METHOD:PUBLISH</code>. Favorites query does a full
+<p>Generation: <code>utils.py ics_file()</code> + <code>talk.py event()</code> → <code>DTSTAMP=edited_at</code> (fallback <code>start_time</code>), stable <code>UID {id}/{ctr}@topdomain</code>, <code>SEQUENCE:0</code> + <code>LAST-MODIFIED</code>, <code>METHOD:PUBLISH</code>, <code>text/calendar</code> inline, <code>ETag/Last-Modified</code> with <code>304</code> (<code>fix-feed-hardening</code>, PR #1012).
+Favorites query does a full
 <code>all_seminars()</code> scan + per-subscription <code>$or</code> + Python filter/sort
 (<code>pwdmanager.py:466-484</code>). External clients poll on their schedule (Google ~12–24h, Outlook 24h+, no SLA);
-Google drops feeds over ~1MB/~1111 events (#777 — documented in #991, not code-fixed).</p>
+Google drops feeds over ~1MB/~1111 events (#777 — documented #991, feeds now stable/small; pull-only by design).</p>
 
-<h2>4. Outstanding Items (rev4 — fork status as of integrate-8, all doc items addressed)</h2>
+<h2>4. Outstanding Items (rev5 — fork <code>master</code> = <code>integrate-9</code>, all doc items addressed, PRs #1010–#1016 open)</h2>
 
 <h3>4.1 Our PRs / issues (winstoncheong → upstream, all OPEN upstream)</h3>
 <table>
@@ -114,13 +114,13 @@ Google drops feeds over ~1MB/~1111 events (#777 — documented in #991, not code
   <tr><td>#1007</td><td>Mute talks in favorited series (closes #460).</td><td><span class="tag done">INTEGRATED</span> <code>fix-460-unfavorite</code></td></tr>
   <tr><td>#1009</td><td>Vet deps: ruff, drop setuptools/typing_extensions (closes #1008).</td><td><span class="tag done">INTEGRATED</span> <code>chore/vet-deps</code></td></tr>
   <tr><td>#985</td><td>Upstream bot PR (draft, unmerged) superseded by #987.</td><td><span class="tag open">DRAFT</span></td></tr>
-  <tr><td>#908</td><td>Wide daterangepicker bounds so pre-2020 dates are queryable + <code>lenght</code> typo (closes #908).</td><td><span class="tag done">INTEGRATED</span> <code>fix-908-predates</code> via integrate-7</td></tr>
-  <tr><td>#964</td><td>XSS/format-string/NUL hardening + JSONP + query filters (closes #964).</td><td><span class="tag done">INTEGRATED</span> <code>fix-964-xss</code> via integrate-7</td></tr>
-  <tr><td>feed</td><td>Stable <code>DTSTAMP</code>, UID domain, <code>SEQUENCE</code>, <code>ETag/304</code>, <code>text/calendar</code> inline (relates #777, part of #82).</td><td><span class="tag done">INTEGRATED</span> <code>fix-feed-hardening</code> via integrate-7</td></tr>
-  <tr><td>#636</td><td>Shared <code>_distinct_table</code>; recount forwards <code>include_deleted/include_pending</code> (closes #636).</td><td><span class="tag done">INTEGRATED</span> <code>fix-636-counts</code> via integrate-8</td></tr>
-  <tr><td>#745/#217</td><td>Bounded <code>LIMIT 100+200</code>, pruned projection, dict TTL cache, <code>prefill:false</code>, light counters endpoint (closes #745, #217).</td><td><span class="tag done">INTEGRATED</span> <code>fix-745-perf</code> via integrate-8</td></tr>
-  <tr><td>#910</td><td>Organizer bulk ICS/ZIP export <code>GET /manage/export/ics</code> with authz + pagination (closes #910).</td><td><span class="tag done">INTEGRATED</span> <code>fix-910-bulk</code> via integrate-8</td></tr>
-  <tr><td>#89</td><td>Optimistic concurrency: hidden <code>edited_at</code>, 409 on mismatch, API <code>version_required/stale_edit</code> (closes #89).</td><td><span class="tag done">INTEGRATED</span> <code>fix-89-locks</code> via integrate-8</td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/1010">#1010</a></td><td>Wide daterangepicker bounds so pre-2020 dates are queryable + <code>lenght</code> typo (closes #908).</td><td><span class="tag done">ON FORK MASTER</span> <code>fix-908-predates</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/1011">#1011</a></td><td>XSS/format-string/NUL hardening + JSONP + query filters (closes #964).</td><td><span class="tag done">ON FORK MASTER</span> <code>fix-964-xss</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/1012">#1012</a></td><td>Stable <code>DTSTAMP</code>, UID domain, <code>SEQUENCE</code>, <code>ETag/304</code>, <code>text/calendar</code> inline (relates #777, part of #82).</td><td><span class="tag done">ON FORK MASTER</span> <code>fix-feed-hardening</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/1013">#1013</a></td><td>Shared <code>_distinct_table</code>; recount forwards <code>include_deleted/include_pending</code> (closes #636).</td><td><span class="tag done">ON FORK MASTER</span> <code>fix-636-counts</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/1014">#1014</a></td><td>Bounded <code>LIMIT 100+200</code>, pruned projection, dict TTL cache, <code>prefill:false</code>, light counters endpoint (closes #745, #217).</td><td><span class="tag done">ON FORK MASTER</span> <code>fix-745-perf</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/1015">#1015</a></td><td>Organizer bulk ICS/ZIP export <code>GET /manage/export/ics</code> with authz + pagination (closes #910).</td><td><span class="tag done">ON FORK MASTER</span> <code>fix-910-bulk</code></td></tr>
+  <tr><td><a href="https://github.com/roed314/seminars/pull/1016">#1016</a></td><td>Optimistic concurrency: hidden <code>edited_at</code>, 409 on mismatch, API <code>version_required/stale_edit</code> (closes #89).</td><td><span class="tag done">ON FORK MASTER</span> <code>fix-89-locks</code></td></tr>
 </table>
 
 <h3>4.2 Upstream defects (by severity + fork status)</h3>
@@ -151,17 +151,17 @@ Google drops feeds over ~1MB/~1111 events (#777 — documented in #991, not code
   <li>ICS is pull-only: poll interval (Google/Apple/Outlook) is <strong>not fixable from this codebase</strong>. Mitigation = small/stable feeds (partially done: #989 + #991) + different model: <strong>event-driven notifications</strong> (prototype #1002: change event + subscriber lookup, no sending yet; parent #82) keeping ICS as fallback.</li>
 </ul>
 
-<h3>4.4 Suggested next work (fork) — rev4 status (all done)</h3>
+<h3>4.4 Suggested next work (fork) — rev5 status (all done, PRs open)</h3>
 <ol>
   <li><span class="tag done">DONE</span> Email-on-edit prototype (#1002: change event from <code>save()</code> + subscriber lookup, no sending yet).</li>
-  <li><span class="tag done">DONE</span> Feed hardening via <code>fix-feed-hardening</code> (stable <code>DTSTAMP</code> from <code>edited_at</code>, <code>SEQUENCE/LAST-MODIFIED</code>, UID domain, <code>METHOD:PUBLISH</code>, <code>ETag/304</code>, <code>text/calendar</code> inline).</li>
-  <li><span class="tag done">DONE</span> Bulk-export endpoint via <code>fix-910-bulk</code> (<code>GET /manage/export/ics</code>, organizer + all-my-series, authz + pagination/ZIP).</li>
+  <li><span class="tag done">DONE</span> Feed hardening via <code>fix-feed-hardening</code> (PR <a href="https://github.com/roed314/seminars/pull/1012">#1012</a>).</li>
+  <li><span class="tag done">DONE</span> Bulk-export endpoint via <code>fix-910-bulk</code> (PR <a href="https://github.com/roed314/seminars/pull/1015">#1015</a>).</li>
   <li><span class="tag done">DONE</span> Pin deps + minimal pytest job (#993 + #992 + #1004).</li>
-  <li><span class="tag done">DONE</span> Merged to <code>integrate-8</code>: integrate-7 (88 passed) + <code>fix-636-counts</code> + <code>fix-745-perf</code> + <code>fix-910-bulk</code> + <code>fix-89-locks</code>. 119 passed.</li>
+  <li><span class="tag done">DONE</span> Fork <code>master</code> = <code>integrate-9</code> (<code>b705a789</code>): all 7 fixes merged, 119 passed, 15 skipped, ruff clean.</li>
   <li><span class="tag open">TRACKING ONLY</span> #988 meta (fixed-but-never-closed upstream) + #777 by-design cap (pull-only; code now stable/small).</li>
 </ol>
 
-<footer>Contact: @winstoncheong · winstonc@ksu.edu · Fork <code>integrate-8</code> = all doc items addressed (119 passed, 15 skipped)</footer>
+<footer>Contact: @winstoncheong · winstonc@ksu.edu · Fork <code>master</code> = <code>integrate-9</code> <code>b705a789</code> · Upstream PRs #1010–#1016 open</footer>
 
 </body>
 </html>
