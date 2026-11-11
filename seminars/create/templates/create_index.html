@@ -62,6 +62,13 @@
   {% endif %}
 
   {% set pair = [('Seminar series you organize', seminars), ('Conferences you organize', conferences)] %}
+  {% if seminars or conferences %}
+      <p>
+        Bulk download:
+        <a href="{{ url_for('.export_ics') }}">all my series (.ics)</a> |
+        <a href="{{ url_for('.export_ics', format='zip') }}">all my series (.zip per-series)</a>
+      </p>
+  {% endif %}
   {% for title, list in pair %}
     {% if list %}
       <h2>{{ title }}</h2>
@@ -80,7 +87,7 @@
               <td style="border-left: solid 1px;"> {{role}} </td>
               <td style="border-left: solid 1px;"> <a href='{{ url_for(".edit_seminar_schedule", shortname=elt.shortname) }}'>schedule</a></td>
               <td> <a href='{{ url_for(".edit_seminar", shortname=elt.shortname) }}'>properties</a></td>
-              <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a></td>
+              <td style="border-left: solid 1px;"> <a href='{{ url_for("show_seminar", shortname=elt.shortname) }}'>{{elt.shortname}}</a> (<a href="{{ url_for('.export_ics', series=elt.shortname) }}">ics</a>)</td>
             </tr>
           {% endfor %}
         </tbody>
