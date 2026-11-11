@@ -25,6 +25,7 @@ name                  | text        | user's name
 password              | text        | hashed password with bcrypt
 seminar_subscriptions | text[]      | set of short names of seminars that the user is subscribed to
 subject_admin         | text        | topic_id for a topic that this user has admin privileges for
+talk_exclusions       | json        | dict as {shortname : list of counters} of talks muted inside favorited series
 talks_subscriptions   | json        | dict as {shorname : list of counters}
 timezone              | text        | time zone code, e.g. "US/Eastern"
 

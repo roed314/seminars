@@ -56,8 +56,9 @@ function toggle_time(id) {
 
 function setCookie(name,value) {
     if (navigator.cookieEnabled) {
-        // our cookies have a 10-year shelf life
-        document.cookie = name + "=" + (value || "") + ";Path=/;Max-age=315360000";
+        // our cookies have a 10-year shelf life; Lax so they are never
+        // rejected for a missing/invalid SameSite attribute (#840)
+        document.cookie = name + "=" + (value || "") + ";Path=/;Max-age=315360000;SameSite=Lax";
     }
 }
 function getCookie(name) {
@@ -73,7 +74,7 @@ function getCookie(name) {
     return null;
 }
 function eraseCookie(name) {
-    document.cookie = name+'=; Max-Age=-99999999;';
+    document.cookie = name+'=; Path=/; Max-Age=-99999999;SameSite=Lax';
 }
 function addToCookie(item, cookie) {
     var cur_items = getCookie(cookie);
@@ -1109,21 +1110,18 @@ function register_subsribe_change() {
           elem.attr('data-chosen', elem.val());
         }
         console.log($(this).val());
-        if($(this).val() == "1") {
-            $.ajax({
-              url: '/user/subscribe/' +  $(this)[0].name,
-              success: success,
-              error: error
-            });
-              console.log('/user/subscribe/' +  $(this)[0].name);
-        } else {
-          $.ajax({
-            url: '/user/unsubscribe/' +  $(this)[0].name,
-            success: success,
-            error: error
-          });
-            console.log('/user/unsubscribe/' +  $(this)[0].name);
-        }
+        // Muted-talk toggles (class talk-exclusion, #460) hit the
+        // exclude/unexclude endpoints; everything else keeps the
+        // subscribe/unsubscribe endpoints (incl. the IC ics-limit ones).
+        var endpoint = ($(this)[0].name.includes('/') && elem.hasClass("talk-exclusion"))
+          ? ($(this).val() == "1" ? '/user/unexclude/' : '/user/exclude/')
+          : ($(this).val() == "1" ? '/user/subscribe/' : '/user/unsubscribe/');
+        $.ajax({
+          url: endpoint +  $(this)[0].name,
+          success: success,
+          error: error
+        });
+        console.log(endpoint +  $(this)[0].name);
     });
 };
 $(document).ready(register_subsribe_change());
