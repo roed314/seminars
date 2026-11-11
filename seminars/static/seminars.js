@@ -56,8 +56,9 @@ function toggle_time(id) {
 
 function setCookie(name,value) {
     if (navigator.cookieEnabled) {
-        // our cookies have a 10-year shelf life
-        document.cookie = name + "=" + (value || "") + ";Path=/;Max-age=315360000";
+        // our cookies have a 10-year shelf life; Lax so they are never
+        // rejected for a missing/invalid SameSite attribute (#840)
+        document.cookie = name + "=" + (value || "") + ";Path=/;Max-age=315360000;SameSite=Lax";
     }
 }
 function getCookie(name) {
@@ -73,7 +74,7 @@ function getCookie(name) {
     return null;
 }
 function eraseCookie(name) {
-    document.cookie = name+'=; Max-Age=-99999999;';
+    document.cookie = name+'=; Path=/; Max-Age=-99999999;SameSite=Lax';
 }
 function addToCookie(item, cookie) {
     var cur_items = getCookie(cookie);
@@ -1183,8 +1184,31 @@ function makeTopicsTree(json_tree) {
 
 
 
-  function callback_topics(instance) {
-    function cmp(a, b) {
+  // Client-side guard for #696: block series/talk saves with no topics
+  // selected, instead of round-tripping to an error page that loses them.
+  function topics_empty(val) {
+    var t = (val || "").trim();
+    return !t || t === "[]" || t === "['']" || t === '[""]';
+  }
+  function check_topics(form) {
+    var input = form.find('input[name="topics"]');
+    if (input.length && topics_empty(input.val())) {
+      input.notify("Please select at least one topic.", {className: "error", position: "top"});
+      var selector = $("#topicDAG_selector");
+      (selector.length ? selector : input).get(0).scrollIntoView({block: "center"});
+      return false;
+    }
+    return true;
+  }
+  $(document).ready(function() {
+    $("#seminarform, #talkform").on("submit", function(e) {
+      if (!check_topics($(this))) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  function callback_topics(instance) {    function cmp(a, b) {
       var ad = instance.get_checked_descendants(a.id).length > 0;
       var bd = instance.get_checked_descendants(b.id).length > 0;
       if( ad == bd) {
