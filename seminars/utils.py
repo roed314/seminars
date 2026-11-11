@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from datetime import time as maketime
 from dateutil.parser import parse as parse_time
 from email_validator import validate_email
-from email.utils import formatdate
+from email.utils import formatdate, parsedate_to_datetime
 from flask import url_for, flash, render_template, request, send_file, Response
 from flask_login import current_user
 from functools import lru_cache
@@ -18,6 +18,7 @@ from seminars import db
 from six import string_types
 from urllib.parse import urlparse, urlencode
 from seminars.psycopg_compat import Placeholder
+import hashlib
 import pytz
 import re
 from psycodict.searchtable import PostgresSearchTable
@@ -799,19 +800,55 @@ class Toggle(SearchBox):
 
 def ics_file(talks, filename, user=None):
     if user is None: user = current_user
+    talks = list(talks)
     cal = Calendar()
     cal.add("VERSION", "2.0")
     cal.add("PRODID", topdomain())
     cal.add("CALSCALE", "GREGORIAN")
+    cal.add("METHOD", "PUBLISH")
     cal.add("X-WR-CALNAME", topdomain())
 
     for talk in talks:
         cal.add_component(talk.event(user=user))
 
+    data = cal.to_ical()
+    etag = '"%s"' % hashlib.sha256(data).hexdigest()
+    # Last-Modified is the latest edit across the feed (None if unknown)
+    last_modified = None
+    for talk in talks:
+        edited = getattr(talk, "edited_at", None)
+        if edited is not None:
+            if edited.tzinfo is None:
+                edited = pytz.UTC.localize(edited)
+            if last_modified is None or edited > last_modified:
+                last_modified = edited
+    # Conditional requests: a matching validator means "not modified"
+    inm = request.headers.get("If-None-Match")
+    if inm is not None and inm.strip() == etag:
+        resp = Response(status=304)
+        resp.headers["ETag"] = etag
+        return resp
+    ims = request.headers.get("If-Modified-Since")
+    if ims and last_modified is not None:
+        try:
+            ims_dt = parsedate_to_datetime(ims)
+            if ims_dt is not None and last_modified <= ims_dt:
+                resp = Response(status=304)
+                resp.headers["ETag"] = etag
+                return resp
+        except (TypeError, ValueError):
+            pass
     bIO = BytesIO()
-    bIO.write(cal.to_ical())
+    bIO.write(data)
     bIO.seek(0)
-    return send_file(bIO, download_name=filename, as_attachment=True)
+    resp = send_file(bIO, download_name=filename, as_attachment=False,
+                     mimetype="text/calendar")
+    resp.headers["Content-Type"] = "text/calendar; charset=utf-8"
+    resp.headers["ETag"] = etag
+    if last_modified is not None:
+        resp.headers["Last-Modified"] = formatdate(last_modified.timestamp(), usegmt=True)
+    resp.headers["Cache-Control"] = "public, max-age=3600"
+    return resp
 
 def rss_file(talks, seminar):
     """RSS 2.0 feed of upcoming talks in a series (see #759).

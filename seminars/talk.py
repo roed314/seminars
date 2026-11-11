@@ -19,6 +19,7 @@ from seminars.utils import (
     sanitized_table,
     search_distinct,
     search_iterator,
+    topdomain,
 )
 from seminars.language import languages
 from seminars.toggle import toggle
@@ -777,8 +778,14 @@ Email link to speaker
 
         event.add("description", desc)
         event.add("location", link)
-        event.add("DTSTAMP", datetime.now(tz=pytz.UTC))
-        event.add("UID", "%s/%s" % (self.seminar_id, self.seminar_ctr))
+        # Stable DTSTAMP so feed bytes don't change between requests (#777):
+        # prefer edited_at, fall back to start_time.
+        dtstamp = getattr(self, "edited_at", None) or self.start_time
+        event.add("DTSTAMP", adapt_datetime(dtstamp, pytz.UTC))
+        event.add("UID", "%s/%s@%s" % (self.seminar_id, self.seminar_ctr, topdomain()))
+        event.add("SEQUENCE", 0)
+        if getattr(self, "edited_at", None) is not None:
+            event.add("LAST-MODIFIED", adapt_datetime(self.edited_at, pytz.UTC))
         return event
 
 def talks_header(include_seminar=True, include_content=False, include_subscribe=True, datetime_header="Your time"):
