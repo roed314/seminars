@@ -14,7 +14,13 @@ import unittest
 import urllib.parse
 import urllib.request
 
-from playwright.sync_api import sync_playwright
+import pytest
+
+playwright = pytest.importorskip(
+    "playwright",
+    reason="playwright not installed; browser tests need it + browsers",
+)
+from playwright.sync_api import sync_playwright  # noqa: E402
 
 
 BASE_URL = os.environ.get("SEMINARS_STAGING_URL", "http://127.0.0.1:37780")
