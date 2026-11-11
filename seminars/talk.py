@@ -838,7 +838,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
         else:
             if not talk.user_can_edit():
-                flash_error("You do not have permission to edit talk %s/%s." % (seminar_id, seminar_ctr))
+                flash_error("You do not have permission to edit talk %s/%s.", seminar_id, seminar_ctr)
                 return redirect(url_for("show_talk", seminar_id=seminar_id, talkid=seminar_ctr), 302), None
     else:
         resp, seminar = can_edit_seminar(seminar_id, new=False)
@@ -846,7 +846,7 @@ def can_edit_talk(seminar_id, seminar_ctr, token):
             return resp, None
         if seminar.new:
             # TODO: This is where you might insert the ability to create a talk without first making a seminar
-            flash_error("You must first create the seminar %s" % seminar_id)
+            flash_error("You must first create the seminar %s", seminar_id)
             return redirect(url_for(".edit_seminar", shortname=seminar_id), 302)
         if new:
             talk = WebTalk(seminar_id, seminar=seminar, editing=True)

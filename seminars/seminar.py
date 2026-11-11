@@ -921,7 +921,7 @@ def can_edit_seminar(shortname, new):
             errmsgs.append(format_errmsg("Identifier %s is reserved by a series that has been deleted", shortname))
         else:
             if not seminar:
-                flash_error("No series with identifier %s exists" % shortname)
+                flash_error("No series with identifier %s exists", shortname)
                 return redirect(url_for("create.index"), 302), None
             else:
                 errmsgs.append(format_errmsg("Identifier %s is already in use by another series", shortname))
