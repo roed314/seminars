@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pyflakes pytest pyyaml
+      - run: pip install pyflakes pytest pyyaml pytz
       - run: python -m pyflakes seminars tests
       - run: python -m pytest tests/ -q
       - run: python -c "import yaml; yaml.safe_load(open('seminars/knowls.yaml')); print('knowls.yaml OK')"
