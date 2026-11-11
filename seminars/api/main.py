@@ -16,6 +16,7 @@ from seminars.utils import (
     MAX_TEXT_LEN,
     MAX_SLOTS,
     MAX_ORGANIZERS,
+    maxlength,
 )
 from seminars.create.main import process_save_seminar, process_save_talk
 from functools import wraps
@@ -89,6 +90,9 @@ def _search_array_value(value, typ, tz):
     if not isinstance(value, list):
         raise ValueError("Array operands must be JSON arrays")
     elttyp = typ[:-2]
+    # Pass col="" so element conversion does not hit the parent column's
+    # container-length check (len(int) -> TypeError). Array-length is
+    # enforced on the whole array by the caller, not per element.
     return [process_user_input(elt, "", elttyp, tz) for elt in value]
 
 
@@ -144,6 +148,10 @@ def process_search_input(inp, col, typ, tz):
         if value is None:
             return None
         if typ == "smallint[]" and isinstance(value, list):
+            # Enforce the container-length constraint on the array itself,
+            # not on each integer element.
+            if col in maxlength and len(value) > maxlength[col]:
+                raise ValueError("Input exceeds maximum length permitted")
             return _search_array_value(value, typ, tz)
         return process_user_input(value, col, typ, tz)
 
