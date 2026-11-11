@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1] / "seminars"
 # or display sorting with no tz semantics); see #742 triage.
 ALLOWLIST = {
     ("homepage/main.py", 742),  # end_date is a date, not timestamptz
-    ("utils.py", 269),          # naive_utcoffset display sort
+    ("utils.py", 270),          # naive_utcoffset display sort
 }
 
 
