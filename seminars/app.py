@@ -198,7 +198,7 @@ def nl2br(s):
 # You can use this formatter to encode a dictionary into a url string
 @app.template_filter("urlencode")
 def urlencode(kwargs):
-    from six.moves.urllib.parse import urlencode
+    from urllib.parse import urlencode
 
     return urlencode(kwargs)
 
