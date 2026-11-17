@@ -13,7 +13,6 @@ from seminars.search_boxes import SearchBox
 from markupsafe import Markup, escape
 from seminars.psycopg_compat import SQL
 from seminars import db
-from six import string_types
 from urllib.parse import urlparse, urlencode
 from seminars.psycopg_compat import Placeholder
 import pytz
@@ -550,7 +549,7 @@ def lucky_distinct(
     cur = table._execute(fselecter, values)
     if cur.rowcount > 0:
         rec = cur.fetchone()
-        if projection == 0 or isinstance(projection, string_types):
+        if projection == 0 or isinstance(projection, str):
             rec = rec[0]
         else:
             rec = {k: v for k, v in zip(cols, rec)}
