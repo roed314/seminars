@@ -11,6 +11,7 @@ from seminars.utils import (
     ics_file,
     maxlength,
     process_user_input,
+    rss_file,
     to_dict,
     topdomain,
     url_for_with_args,
@@ -716,8 +717,8 @@ def _talks_index(query={},
     if request.cookies.get("topics", ""):
         # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
         # For now we set the max_age to 30 years
-        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
-        response.set_cookie("topics", "", max_age=0)
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30, samesite="Lax")
+        response.set_cookie("topics", "", max_age=0, samesite="Lax")
 
     # disable cache
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -767,8 +768,8 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     if request.cookies.get("topics", ""):
         # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
         # For now we set the max_age to 30 years
-        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
-        response.set_cookie("topics", "", max_age=0)
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30, samesite="Lax")
+        response.set_cookie("topics", "", max_age=0, samesite="Lax")
     return response
 
 @app.route("/institutions/")
@@ -951,6 +952,20 @@ def ics_seminar_file(shortname):
         seminar.talks(),
         filename="{}.ics".format(shortname),
         user=current_user)
+
+
+@app.route("/seminar/<shortname>/rss")
+def rss_seminar_file(shortname):
+    seminar = seminars_lucky({"shortname": shortname})
+    if seminar is None or not seminar.visible():
+        # There may be a non-API version of the seminar that can be shown
+        seminar = seminars_lucky({"shortname": shortname})
+        if seminar is None or not seminar.visible():
+            return abort(404, "Seminar not found")
+
+    return rss_file(
+        seminar.talks(),
+        seminar)
 
 
 @app.route("/talk/<seminar_id>/<int:talkid>/ics")

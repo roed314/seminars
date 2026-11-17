@@ -56,8 +56,9 @@ function toggle_time(id) {
 
 function setCookie(name,value) {
     if (navigator.cookieEnabled) {
-        // our cookies have a 10-year shelf life
-        document.cookie = name + "=" + (value || "") + ";Path=/;Max-age=315360000";
+        // our cookies have a 10-year shelf life; Lax so they are never
+        // rejected for a missing/invalid SameSite attribute (#840)
+        document.cookie = name + "=" + (value || "") + ";Path=/;Max-age=315360000;SameSite=Lax";
     }
 }
 function getCookie(name) {
@@ -73,7 +74,7 @@ function getCookie(name) {
     return null;
 }
 function eraseCookie(name) {
-    document.cookie = name+'=; Max-Age=-99999999;';
+    document.cookie = name+'=; Path=/; Max-Age=-99999999;SameSite=Lax';
 }
 function addToCookie(item, cookie) {
     var cur_items = getCookie(cookie);
