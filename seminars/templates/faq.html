@@ -193,14 +193,14 @@
       <h4>
         If I export some series to my calendar app, do I have to export them again every week to see the latest talks?
       </h4>
-      <p> No, once you export a series to your calendar, talks added to that series later will be pushed to your calendar automatically!</p>
+      <p> No, once you export a series to your calendar, talks added to that series later will appear in your calendar the next time your calendar app refetches the feed — providers poll subscribed calendars on their own schedule (Google roughly every 12–24 hours, Outlook 24 hours or more), so updates are not instant. Rescheduled or edited talks likewise appear only after the next poll. To force an update, remove the subscribed calendar and add it again.</p>
     </li>
     
     <li>
       <h4>
         I exported my favorites to a calendar.  Why is it showing no events?
       </h4>
-      <p>Some calendar services sync external calendars only every 24 hours.  Furthermore, some may take even longer for the initial sync.  A workaround is to go to the <a href="{{ url_for('user.info')}}">Account</a> page, copy the URL of the "ICS file" link there, and add it manually to your calendar app.</p>
+      <p>Subscribed calendars update by polling: Google refetches roughly every 12–24 hours, Outlook every 24 hours or more, with no guaranteed time — and the initial sync can take even longer. In-app refresh buttons generally do not force a refetch; to force one, remove the subscribed calendar and add it again. If some events are missing entirely, the feed may exceed Google's size cap (about 1MB / ~1111 events) — go to the <a href="{{ url_for('user.info')}}">Account</a> page, narrow the window with the Calendar options there, and copy the URL of the "ICS file" link to add it manually to your calendar app.</p>
     </li>
   </ul>
 
