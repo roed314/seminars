@@ -1,0 +1,29 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyflakes pytest pyyaml pytz
+      - run: python -m pyflakes seminars tests
+      - run: python -m pytest tests/ -q
+      - run: python -c "import yaml; yaml.safe_load(open('seminars/knowls.yaml')); print('knowls.yaml OK')"
+  install-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -c "import flask, icalendar, flask_login, bcrypt; print('deps import OK')"
