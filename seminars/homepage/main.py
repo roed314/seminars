@@ -716,8 +716,8 @@ def _talks_index(query={},
     if request.cookies.get("topics", ""):
         # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
         # For now we set the max_age to 30 years
-        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
-        response.set_cookie("topics", "", max_age=0)
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30, samesite="Lax")
+        response.set_cookie("topics", "", max_age=0, samesite="Lax")
 
     # disable cache
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -767,8 +767,8 @@ def _series_index(query, sort=None, subsection=None, conference=True, past=False
     if request.cookies.get("topics", ""):
         # TODO: when we move cookie data to server with ajax calls, this will need to get updated again
         # For now we set the max_age to 30 years
-        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30)
-        response.set_cookie("topics", "", max_age=0)
+        response.set_cookie("topics_dict", topic_dag.port_cookie(), max_age=60*60*24*365*30, samesite="Lax")
+        response.set_cookie("topics", "", max_age=0, samesite="Lax")
     return response
 
 @app.route("/institutions/")
