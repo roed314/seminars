@@ -1,7 +1,7 @@
 <script>
 if (navigator.cookieEnabled) {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  document.cookie = "browser_timezone=" + tz + ";path=/"
+  document.cookie = "browser_timezone=" + tz + ";path=/;SameSite=Lax"
   console.log(document.cookie)
   window.location.replace("{{url}}")
 }

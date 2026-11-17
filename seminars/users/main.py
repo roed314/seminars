@@ -614,6 +614,22 @@ def talk_subscriptions_remove(shortname, ctr):
     return msg, code
 
 
+@login_page.route("/exclude/<shortname>/<int:ctr>")
+@login_required
+def talk_exclusions_add(shortname, ctr):
+    code, msg = current_user.exclusion_add(shortname, ctr)
+    current_user.save()
+    return msg, code
+
+
+@login_page.route("/unexclude/<shortname>/<int:ctr>")
+@login_required
+def talk_exclusions_remove(shortname, ctr):
+    code, msg = current_user.exclusion_remove(shortname, ctr)
+    current_user.save()
+    return msg, code
+
+
 @login_page.route("/ics/<token>")
 def user_ics_file(token):
     from itsdangerous.exc import BadSignature
