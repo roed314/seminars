@@ -468,6 +468,8 @@ class SeminarsUser(UserMixin):
         for shortname in self.seminar_subscriptions:
             query.append({'seminar_id': shortname})
         query = {'$or': query, 'hidden': {"$or": [False, {"$exists": False}]}}
+        # Exclude reschedule tombstones (negative seminar_ctr); cf. WebSeminar.talks().
+        query['seminar_ctr'] = {'$gt': 0}
         query_st = {}
         now = datetime.now(tz=UTC)
         if self.ics_limit_past:
