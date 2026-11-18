@@ -40,7 +40,9 @@
         status: '#page-load-status',
         checkLastPage: '.lasttime',
         scrollThreshold: 500,
-        prefill: true,
+        // #745: don't prefill extra pages on load; each prefill page is an
+        // extra DB query + ~100 pruned rows.  User scroll fetches next block.
+        prefill: false,
         debug: true,
       });
       infScroll.on('append',  function () {

@@ -56,8 +56,9 @@ function toggle_time(id) {
 
 function setCookie(name,value) {
     if (navigator.cookieEnabled) {
-        // our cookies have a 10-year shelf life
-        document.cookie = name + "=" + (value || "") + ";Path=/;Max-age=315360000";
+        // our cookies have a 10-year shelf life; Lax so they are never
+        // rejected for a missing/invalid SameSite attribute (#840)
+        document.cookie = name + "=" + (value || "") + ";Path=/;Max-age=315360000;SameSite=Lax";
     }
 }
 function getCookie(name) {
@@ -73,7 +74,7 @@ function getCookie(name) {
     return null;
 }
 function eraseCookie(name) {
-    document.cookie = name+'=; Max-Age=-99999999;';
+    document.cookie = name+'=; Path=/; Max-Age=-99999999;SameSite=Lax';
 }
 function addToCookie(item, cookie) {
     var cur_items = getCookie(cookie);
@@ -948,11 +949,11 @@ $(document).ready(function() {
   var past = $('input[name="past"]').val() === "True";
   var minDate = 'January 1, 1970';
   var maxDate = 'January 1, 2050';
+  // Keep picker bounds wide in both modes so pre-2020 (and other typed)
+  // dates remain queryable; only the shortcut ranges below are filtered
+  // by past.  The backend parse_daterange() accepts arbitrary dates.
   if (past) {
-    maxDate = moment();
     dr.attr('placeholder', moment().format('- MMMM D, YYYY'));
-  } else {
-    minDate = moment();
   }
 
   var start = false;
@@ -971,7 +972,7 @@ $(document).ready(function() {
       end = false;
     }
   }
-  if(dr.lenght > 0) {
+  if(dr.length > 0) {
     deduce_start_end_from_value();
   }
 
@@ -1109,21 +1110,18 @@ function register_subsribe_change() {
           elem.attr('data-chosen', elem.val());
         }
         console.log($(this).val());
-        if($(this).val() == "1") {
-            $.ajax({
-              url: '/user/subscribe/' +  $(this)[0].name,
-              success: success,
-              error: error
-            });
-              console.log('/user/subscribe/' +  $(this)[0].name);
-        } else {
-          $.ajax({
-            url: '/user/unsubscribe/' +  $(this)[0].name,
-            success: success,
-            error: error
-          });
-            console.log('/user/unsubscribe/' +  $(this)[0].name);
-        }
+        // Muted-talk toggles (class talk-exclusion, #460) hit the
+        // exclude/unexclude endpoints; everything else keeps the
+        // subscribe/unsubscribe endpoints (incl. the IC ics-limit ones).
+        var endpoint = ($(this)[0].name.includes('/') && elem.hasClass("talk-exclusion"))
+          ? ($(this).val() == "1" ? '/user/unexclude/' : '/user/exclude/')
+          : ($(this).val() == "1" ? '/user/subscribe/' : '/user/unsubscribe/');
+        $.ajax({
+          url: endpoint +  $(this)[0].name,
+          success: success,
+          error: error
+        });
+        console.log(endpoint +  $(this)[0].name);
     });
 };
 $(document).ready(register_subsribe_change());
@@ -1183,8 +1181,31 @@ function makeTopicsTree(json_tree) {
 
 
 
-  function callback_topics(instance) {
-    function cmp(a, b) {
+  // Client-side guard for #696: block series/talk saves with no topics
+  // selected, instead of round-tripping to an error page that loses them.
+  function topics_empty(val) {
+    var t = (val || "").trim();
+    return !t || t === "[]" || t === "['']" || t === '[""]';
+  }
+  function check_topics(form) {
+    var input = form.find('input[name="topics"]');
+    if (input.length && topics_empty(input.val())) {
+      input.notify("Please select at least one topic.", {className: "error", position: "top"});
+      var selector = $("#topicDAG_selector");
+      (selector.length ? selector : input).get(0).scrollIntoView({block: "center"});
+      return false;
+    }
+    return true;
+  }
+  $(document).ready(function() {
+    $("#seminarform, #talkform").on("submit", function(e) {
+      if (!check_topics($(this))) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  function callback_topics(instance) {    function cmp(a, b) {
       var ad = instance.get_checked_descendants(a.id).length > 0;
       var bd = instance.get_checked_descendants(b.id).length > 0;
       if( ad == bd) {
