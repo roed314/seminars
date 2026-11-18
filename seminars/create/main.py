@@ -71,6 +71,79 @@ import pytz
 SCHEDULE_LEN = 15  # Number of weeks to show in edit_seminar_schedule
 TBA_CONVERSION_MESSAGE = 'To be announced title converted to a blank title that will be shown as "TBA" on all publicly visible pages.'
 
+# Version columns never come from user input; they only stamp saves.
+VERSION_COLS = ("edited_at", "edited_by")
+
+
+def parse_edited_at(value):
+    """Parse a submitted version stamp into an aware UTC datetime.
+
+    Accepts ISO-8601 (as rendered by ``datetime.isoformat()``, including a
+    trailing ``Z``) and RFC-2822/HTTP dates (``If-Unmodified-Since``).
+    Returns None when missing or unparsable.  Pure (no DB/Flask).
+    """
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        dt = value
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=pytz.UTC)
+        return dt.astimezone(pytz.UTC)
+    if not isinstance(value, str):
+        return None
+    s = value.strip()
+    if not s:
+        return None
+    iso = s
+    if iso.endswith("Z") or iso.endswith("z"):
+        iso = iso[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(iso)
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=pytz.UTC)
+        return dt.astimezone(pytz.UTC)
+    except Exception:
+        pass
+    try:
+        from email.utils import parsedate_to_datetime
+
+        dt = parsedate_to_datetime(s)
+        if dt is None:
+            return None
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=pytz.UTC)
+        return dt.astimezone(pytz.UTC)
+    except Exception:
+        return None
+
+
+def edited_at_conflict(submitted_raw, current_dt):
+    """Return True when a save must be rejected as stale.
+
+    Compares the version stamp submitted with the edit form (or API payload)
+    against the current row's ``edited_at``.  Missing/unparsable stamps count
+    as conflicts so old pages cannot silently last-write-win.  A missing
+    current timestamp disables the check (legacy rows).  Pure (no DB/Flask).
+
+    Note: ``WebSeminar/WebTalk/WebInstitution.__eq__`` ignores ``edited_at``,
+    so callers must run this version check *before* the equality check.
+    """
+    if current_dt is None:
+        return False
+    if not isinstance(current_dt, datetime):
+        return False
+    try:
+        if current_dt.tzinfo is None:
+            current_utc = current_dt.replace(tzinfo=pytz.UTC)
+        else:
+            current_utc = current_dt.astimezone(pytz.UTC)
+    except Exception:
+        return False
+    submitted_utc = parse_edited_at(submitted_raw)
+    if submitted_utc is None:
+        return True
+    return submitted_utc != current_utc
+
 def seminar_options():
     return {
         'institution': institutions(),
@@ -238,6 +311,7 @@ def edit_seminar():
         options=seminar_options(),
         maxlength=maxlength,
         lock=lock,
+        submitted_topics=None,
     )
 
 
@@ -247,7 +321,7 @@ def delete_seminar(shortname):
     try:
         seminar = WebSeminar(shortname, include_deleted=True)
     except ValueError as err:
-        flash_error(str(err))
+        flash_error("%s", str(err))
         return redirect(url_for(".index"), 302)
     manage = "Manage" if current_user.is_organizer else "Create"
     lock = get_lock(shortname, request.args.get("lock"))
@@ -281,7 +355,7 @@ def delete_seminar(shortname):
             if seminar.delete():
                 flash("%s %s deleted." % (seminar.series_type, shortname))
             else:
-                flash_error("You do not have permission to delete the %s %s."% (seminar.series_type, seminar.name))
+                flash_error("You do not have permission to delete the %s %s.", seminar.series_type, seminar.name)
                 return failure()
         if raw_data.get("submit") == "permdelete":
             return redirect(url_for(".permdelete_seminar", shortname=shortname), 302)
@@ -346,7 +420,7 @@ def delete_talk(seminar_id, seminar_ctr):
     try:
         talk = WebTalk(seminar_id, seminar_ctr, include_deleted=True)
     except ValueError as err:
-        flash_error(str(err))
+        flash_error("%s", str(err))
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
 
     def failure():
@@ -432,6 +506,18 @@ def permdelete_talk(seminar_id, seminar_ctr):
         return redirect(url_for(".edit_seminar_schedule", shortname=seminar_id), 302)
 
 
+def _rerender_with_topics(template, errmsgs, raw_data, **kwds):
+    """Re-display an edit form after a failed save, preserving the user's
+    submitted topics (#696) instead of the dead-end inputerror.html page.
+    """
+    for msg in errmsgs:
+        flash(msg, "error")
+    return render_template(
+        template,
+        submitted_topics=clean_topics(raw_data.get("topics")),
+        **kwds)
+
+
 @create.route("save/seminar/", methods=["POST"])
 @email_confirmed_required
 def save_seminar():
@@ -449,10 +535,30 @@ def save_seminar():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_seminar", shortname=shortname), 302)
 
+    # Optimistic concurrency (#89): re-looked-up `seminar` above is current;
+    # submitted `edited_at` is the version the form was rendered from.
+    # Check before equality/save since __eq__ ignores edited_at.
+    if not new and edited_at_conflict(raw_data.get("edited_at"), getattr(seminar, "edited_at", None)):
+        flash_error("This series was edited by someone else after you opened it. Your changes were not saved; please reload and reapply them.")
+        manage = "Manage" if current_user.is_organizer else "Create"
+        title = "Create series" if new else "Edit series"
+        return _rerender_with_topics(
+            "edit_seminar.html", [], raw_data,
+            seminar=seminar, title=title, section=manage,
+            subsection="editsem", options=seminar_options(),
+            maxlength=maxlength, lock=get_lock(shortname, raw_data.get("lock"))), 409
+
     new_version, errmsgs = process_save_seminar(seminar, raw_data, incremental_update=False)
-    # Don't try to create new_version using invalid input
+    # Don't try to create new_version using invalid input; re-display the
+    # form with the user's submitted topics preserved (#696)
     if new_version is None:
-        return show_input_errors(errmsgs)
+        manage = "Manage" if current_user.is_organizer else "Create"
+        title = "Create series" if new else "Edit series"
+        return _rerender_with_topics(
+            "edit_seminar.html", errmsgs, raw_data,
+            seminar=seminar, title=title, section=manage,
+            subsection="editsem", options=seminar_options(),
+            maxlength=maxlength, lock=get_lock(shortname, raw_data.get("lock")))
 
     if seminar.new or new_version != seminar:
         new_version.save()
@@ -493,7 +599,7 @@ def process_save_seminar(seminar, raw_data, warn=flash_warnmsg, format_error=for
     data["timezone"] = tz
     tz = pytz.timezone(tz)
     for col in db.seminars.search_cols:
-        if col in data:
+        if col in data or col in VERSION_COLS:
             continue
         # For incremental updates carry over unspecified columns from the previous data
         if incremental_update and col not in raw_data:
@@ -711,12 +817,29 @@ def save_institution():
         flash("Changes discarded")
         return redirect(url_for(".edit_institution", shortname=shortname), 302)
 
+    # Optimistic concurrency (#89): `institution` was just re-looked up via
+    # can_edit_institution; compare against the version the form was rendered
+    # from.  Check before equality/save since __eq__ ignores edited_at.
+    # Institutions use conditional upsert: on conflict, do not save.
+    if not new and edited_at_conflict(raw_data.get("edited_at"), getattr(institution, "edited_at", None)):
+        flash_error("This institution was edited by someone else after you opened it. Your changes were not saved; please reload and reapply them.")
+        return render_template(
+            "edit_institution.html",
+            institution=institution,
+            institution_types=institution_types,
+            timezones=timezones,
+            title="Edit institution",
+            section="Manage",
+            subsection="editinst",
+            maxlength=maxlength,
+        ), 409
+
     data = {}
     data["timezone"] = tz = raw_data.get("timezone", "UTC")
     tz = pytz.timezone(tz)
     errmsgs = []
     for col in db.institutions.search_cols:
-        if col in data:
+        if col in data or col in VERSION_COLS:
             continue
         typ = db.institutions.col_type[col]
         try:
@@ -821,6 +944,7 @@ def edit_talk():
         options=talk_options(),
         maxlength=maxlength,
         token=token,
+        submitted_topics=None,
         **extras
     )
 
@@ -838,10 +962,28 @@ def save_talk():
     if raw_data.get("submit") == "delete":
         return redirect(url_for(".delete_talk", seminar_id=talk.seminar_id, seminar_ctr=talk.seminar_ctr), 302)
 
+    # Optimistic concurrency (#89): `talk` was just re-looked up; compare its
+    # current edited_at against the version the form was rendered from.
+    # Check before equality/save since __eq__ ignores edited_at.
+    if not talk.new and edited_at_conflict(raw_data.get("edited_at"), getattr(talk, "edited_at", None)):
+        flash_error("This talk was edited by someone else after you opened it. Your changes were not saved; please reload and reapply them.")
+        talk_title = "Create talk" if talk.new else "Edit talk"
+        return _rerender_with_topics(
+            "edit_talk.html", [], raw_data,
+            talk=talk, seminar=talk.seminar, title=talk_title,
+            section="Manage", subsection="edittalk",
+            options=talk_options(), maxlength=maxlength, token=token), 409
+
     new_version, errmsgs = process_save_talk(talk, raw_data, incremental_update=False)
-    # Don't try to create new_version using invalid input
+    # Don't try to create new_version using invalid input; re-display the
+    # form with the user's submitted topics preserved (#696)
     if new_version is None:
-        return show_input_errors(errmsgs)
+        talk_title = "Create talk" if talk.new else "Edit talk"
+        return _rerender_with_topics(
+            "edit_talk.html", errmsgs, raw_data,
+            talk=talk, seminar=talk.seminar, title=talk_title,
+            section="Manage", subsection="edittalk",
+            options=talk_options(), maxlength=maxlength, token=token)
 
     if new_version == talk:
         flash("No changes made to talk.")
@@ -886,7 +1028,7 @@ def process_save_talk(talk, raw_data, warn=flash_warnmsg, format_error=format_er
     tz = pytz.timezone(tz)
 
     for col in db.talks.search_cols:
-        if col in data:
+        if col in data or col in VERSION_COLS:
             continue
         # For the API, we want to carry over unspecified columns from the previous data
         if incremental_update and col not in raw_data:
@@ -1098,6 +1240,7 @@ def save_seminar_schedule():
     errmsgs = []
     tz = seminar.tz
     to_save = []
+    conflicts = []
     for i in list(range(slots)):
         seminar_ctr = raw_data.get("seminar_ctr%s" % i)
         speaker = process_user_input(raw_data.get("speaker%s" % i, ""), "speaker", "text", tz)
@@ -1146,6 +1289,11 @@ def save_seminar_schedule():
             # existing talk
             seminar_ctr = int(seminar_ctr)
             talk = WebTalk(shortname, seminar_ctr, seminar=seminar)
+            # Optimistic concurrency (#89): per-talk version check before
+            # equality/save since __eq__ ignores edited_at.
+            if edited_at_conflict(raw_data.get("edited_at%s" % i), getattr(talk, "edited_at", None)):
+                conflicts.append(str(seminar_ctr))
+                continue
         else:
             # new talk
             talk = WebTalk(shortname, seminar=seminar, editing=True)
@@ -1182,6 +1330,28 @@ def save_seminar_schedule():
             ctr += 1
             new_version = WebTalk(talk.seminar_id, data=data)
             to_save.append(new_version) # defer save in case of errors on other talks
+
+    # Optimistic concurrency (#89): abort the whole batch on version
+    # conflicts so a stale schedule grid cannot last-write-win.  Nothing has
+    # been saved yet (saves are deferred to `to_save`).
+    if conflicts:
+        flash_error("Talks %s were edited by someone else after you opened the schedule. No changes were saved; please reload and reapply them.", ", ".join(conflicts))
+        try:
+            data = {"begin": raw_data.get("begin"), "end": raw_data.get("end"), "shortname": shortname}
+            schedule = layout_schedule(seminar, data)
+        except Exception:
+            return redirect(url_for(".edit_seminar_schedule", shortname=shortname), 302)
+        return render_template(
+            "edit_seminar_schedule.html",
+            seminar=seminar,
+            raw_data=data,
+            title="Edit schedule",
+            schedule=schedule,
+            filled=len([s for s in schedule if s[2]]),
+            section="Manage",
+            subsection="schedule",
+            maxlength=maxlength,
+        ), 409
 
     for newver in to_save:
         newver.save()
