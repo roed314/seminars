@@ -538,22 +538,23 @@ hide_talk:
 export:
   title: Export
   contents: |
-    The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> allow you to export your favorite series and talks to your chosen calendar app.  Later, if talks are added to those series, your calendar will automatically be updated.<br><br>  Some calendar services sync external calendars only every <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. Furthermore, some may take even longer for the initial sync. A workaround is to copy the URL of the <i>ICS file</i> link and add it manually to your calendar app.
+    The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> allow you to export your favorite series and talks to your chosen calendar app.  Later, if talks are added to those series, your calendar will be updated the next time your calendar app refetches the feed.<br><br>  Subscribed calendars update by polling, not push: providers refetch on their own schedule — Google roughly every 12–24 hours, Outlook 24 hours or more, Apple similar — with no guaranteed time.  New, rescheduled, or edited talks appear only after the next poll, and outdated entries linger until then; the initial sync can take even longer.  To force an update, remove the subscribed calendar and add it again (in-app refresh buttons generally do not force a refetch).  Google also drops events from feeds larger than about 1MB (~1111 events); if events are missing, narrow the window with the Calendar options on your Account page.  A workaround for setup problems is to copy the URL of the <i>ICS file</i> link and add it manually to your calendar app.
 export_series:
   title: Export
   contents: |
     The links labelled <i>Google Calendar</i> or <i>iCal/Outlook</i> 
     allow you to export this series as a calendar to your chosen calendar app.  
     Later, if talks are added to the series, 
-    your calendar will automatically be updated.  
+    your calendar will be updated the next time your calendar app refetches the feed.  
     Registered users have a better solution: they can 
     select favorite series and talks on the Browse page 
     and export them all as a single calendar on the Account page.
     <br><br>  
-    Some calendar services sync external calendars only every 
-    <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. 
-    Furthermore, some may take even longer for the initial sync. 
-    A workaround is to copy the URL of the <i>ICS file</i> link 
+    Subscribed calendars update by polling, not push: providers refetch on their own schedule — Google roughly every 12–24 hours, Outlook 24 hours or more, Apple similar — with no guaranteed time. 
+    New, rescheduled, or edited talks appear only after the next poll, and outdated entries linger until then; the initial sync can take even longer. 
+    To force an update, remove the subscribed calendar and add it again (in-app refresh buttons generally do not force a refetch). 
+    Google also drops events from feeds larger than about 1MB (~1111 events); if events are missing, narrow the window with the Calendar options on your Account page.
+    A workaround for setup problems is to copy the URL of the <i>ICS file</i> link 
     and add it manually to your calendar app.
 export_talk:
   title: Export
@@ -564,10 +565,10 @@ export_talk:
     select favorite series and talks on the Browse page 
     and export them all as a single calendar on the Account page.
     <br><br>  
-    Some calendar services sync external calendars only every 
-    <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. 
-    Furthermore, some may take even longer for the initial sync. 
-    A workaround is to copy the URL of the <i>ICS file</i> link 
+    Subscribed calendars update by polling, not push: providers refetch on their own schedule — Google roughly every 12–24 hours, Outlook 24 hours or more, Apple similar — with no guaranteed time. 
+    New, rescheduled, or edited talks appear only after the next poll, and outdated entries linger until then; the initial sync can take even longer. 
+    To force an update, remove the subscribed calendar and add it again (in-app refresh buttons generally do not force a refetch). 
+    A workaround for setup problems is to copy the URL of the <i>ICS file</i> link 
     and add it manually to your calendar app.
 export_favorites:
   title: Export
@@ -576,12 +577,13 @@ export_favorites:
     allow you to export your favorite series and talks 
     to your chosen calendar app.  
     Later, if talks are added to those series, 
-    your calendar will automatically be updated.
+    your calendar will be updated the next time your calendar app refetches the feed.
     <br><br>  
-    Some calendar services sync external calendars only every 
-    <a href="https://kb.mit.edu/confluence/display/istcontrib/How+to+change+the+update+frequency+of+a+calendar+I+am+subscribing+to">24 hours</a>. 
-    Furthermore, some may take even longer for the initial sync. 
-    A workaround is to copy the URL of the <i>ICS file</i> link 
+    Subscribed calendars update by polling, not push: providers refetch on their own schedule — Google roughly every 12–24 hours, Outlook 24 hours or more, Apple similar — with no guaranteed time. 
+    New, rescheduled, or edited talks appear only after the next poll, and outdated entries linger until then; the initial sync can take even longer. 
+    To force an update, remove the subscribed calendar and add it again (in-app refresh buttons generally do not force a refetch). 
+    Google also drops events from feeds larger than about 1MB (~1111 events); if events are missing, narrow the window with the Calendar options on your Account page.
+    A workaround for setup problems is to copy the URL of the <i>ICS file</i> link 
     and add it manually to your calendar app.
 ids:
   title: IDs

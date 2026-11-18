@@ -4,6 +4,7 @@
 <form action="{{ url_for('.save_institution') }}" method="POST" id=>
   <input type="hidden" name="shortname" value="{{ institution.shortname }}"/>
   <input type="hidden" name="new" value="{{ 'yes' if institution.new else 'no' }}"/>
+  <input type="hidden" name="edited_at" value="{{ institution.edited_at.isoformat() if institution.edited_at else '' }}"/>
   <table>
     <tr><td colspan='2' style="padding-bottom: 5px;">Click blue captions for more details. Asterisks denote required items.</td></tr>
     <tr>

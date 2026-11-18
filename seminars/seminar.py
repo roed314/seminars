@@ -30,7 +30,32 @@ from datetime import datetime
 
 import urllib.parse
 
+import time
+
 combine = datetime.combine
+
+# TTL cache for expensive seminar/organizer/institution dicts (#217).
+# Homepage and browse pages call all_seminars()/all_organizers()/all_institutions()
+# on every request; each is a separate DB round-trip.  Cache the default
+# (empty-query) results for a short TTL and invalidate on save/delete.
+_DICT_CACHE_TTL = 300
+_dict_cache = {}
+_dict_cache_time = {}
+
+
+def _cached_dict(key, compute, ttl=_DICT_CACHE_TTL):
+    now = time.monotonic()
+    if key in _dict_cache and (now - _dict_cache_time.get(key, 0)) < ttl:
+        return _dict_cache[key]
+    val = compute()
+    _dict_cache[key] = val
+    _dict_cache_time[key] = now
+    return val
+
+
+def invalidate_seminar_cache():
+    _dict_cache.clear()
+    _dict_cache_time.clear()
 
 access_control_options = [
     (0, 'open'),
@@ -303,6 +328,7 @@ class WebSeminar(object):
         data["edited_at"] = datetime.now(tz=pytz.UTC)
         self.validate()
         db.seminars.insert_many([data])
+        invalidate_seminar_cache()
 
 
     def save_admin(self):
@@ -311,12 +337,14 @@ class WebSeminar(object):
         assert data.get("shortname")
         data["edited_by"] = 0
         db.seminars.insert_many([data])
+        invalidate_seminar_cache()
 
     def save_organizers(self):
         # Need to allow for deleting organizers, so we delete them all then add them back
         with DelayCommit(db):
             db.seminar_organizers.delete({"seminar_id": self.shortname})
             db.seminar_organizers.insert_many(self.organizers)
+        invalidate_seminar_cache()
 
     # We use timestamps on January 1, 2020 to save start and end times
     # so that we have a well defined conversion between time zone and UTC offset (which
@@ -609,6 +637,10 @@ class WebSeminar(object):
         return url_for(".ics_seminar_file", shortname=self.shortname, _external=True, _scheme="webcal")
 
     @property
+    def rss_link(self):
+        return url_for(".rss_seminar_file", shortname=self.shortname, _external=True, _scheme="https")
+
+    @property
     def next_talk_time(self):
         try:
             return self._next_talk_time
@@ -648,7 +680,21 @@ class WebSeminar(object):
                 ):
                     del talk_sub[self.shortname]
                     db.users.update({"id": i}, {"talk_subscriptions": talk_sub})
+                if "talk_exclusions" in db.users.search_cols:
+                    for i, excl in db._execute(
+                        SQL("SELECT {},{} FROM {} WHERE {} ? %s").format(
+                            *map(
+                                IdentifierWrapper,
+                                ["id", "talk_exclusions", "users", "talk_exclusions"],
+                            )
+                        ),
+                        [self.shortname],
+                    ):
+                        if self.shortname in excl:
+                            del excl[self.shortname]
+                            db.users.update({"id": i}, {"talk_exclusions": excl})
             self.deleted = True
+            invalidate_seminar_cache()
             return True
         else:
             return False
@@ -719,11 +765,15 @@ def _iterator(organizer_dict, institution_dict, objects=True, more=False):
     return object_iterator if objects else plain_iterator(db.seminars)
 
 
-def seminars_count(query={}, include_deleted=False):
+def seminars_count(query={}, include_deleted=False, include_pending=False):
     """
     Replacement for db.seminars.count to account for versioning.
+
+    Counts the same SQL-level row set that ``seminars_search`` selects (see
+    ``count_distinct`` for the count-vs-search caveat on Python-side
+    filtering).
     """
-    return count_distinct(db.seminars, _counter, query, include_deleted)
+    return count_distinct(db.seminars, _counter, query, include_deleted, include_pending)
 
 
 def seminars_max(col, constraint={}, include_deleted=False):
@@ -793,26 +843,41 @@ def all_organizers(query={}):
     A dictionary with keys the seminar ids and values a list of organizer data as fed into WebSeminar.
     Usable for the organizer_dict input to seminars_search, seminars_lucky and seminars_lookup
     """
-    organizers = defaultdict(list)
-    for rec in db.seminar_organizers.search(query, sort=["seminar_id", "order"]):
-        organizers[rec["seminar_id"]].append(rec)
-    return organizers
+    if query:
+        organizers = defaultdict(list)
+        for rec in db.seminar_organizers.search(query, sort=["seminar_id", "order"]):
+            organizers[rec["seminar_id"]].append(rec)
+        return organizers
+
+    def _compute():
+        organizers = defaultdict(list)
+        for rec in db.seminar_organizers.search({}, sort=["seminar_id", "order"]):
+            organizers[rec["seminar_id"]].append(rec)
+        return organizers
+
+    return _cached_dict("all_organizers", _compute)
 
 def all_institutions(query={}):
     """
     A dictionary with keys the seminar ids and values a list of institution data as fed into WebSeminar.
     Usable for the institution_dict input to seminars_search, seminars_lucky and seminars_lookup
     """
-    return {rec["shortname"]: (rec.get("name"), rec.get("homepage")) for rec in db.institutions.search(query, ["shortname", "name", "homepage"])}
+    if query:
+        return {rec["shortname"]: (rec.get("name"), rec.get("homepage")) for rec in db.institutions.search(query, ["shortname", "name", "homepage"])}
+    def _compute():
+        return {rec["shortname"]: (rec.get("name"), rec.get("homepage")) for rec in db.institutions.search({}, ["shortname", "name", "homepage"])}
+    return _cached_dict("all_institutions", _compute)
 
 def all_seminars():
     """
     A dictionary with keys the seminar ids and values a WebSeminar object.
     """
-    return {
-        seminar.shortname: seminar
-        for seminar in seminars_search({}, organizer_dict=all_organizers(), institution_dict=all_institutions())
-    }
+    def _compute():
+        return {
+            seminar.shortname: seminar
+            for seminar in seminars_search({}, organizer_dict=all_organizers(), institution_dict=all_institutions())
+        }
+    return _cached_dict("all_seminars", _compute)
 
 def next_talks(query=None):
     """
@@ -904,7 +969,7 @@ def can_edit_seminar(shortname, new):
             errmsgs.append(format_errmsg("Identifier %s is reserved by a series that has been deleted", shortname))
         else:
             if not seminar:
-                flash_error("No series with identifier %s exists" % shortname)
+                flash_error("No series with identifier %s exists", shortname)
                 return redirect(url_for("create.index"), 302), None
             else:
                 errmsgs.append(format_errmsg("Identifier %s is already in use by another series", shortname))
